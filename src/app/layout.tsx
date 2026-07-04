@@ -1,0 +1,45 @@
+import React from 'react';
+import type { Metadata, Viewport } from 'next';
+import { Plus_Jakarta_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { Toaster } from 'sonner';
+import '../styles/tailwind.css';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-plus-jakarta-sans',
+  display: 'swap',
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-ibm-plex-mono',
+  display: 'swap',
+});
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
+
+export const metadata: Metadata = {
+  title: 'AstroParihar — AI-Powered Vedic Astrology Guidance',
+  description: 'Get personalized Vedic astrology insights, AI gemstone & mantra recommendations, and connect with expert astrologers for live consultations.',
+  icons: {
+    icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en" className={`${plusJakartaSans.variable} ${ibmPlexMono.variable} dark`}>
+      <body className={plusJakartaSans.className}>
+        {children}
+        <Toaster position="bottom-right" richColors />
+</body>
+    </html>
+  );
+}

@@ -1,0 +1,145 @@
+'use client';
+import React from 'react';
+import Navbar from '@/components/Navbar';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Triangle, Check, ArrowRight, Lock } from 'lucide-react';
+
+const benefits = [
+  'Attracts wealth, prosperity, and abundance',
+  'Harmonizes all nine planetary energies simultaneously',
+  'Removes Vastu doshas and negative energy from spaces',
+  'Enhances positive energy flow in home and workplace',
+  'Provides protection from evil eye and negative influences',
+];
+
+const yantras = [
+  { name: 'Sri Yantra', planet: 'Venus/Lakshmi', purpose: 'Wealth & Prosperity', placement: 'East wall, pooja room', color: 'text-pink-400' },
+  { name: 'Surya Yantra', planet: 'Sun', purpose: 'Health & Authority', placement: 'East wall', color: 'text-red-400' },
+  { name: 'Chandra Yantra', planet: 'Moon', purpose: 'Peace & Emotions', placement: 'North wall', color: 'text-blue-200' },
+  { name: 'Mangal Yantra', planet: 'Mars', purpose: 'Courage & Energy', placement: 'South wall', color: 'text-orange-400' },
+  { name: 'Budh Yantra', planet: 'Mercury', purpose: 'Intelligence & Business', placement: 'North wall', color: 'text-green-400' },
+  { name: 'Guru Yantra', planet: 'Jupiter', purpose: 'Wisdom & Blessings', placement: 'North-East', color: 'text-yellow-400' },
+  { name: 'Shukra Yantra', planet: 'Venus', purpose: 'Love & Luxury', placement: 'South-East', color: 'text-pink-300' },
+  { name: 'Shani Yantra', planet: 'Saturn', purpose: 'Karma & Discipline', placement: 'West wall', color: 'text-blue-400' },
+];
+
+export default function YantraServicePage() {
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <section className="relative pt-24 py-20 cosmic-bg overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-[#8B1A2A]/20 blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#C9952B]/15 blur-3xl" />
+        </div>
+        <div className="relative max-w-screen-xl mx-auto px-6 lg:px-10">
+          <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
+            <Link href="/" className="hover:text-[#C9952B] transition-colors">Home</Link>
+            <span>/</span>
+            <Link href="/#services" className="hover:text-[#C9952B] transition-colors">Services</Link>
+            <span>/</span>
+            <span className="text-[#C9952B]">Yantra Recommendations</span>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
+                <Triangle size={12} /> Sacred Geometry
+              </div>
+              <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
+                Sacred Yantra<br /><span className="text-gradient-gold">Recommendations</span>
+              </h1>
+              <p className="text-lg text-white/70 mb-8 leading-relaxed">
+                Yantras are sacred geometric diagrams that serve as cosmic antennae, channeling specific planetary energies. Get your personalized Yantra based on your birth chart analysis.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
+                  <Triangle size={16} /> Get My Yantra Report
+                </Link>
+                <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
+                  Consult Astrologer
+                </Link>
+              </div>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="flex justify-center">
+              <div className="relative w-64 h-64">
+                <div className="absolute inset-0 rounded-full border-2 border-[#C9952B]/30 animate-spin-slow" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-40 h-40 rounded-full gold-gradient-bg flex items-center justify-center shadow-2xl animate-float">
+                    <Triangle size={64} className="text-white" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+      <section className="py-16 bg-background">
+        <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold text-foreground mb-6">Benefits of <span className="text-gradient-gold">Yantra Worship</span></h2>
+              <div className="space-y-4">
+                {benefits?.map((b, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check size={12} className="text-[#C9952B]" />
+                    </div>
+                    <p className="text-muted-foreground">{b}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="font-bold text-foreground mb-4">Sample Report Preview</h3>
+              <div className="space-y-3">
+                <div className="p-4 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20">
+                  <p className="text-xs text-[#C9952B] font-semibold mb-1">Recommended Yantra</p>
+                  <p className="text-sm font-bold text-foreground">Sri Yantra (Copper)</p>
+                  <p className="text-xs text-muted-foreground mt-1">East-facing wall · Pooja room</p>
+                </div>
+                <div className="p-4 rounded-xl bg-muted/50 border border-border blur-sm select-none">
+                  <p className="text-xs text-muted-foreground font-semibold mb-1">Activation Mantra</p>
+                  <p className="text-sm text-foreground">Om Shreem Hreem Shreem...</p>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-[#C9952B]">
+                  <Lock size={12} /> Full report requires Premium membership
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="py-16 bg-muted/30">
+        <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Planetary <span className="text-gradient-gold">Yantra Guide</span></h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {yantras?.map((y, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }} className="rounded-2xl border border-border bg-card p-5">
+                <div className={`text-2xl mb-3 ${y?.color}`}>△</div>
+                <h3 className="font-semibold text-foreground text-sm mb-1">{y?.name}</h3>
+                <p className={`text-xs font-medium ${y?.color} mb-2`}>{y?.planet}</p>
+                <p className="text-xs text-muted-foreground mb-2">{y?.purpose}</p>
+                <p className="text-xs text-muted-foreground/70">📍 {y?.placement}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="py-16 cosmic-bg">
+        <div className="max-w-screen-xl mx-auto px-6 lg:px-10 text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">Unlock Your <span className="text-gradient-gold">Yantra Report</span></h2>
+          <p className="text-white/60 mb-8 max-w-xl mx-auto">Get a detailed Yantra recommendation with activation mantras, placement instructions, and worship guidelines.</p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
+              <Triangle size={18} /> Get Premium Report
+            </Link>
+            <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
+              Talk to Astrologer <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
