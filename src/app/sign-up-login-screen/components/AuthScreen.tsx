@@ -108,8 +108,7 @@ export default function AuthScreen() {
 
         <div className="relative text-center space-y-8">
           <div className="flex items-center justify-center gap-3 mb-8">
-            <AppLogo src="/assets/images/AstroParihar_Top_Logo-1783108877658.png" size={56} />
-            <span className="text-3xl font-bold text-gradient-gold">AstroParihar</span>
+            <AppLogo src="/AstroParihar_Top_Logo.jpg" size={56} />
           </div>
 
           <div className="w-48 h-48 mx-auto rounded-full gold-gradient-bg flex items-center justify-center animate-float shadow-2xl">
@@ -143,8 +142,7 @@ export default function AuthScreen() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center justify-center gap-2 mb-8 lg:hidden">
-            <AppLogo src="/assets/images/AstroParihar_Top_Logo-1783108877658.png" size={36} />
-            <span className="text-xl font-bold text-gradient-gold">AstroParihar</span>
+            <AppLogo src="/AstroParihar_Top_Logo.jpg" size={36} />
           </div>
 
           {/* Mode tabs */}

@@ -13,13 +13,12 @@ interface AppLogoProps {
 }
 
 const AppLogo = memo(function AppLogo({
-  src = '/assets/images/app_logo.png',
+  src = '/AstroParihar_Top_Logo.jpg',
   iconName = 'SparklesIcon',
   size = 64,
   className = '',
   onClick,
 }: AppLogoProps) {
-  // Memoize className calculation
   const containerClassName = useMemo(() => {
     const classes = ['flex items-center'];
     if (onClick) classes.push('cursor-pointer hover:opacity-80 transition-opacity');
@@ -34,9 +33,10 @@ const AppLogo = memo(function AppLogo({
         <AppImage
           src={src}
           alt="Logo" 
-          width={size}
-          height={size}
-          className="flex-shrink-0"
+          width={size * 8}
+          height={size * 1.75}
+          className="flex-shrink-0 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
+          style={{ width: 'auto', height: size * 1.75 }}
           priority={true}
           unoptimized={src.endsWith('.svg')}
         />

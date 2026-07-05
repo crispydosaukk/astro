@@ -46,8 +46,7 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
     <aside className={`fixed left-0 top-0 h-screen z-40 flex flex-col transition-all duration-300 ease-in-out ${collapsed ? 'w-16' : 'w-64'} bg-card border-r border-border`}>
       {/* Logo */}
       <div className={`flex items-center h-16 px-4 border-b border-border ${collapsed ? 'justify-center' : 'gap-3'}`}>
-        <AppLogo src="/assets/images/AstroParihar_Top_Logo-1783108877658.png" size={32} />
-        {!collapsed && <span className="font-bold text-base text-gradient-gold">AstroParihar</span>}
+        <AppLogo src="/AstroParihar_Top_Logo.jpg" size={32} />
       </div>
 
       {/* Nav Groups */}

@@ -34,8 +34,7 @@ export default function LandingFooter() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <AppLogo src="/assets/images/AstroParihar_Top_Logo-1783108877658.png" size={36} />
-              <span className="font-bold text-xl text-gradient-gold">AstroParihar</span>
+              <AppLogo src="/AstroParihar_Top_Logo.jpg" size={36} />
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-xs">
               India&apos;s most advanced AI-powered Vedic astrology platform. Ancient wisdom, modern technology, personalized for you.
