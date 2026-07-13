@@ -6,12 +6,16 @@ import AdminUsersTable from './AdminUsersTable';
 import AdminAstrologersTable from './AdminAstrologersTable';
 import AdminAppointmentsTable from './AdminAppointmentsTable';
 import AdminPaymentsTable from './AdminPaymentsTable';
-import { Shield, Users, Star, Calendar, CreditCard, Bell, Download } from 'lucide-react';
+import AdminContentManagement from './AdminContentManagement';
+import { Shield, Users, Star, Calendar, CreditCard, Bell, Download, LogOut, LayoutTemplate } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
+import { logoutAdmin } from '@/app/admin-panel/actions';
+import LogoutModal from '@/components/LogoutModal';
 
 
 const tabs = [
   { id: 'tab-overview', label: 'Overview', icon: Shield },
+  { id: 'tab-content', label: 'Content', icon: LayoutTemplate },
   { id: 'tab-users', label: 'Users', icon: Users },
   { id: 'tab-astrologers', label: 'Astrologers', icon: Star },
   { id: 'tab-appointments', label: 'Appointments', icon: Calendar },
@@ -20,6 +24,7 @@ const tabs = [
 
 export default function AdminContent() {
   const [activeTab, setActiveTab] = useState('tab-overview');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -35,6 +40,12 @@ export default function AdminContent() {
           <div className="flex items-center gap-2">
             <button className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border hover:border-accent/50 text-sm hover:text-accent transition-all">
               <Download size={14} /> Export
+            </button>
+            <button 
+              onClick={() => setShowLogoutModal(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border text-white hover:border-red-500/50 text-sm hover:text-red-400 transition-all"
+            >
+              <LogOut size={14} /> Sign Out
             </button>
             <button className="relative p-2 rounded-xl hover:bg-muted transition-all">
               <Bell size={18} className="text-muted-foreground" />
@@ -67,11 +78,14 @@ export default function AdminContent() {
             <AdminCharts />
           </>
         )}
+        {activeTab === 'tab-content' && <AdminContentManagement />}
         {activeTab === 'tab-users' && <AdminUsersTable />}
         {activeTab === 'tab-astrologers' && <AdminAstrologersTable />}
         {activeTab === 'tab-appointments' && <AdminAppointmentsTable />}
         {activeTab === 'tab-payments' && <AdminPaymentsTable />}
       </div>
+      {/* Modals */}
+      <LogoutModal isOpen={showLogoutModal} onClose={() => setShowLogoutModal(false)} />
     </div>
   );
 }

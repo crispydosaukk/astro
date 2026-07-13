@@ -13,6 +13,7 @@ const navLinks = [
   { label: 'Remedies', href: '/ai-recommendations-screen' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Blog', href: '#blog' },
+  { label: 'Admin', href: '/admin-panel' },
 ];
 
 export default function Navbar() {

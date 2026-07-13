@@ -8,12 +8,15 @@ import AIModulesPreview from './components/AIModulesPreview';
 import PricingSection from './components/PricingSection';
 import TestimonialsSection from './components/TestimonialsSection';
 import LandingFooter from './components/LandingFooter';
+import { getHomepageContent } from '@/lib/cms';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const content = await getHomepageContent();
+
   return (
     <div className="min-h-screen bg-background dark">
       <Navbar />
-      <HeroSection />
+      <HeroSection content={content.hero} />
       <PanchangWidget />
       <ServicesSection />
       <FeaturedAstrologers />

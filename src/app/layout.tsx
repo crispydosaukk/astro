@@ -36,7 +36,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${ibmPlexMono.variable} dark`}>
-      <body className={plusJakartaSans.className}>
+      <body className={plusJakartaSans.className} suppressHydrationWarning>
         {children}
         <Toaster position="bottom-right" richColors />
 </body>
