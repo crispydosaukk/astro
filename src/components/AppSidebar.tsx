@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Home, FileText, Calendar, Star, Crown, LayoutDashboard, Sparkles, Bell, Shield, LogOut, User, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import AppLogo from '@/components/ui/AppLogo';
-import { LayoutDashboard, Sparkles, Calendar, FileText, Star, ChevronLeft, ChevronRight, Bell, Crown, User, Home, Shield, LogOut } from 'lucide-react';
-import Icon from '@/components/ui/AppIcon';
+import { useUserData } from '@/lib/useUserData';
+import { auth } from '@/lib/firebase/config';
+import { signOut } from 'firebase/auth';
 import LogoutModal from '@/components/LogoutModal';
 
 
@@ -43,7 +45,12 @@ interface AppSidebarProps {
 export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarProps) {
   const pathname = usePathname();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false); // Mock user state
+  const { user, userData, loading } = useUserData();
+
+  const isUserLoggedIn = !!user;
+  const fullName = userData?.name || 'User';
+  // Check if admin by email or custom claim, but for now fallback to false unless explicitly mocked
+  const isAdminLoggedIn = false; 
 
   const isAdminRoute = pathname.startsWith('/admin-panel');
 
@@ -130,13 +137,16 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
                 <User size={14} className="text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate">Arjun Sharma</p>
+                <p className="text-sm font-semibold truncate">{fullName}</p>
                 <p className="text-xs text-muted-foreground truncate">Premium Member</p>
               </div>
               <Crown size={14} className="text-accent flex-shrink-0" />
             </div>
             <button 
-              onClick={() => setIsUserLoggedIn(false)}
+              onClick={async () => {
+                await signOut(auth);
+                window.location.href = '/';
+              }}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-all font-medium text-sm"
             >
               <LogOut size={18} className="flex-shrink-0" />

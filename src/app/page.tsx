@@ -1,11 +1,9 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import HeroSection from './components/HeroSection';
-import PanchangWidget from './components/PanchangWidget';
 import ServicesSection from './components/ServicesSection';
 import FeaturedAstrologers from './components/FeaturedAstrologers';
 import AIModulesPreview from './components/AIModulesPreview';
-import PricingSection from './components/PricingSection';
 import TestimonialsSection from './components/TestimonialsSection';
 import LandingFooter from './components/LandingFooter';
 import { getHomepageContent } from '@/lib/cms';
@@ -17,11 +15,9 @@ export default async function LandingPage() {
     <div className="min-h-screen bg-background dark">
       <Navbar />
       <HeroSection content={content.hero} />
-      <PanchangWidget />
-      <ServicesSection />
+      <ServicesSection content={content.services} />
       <FeaturedAstrologers />
       <AIModulesPreview />
-      <PricingSection />
       <TestimonialsSection />
       <LandingFooter />
     </div>

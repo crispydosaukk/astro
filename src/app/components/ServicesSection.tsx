@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Gem, Music, Triangle, Flame, Heart, Moon, Compass, ArrowRight, Gift } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
+import { getHomepageContent, HomepageContent, defaultHomepageContent } from '@/lib/cms';
+
+const iconMap: Record<string, any> = {
+  Gem, Music, Triangle, Flame, Heart, Moon, Compass, Gift
+};
 
 
 const services = [
@@ -89,7 +94,8 @@ const services = [
   },
 ];
 
-export default function ServicesSection() {
+export default function ServicesSection({ content }: { content: HomepageContent['services'] }) {
+
   return (
     <section id="services" className="py-20 bg-background">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
@@ -100,19 +106,19 @@ export default function ServicesSection() {
           className="text-center mb-14"
         >
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-4">
-            Our Services
+            {content.tagline}
           </span>
           <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Ancient Wisdom, <span className="text-gradient-gold">Modern Precision</span>
+            {content.title} <span className="text-gradient-gold">{content.titleHighlight}</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive Vedic astrology services powered by Swiss Ephemeris calculations and expert guidance
+            {content.subtitle}
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services?.map((service, i) => {
-            const Icon = service?.icon;
+          {content.items.map((service, i) => {
+            const Icon = iconMap[service.icon] || Gem; // Fallback to Gem if not found
             return (
               <motion.div
                 key={service?.id}

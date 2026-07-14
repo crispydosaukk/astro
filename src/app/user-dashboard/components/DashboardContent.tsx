@@ -8,15 +8,20 @@ import DailyHoroscope from './DailyHoroscope';
 import RemedySuggestions from './RemedySuggestions';
 import { Bell, User } from 'lucide-react';
 import Link from 'next/link';
+import { useUserData } from '@/lib/useUserData';
 
 export default function DashboardContent() {
+  const { userData, loading } = useUserData();
+  const firstName = userData?.firstName || 'User';
+  const fullName = userData?.name || 'Loading...';
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top bar */}
       <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-foreground">Namaste, Arjun 🙏</h1>
+            <h1 className="text-xl font-bold text-foreground">Namaste, {firstName} 🙏</h1>
             <p className="text-sm text-muted-foreground">Thursday, 3 July 2026 · Guruvar · Shukla Saptami</p>
           </div>
           <div className="flex items-center gap-3">
@@ -24,11 +29,11 @@ export default function DashboardContent() {
               <Bell size={18} className="text-muted-foreground" />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent" />
             </button>
-            <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-all">
+            <Link href="/user-dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-all">
               <div className="w-7 h-7 rounded-full indigo-gradient-bg flex items-center justify-center">
                 <User size={13} className="text-white" />
               </div>
-              <span className="text-sm font-medium hidden sm:block">Arjun Sharma</span>
+              <span className="text-sm font-medium hidden sm:block">{fullName}</span>
             </Link>
           </div>
         </div>

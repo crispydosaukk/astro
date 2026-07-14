@@ -1,26 +1,49 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 import { motion } from 'framer-motion';
 import { Search, Crown, Ban, Mail, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import AppImage from '@/components/ui/AppImage';
 
-const users = [
-{ id: 'usr-001', name: 'Arjun Sharma', email: 'arjun.sharma@demo.in', plan: 'Premium', joined: '12 Jan 2026', lastActive: '3 Jul 2026', reports: 12, consultations: 8, status: 'active', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop' },
-{ id: 'usr-002', name: 'Ananya Krishnamurthy', email: 'ananya.k@gmail.com', plan: 'Premium', joined: '8 Feb 2026', lastActive: '2 Jul 2026', reports: 24, consultations: 15, status: 'active', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=60&h=60&fit=crop' },
-{ id: 'usr-003', name: 'Rajan Mehta', email: 'rajan.mehta@business.in', plan: 'Annual', joined: '3 Mar 2026', lastActive: '1 Jul 2026', reports: 18, consultations: 22, status: 'active', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop' },
-{ id: 'usr-004', name: 'Preethi Sundaram', email: 'preethi.s@yahoo.com', plan: 'Free', joined: '20 Mar 2026', lastActive: '28 Jun 2026', reports: 2, consultations: 1, status: 'active', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop' },
-{ id: 'usr-005', name: 'Deepak Nambiar', email: 'deepak.nambiar@hospital.in', plan: 'Premium', joined: '5 Apr 2026', lastActive: '3 Jul 2026', reports: 9, consultations: 6, status: 'active', avatar: "https://img.rocket.new/generatedImages/rocket_gen_img_1fff3ded5-1772146033684.png" },
-{ id: 'usr-006', name: 'Kavitha Reddy', email: 'kavitha.r@hotmail.com', plan: 'Free', joined: '15 Apr 2026', lastActive: '25 Jun 2026', reports: 1, consultations: 0, status: 'suspended', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&h=60&fit=crop' },
-{ id: 'usr-007', name: 'Suresh Pillai', email: 'suresh.pillai@gmail.com', plan: 'Annual', joined: '2 May 2026', lastActive: '3 Jul 2026', reports: 31, consultations: 18, status: 'active', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop' },
-{ id: 'usr-008', name: 'Meera Iyer', email: 'meera.iyer@outlook.com', plan: 'Premium', joined: '18 May 2026', lastActive: '30 Jun 2026', reports: 7, consultations: 4, status: 'active', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&h=60&fit=crop' }];
-
-
 export default function AdminUsersTable() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterPlan, setFilterPlan] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [page, setPage] = useState(1);
   const perPage = 6;
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'users'));
+        const dbUsers = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          const joinedDate = data.createdAt ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Unknown';
+          return {
+            id: doc.id,
+            name: data.name || 'Unknown',
+            email: data.email || 'N/A',
+            plan: data.plan || 'Free',
+            joined: joinedDate,
+            lastActive: data.lastActive || 'Today',
+            reports: data.reports || 0,
+            consultations: data.consultations || 0,
+            status: data.status || 'active',
+            avatar: data.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=random`
+          };
+        });
+        setUsers(dbUsers);
+      } catch (error) {
+        console.error("Error fetching users: ", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUsers();
+  }, []);
 
   const filtered = users?.filter((u) => {
     const matchSearch = u?.name?.toLowerCase()?.includes(search?.toLowerCase()) || u?.email?.toLowerCase()?.includes(search?.toLowerCase());
@@ -33,7 +56,13 @@ export default function AdminUsersTable() {
   const totalPages = Math.ceil(filtered?.length / perPage);
 
   return (
-    <div className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden">
+    <div className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden relative min-h-[400px]">
+      {loading && (
+        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+          <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-sm text-muted-foreground font-medium">Loading users...</p>
+        </div>
+      )}
       <div className="p-5 border-b border-border flex flex-wrap items-center gap-3">
         <h2 className="text-base font-bold text-foreground flex-1">Users Management</h2>
         <div className="relative">

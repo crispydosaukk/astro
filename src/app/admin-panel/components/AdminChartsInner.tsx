@@ -3,40 +3,40 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 
 const revenueData = [
-  { month: 'Jan', revenue: 3240000, consultations: 8420, premium: 2100 },
-  { month: 'Feb', revenue: 2980000, consultations: 7830, premium: 1950 },
-  { month: 'Mar', revenue: 3560000, consultations: 9240, premium: 2380 },
-  { month: 'Apr', revenue: 3120000, consultations: 8100, premium: 2050 },
-  { month: 'May', revenue: 4210000, consultations: 10840, premium: 2840 },
-  { month: 'Jun', revenue: 3890000, consultations: 9980, premium: 2610 },
-  { month: 'Jul', revenue: 4820000, consultations: 12400, premium: 3240 },
+  { month: 'Jan', revenue: 0, consultations: 0, premium: 0 },
+  { month: 'Feb', revenue: 0, consultations: 0, premium: 0 },
+  { month: 'Mar', revenue: 0, consultations: 0, premium: 0 },
+  { month: 'Apr', revenue: 0, consultations: 0, premium: 0 },
+  { month: 'May', revenue: 0, consultations: 0, premium: 0 },
+  { month: 'Jun', revenue: 0, consultations: 0, premium: 0 },
+  { month: 'Jul', revenue: 0, consultations: 0, premium: 0 },
 ];
 
 const userGrowthData = [
-  { week: 'W1 May', users: 238400, premium: 34200 },
-  { week: 'W2 May', users: 241200, premium: 35100 },
-  { week: 'W3 May', users: 244800, premium: 35800 },
-  { week: 'W4 May', users: 246100, premium: 36200 },
-  { week: 'W1 Jun', users: 247900, premium: 36800 },
-  { week: 'W2 Jun', users: 249200, premium: 37400 },
-  { week: 'W3 Jun', users: 250400, premium: 37900 },
-  { week: 'W4 Jun', users: 251847, premium: 38420 },
+  { week: 'W1 May', users: 0, premium: 0 },
+  { week: 'W2 May', users: 0, premium: 0 },
+  { week: 'W3 May', users: 0, premium: 0 },
+  { week: 'W4 May', users: 0, premium: 0 },
+  { week: 'W1 Jun', users: 0, premium: 0 },
+  { week: 'W2 Jun', users: 0, premium: 0 },
+  { week: 'W3 Jun', users: 0, premium: 0 },
+  { week: 'W4 Jun', users: 0, premium: 0 },
 ];
 
 const consultationTypeData = [
-  { name: 'Video Call', value: 42, color: 'var(--secondary)' },
-  { name: 'Phone Call', value: 35, color: 'var(--accent)' },
-  { name: 'AI Report', value: 23, color: '#10b981' },
+  { name: 'Video Call', value: 0, color: 'var(--secondary)' },
+  { name: 'Phone Call', value: 0, color: 'var(--accent)' },
+  { name: 'AI Report', value: 0, color: '#10b981' },
 ];
 
 const aiReportData = [
-  { day: 'Mon', gemstone: 420, mantra: 380, yantra: 210, muhurtham: 180 },
-  { day: 'Tue', gemstone: 380, mantra: 340, yantra: 190, muhurtham: 160 },
-  { day: 'Wed', gemstone: 510, mantra: 460, yantra: 280, muhurtham: 220 },
-  { day: 'Thu', gemstone: 480, mantra: 420, yantra: 260, muhurtham: 200 },
-  { day: 'Fri', gemstone: 620, mantra: 540, yantra: 320, muhurtham: 280 },
-  { day: 'Sat', gemstone: 840, mantra: 720, yantra: 480, muhurtham: 380 },
-  { day: 'Sun', gemstone: 760, mantra: 680, yantra: 420, muhurtham: 340 },
+  { day: 'Mon', gemstone: 0, mantra: 0, yantra: 0, muhurtham: 0 },
+  { day: 'Tue', gemstone: 0, mantra: 0, yantra: 0, muhurtham: 0 },
+  { day: 'Wed', gemstone: 0, mantra: 0, yantra: 0, muhurtham: 0 },
+  { day: 'Thu', gemstone: 0, mantra: 0, yantra: 0, muhurtham: 0 },
+  { day: 'Fri', gemstone: 0, mantra: 0, yantra: 0, muhurtham: 0 },
+  { day: 'Sat', gemstone: 0, mantra: 0, yantra: 0, muhurtham: 0 },
+  { day: 'Sun', gemstone: 0, mantra: 0, yantra: 0, muhurtham: 0 },
 ];
 
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) => {

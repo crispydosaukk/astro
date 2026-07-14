@@ -12,6 +12,10 @@ export async function loginAdmin(prevState: any, formData: FormData) {
     return { error: 'Email and password are required' };
   }
 
+  if (email.toLowerCase() !== 'rahulbadugu22@gmail.com') {
+    return { error: 'Unauthorized Access. Admin privileges required.' };
+  }
+
   try {
     await signInWithEmailAndPassword(auth, email, password);
     const cookieStore = await cookies();

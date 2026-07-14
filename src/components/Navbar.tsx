@@ -5,14 +5,14 @@ import { usePathname } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
 import { Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { auth } from '@/lib/firebase/config';
+import { onAuthStateChanged, signOut as firebaseSignOut, User } from 'firebase/auth';
 
 const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Services', href: '#services' },
   { label: 'Talk to Astrologer', href: '/talk-to-astrologer' },
   { label: 'Remedies', href: '/ai-recommendations-screen' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Blog', href: '#blog' },
   { label: 'Admin', href: '/admin-panel' },
 ];
 
@@ -20,7 +20,15 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -60,13 +68,26 @@ export default function Navbar() {
             <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-accent/10 text-slate-700 hover:text-accent transition-all icon-hover-animate">
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <Link href="/sign-up-login-screen" className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200">
-              Sign In
-            </Link>
-            <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all duration-200 gold-shadow">
-              <Sparkles size={14} />
-              <span className="hidden sm:inline">Get Started</span>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/user-dashboard" className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200">
+                  Dashboard
+                </Link>
+                <button onClick={() => firebaseSignOut(auth)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all duration-200 gold-shadow">
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/sign-up-login-screen" className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200">
+                  Sign In
+                </Link>
+                <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all duration-200 gold-shadow">
+                  <Sparkles size={14} />
+                  <span className="hidden sm:inline">Get Started</span>
+                </Link>
+              </>
+            )}
             <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-800 transition-all">
               {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -95,8 +116,17 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="pt-3 border-t border-slate-100 flex gap-3">
-                <Link href="/sign-up-login-screen" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 transition-all">Sign In</Link>
-                <Link href="/sign-up-login-screen" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold gold-gradient-bg text-white">Get Started</Link>
+                {user ? (
+                  <>
+                    <Link href="/user-dashboard" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 transition-all">Dashboard</Link>
+                    <button onClick={() => firebaseSignOut(auth)} className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold gold-gradient-bg text-white">Sign Out</button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/sign-up-login-screen" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 transition-all">Sign In</Link>
+                    <Link href="/sign-up-login-screen" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold gold-gradient-bg text-white">Get Started</Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

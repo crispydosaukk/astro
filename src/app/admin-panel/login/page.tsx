@@ -1,9 +1,9 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { loginAdmin } from '../actions';
 import AppLogo from '@/components/ui/AppLogo';
-import { Loader2, Mail, Lock } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const initialState = {
   error: ''
@@ -11,6 +11,7 @@ const initialState = {
 
 export default function AdminLogin() {
   const [state, formAction, isPending] = useActionState(loginAdmin, initialState);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -39,7 +40,7 @@ export default function AdminLogin() {
                   type="email" 
                   name="email"
                   required 
-                  className="pl-10 w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all"
+                  className="pl-10 w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-slate-900 bg-white"
                   placeholder="name@example.com"
                 />
               </div>
@@ -52,12 +53,19 @@ export default function AdminLogin() {
                   <Lock className="h-5 w-5 text-slate-400" />
                 </div>
                 <input 
-                  type="password" 
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   required 
-                  className="pl-10 w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all"
+                  className="pl-10 pr-10 w-full rounded-xl border border-slate-200 py-2.5 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-slate-900 bg-white"
                   placeholder="••••••••"
                 />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
             </div>
 

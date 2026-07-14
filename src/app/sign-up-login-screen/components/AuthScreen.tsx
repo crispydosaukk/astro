@@ -1,11 +1,15 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import Script from 'next/script';
 import AppLogo from '@/components/ui/AppLogo';
-import { Eye, EyeOff, Mail, Lock, User, Calendar, Clock, MapPin, Sparkles, Star, ChevronRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Calendar, Clock, MapPin, Sparkles, Star, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { auth, db } from '@/lib/firebase/config';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 type AuthMode = 'login' | 'signup' | 'otp';
 type SignupStep = 1 | 2;
@@ -27,12 +31,6 @@ interface SignupForm {
   gender: string;
 }
 
-const demoCredentials = [
-  { role: 'User', email: 'arjun.sharma@demo.in', password: 'Cosmic@2026' },
-  { role: 'Premium', email: 'meera.devi@premium.in', password: 'Vedic@9999' },
-  { role: 'Admin', email: 'admin@astroparihar.in', password: 'AstroAdmin#1' },
-];
-
 export default function AuthScreen() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [step, setStep] = useState<SignupStep>(1);
@@ -40,9 +38,31 @@ export default function AuthScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState<'signup' | 'login' | null>(null);
+  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
+  const pobRef = useRef<HTMLInputElement | null>(null);
 
   const loginForm = useForm<LoginForm>({ defaultValues: { email: '', password: '', remember: false } });
   const signupForm = useForm<SignupForm>({ defaultValues: { name: '', email: '', password: '', confirmPassword: '', dob: '', tob: '', pob: '', gender: '' } });
+
+  useEffect(() => {
+    if (step === 2 && isGoogleLoaded && pobRef.current) {
+      if (!(pobRef.current as any)._autocompleteAttached) {
+        const autocomplete = new window.google.maps.places.Autocomplete(pobRef.current, {
+          types: ['(cities)'],
+        });
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace();
+          if (place && place.formatted_address) {
+            signupForm.setValue('pob', place.formatted_address, { shouldValidate: true });
+          } else if (place && place.name) {
+            signupForm.setValue('pob', place.name, { shouldValidate: true });
+          }
+        });
+        (pobRef.current as any)._autocompleteAttached = true;
+      }
+    }
+  }, [step, isGoogleLoaded, signupForm]);
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -50,24 +70,19 @@ export default function AuthScreen() {
     setTimeout(() => setCopiedField(null), 1500);
   };
 
-  const handleFillCredentials = (cred: typeof demoCredentials[0]) => {
-    loginForm.setValue('email', cred.email);
-    loginForm.setValue('password', cred.password);
-    toast.success(`Filled ${cred.role} credentials`);
-  };
-
   const onLogin = async (data: LoginForm) => {
-    const valid = demoCredentials.some(c => c.email === data.email && c.password === data.password);
-    if (!valid) {
-      loginForm.setError('email', { message: 'Invalid credentials — use the demo accounts below to sign in' });
-      return;
-    }
     setIsLoading(true);
-    // Backend: POST /api/auth/login
-    await new Promise(r => setTimeout(r, 1500));
-    setIsLoading(false);
-    toast.success('Welcome back! Redirecting to dashboard...');
-    window.location.href = '/user-dashboard';
+    try {
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      setShowSuccessPopup('login');
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2500);
+    } catch (error: any) {
+      console.error(error);
+      loginForm.setError('email', { message: error.message || 'Invalid credentials' });
+      setIsLoading(false);
+    }
   };
 
   const onSignup = async (data: SignupForm) => {
@@ -76,15 +91,45 @@ export default function AuthScreen() {
       return;
     }
     setIsLoading(true);
-    // Backend: POST /api/auth/register
-    await new Promise(r => setTimeout(r, 1800));
-    setIsLoading(false);
-    toast.success('Account created! Welcome to AstroParihar 🌟');
-    window.location.href = '/user-dashboard';
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+      
+      await setDoc(doc(db, 'users', user.uid), {
+        name: data.name,
+        email: data.email,
+        dob: data.dob,
+        tob: data.tob,
+        pob: data.pob,
+        gender: data.gender,
+        createdAt: new Date().toISOString()
+      });
+      
+      await signOut(auth);
+      
+      setShowSuccessPopup('signup');
+      setTimeout(() => {
+        setShowSuccessPopup(null);
+        setMode('login');
+        setStep(1);
+        setIsLoading(false);
+        signupForm.reset();
+        loginForm.setValue('email', data.email);
+      }, 3000);
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Failed to create account');
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex dark">
+      <Script 
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-CXsyKpvFtpidpOkhOiIQGfXFO3O5lKA&libraries=places" 
+        strategy="lazyOnload" 
+        onReady={() => setIsGoogleLoaded(true)}
+      />
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 cosmic-bg flex-col items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
@@ -164,22 +209,6 @@ export default function AuthScreen() {
                 <h1 className="text-2xl font-bold text-foreground mb-1">Welcome Back</h1>
                 <p className="text-sm text-muted-foreground mb-8">Sign in to continue your cosmic journey</p>
 
-                {/* Social logins */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <button className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border hover:border-accent/50 text-sm font-medium hover:text-accent transition-all">
-                    <span className="text-lg">G</span> Google
-                  </button>
-                  <button className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border hover:border-accent/50 text-sm font-medium hover:text-accent transition-all">
-                    <span className="text-lg">📱</span> OTP Login
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-xs text-muted-foreground">or email</span>
-                  <div className="flex-1 h-px bg-border" />
-                </div>
-
                 <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">Email Address</label>
@@ -237,21 +266,6 @@ export default function AuthScreen() {
                   </button>
                 </form>
 
-                {/* Demo credentials */}
-                <div className="mt-6 rounded-xl border border-accent/20 bg-accent/5 p-4">
-                  <p className="text-xs font-semibold text-accent mb-3 flex items-center gap-1.5"><Star size={12} /> Demo Accounts</p>
-                  <div className="space-y-2">
-                    {demoCredentials.map((cred) => (
-                      <div key={`cred-${cred.role}`} className="flex items-center justify-between gap-2 text-xs">
-                        <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{cred.role}</span>
-                        <span className="text-muted-foreground flex-1 truncate font-mono">{cred.email}</span>
-                        <button onClick={() => handleFillCredentials(cred)} className="px-2 py-1 rounded-lg bg-accent/20 text-accent hover:bg-accent hover:text-white transition-all font-medium">
-                          Use
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </motion.div>
             )}
 
@@ -328,8 +342,7 @@ export default function AuthScreen() {
                           <label className="block text-sm font-medium text-foreground mb-1.5">Date of Birth</label>
                           <p className="text-xs text-muted-foreground mb-1.5">Required for Kundli</p>
                           <div className="relative">
-                            <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                            <input type="date" {...signupForm.register('dob', { required: 'Date of birth required' })} className="w-full pl-10 pr-3 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" />
+                            <input type="date" style={{ colorScheme: 'dark' }} {...signupForm.register('dob', { required: 'Date of birth required' })} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" />
                           </div>
                           {signupForm.formState.errors.dob && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.dob.message}</p>}
                         </div>
@@ -337,8 +350,7 @@ export default function AuthScreen() {
                           <label className="block text-sm font-medium text-foreground mb-1.5">Time of Birth</label>
                           <p className="text-xs text-muted-foreground mb-1.5">As accurate as possible</p>
                           <div className="relative">
-                            <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                            <input type="time" {...signupForm.register('tob')} className="w-full pl-10 pr-3 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" />
+                            <input type="time" style={{ colorScheme: 'dark' }} {...signupForm.register('tob')} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" />
                           </div>
                         </div>
                       </div>
@@ -347,15 +359,24 @@ export default function AuthScreen() {
                         <label className="block text-sm font-medium text-foreground mb-1.5">Place of Birth</label>
                         <p className="text-xs text-muted-foreground mb-1.5">City, State, Country</p>
                         <div className="relative">
-                          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                          <input type="text" {...signupForm.register('pob', { required: 'Place of birth required' })} className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" placeholder="Mumbai, Maharashtra, India" />
+                          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                          <input 
+                            type="text" 
+                            {...signupForm.register('pob', { required: 'Place of birth required' })}
+                            ref={(e) => {
+                              signupForm.register('pob').ref(e);
+                              pobRef.current = e;
+                            }}
+                            className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" 
+                            placeholder="Mumbai, Maharashtra, India" 
+                          />
                         </div>
                         {signupForm.formState.errors.pob && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.pob.message}</p>}
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-foreground mb-1.5">Gender</label>
-                        <select {...signupForm.register('gender')} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all">
+                        <select {...signupForm.register('gender')} style={{ colorScheme: 'dark' }} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all appearance-none cursor-pointer">
                           <option value="">Select gender</option>
                           <option value="male">Male</option>
                           <option value="female">Female</option>
@@ -379,6 +400,50 @@ export default function AuthScreen() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Success Popup Modal */}
+      <AnimatePresence>
+        {showSuccessPopup && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.9, opacity: 0, y: 20 }} 
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-card border border-border p-10 rounded-3xl shadow-2xl flex flex-col items-center max-w-md w-full mx-4 text-center relative overflow-hidden"
+            >
+              <div className="absolute inset-0 gold-gradient-bg opacity-5 pointer-events-none" />
+              <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6 text-accent animate-pulse-glow relative z-10">
+                <Sparkles size={40} className="animate-float" />
+              </div>
+              <h3 className="text-3xl font-bold text-foreground mb-3 relative z-10">
+                {showSuccessPopup === 'signup' ? 'Account Created!' : 'Sign In Success!'}
+              </h3>
+              <p className="text-base text-muted-foreground relative z-10">
+                {showSuccessPopup === 'signup' 
+                  ? 'Your cosmic journey begins now. Please sign in to continue.' 
+                  : 'Welcome back! Redirecting you to the portal...'}
+              </p>
+              
+              {showSuccessPopup === 'signup' && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring' }}
+                  className="mt-8 relative z-10 text-green-500"
+                >
+                  <CheckCircle2 size={32} className="mx-auto" />
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

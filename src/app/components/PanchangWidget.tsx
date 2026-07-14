@@ -1,27 +1,38 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon, Star, Clock, Calendar, Compass } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
+import { getHomepageContent, HomepageContent, defaultHomepageContent } from '@/lib/cms';
 
-
-const panchangData = [
-  { icon: Sun, label: 'Tithi', value: 'Shukla Saptami', sub: 'Ends 11:45 PM', color: 'text-amber-400' },
-  { icon: Star, label: 'Nakshatra', value: 'Punarvasu', sub: 'Until 08:30 PM', color: 'text-purple-400' },
-  { icon: Compass, label: 'Yoga', value: 'Siddha Yoga', sub: 'Auspicious', color: 'text-green-400' },
-  { icon: Moon, label: 'Karana', value: 'Bava', sub: 'Till 12:30 PM', color: 'text-blue-400' },
-  { icon: Calendar, label: 'Vara', value: 'Guruvar', sub: 'Thursday', color: 'text-amber-400' },
-  { icon: Clock, label: 'Rahu Kalam', value: '01:30 – 03:00 PM', sub: 'Avoid this time', color: 'text-red-400' },
-];
 
 export default function PanchangWidget() {
+  const [content, setContent] = useState<HomepageContent>(defaultHomepageContent);
+
+  useEffect(() => {
+    async function fetchContent() {
+      const data = await getHomepageContent();
+      setContent(data);
+    }
+    fetchContent();
+  }, []);
+
+  const panchangData = [
+    { icon: Sun, label: 'Tithi', value: content.panchang.tithiValue, sub: content.panchang.tithiSub, color: 'text-amber-400' },
+    { icon: Star, label: 'Nakshatra', value: content.panchang.nakshatraValue, sub: content.panchang.nakshatraSub, color: 'text-purple-400' },
+    { icon: Compass, label: 'Yoga', value: content.panchang.yogaValue, sub: content.panchang.yogaSub, color: 'text-green-400' },
+    { icon: Moon, label: 'Karana', value: content.panchang.karanaValue, sub: content.panchang.karanaSub, color: 'text-blue-400' },
+    { icon: Calendar, label: 'Vara', value: content.panchang.varaValue, sub: content.panchang.varaSub, color: 'text-amber-400' },
+    { icon: Clock, label: 'Rahu Kalam', value: content.panchang.rahuKalamValue, sub: content.panchang.rahuKalamSub, color: 'text-red-400' },
+  ];
+
   return (
     <section className="py-12 bg-muted/30 border-y border-border">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Today&apos;s Panchang</h2>
-            <p className="text-sm text-muted-foreground mt-1">Thursday, 3 July 2026 · Ashadha Shukla Saptami · IST</p>
+            <p className="text-sm text-muted-foreground mt-1">{content.panchang.dateLabel}</p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/10 border border-accent/20">
             <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
