@@ -18,6 +18,10 @@ const footerLinks = {
     { label: 'Press', href: '#' },
     { label: 'Contact', href: '#' },
   ],
+  Astrologers: [
+    { label: 'Astrologer Login', href: '/astrologer-login' },
+    { label: 'Astrologer Registration', href: '/astrologer-login?mode=signup' },
+  ],
   Legal: [
     { label: 'Privacy Policy', href: '#' },
     { label: 'Terms of Service', href: '#' },
@@ -30,7 +34,7 @@ export default function LandingFooter() {
   return (
     <footer className="bg-card border-t border-border">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-10 mb-12">
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">

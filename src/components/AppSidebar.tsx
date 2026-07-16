@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Calendar, Star, Crown, LayoutDashboard, Sparkles, Bell, Shield, LogOut, User, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, FileText, Calendar, Star, Crown, LayoutDashboard, Sparkles, Bell, Shield, LogOut, User, Menu, X, ChevronLeft, ChevronRight, LayoutTemplate, Users, CreditCard } from 'lucide-react';
 import AppLogo from '@/components/ui/AppLogo';
 import { useUserData } from '@/lib/useUserData';
 import { auth } from '@/lib/firebase/config';
@@ -32,7 +32,12 @@ const sidebarGroups = [
   {
     label: 'Admin',
     items: [
-      { icon: Shield, label: 'Admin Panel', href: '/admin-panel', badge: null },
+      { icon: Shield, label: 'Overview', href: '/admin-panel', badge: null },
+      { icon: LayoutTemplate, label: 'Content', href: '/admin-panel/content', badge: null },
+      { icon: Users, label: 'Users', href: '/admin-panel/users', badge: null },
+      { icon: Star, label: 'Astrologers', href: '/admin-panel/astrologers', badge: null },
+      { icon: Calendar, label: 'Appointments', href: '/admin-panel/appointments', badge: null },
+      { icon: CreditCard, label: 'Payments', href: '/admin-panel/payments', badge: null },
     ],
   },
 ];
@@ -157,10 +162,10 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
 
         {!collapsed && !isAdminRoute && !isUserLoggedIn && (
           <button 
-            onClick={() => setIsUserLoggedIn(true)}
+            onClick={() => window.location.href = '/sign-up-login-screen'}
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent text-accent-foreground font-medium text-sm hover:bg-accent/90 transition-all"
           >
-            <User size={16} /> Sign In (Mock)
+            <User size={16} /> Sign In
           </button>
         )}
         <button

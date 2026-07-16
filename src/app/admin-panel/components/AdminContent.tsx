@@ -22,8 +22,7 @@ const tabs = [
   { id: 'tab-payments', label: 'Payments', icon: CreditCard },
 ];
 
-export default function AdminContent() {
-  const [activeTab, setActiveTab] = useState('tab-overview');
+export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab?: string }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   return (
@@ -54,22 +53,7 @@ export default function AdminContent() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mt-4 overflow-x-auto scrollbar-hide">
-          {tabs?.map(tab => {
-            const Icon = tab?.icon;
-            return (
-              <button
-                key={tab?.id}
-                onClick={() => setActiveTab(tab?.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all flex-shrink-0 ${activeTab === tab?.id ? 'gold-gradient-bg text-white' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
-              >
-                <Icon size={14} />
-                {tab?.label}
-              </button>
-            );
-          })}
-        </div>
+
       </div>
       <div className="px-6 lg:px-8 py-8 max-w-screen-2xl space-y-8">
         {activeTab === 'tab-overview' && (

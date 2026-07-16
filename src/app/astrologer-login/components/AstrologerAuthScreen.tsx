@@ -10,6 +10,7 @@ import { Eye, EyeOff, Mail, Lock, User, Calendar, Clock, MapPin, Sparkles, Star,
 import { auth, db } from '@/lib/firebase/config';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { useSearchParams } from 'next/navigation';
 
 type AuthMode = 'login' | 'signup' | 'otp';
 type SignupStep = 1 | 2;
@@ -26,27 +27,35 @@ interface SignupForm {
   password: string;
   confirmPassword: string;
   dob: string;
-  tob: string;
-  pob: string;
+  city: string;
   gender: string;
+  languages: string;
+  skills: string;
+  phoneType: string;
+  workingElsewhere: string;
+  dailyHours: string;
+  learningSource: string;
 }
 
-export default function AuthScreen() {
-  const [mode, setMode] = useState<AuthMode>('login');
+export default function AstrologerAuthScreen() {
+  const searchParams = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login';
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [step, setStep] = useState<SignupStep>(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [showSuccessPopup, setShowSuccessPopup] = useState<'signup' | 'login' | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState<'login' | null>(null);
+  const [signupSuccessToken, setSignupSuccessToken] = useState<number | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const pobRef = useRef<HTMLInputElement | null>(null);
 
   const loginForm = useForm<LoginForm>({ defaultValues: { email: '', password: '', remember: false } });
-  const signupForm = useForm<SignupForm>({ defaultValues: { name: '', email: '', password: '', confirmPassword: '', dob: '', tob: '', pob: '', gender: '' } });
+  const signupForm = useForm<SignupForm>({ defaultValues: { name: '', email: '', password: '', confirmPassword: '', dob: '', city: '', gender: '', languages: '', skills: '', phoneType: '', workingElsewhere: 'no', dailyHours: '', learningSource: '' } });
 
   useEffect(() => {
-    if (step === 2 && isGoogleLoaded && pobRef.current) {
+    if (step === 1 && isGoogleLoaded && pobRef.current) {
       if (!(pobRef.current as any)._autocompleteAttached) {
         const autocomplete = new (window as any).google.maps.places.Autocomplete(pobRef.current, {
           types: ['(cities)'],
@@ -54,9 +63,9 @@ export default function AuthScreen() {
         autocomplete.addListener('place_changed', () => {
           const place = autocomplete.getPlace();
           if (place && place.formatted_address) {
-            signupForm.setValue('pob', place.formatted_address, { shouldValidate: true });
+            signupForm.setValue('city', place.formatted_address, { shouldValidate: true });
           } else if (place && place.name) {
-            signupForm.setValue('pob', place.name, { shouldValidate: true });
+            signupForm.setValue('city', place.name, { shouldValidate: true });
           }
         });
         (pobRef.current as any)._autocompleteAttached = true;
@@ -76,7 +85,7 @@ export default function AuthScreen() {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       setShowSuccessPopup('login');
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/admin-panel'; // Assuming they go to a dashboard, admin-panel is fine for now
       }, 2500);
     } catch (error: any) {
       console.error(error);
@@ -94,28 +103,31 @@ export default function AuthScreen() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
+      const token = Math.floor(100000 + Math.random() * 900000);
       
-      await setDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, 'astrologers', user.uid), {
         name: data.name,
         email: data.email,
         dob: data.dob,
-        tob: data.tob,
-        pob: data.pob,
+        city: data.city,
         gender: data.gender,
+        languages: data.languages,
+        skills: data.skills,
+        phoneType: data.phoneType,
+        workingElsewhere: data.workingElsewhere,
+        dailyHours: data.dailyHours,
+        learningSource: data.learningSource,
+        role: 'astrologer',
+        status: 'pending',
+        tokenNumber: token,
         createdAt: new Date().toISOString()
       });
       
       await signOut(auth);
       
-      setShowSuccessPopup('signup');
-      setTimeout(() => {
-        setShowSuccessPopup(null);
-        setMode('login');
-        setStep(1);
-        setIsLoading(false);
-        signupForm.reset();
-        loginForm.setValue('email', data.email);
-      }, 3000);
+      setSignupSuccessToken(token);
+      setIsLoading(false);
+      loginForm.setValue('email', data.email);
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Failed to create account');
@@ -157,13 +169,13 @@ export default function AuthScreen() {
           </div>
 
           <div className="w-48 h-48 mx-auto rounded-full gold-gradient-bg flex items-center justify-center animate-float shadow-2xl">
-            <span className="text-8xl">🔮</span>
+            <span className="text-8xl">✨</span>
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold text-white mb-3">Your Stars Await</h2>
+            <h2 className="text-3xl font-bold text-white mb-3">Join as an Astrologer</h2>
             <p className="text-white/60 text-base max-w-sm mx-auto leading-relaxed">
-              Join 2,50,000+ seekers discovering their cosmic path through ancient Vedic wisdom and AI intelligence
+              Guide thousands of seekers on their cosmic journey using our advanced platform.
             </p>
           </div>
 
@@ -190,24 +202,68 @@ export default function AuthScreen() {
             <AppLogo src="/AstroParihar_Top_Logo.jpg" size={36} />
           </div>
 
-          {/* Mode tabs */}
-          <div className="flex rounded-xl bg-muted p-1 mb-8">
-            {(['login', 'signup'] as const).map((m) => (
-              <button
-                key={`mode-${m}`}
-                onClick={() => { setMode(m); setStep(1); }}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${mode === m ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          {signupSuccessToken ? (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="bg-card border border-border p-10 rounded-3xl shadow-xl flex flex-col items-center w-full text-center relative overflow-hidden"
+            >
+              <div className="absolute inset-0 gold-gradient-bg opacity-5 pointer-events-none" />
+              <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6 text-accent animate-pulse-glow relative z-10">
+                <Sparkles size={40} className="animate-float" />
+              </div>
+              <h3 className="text-3xl font-bold text-foreground mb-3 relative z-10">
+                Thank You!
+              </h3>
+              <p className="text-base text-muted-foreground relative z-10">
+                <span className="flex flex-col gap-3">
+                  <span>Thank you for submitting your details with AstroParihar! Your token number is <strong className="text-foreground">{signupSuccessToken}</strong>.</span>
+                  <span>Please join the waitlist on the Astrologer Hiring App once you get shortlisted. Please note that you will be notified about any updates both via WhatsApp and email.</span>
+                  <span>For further details, feel free to reach out to us via email at onboarding@astroparihar.com. Looking forward to having you on board!</span>
+                </span>
+              </p>
+              
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring' }}
+                className="mt-8 relative z-10 text-green-500"
               >
-                {m === 'login' ? 'Sign In' : 'Create Account'}
+                <CheckCircle2 size={32} className="mx-auto" />
+              </motion.div>
+              
+              <button 
+                onClick={() => {
+                  setSignupSuccessToken(null);
+                  setMode('login');
+                  setStep(1);
+                  signupForm.reset();
+                }}
+                className="mt-8 px-6 py-2.5 rounded-xl border border-border text-sm font-semibold hover:border-accent/50 transition-all z-10"
+              >
+                Go back to Login
               </button>
-            ))}
-          </div>
+            </motion.div>
+          ) : (
+            <>
+              {/* Mode tabs */}
+              <div className="flex rounded-xl bg-muted p-1 mb-8">
+                {(['login', 'signup'] as const).map((m) => (
+                  <button
+                    key={`mode-${m}`}
+                    onClick={() => { setMode(m); setStep(1); }}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${mode === m ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {m === 'login' ? 'Sign In' : 'Create Account'}
+                  </button>
+                ))}
+              </div>
 
           <AnimatePresence mode="wait">
             {mode === 'login' && (
               <motion.div key="login" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
-                <h1 className="text-2xl font-bold text-foreground mb-1">Welcome Back</h1>
-                <p className="text-sm text-muted-foreground mb-8">Sign in to continue your cosmic journey</p>
+                <h1 className="text-2xl font-bold text-foreground mb-1">Astrologer Portal</h1>
+                <p className="text-sm text-muted-foreground mb-8">Sign in to your astrologer dashboard</p>
 
                 <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-5">
                   <div>
@@ -218,7 +274,7 @@ export default function AuthScreen() {
                         type="email"
                         {...loginForm.register('email', { required: 'Email is required', pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' } })}
                         className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none text-sm transition-all"
-                        placeholder="arjun@example.com"
+                        placeholder="guru@astroparihar.com"
                       />
                     </div>
                     {loginForm.formState.errors.email && (
@@ -284,10 +340,10 @@ export default function AuthScreen() {
                 </div>
 
                 <h1 className="text-2xl font-bold text-foreground mb-1">
-                  {step === 1 ? 'Create Account' : 'Birth Details'}
+                  {step === 1 ? 'Personal Details' : 'Professional Details'}
                 </h1>
                 <p className="text-sm text-muted-foreground mb-8">
-                  {step === 1 ? 'Start your cosmic journey today' : 'Required for accurate Kundli generation'}
+                  {step === 1 ? 'Basic information to get started' : 'Tell us about your astrology background'}
                 </p>
 
                 <form onSubmit={signupForm.handleSubmit(onSignup)} className="space-y-5">
@@ -297,7 +353,7 @@ export default function AuthScreen() {
                         <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
                         <div className="relative">
                           <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                          <input type="text" {...signupForm.register('name', { required: 'Name is required' })} className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none text-sm transition-all" placeholder="Arjun Sharma" />
+                          <input type="text" {...signupForm.register('name', { required: 'Name is required' })} className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none text-sm transition-all" placeholder="Guru Sharma" />
                         </div>
                         {signupForm.formState.errors.name && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.name.message}</p>}
                       </div>
@@ -306,9 +362,47 @@ export default function AuthScreen() {
                         <label className="block text-sm font-medium text-foreground mb-1.5">Email Address</label>
                         <div className="relative">
                           <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                          <input type="email" {...signupForm.register('email', { required: 'Email is required', pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' } })} className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none text-sm transition-all" placeholder="arjun@example.com" />
+                          <input type="email" {...signupForm.register('email', { required: 'Email is required', pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' } })} className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none text-sm transition-all" placeholder="guru@example.com" />
                         </div>
                         {signupForm.formState.errors.email && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.email.message}</p>}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">Date of Birth</label>
+                          <div className="relative">
+                            <input type="date" style={{ colorScheme: 'dark' }} {...signupForm.register('dob', { required: 'Date of birth required' })} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" />
+                          </div>
+                          {signupForm.formState.errors.dob && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.dob.message}</p>}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">Gender</label>
+                          <select {...signupForm.register('gender', { required: 'Required' })} style={{ colorScheme: 'dark' }} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all appearance-none cursor-pointer">
+                            <option value="">Select gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                          </select>
+                          {signupForm.formState.errors.gender && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.gender.message}</p>}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">Current City, State, Country</label>
+                        <div className="relative">
+                          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                          <input 
+                            type="text" 
+                            {...signupForm.register('city', { required: 'City is required' })}
+                            ref={(e) => {
+                              signupForm.register('city').ref(e);
+                              pobRef.current = e;
+                            }}
+                            className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" 
+                            placeholder="Mumbai, Maharashtra, India" 
+                          />
+                        </div>
+                        {signupForm.formState.errors.city && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.city.message}</p>}
                       </div>
 
                       <div>
@@ -337,51 +431,58 @@ export default function AuthScreen() {
 
                   {step === 2 && (
                     <>
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">Languages</label>
+                        <input type="text" {...signupForm.register('languages', { required: 'Required' })} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" placeholder="English, Hindi, Telugu" />
+                        {signupForm.formState.errors.languages && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.languages.message}</p>}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">Skills</label>
+                        <input type="text" {...signupForm.register('skills', { required: 'Required' })} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" placeholder="Numerology, Palmistry, Vastu" />
+                        {signupForm.formState.errors.skills && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.skills.message}</p>}
+                      </div>
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-foreground mb-1.5">Date of Birth</label>
-                          <p className="text-xs text-muted-foreground mb-1.5">Required for Kundli</p>
-                          <div className="relative">
-                            <input type="date" style={{ colorScheme: 'dark' }} {...signupForm.register('dob', { required: 'Date of birth required' })} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" />
-                          </div>
-                          {signupForm.formState.errors.dob && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.dob.message}</p>}
+                          <label className="block text-sm font-medium text-foreground mb-1.5">Which phone do you use?</label>
+                          <select {...signupForm.register('phoneType')} style={{ colorScheme: 'dark' }} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all appearance-none cursor-pointer">
+                            <option value="Android">Android</option>
+                            <option value="iPhone">iPhone</option>
+                            <option value="Other">Other</option>
+                          </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-foreground mb-1.5">Time of Birth</label>
-                          <p className="text-xs text-muted-foreground mb-1.5">As accurate as possible</p>
-                          <div className="relative">
-                            <input type="time" style={{ colorScheme: 'dark' }} {...signupForm.register('tob')} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" />
+                          <label className="block text-sm font-medium text-foreground mb-1.5">Working on other platform?</label>
+                          <div className="flex gap-4 h-[46px] items-center">
+                            <label className="flex items-center gap-2 cursor-pointer text-sm">
+                              <input type="radio" value="yes" {...signupForm.register('workingElsewhere')} className="text-accent" />
+                              Yes
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer text-sm">
+                              <input type="radio" value="no" {...signupForm.register('workingElsewhere')} className="text-accent" />
+                              No
+                            </label>
                           </div>
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">Place of Birth</label>
-                        <p className="text-xs text-muted-foreground mb-1.5">City, State, Country</p>
-                        <div className="relative">
-                          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                          <input 
-                            type="text" 
-                            {...signupForm.register('pob', { required: 'Place of birth required' })}
-                            ref={(e) => {
-                              signupForm.register('pob').ref(e);
-                              pobRef.current = e;
-                            }}
-                            className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" 
-                            placeholder="Mumbai, Maharashtra, India" 
-                          />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">Daily Hours Contribution</label>
+                          <select {...signupForm.register('dailyHours')} style={{ colorScheme: 'dark' }} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all appearance-none cursor-pointer">
+                            <option value="2">2 Hours</option>
+                            <option value="4">4 Hours</option>
+                            <option value="6">6 Hours</option>
+                            <option value="8">8 Hours</option>
+                            <option value="10">10+ Hours</option>
+                          </select>
                         </div>
-                        {signupForm.formState.errors.pob && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.pob.message}</p>}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">Gender</label>
-                        <select {...signupForm.register('gender')} style={{ colorScheme: 'dark' }} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all appearance-none cursor-pointer">
-                          <option value="">Select gender</option>
-                          <option value="male">Male</option>
-                          <option value="female">Female</option>
-                          <option value="other">Other / Prefer not to say</option>
-                        </select>
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-1.5">Where did you learn Astrology?</label>
+                          <input type="text" {...signupForm.register('learningSource', { required: 'Required' })} className="w-full px-4 py-3 rounded-xl bg-input border border-border focus:border-ring outline-none text-sm transition-all" placeholder="Institution / Self-taught" />
+                          {signupForm.formState.errors.learningSource && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.learningSource.message}</p>}
+                        </div>
                       </div>
 
                       <div className="flex gap-3">
@@ -398,12 +499,14 @@ export default function AuthScreen() {
               </motion.div>
             )}
           </AnimatePresence>
+          </>
+          )}
         </div>
       </div>
 
       {/* Success Popup Modal */}
       <AnimatePresence>
-        {showSuccessPopup && (
+        {showSuccessPopup === 'login' && (
           <motion.div 
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
@@ -422,24 +525,11 @@ export default function AuthScreen() {
                 <Sparkles size={40} className="animate-float" />
               </div>
               <h3 className="text-3xl font-bold text-foreground mb-3 relative z-10">
-                {showSuccessPopup === 'signup' ? 'Account Created!' : 'Sign In Success!'}
+                Sign In Success!
               </h3>
               <p className="text-base text-muted-foreground relative z-10">
-                {showSuccessPopup === 'signup' 
-                  ? 'Your cosmic journey begins now. Please sign in to continue.' 
-                  : 'Welcome back! Redirecting you to the portal...'}
+                Welcome back, Astrologer! Redirecting you to the portal...
               </p>
-              
-              {showSuccessPopup === 'signup' && (
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: 'spring' }}
-                  className="mt-8 relative z-10 text-green-500"
-                >
-                  <CheckCircle2 size={32} className="mx-auto" />
-                </motion.div>
-              )}
             </motion.div>
           </motion.div>
         )}

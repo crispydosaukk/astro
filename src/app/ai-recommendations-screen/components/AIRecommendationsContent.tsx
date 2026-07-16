@@ -293,7 +293,7 @@ export default function AIRecommendationsContent() {
                             <div>
                               <h4 className="text-sm font-semibold text-foreground mb-3">Benefits</h4>
                               <ul className="space-y-2">
-                                {mod?.result?.benefits?.map((b, bi) => (
+                                {(Array.isArray(mod?.result?.benefits) ? mod.result.benefits : (mod?.result?.benefits ? [mod.result.benefits] : [])).map((b: any, bi: number) => (
                                   <li key={`gem-benefit-${bi}`} className="flex items-start gap-2 text-sm text-muted-foreground">
                                     <Check size={14} className="text-green-400 mt-0.5 flex-shrink-0" />
                                     {b}
@@ -338,7 +338,7 @@ export default function AIRecommendationsContent() {
                             <div>
                               <h4 className="text-sm font-semibold text-foreground mb-3">Spiritual Benefits</h4>
                               <ul className="space-y-2">
-                                {mod?.result?.benefits?.map((b, bi) => (
+                                {(Array.isArray(mod?.result?.benefits) ? mod.result.benefits : (mod?.result?.benefits ? [mod.result.benefits] : [])).map((b: any, bi: number) => (
                                   <li key={`mantra-benefit-${bi}`} className="flex items-start gap-2 text-sm text-muted-foreground">
                                     <Star size={12} className="text-accent mt-0.5 flex-shrink-0" />
                                     {b}

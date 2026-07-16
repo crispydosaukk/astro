@@ -14,6 +14,8 @@ const navLinks = [
   { label: 'Talk to Astrologer', href: '/talk-to-astrologer' },
   { label: 'Remedies', href: '/ai-recommendations-screen' },
   { label: 'Admin', href: '/admin-panel' },
+  { label: 'Astrologer Login', href: '/astrologer-login' },
+  { label: 'Astrologer Registration', href: '/astrologer-login?mode=signup' },
 ];
 
 export default function Navbar() {
@@ -79,12 +81,8 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/sign-up-login-screen" className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200">
+                <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200">
                   Sign In
-                </Link>
-                <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all duration-200 gold-shadow">
-                  <Sparkles size={14} />
-                  <span className="hidden sm:inline">Get Started</span>
                 </Link>
               </>
             )}
@@ -124,7 +122,6 @@ export default function Navbar() {
                 ) : (
                   <>
                     <Link href="/sign-up-login-screen" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 transition-all">Sign In</Link>
-                    <Link href="/sign-up-login-screen" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold gold-gradient-bg text-white">Get Started</Link>
                   </>
                 )}
               </div>

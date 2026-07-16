@@ -5,7 +5,7 @@ import AdminContent from '../components/AdminContent';
 export default function AdminPanelPage() {
   return (
     <AppLayout>
-      <AdminContent />
+      <AdminContent activeTab="tab-overview" />
     </AppLayout>
   );
 }
