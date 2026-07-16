@@ -9,7 +9,7 @@ import AppLogo from '@/components/ui/AppLogo';
 import { Eye, EyeOff, Mail, Lock, User, Calendar, Clock, MapPin, Sparkles, Star, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { auth, db } from '@/lib/firebase/config';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, runTransaction, getDoc } from 'firebase/firestore';
 import { useSearchParams } from 'next/navigation';
 
 type AuthMode = 'login' | 'signup' | 'otp';
@@ -47,7 +47,7 @@ export default function AstrologerAuthScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState<'login' | null>(null);
-  const [signupSuccessToken, setSignupSuccessToken] = useState<number | null>(null);
+  const [signupSuccessToken, setSignupSuccessToken] = useState<string | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const pobRef = useRef<HTMLInputElement | null>(null);
 
@@ -82,10 +82,32 @@ export default function AstrologerAuthScreen() {
   const onLogin = async (data: LoginForm) => {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+      
+      // Fetch astrologer document
+      const astDocRef = doc(db, 'astrologers', user.uid);
+      const astDocSnap = await getDoc(astDocRef);
+      
+      if (!astDocSnap.exists()) {
+        await signOut(auth);
+        loginForm.setError('email', { message: 'No astrologer account found for this email.' });
+        setIsLoading(false);
+        return;
+      }
+      
+      const astData = astDocSnap.data();
+      
+      if (astData.status !== 'approved') {
+        await signOut(auth);
+        loginForm.setError('email', { message: `Your application is currently ${astData.status || 'pending'}. Please wait for admin approval.` });
+        setIsLoading(false);
+        return;
+      }
+
       setShowSuccessPopup('login');
       setTimeout(() => {
-        window.location.href = '/admin-panel'; // Assuming they go to a dashboard, admin-panel is fine for now
+        window.location.href = '/astrologer-dashboard';
       }, 2500);
     } catch (error: any) {
       console.error(error);
@@ -103,7 +125,27 @@ export default function AstrologerAuthScreen() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
-      const token = Math.floor(100000 + Math.random() * 900000);
+      
+      let tokenValue = 1;
+      const counterRef = doc(db, 'system', 'astrologerCounter');
+      
+      try {
+        await runTransaction(db, async (transaction) => {
+          const counterDoc = await transaction.get(counterRef);
+          if (!counterDoc.exists()) {
+            transaction.set(counterRef, { count: 1 });
+          } else {
+            tokenValue = counterDoc.data().count + 1;
+            transaction.update(counterRef, { count: tokenValue });
+          }
+        });
+      } catch (err) {
+        console.error("Transaction failed: ", err);
+        // Fallback to random if transaction fails for any reason
+        tokenValue = Math.floor(100 + Math.random() * 900);
+      }
+      
+      const formattedToken = tokenValue.toString().padStart(3, '0');
       
       await setDoc(doc(db, 'astrologers', user.uid), {
         name: data.name,
@@ -119,13 +161,13 @@ export default function AstrologerAuthScreen() {
         learningSource: data.learningSource,
         role: 'astrologer',
         status: 'pending',
-        tokenNumber: token,
+        tokenNumber: formattedToken,
         createdAt: new Date().toISOString()
       });
       
       await signOut(auth);
       
-      setSignupSuccessToken(token);
+      setSignupSuccessToken(formattedToken);
       setIsLoading(false);
       loginForm.setValue('email', data.email);
     } catch (error: any) {

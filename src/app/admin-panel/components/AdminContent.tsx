@@ -4,23 +4,12 @@ import AdminMetrics from './AdminMetrics';
 import AdminCharts from './AdminCharts';
 import AdminUsersTable from './AdminUsersTable';
 import AdminAstrologersTable from './AdminAstrologersTable';
+import AdminAstrologerApplicationsTable from './AdminAstrologerApplicationsTable';
 import AdminAppointmentsTable from './AdminAppointmentsTable';
 import AdminPaymentsTable from './AdminPaymentsTable';
 import AdminContentManagement from './AdminContentManagement';
-import { Shield, Users, Star, Calendar, CreditCard, Bell, Download, LogOut, LayoutTemplate } from 'lucide-react';
-import Icon from '@/components/ui/AppIcon';
-import { logoutAdmin } from '@/app/admin-panel/actions';
+import { Shield, Bell, Download, LogOut } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
-
-
-const tabs = [
-  { id: 'tab-overview', label: 'Overview', icon: Shield },
-  { id: 'tab-content', label: 'Content', icon: LayoutTemplate },
-  { id: 'tab-users', label: 'Users', icon: Users },
-  { id: 'tab-astrologers', label: 'Astrologers', icon: Star },
-  { id: 'tab-appointments', label: 'Appointments', icon: Calendar },
-  { id: 'tab-payments', label: 'Payments', icon: CreditCard },
-];
 
 export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab?: string }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -34,13 +23,15 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
             <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Shield size={20} className="text-accent" /> Admin Panel
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">AstroParihar Control Center · Last synced 2 min ago</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              AstroParihar Control Center · Last synced 2 min ago
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <button className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border hover:border-accent/50 text-sm hover:text-accent transition-all">
               <Download size={14} /> Export
             </button>
-            <button 
+            <button
               onClick={() => setShowLogoutModal(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border text-white hover:border-red-500/50 text-sm hover:text-red-400 transition-all"
             >
@@ -52,8 +43,6 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
             </button>
           </div>
         </div>
-
-
       </div>
       <div className="px-6 lg:px-8 py-8 max-w-screen-2xl space-y-8">
         {activeTab === 'tab-overview' && (
@@ -65,6 +54,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
         {activeTab === 'tab-content' && <AdminContentManagement />}
         {activeTab === 'tab-users' && <AdminUsersTable />}
         {activeTab === 'tab-astrologers' && <AdminAstrologersTable />}
+        {activeTab === 'tab-applications' && <AdminAstrologerApplicationsTable />}
         {activeTab === 'tab-appointments' && <AdminAppointmentsTable />}
         {activeTab === 'tab-payments' && <AdminPaymentsTable />}
       </div>

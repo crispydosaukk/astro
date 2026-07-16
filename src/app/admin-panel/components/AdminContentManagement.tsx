@@ -1,7 +1,22 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { getHomepageContent, updateHomepageContent, HomepageContent, defaultHomepageContent } from '@/lib/cms';
-import { Save, Loader2, Info, LayoutTemplate, Sparkles, Users, Star, CreditCard, ChevronUp, ChevronDown } from 'lucide-react';
+import {
+  getHomepageContent,
+  updateHomepageContent,
+  HomepageContent,
+  defaultHomepageContent,
+} from '@/lib/cms';
+import {
+  Save,
+  Loader2,
+  Info,
+  LayoutTemplate,
+  Sparkles,
+  Users,
+  Star,
+  ChevronUp,
+  ChevronDown,
+} from 'lucide-react';
 
 const contentTabs = [
   { id: 'tab-hero', label: 'Hero Section', icon: LayoutTemplate },
@@ -14,7 +29,7 @@ export default function AdminContentManagement() {
   const [content, setContent] = useState<HomepageContent>(defaultHomepageContent);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState('tab-hero');
 
   useEffect(() => {
@@ -47,7 +62,11 @@ export default function AdminContentManagement() {
     setContent({ ...content, hero: { ...content.hero, stats: newStats } });
   };
 
-  const handleServiceChange = (index: number, field: keyof typeof content.services.items[0], val: string) => {
+  const handleServiceChange = (
+    index: number,
+    field: keyof (typeof content.services.items)[0],
+    val: string
+  ) => {
     const newItems = [...content.services.items];
     newItems[index] = { ...newItems[index], [field]: val };
     setContent({ ...content, services: { ...content.services, items: newItems } });
@@ -78,7 +97,7 @@ export default function AdminContentManagement() {
       {/* CMS Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border">
         <div className="flex gap-1 overflow-x-auto scrollbar-hide max-w-full">
-          {contentTabs.map(tab => {
+          {contentTabs.map((tab) => {
             const TabIcon = tab.icon;
             return (
               <button
@@ -93,7 +112,7 @@ export default function AdminContentManagement() {
             );
           })}
         </div>
-        <button 
+        <button
           onClick={handleSave}
           disabled={saving}
           type="button"
@@ -105,7 +124,9 @@ export default function AdminContentManagement() {
       </div>
 
       {message && (
-        <div className={`p-4 rounded-xl flex items-start gap-3 border ${message.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+        <div
+          className={`p-4 rounded-xl flex items-start gap-3 border ${message.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}
+        >
           <Info size={20} className="flex-shrink-0 mt-0.5" />
           <p className="text-sm font-medium">{message.text}</p>
         </div>
@@ -116,23 +137,37 @@ export default function AdminContentManagement() {
         {activeTab === 'tab-hero' && (
           <div className="bg-card p-6 md:p-8 rounded-2xl border border-border shadow-sm space-y-8">
             <div className="space-y-6">
-              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">Main Headings</h3>
+              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">
+                Main Headings
+              </h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Headline Line 1</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={content.hero.headline1}
-                    onChange={e => setContent({ ...content, hero: { ...content.hero, headline1: e.target.value } })}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        hero: { ...content.hero, headline1: e.target.value },
+                      })
+                    }
                     className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Headline Line 2 (Gold)</label>
-                  <input 
-                    type="text" 
+                  <label className="text-sm font-medium text-foreground">
+                    Headline Line 2 (Gold)
+                  </label>
+                  <input
+                    type="text"
                     value={content.hero.headline2}
-                    onChange={e => setContent({ ...content, hero: { ...content.hero, headline2: e.target.value } })}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        hero: { ...content.hero, headline2: e.target.value },
+                      })
+                    }
                     className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
                   />
                 </div>
@@ -140,33 +175,49 @@ export default function AdminContentManagement() {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Subtitle Text</label>
-                <textarea 
+                <textarea
                   rows={3}
                   value={content.hero.subtitle}
-                  onChange={e => setContent({ ...content, hero: { ...content.hero, subtitle: e.target.value } })}
+                  onChange={(e) =>
+                    setContent({ ...content, hero: { ...content.hero, subtitle: e.target.value } })
+                  }
                   className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all resize-none"
                 />
               </div>
             </div>
 
             <div className="border-t border-border pt-8 space-y-6">
-              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">Call to Action Buttons</h3>
+              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">
+                Call to Action Buttons
+              </h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Primary Button Text</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={content.hero.primaryBtnText}
-                    onChange={e => setContent({ ...content, hero: { ...content.hero, primaryBtnText: e.target.value } })}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        hero: { ...content.hero, primaryBtnText: e.target.value },
+                      })
+                    }
                     className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Secondary Button Text</label>
-                  <input 
-                    type="text" 
+                  <label className="text-sm font-medium text-foreground">
+                    Secondary Button Text
+                  </label>
+                  <input
+                    type="text"
                     value={content.hero.secondaryBtnText}
-                    onChange={e => setContent({ ...content, hero: { ...content.hero, secondaryBtnText: e.target.value } })}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        hero: { ...content.hero, secondaryBtnText: e.target.value },
+                      })
+                    }
                     className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
                   />
                 </div>
@@ -174,26 +225,33 @@ export default function AdminContentManagement() {
             </div>
 
             <div className="border-t border-border pt-8 space-y-6">
-              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">Key Statistics</h3>
+              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">
+                Key Statistics
+              </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {content.hero.stats.map((stat, idx) => (
-                  <div key={idx} className="p-4 border border-border rounded-xl bg-background space-y-4">
-                    <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase">Stat {idx + 1}</div>
+                  <div
+                    key={idx}
+                    className="p-4 border border-border rounded-xl bg-background space-y-4"
+                  >
+                    <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase">
+                      Stat {idx + 1}
+                    </div>
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground">Value</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={stat.value}
-                        onChange={e => handleStatChange(idx, 'value', e.target.value)}
+                        onChange={(e) => handleStatChange(idx, 'value', e.target.value)}
                         className="w-full px-3 py-2 rounded-lg bg-card border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all text-sm"
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground">Label</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={stat.label}
-                        onChange={e => handleStatChange(idx, 'label', e.target.value)}
+                        onChange={(e) => handleStatChange(idx, 'label', e.target.value)}
                         className="w-full px-3 py-2 rounded-lg bg-card border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all text-sm"
                       />
                     </div>
@@ -209,7 +267,8 @@ export default function AdminContentManagement() {
             <LayoutTemplate size={48} className="text-muted-foreground mb-4 opacity-50" />
             <h3 className="text-lg font-bold text-foreground">Section Configuration Upcoming</h3>
             <p className="text-muted-foreground max-w-md mt-2">
-              This section's dynamic content editor is not yet implemented. It will be added in future updates to manage other parts of the homepage.
+              This section's dynamic content editor is not yet implemented. It will be added in
+              future updates to manage other parts of the homepage.
             </p>
           </div>
         )}
@@ -217,57 +276,90 @@ export default function AdminContentManagement() {
         {activeTab === 'tab-services' && (
           <div className="bg-card p-6 md:p-8 rounded-2xl border border-border shadow-sm space-y-8">
             <div className="space-y-6">
-              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">Services Header</h3>
+              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">
+                Services Header
+              </h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Tagline (e.g., Our Services)</label>
-                  <input 
-                    type="text" 
+                  <label className="text-sm font-medium text-foreground">
+                    Tagline (e.g., Our Services)
+                  </label>
+                  <input
+                    type="text"
                     value={content.services.tagline}
-                    onChange={e => setContent({ ...content, services: { ...content.services, tagline: e.target.value } })}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        services: { ...content.services, tagline: e.target.value },
+                      })
+                    }
                     className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Title (e.g., Ancient Wisdom,)</label>
-                  <input 
-                    type="text" 
+                  <label className="text-sm font-medium text-foreground">
+                    Title (e.g., Ancient Wisdom,)
+                  </label>
+                  <input
+                    type="text"
                     value={content.services.title}
-                    onChange={e => setContent({ ...content, services: { ...content.services, title: e.target.value } })}
+                    onChange={(e) =>
+                      setContent({
+                        ...content,
+                        services: { ...content.services, title: e.target.value },
+                      })
+                    }
                     className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Title Highlight (Gold) (e.g., Modern Precision)</label>
-                <input 
-                  type="text" 
+                <label className="text-sm font-medium text-foreground">
+                  Title Highlight (Gold) (e.g., Modern Precision)
+                </label>
+                <input
+                  type="text"
                   value={content.services.titleHighlight}
-                  onChange={e => setContent({ ...content, services: { ...content.services, titleHighlight: e.target.value } })}
+                  onChange={(e) =>
+                    setContent({
+                      ...content,
+                      services: { ...content.services, titleHighlight: e.target.value },
+                    })
+                  }
                   className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all"
                 />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Subtitle Description</label>
-                <textarea 
+                <textarea
                   rows={2}
                   value={content.services.subtitle}
-                  onChange={e => setContent({ ...content, services: { ...content.services, subtitle: e.target.value } })}
+                  onChange={(e) =>
+                    setContent({
+                      ...content,
+                      services: { ...content.services, subtitle: e.target.value },
+                    })
+                  }
                   className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all resize-none"
                 />
               </div>
             </div>
 
             <div className="border-t border-border pt-8 space-y-6">
-              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">Service Cards</h3>
-              
+              <h3 className="text-sm font-bold text-accent uppercase tracking-wider">
+                Service Cards
+              </h3>
+
               <div className="space-y-4">
                 {content.services.items.map((svc, idx) => (
-                  <div key={idx} className="p-4 border border-border rounded-xl space-y-4 bg-muted/20 relative group">
+                  <div
+                    key={idx}
+                    className="p-4 border border-border rounded-xl space-y-4 bg-muted/20 relative group"
+                  >
                     <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
+                      <button
                         type="button"
                         onClick={() => moveService(idx, 'up')}
                         disabled={idx === 0}
@@ -275,7 +367,7 @@ export default function AdminContentManagement() {
                       >
                         <ChevronUp size={14} />
                       </button>
-                      <button 
+                      <button
                         type="button"
                         onClick={() => moveService(idx, 'down')}
                         disabled={idx === content.services.items.length - 1}
@@ -287,25 +379,58 @@ export default function AdminContentManagement() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-xs font-medium text-muted-foreground">Title</label>
-                        <input type="text" value={svc.title} onChange={e => handleServiceChange(idx, 'title', e.target.value)} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm" />
+                        <input
+                          type="text"
+                          value={svc.title}
+                          onChange={(e) => handleServiceChange(idx, 'title', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+                        />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Description</label>
-                        <input type="text" value={svc.description} onChange={e => handleServiceChange(idx, 'description', e.target.value)} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm" />
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Description
+                        </label>
+                        <input
+                          type="text"
+                          value={svc.description}
+                          onChange={(e) => handleServiceChange(idx, 'description', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+                        />
                       </div>
                     </div>
                     <div className="grid md:grid-cols-4 gap-4">
                       <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Icon (e.g., Gem, Music)</label>
-                        <input type="text" value={svc.icon} onChange={e => handleServiceChange(idx, 'icon', e.target.value)} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm" />
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Icon (e.g., Gem, Music)
+                        </label>
+                        <input
+                          type="text"
+                          value={svc.icon}
+                          onChange={(e) => handleServiceChange(idx, 'icon', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+                        />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Badge (e.g., Premium)</label>
-                        <input type="text" value={svc.badge} onChange={e => handleServiceChange(idx, 'badge', e.target.value)} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm" />
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Badge (e.g., Premium)
+                        </label>
+                        <input
+                          type="text"
+                          value={svc.badge}
+                          onChange={(e) => handleServiceChange(idx, 'badge', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+                        />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Link (href)</label>
-                        <input type="text" value={svc.href} onChange={e => handleServiceChange(idx, 'href', e.target.value)} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm" />
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Link (href)
+                        </label>
+                        <input
+                          type="text"
+                          value={svc.href}
+                          onChange={(e) => handleServiceChange(idx, 'href', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+                        />
                       </div>
                     </div>
                   </div>
@@ -314,7 +439,6 @@ export default function AdminContentManagement() {
             </div>
           </div>
         )}
-
       </form>
     </div>
   );

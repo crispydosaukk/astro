@@ -1,6 +1,19 @@
 'use client';
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
+} from 'recharts';
 
 const revenueData = [
   { month: 'Jan', revenue: 0, consultations: 0, premium: 0 },
@@ -39,7 +52,15 @@ const aiReportData = [
   { day: 'Sun', gemstone: 0, mantra: 0, yantra: 0, muhurtham: 0 },
 ];
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-card border border-border rounded-xl p-3 shadow-lg text-xs">
@@ -72,18 +93,39 @@ export default function AdminChartsInner() {
             <p className="text-xs text-muted-foreground mt-0.5">Jan – Jul 2026</p>
           </div>
           <div className="flex items-center gap-3 text-xs">
-            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm" style={{ background: 'var(--secondary)' }} /> Revenue</div>
-            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm" style={{ background: 'var(--accent)' }} /> Consultations</div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm" style={{ background: 'var(--secondary)' }} />{' '}
+              Revenue
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm" style={{ background: 'var(--accent)' }} />{' '}
+              Consultations
+            </div>
           </div>
         </div>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={revenueData} barGap={4}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v / 100000).toFixed(0)}L`} />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`}
+            />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="revenue" fill="var(--secondary)" radius={[4, 4, 0, 0]} name="Revenue" />
-            <Bar dataKey="consultations" fill="var(--accent)" radius={[4, 4, 0, 0]} name="Consultations" />
+            <Bar
+              dataKey="consultations"
+              fill="var(--accent)"
+              radius={[4, 4, 0, 0]}
+              name="Consultations"
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -96,7 +138,15 @@ export default function AdminChartsInner() {
         </div>
         <ResponsiveContainer width="100%" height={160}>
           <PieChart>
-            <Pie data={consultationTypeData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="value">
+            <Pie
+              data={consultationTypeData}
+              cx="50%"
+              cy="50%"
+              innerRadius={50}
+              outerRadius={75}
+              paddingAngle={3}
+              dataKey="value"
+            >
               {consultationTypeData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
@@ -106,7 +156,10 @@ export default function AdminChartsInner() {
         </ResponsiveContainer>
         <div className="space-y-2 mt-2">
           {consultationTypeData.map((item) => (
-            <div key={`pie-legend-${item.name}`} className="flex items-center justify-between text-xs">
+            <div
+              key={`pie-legend-${item.name}`}
+              className="flex items-center justify-between text-xs"
+            >
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
                 <span className="text-muted-foreground">{item.name}</span>
@@ -138,11 +191,35 @@ export default function AdminChartsInner() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="week" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1000).toFixed(0)}K`} />
+            <XAxis
+              dataKey="week"
+              tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+            />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="users" stroke="var(--secondary)" fill="url(#gradTotal)" strokeWidth={2} name="Total Users" />
-            <Area type="monotone" dataKey="premium" stroke="var(--accent)" fill="url(#gradPremium)" strokeWidth={2} name="Premium" />
+            <Area
+              type="monotone"
+              dataKey="users"
+              stroke="var(--secondary)"
+              fill="url(#gradTotal)"
+              strokeWidth={2}
+              name="Total Users"
+            />
+            <Area
+              type="monotone"
+              dataKey="premium"
+              stroke="var(--accent)"
+              fill="url(#gradPremium)"
+              strokeWidth={2}
+              name="Premium"
+            />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -156,8 +233,20 @@ export default function AdminChartsInner() {
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={aiReportData} layout="vertical" barSize={8}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-            <XAxis type="number" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="day" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} width={30} />
+            <XAxis
+              type="number"
+              tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              type="category"
+              dataKey="day"
+              tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+              axisLine={false}
+              tickLine={false}
+              width={30}
+            />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="gemstone" fill="var(--accent)" radius={[0, 4, 4, 0]} name="Gemstone" />
             <Bar dataKey="mantra" fill="var(--secondary)" radius={[0, 4, 4, 0]} name="Mantra" />
