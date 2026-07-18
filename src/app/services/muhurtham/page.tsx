@@ -1,30 +1,32 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Compass, Check, ArrowRight, Lock } from 'lucide-react';
-
-const events = [
-  { name: 'Marriage', icon: '💍', desc: 'Find the most auspicious wedding date and time' },
-  { name: 'Housewarming', icon: '🏠', desc: 'Griha Pravesh muhurtham for prosperity' },
-  { name: 'Vehicle Purchase', icon: '🚗', desc: 'Auspicious time for buying new vehicles' },
-  { name: 'Naming Ceremony', icon: '👶', desc: 'Namakarana muhurtham for newborns' },
-  { name: 'Business Opening', icon: '🏢', desc: 'Auspicious inauguration timing' },
-  { name: 'Travel', icon: '✈️', desc: 'Best time for important journeys' },
-  { name: 'Education', icon: '📚', desc: 'Vidyarambha muhurtham for learning' },
-  { name: 'Property Registration', icon: '📋', desc: 'Auspicious time for property deals' },
-];
-
-const benefits = [
-  'Identifies the most auspicious planetary alignment for your event',
-  'Avoids inauspicious periods like Rahu Kalam and Yamagandam',
-  'Considers your personal birth chart for maximum compatibility',
-  'Provides multiple date options with strength ratings',
-  'Includes Nakshatra, Lagna, and Tithi analysis',
-];
+import { Compass, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { getServicePageContent, MuhurthamServiceContent, defaultMuhurthamContent } from '@/lib/cms';
 
 export default function MuhurthamServicePage() {
+  const [content, setContent] = useState<MuhurthamServiceContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadContent() {
+      const data = await getServicePageContent('muhurtham', defaultMuhurthamContent);
+      setContent(data);
+      setLoading(false);
+    }
+    loadContent();
+  }, []);
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -44,20 +46,20 @@ export default function MuhurthamServicePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
-                <Compass size={12} /> Auspicious Timing
+                <Compass size={12} /> {content.hero.tag}
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                Muhurtham<br /><span className="text-gradient-gold">Generator</span>
+                {content.hero.titleLine1}<br /><span className="text-gradient-gold">{content.hero.titleLine2}</span>
               </h1>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                Every important event deserves the most auspicious timing. Our Muhurtham generator analyzes planetary positions to find the perfect moment for your life's milestones.
+                {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                  <Compass size={16} /> Find Auspicious Date
+                  <Compass size={16} /> {content.hero.primaryBtnText}
                 </Link>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
-                  Consult Astrologer
+                  {content.hero.secondaryBtnText}
                 </Link>
               </div>
             </motion.div>
@@ -76,9 +78,9 @@ export default function MuhurthamServicePage() {
       </section>
       <section className="py-16 bg-background">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Events We <span className="text-gradient-gold">Cover</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.eventsTitle.split(' ').slice(0, 2).join(' ')} <span className="text-gradient-gold">{content.eventsTitle.split(' ').slice(2).join(' ')}</span></h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {events?.map((e, i) => (
+            {content.events?.map((e, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }} className="rounded-2xl border border-border bg-card p-5 text-center card-hover">
                 <div className="text-3xl mb-3">{e?.icon}</div>
                 <h3 className="font-semibold text-foreground text-sm mb-1">{e?.name}</h3>
@@ -92,9 +94,9 @@ export default function MuhurthamServicePage() {
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-6">Why Choose the <span className="text-gradient-gold">Right Muhurtham?</span></h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">{content.benefitsTitle.split(' ').slice(0, -2).join(' ')} <span className="text-gradient-gold">{content.benefitsTitle.split(' ').slice(-2).join(' ')}</span></h2>
               <div className="space-y-4">
-                {benefits?.map((b, i) => (
+                {content.benefits?.map((b, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check size={12} className="text-[#C9952B]" />

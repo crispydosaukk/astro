@@ -1,28 +1,32 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Flame, Check, ArrowRight, Lock } from 'lucide-react';
+import { Flame, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-
-const homams = [
-  { name: 'Navagraha Homam', purpose: 'Balance all 9 planetary energies', day: 'Saturday', duration: '3–4 hours', color: 'text-orange-400' },
-  { name: 'Ganapathi Homam', purpose: 'Remove obstacles, new beginnings', day: 'Any auspicious day', duration: '2–3 hours', color: 'text-yellow-400' },
-  { name: 'Sudarshana Homam', purpose: 'Protection from evil, enemies', day: 'Sunday', duration: '3–4 hours', color: 'text-red-400' },
-  { name: 'Mrityunjaya Homam', purpose: 'Health, longevity, healing', day: 'Monday', duration: '3–4 hours', color: 'text-blue-400' },
-  { name: 'Lakshmi Kubera Homam', purpose: 'Wealth, prosperity, abundance', day: 'Friday', duration: '2–3 hours', color: 'text-pink-400' },
-  { name: 'Ayush Homam', purpose: 'Long life, good health', day: 'Birthday', duration: '2–3 hours', color: 'text-green-400' },
-];
-
-const benefits = [
-  'Removes planetary afflictions and negative karma',
-  'Purifies the environment and creates positive energy',
-  'Brings success in career, business, and relationships',
-  'Improves family harmony and removes ancestral doshas',
-  'Accelerates spiritual growth and divine blessings',
-];
+import { getServicePageContent, HomaServiceContent, defaultHomaContent } from '@/lib/cms';
 
 export default function HomaServicePage() {
+  const [content, setContent] = useState<HomaServiceContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const data = await getServicePageContent('homa', defaultHomaContent);
+      setContent(data);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -42,20 +46,20 @@ export default function HomaServicePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
-                <Flame size={12} /> Sacred Fire Rituals
+                <Flame size={12} /> {content.hero.tag}
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                Homam & Puja<br /><span className="text-gradient-gold">Recommendations</span>
+                {content.hero.titleLine1}<br /><span className="text-gradient-gold">{content.hero.titleLine2}</span>
               </h1>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                Fire rituals (Homam) are among the most powerful Vedic remedies. Get personalized recommendations for the right Homam based on your planetary afflictions and life goals.
+                {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                  <Flame size={16} /> Get My Homam Report
+                  <Flame size={16} /> {content.hero.primaryBtnText}
                 </Link>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
-                  Consult Astrologer
+                  {content.hero.secondaryBtnText}
                 </Link>
               </div>
             </motion.div>
@@ -76,9 +80,9 @@ export default function HomaServicePage() {
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-6">Benefits of <span className="text-gradient-gold">Vedic Homam</span></h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">{content.benefitsTitle.split(' ').map((word, i, arr) => i === arr.length - 1 ? <span key={i} className="text-gradient-gold">{word}</span> : word + ' ')}</h2>
               <div className="space-y-4">
-                {benefits?.map((b, i) => (
+                {content.benefits.map((b, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check size={12} className="text-[#C9952B]" />
@@ -110,9 +114,9 @@ export default function HomaServicePage() {
       </section>
       <section className="py-16 bg-muted/30">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Popular <span className="text-gradient-gold">Homam Types</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.homamsTitle.split(' ').map((word, i, arr) => i === arr.length - 1 || i === arr.length - 2 ? <span key={i} className="text-gradient-gold">{word} </span> : word + ' ')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {homams?.map((h, i) => (
+            {content.homams.map((h, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }} className="rounded-2xl border border-border bg-card p-6">
                 <Flame size={24} className={`${h?.color} mb-3`} />
                 <h3 className="font-semibold text-foreground mb-2">{h?.name}</h3>

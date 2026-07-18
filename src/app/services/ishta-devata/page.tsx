@@ -1,28 +1,32 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, Check, ArrowRight, Lock } from 'lucide-react';
-
-const deities = [
-  { name: 'Lord Shiva', indicator: 'Moon in 12th / Ketu aspect', worship: 'Monday Abhishekam', stotra: 'Shiva Panchakshara', color: 'text-blue-400' },
-  { name: 'Lord Vishnu', indicator: 'Jupiter strong / Sagittarius rising', worship: 'Thursday Tulsi puja', stotra: 'Vishnu Sahasranama', color: 'text-blue-300' },
-  { name: 'Goddess Durga', indicator: 'Mars dominant / Scorpio rising', worship: 'Tuesday Kumkum archana', stotra: 'Durga Saptashati', color: 'text-red-400' },
-  { name: 'Lord Ganesha', indicator: 'Ketu in 1st / Moola nakshatra', worship: 'Wednesday modak offering', stotra: 'Ganapathi Atharvashirsha', color: 'text-orange-400' },
-  { name: 'Goddess Lakshmi', indicator: 'Venus strong / Taurus rising', worship: 'Friday lotus offering', stotra: 'Sri Sukta', color: 'text-pink-400' },
-  { name: 'Lord Surya', indicator: 'Sun in 1st / Leo rising', worship: 'Sunday Arghya at sunrise', stotra: 'Aditya Hridayam', color: 'text-yellow-400' },
-];
-
-const benefits = [
-  'Establishes a deep personal connection with your divine protector',
-  'Daily worship aligned with your chart brings faster spiritual progress',
-  'Specific deity worship removes your unique planetary doshas',
-  'Strengthens your natural talents and life purpose',
-  'Provides divine protection and guidance in difficult times',
-];
+import { Heart, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { getServicePageContent, IshtaDevataServiceContent, defaultIshtaDevataContent } from '@/lib/cms';
 
 export default function IshtaDevataServicePage() {
+  const [content, setContent] = useState<IshtaDevataServiceContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadContent() {
+      const data = await getServicePageContent('ishta-devata', defaultIshtaDevataContent);
+      setContent(data);
+      setLoading(false);
+    }
+    loadContent();
+  }, []);
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -42,20 +46,20 @@ export default function IshtaDevataServicePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
-                <Heart size={12} /> Personal Deity Finder
+                <Heart size={12} /> {content.hero.tag}
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                Discover Your<br /><span className="text-gradient-gold">Ishta Devata</span>
+                {content.hero.titleLine1}<br /><span className="text-gradient-gold">{content.hero.titleLine2}</span>
               </h1>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                Your Ishta Devata is the personal deity most aligned with your soul's journey. Determined by the 12th house lord and its nakshatra, this deity is your divine protector and guide.
+                {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                  <Heart size={16} /> Find My Ishta Devata
+                  <Heart size={16} /> {content.hero.primaryBtnText}
                 </Link>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
-                  Consult Astrologer
+                  {content.hero.secondaryBtnText}
                 </Link>
               </div>
             </motion.div>
@@ -76,9 +80,9 @@ export default function IshtaDevataServicePage() {
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-6">Why Know Your <span className="text-gradient-gold">Ishta Devata?</span></h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">{content.benefitsTitle.split(' ').slice(0, 2).join(' ')} <span className="text-gradient-gold">{content.benefitsTitle.split(' ').slice(2).join(' ')}</span></h2>
               <div className="space-y-4">
-                {benefits?.map((b, i) => (
+                {content.benefits?.map((b, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check size={12} className="text-[#C9952B]" />
@@ -114,9 +118,9 @@ export default function IshtaDevataServicePage() {
       </section>
       <section className="py-16 bg-muted/30">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Common <span className="text-gradient-gold">Ishta Devatas</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.guideTitle.split(' ')[0]} <span className="text-gradient-gold">{content.guideTitle.split(' ').slice(1).join(' ')}</span></h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {deities?.map((d, i) => (
+            {content.deities?.map((d, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }} className="rounded-2xl border border-border bg-card p-6">
                 <Heart size={24} className={`${d?.color} mb-3`} />
                 <h3 className="font-semibold text-foreground mb-2">{d?.name}</h3>

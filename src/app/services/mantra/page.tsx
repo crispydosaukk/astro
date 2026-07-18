@@ -1,37 +1,33 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Music, Check, ArrowRight, ChevronDown, ChevronUp, Lock, Volume2 } from 'lucide-react';
+import { Music, Check, ArrowRight, ChevronDown, ChevronUp, Lock, Volume2, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-
-const benefits = [
-  'Pacifies malefic planets and reduces their negative effects',
-  'Brings mental peace, clarity, and emotional balance',
-  'Strengthens the positive influence of benefic planets',
-  'Removes karmic obstacles and negative energy patterns',
-  'Enhances spiritual growth and inner awakening',
-];
-
-const mantras = [
-  { planet: 'Sun', mantra: 'Om Hraam Hreem Hraum Sah Suryaya Namah', count: '108', time: 'Sunrise', color: 'text-red-400' },
-  { planet: 'Moon', mantra: 'Om Shraam Shreem Shraum Sah Chandraya Namah', count: '108', time: 'Monday evening', color: 'text-blue-200' },
-  { planet: 'Mars', mantra: 'Om Kraam Kreem Kraum Sah Bhaumaya Namah', count: '108', time: 'Tuesday sunrise', color: 'text-orange-400' },
-  { planet: 'Mercury', mantra: 'Om Braam Breem Braum Sah Budhaya Namah', count: '108', time: 'Wednesday morning', color: 'text-green-400' },
-  { planet: 'Jupiter', mantra: 'Om Graam Greem Graum Sah Guruve Namah', count: '108', time: 'Thursday morning', color: 'text-yellow-400' },
-  { planet: 'Venus', mantra: 'Om Draam Dreem Draum Sah Shukraya Namah', count: '108', time: 'Friday morning', color: 'text-pink-300' },
-  { planet: 'Saturn', mantra: 'Om Praam Preem Praum Sah Shanaischaraya Namah', count: '108', time: 'Saturday evening', color: 'text-blue-400' },
-];
-
-const faqs = [
-  { q: 'How many times should I chant the mantra?', a: 'The standard count is 108 times per session, as 108 is considered sacred in Vedic tradition. You can use a mala (prayer beads) to keep count.' },
-  { q: 'Does pronunciation matter?', a: 'Yes, correct pronunciation is important for maximum benefit. Our detailed report includes phonetic pronunciation guides and audio references.' },
-  { q: 'Can I chant mantras silently?', a: 'Yes, silent (mental) chanting is equally effective. However, audible chanting creates sound vibrations that have additional healing benefits.' },
-  { q: 'How long before I see results?', a: 'Regular chanting for 40 days (a mandala) typically shows noticeable changes. Full benefits manifest over 3–6 months of consistent practice.' },
-];
+import { getServicePageContent, MantraServiceContent, defaultMantraContent } from '@/lib/cms';
 
 export default function MantraServicePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [content, setContent] = useState<MantraServiceContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadContent() {
+      const data = await getServicePageContent('mantra', defaultMantraContent);
+      setContent(data);
+      setLoading(false);
+    }
+    loadContent();
+  }, []);
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,20 +49,20 @@ export default function MantraServicePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
-                <Music size={12} /> Sacred Sound Healing
+                <Music size={12} /> {content.hero.tag}
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                Personalized Mantra<br /><span className="text-gradient-gold">Recommendations</span>
+                {content.hero.titleLine1}<br /><span className="text-gradient-gold">{content.hero.titleLine2}</span>
               </h1>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                Receive sacred mantras precisely aligned with your planetary positions. Each mantra is a vibrational key that unlocks specific cosmic energies in your birth chart.
+                {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
                 <a href="#get-report" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                  <Music size={16} /> Get My Mantra Report
+                  <Music size={16} /> {content.hero.primaryBtnText}
                 </a>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
-                  Consult Astrologer
+                  {content.hero.secondaryBtnText}
                 </Link>
               </div>
             </motion.div>
@@ -88,9 +84,9 @@ export default function MantraServicePage() {
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-6">Power of <span className="text-gradient-gold">Vedic Mantras</span></h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">{content.benefitsTitle.split(' ')[0]} <span className="text-gradient-gold">{content.benefitsTitle.split(' ').slice(1).join(' ')}</span></h2>
               <div className="space-y-4">
-                {benefits?.map((b, i) => (
+                {content.benefits?.map((b, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check size={12} className="text-[#C9952B]" />
@@ -127,7 +123,7 @@ export default function MantraServicePage() {
       {/* Mantra Table */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Navagraha <span className="text-gradient-gold">Mantra Guide</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.guideTitle.split(' ')[0]} <span className="text-gradient-gold">{content.guideTitle.split(' ').slice(1).join(' ')}</span></h2>
           <div className="overflow-x-auto rounded-2xl border border-border">
             <table className="w-full">
               <thead>
@@ -139,7 +135,7 @@ export default function MantraServicePage() {
                 </tr>
               </thead>
               <tbody>
-                {mantras?.map((m, i) => (
+                {content.mantras?.map((m, i) => (
                   <tr key={i} className="border-b border-border hover:bg-muted/50 transition-colors">
                     <td className={`px-5 py-3.5 text-sm font-semibold ${m?.color}`}>{m?.planet}</td>
                     <td className="px-5 py-3.5 text-xs text-foreground font-mono">{m?.mantra}</td>
@@ -184,9 +180,9 @@ export default function MantraServicePage() {
       {/* FAQ */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-2xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Frequently Asked <span className="text-gradient-gold">Questions</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.faqTitle.split(' ')[0]} <span className="text-gradient-gold">{content.faqTitle.split(' ').slice(1).join(' ')}</span></h2>
           <div className="space-y-3">
-            {faqs?.map((faq, i) => (
+            {content.faqs?.map((faq, i) => (
               <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-muted/50 transition-colors">
                   <span className="font-semibold text-foreground text-sm">{faq?.q}</span>

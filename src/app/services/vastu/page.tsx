@@ -1,30 +1,32 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Compass, Check, ArrowRight, Lock } from 'lucide-react';
-
-const directions = [
-  { dir: 'North', deity: 'Kubera', element: 'Water', color: 'text-blue-400', purpose: 'Wealth & Career', remedy: 'Blue/Green colors, water feature' },
-  { dir: 'South', deity: 'Yama', element: 'Fire', color: 'text-red-400', purpose: 'Fame & Recognition', remedy: 'Red/Orange colors, avoid bedroom' },
-  { dir: 'East', deity: 'Indra', element: 'Air', color: 'text-green-400', purpose: 'Health & Sunrise energy', remedy: 'Green plants, open windows' },
-  { dir: 'West', deity: 'Varuna', element: 'Earth', color: 'text-amber-400', purpose: 'Gains & Profits', remedy: 'White/Grey colors, metal objects' },
-  { dir: 'North-East', deity: 'Ishanya', element: 'Water+Air', color: 'text-cyan-400', purpose: 'Spirituality & Wisdom', remedy: 'Keep clean, pooja room ideal' },
-  { dir: 'North-West', deity: 'Vayu', element: 'Air', color: 'text-sky-400', purpose: 'Support & Relationships', remedy: 'White/Silver, guest room' },
-  { dir: 'South-East', deity: 'Agni', element: 'Fire', color: 'text-orange-400', purpose: 'Energy & Kitchen', remedy: 'Kitchen here, red/orange' },
-  { dir: 'South-West', deity: 'Nirriti', element: 'Earth', color: 'text-yellow-600', purpose: 'Stability & Master bedroom', remedy: 'Heavy furniture, master bedroom' },
-];
-
-const benefits = [
-  'Identifies energy imbalances in your living or work space',
-  'Provides direction-specific remedies for each zone',
-  'Improves health, wealth, and relationship harmony',
-  'Removes Vastu doshas without major structural changes',
-  'Enhances positive energy flow throughout the property',
-];
+import { Compass, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { getServicePageContent, VastuServiceContent, defaultVastuContent } from '@/lib/cms';
 
 export default function VastuServicePage() {
+  const [content, setContent] = useState<VastuServiceContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadContent() {
+      const data = await getServicePageContent('vastu', defaultVastuContent);
+      setContent(data);
+      setLoading(false);
+    }
+    loadContent();
+  }, []);
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -44,20 +46,20 @@ export default function VastuServicePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
-                <Compass size={12} /> Vedic Architecture
+                <Compass size={12} /> {content.hero.tag}
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                Interactive Vastu<br /><span className="text-gradient-gold">Analysis</span>
+                {content.hero.titleLine1}<br /><span className="text-gradient-gold">{content.hero.titleLine2}</span>
               </h1>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                Vastu Shastra is the ancient science of spatial arrangement. Get a complete room-by-room analysis of your home or office with specific remedies for each direction.
+                {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                  <Compass size={16} /> Get Vastu Analysis
+                  <Compass size={16} /> {content.hero.primaryBtnText}
                 </Link>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
-                  Consult Astrologer
+                  {content.hero.secondaryBtnText}
                 </Link>
               </div>
             </motion.div>
@@ -79,9 +81,9 @@ export default function VastuServicePage() {
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-6">Benefits of <span className="text-gradient-gold">Vastu Analysis</span></h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">{content.benefitsTitle.split(' ').slice(0, 2).join(' ')} <span className="text-gradient-gold">{content.benefitsTitle.split(' ').slice(2).join(' ')}</span></h2>
               <div className="space-y-4">
-                {benefits?.map((b, i) => (
+                {content.benefits?.map((b, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check size={12} className="text-[#C9952B]" />
@@ -117,9 +119,9 @@ export default function VastuServicePage() {
       </section>
       <section className="py-16 bg-muted/30">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">8 Directions — <span className="text-gradient-gold">Vastu Guide</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.guideTitle.split(' ').slice(0, 2).join(' ')} <span className="text-gradient-gold">{content.guideTitle.split(' ').slice(2).join(' ')}</span></h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {directions?.map((d, i) => (
+            {content.directions?.map((d, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }} className="rounded-2xl border border-border bg-card p-5">
                 <div className={`text-2xl mb-2 ${d?.color} font-bold`}>{d?.dir}</div>
                 <p className="text-xs text-muted-foreground mb-1">Deity: {d?.deity}</p>

@@ -1,31 +1,32 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Gift, Check, ArrowRight, Lock } from 'lucide-react';
-
-const charityItems = [
-  { planet: 'Sun', item: 'Wheat, Jaggery, Copper', day: 'Sunday', recipient: 'Temples, Brahmins', color: 'text-red-400' },
-  { planet: 'Moon', item: 'Rice, Milk, White cloth', day: 'Monday', recipient: 'Women, elderly', color: 'text-blue-200' },
-  { planet: 'Mars', item: 'Red lentils, Red cloth', day: 'Tuesday', recipient: 'Soldiers, poor', color: 'text-orange-400' },
-  { planet: 'Mercury', item: 'Green vegetables, Books', day: 'Wednesday', recipient: 'Students, teachers', color: 'text-green-400' },
-  { planet: 'Jupiter', item: 'Yellow lentils, Gold', day: 'Thursday', recipient: 'Brahmins, gurus', color: 'text-yellow-400' },
-  { planet: 'Venus', item: 'White sweets, Perfume', day: 'Friday', recipient: 'Women, artists', color: 'text-pink-300' },
-  { planet: 'Saturn', item: 'Black sesame, Iron', day: 'Saturday', recipient: 'Poor, disabled', color: 'text-blue-400' },
-  { planet: 'Rahu', item: 'Blue cloth, Coconut', day: 'Saturday', recipient: 'Outcastes, foreigners', color: 'text-amber-600' },
-  { planet: 'Ketu', item: 'Multi-color cloth, Blanket', day: 'Tuesday', recipient: 'Spiritual seekers', color: 'text-gray-400' },
-];
-
-const benefits = [
-  'Reduces the negative effects of malefic planets through karma',
-  'Builds positive karma that manifests as life improvements',
-  'Aligns your giving with cosmic timing for maximum impact',
-  'Tracks your donation history and karma balance',
-  'Provides monthly reminders for scheduled charity activities',
-];
+import { Gift, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { getServicePageContent, CharityServiceContent, defaultCharityContent } from '@/lib/cms';
 
 export default function CharityServicePage() {
+  const [content, setContent] = useState<CharityServiceContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadContent() {
+      const data = await getServicePageContent('charity', defaultCharityContent);
+      setContent(data);
+      setLoading(false);
+    }
+    loadContent();
+  }, []);
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -45,20 +46,20 @@ export default function CharityServicePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
-                <Gift size={12} /> Karma-Aligned Giving
+                <Gift size={12} /> {content.hero.tag}
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                Vedic Charity<br /><span className="text-gradient-gold">Planner</span>
+                {content.hero.titleLine1}<br /><span className="text-gradient-gold">{content.hero.titleLine2}</span>
               </h1>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                Dana (charity) is a powerful Vedic remedy. When you donate the right items to the right people on the right day, it directly reduces planetary afflictions and builds positive karma.
+                {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                  <Gift size={16} /> Get My Charity Plan
+                  <Gift size={16} /> {content.hero.primaryBtnText}
                 </Link>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
-                  Consult Astrologer
+                  {content.hero.secondaryBtnText}
                 </Link>
               </div>
             </motion.div>
@@ -79,9 +80,9 @@ export default function CharityServicePage() {
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-6">Benefits of <span className="text-gradient-gold">Vedic Dana</span></h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">{content.benefitsTitle.split(' ').slice(0, 2).join(' ')} <span className="text-gradient-gold">{content.benefitsTitle.split(' ').slice(2).join(' ')}</span></h2>
               <div className="space-y-4">
-                {benefits?.map((b, i) => (
+                {content.benefits?.map((b, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check size={12} className="text-[#C9952B]" />
@@ -117,7 +118,7 @@ export default function CharityServicePage() {
       </section>
       <section className="py-16 bg-muted/30">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Navagraha <span className="text-gradient-gold">Dana Guide</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.guideTitle.split(' ')[0]} <span className="text-gradient-gold">{content.guideTitle.split(' ').slice(1).join(' ')}</span></h2>
           <div className="overflow-x-auto rounded-2xl border border-border">
             <table className="w-full">
               <thead>
@@ -129,7 +130,7 @@ export default function CharityServicePage() {
                 </tr>
               </thead>
               <tbody>
-                {charityItems?.map((c, i) => (
+                {content.charityItems?.map((c, i) => (
                   <tr key={i} className="border-b border-border hover:bg-muted/50 transition-colors">
                     <td className={`px-5 py-3.5 text-sm font-semibold ${c?.color}`}>{c?.planet}</td>
                     <td className="px-5 py-3.5 text-sm text-foreground">{c?.item}</td>

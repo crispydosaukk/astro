@@ -1,42 +1,36 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Gem, Check, ArrowRight, ChevronDown, ChevronUp, Lock } from 'lucide-react';
+import { Gem, Check, ArrowRight, ChevronDown, ChevronUp, Lock, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-
-const benefits = [
-  'Strengthens Sun energy and boosts confidence',
-  'Improves career prospects and leadership qualities',
-  'Enhances vitality, health, and overall well-being',
-  'Attracts prosperity and removes obstacles',
-  'Balances planetary doshas in your birth chart',
-];
-
-const gemstones = [
-  { planet: 'Sun', gem: 'Ruby (Manik)', color: 'text-red-400', bg: 'bg-red-500/10', metal: 'Gold', finger: 'Ring finger', day: 'Sunday' },
-  { planet: 'Moon', gem: 'Pearl (Moti)', color: 'text-blue-200', bg: 'bg-blue-200/10', metal: 'Silver', finger: 'Little finger', day: 'Monday' },
-  { planet: 'Mars', gem: 'Red Coral (Moonga)', color: 'text-orange-400', bg: 'bg-orange-500/10', metal: 'Gold/Copper', finger: 'Ring finger', day: 'Tuesday' },
-  { planet: 'Mercury', gem: 'Emerald (Panna)', color: 'text-green-400', bg: 'bg-green-500/10', metal: 'Gold', finger: 'Little finger', day: 'Wednesday' },
-  { planet: 'Jupiter', gem: 'Yellow Sapphire (Pukhraj)', color: 'text-yellow-400', bg: 'bg-yellow-500/10', metal: 'Gold', finger: 'Index finger', day: 'Thursday' },
-  { planet: 'Venus', gem: 'Diamond (Heera)', color: 'text-pink-300', bg: 'bg-pink-300/10', metal: 'Gold/Platinum', finger: 'Middle finger', day: 'Friday' },
-  { planet: 'Saturn', gem: 'Blue Sapphire (Neelam)', color: 'text-blue-400', bg: 'bg-blue-500/10', metal: 'Silver/Iron', finger: 'Middle finger', day: 'Saturday' },
-  { planet: 'Rahu', gem: 'Hessonite (Gomed)', color: 'text-amber-600', bg: 'bg-amber-600/10', metal: 'Silver', finger: 'Middle finger', day: 'Saturday' },
-  { planet: 'Ketu', gem: "Cat's Eye (Lehsunia)", color: 'text-gray-400', bg: 'bg-gray-400/10', metal: 'Silver', finger: 'Middle finger', day: 'Tuesday' },
-];
-
-const faqs = [
-  { q: 'How is the gemstone determined for me?', a: 'Based on your birth chart, we analyze the strength and weakness of each planet. The gemstone is recommended to strengthen your beneficial planets and neutralize malefic ones.' },
-  { q: 'What is the ideal carat weight for a gemstone?', a: 'Generally 3–7 carats for most gemstones. The exact weight depends on your body weight and planetary strength. Our detailed report specifies the ideal weight for you.' },
-  { q: 'Can I wear multiple gemstones?', a: 'Yes, but certain combinations are incompatible. For example, Ruby and Blue Sapphire should never be worn together. Our report includes safe combination guidelines.' },
-  { q: 'How long before I see results?', a: 'Most people notice effects within 40 days of wearing the correct gemstone. Full benefits are typically experienced within 3–6 months of consistent wear.' },
-];
+import { getServicePageContent, GemstoneServiceContent, defaultGemstoneContent } from '@/lib/cms';
 
 export default function GemstoneServicePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [dob, setDob] = useState('');
   const [time, setTime] = useState('');
   const [place, setPlace] = useState('');
+  
+  const [content, setContent] = useState<GemstoneServiceContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const data = await getServicePageContent('gemstone', defaultGemstoneContent);
+      setContent(data);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  if (loading || !content) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -58,20 +52,20 @@ export default function GemstoneServicePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
-                <Gem size={12} /> Vedic Gemology
+                <Gem size={12} /> {content.hero.tag}
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                Sacred Gemstone<br /><span className="text-gradient-gold">Recommendations</span>
+                {content.hero.titleLine1}<br /><span className="text-gradient-gold">{content.hero.titleLine2}</span>
               </h1>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                Discover the precise gemstone aligned with your birth chart. Each recommendation is based on Navagraha analysis — the nine planetary forces that shape your destiny.
+                {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
                 <a href="#get-report" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                  <Gem size={16} /> Get My Gemstone Report
+                  <Gem size={16} /> {content.hero.primaryBtnText}
                 </a>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
-                  Consult Astrologer
+                  {content.hero.secondaryBtnText}
                 </Link>
               </div>
             </motion.div>
@@ -93,9 +87,9 @@ export default function GemstoneServicePage() {
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-6">Why Wear the <span className="text-gradient-gold">Right Gemstone?</span></h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">{content.benefitsTitle.split(' ').map((word, i, arr) => i >= arr.length - 2 ? <span key={i} className="text-gradient-gold">{word} </span> : word + ' ')}</h2>
               <div className="space-y-4">
-                {benefits?.map((b, i) => (
+                {content.benefits.map((b, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
                     <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check size={12} className="text-[#C9952B]" />
@@ -106,7 +100,7 @@ export default function GemstoneServicePage() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              {gemstones?.slice(0, 6)?.map((g, i) => (
+              {content.gemstones.slice(0, 6).map((g, i) => (
                 <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }} className={`rounded-2xl p-4 ${g?.bg} border border-border text-center`}>
                   <div className={`text-2xl mb-2 ${g?.color}`}>💎</div>
                   <p className="text-xs font-semibold text-foreground">{g?.planet}</p>
@@ -120,7 +114,7 @@ export default function GemstoneServicePage() {
       {/* Gemstone Table */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Navagraha <span className="text-gradient-gold">Gemstone Chart</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.chartTitle.split(' ').map((word, i, arr) => i >= arr.length - 2 ? <span key={i} className="text-gradient-gold">{word} </span> : word + ' ')}</h2>
           <div className="overflow-x-auto rounded-2xl border border-border">
             <table className="w-full">
               <thead>
@@ -133,7 +127,7 @@ export default function GemstoneServicePage() {
                 </tr>
               </thead>
               <tbody>
-                {gemstones?.map((g, i) => (
+                {content.gemstones.map((g, i) => (
                   <tr key={i} className="border-b border-border hover:bg-muted/50 transition-colors">
                     <td className={`px-5 py-3.5 text-sm font-semibold ${g?.color}`}>{g?.planet}</td>
                     <td className="px-5 py-3.5 text-sm text-foreground">{g?.gem}</td>
@@ -186,9 +180,9 @@ export default function GemstoneServicePage() {
       {/* FAQ */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-2xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Frequently Asked <span className="text-gradient-gold">Questions</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.faqTitle.split(' ').map((word, i, arr) => i === arr.length - 1 ? <span key={i} className="text-gradient-gold">{word}</span> : word + ' ')}</h2>
           <div className="space-y-3">
-            {faqs?.map((faq, i) => (
+            {content.faqs.map((faq, i) => (
               <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-muted/50 transition-colors">
                   <span className="font-semibold text-foreground text-sm">{faq?.q}</span>

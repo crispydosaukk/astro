@@ -6,6 +6,7 @@ import {
   HomepageContent,
   defaultHomepageContent,
 } from '@/lib/cms';
+import AdminServicePagesEditor from './AdminServicePagesEditor';
 import {
   Save,
   Loader2,
@@ -20,7 +21,8 @@ import {
 
 const contentTabs = [
   { id: 'tab-hero', label: 'Hero Section', icon: LayoutTemplate },
-  { id: 'tab-services', label: 'Services', icon: Sparkles },
+  { id: 'tab-services', label: 'Homepage Services', icon: Sparkles },
+  { id: 'tab-service-pages', label: 'Service Pages', icon: LayoutTemplate },
   { id: 'tab-astrologers', label: 'Astrologers', icon: Users },
   { id: 'tab-testimonials', label: 'Testimonials', icon: Star },
 ];
@@ -133,8 +135,9 @@ export default function AdminContentManagement() {
       )}
 
       {/* Editor Content */}
-      <form onSubmit={handleSave} className="space-y-8">
-        {activeTab === 'tab-hero' && (
+      {activeTab !== 'tab-service-pages' && (
+        <form onSubmit={handleSave} className="space-y-8">
+          {activeTab === 'tab-hero' && (
           <div className="bg-card p-6 md:p-8 rounded-2xl border border-border shadow-sm space-y-8">
             <div className="space-y-6">
               <h3 className="text-sm font-bold text-accent uppercase tracking-wider">
@@ -262,7 +265,7 @@ export default function AdminContentManagement() {
           </div>
         )}
 
-        {activeTab !== 'tab-hero' && activeTab !== 'tab-services' && (
+        {activeTab !== 'tab-hero' && activeTab !== 'tab-services' && activeTab !== 'tab-service-pages' && (
           <div className="flex flex-col items-center justify-center p-12 bg-card rounded-2xl border border-border border-dashed text-center">
             <LayoutTemplate size={48} className="text-muted-foreground mb-4 opacity-50" />
             <h3 className="text-lg font-bold text-foreground">Section Configuration Upcoming</h3>
@@ -440,6 +443,11 @@ export default function AdminContentManagement() {
           </div>
         )}
       </form>
+      )}
+
+      {activeTab === 'tab-service-pages' && (
+        <AdminServicePagesEditor />
+      )}
     </div>
   );
 }
