@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Music, Check, ArrowRight, ChevronDown, ChevronUp, Lock, Volume2, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, MantraServiceContent, defaultMantraContent } from '@/lib/cms';
 
 export default function MantraServicePage() {
@@ -148,35 +149,13 @@ export default function MantraServicePage() {
           </div>
         </div>
       </section>
-      {/* Get Report */}
-      <section id="get-report" className="py-16 bg-background">
-        <div className="max-w-2xl mx-auto px-6 lg:px-10">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-foreground mb-3">Get Your <span className="text-gradient-gold">Mantra Report</span></h2>
-            <p className="text-muted-foreground">Enter your birth details for a personalized mantra recommendation</p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Date of Birth</label>
-                <input type="date" className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Time of Birth</label>
-                <input type="time" className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Place of Birth</label>
-                <input type="text" placeholder="e.g. Delhi, India" className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
-              </div>
-              <Link href="/sign-up-login-screen" className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                <Music size={16} /> Unlock Full Mantra Report
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ServiceReportForm
+        titleText="Get Your"
+        highlightText="Mantra Report"
+        subtitle="Enter your birth details for a personalized mantra recommendation"
+        buttonText="Unlock Full Mantra Report"
+        Icon={Music}
+      />
       {/* FAQ */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-2xl mx-auto px-6 lg:px-10">

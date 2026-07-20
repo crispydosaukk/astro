@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Triangle, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, YantraServiceContent, defaultYantraContent } from '@/lib/cms';
 
 export default function YantraServicePage() {
@@ -128,6 +129,14 @@ export default function YantraServicePage() {
           </div>
         </div>
       </section>
+      <ServiceReportForm
+        titleText="Discover Your"
+        highlightText="Sacred Geometry"
+        subtitle="Get a personalized Yantra recommendation based on your birth chart"
+        buttonText="Unlock Full Yantra Report"
+        Icon={Triangle}
+        premiumInfo="Full report with specific Yantra placement, activation rituals, and mantra associations requires Premium membership"
+      />
       <section className="py-16 cosmic-bg">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Unlock Your <span className="text-gradient-gold">Yantra Report</span></h2>

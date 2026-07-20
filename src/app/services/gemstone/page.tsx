@@ -4,13 +4,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Gem, Check, ArrowRight, ChevronDown, ChevronUp, Lock, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, GemstoneServiceContent, defaultGemstoneContent } from '@/lib/cms';
 
 export default function GemstoneServicePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [dob, setDob] = useState('');
-  const [time, setTime] = useState('');
-  const [place, setPlace] = useState('');
   
   const [content, setContent] = useState<GemstoneServiceContent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -141,42 +139,14 @@ export default function GemstoneServicePage() {
           </div>
         </div>
       </section>
-      {/* Get Report Form */}
-      <section id="get-report" className="py-16 bg-background">
-        <div className="max-w-2xl mx-auto px-6 lg:px-10">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-foreground mb-3">Get Your <span className="text-gradient-gold">Personal Report</span></h2>
-            <p className="text-muted-foreground">Enter your birth details to receive a precise gemstone recommendation</p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Date of Birth</label>
-                <input type="date" value={dob} onChange={e => setDob(e?.target?.value)} className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Time of Birth</label>
-                <input type="time" value={time} onChange={e => setTime(e?.target?.value)} className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Place of Birth</label>
-                <input type="text" placeholder="e.g. Mumbai, Maharashtra" value={place} onChange={e => setPlace(e?.target?.value)} className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
-              </div>
-              <div className="rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20 p-4 flex items-start gap-3">
-                <Lock size={16} className="text-[#C9952B] flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Premium Report</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Full gemstone analysis with metal, finger, mantra, and precautions requires Premium membership</p>
-                </div>
-              </div>
-              <Link href="/sign-up-login-screen" className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                <Gem size={16} /> Unlock Full Report — Upgrade to Premium
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ServiceReportForm
+        titleText="Get Your"
+        highlightText="Personal Report"
+        subtitle="Enter your birth details to receive a precise gemstone recommendation"
+        buttonText="Unlock Full Report — Upgrade to Premium"
+        Icon={Gem}
+        premiumInfo="Full gemstone analysis with metal, finger, mantra, and precautions requires Premium membership"
+      />
       {/* FAQ */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-2xl mx-auto px-6 lg:px-10">

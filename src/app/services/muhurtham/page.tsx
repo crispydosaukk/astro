@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Compass, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, MuhurthamServiceContent, defaultMuhurthamContent } from '@/lib/cms';
 
 export default function MuhurthamServicePage() {
@@ -130,6 +131,14 @@ export default function MuhurthamServicePage() {
           </div>
         </div>
       </section>
+      <ServiceReportForm
+        titleText="Find Your"
+        highlightText="Perfect Muhurtham"
+        subtitle="Get 3 auspicious date options with complete planetary analysis and Nakshatra details"
+        buttonText="Unlock Full Muhurtham Report"
+        Icon={Compass}
+        premiumInfo="Full report with specific timings, alternative dates, and detailed avoid times requires Premium membership"
+      />
       <section className="py-16 cosmic-bg">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Find Your <span className="text-gradient-gold">Perfect Muhurtham</span></h2>

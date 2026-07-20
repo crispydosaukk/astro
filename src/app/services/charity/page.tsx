@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Gift, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, CharityServiceContent, defaultCharityContent } from '@/lib/cms';
 
 export default function CharityServicePage() {
@@ -143,6 +144,14 @@ export default function CharityServicePage() {
           </div>
         </div>
       </section>
+      <ServiceReportForm
+        titleText="Get Your"
+        highlightText="Charity Report"
+        subtitle="Enter your birth details for a personalized charity recommendation"
+        buttonText="Unlock Full Charity Report"
+        Icon={Gift}
+        premiumInfo="Full charity calendar with monthly schedules and karma tracking requires Premium membership"
+      />
       <section className="py-16 cosmic-bg">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Start Your <span className="text-gradient-gold">Karma Journey</span></h2>

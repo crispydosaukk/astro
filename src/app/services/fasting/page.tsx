@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Moon, Check, ArrowRight, Lock, ChevronDown, ChevronUp } from 'lucide-react';
+import ServiceReportForm from '@/components/ServiceReportForm';
 
 const fastTypes = [
   { name: 'Ekadashi Fast', deity: 'Lord Vishnu', day: 'Bi-monthly (11th lunar day)', benefit: 'Removes sins, pleases Vishnu', food: 'Fruits, milk, sabudana' },
@@ -139,6 +140,14 @@ export default function FastingServicePage() {
           </div>
         </div>
       </section>
+      <ServiceReportForm
+        titleText="Get Your"
+        highlightText="Fasting Plan"
+        subtitle="Enter your birth details for a personalized fasting recommendation"
+        buttonText="Unlock Full Fasting Plan"
+        Icon={Moon}
+        premiumInfo="Full fasting calendar with monthly reminders, food guides, and spiritual practices requires Premium membership"
+      />
       <section className="py-16 bg-background">
         <div className="max-w-2xl mx-auto px-6 lg:px-10">
           <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Frequently Asked <span className="text-gradient-gold">Questions</span></h2>

@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Compass, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, VastuServiceContent, defaultVastuContent } from '@/lib/cms';
 
 export default function VastuServicePage() {
@@ -133,6 +134,14 @@ export default function VastuServicePage() {
           </div>
         </div>
       </section>
+      <ServiceReportForm
+        titleText="Transform Your"
+        highlightText="Space"
+        subtitle="Get a personalized Vastu map for your home or office based on your birth chart"
+        buttonText="Unlock Full Vastu Report"
+        Icon={Compass}
+        premiumInfo="Full report with specific directional remedies, color recommendations, and object placements requires Premium membership"
+      />
       <section className="py-16 cosmic-bg">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Harmonize Your <span className="text-gradient-gold">Living Space</span></h2>

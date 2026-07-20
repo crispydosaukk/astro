@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Flame, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, HomaServiceContent, defaultHomaContent } from '@/lib/cms';
 
 export default function HomaServicePage() {
@@ -130,6 +131,14 @@ export default function HomaServicePage() {
           </div>
         </div>
       </section>
+      <ServiceReportForm
+        titleText="Get Your"
+        highlightText="Homam Recommendation"
+        subtitle="Receive a detailed Homam recommendation with auspicious timing and materials list"
+        buttonText="Unlock Full Homam Report"
+        Icon={Flame}
+        premiumInfo="Full homam report with exact timings, detailed materials list, and step-by-step guidance requires Premium membership"
+      />
       <section className="py-16 cosmic-bg">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Get Your <span className="text-gradient-gold">Homam Recommendation</span></h2>

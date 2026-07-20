@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Heart, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, IshtaDevataServiceContent, defaultIshtaDevataContent } from '@/lib/cms';
 
 export default function IshtaDevataServicePage() {
@@ -132,6 +133,14 @@ export default function IshtaDevataServicePage() {
           </div>
         </div>
       </section>
+      <ServiceReportForm
+        titleText="Discover Your"
+        highlightText="Divine Connection"
+        subtitle="Get your complete Ishta Devata report with daily worship guide and stotra recommendations"
+        buttonText="Unlock Full Devata Report"
+        Icon={Heart}
+        premiumInfo="Full report with specific stotras, yantras, and detailed worship procedures requires Premium membership"
+      />
       <section className="py-16 cosmic-bg">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Discover Your <span className="text-gradient-gold">Divine Connection</span></h2>
