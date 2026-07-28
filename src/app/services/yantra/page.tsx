@@ -56,7 +56,7 @@ export default function YantraServicePage() {
                 {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
+                <Link href="#get-report" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
                   <Triangle size={16} /> {content.hero.primaryBtnText}
                 </Link>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
@@ -131,7 +131,7 @@ export default function YantraServicePage() {
       </section>
       <ServiceReportForm
         titleText="Discover Your"
-        highlightText="Sacred Geometry"
+        highlightText="Yantra Recommendation"
         subtitle="Get a personalized Yantra recommendation based on your birth chart"
         buttonText="Unlock Full Yantra Report"
         Icon={Triangle}
@@ -142,7 +142,7 @@ export default function YantraServicePage() {
           <h2 className="text-3xl font-bold text-white mb-4">Unlock Your <span className="text-gradient-gold">Yantra Report</span></h2>
           <p className="text-white/60 mb-8 max-w-xl mx-auto">Get a detailed Yantra recommendation with activation mantras, placement instructions, and worship guidelines.</p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
+            <Link href="#get-report" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
               <Triangle size={18} /> Get Premium Report
             </Link>
             <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">

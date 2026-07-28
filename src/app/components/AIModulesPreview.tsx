@@ -83,7 +83,7 @@ export default function AIModulesPreview() {
           viewport={{ once: true }}
           className="text-center mt-10"
         >
-          <Link href="/ai-recommendations-screen" className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow text-base">
+          <Link href="/#services" className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow text-base">
             ✦ Explore All Remedies
             <ArrowRight size={16} />
           </Link>

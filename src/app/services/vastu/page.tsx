@@ -56,7 +56,7 @@ export default function VastuServicePage() {
                 {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
+                <Link href="#get-report" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
                   <Compass size={16} /> {content.hero.primaryBtnText}
                 </Link>
                 <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
@@ -136,7 +136,7 @@ export default function VastuServicePage() {
       </section>
       <ServiceReportForm
         titleText="Transform Your"
-        highlightText="Space"
+        highlightText="Vastu Report"
         subtitle="Get a personalized Vastu map for your home or office based on your birth chart"
         buttonText="Unlock Full Vastu Report"
         Icon={Compass}
@@ -147,7 +147,7 @@ export default function VastuServicePage() {
           <h2 className="text-3xl font-bold text-white mb-4">Harmonize Your <span className="text-gradient-gold">Living Space</span></h2>
           <p className="text-white/60 mb-8 max-w-xl mx-auto">Get a complete interactive Vastu analysis with room-by-room remedies and a personalized action plan.</p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
+            <Link href="#get-report" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
               <Compass size={18} /> Get Premium Analysis
             </Link>
             <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">

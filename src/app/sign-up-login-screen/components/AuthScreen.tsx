@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import Script from 'next/script';
 import AppLogo from '@/components/ui/AppLogo';
-import { Eye, EyeOff, Mail, Lock, User, Calendar, Clock, MapPin, Sparkles, Star, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Calendar, Clock, MapPin, Sparkles, Star, ChevronRight, CheckCircle2, Phone } from 'lucide-react';
 import { auth, db } from '@/lib/firebase/config';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -23,6 +23,7 @@ interface LoginForm {
 interface SignupForm {
   name: string;
   email: string;
+  phone: string;
   password: string;
   confirmPassword: string;
   dob: string;
@@ -41,9 +42,19 @@ export default function AuthScreen() {
   const [showSuccessPopup, setShowSuccessPopup] = useState<'signup' | 'login' | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const pobRef = useRef<HTMLInputElement | null>(null);
+  const router = require('next/navigation').useRouter();
 
   const loginForm = useForm<LoginForm>({ defaultValues: { email: '', password: '', remember: false } });
-  const signupForm = useForm<SignupForm>({ defaultValues: { name: '', email: '', password: '', confirmPassword: '', dob: '', tob: '', pob: '', gender: '' } });
+  const signupForm = useForm<SignupForm>({ defaultValues: { name: '', email: '', phone: '', password: '', confirmPassword: '', dob: '', tob: '', pob: '', gender: '' } });
+
+  useEffect(() => {
+    const unsubscribe = require('firebase/auth').onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        router.push('/user-dashboard');
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   useEffect(() => {
     if (step === 2 && isGoogleLoaded && pobRef.current) {
@@ -98,6 +109,7 @@ export default function AuthScreen() {
       await setDoc(doc(db, 'users', user.uid), {
         name: data.name,
         email: data.email,
+        phone: data.phone,
         dob: data.dob,
         tob: data.tob,
         pob: data.pob,
@@ -309,6 +321,15 @@ export default function AuthScreen() {
                           <input type="email" {...signupForm.register('email', { required: 'Email is required', pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email' } })} className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none text-sm transition-all" placeholder="arjun@example.com" />
                         </div>
                         {signupForm.formState.errors.email && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.email.message}</p>}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-foreground mb-1.5">Phone Number</label>
+                        <div className="relative">
+                          <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                          <input type="tel" {...signupForm.register('phone', { required: 'Phone number is required' })} className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none text-sm transition-all" placeholder="+91 9876543210" />
+                        </div>
+                        {signupForm.formState.errors.phone && <p className="text-red-400 text-xs mt-1">{signupForm.formState.errors.phone.message}</p>}
                       </div>
 
                       <div>

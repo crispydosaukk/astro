@@ -7,12 +7,12 @@ import { Menu, X, Sun, Moon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth } from '@/lib/firebase/config';
 import { onAuthStateChanged, signOut as firebaseSignOut, User } from 'firebase/auth';
-
+import UserDropdown from './UserDropdown';
 const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Services', href: '#services' },
   { label: 'Talk to Astrologer', href: '/talk-to-astrologer' },
-  { label: 'Remedies', href: '/ai-recommendations-screen' },
+  { label: 'Remedies', href: '/#services' },
   { label: 'Admin', href: '/admin-panel' },
   { label: 'Astrologer Login', href: '/astrologer-login' },
   { label: 'Astrologer Registration', href: '/astrologer-login?mode=signup' },
@@ -67,17 +67,12 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
-            <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-accent/10 text-slate-700 hover:text-accent transition-all icon-hover-animate">
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
             {user ? (
               <>
                 <Link href="/user-dashboard" className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200">
                   Dashboard
                 </Link>
-                <button onClick={() => firebaseSignOut(auth)} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all duration-200 gold-shadow">
-                  Sign Out
-                </button>
+                <UserDropdown />
               </>
             ) : (
               <>
@@ -114,12 +109,7 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="pt-3 border-t border-slate-100 flex gap-3">
-                {user ? (
-                  <>
-                    <Link href="/user-dashboard" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 transition-all">Dashboard</Link>
-                    <button onClick={() => firebaseSignOut(auth)} className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold gold-gradient-bg text-white">Sign Out</button>
-                  </>
-                ) : (
+                {user ? null : (
                   <>
                     <Link href="/sign-up-login-screen" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 transition-all">Sign In</Link>
                   </>

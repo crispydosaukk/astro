@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { ArrowRight, Lock, Loader2, MapPin } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -30,10 +30,51 @@ export default function ServiceReportForm({
   const [dob, setDob] = useState('');
   const [time, setTime] = useState('');
   const [place, setPlace] = useState('');
+  
+  // Location Autocomplete State
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   
   const { user, loading } = useUserData();
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPlace(value);
+    
+    if (value.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    
+    setIsSearching(true);
+    setShowSuggestions(true);
+    
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&limit=5`);
+        const data = await res.json();
+        setSuggestions(data);
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+  };
+
+  const handleSelectLocation = (locationName: string) => {
+    setPlace(locationName);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
 
   const handleSubmit = async () => {
     if (!dob || !time || !place) {
@@ -41,23 +82,28 @@ export default function ServiceReportForm({
       return;
     }
 
-    if (!user) {
-      toast.error('Please sign in first');
-      return;
-    }
-
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'service_requests'), {
-        userId: user.uid,
-        userEmail: user.email,
-        type: `${titleText} ${highlightText}`,
-        details: { dob, time, place },
-        status: 'pending',
-        createdAt: serverTimestamp()
+      const response = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.uid || 'demo-user-id',
+          userEmail: user?.email || 'demo@example.com',
+          type: `${titleText} ${highlightText}`,
+          details: { dob, time, place },
+        }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate report');
+      }
       
-      toast.success('Request submitted successfully!');
+      toast.success('Payment successful! Your report is ready.');
       setDob('');
       setTime('');
       setPlace('');
@@ -80,30 +126,65 @@ export default function ServiceReportForm({
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
         <div className="relative rounded-2xl border border-border bg-card p-8 shadow-lg overflow-hidden">
-          {!loading && !user && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 bg-background/80 backdrop-blur-sm text-center">
-              <Lock size={40} className="text-[#C9952B] mb-4" />
-              <h3 className="text-xl font-bold text-foreground mb-2">Sign In Required</h3>
-              <p className="text-sm text-muted-foreground mb-6">Please sign in to fill out your details and unlock this report.</p>
-              <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
-                Sign In to Continue
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          )}
-          
-          <div className={`space-y-5 ${!loading && !user ? 'opacity-30 pointer-events-none select-none' : ''}`}>
+          <div className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">Date of Birth</label>
-              <input type="date" value={dob} onChange={e => setDob(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
+              <input 
+                type="date" 
+                value={dob} 
+                onChange={e => setDob(e.target.value)} 
+                onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all custom-calendar-icon cursor-pointer" 
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">Time of Birth</label>
-              <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
+              <input 
+                type="time" 
+                value={time} 
+                onChange={e => setTime(e.target.value)} 
+                onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all custom-clock-icon cursor-pointer" 
+              />
             </div>
-            <div>
+            <div className="relative">
               <label className="block text-sm font-semibold text-foreground mb-2">Place of Birth</label>
-              <input type="text" placeholder="e.g. Delhi, India" value={place} onChange={e => setPlace(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all" />
+              <input 
+                type="text" 
+                placeholder="e.g. Delhi, India" 
+                value={place} 
+                onChange={handleLocationChange} 
+                onFocus={() => place.length >= 3 && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all placeholder:text-muted-foreground" 
+              />
+              {/* Location Suggestions Dropdown */}
+              {showSuggestions && (
+                <div className="absolute z-20 w-full mt-2 bg-card border border-border rounded-xl shadow-lg overflow-hidden">
+                  {isSearching ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                      <Loader2 className="animate-spin" size={14} /> Searching locations...
+                    </div>
+                  ) : suggestions.length > 0 ? (
+                    <ul className="max-h-60 overflow-y-auto">
+                      {suggestions.map((s, i) => (
+                        <li 
+                          key={i} 
+                          onMouseDown={() => handleSelectLocation(s.display_name)}
+                          className="px-4 py-3 hover:bg-muted cursor-pointer flex items-start gap-3 transition-colors border-b border-border/50 last:border-0"
+                        >
+                          <MapPin size={16} className="text-[#C9952B] flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-foreground">{s.display_name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : place.length >= 3 ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      No locations found
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </div>
             
             {premiumInfo && (
@@ -116,27 +197,20 @@ export default function ServiceReportForm({
               </div>
             )}
             
-            {user ? (
-              <button 
-                onClick={handleSubmit} 
-                disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2"><Loader2 className="animate-spin" size={16} /> Submitting...</span>
-                ) : (
-                  <>
-                    <Icon size={16} /> {buttonText}
-                    <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-            ) : (
-              <div className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white opacity-80">
-                <Icon size={16} /> {buttonText}
-                <ArrowRight size={16} />
-              </div>
-            )}
+            <button 
+              onClick={handleSubmit} 
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center gap-2"><Loader2 className="animate-spin" size={16} /> Submitting...</span>
+              ) : (
+                <>
+                  <Icon size={16} /> {buttonText}
+                  <ArrowRight size={16} />
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

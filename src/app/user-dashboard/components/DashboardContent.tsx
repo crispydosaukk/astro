@@ -3,7 +3,6 @@ import React from 'react';
 import DashboardMetrics from './DashboardMetrics';
 import KundliSummary from './KundliSummary';
 import UpcomingAppointments from './UpcomingAppointments';
-import RecentReports from './RecentReports';
 import DailyHoroscope from './DailyHoroscope';
 import RemedySuggestions from './RemedySuggestions';
 import { Bell, User } from 'lucide-react';
@@ -53,7 +52,6 @@ export default function DashboardContent() {
           </div>
         </div>
 
-        <RecentReports />
       </div>
     </div>
   );

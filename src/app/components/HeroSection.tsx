@@ -24,12 +24,15 @@ const zodiacPositions = zodiacSigns?.map((_, i) => {
 
 import { HomepageContent } from '@/lib/cms';
 
+import { useUserData } from '@/lib/useUserData';
+
 interface HeroSectionProps {
   content?: HomepageContent['hero'];
 }
 
 export default function HeroSection({ content }: HeroSectionProps) {
   const [currentZodiac, setCurrentZodiac] = useState(0);
+  const { user } = useUserData();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -85,7 +88,7 @@ export default function HeroSection({ content }: HeroSectionProps) {
               {/* CTAs */}
               <div className="flex flex-wrap gap-4">
                 <Link
-                  href="/sign-up-login-screen"
+                  href={user ? "/user-dashboard" : "/sign-up-login-screen"}
                   className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all duration-200 gold-shadow animate-pulse-gold"
                 >
                   {content?.primaryBtnText || '✦ Get Free Kundli'}

@@ -50,9 +50,19 @@ export default function AstrologerAuthScreen() {
   const [signupSuccessToken, setSignupSuccessToken] = useState<string | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
   const pobRef = useRef<HTMLInputElement | null>(null);
+  const router = require('next/navigation').useRouter();
 
   const loginForm = useForm<LoginForm>({ defaultValues: { email: '', password: '', remember: false } });
   const signupForm = useForm<SignupForm>({ defaultValues: { name: '', email: '', password: '', confirmPassword: '', dob: '', city: '', gender: '', languages: '', skills: '', phoneType: '', workingElsewhere: 'no', dailyHours: '', learningSource: '' } });
+
+  useEffect(() => {
+    const unsubscribe = require('firebase/auth').onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        router.push('/astrologer-dashboard');
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   useEffect(() => {
     if (step === 1 && isGoogleLoaded && pobRef.current) {

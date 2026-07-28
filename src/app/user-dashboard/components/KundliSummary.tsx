@@ -31,7 +31,7 @@ export default function KundliSummary() {
           <button className="p-2 rounded-xl hover:bg-muted transition-all icon-hover-animate" title="Share Kundli">
             <Share2 size={16} className="text-muted-foreground" />
           </button>
-          <Link href="/ai-recommendations-screen" className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold gold-gradient-bg text-white">
+          <Link href="/#services" className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold gold-gradient-bg text-white">
             <Eye size={12} /> Full Analysis
           </Link>
         </div>

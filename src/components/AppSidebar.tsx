@@ -16,14 +16,13 @@ const sidebarGroups = [
     items: [
       { icon: Home, label: 'Home', href: '/' },
       { icon: LayoutDashboard, label: 'Dashboard', href: '/user-dashboard', badge: null },
-      { icon: Sparkles, label: 'AI Insights', href: '/ai-recommendations-screen', badge: 'NEW' },
       { icon: Calendar, label: 'Book Consultation', href: '/consultation-booking-screen', badge: null },
     ],
   },
   {
     label: 'My Space',
     items: [
-      { icon: FileText, label: 'My Reports', href: '/user-dashboard', badge: '3' },
+      { icon: FileText, label: 'My Reports', href: '/my-reports', badge: '3' },
       { icon: Star, label: 'Saved Kundlis', href: '/user-dashboard', badge: null },
       { icon: Crown, label: 'Membership', href: '/user-dashboard', badge: null },
       { icon: Bell, label: 'Notifications', href: '/user-dashboard', badge: '5' },
@@ -52,6 +51,23 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
   const pathname = usePathname();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user, userData, loading } = useUserData();
+  const [reportsCount, setReportsCount] = useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (!user) return;
+    const fetchCount = async () => {
+      try {
+        const { collection, query, where, getCountFromServer } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase/config');
+        const q = query(collection(db, 'service_requests'), where('userId', '==', user.uid));
+        const snapshot = await getCountFromServer(q);
+        setReportsCount(snapshot.data().count);
+      } catch (err) {
+        console.error('Failed to fetch reports count:', err);
+      }
+    };
+    fetchCount();
+  }, [user]);
 
   const isUserLoggedIn = !!user;
   const fullName = userData?.name || 'User';
@@ -60,13 +76,19 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
 
   const isAdminRoute = pathname.startsWith('/admin-panel');
 
-  const visibleGroups = sidebarGroups.filter(group => {
+  const visibleGroups = sidebarGroups.map(group => ({
+    ...group,
+    items: group.items.map(item => ({
+      ...item,
+      badge: item.label === 'My Reports' && reportsCount !== null 
+        ? (reportsCount > 0 ? reportsCount.toString() : null) 
+        : item.badge
+    }))
+  })).filter(group => {
     if (isAdminRoute) {
       return group.label === 'Admin';
-    } else {
-      if (group.label === 'Admin') return false;
-      return true;
     }
+    return group.label !== 'Admin';
   });
 
   return (

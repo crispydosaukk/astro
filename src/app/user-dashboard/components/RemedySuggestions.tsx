@@ -16,7 +16,7 @@ export default function RemedySuggestions() {
     <div className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden">
       <div className="p-5 border-b border-border flex items-center justify-between">
         <h2 className="text-base font-bold text-foreground">Active Remedies</h2>
-        <Link href="/ai-recommendations-screen" className="text-xs text-accent hover:underline">View All</Link>
+        <Link href="/#services" className="text-xs text-accent hover:underline">View All</Link>
       </div>
       <div className="p-5 space-y-3">
         {remedies?.map((rem) => {

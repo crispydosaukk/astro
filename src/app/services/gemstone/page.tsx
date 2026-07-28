@@ -141,7 +141,7 @@ export default function GemstoneServicePage() {
       </section>
       <ServiceReportForm
         titleText="Get Your"
-        highlightText="Personal Report"
+        highlightText="Gemstone Recommendation"
         subtitle="Enter your birth details to receive a precise gemstone recommendation"
         buttonText="Unlock Full Report — Upgrade to Premium"
         Icon={Gem}
@@ -174,7 +174,7 @@ export default function GemstoneServicePage() {
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Find Your <span className="text-gradient-gold">Sacred Gemstone?</span></h2>
           <p className="text-white/60 mb-8 max-w-xl mx-auto">Consult with our expert astrologers for a personalized gemstone recommendation backed by your complete birth chart analysis.</p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
+            <Link href="#get-report" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
               <Gem size={18} /> Get Premium Report
             </Link>
             <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">

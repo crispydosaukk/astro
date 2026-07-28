@@ -5,11 +5,11 @@ import { Mail, Phone, MapPin, PlayCircle, Share2, MessageCircle, AtSign } from '
 
 const footerLinks = {
   Services: [
-    { label: 'Kundli Generation', href: '/ai-recommendations-screen' },
-    { label: 'AI Gemstone', href: '/ai-recommendations-screen' },
+    { label: 'Kundli Generation', href: '/#services' },
+    { label: 'AI Gemstone', href: '/#services' },
     { label: 'Consultation', href: '/consultation-booking-screen' },
-    { label: 'Muhurtham', href: '/ai-recommendations-screen' },
-    { label: 'Vastu Analysis', href: '/ai-recommendations-screen' },
+    { label: 'Muhurtham', href: '/#services' },
+    { label: 'Vastu Analysis', href: '/#services' },
   ],
   Company: [
     { label: 'About Us', href: '#' },

@@ -20,8 +20,15 @@ export function useUserData() {
       setUser(currentUser);
       if (currentUser) {
         try {
-          const docRef = doc(db, 'users', currentUser.uid);
-          const docSnap = await getDoc(docRef);
+          let docRef = doc(db, 'users', currentUser.uid);
+          let docSnap = await getDoc(docRef);
+          
+          if (!docSnap.exists()) {
+            // Check if they are an astrologer
+            docRef = doc(db, 'astrologers', currentUser.uid);
+            docSnap = await getDoc(docRef);
+          }
+          
           if (docSnap.exists()) {
             const data = docSnap.data();
             const name = data.name || 'User';
