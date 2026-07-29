@@ -4,6 +4,8 @@ import { collection, getDocs } from 'firebase/firestore';
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const usersSnapshot = await getDocs(collection(db, 'users'));
