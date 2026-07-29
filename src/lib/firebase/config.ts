@@ -1,8 +1,8 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAnalytics, isSupported, Analytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-// import { getStorage } from "firebase/storage"; // Uncomment if you plan to use Firebase Storage
+import { initializeApp, getApps } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getAnalytics, isSupported, Analytics } from 'firebase/analytics';
+import { getAuth } from 'firebase/auth';
+import { getStorage } from "firebase/storage"; 
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,7 +11,7 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase only if there are no other instances running
@@ -22,10 +22,10 @@ const db = getFirestore(app);
 
 // Initialize other services as needed
 const auth = getAuth(app);
-// const storage = getStorage(app);
+const storage = getStorage(app);
 
 let analytics: Analytics | null = null;
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   isSupported().then((supported) => {
     if (supported) {
       analytics = getAnalytics(app);
@@ -33,4 +33,4 @@ if (typeof window !== "undefined") {
   });
 }
 
-export { app, db, auth, analytics };
+export { app, db, auth, storage, analytics };

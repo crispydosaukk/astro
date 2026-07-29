@@ -68,7 +68,7 @@ export default function DashboardMetrics() {
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
       {metrics?.map((m, i) => {
         const Icon = m?.icon;
-        
+
         let displayValue = '0';
         let displaySub = '';
         let displayTrend = '';
@@ -87,13 +87,14 @@ export default function DashboardMetrics() {
             displayTrend = 'Book now';
             displayTrendUp = false;
             break;
-          case 'metric-premium':
+          case 'metric-premium': {
             const isPremium = false; // Based on actual userData when available
             displayValue = isPremium ? 'Premium' : 'Free';
             displaySub = isPremium ? 'Active Plan' : 'Basic Plan';
             displayTrend = isPremium ? 'Valid' : 'Upgrade';
             displayTrendUp = isPremium;
             break;
+          }
           case 'metric-remedies':
             displayValue = '0';
             displaySub = 'None active';
@@ -116,15 +117,21 @@ export default function DashboardMetrics() {
             transition={{ delay: i * 0.1 }}
             className="p-5 rounded-2xl glass-card-light dark:glass-card border border-border group hover:border-[#C9952B]/30 transition-colors"
           >
-            <div className={`w-10 h-10 rounded-xl ${m?.bg} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
+            <div
+              className={`w-10 h-10 rounded-xl ${m?.bg} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}
+            >
               <Icon size={18} className={m?.color} />
             </div>
-            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 line-clamp-1">{m?.label}</p>
+            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 line-clamp-1">
+              {m?.label}
+            </p>
             <div className="flex items-end gap-2 mb-1">
               <h3 className="text-2xl font-bold text-foreground">{displayValue}</h3>
             </div>
             <div className="text-xs text-muted-foreground mb-1">{displaySub}</div>
-            <div className={`text-xs font-medium mt-2 ${displayTrendUp ? 'text-green-400' : 'text-muted-foreground'}`}>
+            <div
+              className={`text-xs font-medium mt-2 ${displayTrendUp ? 'text-green-400' : 'text-muted-foreground'}`}
+            >
               {displayTrend}
             </div>
           </motion.div>

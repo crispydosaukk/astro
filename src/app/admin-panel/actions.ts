@@ -7,7 +7,7 @@ import { auth } from '@/lib/firebase/config';
 export async function loginAdmin(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
-  
+
   if (!email || !password) {
     return { error: 'Email and password are required' };
   }
@@ -23,7 +23,7 @@ export async function loginAdmin(prevState: any, formData: FormData) {
   } catch (error) {
     return { error: 'Invalid email or password' };
   }
-  
+
   redirect('/admin-panel');
 }
 

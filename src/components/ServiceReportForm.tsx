@@ -25,27 +25,27 @@ export default function ServiceReportForm({
   subtitle,
   buttonText,
   Icon,
-  premiumInfo
+  premiumInfo,
 }: ServiceReportFormProps) {
   const [dob, setDob] = useState('');
   const [time, setTime] = useState('');
   const [place, setPlace] = useState('');
-  
+
   // Location Autocomplete State
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  
+
   const { user, loading } = useUserData();
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPlace(value);
-    
+
     if (value.length < 3) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -53,13 +53,15 @@ export default function ServiceReportForm({
     }
 
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    
+
     setIsSearching(true);
     setShowSuggestions(true);
-    
+
     searchTimeoutRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&limit=5`);
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&limit=5`
+        );
         const data = await res.json();
         setSuggestions(data);
       } catch (error) {
@@ -102,7 +104,7 @@ export default function ServiceReportForm({
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate report');
       }
-      
+
       toast.success('Payment successful! Your report is ready.');
       setDob('');
       setTime('');
@@ -128,35 +130,41 @@ export default function ServiceReportForm({
         <div className="relative rounded-2xl border border-border bg-card p-8 shadow-lg overflow-hidden">
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">Date of Birth</label>
-              <input 
-                type="date" 
-                value={dob} 
-                onChange={e => setDob(e.target.value)} 
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Date of Birth
+              </label>
+              <input
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
                 onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all custom-calendar-icon cursor-pointer" 
+                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all custom-calendar-icon cursor-pointer"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">Time of Birth</label>
-              <input 
-                type="time" 
-                value={time} 
-                onChange={e => setTime(e.target.value)} 
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Time of Birth
+              </label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
                 onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all custom-clock-icon cursor-pointer" 
+                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all custom-clock-icon cursor-pointer"
               />
             </div>
             <div className="relative">
-              <label className="block text-sm font-semibold text-foreground mb-2">Place of Birth</label>
-              <input 
-                type="text" 
-                placeholder="e.g. Delhi, India" 
-                value={place} 
-                onChange={handleLocationChange} 
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Place of Birth
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Delhi, India"
+                value={place}
+                onChange={handleLocationChange}
                 onFocus={() => place.length >= 3 && setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all placeholder:text-muted-foreground" 
+                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all placeholder:text-muted-foreground"
               />
               {/* Location Suggestions Dropdown */}
               {showSuggestions && (
@@ -168,8 +176,8 @@ export default function ServiceReportForm({
                   ) : suggestions.length > 0 ? (
                     <ul className="max-h-60 overflow-y-auto">
                       {suggestions.map((s, i) => (
-                        <li 
-                          key={i} 
+                        <li
+                          key={i}
                           onMouseDown={() => handleSelectLocation(s.display_name)}
                           className="px-4 py-3 hover:bg-muted cursor-pointer flex items-start gap-3 transition-colors border-b border-border/50 last:border-0"
                         >
@@ -186,7 +194,7 @@ export default function ServiceReportForm({
                 </div>
               )}
             </div>
-            
+
             {premiumInfo && (
               <div className="rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20 p-4 flex items-start gap-3">
                 <Lock size={16} className="text-[#C9952B] flex-shrink-0 mt-0.5" />
@@ -196,14 +204,16 @@ export default function ServiceReportForm({
                 </div>
               </div>
             )}
-            
-            <button 
-              onClick={handleSubmit} 
+
+            <button
+              onClick={handleSubmit}
               disabled={isSubmitting}
               className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow disabled:opacity-50"
             >
               {isSubmitting ? (
-                <span className="flex items-center gap-2"><Loader2 className="animate-spin" size={16} /> Submitting...</span>
+                <span className="flex items-center gap-2">
+                  <Loader2 className="animate-spin" size={16} /> Submitting...
+                </span>
               ) : (
                 <>
                   <Icon size={16} /> {buttonText}

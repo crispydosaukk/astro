@@ -2,7 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Music, Check, ArrowRight, ChevronDown, ChevronUp, Lock, Volume2, Loader2 } from 'lucide-react';
+import {
+  Music,
+  Check,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  Volume2,
+  Loader2,
+} from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ServiceReportForm from '@/components/ServiceReportForm';
 import { getServicePageContent, MantraServiceContent, defaultMantraContent } from '@/lib/cms';
@@ -29,7 +38,6 @@ export default function MantraServicePage() {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -41,33 +49,54 @@ export default function MantraServicePage() {
         </div>
         <div className="relative max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
-            <Link href="/" className="hover:text-[#C9952B] transition-colors">Home</Link>
+            <Link href="/" className="hover:text-[#C9952B] transition-colors">
+              Home
+            </Link>
             <span>/</span>
-            <Link href="/#services" className="hover:text-[#C9952B] transition-colors">Services</Link>
+            <Link href="/#services" className="hover:text-[#C9952B] transition-colors">
+              Services
+            </Link>
             <span>/</span>
             <span className="text-[#C9952B]">Mantra Guidance</span>
           </div>
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
+            >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
                 <Music size={12} /> {content.hero.tag}
               </div>
               <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                {content.hero.titleLine1}<br /><span className="text-gradient-gold">{content.hero.titleLine2}</span>
+                {content.hero.titleLine1}
+                <br />
+                <span className="text-gradient-gold">{content.hero.titleLine2}</span>
               </h1>
               <p className="text-lg text-white/70 mb-8 leading-relaxed">
                 {content.hero.description}
               </p>
               <div className="flex flex-wrap gap-3">
-                <a href="#get-report" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow">
+                <a
+                  href="#get-report"
+                  className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow"
+                >
                   <Music size={16} /> {content.hero.primaryBtnText}
                 </a>
-                <Link href="/talk-to-astrologer" className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all">
+                <Link
+                  href="/talk-to-astrologer"
+                  className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all"
+                >
                   {content.hero.secondaryBtnText}
                 </Link>
               </div>
             </motion.div>
-            <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="flex justify-center"
+            >
               <div className="relative w-64 h-64">
                 <div className="absolute inset-0 rounded-full border-2 border-[#C9952B]/30 animate-spin-slow" />
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -85,10 +114,22 @@ export default function MantraServicePage() {
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-foreground mb-6">{content.benefitsTitle.split(' ')[0]} <span className="text-gradient-gold">{content.benefitsTitle.split(' ').slice(1).join(' ')}</span></h2>
+              <h2 className="text-3xl font-bold text-foreground mb-6">
+                {content.benefitsTitle.split(' ')[0]}{' '}
+                <span className="text-gradient-gold">
+                  {content.benefitsTitle.split(' ').slice(1).join(' ')}
+                </span>
+              </h2>
               <div className="space-y-4">
                 {content.benefits?.map((b, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-start gap-3">
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-start gap-3"
+                  >
                     <div className="w-6 h-6 rounded-full bg-[#C9952B]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check size={12} className="text-[#C9952B]" />
                     </div>
@@ -103,14 +144,20 @@ export default function MantraServicePage() {
                 <div className="p-4 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20">
                   <p className="text-xs text-[#C9952B] font-semibold mb-1">Primary Mantra</p>
                   <p className="text-sm font-bold text-foreground">Om Namah Shivaya</p>
-                  <p className="text-xs text-muted-foreground mt-1">108 times daily · Brahma Muhurtha (4:30–6:00 AM)</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    108 times daily · Brahma Muhurtha (4:30–6:00 AM)
+                  </p>
                 </div>
                 <div className="p-4 rounded-xl bg-muted/50 border border-border">
                   <p className="text-xs text-muted-foreground font-semibold mb-1">Purpose</p>
-                  <p className="text-sm text-foreground">Pacifies Saturn, removes obstacles, brings peace</p>
+                  <p className="text-sm text-foreground">
+                    Pacifies Saturn, removes obstacles, brings peace
+                  </p>
                 </div>
                 <div className="p-4 rounded-xl bg-muted/50 border border-border blur-sm select-none">
-                  <p className="text-xs text-muted-foreground font-semibold mb-1">Secondary Mantras</p>
+                  <p className="text-xs text-muted-foreground font-semibold mb-1">
+                    Secondary Mantras
+                  </p>
                   <p className="text-sm text-foreground">Gayatri Mantra · Om Namo Bhagavate...</p>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-[#C9952B]">
@@ -124,20 +171,36 @@ export default function MantraServicePage() {
       {/* Mantra Table */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.guideTitle.split(' ')[0]} <span className="text-gradient-gold">{content.guideTitle.split(' ').slice(1).join(' ')}</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
+            {content.guideTitle.split(' ')[0]}{' '}
+            <span className="text-gradient-gold">
+              {content.guideTitle.split(' ').slice(1).join(' ')}
+            </span>
+          </h2>
           <div className="overflow-x-auto rounded-2xl border border-border">
             <table className="w-full">
               <thead>
                 <tr className="bg-[#6B0F1A]/10 border-b border-border">
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">Planet</th>
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">Mantra</th>
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">Count</th>
-                  <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">Best Time</th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">
+                    Planet
+                  </th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">
+                    Mantra
+                  </th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">
+                    Count
+                  </th>
+                  <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">
+                    Best Time
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {content.mantras?.map((m, i) => (
-                  <tr key={i} className="border-b border-border hover:bg-muted/50 transition-colors">
+                  <tr
+                    key={i}
+                    className="border-b border-border hover:bg-muted/50 transition-colors"
+                  >
                     <td className={`px-5 py-3.5 text-sm font-semibold ${m?.color}`}>{m?.planet}</td>
                     <td className="px-5 py-3.5 text-xs text-foreground font-mono">{m?.mantra}</td>
                     <td className="px-5 py-3.5 text-sm text-muted-foreground">{m?.count}x</td>
@@ -159,13 +222,25 @@ export default function MantraServicePage() {
       {/* FAQ */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-2xl mx-auto px-6 lg:px-10">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">{content.faqTitle.split(' ')[0]} <span className="text-gradient-gold">{content.faqTitle.split(' ').slice(1).join(' ')}</span></h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
+            {content.faqTitle.split(' ')[0]}{' '}
+            <span className="text-gradient-gold">
+              {content.faqTitle.split(' ').slice(1).join(' ')}
+            </span>
+          </h2>
           <div className="space-y-3">
             {content.faqs?.map((faq, i) => (
               <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-muted/50 transition-colors">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-muted/50 transition-colors"
+                >
                   <span className="font-semibold text-foreground text-sm">{faq?.q}</span>
-                  {openFaq === i ? <ChevronUp size={16} className="text-[#C9952B] flex-shrink-0" /> : <ChevronDown size={16} className="text-muted-foreground flex-shrink-0" />}
+                  {openFaq === i ? (
+                    <ChevronUp size={16} className="text-[#C9952B] flex-shrink-0" />
+                  ) : (
+                    <ChevronDown size={16} className="text-muted-foreground flex-shrink-0" />
+                  )}
                 </button>
                 {openFaq === i && (
                   <div className="px-6 pb-4">

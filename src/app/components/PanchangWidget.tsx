@@ -5,7 +5,6 @@ import { Sun, Moon, Star, Clock, Calendar, Compass } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
 import { getHomepageContent, HomepageContent, defaultHomepageContent } from '@/lib/cms';
 
-
 export default function PanchangWidget() {
   const [content, setContent] = useState<HomepageContent>(defaultHomepageContent);
 
@@ -18,12 +17,48 @@ export default function PanchangWidget() {
   }, []);
 
   const panchangData = [
-    { icon: Sun, label: 'Tithi', value: content.panchang.tithiValue, sub: content.panchang.tithiSub, color: 'text-amber-400' },
-    { icon: Star, label: 'Nakshatra', value: content.panchang.nakshatraValue, sub: content.panchang.nakshatraSub, color: 'text-purple-400' },
-    { icon: Compass, label: 'Yoga', value: content.panchang.yogaValue, sub: content.panchang.yogaSub, color: 'text-green-400' },
-    { icon: Moon, label: 'Karana', value: content.panchang.karanaValue, sub: content.panchang.karanaSub, color: 'text-blue-400' },
-    { icon: Calendar, label: 'Vara', value: content.panchang.varaValue, sub: content.panchang.varaSub, color: 'text-amber-400' },
-    { icon: Clock, label: 'Rahu Kalam', value: content.panchang.rahuKalamValue, sub: content.panchang.rahuKalamSub, color: 'text-red-400' },
+    {
+      icon: Sun,
+      label: 'Tithi',
+      value: content.panchang.tithiValue,
+      sub: content.panchang.tithiSub,
+      color: 'text-amber-400',
+    },
+    {
+      icon: Star,
+      label: 'Nakshatra',
+      value: content.panchang.nakshatraValue,
+      sub: content.panchang.nakshatraSub,
+      color: 'text-purple-400',
+    },
+    {
+      icon: Compass,
+      label: 'Yoga',
+      value: content.panchang.yogaValue,
+      sub: content.panchang.yogaSub,
+      color: 'text-green-400',
+    },
+    {
+      icon: Moon,
+      label: 'Karana',
+      value: content.panchang.karanaValue,
+      sub: content.panchang.karanaSub,
+      color: 'text-blue-400',
+    },
+    {
+      icon: Calendar,
+      label: 'Vara',
+      value: content.panchang.varaValue,
+      sub: content.panchang.varaSub,
+      color: 'text-amber-400',
+    },
+    {
+      icon: Clock,
+      label: 'Rahu Kalam',
+      value: content.panchang.rahuKalamValue,
+      sub: content.panchang.rahuKalamSub,
+      color: 'text-red-400',
+    },
   ];
 
   return (
@@ -52,10 +87,14 @@ export default function PanchangWidget() {
                 transition={{ delay: i * 0.1 }}
                 className="glass-card-light dark:glass-card rounded-2xl p-4 border border-border card-hover"
               >
-                <div className={`w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-3 icon-hover-animate ${item?.color}`}>
+                <div
+                  className={`w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-3 icon-hover-animate ${item?.color}`}
+                >
                   <Icon size={20} />
                 </div>
-                <div className="text-xs font-500 text-muted-foreground uppercase tracking-wide mb-1">{item?.label}</div>
+                <div className="text-xs font-500 text-muted-foreground uppercase tracking-wide mb-1">
+                  {item?.label}
+                </div>
                 <div className="text-sm font-semibold text-foreground">{item?.value}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{item?.sub}</div>
               </motion.div>

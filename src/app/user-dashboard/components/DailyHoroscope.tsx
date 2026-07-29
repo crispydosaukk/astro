@@ -4,9 +4,34 @@ import { motion } from 'framer-motion';
 import { Heart, Briefcase, DollarSign, Activity } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
 
-
-const rashis = ['Mesha', 'Vrishabha', 'Mithuna', 'Karka', 'Simha', 'Kanya', 'Tula', 'Vrishchika', 'Dhanu', 'Makara', 'Kumbha', 'Meena'];
-const rashiSymbols: Record<string, string> = { Mesha: '♈', Vrishabha: '♉', Mithuna: '♊', Karka: '♋', Simha: '♌', Kanya: '♍', Tula: '♎', Vrishchika: '♏', Dhanu: '♐', Makara: '♑', Kumbha: '♒', Meena: '♓' };
+const rashis = [
+  'Mesha',
+  'Vrishabha',
+  'Mithuna',
+  'Karka',
+  'Simha',
+  'Kanya',
+  'Tula',
+  'Vrishchika',
+  'Dhanu',
+  'Makara',
+  'Kumbha',
+  'Meena',
+];
+const rashiSymbols: Record<string, string> = {
+  Mesha: '♈',
+  Vrishabha: '♉',
+  Mithuna: '♊',
+  Karka: '♋',
+  Simha: '♌',
+  Kanya: '♍',
+  Tula: '♎',
+  Vrishchika: '♏',
+  Dhanu: '♐',
+  Makara: '♑',
+  Kumbha: '♒',
+  Meena: '♓',
+};
 
 const horoscopeData = {
   overall: 4,
@@ -14,7 +39,8 @@ const horoscopeData = {
   career: 5,
   finance: 3,
   health: 4,
-  prediction: "Jupiter\'s favorable aspect on your 10th house brings excellent opportunities in career today. A long-awaited recognition or promotion may come your way. In relationships, Venus in your 7th house suggests a warm and romantic evening with your partner. Financially, avoid impulsive purchases — wait until Saturday for major transactions. Health is good but avoid spicy food.",
+  prediction:
+    "Jupiter's favorable aspect on your 10th house brings excellent opportunities in career today. A long-awaited recognition or promotion may come your way. In relationships, Venus in your 7th house suggests a warm and romantic evening with your partner. Financially, avoid impulsive purchases — wait until Saturday for major transactions. Health is good but avoid spicy food.",
   luckyNumber: 7,
   luckyColor: 'Golden Yellow',
   luckyTime: '11:00 AM – 1:00 PM',
@@ -60,9 +86,14 @@ export default function DailyHoroscope() {
             <h3 className="text-xl font-bold text-foreground">{selectedRashi}</h3>
             <div className="flex items-center gap-1 mt-1">
               {[...Array(5)].map((_, i) => (
-                <div key={`overall-star-${i}`} className={`w-3 h-3 rounded-full ${i < horoscopeData.overall ? 'bg-accent' : 'bg-muted'}`} />
+                <div
+                  key={`overall-star-${i}`}
+                  className={`w-3 h-3 rounded-full ${i < horoscopeData.overall ? 'bg-accent' : 'bg-muted'}`}
+                />
               ))}
-              <span className="text-xs text-muted-foreground ml-2">Overall {horoscopeData.overall}/5</span>
+              <span className="text-xs text-muted-foreground ml-2">
+                Overall {horoscopeData.overall}/5
+              </span>
             </div>
           </div>
         </div>
@@ -72,7 +103,12 @@ export default function DailyHoroscope() {
           {[
             { icon: Heart, label: 'Love', score: horoscopeData.love, color: 'bg-pink-500' },
             { icon: Briefcase, label: 'Career', score: horoscopeData.career, color: 'bg-blue-500' },
-            { icon: DollarSign, label: 'Finance', score: horoscopeData.finance, color: 'bg-green-500' },
+            {
+              icon: DollarSign,
+              label: 'Finance',
+              score: horoscopeData.finance,
+              color: 'bg-green-500',
+            },
             { icon: Activity, label: 'Health', score: horoscopeData.health, color: 'bg-amber-500' },
           ].map((item) => {
             const Icon = item.icon;
@@ -100,7 +136,9 @@ export default function DailyHoroscope() {
           })}
         </div>
 
-        <p className="text-sm text-muted-foreground leading-relaxed mb-6">{horoscopeData.prediction}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+          {horoscopeData.prediction}
+        </p>
 
         <div className="grid grid-cols-3 gap-3">
           {[

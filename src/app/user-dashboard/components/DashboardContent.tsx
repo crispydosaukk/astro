@@ -21,14 +21,19 @@ export default function DashboardContent() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">Namaste, {firstName} 🙏</h1>
-            <p className="text-sm text-muted-foreground">Thursday, 3 July 2026 · Guruvar · Shukla Saptami</p>
+            <p className="text-sm text-muted-foreground">
+              Thursday, 3 July 2026 · Guruvar · Shukla Saptami
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <button className="relative p-2 rounded-xl hover:bg-muted transition-all icon-hover-animate">
               <Bell size={18} className="text-muted-foreground" />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent" />
             </button>
-            <Link href="/user-dashboard" className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-all">
+            <Link
+              href="/user-dashboard"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-all"
+            >
               <div className="w-7 h-7 rounded-full indigo-gradient-bg flex items-center justify-center">
                 <User size={13} className="text-white" />
               </div>
@@ -51,7 +56,6 @@ export default function DashboardContent() {
             <RemedySuggestions />
           </div>
         </div>
-
       </div>
     </div>
   );

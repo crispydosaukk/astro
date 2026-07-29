@@ -2,13 +2,32 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Calendar, Star, Crown, LayoutDashboard, Sparkles, Bell, Shield, LogOut, User, Menu, X, ChevronLeft, ChevronRight, LayoutTemplate, Users, CreditCard, ClipboardList } from 'lucide-react';
+import {
+  Home,
+  FileText,
+  Calendar,
+  Star,
+  Crown,
+  LayoutDashboard,
+  Sparkles,
+  Bell,
+  Shield,
+  LogOut,
+  User,
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  LayoutTemplate,
+  Users,
+  CreditCard,
+  ClipboardList,
+} from 'lucide-react';
 import AppLogo from '@/components/ui/AppLogo';
 import { useUserData } from '@/lib/useUserData';
 import { auth } from '@/lib/firebase/config';
 import { signOut } from 'firebase/auth';
 import LogoutModal from '@/components/LogoutModal';
-
 
 const sidebarGroups = [
   {
@@ -16,7 +35,12 @@ const sidebarGroups = [
     items: [
       { icon: Home, label: 'Home', href: '/' },
       { icon: LayoutDashboard, label: 'Dashboard', href: '/user-dashboard', badge: null },
-      { icon: Calendar, label: 'Book Consultation', href: '/consultation-booking-screen', badge: null },
+      {
+        icon: Calendar,
+        label: 'Book Consultation',
+        href: '/consultation-booking-screen',
+        badge: null,
+      },
     ],
   },
   {
@@ -35,7 +59,12 @@ const sidebarGroups = [
       { icon: LayoutTemplate, label: 'Content', href: '/admin-panel/content', badge: null },
       { icon: Users, label: 'Users', href: '/admin-panel/users', badge: null },
       { icon: Star, label: 'Astrologers', href: '/admin-panel/astrologers', badge: null },
-      { icon: ClipboardList, label: 'Applications', href: '/admin-panel/applications', badge: null },
+      {
+        icon: ClipboardList,
+        label: 'Applications',
+        href: '/admin-panel/applications',
+        badge: null,
+      },
       { icon: Calendar, label: 'Appointments', href: '/admin-panel/appointments', badge: null },
       { icon: CreditCard, label: 'Payments', href: '/admin-panel/payments', badge: null },
     ],
@@ -72,29 +101,38 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
   const isUserLoggedIn = !!user;
   const fullName = userData?.name || 'User';
   // Check if admin by email or custom claim, but for now fallback to false unless explicitly mocked
-  const isAdminLoggedIn = false; 
+  const isAdminLoggedIn = false;
 
   const isAdminRoute = pathname.startsWith('/admin-panel');
 
-  const visibleGroups = sidebarGroups.map(group => ({
-    ...group,
-    items: group.items.map(item => ({
-      ...item,
-      badge: item.label === 'My Reports' && reportsCount !== null 
-        ? (reportsCount > 0 ? reportsCount.toString() : null) 
-        : item.badge
+  const visibleGroups = sidebarGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.map((item) => ({
+        ...item,
+        badge:
+          item.label === 'My Reports' && reportsCount !== null
+            ? reportsCount > 0
+              ? reportsCount.toString()
+              : null
+            : item.badge,
+      })),
     }))
-  })).filter(group => {
-    if (isAdminRoute) {
-      return group.label === 'Admin';
-    }
-    return group.label !== 'Admin';
-  });
+    .filter((group) => {
+      if (isAdminRoute) {
+        return group.label === 'Admin';
+      }
+      return group.label !== 'Admin';
+    });
 
   return (
-    <aside className={`fixed left-0 top-0 h-screen z-40 flex flex-col transition-all duration-300 ease-in-out ${collapsed ? 'w-16' : 'w-64'} bg-card border-r border-border`}>
+    <aside
+      className={`fixed left-0 top-0 h-screen z-40 flex flex-col transition-all duration-300 ease-in-out ${collapsed ? 'w-16' : 'w-64'} bg-card border-r border-border`}
+    >
       {/* Logo */}
-      <div className={`flex items-center h-16 px-4 border-b border-border ${collapsed ? 'justify-center' : 'gap-3'}`}>
+      <div
+        className={`flex items-center h-16 px-4 border-b border-border ${collapsed ? 'justify-center' : 'gap-3'}`}
+      >
         <AppLogo src="/AstroParihar_Top_Logo.jpg" size={32} />
       </div>
 
@@ -103,7 +141,9 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
         {visibleGroups.map((group) => (
           <div key={`group-${group.label}`}>
             {!collapsed && (
-              <p className="px-3 mb-2 text-xs font-600 uppercase tracking-widest text-muted-foreground">{group.label}</p>
+              <p className="px-3 mb-2 text-xs font-600 uppercase tracking-widest text-muted-foreground">
+                {group.label}
+              </p>
             )}
             <div className="space-y-1">
               {group.items.map((item) => {
@@ -117,10 +157,15 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative
                       ${isActive ? 'nav-link-active text-accent' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
                   >
-                    <Icon size={18} className={`flex-shrink-0 icon-hover-animate ${isActive ? 'text-accent' : ''}`} />
+                    <Icon
+                      size={18}
+                      className={`flex-shrink-0 icon-hover-animate ${isActive ? 'text-accent' : ''}`}
+                    />
                     {!collapsed && <span className="flex-1">{item.label}</span>}
                     {!collapsed && item.badge && (
-                      <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${item.badge === 'NEW' ? 'bg-accent text-accent-foreground' : 'bg-secondary text-white'}`}>
+                      <span
+                        className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${item.badge === 'NEW' ? 'bg-accent text-accent-foreground' : 'bg-secondary text-white'}`}
+                      >
                         {item.badge}
                       </span>
                     )}
@@ -148,7 +193,7 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
                 <p className="text-xs text-muted-foreground truncate">AstroParihar</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setShowLogoutModal(true)}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-all font-medium text-sm mt-2"
             >
@@ -170,7 +215,7 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
               </div>
               <Crown size={14} className="text-accent flex-shrink-0" />
             </div>
-            <button 
+            <button
               onClick={async () => {
                 await signOut(auth);
                 window.location.href = '/';
@@ -184,8 +229,8 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
         )}
 
         {!collapsed && !isAdminRoute && !isUserLoggedIn && (
-          <button 
-            onClick={() => window.location.href = '/sign-up-login-screen'}
+          <button
+            onClick={() => (window.location.href = '/sign-up-login-screen')}
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent text-accent-foreground font-medium text-sm hover:bg-accent/90 transition-all"
           >
             <User size={16} /> Sign In
@@ -195,10 +240,17 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
           onClick={onToggle}
           className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
         >
-          {collapsed ? <ChevronRight size={16} /> : <><ChevronLeft size={16} /><span>Collapse</span></>}
+          {collapsed ? (
+            <ChevronRight size={16} />
+          ) : (
+            <>
+              <ChevronLeft size={16} />
+              <span>Collapse</span>
+            </>
+          )}
         </button>
       </div>
-      
+
       {/* Modals */}
       <LogoutModal isOpen={showLogoutModal} onClose={() => setShowLogoutModal(false)} />
     </aside>

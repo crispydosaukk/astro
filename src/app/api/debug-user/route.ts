@@ -7,10 +7,10 @@ import path from 'path';
 export async function GET() {
   try {
     const usersSnapshot = await getDocs(collection(db, 'users'));
-    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const users = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
     const astSnapshot = await getDocs(collection(db, 'astrologers'));
-    const astrologers = astSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const astrologers = astSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
     return NextResponse.json({ users, astrologers });
   } catch (error: any) {

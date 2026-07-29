@@ -1,26 +1,57 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Phone, IndianRupee, Star, TrendingUp, Users, Calendar, User } from 'lucide-react';
+import {
+  MessageSquare,
+  Phone,
+  IndianRupee,
+  Star,
+  TrendingUp,
+  Users,
+  Calendar,
+  User,
+} from 'lucide-react';
 import { auth, db } from '@/lib/firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { toast } from 'sonner';
 
 export default function AstrologerDashboardPage() {
   const [astrologerName, setAstrologerName] = useState('Astrologer');
+  const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const user = auth.currentUser;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const docRef = doc(db, 'astrologers', user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setAstrologerName(docSnap.data().name);
+          const data = docSnap.data();
+          setAstrologerName(data.name || 'Astrologer');
+          setIsOnline(data.isOnline || false);
         }
       }
-    };
-    fetchProfile();
+    });
+    return () => unsubscribe();
   }, []);
+
+  const toggleOnlineStatus = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const newStatus = !isOnline;
+    setIsOnline(newStatus);
+    
+    try {
+      const docRef = doc(db, 'astrologers', user.uid);
+      await updateDoc(docRef, { isOnline: newStatus });
+      toast.success(`You are now ${newStatus ? 'Online' : 'Offline'}`);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      setIsOnline(!newStatus);
+      toast.error('Failed to update status');
+    }
+  };
 
   return (
     <div className="px-6 lg:px-8 py-8 max-w-screen-2xl space-y-8">
@@ -31,19 +62,40 @@ export default function AstrologerDashboardPage() {
           <p className="text-muted-foreground mt-1">Here is your daily performance overview.</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-sm font-semibold text-green-400">You are Online</span>
-          </div>
+          <button 
+            onClick={toggleOnlineStatus}
+            className={`px-4 py-2 rounded-xl border flex items-center gap-2 transition-all hover:opacity-80 ${
+              isOnline 
+                ? 'bg-green-500/10 border-green-500/20' 
+                : 'bg-red-500/10 border-red-500/20'
+            }`}
+          >
+            <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+            <span className={`text-sm font-semibold ${isOnline ? 'text-green-400' : 'text-red-400'}`}>
+              {isOnline ? 'You are Online' : 'You are Offline'}
+            </span>
+          </button>
         </div>
       </div>
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Today's Earnings", value: '₹1,240', icon: IndianRupee, trend: '+12%', isPositive: true },
+          {
+            label: "Today's Earnings",
+            value: '₹1,240',
+            icon: IndianRupee,
+            trend: '+12%',
+            isPositive: true,
+          },
           { label: 'Active Chats', value: '3', icon: MessageSquare, trend: '+2', isPositive: true },
-          { label: 'Total Consultations', value: '142', icon: Users, trend: '+18%', isPositive: true },
+          {
+            label: 'Total Consultations',
+            value: '142',
+            icon: Users,
+            trend: '+18%',
+            isPositive: true,
+          },
           { label: 'Average Rating', value: '4.8', icon: Star, trend: '+0.1', isPositive: true },
         ].map((stat, i) => {
           const Icon = stat.icon;
@@ -65,7 +117,9 @@ export default function AstrologerDashboardPage() {
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2">
-                <span className={`text-xs font-semibold ${stat.isPositive ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}>
+                <span
+                  className={`text-xs font-semibold ${stat.isPositive ? 'text-green-400' : 'text-red-400'} flex items-center gap-1`}
+                >
                   <TrendingUp size={12} /> {stat.trend}
                 </span>
                 <span className="text-xs text-muted-foreground">vs last week</span>
@@ -97,7 +151,8 @@ export default function AstrologerDashboardPage() {
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    "Excellent consultation. Very accurate predictions and helpful remedies provided."
+                    "Excellent consultation. Very accurate predictions and helpful remedies
+                    provided."
                   </p>
                 </div>
               </div>
@@ -110,7 +165,10 @@ export default function AstrologerDashboardPage() {
           <h3 className="text-lg font-bold text-foreground mb-6">Upcoming Sessions</h3>
           <div className="space-y-4">
             {[1, 2].map((_, i) => (
-              <div key={i} className="p-4 rounded-xl border border-border/50 bg-background flex flex-col gap-3">
+              <div
+                key={i}
+                className="p-4 rounded-xl border border-border/50 bg-background flex flex-col gap-3"
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold">User {i + 1}</span>
                   <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">

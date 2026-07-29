@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Check, Sparkles, Crown, Zap } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
 
-
 const plans = [
   {
     id: 'plan-free',
@@ -20,7 +19,7 @@ const plans = [
     features: [
       'Basic Kundli Generation',
       'Daily Horoscope',
-      'Today\'s Panchang',
+      "Today's Panchang",
       'Basic Gemstone Info',
       '1 Vedic Report/month',
       'Community Access',
@@ -112,7 +111,9 @@ export default function PricingSection() {
               >
                 {plan?.badge && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className={`px-4 py-1.5 rounded-full text-xs font-semibold ${plan?.badge === 'Most Popular' ? 'gold-gradient-bg text-white' : 'indigo-gradient-bg text-white'}`}>
+                    <span
+                      className={`px-4 py-1.5 rounded-full text-xs font-semibold ${plan?.badge === 'Most Popular' ? 'gold-gradient-bg text-white' : 'indigo-gradient-bg text-white'}`}
+                    >
                       {plan?.badge}
                     </span>
                   </div>
@@ -128,24 +129,33 @@ export default function PricingSection() {
                 </div>
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-4xl font-bold text-foreground tabular-nums">{plan?.priceUSD}</span>
+                    <span className="text-4xl font-bold text-foreground tabular-nums">
+                      {plan?.priceUSD}
+                    </span>
                     <span className="text-sm text-muted-foreground">/ {plan?.period}</span>
                   </div>
                   {plan?.price !== '₹0' && (
                     <div className="text-xs text-muted-foreground mt-1">
-                      Also available at <span className="font-semibold text-foreground">{plan?.price}</span> INR
+                      Also available at{' '}
+                      <span className="font-semibold text-foreground">{plan?.price}</span> INR
                     </div>
                   )}
                 </div>
                 <ul className="space-y-3 mb-8">
                   {plan?.features?.map((feature) => (
-                    <li key={`feat-${plan?.id}-${feature?.slice(0, 20)}`} className="flex items-start gap-2.5 text-sm text-foreground/80">
+                    <li
+                      key={`feat-${plan?.id}-${feature?.slice(0, 20)}`}
+                      className="flex items-start gap-2.5 text-sm text-foreground/80"
+                    >
                       <Check size={14} className="text-accent mt-0.5 flex-shrink-0" />
                       {feature}
                     </li>
                   ))}
                 </ul>
-                <Link href="/sign-up-login-screen" className={`block w-full text-center py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${plan?.ctaClass}`}>
+                <Link
+                  href="/sign-up-login-screen"
+                  className={`block w-full text-center py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${plan?.ctaClass}`}
+                >
                   {plan?.cta}
                 </Link>
               </motion.div>

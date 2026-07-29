@@ -2,19 +2,101 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Gem, Music, Triangle, Flame, Heart, Gift, Moon, Compass, Lock, ArrowRight } from 'lucide-react';
+import {
+  Gem,
+  Music,
+  Triangle,
+  Flame,
+  Heart,
+  Gift,
+  Moon,
+  Compass,
+  Lock,
+  ArrowRight,
+} from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
 
-
 const modules = [
-  { id: 'ai-gem', icon: Gem, title: 'Gemstone Advice', desc: 'Ruby for Sun strength', color: 'text-red-400', preview: 'Wear Ruby on Sunday', locked: false, href: '/services/gemstone' },
-  { id: 'ai-mantra', icon: Music, title: 'Mantra Guidance', desc: 'Om Namah Shivaya', color: 'text-blue-400', preview: '108 times at dawn', locked: false, href: '/services/mantra' },
-  { id: 'ai-yantra', icon: Triangle, title: 'Yantra Remedy', desc: 'Sri Yantra', color: 'text-green-400', preview: 'East wall placement', locked: true, href: '/services/yantra' },
-  { id: 'ai-homam', icon: Flame, title: 'Homam Planner', desc: 'Navagraha Homam', color: 'text-orange-400', preview: 'Saturday morning', locked: true, href: '/services/homa' },
-  { id: 'ai-ishta', icon: Heart, title: 'Ishta Devata', desc: 'Lord Vishnu', color: 'text-pink-400', preview: 'Daily puja guide', locked: true, href: '/services/ishta-devata' },
-  { id: 'ai-charity', icon: Gift, title: 'Charity Planner', desc: 'Donate black sesame', color: 'text-violet-400', preview: 'Saturday donations', locked: true, href: '/services/charity' },
-  { id: 'ai-fasting', icon: Moon, title: 'Fasting Planner', desc: 'Ekadashi fast', color: 'text-cyan-400', preview: 'Monthly calendar', locked: true, href: '/services/fasting' },
-  { id: 'ai-muhurtha', icon: Compass, title: 'Muhurtham', desc: 'Marriage date finder', color: 'text-amber-400', preview: '12 auspicious dates', locked: true, href: '/services/muhurtham' },
+  {
+    id: 'ai-gem',
+    icon: Gem,
+    title: 'Gemstone Advice',
+    desc: 'Ruby for Sun strength',
+    color: 'text-red-400',
+    preview: 'Wear Ruby on Sunday',
+    locked: false,
+    href: '/services/gemstone',
+  },
+  {
+    id: 'ai-mantra',
+    icon: Music,
+    title: 'Mantra Guidance',
+    desc: 'Om Namah Shivaya',
+    color: 'text-blue-400',
+    preview: '108 times at dawn',
+    locked: false,
+    href: '/services/mantra',
+  },
+  {
+    id: 'ai-yantra',
+    icon: Triangle,
+    title: 'Yantra Remedy',
+    desc: 'Sri Yantra',
+    color: 'text-green-400',
+    preview: 'East wall placement',
+    locked: true,
+    href: '/services/yantra',
+  },
+  {
+    id: 'ai-homam',
+    icon: Flame,
+    title: 'Homam Planner',
+    desc: 'Navagraha Homam',
+    color: 'text-orange-400',
+    preview: 'Saturday morning',
+    locked: true,
+    href: '/services/homa',
+  },
+  {
+    id: 'ai-ishta',
+    icon: Heart,
+    title: 'Ishta Devata',
+    desc: 'Lord Vishnu',
+    color: 'text-pink-400',
+    preview: 'Daily puja guide',
+    locked: true,
+    href: '/services/ishta-devata',
+  },
+  {
+    id: 'ai-charity',
+    icon: Gift,
+    title: 'Charity Planner',
+    desc: 'Donate black sesame',
+    color: 'text-violet-400',
+    preview: 'Saturday donations',
+    locked: true,
+    href: '/services/charity',
+  },
+  {
+    id: 'ai-fasting',
+    icon: Moon,
+    title: 'Fasting Planner',
+    desc: 'Ekadashi fast',
+    color: 'text-cyan-400',
+    preview: 'Monthly calendar',
+    locked: true,
+    href: '/services/fasting',
+  },
+  {
+    id: 'ai-muhurtha',
+    icon: Compass,
+    title: 'Muhurtham',
+    desc: 'Marriage date finder',
+    color: 'text-amber-400',
+    preview: '12 auspicious dates',
+    locked: true,
+    href: '/services/muhurtham',
+  },
 ];
 
 export default function AIModulesPreview() {
@@ -57,13 +139,20 @@ export default function AIModulesPreview() {
                 {mod?.locked && (
                   <div className="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <Lock size={24} className="text-[#C9952B]" />
-                    <p className="text-sm font-semibold text-white text-center px-4">Premium Feature</p>
-                    <Link href={mod?.href} className="px-4 py-2 rounded-xl text-xs font-semibold gold-gradient-bg text-white">
+                    <p className="text-sm font-semibold text-white text-center px-4">
+                      Premium Feature
+                    </p>
+                    <Link
+                      href={mod?.href}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold gold-gradient-bg text-white"
+                    >
                       Learn More
                     </Link>
                   </div>
                 )}
-                <div className={`w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center mb-4 icon-hover-animate ${mod?.color}`}>
+                <div
+                  className={`w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center mb-4 icon-hover-animate ${mod?.color}`}
+                >
                   <Icon size={20} />
                 </div>
                 {mod?.locked && <Lock size={12} className="absolute top-4 right-4 text-white/40" />}
@@ -83,7 +172,10 @@ export default function AIModulesPreview() {
           viewport={{ once: true }}
           className="text-center mt-10"
         >
-          <Link href="/#services" className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow text-base">
+          <Link
+            href="/#services"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow text-base"
+          >
             ✦ Explore All Remedies
             <ArrowRight size={16} />
           </Link>

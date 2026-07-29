@@ -20,15 +20,9 @@ export function useUserData() {
       setUser(currentUser);
       if (currentUser) {
         try {
-          let docRef = doc(db, 'users', currentUser.uid);
-          let docSnap = await getDoc(docRef);
-          
-          if (!docSnap.exists()) {
-            // Check if they are an astrologer
-            docRef = doc(db, 'astrologers', currentUser.uid);
-            docSnap = await getDoc(docRef);
-          }
-          
+          const docRef = doc(db, 'users', currentUser.uid);
+          const docSnap = await getDoc(docRef);
+
           if (docSnap.exists()) {
             const data = docSnap.data();
             const name = data.name || 'User';
@@ -38,7 +32,7 @@ export function useUserData() {
             setUserData(null);
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error('Error fetching user data:', error);
           setUserData(null);
         }
       } else {

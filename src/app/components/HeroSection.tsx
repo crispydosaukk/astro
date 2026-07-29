@@ -78,21 +78,27 @@ export default function HeroSection({ content }: HeroSectionProps) {
               <div className="space-y-4">
                 <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight hero-text-glow">
                   {content?.headline1 || 'Discover Your'}
-                  <span className="block text-gradient-gold">{content?.headline2 || 'Cosmic Destiny'}</span>
+                  <span className="block text-gradient-gold">
+                    {content?.headline2 || 'Cosmic Destiny'}
+                  </span>
                 </h1>
                 <p className="text-lg lg:text-xl text-white/70 leading-relaxed max-w-lg">
-                  {content?.subtitle || 'Ancient Vedic wisdom meets modern precision. Get your personalized Kundli, sacred gemstone & mantra recommendations, and consult expert astrologers — all in one platform.'}
+                  {content?.subtitle ||
+                    'Ancient Vedic wisdom meets modern precision. Get your personalized Kundli, sacred gemstone & mantra recommendations, and consult expert astrologers — all in one platform.'}
                 </p>
               </div>
 
               {/* CTAs */}
               <div className="flex flex-wrap gap-4">
                 <Link
-                  href={user ? "/user-dashboard" : "/sign-up-login-screen"}
+                  href={user ? '/user-dashboard' : '/sign-up-login-screen'}
                   className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all duration-200 gold-shadow animate-pulse-gold"
                 >
                   {content?.primaryBtnText || '✦ Get Free Kundli'}
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight
+                    size={16}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
                 </Link>
                 <Link
                   href="/talk-to-astrologer"
@@ -107,7 +113,9 @@ export default function HeroSection({ content }: HeroSectionProps) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
                 {(content?.stats || stats)?.map((stat: any) => (
                   <div key={`stat-${stat?.label}`} className="text-center">
-                    <div className="text-2xl font-bold text-gradient-gold tabular-nums">{stat?.value}</div>
+                    <div className="text-2xl font-bold text-gradient-gold tabular-nums">
+                      {stat?.value}
+                    </div>
                     <div className="text-xs text-white/60 mt-1">{stat?.label}</div>
                   </div>
                 ))}

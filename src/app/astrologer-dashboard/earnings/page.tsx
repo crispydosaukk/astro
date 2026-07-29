@@ -1,7 +1,14 @@
 'use client';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { IndianRupee, TrendingUp, Download, Calendar, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import {
+  IndianRupee,
+  TrendingUp,
+  Download,
+  Calendar,
+  ArrowUpRight,
+  ArrowDownRight,
+} from 'lucide-react';
 
 export default function EarningsPage() {
   return (
@@ -24,9 +31,7 @@ export default function EarningsPage() {
           className="glass-card-light dark:glass-card p-6 rounded-2xl border border-border"
         >
           <p className="text-sm font-medium text-muted-foreground mb-1">Available Balance</p>
-          <h2 className="text-4xl font-bold text-foreground flex items-center">
-            ₹8,450
-          </h2>
+          <h2 className="text-4xl font-bold text-foreground flex items-center">₹8,450</h2>
           <button className="mt-4 w-full py-2.5 rounded-xl border border-accent text-accent font-semibold hover:bg-accent/10 transition-colors">
             Withdraw Funds
           </button>
@@ -38,7 +43,9 @@ export default function EarningsPage() {
           transition={{ delay: 0.1 }}
           className="glass-card-light dark:glass-card p-6 rounded-2xl border border-border"
         >
-          <p className="text-sm font-medium text-muted-foreground mb-1">Total Earnings (This Month)</p>
+          <p className="text-sm font-medium text-muted-foreground mb-1">
+            Total Earnings (This Month)
+          </p>
           <h2 className="text-4xl font-bold text-foreground">₹24,500</h2>
           <div className="mt-4 flex items-center gap-2 text-green-400 text-sm font-semibold">
             <TrendingUp size={16} /> +15% from last month
@@ -71,27 +78,68 @@ export default function EarningsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Transaction ID</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
-                <th className="text-right px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Transaction ID
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Type
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="text-right px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Amount
+                </th>
               </tr>
             </thead>
             <tbody>
               {[
-                { id: 'TXN-00124', type: 'Consultation (Call)', date: 'Today, 2:30 PM', amount: '+₹400', isCredit: true },
-                { id: 'TXN-00123', type: 'Consultation (Chat)', date: 'Today, 11:15 AM', amount: '+₹250', isCredit: true },
-                { id: 'TXN-00122', type: 'Payout (Bank Transfer)', date: '01 Jul 2026', amount: '-₹15,000', isCredit: false },
-                { id: 'TXN-00121', type: 'Consultation (Call)', date: '30 Jun 2026', amount: '+₹600', isCredit: true },
+                {
+                  id: 'TXN-00124',
+                  type: 'Consultation (Call)',
+                  date: 'Today, 2:30 PM',
+                  amount: '+₹400',
+                  isCredit: true,
+                },
+                {
+                  id: 'TXN-00123',
+                  type: 'Consultation (Chat)',
+                  date: 'Today, 11:15 AM',
+                  amount: '+₹250',
+                  isCredit: true,
+                },
+                {
+                  id: 'TXN-00122',
+                  type: 'Payout (Bank Transfer)',
+                  date: '01 Jul 2026',
+                  amount: '-₹15,000',
+                  isCredit: false,
+                },
+                {
+                  id: 'TXN-00121',
+                  type: 'Consultation (Call)',
+                  date: '30 Jun 2026',
+                  amount: '+₹600',
+                  isCredit: true,
+                },
               ].map((txn, i) => (
-                <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                <tr
+                  key={i}
+                  className="border-b border-border/50 hover:bg-muted/20 transition-colors"
+                >
                   <td className="px-6 py-4 font-mono text-muted-foreground">{txn.id}</td>
                   <td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
-                    {txn.isCredit ? <ArrowDownRight size={16} className="text-green-400" /> : <ArrowUpRight size={16} className="text-red-400" />}
+                    {txn.isCredit ? (
+                      <ArrowDownRight size={16} className="text-green-400" />
+                    ) : (
+                      <ArrowUpRight size={16} className="text-red-400" />
+                    )}
                     {txn.type}
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">{txn.date}</td>
-                  <td className={`px-6 py-4 text-right font-bold tabular-nums ${txn.isCredit ? 'text-green-400' : 'text-foreground'}`}>
+                  <td
+                    className={`px-6 py-4 text-right font-bold tabular-nums ${txn.isCredit ? 'text-green-400' : 'text-foreground'}`}
+                  >
                     {txn.amount}
                   </td>
                 </tr>

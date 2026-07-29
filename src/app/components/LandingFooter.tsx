@@ -41,12 +41,19 @@ export default function LandingFooter() {
               <AppLogo src="/AstroParihar_Top_Logo.jpg" size={36} />
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-xs">
-              India&apos;s most advanced AI-powered Vedic astrology platform. Ancient wisdom, modern technology, personalized for you.
+              India&apos;s most advanced AI-powered Vedic astrology platform. Ancient wisdom, modern
+              technology, personalized for you.
             </p>
             <div className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2"><Mail size={14} /> support@astroparihar.com</div>
-              <div className="flex items-center gap-2"><Phone size={14} /> +91 98765 43210</div>
-              <div className="flex items-center gap-2"><MapPin size={14} /> Bengaluru, Karnataka, India</div>
+              <div className="flex items-center gap-2">
+                <Mail size={14} /> support@astroparihar.com
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone size={14} /> +91 98765 43210
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin size={14} /> Bengaluru, Karnataka, India
+              </div>
             </div>
           </div>
 
@@ -57,7 +64,10 @@ export default function LandingFooter() {
               <ul className="space-y-2.5">
                 {links?.map((link) => (
                   <li key={`footer-link-${link?.label}`}>
-                    <Link href={link?.href} className="text-sm text-muted-foreground hover:text-accent transition-colors">
+                    <Link
+                      href={link?.href}
+                      className="text-sm text-muted-foreground hover:text-accent transition-colors"
+                    >
                       {link?.label}
                     </Link>
                   </li>
@@ -71,7 +81,10 @@ export default function LandingFooter() {
           <p className="text-sm text-muted-foreground">© 2026 AstroParihar. All rights reserved.</p>
           <div className="flex items-center gap-3">
             {[Share2, AtSign, MessageCircle, PlayCircle]?.map((IconComp, i) => (
-              <button key={`social-${i}`} className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all icon-hover-animate">
+              <button
+                key={`social-${i}`}
+                className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all icon-hover-animate"
+              >
                 <IconComp size={14} />
               </button>
             ))}

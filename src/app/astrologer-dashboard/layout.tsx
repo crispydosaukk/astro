@@ -7,11 +7,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import AstrologerSidebar from './components/AstrologerSidebar';
 import { Loader2 } from 'lucide-react';
 
-export default function AstrologerDashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AstrologerDashboardLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const router = useRouter();
@@ -33,7 +29,7 @@ export default function AstrologerDashboardLayout({
           router.push('/astrologer-login');
         }
       } catch (error) {
-        console.error("Error checking astrologer role:", error);
+        console.error('Error checking astrologer role:', error);
         router.push('/astrologer-login');
       } finally {
         setLoading(false);
@@ -56,9 +52,7 @@ export default function AstrologerDashboardLayout({
   return (
     <div className="flex min-h-screen bg-background">
       <AstrologerSidebar />
-      <main className="flex-1 ml-64 min-h-screen overflow-x-hidden">
-        {children}
-      </main>
+      <main className="flex-1 ml-64 min-h-screen overflow-x-hidden">{children}</main>
     </div>
   );
 }

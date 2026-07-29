@@ -21,7 +21,7 @@ export default function UserDropdown() {
       setIsOpen(false);
       router.push('/');
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
     }
   };
 
@@ -41,13 +41,22 @@ export default function UserDropdown() {
     if (user || userData) {
       fetch('/api/debug-user', {
         method: 'POST',
-        body: JSON.stringify({ uid: user?.uid, email: user?.email, userData, authPhone: user?.phoneNumber })
-      }).catch(e => console.error(e));
+        body: JSON.stringify({
+          uid: user?.uid,
+          email: user?.email,
+          userData,
+          authPhone: user?.phoneNumber,
+        }),
+      }).catch((e) => console.error(e));
     }
   }, [user, userData]);
 
-  const fullName = loading ? 'Loading...' : (userData?.name || user?.displayName || user?.email?.split('@')[0] || 'User');
-  const phoneNumber = loading ? '...' : (user?.phoneNumber || userData?.phone || userData?.phoneNumber || '');
+  const fullName = loading
+    ? 'Loading...'
+    : userData?.name || user?.displayName || user?.email?.split('@')[0] || 'User';
+  const phoneNumber = loading
+    ? '...'
+    : user?.phoneNumber || userData?.phone || userData?.phoneNumber || '';
   const walletBalance = userData?.walletBalance || 0;
 
   return (
@@ -77,43 +86,45 @@ export default function UserDropdown() {
               {phoneNumber ? (
                 <p className="text-base font-semibold text-gray-600 mt-1">{phoneNumber}</p>
               ) : (
-                <p className="text-base font-semibold text-gray-400 mt-1">{loading ? 'Loading...' : 'No Phone Added'}</p>
+                <p className="text-base font-semibold text-gray-400 mt-1">
+                  {loading ? 'Loading...' : 'No Phone Added'}
+                </p>
               )}
             </div>
 
             {/* Menu Items */}
             <div className="py-2 flex flex-col">
-              <Link 
-                href="/notifications" 
+              <Link
+                href="/notifications"
                 onClick={() => setIsOpen(false)}
                 className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors text-left"
               >
                 Notification
               </Link>
-              <Link 
-                href="/wallet" 
+              <Link
+                href="/wallet"
                 onClick={() => setIsOpen(false)}
                 className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors flex justify-between items-center"
               >
                 <span>Wallet Transactions</span>
                 <span className="font-bold text-black">₹ {walletBalance}</span>
               </Link>
-              <Link 
-                href="/order-history" 
+              <Link
+                href="/order-history"
                 onClick={() => setIsOpen(false)}
                 className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors text-left"
               >
                 Order History
               </Link>
-              <Link 
-                href="/customer-support" 
+              <Link
+                href="/customer-support"
                 onClick={() => setIsOpen(false)}
                 className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors text-left"
               >
                 Customer Support Chat
               </Link>
-              
-              <button 
+
+              <button
                 onClick={handleLogout}
                 className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors text-left"
               >

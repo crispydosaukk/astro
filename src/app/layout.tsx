@@ -25,21 +25,20 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: 'AstroParihar — AI-Powered Vedic Astrology Guidance',
-  description: 'Get personalized Vedic astrology insights, AI gemstone & mantra recommendations, and connect with expert astrologers for live consultations.',
+  description:
+    'Get personalized Vedic astrology insights, AI gemstone & mantra recommendations, and connect with expert astrologers for live consultations.',
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${ibmPlexMono.variable} dark`}>
       <body className={plusJakartaSans.className} suppressHydrationWarning>
         {children}
         <Toaster position="bottom-right" richColors />
-</body>
+      </body>
     </html>
   );
 }

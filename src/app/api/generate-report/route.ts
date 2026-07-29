@@ -13,13 +13,18 @@ export async function POST(request: Request) {
 
     // Call OpenAI to generate the report
     const openaiApiKey = process.env.OPENAI_API_KEY;
-    
+
     if (!openaiApiKey) {
       console.error('OPENAI_API_KEY is not set');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const currentDate = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
     const prompt = `You are an expert Vedic Astrologer. Generate a detailed and personalized astrology report for a user based on the following details:
 Service Type: ${type}
 Date of Birth: ${details.dob}
@@ -41,20 +46,20 @@ Respond EXCLUSIVELY with a JSON object. Do not include any markdown formatting l
 }`;
 
     let reportContent = '';
-    
+
     try {
       const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiApiKey}`
+          Authorization: `Bearer ${openaiApiKey}`,
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.7,
-          response_format: { type: "json_object" }
-        })
+          response_format: { type: 'json_object' },
+        }),
       });
 
       if (!openAiResponse.ok) {
@@ -69,13 +74,16 @@ Respond EXCLUSIVELY with a JSON object. Do not include any markdown formatting l
       console.log('Using fallback mock report due to API error.');
       const fallbackJson = {
         recommendationTitle: `Recommended ${type.replace(/ Report/i, '')}`,
-        recommendationName: "Navagraha Homam",
-        timing: "Saturday, 15 Aug 2026 · 6:00-9:00 AM",
-        duration: "3-4 hours",
-        materials: "Sesame seeds, Ghee, Navagraha herbs, Flowers, Coconut, Betel leaves",
-        astrologicalAnalysis: "Based on the profound analysis of your birth chart, we observe a significant transit of Saturn and Rahu impacting your 10th and 4th houses. This planetary alignment creates friction in career progression and domestic harmony. The Navagraha Homam acts as a powerful energetic balancer.\n\nBy appeasing the nine celestial bodies, specifically focusing on mitigating the malefic effects of Rahu, this ritual will clear the cosmic blockages currently causing delays in your endeavors.",
-        procedure: "1. Sankalpam (Vow taking) with your name and gotra. \n2. Kalasa Puja invoking the divine energies. \n3. Navagraha chanting and Ahuti (offerings) into the sacred fire. \n4. Purnahuti (final offering) and Aarti.",
-        rules: "Observe a strict vegetarian diet on the day of the Homam. Abstain from alcohol and onion/garlic. Chant the 'Om Namah Shivaya' mantra 108 times during the Brahma Muhurtam."
+        recommendationName: 'Navagraha Homam',
+        timing: 'Saturday, 15 Aug 2026 · 6:00-9:00 AM',
+        duration: '3-4 hours',
+        materials: 'Sesame seeds, Ghee, Navagraha herbs, Flowers, Coconut, Betel leaves',
+        astrologicalAnalysis:
+          'Based on the profound analysis of your birth chart, we observe a significant transit of Saturn and Rahu impacting your 10th and 4th houses. This planetary alignment creates friction in career progression and domestic harmony. The Navagraha Homam acts as a powerful energetic balancer.\n\nBy appeasing the nine celestial bodies, specifically focusing on mitigating the malefic effects of Rahu, this ritual will clear the cosmic blockages currently causing delays in your endeavors.',
+        procedure:
+          '1. Sankalpam (Vow taking) with your name and gotra. \n2. Kalasa Puja invoking the divine energies. \n3. Navagraha chanting and Ahuti (offerings) into the sacred fire. \n4. Purnahuti (final offering) and Aarti.',
+        rules:
+          "Observe a strict vegetarian diet on the day of the Homam. Abstain from alcohol and onion/garlic. Chant the 'Om Namah Shivaya' mantra 108 times during the Brahma Muhurtam.",
       };
       reportContent = JSON.stringify(fallbackJson);
     }
@@ -88,11 +96,10 @@ Respond EXCLUSIVELY with a JSON object. Do not include any markdown formatting l
       details,
       status: 'completed',
       reportContent,
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
     });
 
     return NextResponse.json({ success: true, reportId: docRef.id });
-
   } catch (error: any) {
     console.error('Error generating report:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });

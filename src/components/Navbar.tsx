@@ -44,7 +44,9 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white ${scrolled ? 'shadow-lg' : ''}`}>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white ${scrolled ? 'shadow-lg' : ''}`}
+    >
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
@@ -69,19 +71,28 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                <Link href="/user-dashboard" className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200">
+                <Link
+                  href="/user-dashboard"
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200"
+                >
                   Dashboard
                 </Link>
                 <UserDropdown />
               </>
             ) : (
               <>
-                <Link href="/sign-up-login-screen" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200">
+                <Link
+                  href="/sign-up-login-screen"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200"
+                >
                   Sign In
                 </Link>
               </>
             )}
-            <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-800 transition-all">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-800 transition-all"
+            >
               {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -111,7 +122,12 @@ export default function Navbar() {
               <div className="pt-3 border-t border-slate-100 flex gap-3">
                 {user ? null : (
                   <>
-                    <Link href="/sign-up-login-screen" className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 transition-all">Sign In</Link>
+                    <Link
+                      href="/sign-up-login-screen"
+                      className="flex-1 text-center py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 transition-all"
+                    >
+                      Sign In
+                    </Link>
                   </>
                 )}
               </div>

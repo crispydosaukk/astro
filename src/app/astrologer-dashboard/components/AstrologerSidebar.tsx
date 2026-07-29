@@ -2,7 +2,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, MessageSquare, CreditCard, User, LogOut, Settings, Calendar } from 'lucide-react';
+import {
+  LayoutDashboard,
+  MessageSquare,
+  CreditCard,
+  User,
+  LogOut,
+  Settings,
+  Calendar,
+} from 'lucide-react';
 import AppLogo from '@/components/ui/AppLogo';
 import { auth } from '@/lib/firebase/config';
 import { signOut } from 'firebase/auth';
@@ -12,7 +20,12 @@ const sidebarGroups = [
     label: 'Dashboard',
     items: [
       { icon: LayoutDashboard, label: 'Overview', href: '/astrologer-dashboard' },
-      { icon: MessageSquare, label: 'Consultations', href: '/astrologer-dashboard/consultations', badge: '3' },
+      {
+        icon: MessageSquare,
+        label: 'Consultations',
+        href: '/astrologer-dashboard/consultations',
+        badge: '3',
+      },
     ],
   },
   {
@@ -57,7 +70,12 @@ export default function AstrologerSidebar() {
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
-                  <Icon size={18} className={isActive ? 'text-accent' : 'text-muted-foreground group-hover:text-foreground'} />
+                  <Icon
+                    size={18}
+                    className={
+                      isActive ? 'text-accent' : 'text-muted-foreground group-hover:text-foreground'
+                    }
+                  />
                   <span className="ml-3 flex-1">{item.label}</span>
                   {item.badge && (
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent text-accent-foreground">

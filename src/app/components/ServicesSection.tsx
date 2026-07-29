@@ -7,16 +7,23 @@ import Icon from '@/components/ui/AppIcon';
 import { getHomepageContent, HomepageContent, defaultHomepageContent } from '@/lib/cms';
 
 const iconMap: Record<string, any> = {
-  Gem, Music, Triangle, Flame, Heart, Moon, Compass, Gift
+  Gem,
+  Music,
+  Triangle,
+  Flame,
+  Heart,
+  Moon,
+  Compass,
+  Gift,
 };
-
 
 const services = [
   {
     id: 'svc-gemstone',
     icon: Gem,
     title: 'Gemstone Advice',
-    description: 'Personalized gemstone recommendations based on your planetary analysis and birth chart',
+    description:
+      'Personalized gemstone recommendations based on your planetary analysis and birth chart',
     color: 'from-amber-500/15 to-yellow-500/10',
     iconColor: 'text-amber-400',
     href: '/services/gemstone',
@@ -26,7 +33,8 @@ const services = [
     id: 'svc-mantra',
     icon: Music,
     title: 'Mantra Guidance',
-    description: 'Sacred mantras tailored to strengthen your weak planets and amplify positive energies',
+    description:
+      'Sacred mantras tailored to strengthen your weak planets and amplify positive energies',
     color: 'from-blue-500/15 to-cyan-500/10',
     iconColor: 'text-blue-400',
     href: '/services/mantra',
@@ -46,7 +54,8 @@ const services = [
     id: 'svc-homam',
     icon: Flame,
     title: 'Homam & Puja',
-    description: 'Recommended fire rituals and pujas for planetary appeasement and divine blessings',
+    description:
+      'Recommended fire rituals and pujas for planetary appeasement and divine blessings',
     color: 'from-orange-500/15 to-red-500/10',
     iconColor: 'text-orange-400',
     href: '/services/homa',
@@ -95,7 +104,6 @@ const services = [
 ];
 
 export default function ServicesSection({ content }: { content: HomepageContent['services'] }) {
-
   return (
     <section id="services" className="py-20 bg-background">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
@@ -111,9 +119,7 @@ export default function ServicesSection({ content }: { content: HomepageContent[
           <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
             {content.title} <span className="text-gradient-gold">{content.titleHighlight}</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {content.subtitle}
-          </p>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{content.subtitle}</p>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -129,7 +135,9 @@ export default function ServicesSection({ content }: { content: HomepageContent[
                 className={`relative group rounded-2xl p-6 bg-gradient-to-br ${service?.color} border border-border card-hover cursor-pointer`}
               >
                 <Link href={service?.href}>
-                  <div className={`w-12 h-12 rounded-xl bg-card/80 flex items-center justify-center mb-4 icon-hover-animate ${service?.iconColor} group-hover:scale-110 transition-transform`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-card/80 flex items-center justify-center mb-4 icon-hover-animate ${service?.iconColor} group-hover:scale-110 transition-transform`}
+                  >
                     <Icon size={22} />
                   </div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -138,7 +146,9 @@ export default function ServicesSection({ content }: { content: HomepageContent[
                       {service?.badge}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{service?.description}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {service?.description}
+                  </p>
                   <div className="mt-4 flex items-center gap-1 text-xs font-medium text-[#C9952B] opacity-0 group-hover:opacity-100 transition-opacity">
                     Explore <ArrowRight size={12} />
                   </div>

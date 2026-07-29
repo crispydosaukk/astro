@@ -6,7 +6,7 @@ import AppLogo from '@/components/ui/AppLogo';
 import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const initialState = {
-  error: ''
+  error: '',
 };
 
 export default function AdminLogin() {
@@ -22,24 +22,24 @@ export default function AdminLogin() {
           </div>
           <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">Admin Panel</h2>
           <p className="text-center text-slate-500 mb-8 text-sm">Sign in to manage AstroParihar</p>
-          
+
           <form action={formAction} className="space-y-4">
             {state?.error && (
               <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center border border-red-100">
                 {state.error}
               </div>
             )}
-            
+
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700 block">Email Address</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-slate-400" />
                 </div>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   name="email"
-                  required 
+                  required
                   className="pl-10 w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-slate-900 bg-white"
                   placeholder="name@example.com"
                 />
@@ -52,15 +52,15 @@ export default function AdminLogin() {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-slate-400" />
                 </div>
-                <input 
+                <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
-                  required 
+                  required
                   className="pl-10 pr-10 w-full rounded-xl border border-slate-200 py-2.5 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-slate-900 bg-white"
                   placeholder="••••••••"
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                 >
@@ -69,8 +69,8 @@ export default function AdminLogin() {
               </div>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isPending}
               className="w-full mt-6 py-2.5 rounded-xl gold-gradient-bg text-white font-semibold hover:opacity-90 transition-opacity flex justify-center items-center gap-2 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
             >
@@ -80,7 +80,9 @@ export default function AdminLogin() {
           </form>
         </div>
         <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 text-center">
-          <p className="text-xs text-slate-500">Secure access restricted to authorized personnel only.</p>
+          <p className="text-xs text-slate-500">
+            Secure access restricted to authorized personnel only.
+          </p>
         </div>
       </div>
     </div>

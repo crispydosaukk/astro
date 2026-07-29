@@ -221,148 +221,153 @@ export default function AdminAstrologerApplicationsTable() {
       </div>
 
       {/* Modal for full details via Portal */}
-      {mounted && createPortal(
-        <AnimatePresence>
-          {selectedApp && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedApp(null)}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            >
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {selectedApp && (
               <motion.div
-                initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-card border border-border p-6 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative"
-              >
-              <button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 onClick={() => setSelectedApp(null)}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
               >
-                <XCircle size={24} />
-              </button>
-
-              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
-                <div className="w-16 h-16 rounded-full gold-gradient-bg flex items-center justify-center text-white text-2xl font-bold">
-                  {selectedApp.name?.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground">{selectedApp.name}</h3>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                    <span className="font-mono bg-muted px-2 py-0.5 rounded-md">
-                      Token: #{selectedApp.tokenNumber}
-                    </span>
-                    <span className="mx-2">•</span>
-                    {selectedApp.email}
-                  </p>
-                </div>
-                <div className="ml-auto">
-                  <span
-                    className={`px-3 py-1.5 rounded-full text-sm font-semibold ${selectedApp.status === 'approved' ? 'bg-green-500/15 text-green-400' : selectedApp.status === 'pending' ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400'}`}
-                  >
-                    {selectedApp.status
-                      ? selectedApp.status.charAt(0).toUpperCase() + selectedApp.status.slice(1)
-                      : 'Unknown'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-foreground border-b border-border pb-2">
-                    Personal Details
-                  </h4>
-                  <div className="space-y-2">
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">DOB:</span>{' '}
-                      <span className="font-medium text-foreground">{selectedApp.dob}</span>
-                    </p>
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Gender:</span>{' '}
-                      <span className="font-medium text-foreground capitalize">
-                        {selectedApp.gender}
-                      </span>
-                    </p>
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">City:</span>{' '}
-                      <span className="font-medium text-foreground">{selectedApp.city}</span>
-                    </p>
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Phone Type:</span>{' '}
-                      <span className="font-medium text-foreground">{selectedApp.phoneType}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-foreground border-b border-border pb-2">
-                    Professional Details
-                  </h4>
-                  <div className="space-y-2">
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Languages:</span>{' '}
-                      <span className="font-medium text-foreground">{selectedApp.languages}</span>
-                    </p>
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Skills:</span>{' '}
-                      <span className="font-medium text-foreground">{selectedApp.skills}</span>
-                    </p>
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Learning Source:</span>{' '}
-                      <span className="font-medium text-foreground">
-                        {selectedApp.learningSource}
-                      </span>
-                    </p>
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Daily Hours:</span>{' '}
-                      <span className="font-medium text-foreground">
-                        {selectedApp.dailyHours} Hours
-                      </span>
-                    </p>
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Working Elsewhere:</span>{' '}
-                      <span className="font-medium text-foreground capitalize">
-                        {selectedApp.workingElsewhere}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-border flex justify-end gap-3">
-                {selectedApp.status === 'pending' ? (
-                  <>
-                    <button
-                      onClick={() => handleStatusChange(selectedApp.id, 'declined')}
-                      className="px-6 py-2.5 rounded-xl border border-red-500/50 text-red-400 hover:bg-red-500/10 font-semibold transition-all"
-                    >
-                      Decline Application
-                    </button>
-                    <button
-                      onClick={() => handleStatusChange(selectedApp.id, 'approved')}
-                      className="px-6 py-2.5 rounded-xl bg-green-500 text-white hover:bg-green-600 font-semibold transition-all flex items-center gap-2"
-                    >
-                      <Check size={18} /> Approve Application
-                    </button>
-                  </>
-                ) : (
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-card border border-border p-6 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative"
+                >
                   <button
                     onClick={() => setSelectedApp(null)}
-                    className="px-6 py-2.5 rounded-xl border border-border text-foreground hover:bg-muted font-semibold transition-all"
+                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
                   >
-                    Close
+                    <XCircle size={24} />
                   </button>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
+
+                  <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
+                    <div className="w-16 h-16 rounded-full gold-gradient-bg flex items-center justify-center text-white text-2xl font-bold">
+                      {selectedApp.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-foreground">{selectedApp.name}</h3>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                        <span className="font-mono bg-muted px-2 py-0.5 rounded-md">
+                          Token: #{selectedApp.tokenNumber}
+                        </span>
+                        <span className="mx-2">•</span>
+                        {selectedApp.email}
+                      </p>
+                    </div>
+                    <div className="ml-auto">
+                      <span
+                        className={`px-3 py-1.5 rounded-full text-sm font-semibold ${selectedApp.status === 'approved' ? 'bg-green-500/15 text-green-400' : selectedApp.status === 'pending' ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400'}`}
+                      >
+                        {selectedApp.status
+                          ? selectedApp.status.charAt(0).toUpperCase() + selectedApp.status.slice(1)
+                          : 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-foreground border-b border-border pb-2">
+                        Personal Details
+                      </h4>
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">DOB:</span>{' '}
+                          <span className="font-medium text-foreground">{selectedApp.dob}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Gender:</span>{' '}
+                          <span className="font-medium text-foreground capitalize">
+                            {selectedApp.gender}
+                          </span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">City:</span>{' '}
+                          <span className="font-medium text-foreground">{selectedApp.city}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Phone Type:</span>{' '}
+                          <span className="font-medium text-foreground">
+                            {selectedApp.phoneType}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-foreground border-b border-border pb-2">
+                        Professional Details
+                      </h4>
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Languages:</span>{' '}
+                          <span className="font-medium text-foreground">
+                            {selectedApp.languages}
+                          </span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Skills:</span>{' '}
+                          <span className="font-medium text-foreground">{selectedApp.skills}</span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Learning Source:</span>{' '}
+                          <span className="font-medium text-foreground">
+                            {selectedApp.learningSource}
+                          </span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Daily Hours:</span>{' '}
+                          <span className="font-medium text-foreground">
+                            {selectedApp.dailyHours} Hours
+                          </span>
+                        </p>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">Working Elsewhere:</span>{' '}
+                          <span className="font-medium text-foreground capitalize">
+                            {selectedApp.workingElsewhere}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-border flex justify-end gap-3">
+                    {selectedApp.status === 'pending' ? (
+                      <>
+                        <button
+                          onClick={() => handleStatusChange(selectedApp.id, 'declined')}
+                          className="px-6 py-2.5 rounded-xl border border-red-500/50 text-red-400 hover:bg-red-500/10 font-semibold transition-all"
+                        >
+                          Decline Application
+                        </button>
+                        <button
+                          onClick={() => handleStatusChange(selectedApp.id, 'approved')}
+                          className="px-6 py-2.5 rounded-xl bg-green-500 text-white hover:bg-green-600 font-semibold transition-all flex items-center gap-2"
+                        >
+                          <Check size={18} /> Approve Application
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => setSelectedApp(null)}
+                        className="px-6 py-2.5 rounded-xl border border-border text-foreground hover:bg-muted font-semibold transition-all"
+                      >
+                        Close
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>,
-      document.body
-      )}
     </div>
   );
 }

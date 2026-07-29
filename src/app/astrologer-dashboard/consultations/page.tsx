@@ -12,7 +12,7 @@ const mockRequests = [
     duration: '15 mins',
     amount: '₹300',
     time: '2 mins ago',
-    status: 'pending'
+    status: 'pending',
   },
   {
     id: 'req-2',
@@ -21,8 +21,8 @@ const mockRequests = [
     duration: '30 mins',
     amount: '₹600',
     time: '5 mins ago',
-    status: 'pending'
-  }
+    status: 'pending',
+  },
 ];
 
 export default function ConsultationsPage() {
@@ -30,13 +30,13 @@ export default function ConsultationsPage() {
   const [requests, setRequests] = useState(mockRequests);
 
   const handleAccept = (id: string) => {
-    setRequests(prev => prev.filter(req => req.id !== id));
+    setRequests((prev) => prev.filter((req) => req.id !== id));
     toast.success('Consultation accepted. Connecting...');
     // Connect logic would go here
   };
 
   const handleDecline = (id: string) => {
-    setRequests(prev => prev.filter(req => req.id !== id));
+    setRequests((prev) => prev.filter((req) => req.id !== id));
     toast.error('Consultation declined.');
   };
 
@@ -44,15 +44,17 @@ export default function ConsultationsPage() {
     <div className="px-6 lg:px-8 py-8 max-w-screen-2xl space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Consultations</h1>
-        <p className="text-muted-foreground mt-1">Manage your incoming customer requests and active sessions.</p>
+        <p className="text-muted-foreground mt-1">
+          Manage your incoming customer requests and active sessions.
+        </p>
       </div>
 
       <div className="flex border-b border-border gap-6">
         {[
           { id: 'requests', label: 'Incoming Requests', count: requests.length },
           { id: 'active', label: 'Active Sessions', count: 0 },
-          { id: 'history', label: 'History', count: 45 }
-        ].map(tab => (
+          { id: 'history', label: 'History', count: 45 },
+        ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
@@ -62,9 +64,13 @@ export default function ConsultationsPage() {
           >
             {tab.label}
             {tab.count > 0 && (
-              <span className={`ml-2 px-1.5 py-0.5 rounded-full text-[10px] ${
-                activeTab === tab.id ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground'
-              }`}>
+              <span
+                className={`ml-2 px-1.5 py-0.5 rounded-full text-[10px] ${
+                  activeTab === tab.id
+                    ? 'bg-accent/20 text-accent'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+              >
                 {tab.count}
               </span>
             )}
@@ -87,19 +93,24 @@ export default function ConsultationsPage() {
               <p className="text-sm">Stay online to receive consultations.</p>
             </div>
           ) : (
-            requests.map(req => (
-              <div key={req.id} className="glass-card-light dark:glass-card p-6 rounded-2xl border border-border flex flex-col justify-between">
+            requests.map((req) => (
+              <div
+                key={req.id}
+                className="glass-card-light dark:glass-card p-6 rounded-2xl border border-border flex flex-col justify-between"
+              >
                 <div>
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="font-bold text-lg text-foreground">{req.user}</h3>
                       <p className="text-xs text-muted-foreground mt-1">Requested {req.time}</p>
                     </div>
-                    <div className={`p-2 rounded-xl ${req.type === 'chat' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                    <div
+                      className={`p-2 rounded-xl ${req.type === 'chat' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}
+                    >
                       {req.type === 'chat' ? <MessageSquare size={18} /> : <Phone size={18} />}
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2 mb-6">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Session Type:</span>

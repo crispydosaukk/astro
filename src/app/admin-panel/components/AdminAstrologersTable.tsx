@@ -44,7 +44,7 @@ export default function AdminAstrologersTable() {
         const q = query(collection(db, 'astrologers'), where('status', '==', 'approved'));
         const querySnapshot = await getDocs(q);
         const fetchedData: AstrologerData[] = [];
-        
+
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           fetchedData.push({
@@ -57,7 +57,9 @@ export default function AdminAstrologersTable() {
             consultations: data.consultations || 0,
             revenue: data.revenue || '₹0',
             status: data.status || 'approved',
-            avatar: data.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop',
+            avatar:
+              data.avatar ||
+              'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop',
             tokenNumber: data.tokenNumber || 'N/A',
             dob: data.dob,
             gender: data.gender,
@@ -70,12 +72,12 @@ export default function AdminAstrologersTable() {
             createdAt: data.createdAt,
           });
         });
-        
+
         // Sort by name client-side
         fetchedData.sort((a, b) => a.name.localeCompare(b.name));
         setAstrologers(fetchedData);
       } catch (error) {
-        console.error("Error fetching astrologers:", error);
+        console.error('Error fetching astrologers:', error);
       } finally {
         setLoading(false);
       }
@@ -84,9 +86,7 @@ export default function AdminAstrologersTable() {
     fetchApprovedAstrologers();
   }, []);
 
-  const filtered = astrologers.filter((a) =>
-    a.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = astrologers.filter((a) => a.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden">
@@ -218,79 +218,131 @@ export default function AdminAstrologersTable() {
       </div>
 
       {/* Modal for full details via Portal */}
-      {mounted && createPortal(
-        <AnimatePresence>
-          {selectedAstrologer && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedAstrologer(null)}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            >
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {selectedAstrologer && (
               <motion.div
-                initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-card border border-border p-6 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSelectedAstrologer(null)}
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
               >
-                <button
-                  onClick={() => setSelectedAstrologer(null)}
-                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-card border border-border p-6 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative"
                 >
-                  <XCircle size={24} />
-                </button>
+                  <button
+                    onClick={() => setSelectedAstrologer(null)}
+                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+                  >
+                    <XCircle size={24} />
+                  </button>
 
-                <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
-                  <div className="w-16 h-16 rounded-full gold-gradient-bg flex items-center justify-center text-white text-2xl font-bold">
-                    {selectedAstrologer.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-foreground">{selectedAstrologer.name}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                      <span className="font-mono bg-muted px-2 py-0.5 rounded-md">
-                        Token: #{selectedAstrologer.tokenNumber}
+                  <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
+                    <div className="w-16 h-16 rounded-full gold-gradient-bg flex items-center justify-center text-white text-2xl font-bold">
+                      {selectedAstrologer.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-foreground">
+                        {selectedAstrologer.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                        <span className="font-mono bg-muted px-2 py-0.5 rounded-md">
+                          Token: #{selectedAstrologer.tokenNumber}
+                        </span>
+                        <span className="mx-2">•</span>
+                        {selectedAstrologer.email}
+                      </p>
+                    </div>
+                    <div className="ml-auto">
+                      <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500/15 text-green-400">
+                        Approved
                       </span>
-                      <span className="mx-2">•</span>
-                      {selectedAstrologer.email}
-                    </p>
-                  </div>
-                  <div className="ml-auto">
-                    <span className="px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500/15 text-green-400">
-                      Approved
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-foreground border-b border-border pb-2">Personal Details</h4>
-                    <div className="space-y-3 text-sm">
-                      <p><span className="text-muted-foreground">DOB:</span> <span className="text-foreground font-medium">{selectedAstrologer.dob || 'N/A'}</span></p>
-                      <p><span className="text-muted-foreground">Gender:</span> <span className="text-foreground font-medium">{selectedAstrologer.gender || 'N/A'}</span></p>
-                      <p><span className="text-muted-foreground">City:</span> <span className="text-foreground font-medium">{selectedAstrologer.city || 'N/A'}</span></p>
-                      <p><span className="text-muted-foreground">Phone Type:</span> <span className="text-foreground font-medium">{selectedAstrologer.phoneType || 'N/A'}</span></p>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-foreground border-b border-border pb-2">Professional Details</h4>
-                    <div className="space-y-3 text-sm">
-                      <p><span className="text-muted-foreground">Languages:</span> <span className="text-foreground font-medium">{selectedAstrologer.languages || 'N/A'}</span></p>
-                      <p><span className="text-muted-foreground">Skills:</span> <span className="text-foreground font-medium">{selectedAstrologer.specialty || 'N/A'}</span></p>
-                      <p><span className="text-muted-foreground">Learning Source:</span> <span className="text-foreground font-medium">{selectedAstrologer.learningSource || 'N/A'}</span></p>
-                      <p><span className="text-muted-foreground">Daily Hours:</span> <span className="text-foreground font-medium">{selectedAstrologer.dailyHours || 'N/A'}</span></p>
-                      <p><span className="text-muted-foreground">Working Elsewhere:</span> <span className="text-foreground font-medium">{selectedAstrologer.workingElsewhere || 'N/A'}</span></p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-foreground border-b border-border pb-2">
+                        Personal Details
+                      </h4>
+                      <div className="space-y-3 text-sm">
+                        <p>
+                          <span className="text-muted-foreground">DOB:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.dob || 'N/A'}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-muted-foreground">Gender:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.gender || 'N/A'}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-muted-foreground">City:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.city || 'N/A'}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-muted-foreground">Phone Type:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.phoneType || 'N/A'}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-foreground border-b border-border pb-2">
+                        Professional Details
+                      </h4>
+                      <div className="space-y-3 text-sm">
+                        <p>
+                          <span className="text-muted-foreground">Languages:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.languages || 'N/A'}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-muted-foreground">Skills:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.specialty || 'N/A'}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-muted-foreground">Learning Source:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.learningSource || 'N/A'}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-muted-foreground">Daily Hours:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.dailyHours || 'N/A'}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-muted-foreground">Working Elsewhere:</span>{' '}
+                          <span className="text-foreground font-medium">
+                            {selectedAstrologer.workingElsewhere || 'N/A'}
+                          </span>
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }

@@ -1,23 +1,6 @@
 {
   "uid": "8No3bTeCRKRdQ2c1AVXi9ZGvSGc2",
   "email": "sharma@gmail.com",
-  "userData": {
-    "createdAt": "2026-07-16T14:05:55.154Z",
-    "role": "astrologer",
-    "learningSource": "institution",
-    "dailyHours": "6",
-    "city": "warangal",
-    "languages": "english",
-    "dob": "2014-01-28",
-    "tokenNumber": 504128,
-    "skills": "numerology",
-    "status": "approved",
-    "phoneType": "Android",
-    "workingElsewhere": "no",
-    "email": "sharma@gmail.com",
-    "gender": "male",
-    "name": "sharma",
-    "firstName": "sharma"
-  },
+  "userData": null,
   "authPhone": null
 }

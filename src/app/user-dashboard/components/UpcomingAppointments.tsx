@@ -33,7 +33,10 @@ export default function UpcomingAppointments() {
     <div className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden">
       <div className="p-5 border-b border-border flex items-center justify-between">
         <h2 className="text-base font-bold text-foreground">Upcoming Consultations</h2>
-        <Link href="/consultation-booking-screen" className="text-xs text-accent hover:underline flex items-center gap-1">
+        <Link
+          href="/consultation-booking-screen"
+          className="text-xs text-accent hover:underline flex items-center gap-1"
+        >
           Book New <ArrowRight size={10} />
         </Link>
       </div>
@@ -56,7 +59,9 @@ export default function UpcomingAppointments() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <p className="text-sm font-semibold text-foreground truncate">{apt?.astrologer}</p>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${apt?.status === 'confirmed' ? 'bg-green-500/15 text-green-400' : 'bg-amber-500/15 text-amber-400'}`}>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${apt?.status === 'confirmed' ? 'bg-green-500/15 text-green-400' : 'bg-amber-500/15 text-amber-400'}`}
+                >
                   {apt?.status === 'confirmed' ? 'Confirmed' : 'Pending'}
                 </span>
               </div>
@@ -64,8 +69,12 @@ export default function UpcomingAppointments() {
                 <span className="flex items-center gap-1">
                   {apt?.type === 'Video' ? <Video size={10} /> : <Phone size={10} />} {apt?.type}
                 </span>
-                <span className="flex items-center gap-1"><Calendar size={10} /> {apt?.date}</span>
-                <span className="flex items-center gap-1"><Clock size={10} /> {apt?.time}</span>
+                <span className="flex items-center gap-1">
+                  <Calendar size={10} /> {apt?.date}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock size={10} /> {apt?.time}
+                </span>
               </div>
             </div>
           </motion.div>
@@ -75,7 +84,12 @@ export default function UpcomingAppointments() {
           <div className="text-center py-6">
             <Calendar size={32} className="text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">No upcoming consultations</p>
-            <Link href="/consultation-booking-screen" className="text-xs text-accent hover:underline mt-1 inline-block">Book your first session</Link>
+            <Link
+              href="/consultation-booking-screen"
+              className="text-xs text-accent hover:underline mt-1 inline-block"
+            >
+              Book your first session
+            </Link>
           </div>
         )}
       </div>
