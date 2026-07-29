@@ -12,6 +12,7 @@ import {
   CreditCard,
   Globe,
 } from 'lucide-react';
+import Link from 'next/link';
 import AppImage from '@/components/ui/AppImage';
 import { toast } from 'sonner';
 
