@@ -15,135 +15,24 @@ import {
 import AppImage from '@/components/ui/AppImage';
 import { toast } from 'sonner';
 
-const astrologers = [
-  {
-    id: 'ast-001',
-    name: 'Pt. Rajendra Sharma',
-    specialty: ['Vedic', 'KP Astrology', 'Prashna'],
-    experience: 18,
-    rating: 4.9,
-    reviews: 2847,
-    pricePerMin: 25,
-    languages: ['Hindi', 'English'],
-    status: 'online',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_15639f0dd-1783110363486.png',
-    consultations: 12480,
-    badge: 'Top Rated',
-    about:
-      'Expert in Vedic and KP astrology with 18 years of experience. Specializes in career, marriage, and financial predictions.',
-  },
-  {
-    id: 'ast-002',
-    name: 'Jyotishi Meera Devi',
-    specialty: ['Nadi', 'Tamil Astrology', 'Remedies'],
-    experience: 22,
-    rating: 4.8,
-    reviews: 3124,
-    pricePerMin: 30,
-    languages: ['Tamil', 'English'],
-    status: 'online',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_1e180e2d9-1783110364377.png',
-    consultations: 15620,
-    badge: 'Expert',
-    about:
-      'Master of Nadi astrology with access to ancient palm leaf manuscripts. 22 years of dedicated practice.',
-  },
-  {
-    id: 'ast-003',
-    name: 'Acharya Vikram Joshi',
-    specialty: ['Lal Kitab', 'Vastu', 'Numerology'],
-    experience: 15,
-    rating: 4.7,
-    reviews: 1893,
-    pricePerMin: 20,
-    languages: ['Hindi', 'Gujarati'],
-    status: 'busy',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_176bb934d-1783110364175.png',
-    consultations: 8930,
-    badge: null,
-    about:
-      'Lal Kitab and Vastu specialist. Known for practical and effective remedies that show quick results.',
-  },
-  {
-    id: 'ast-004',
-    name: 'Dr. Priya Nair',
-    specialty: ['Numerology', 'Tarot', 'Western Astrology'],
-    experience: 10,
-    rating: 4.8,
-    reviews: 1567,
-    pricePerMin: 18,
-    languages: ['Malayalam', 'English'],
-    status: 'online',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_156173901-1765028487423.png',
-    consultations: 6240,
-    badge: 'Rising Star',
-    about: 'Combines Vedic and Western astrology with numerology for comprehensive life guidance.',
-  },
-  {
-    id: 'ast-005',
-    name: 'Pandit Suresh Iyer',
-    specialty: ['Vedic', 'Muhurtham', 'Panchang'],
-    experience: 25,
-    rating: 4.9,
-    reviews: 4210,
-    pricePerMin: 35,
-    languages: ['Tamil', 'Telugu', 'English'],
-    status: 'online',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_12575c18b-1783110364261.png',
-    consultations: 22100,
-    badge: 'Grand Master',
-    about:
-      'Vedic astrology grandmaster with 25 years experience. Expert in Muhurtham and auspicious timing.',
-  },
-  {
-    id: 'ast-006',
-    name: 'Jyotishi Lakshmi Bai',
-    specialty: ['Vedic', 'Marriage', 'Compatibility'],
-    experience: 12,
-    rating: 4.6,
-    reviews: 1122,
-    pricePerMin: 15,
-    languages: ['Kannada', 'Hindi', 'English'],
-    status: 'offline',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_13e2e836c-1769286798521.png',
-    consultations: 4580,
-    badge: null,
-    about:
-      'Specializes in marriage compatibility and relationship astrology. Helped thousands of couples.',
-  },
-  {
-    id: 'ast-007',
-    name: 'Acharya Deepak Mishra',
-    specialty: ['Jaimini', 'Parashari', 'Medical Astrology'],
-    experience: 20,
-    rating: 4.7,
-    reviews: 2340,
-    pricePerMin: 28,
-    languages: ['Hindi', 'Bengali', 'English'],
-    status: 'online',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_18a34b9f2-1783110363357.png',
-    consultations: 10850,
-    badge: null,
-    about:
-      'Expert in Jaimini and Parashari systems. Medical astrology specialist helping with health-related queries.',
-  },
-  {
-    id: 'ast-008',
-    name: 'Pt. Kavitha Reddy',
-    specialty: ['Vedic', 'Business Astrology', 'Finance'],
-    experience: 14,
-    rating: 4.8,
-    reviews: 1876,
-    pricePerMin: 22,
-    languages: ['Telugu', 'English'],
-    status: 'online',
-    image: 'https://img.rocket.new/generatedImages/rocket_gen_img_156173901-1765028487423.png',
-    consultations: 7340,
-    badge: 'Business Expert',
-    about:
-      'Specializes in business astrology, stock market timing, and financial planning through Vedic principles.',
-  },
-];
+import { db } from '@/lib/firebase/config';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+
+export interface Astrologer {
+  id: string;
+  name: string;
+  specialty: string[];
+  experience: number;
+  rating: number;
+  reviews: number;
+  pricePerMin: number;
+  languages: string[];
+  status: string;
+  image: string;
+  consultations: number;
+  badge: string | null;
+  about: string;
+}
 
 const timeSlots = [
   '9:00 AM',
@@ -176,13 +65,13 @@ const currencies = [
 ];
 
 export default function ConsultationContent() {
+  const [astrologers, setAstrologers] = useState<Astrologer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterSpecialty, setFilterSpecialty] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('rating');
-  const [selectedAstrologer, setSelectedAstrologer] = useState<(typeof astrologers)[0] | null>(
-    null
-  );
+  const [selectedAstrologer, setSelectedAstrologer] = useState<Astrologer | null>(null);
   const [bookingStep, setBookingStep] = useState<1 | 2 | 3>(1);
   const [consultationType, setConsultationType] = useState<'video' | 'call'>('video');
   const [selectedDate, setSelectedDate] = useState('');
@@ -190,6 +79,40 @@ export default function ConsultationContent() {
   const [duration, setDuration] = useState(30);
   const [isBooking, setIsBooking] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
+
+  React.useEffect(() => {
+    const fetchAstrologers = async () => {
+      try {
+        const q = query(collection(db, 'astrologers'), where('status', '==', 'approved'));
+        const snapshot = await getDocs(q);
+        const fetched: Astrologer[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          fetched.push({
+            id: doc.id,
+            name: data.name || 'Unknown Astrologer',
+            specialty: data.skills ? data.skills.split(',').map((s: string) => s.trim()) : ['Vedic'],
+            experience: data.experience || 10,
+            rating: data.rating || 4.5,
+            reviews: data.consultations || 120,
+            pricePerMin: Number(data.amount) || 20,
+            languages: data.languages ? data.languages.split(',').map((s: string) => s.trim()) : ['Hindi', 'English'],
+            status: 'online', // Mock online status for display
+            image: data.profileImageUrl || data.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop',
+            consultations: data.consultations || 0,
+            badge: data.rating >= 4.8 ? 'Top Rated' : null,
+            about: data.bio || 'Experienced Vedic astrologer providing personalized guidance.',
+          });
+        });
+        setAstrologers(fetched);
+      } catch (err) {
+        console.error('Error fetching astrologers:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAstrologers();
+  }, []);
 
   const specialties = [
     'all',
@@ -248,9 +171,9 @@ export default function ConsultationContent() {
   const unavailableDays = [5, 12, 19, 26, 13, 20];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-20">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-6 lg:px-8 py-4">
+      <div className="sticky top-20 z-30 bg-card/80 backdrop-blur-md border-b border-border px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">Book a Consultation</h1>
@@ -341,8 +264,14 @@ export default function ConsultationContent() {
           </div>
         </div>
 
-        {/* Astrologer grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="w-10 h-10 border-4 border-muted border-t-accent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* Astrologer grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filtered.map((ast, i) => (
             <motion.div
               key={ast.id}
@@ -427,6 +356,13 @@ export default function ConsultationContent() {
                   </div>
                 </div>
 
+                <Link
+                  href={`/astrologer/${ast.id}`}
+                  className="block w-full text-center py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-[#C9952B] border border-border hover:border-[#C9952B]/40 transition-all mb-2"
+                >
+                  View Full Profile →
+                </Link>
+
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => {
@@ -464,6 +400,8 @@ export default function ConsultationContent() {
               Try adjusting your filters or search term
             </p>
           </div>
+        )}
+          </>
         )}
       </div>
 

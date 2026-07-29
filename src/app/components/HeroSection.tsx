@@ -91,10 +91,10 @@ export default function HeroSection({ content }: HeroSectionProps) {
               {/* CTAs */}
               <div className="flex flex-wrap gap-4">
                 <Link
-                  href={user ? '/user-dashboard' : '/sign-up-login-screen'}
+                  href="/#services"
                   className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all duration-200 gold-shadow animate-pulse-gold"
                 >
-                  {content?.primaryBtnText || '✦ Get Free Kundli'}
+                  ✦ Explore Services
                   <ArrowRight
                     size={16}
                     className="group-hover:translate-x-1 transition-transform"

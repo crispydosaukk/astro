@@ -63,9 +63,12 @@ export default function UserDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-200 hover:bg-slate-300 transition-colors focus:outline-none"
+        className="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200 focus:outline-none"
       >
-        <UserIcon size={20} className="text-slate-600" />
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-200">
+          <UserIcon size={16} className="text-slate-600" />
+        </div>
+        <span className="text-sm font-semibold text-slate-700 pr-2 hidden sm:block">My Profile</span>
       </button>
 
       <AnimatePresence>
@@ -115,6 +118,13 @@ export default function UserDropdown() {
                 className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors text-left"
               >
                 Order History
+              </Link>
+              <Link
+                href="/my-reports"
+                onClick={() => setIsOpen(false)}
+                className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors text-left"
+              >
+                My Reports
               </Link>
               <Link
                 href="/customer-support"

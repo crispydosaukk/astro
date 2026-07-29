@@ -87,7 +87,7 @@ export default function AuthScreen() {
         const userDocRef = doc(db, 'users', currentUser.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
-          router.push('/user-dashboard');
+          router.push('/');
         } else {
           await signOut(auth);
         }
@@ -138,7 +138,7 @@ export default function AuthScreen() {
       
       setShowSuccessPopup('login');
       setTimeout(() => {
-        window.location.href = '/user-dashboard';
+        window.location.href = '/';
       }, 2500);
     } catch (error: any) {
       loginForm.setError('email', { message: 'Invalid email or password. Please try again.' });
@@ -234,7 +234,7 @@ export default function AuthScreen() {
             <h2 className="text-3xl font-bold text-white mb-3">Your Stars Await</h2>
             <p className="text-white/60 text-base max-w-sm mx-auto leading-relaxed">
               Join 2,50,000+ seekers discovering their cosmic path through ancient Vedic wisdom and
-              AI intelligence
+              Expert intelligence
             </p>
           </div>
 

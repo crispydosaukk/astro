@@ -71,12 +71,6 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                <Link
-                  href="/user-dashboard"
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 hover:border-accent/50 hover:text-accent transition-all duration-200"
-                >
-                  Dashboard
-                </Link>
                 <UserDropdown />
               </>
             ) : (

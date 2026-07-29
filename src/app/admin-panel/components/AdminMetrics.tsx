@@ -101,7 +101,7 @@ export default function AdminMetrics() {
     {
       id: 'adm-reports',
       icon: Sparkles,
-      label: 'AI Reports Generated',
+      label: 'Reports Generated',
       value: '0',
       sub: '0 today',
       trend: '',

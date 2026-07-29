@@ -1,11 +1,12 @@
 import React from 'react';
-import AppLayout from '@/components/AppLayout';
+import Navbar from '@/components/Navbar';
 import ConsultationContent from './components/ConsultationContent';
 
 export default function ConsultationBookingPage() {
   return (
-    <AppLayout>
+    <>
+      <Navbar />
       <ConsultationContent />
-    </AppLayout>
+    </>
   );
 }

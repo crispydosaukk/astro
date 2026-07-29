@@ -293,7 +293,47 @@ const fullyBookedDays = [8, 15, 22];
 
 export default function AstrologerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
-  const astrologer = astrologersData[id] || astrologersData['ast-001'];
+  
+  const [dbAstrologer, setDbAstrologer] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchAstrologer = async () => {
+      try {
+        const { doc, getDoc } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase/config');
+        const docRef = doc(db, 'astrologers', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setDbAstrologer({ id: docSnap.id, ...docSnap.data() });
+        }
+      } catch (error) {
+        console.error('Error fetching astrologer:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAstrologer();
+  }, [id]);
+
+  const fallbackData = astrologersData[id] || astrologersData['ast-001'];
+
+  const astrologer = React.useMemo(() => {
+    if (!dbAstrologer) return fallbackData;
+    return {
+      ...fallbackData,
+      name: dbAstrologer.name || fallbackData.name,
+      experience: dbAstrologer.experience || fallbackData.experience,
+      rating: dbAstrologer.rating || fallbackData.rating,
+      pricePerMin: Number(dbAstrologer.amount) || fallbackData.pricePerMin,
+      specialty: dbAstrologer.skills ? dbAstrologer.skills.split(',').map((s: string) => s.trim()) : fallbackData.specialty,
+      image: dbAstrologer.profileImageUrl || dbAstrologer.avatar || fallbackData.image,
+      consultations: dbAstrologer.consultations || fallbackData.consultations,
+      about: dbAstrologer.bio || fallbackData.about,
+      languages: dbAstrologer.languages ? dbAstrologer.languages.split(',').map((s: string) => s.trim()) : fallbackData.languages,
+    };
+  }, [dbAstrologer, fallbackData]);
+
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]); // Default USD
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState('');
@@ -324,6 +364,17 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
   };
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex justify-center items-center h-[80vh]">
+          <div className="w-10 h-10 border-4 border-muted border-t-[#C9952B] rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -668,20 +719,12 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
 
               {/* Pricing */}
               <div className="p-4 rounded-xl bg-gradient-to-br from-[#6B0F1A]/10 to-[#C9952B]/10 border border-[#C9952B]/20 mb-5">
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-3xl font-bold text-[#C9952B]">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold text-[#C9952B] tabular-nums">
                     {selectedCurrency.symbol}
                     {convertPrice(astrologer.pricePerMin)}
                   </span>
-                  <span className="text-sm text-muted-foreground">/ min</span>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  ≈{' '}
-                  <span className="font-semibold text-foreground">
-                    {selectedCurrency.symbol}
-                    {convertPrice(hourlyRate)}
-                  </span>{' '}
-                  / hour
+                  <span className="text-sm text-muted-foreground">/min</span>
                 </div>
               </div>
 

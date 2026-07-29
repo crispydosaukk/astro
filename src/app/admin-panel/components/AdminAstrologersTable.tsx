@@ -58,6 +58,7 @@ export default function AdminAstrologersTable() {
             revenue: data.revenue || '₹0',
             status: data.status || 'approved',
             avatar:
+              data.profileImageUrl ||
               data.avatar ||
               'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop',
             tokenNumber: data.tokenNumber || 'N/A',
@@ -244,9 +245,13 @@ export default function AdminAstrologersTable() {
                   </button>
 
                   <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border">
-                    <div className="w-16 h-16 rounded-full gold-gradient-bg flex items-center justify-center text-white text-2xl font-bold">
-                      {selectedAstrologer.name?.charAt(0).toUpperCase()}
-                    </div>
+                    {selectedAstrologer.avatar && selectedAstrologer.avatar !== 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop' ? (
+                      <img src={selectedAstrologer.avatar} alt={selectedAstrologer.name} className="w-16 h-16 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full gold-gradient-bg flex items-center justify-center text-white text-2xl font-bold">
+                        {selectedAstrologer.name?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <h3 className="text-2xl font-bold text-foreground">
                         {selectedAstrologer.name}

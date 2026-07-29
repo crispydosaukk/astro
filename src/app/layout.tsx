@@ -24,9 +24,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'AstroParihar — AI-Powered Vedic Astrology Guidance',
+  title: 'AstroParihar — Premium Vedic Astrology Guidance',
   description:
-    'Get personalized Vedic astrology insights, AI gemstone & mantra recommendations, and connect with expert astrologers for live consultations.',
+    'Get personalized Vedic astrology insights, gemstone & mantra recommendations, and connect with expert astrologers for live consultations.',
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
   },

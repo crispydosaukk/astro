@@ -39,7 +39,7 @@ const userGrowthData = [
 const consultationTypeData = [
   { name: 'Video Call', value: 0, color: 'var(--secondary)' },
   { name: 'Phone Call', value: 0, color: 'var(--accent)' },
-  { name: 'AI Report', value: 0, color: '#10b981' },
+  { name: 'Report', value: 0, color: '#10b981' },
 ];
 
 const aiReportData = [
@@ -224,10 +224,10 @@ export default function AdminChartsInner() {
         </ResponsiveContainer>
       </div>
 
-      {/* AI Reports by type */}
-      <div className="glass-card-light dark:glass-card rounded-2xl border border-border p-6">
+      {/* Reports by type */}
+      <div className="glass-card-light dark:glass-card p-6 rounded-2xl border border-border flex flex-col justify-between h-full">
         <div className="mb-6">
-          <h3 className="font-semibold text-foreground">AI Reports This Week</h3>
+          <h3 className="font-semibold text-foreground">Reports This Week</h3>
           <p className="text-xs text-muted-foreground mt-0.5">By report type</p>
         </div>
         <ResponsiveContainer width="100%" height={200}>

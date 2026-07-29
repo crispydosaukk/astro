@@ -24,7 +24,7 @@ const modules = [
     desc: 'Ruby for Sun strength',
     color: 'text-red-400',
     preview: 'Wear Ruby on Sunday',
-    locked: false,
+    locked: true,
     href: '/services/gemstone',
   },
   {
@@ -34,7 +34,7 @@ const modules = [
     desc: 'Om Namah Shivaya',
     color: 'text-blue-400',
     preview: '108 times at dawn',
-    locked: false,
+    locked: true,
     href: '/services/mantra',
   },
   {
@@ -136,20 +136,18 @@ export default function AIModulesPreview() {
                 transition={{ delay: i * 0.07 }}
                 className="glass-card rounded-2xl p-5 border border-white/10 card-hover group relative overflow-hidden"
               >
-                {mod?.locked && (
-                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <Lock size={24} className="text-[#C9952B]" />
-                    <p className="text-sm font-semibold text-white text-center px-4">
-                      Premium Feature
-                    </p>
-                    <Link
-                      href={mod?.href}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold gold-gradient-bg text-white"
-                    >
-                      Learn More
-                    </Link>
-                  </div>
-                )}
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <Lock size={24} className="text-[#C9952B]" />
+                  <p className="text-sm font-semibold text-white text-center px-4">
+                    Premium Feature
+                  </p>
+                  <Link
+                    href={mod?.href}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold gold-gradient-bg text-white"
+                  >
+                    Try Now
+                  </Link>
+                </div>
                 <div
                   className={`w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center mb-4 icon-hover-animate ${mod?.color}`}
                 >

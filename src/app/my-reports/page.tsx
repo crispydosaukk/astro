@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import AppLayout from '@/components/AppLayout';
-import RecentReports from '@/app/user-dashboard/components/RecentReports';
+import Navbar from '@/components/Navbar';
+import RecentReports from '@/app/my-reports/components/RecentReports';
 import { useUserData } from '@/lib/useUserData';
 import { Bell, User } from 'lucide-react';
 import Link from 'next/link';
@@ -22,10 +22,13 @@ export default function MyReportsPage() {
   const formattedDate = currentDate.toLocaleDateString('en-US', options);
 
   return (
-    <AppLayout>
-      <div className="min-h-screen bg-background">
+    <>
+      <div className="print:hidden">
+        <Navbar />
+      </div>
+      <div className="min-h-screen bg-background pt-20 print:pt-0 print:min-h-0 print:bg-transparent">
         {/* Top bar */}
-        <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-6 lg:px-8 py-4">
+        <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-6 lg:px-8 py-4 print:hidden">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-foreground">My Reports 📄</h1>
@@ -39,7 +42,7 @@ export default function MyReportsPage() {
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent" />
               </button>
               <Link
-                href="/user-dashboard"
+                href="/my-reports"
                 className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-all"
               >
                 <div className="w-7 h-7 rounded-full indigo-gradient-bg flex items-center justify-center">
@@ -55,6 +58,6 @@ export default function MyReportsPage() {
           <RecentReports />
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }

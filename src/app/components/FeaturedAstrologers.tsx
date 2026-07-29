@@ -134,6 +134,13 @@ export default function FeaturedAstrologers() {
                 </span>
               </div>
 
+              <Link
+                href={`/astrologer/${ast?.id}`}
+                className="block w-full text-center py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-[#C9952B] border border-border hover:border-[#C9952B]/40 transition-all mb-2"
+              >
+                View Full Profile →
+              </Link>
+
               <div className="grid grid-cols-2 gap-2">
                 <Link
                   href="/consultation-booking-screen"

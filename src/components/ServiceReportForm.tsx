@@ -109,7 +109,7 @@ export default function ServiceReportForm({
       setDob('');
       setTime('');
       setPlace('');
-      router.push('/user-dashboard');
+      router.push('/');
     } catch (error) {
       console.error(error);
       toast.error('Failed to submit request. Please try again.');
@@ -128,6 +128,21 @@ export default function ServiceReportForm({
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
         <div className="relative rounded-2xl border border-border bg-card p-8 shadow-lg overflow-hidden">
+          {!user && !loading && (
+            <div className="absolute inset-0 z-10 backdrop-blur-md bg-background/50 flex flex-col items-center justify-center p-6">
+              <Lock size={48} className="text-[#C9952B] mb-4 opacity-80" />
+              <h3 className="text-xl font-bold text-foreground mb-2 text-center">Sign In Required</h3>
+              <p className="text-sm text-muted-foreground text-center mb-6 max-w-[280px]">
+                Please sign in to your account to generate and access this report.
+              </p>
+              <Link
+                href="/sign-up-login-screen"
+                className="px-6 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow shadow-lg flex items-center gap-2"
+              >
+                Sign In to Continue <ArrowRight size={16} />
+              </Link>
+            </div>
+          )}
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">

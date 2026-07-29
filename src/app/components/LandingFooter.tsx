@@ -6,7 +6,7 @@ import { Mail, Phone, MapPin, PlayCircle, Share2, MessageCircle, AtSign } from '
 const footerLinks = {
   Services: [
     { label: 'Kundli Generation', href: '/#services' },
-    { label: 'AI Gemstone', href: '/#services' },
+    { label: 'Gemstone Recommendation', href: '/#services' },
     { label: 'Consultation', href: '/consultation-booking-screen' },
     { label: 'Muhurtham', href: '/#services' },
     { label: 'Vastu Analysis', href: '/#services' },
@@ -41,7 +41,7 @@ export default function LandingFooter() {
               <AppLogo src="/AstroParihar_Top_Logo.jpg" size={36} />
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-xs">
-              India&apos;s most advanced AI-powered Vedic astrology platform. Ancient wisdom, modern
+              India's most advanced premium Vedic astrology platform. Ancient wisdom, modern
               technology, personalized for you.
             </p>
             <div className="space-y-2 text-sm text-muted-foreground">

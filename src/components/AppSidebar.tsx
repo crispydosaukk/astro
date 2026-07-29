@@ -34,7 +34,6 @@ const sidebarGroups = [
     label: 'Main',
     items: [
       { icon: Home, label: 'Home', href: '/' },
-      { icon: LayoutDashboard, label: 'Dashboard', href: '/user-dashboard', badge: null },
       {
         icon: Calendar,
         label: 'Book Consultation',
@@ -47,9 +46,9 @@ const sidebarGroups = [
     label: 'My Space',
     items: [
       { icon: FileText, label: 'My Reports', href: '/my-reports', badge: '3' },
-      { icon: Star, label: 'Saved Kundlis', href: '/user-dashboard', badge: null },
-      { icon: Crown, label: 'Membership', href: '/user-dashboard', badge: null },
-      { icon: Bell, label: 'Notifications', href: '/user-dashboard', badge: '5' },
+      { icon: Star, label: 'Saved Kundlis', href: '/', badge: null },
+      { icon: Crown, label: 'Membership', href: '/', badge: null },
+      { icon: Bell, label: 'Notifications', href: '/notifications', badge: '5' },
     ],
   },
   {

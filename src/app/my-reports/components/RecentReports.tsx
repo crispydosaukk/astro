@@ -94,7 +94,7 @@ export default function RecentReports() {
     <>
       <div
         id="recent-reports"
-        className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden"
+        className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden print:hidden"
       >
         <div className="p-6 border-b border-border flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground">Recent Reports</h2>
@@ -190,98 +190,104 @@ export default function RecentReports() {
       {/* Report Modal */}
       <AnimatePresence>
         {selectedReport && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 print:p-0 print:static print:inset-auto print:z-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm print:hidden"
               onClick={() => setSelectedReport(null)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl max-h-[85vh] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+              className="relative w-full max-w-3xl max-h-[85vh] print:max-h-none print:h-auto print:shadow-none print:border-none print:bg-transparent bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden print:overflow-visible"
             >
-              <div className="p-6 border-b border-border flex items-center justify-between bg-muted/30">
+              {/* Print Header with Logo */}
+              <div className="hidden print:flex flex-col items-center justify-center pb-6 mb-6 border-b-2 border-black">
+                 <img src="/AstroParihar_Logo.png" alt="AstroParihar Logo" className="h-24 object-contain" />
+              </div>
+
+              <div className="p-6 sm:p-8 border-b border-border flex items-center justify-between bg-muted/30 print:bg-transparent print:border-none print:p-0">
                 <div>
-                  <h3 className="text-xl font-bold text-foreground">{selectedReport.type}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <h3 className="text-2xl font-bold text-foreground print:text-black">{selectedReport.type}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 print:text-gray-600">
                     Generated for {selectedReport.details?.dob} | {selectedReport.details?.time} |{' '}
                     {selectedReport.details?.place}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedReport(null)}
-                  className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground"
+                  className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground print:hidden"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="p-6 overflow-y-auto custom-scrollbar">
-                {(() => {
-                  try {
-                    const data = JSON.parse(selectedReport.reportContent);
-                    if (data && data.recommendationTitle) {
-                      return (
-                        <div className="space-y-4">
-                          <div className="p-5 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30">
-                            <p className="text-xs text-[#C9952B] font-semibold mb-1 uppercase tracking-wider">
+              <div className="overflow-y-auto custom-scrollbar print:overflow-visible print:h-auto">
+                <div className="p-6 sm:p-8 space-y-6 print:p-0 print:py-6">
+                  {(() => {
+                    try {
+                      const data = JSON.parse(selectedReport.reportContent);
+                      if (data && data.recommendationTitle) {
+                        return (
+                          <div className="space-y-6">
+                          <div className="p-5 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 print:break-inside-avoid print:border-gray-300 print:bg-transparent">
+                            <p className="text-xs text-[#C9952B] font-semibold mb-1 uppercase tracking-wider print:text-black">
                               {data.recommendationTitle
                                 .replace(/Recommended /i, '')
                                 .replace(/Get Your /i, '')}
                             </p>
-                            <h2 className="text-2xl font-bold text-foreground mb-2">
+                            <h2 className="text-2xl font-bold text-foreground mb-2 print:text-black">
                               {data.recommendationName}
                             </h2>
-                            <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                            <p className="text-sm text-muted-foreground font-medium flex items-center gap-2 print:text-gray-700">
                               {data.timing}{' '}
                               {data.duration && data.duration !== 'N/A' && `· ${data.duration}`}
                             </p>
                           </div>
 
                           {data.materials && (
-                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm">
-                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider">
+                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
+                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
                                 Materials / Requirements
                               </p>
-                              <p className="text-sm text-foreground leading-relaxed">
+                              <p className="text-sm text-foreground leading-relaxed print:text-black">
                                 {data.materials}
                               </p>
                             </div>
                           )}
 
                           {(data.astrologicalAnalysis || data.description) && (
-                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm">
-                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider">
+                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
+                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
                                 Astrological Insights
                               </p>
-                              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap print:text-black">
                                 {data.astrologicalAnalysis || data.description}
                               </p>
                             </div>
                           )}
 
                           {data.procedure && (
-                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm">
-                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider">
+                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
+                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
                                 Procedure / Methodology
                               </p>
-                              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap print:text-black">
                                 {data.procedure}
                               </p>
                             </div>
                           )}
 
                           {data.rules && (
-                            <div className="p-5 rounded-2xl bg-card border border-[#C9952B]/20 shadow-sm relative overflow-hidden">
-                              <div className="absolute top-0 left-0 w-1 h-full bg-[#C9952B]" />
-                              <p className="text-xs text-[#C9952B] font-semibold mb-2 uppercase tracking-wider pl-2">
+                            <div className="p-5 rounded-2xl bg-card border border-[#C9952B]/20 shadow-sm relative overflow-hidden print:break-inside-avoid print:shadow-none print:border-gray-300">
+                              <div className="absolute top-0 left-0 w-1 h-full bg-[#C9952B] print:hidden" />
+                              <p className="text-xs text-[#C9952B] font-semibold mb-2 uppercase tracking-wider pl-2 print:pl-0 print:text-black">
                                 Rules & Restrictions
                               </p>
-                              <p className="text-sm text-foreground leading-relaxed pl-2">
+                              <p className="text-sm text-foreground leading-relaxed pl-2 print:pl-0 print:text-black">
                                 {data.rules}
                               </p>
                             </div>
@@ -330,9 +336,10 @@ export default function RecentReports() {
                     </div>
                   );
                 })()}
+                </div>
               </div>
 
-              <div className="p-6 border-t border-border bg-muted/30 flex justify-end">
+              <div className="p-6 border-t border-border bg-muted/30 flex justify-end print:hidden">
                 <button
                   onClick={() => window.print()}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"

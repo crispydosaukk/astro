@@ -11,7 +11,7 @@ const testimonials = [
     role: 'Software Engineer, Bengaluru',
     avatar: 'https://img.rocket.new/generatedImages/rocket_gen_img_1a2f4decc-1763300127301.png',
     rating: 5,
-    text: 'The AI gemstone recommendation was spot on! I started wearing Emerald as suggested and within weeks noticed improvements in communication and career opportunities. The Kundli analysis was incredibly detailed.',
+    text: 'The gemstone recommendation was spot on! I started wearing Emerald as suggested and within weeks noticed improvements in communication and career opportunities. The Kundli analysis was incredibly detailed.',
   },
   {
     id: 'test-002',
@@ -43,7 +43,7 @@ const testimonials = [
     role: 'Homemaker, Hyderabad',
     avatar: 'https://img.rocket.new/generatedImages/rocket_gen_img_1e464dca4-1768028671702.png',
     rating: 5,
-    text: 'The Fasting Planner and Charity Planner are absolutely wonderful. It keeps me on track with my spiritual practices and sends timely reminders. The AI understands Vedic traditions so well.',
+    text: 'The Fasting Planner and Charity Planner are absolutely wonderful. It keeps me on track with my spiritual practices and sends timely reminders. The platform understands Vedic traditions so well.',
   },
   {
     id: 'test-006',
