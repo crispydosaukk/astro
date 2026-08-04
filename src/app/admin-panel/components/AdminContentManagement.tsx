@@ -21,8 +21,8 @@ import {
 
 const contentTabs = [
   { id: 'tab-hero', label: 'Hero Section', icon: LayoutTemplate },
-  { id: 'tab-services', label: 'Homepage Services', icon: Sparkles },
-  { id: 'tab-service-pages', label: 'Service Pages', icon: LayoutTemplate },
+  { id: 'tab-services', label: 'Homepage Remedies', icon: Sparkles },
+  { id: 'tab-service-pages', label: 'Remedy Pages', icon: LayoutTemplate },
   { id: 'tab-astrologers', label: 'Astrologers', icon: Users },
   { id: 'tab-testimonials', label: 'Testimonials', icon: Star },
 ];
@@ -289,12 +289,12 @@ export default function AdminContentManagement() {
             <div className="bg-card p-6 md:p-8 rounded-2xl border border-border shadow-sm space-y-8">
               <div className="space-y-6">
                 <h3 className="text-sm font-bold text-accent uppercase tracking-wider">
-                  Services Header
+                  Remedies Header
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">
-                      Tagline (e.g., Our Services)
+                      Tagline (e.g., Our Remedies)
                     </label>
                     <input
                       type="text"
@@ -363,7 +363,7 @@ export default function AdminContentManagement() {
 
               <div className="border-t border-border pt-8 space-y-6">
                 <h3 className="text-sm font-bold text-accent uppercase tracking-wider">
-                  Service Cards
+                  Remedy Cards
                 </h3>
 
                 <div className="space-y-4">
@@ -390,7 +390,7 @@ export default function AdminContentManagement() {
                           <ChevronDown size={14} />
                         </button>
                       </div>
-                      <div className="grid md:grid-cols-2 gap-4">
+                      <div className="grid md:grid-cols-2 gap-4 mt-4">
                         <div className="space-y-2">
                           <label className="text-xs font-medium text-muted-foreground">Title</label>
                           <input
@@ -414,7 +414,18 @@ export default function AdminContentManagement() {
                           />
                         </div>
                       </div>
-                      <div className="grid md:grid-cols-4 gap-4">
+                      <div className="grid md:grid-cols-5 gap-4 mt-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-muted-foreground">
+                            Price (£)
+                          </label>
+                          <input
+                            type="number"
+                            value={svc.price || 8}
+                            onChange={(e) => handleServiceChange(idx, 'price' as any, e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+                          />
+                        </div>
                         <div className="space-y-2">
                           <label className="text-xs font-medium text-muted-foreground">
                             Icon (e.g., Gem, Music)

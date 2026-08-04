@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { db } from '@/lib/firebase/config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useUserData } from '@/lib/useUserData';
+import { getHomepageContent } from '@/lib/cms';
 
 interface ServiceReportFormProps {
   titleText: string;
@@ -17,6 +18,7 @@ interface ServiceReportFormProps {
   buttonText: string;
   Icon: LucideIcon;
   premiumInfo?: string;
+  serviceId?: string;
 }
 
 export default function ServiceReportForm({
@@ -26,6 +28,7 @@ export default function ServiceReportForm({
   buttonText,
   Icon,
   premiumInfo,
+  serviceId,
 }: ServiceReportFormProps) {
   const [dob, setDob] = useState('');
   const [time, setTime] = useState('');
@@ -41,6 +44,28 @@ export default function ServiceReportForm({
   const router = useRouter();
 
   const { user, loading } = useUserData();
+
+  const [price, setPrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!serviceId) return;
+    let isMounted = true;
+    getHomepageContent().then((content) => {
+      if (!isMounted) return;
+      let p = 8;
+      if (content?.services?.items) {
+        const item = content.services.items.find((i) => i.id === serviceId);
+        if (item && item.price !== undefined) {
+          p = item.price;
+        }
+      }
+      setPrice(p);
+    }).catch(console.error);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [serviceId]);
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -86,40 +111,46 @@ export default function ServiceReportForm({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/generate-report', {
+      // Store report details in localStorage to generate after successful payment
+      const reportDetails = {
+        userId: user?.uid || 'demo-user-id',
+        userEmail: user?.email || 'demo@example.com',
+        type: `${titleText} ${highlightText}`,
+        serviceId: serviceId, // Send serviceId to backend
+        details: { dob, time, place },
+      };
+      localStorage.setItem('pending_report', JSON.stringify(reportDetails));
+
+      // Call create-stripe-session
+      const response = await fetch('/api/create-stripe-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId: user?.uid || 'demo-user-id',
-          userEmail: user?.email || 'demo@example.com',
-          type: `${titleText} ${highlightText}`,
-          details: { dob, time, place },
-        }),
+        body: JSON.stringify(reportDetails),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate report');
+        throw new Error(data.error || 'Failed to initialize payment');
       }
 
-      toast.success('Payment successful! Your report is ready.');
-      setDob('');
-      setTime('');
-      setPlace('');
-      router.push('/');
-    } catch (error) {
+      if (data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error: any) {
       console.error(error);
-      toast.error('Failed to submit request. Please try again.');
-    } finally {
+      toast.error(error.message || 'Failed to submit request. Please try again.');
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section id="get-report" className="py-16 bg-background">
+    <section id="get-report" className="pt-8 pb-16 bg-background">
       <div className="max-w-2xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-foreground mb-3">
@@ -128,21 +159,6 @@ export default function ServiceReportForm({
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
         <div className="relative rounded-2xl border border-border bg-card p-8 shadow-lg overflow-hidden">
-          {!user && !loading && (
-            <div className="absolute inset-0 z-10 backdrop-blur-md bg-background/50 flex flex-col items-center justify-center p-6">
-              <Lock size={48} className="text-[#C9952B] mb-4 opacity-80" />
-              <h3 className="text-xl font-bold text-foreground mb-2 text-center">Sign In Required</h3>
-              <p className="text-sm text-muted-foreground text-center mb-6 max-w-[280px]">
-                Please sign in to your account to generate and access this report.
-              </p>
-              <Link
-                href="/sign-up-login-screen"
-                className="px-6 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow shadow-lg flex items-center gap-2"
-              >
-                Sign In to Continue <ArrowRight size={16} />
-              </Link>
-            </div>
-          )}
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
@@ -220,22 +236,31 @@ export default function ServiceReportForm({
               </div>
             )}
 
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="animate-spin" size={16} /> Submitting...
-                </span>
-              ) : (
-                <>
-                  <Icon size={16} /> {buttonText}
-                  <ArrowRight size={16} />
-                </>
-              )}
-            </button>
+            {!user && !loading ? (
+              <button
+                onClick={() => router.push('/sign-up-login-screen')}
+                className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow"
+              >
+                <Lock size={16} /> Sign In to Continue <ArrowRight size={16} />
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting || loading}
+                className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow disabled:opacity-50"
+              >
+                {isSubmitting || loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="animate-spin" size={16} /> {loading ? 'Loading...' : 'Submitting...'}
+                  </span>
+                ) : (
+                  <>
+                    <Icon size={16} /> {buttonText} {price !== null ? `— £${price}` : ''}
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

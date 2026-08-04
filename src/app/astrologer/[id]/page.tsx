@@ -441,7 +441,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     )}
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-3">
-                    {astrologer.specialty.map((s) => (
+                    {astrologer.specialty.map((s: string) => (
                       <span
                         key={s}
                         className="text-xs px-2.5 py-1 rounded-full bg-[#6B0F1A]/10 text-[#6B0F1A] dark:text-[#C9952B] font-medium border border-[#C9952B]/20"
@@ -552,10 +552,10 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     <div>
                       <h3 className="font-semibold text-foreground mb-3">Languages</h3>
                       <div className="flex flex-wrap gap-2">
-                        {astrologer.languages.map((lang) => (
+                        {astrologer.languages.map((lang: string, idx: number) => (
                           <span
-                            key={lang}
-                            className="px-3 py-1.5 rounded-xl bg-muted text-sm text-muted-foreground font-medium"
+                            key={idx}
+                            className="text-xs px-2 py-1 rounded bg-secondary/5 text-secondary font-medium"
                           >
                             {lang}
                           </span>

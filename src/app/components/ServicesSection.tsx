@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Gem, Music, Triangle, Flame, Heart, Moon, Compass, ArrowRight, Gift } from 'lucide-react';
+import { Gem, Music, Triangle, Flame, Heart, Moon, Compass, ArrowRight, Gift, CircleDot } from 'lucide-react';
 import Icon from '@/components/ui/AppIcon';
 import { getHomepageContent, HomepageContent, defaultHomepageContent } from '@/lib/cms';
 
@@ -15,6 +15,7 @@ const iconMap: Record<string, any> = {
   Moon,
   Compass,
   Gift,
+  CircleDot,
 };
 
 const services = [
@@ -26,7 +27,7 @@ const services = [
       'Personalized gemstone recommendations based on your planetary analysis and birth chart',
     color: 'from-amber-500/15 to-yellow-500/10',
     iconColor: 'text-amber-400',
-    href: '/services/gemstone',
+    href: '/remedies/gemstone',
     badge: 'Premium',
   },
   {
@@ -37,7 +38,7 @@ const services = [
       'Sacred mantras tailored to strengthen your weak planets and amplify positive energies',
     color: 'from-blue-500/15 to-cyan-500/10',
     iconColor: 'text-blue-400',
-    href: '/services/mantra',
+    href: '/remedies/mantra',
     badge: 'Premium',
   },
   {
@@ -47,7 +48,7 @@ const services = [
     description: 'Sacred geometric tools for specific planetary remedies and energy balancing',
     color: 'from-green-500/15 to-emerald-500/10',
     iconColor: 'text-green-400',
-    href: '/services/yantra',
+    href: '/remedies/yantra',
     badge: 'Premium',
   },
   {
@@ -58,7 +59,7 @@ const services = [
       'Recommended fire rituals and pujas for planetary appeasement and divine blessings',
     color: 'from-orange-500/15 to-red-500/10',
     iconColor: 'text-orange-400',
-    href: '/services/homa',
+    href: '/remedies/homa',
     badge: 'Premium',
   },
   {
@@ -68,7 +69,7 @@ const services = [
     description: 'Discover your personal deity and daily worship practices for spiritual growth',
     color: 'from-pink-500/15 to-rose-500/10',
     iconColor: 'text-pink-400',
-    href: '/services/ishta-devata',
+    href: '/remedies/ishta-devata',
     badge: 'Premium',
   },
   {
@@ -78,7 +79,7 @@ const services = [
     description: 'Find the most auspicious time for marriage, business, travel and more',
     color: 'from-violet-500/15 to-purple-500/10',
     iconColor: 'text-violet-400',
-    href: '/services/muhurtham',
+    href: '/remedies/muhurtham',
     badge: 'Premium',
   },
   {
@@ -88,7 +89,7 @@ const services = [
     description: 'Room-by-room Vastu analysis with remedies for every direction of your home',
     color: 'from-teal-500/15 to-cyan-500/10',
     iconColor: 'text-teal-400',
-    href: '/services/vastu',
+    href: '/remedies/vastu',
     badge: 'Premium',
   },
   {
@@ -98,7 +99,7 @@ const services = [
     description: 'Karma-aligned giving schedule based on your planetary positions and doshas',
     color: 'from-purple-500/15 to-indigo-500/10',
     iconColor: 'text-purple-400',
-    href: '/services/charity',
+    href: '/remedies/charity',
     badge: 'Premium',
   },
 ];
@@ -134,7 +135,7 @@ export default function ServicesSection({ content }: { content: HomepageContent[
                 transition={{ delay: i * 0.08 }}
                 className={`relative group rounded-2xl p-6 bg-gradient-to-br ${service?.color} border border-border card-hover cursor-pointer`}
               >
-                <Link href={service?.href}>
+                <Link href={service?.href.replace('/services/', '/remedies/')}>
                   <div
                     className={`w-12 h-12 rounded-xl bg-card/80 flex items-center justify-center mb-4 icon-hover-animate ${service?.iconColor} group-hover:scale-110 transition-transform`}
                   >

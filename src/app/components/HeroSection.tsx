@@ -175,21 +175,60 @@ export default function HeroSection({ content }: HeroSectionProps) {
                 </div>
               </motion.div>
 
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                className="absolute bottom-8 -right-4 glass-card rounded-xl p-3 border border-white/10 shadow-lg"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#8B1A2A]/30 flex items-center justify-center">
-                    <span className="text-sm">💎</span>
+              {/* Floating cards */}
+              <Link href="/remedies/gemstone">
+                <motion.div
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                  className="absolute bottom-8 -right-4 glass-card rounded-xl p-3 border border-white/10 shadow-lg hover:border-[#C9952B]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#8B1A2A]/30 flex items-center justify-center">
+                      <span className="text-sm">💎</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-white/60">Report Ready</div>
+                      <div className="text-sm font-semibold text-white">Gemstone: Ruby</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-white/60">Report Ready</div>
-                    <div className="text-sm font-semibold text-white">Gemstone: Ruby</div>
+                </motion.div>
+              </Link>
+
+              <Link href="/remedies/mantra">
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                  className="absolute bottom-8 -left-8 glass-card rounded-xl p-3 border border-white/10 shadow-lg hover:border-[#C9952B]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <span className="text-sm">🎵</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-white/60">Remedy</div>
+                      <div className="text-sm font-semibold text-white">Mantra Guidance</div>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </Link>
+
+              <Link href="/remedies/yantra">
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+                  className="absolute top-12 -right-12 glass-card rounded-xl p-3 border border-white/10 shadow-lg hover:border-[#C9952B]/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <span className="text-sm">🔺</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-white/60">Remedy</div>
+                      <div className="text-sm font-semibold text-white">Yantra Rituals</div>
+                    </div>
+                  </div>
+                </motion.div>
+              </Link>
             </motion.div>
           </div>
         </div>

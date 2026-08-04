@@ -10,9 +10,8 @@ import { onAuthStateChanged, signOut as firebaseSignOut, User } from 'firebase/a
 import UserDropdown from './UserDropdown';
 const navLinks = [
   { label: 'Home', href: '/' },
-  { label: 'Services', href: '#services' },
   { label: 'Talk to Astrologer', href: '/talk-to-astrologer' },
-  { label: 'Remedies', href: '/#services' },
+  { label: 'Remedies', href: '/remedies' },
   { label: 'Admin', href: '/admin-panel' },
   { label: 'Astrologer Login', href: '/astrologer-login' },
   { label: 'Astrologer Registration', href: '/astrologer-login?mode=signup' },

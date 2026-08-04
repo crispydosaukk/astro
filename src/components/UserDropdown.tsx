@@ -81,18 +81,20 @@ export default function UserDropdown() {
             className="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden"
           >
             {/* User Profile Header */}
-            <div className="pt-6 pb-4 flex flex-col items-center border-b border-dashed border-gray-300">
-              <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center mb-3 overflow-hidden">
-                <UserIcon size={64} className="text-gray-400 mt-4" />
+            <div className="p-5 flex items-center gap-4 border-b border-gray-200 bg-slate-50/50">
+              <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
+                <UserIcon size={24} className="text-slate-500" />
               </div>
-              <h3 className="text-xl font-bold text-[#3b5998]">{fullName}</h3>
-              {phoneNumber ? (
-                <p className="text-base font-semibold text-gray-600 mt-1">{phoneNumber}</p>
-              ) : (
-                <p className="text-base font-semibold text-gray-400 mt-1">
-                  {loading ? 'Loading...' : 'No Phone Added'}
-                </p>
-              )}
+              <div className="flex flex-col overflow-hidden">
+                <h3 className="text-lg font-bold text-gray-800 truncate">{fullName}</h3>
+                {phoneNumber ? (
+                  <p className="text-sm font-medium text-gray-500 truncate">{phoneNumber}</p>
+                ) : (
+                  <p className="text-sm font-medium text-gray-400 truncate">
+                    {loading ? 'Loading...' : 'No Phone Added'}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Menu Items */}

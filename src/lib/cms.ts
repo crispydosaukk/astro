@@ -10,6 +10,7 @@ export interface ServiceItem {
   iconColor: string;
   href: string;
   badge: string;
+  price?: number;
 }
 
 export interface HomepageContent {
@@ -61,11 +62,11 @@ export const defaultHomepageContent: HomepageContent = {
     ],
   },
   services: {
-    tagline: 'Our Services',
-    title: 'Ancient Wisdom,',
-    titleHighlight: 'Modern Precision',
+    tagline: 'Our Remedies',
+    title: 'Ashta Digbandhana',
+    titleHighlight: 'To Propel Growth',
     subtitle:
-      'Comprehensive Vedic astrology services powered by Swiss Ephemeris calculations and expert guidance',
+      'We stand for: Genuine help, Practical solutions, No fear-based astrology, Spiritual clarity, Long-term transformation.',
     items: [
       {
         id: 'svc-gemstone',
@@ -75,7 +76,7 @@ export const defaultHomepageContent: HomepageContent = {
           'Personalized gemstone recommendations based on your planetary analysis and birth chart',
         color: 'from-amber-500/15 to-yellow-500/10',
         iconColor: 'text-amber-400',
-        href: '/services/gemstone',
+        href: '/remedies/gemstone',
         badge: 'Premium',
       },
       {
@@ -86,7 +87,7 @@ export const defaultHomepageContent: HomepageContent = {
           'Sacred mantras tailored to strengthen your weak planets and amplify positive energies',
         color: 'from-blue-500/15 to-cyan-500/10',
         iconColor: 'text-blue-400',
-        href: '/services/mantra',
+        href: '/remedies/mantra',
         badge: 'Premium',
       },
       {
@@ -96,7 +97,7 @@ export const defaultHomepageContent: HomepageContent = {
         description: 'Sacred geometric tools for specific planetary remedies and energy balancing',
         color: 'from-green-500/15 to-emerald-500/10',
         iconColor: 'text-green-400',
-        href: '/services/yantra',
+        href: '/remedies/yantra',
         badge: 'Premium',
       },
       {
@@ -107,7 +108,7 @@ export const defaultHomepageContent: HomepageContent = {
           'Recommended fire rituals and pujas for planetary appeasement and divine blessings',
         color: 'from-orange-500/15 to-red-500/10',
         iconColor: 'text-orange-400',
-        href: '/services/homa',
+        href: '/remedies/homa',
         badge: 'Premium',
       },
       {
@@ -118,7 +119,7 @@ export const defaultHomepageContent: HomepageContent = {
           'Discover your personal deity and daily worship practices for spiritual growth',
         color: 'from-pink-500/15 to-rose-500/10',
         iconColor: 'text-pink-400',
-        href: '/services/ishta-devata',
+        href: '/remedies/ishta-devata',
         badge: 'Premium',
       },
       {
@@ -128,7 +129,7 @@ export const defaultHomepageContent: HomepageContent = {
         description: 'Find the most auspicious time for marriage, business, travel and more',
         color: 'from-violet-500/15 to-purple-500/10',
         iconColor: 'text-violet-400',
-        href: '/services/muhurtham',
+        href: '/remedies/muhurtham',
         badge: 'Premium',
       },
       {
@@ -138,7 +139,7 @@ export const defaultHomepageContent: HomepageContent = {
         description: 'Room-by-room Vastu analysis with remedies for every direction of your home',
         color: 'from-teal-500/15 to-cyan-500/10',
         iconColor: 'text-teal-400',
-        href: '/services/vastu',
+        href: '/remedies/vastu',
         badge: 'Premium',
       },
       {
@@ -148,7 +149,17 @@ export const defaultHomepageContent: HomepageContent = {
         description: 'Karma-aligned giving schedule based on your planetary positions and doshas',
         color: 'from-purple-500/15 to-indigo-500/10',
         iconColor: 'text-purple-400',
-        href: '/services/charity',
+        href: '/remedies/charity',
+        badge: 'Premium',
+      },
+      {
+        id: 'svc-rudraksha',
+        icon: 'CircleDot',
+        title: 'Rudraksha Guide',
+        description: 'Discover the right Mukhi Rudraksha to balance your planetary energies and doshas',
+        color: 'from-orange-500/15 to-yellow-500/10',
+        iconColor: 'text-orange-400',
+        href: '/remedies/rudraksha',
         badge: 'Premium',
       },
     ],
@@ -203,6 +214,36 @@ export async function updateHomepageContent(data: HomepageContent): Promise<void
   }
 }
 
+export interface PremiumDetails {
+  enabled: boolean;
+  tagline: string;
+  titleLine1: string;
+  titleLine2Gold: string;
+  description: string;
+  quote?: string;
+  sloka?: {
+    sanskrit: string;
+    transliteration: string;
+    meaning: string;
+  };
+  infoCards: {
+    title: string;
+    icon?: string;
+    subtitle?: string;
+    description?: string;
+    points?: string[];
+    subSections?: {
+      title: string;
+      description?: string;
+      points?: string[];
+    }[];
+  }[];
+  summaryTitle: string;
+  summaryTitleGold: string;
+  summaryPoints?: string[];
+  summaryFooter?: string;
+}
+
 export interface HomaItem {
   name: string;
   purpose: string;
@@ -224,6 +265,7 @@ export interface HomaServiceContent {
   benefits: string[];
   homamsTitle: string;
   homams: HomaItem[];
+  premiumDetails?: PremiumDetails;
 }
 
 export const defaultHomaContent: HomaServiceContent = {
@@ -289,6 +331,103 @@ export const defaultHomaContent: HomaServiceContent = {
       color: 'text-green-400',
     },
   ],
+  premiumDetails: {
+  "enabled": true,
+  "tagline": "Homa & Pūjā as a Remedy",
+  "titleLine1": "Sacred",
+  "titleLine2Gold": "Active Transformation",
+  "quote": "“Where intention meets sacred action, transformation begins.”",
+  "description": "Homa and Pūjā are among the most powerful traditional remedies, invoking divine energies to restore balance and reduce obstacles arising from karma. Through the purifying element of fire and focused intention, these practices help create harmony within and around you.",
+  "sloka": {
+    "sanskrit": "होमपूजाजपैर्नित्यं देवताः प्रीतिमाप्नुयुः ।\nतेषां प्रसादात् नश्यन्ति बाधाः कर्मसमुद्भवाः ॥",
+    "transliteration": "Homa-pūjā-japair nityaṁ devatāḥ prītim āpnuyuḥ\nTeṣāṁ prasādāt naśyanti bādhāḥ karma-samudbhavāḥ",
+    "meaning": "“Through regular homa, worship, and mantra, the deities become pleased; by their grace, obstacles arising from karma are reduced.”"
+  },
+  "infoCards": [
+    {
+      "title": "Why Homa / Pūjā is Powerful",
+      "icon": "🕉️",
+      "subtitle": "Core Principle: Homa and Pūjā purify and harmonize subtle energies that influence life.",
+      "subSections": [
+        {
+          "title": "1 Direct connection with divine forces",
+          "points": [
+            "Invokes specific planetary or deity energies",
+            "Aligns individual with higher order"
+          ]
+        },
+        {
+          "title": "2 Active karmic resolution",
+          "points": [
+            "Offerings symbolize surrender of ego and negative karma",
+            "Fire (Agni) acts as the divine messenger and purifier"
+          ]
+        },
+        {
+          "title": "3 Environmental harmony",
+          "points": [
+            "Vibrations of mantras cleanse the physical space",
+            "Creates a protective and auspicious aura"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Comparing Remedies",
+      "icon": "⚖️",
+      "subSections": [
+        {
+          "title": "Gemstones",
+          "points": [
+            "Passive support",
+            "Works externally",
+            "Slow, steady impact"
+          ]
+        },
+        {
+          "title": "Mantras",
+          "points": [
+            "Internal focus",
+            "Directly influences the mind",
+            "Requires daily consistency"
+          ]
+        },
+        {
+          "title": "Homa / Pūjā",
+          "points": [
+            "Active intervention",
+            "Transforms environment and energy",
+            "Often yields faster, noticeable shifts"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "When is Homa Most Effective?",
+      "icon": "⏳",
+      "points": [
+        "During intense planetary afflictions (e.g., Sade Sati)",
+        "When facing sudden obstacles or inexplicable delays",
+        "For specific material or spiritual goals (e.g., health, career)",
+        "To express gratitude and maintain continuous blessings"
+      ]
+    },
+    {
+      "title": "The Role of Intention (Sankalpa)",
+      "icon": "🎯",
+      "description": "The power of any ritual lies in the Sankalpa (resolve). A Homa performed with mechanical action yields little. When performed with deep faith, clear intention, and surrender, it becomes a powerful catalyst for change."
+    }
+  ],
+  "summaryTitle": "Final",
+  "summaryTitleGold": "Thoughts",
+  "summaryPoints": [
+    "🔥 Homa is the physical manifestation of prayer",
+    "✨ It actively burns negative karmic influences",
+    "🙏 Requires purity of intention and action",
+    "💎 A profound way to seek divine grace"
+  ],
+  "summaryFooter": "Consult our experts to find the right Homa for your specific needs."
+}
 };
 
 export interface GemstoneItem {
@@ -321,6 +460,7 @@ export interface GemstoneServiceContent {
   gemstones: GemstoneItem[];
   faqTitle: string;
   faqs: FaqItem[];
+  premiumDetails?: PremiumDetails;
 }
 
 export const defaultGemstoneContent: GemstoneServiceContent = {
@@ -444,6 +584,69 @@ export const defaultGemstoneContent: GemstoneServiceContent = {
       a: 'Most people notice effects within 40 days of wearing the correct gemstone. Full benefits are typically experienced within 3–6 months of consistent wear.',
     },
   ],
+  premiumDetails: {
+    enabled: true,
+    tagline: 'Gemstone Remedies',
+    titleLine1: 'The True Power of',
+    titleLine2Gold: 'Vedic Gemstones',
+    description: 'In Vedic astrology, gemstones are not decorative objects; they are powerful energy conductors. A gemstone, when pure and correctly worn, acts like an antenna that absorbs specific planetary frequencies, amplifies them, and continuously transfers them to the wearer.',
+    sloka: {
+      sanskrit: 'रत्नं ग्रहबलप्रदं नित्यं धार्यं विधिविधानतः ।\nदुर्बलग्रहपीडायां शमनं तत्प्रकीर्तितम् ॥',
+      transliteration: 'Ratnaṁ grahabala-pradaṁ nityaṁ dhāryaṁ vidhi-vidhānataḥ |\ndurbala-graha-pīḍāyāṁ śamanaṁ tat prakīrtitam ||',
+      meaning: '“A gemstone, when worn according to proper rules, continuously strengthens planetary power. In cases of weak or afflicted planets, it is praised as a means of pacification.”',
+    },
+    infoCards: [
+      {
+        title: 'What Gemstones DO and DO NOT DO',
+        icon: '⚖️',
+        subSections: [
+          {
+            title: 'What gemstones CAN do:',
+            points: ['Strengthen a weak but benefic planet', 'Stabilise a planet during its dasha', 'Improve confidence, clarity, health, luck, or stability', 'Reduce negative effects caused by planetary weakness', 'Support long-term effort and discipline'],
+          },
+          {
+            title: 'What gemstones CANNOT do:',
+            points: ['They cannot change fate overnight', 'They cannot replace hard work', 'They cannot fix wrong decisions', 'They cannot override karma', 'They cannot make an unsuitable career suddenly successful'],
+          },
+        ],
+      },
+      {
+        title: 'When Gemstones Are Actually Useful',
+        description: 'Gemstones work best when:',
+        points: ['The planet is benefic for the chart', 'The planet is weak, afflicted, or underperforming', 'The person is in that planet’s dasha or sub-dasha', 'The person is willing to make behavioural corrections'],
+      },
+      {
+        title: 'Why Gemstones Must Be Worn Carefully',
+        description: 'Each planet represents a psychological force: Wearing a gemstone increases that force. If you strengthen the wrong planet, it amplifies the wrong tendencies. This is why gemstones are powerful but neutral tools.',
+        subSections: [
+          { title: 'Mars', description: 'drive, courage' },
+          { title: 'Jupiter', description: 'wisdom, ethics' },
+          { title: 'Venus', description: 'pleasure, comfort' },
+          { title: 'Saturn', description: 'discipline' },
+          { title: 'Moon', description: 'emotions, mind' },
+          { title: 'Rahu/Ketu', description: 'obsession' },
+        ],
+      },
+      {
+        title: 'Comparing Remedies',
+        subSections: [
+          { title: 'Gemstones', description: 'Passive | Slow/Steady | Low Control' },
+          { title: 'Mantras', description: 'Active | Faster | High Control' },
+          { title: 'Lifestyle/Behavior', description: 'Active | Strong | Very High Control' },
+        ],
+      },
+    ],
+    summaryTitle: 'Final',
+    summaryTitleGold: 'Summary',
+    summaryPoints: [
+      'Gemstones are tools, not magic',
+      'They strengthen planetary energy, not destiny',
+      'Must be chosen ONLY after chart analysis',
+      'They work best with right action & discipline',
+      'They are support systems, not solutions',
+    ],
+    summaryFooter: 'Please consult a qualified Astrologer for the best gemstone for you as per your chart.',
+  },
 };
 
 // ----------------- MANTRA -----------------
@@ -469,6 +672,7 @@ export interface MantraServiceContent {
   mantras: MantraItem[];
   faqTitle: string;
   faqs: FaqItem[];
+  premiumDetails?: PremiumDetails;
 }
 export const defaultMantraContent: MantraServiceContent = {
   hero: {
@@ -559,6 +763,58 @@ export const defaultMantraContent: MantraServiceContent = {
       a: 'Regular chanting for 40 days (a mandala) typically shows noticeable changes. Full benefits manifest over 3–6 months of consistent practice.',
     },
   ],
+  premiumDetails: {
+    enabled: true,
+    tagline: 'Mantra Remedies',
+    titleLine1: 'The Fundamental Power of',
+    titleLine2Gold: 'Vedic Mantras',
+    description: '“Graha peedāyām mantraḥ pradhānam” – When planets cause suffering, mantra is the primary remedy. In Vedic astrology, planets are not just physical bodies; they are cosmic principles that influence the mind, decision-making, and karma. A mantra is a sound-based method to harmonize your inner frequency.',
+    infoCards: [
+      {
+        title: 'Mantras Work Directly on the Mind',
+        description: 'In astrology, the Moon governs the mind, and all planetary suffering is experienced through the mind. Mantras calm, stabilize, and strengthen the Moon, leading to:',
+        points: ['Better emotional regulation', 'Clearer thinking', 'Reduced anxiety', 'Better decisions'],
+        subtitle: 'Even if a planet is malefic, a stable Moon reduces suffering. That is why mantra practice often brings relief even without visible external change.'
+      },
+      {
+        title: 'Why Mantras Are Safer',
+        description: 'Mantras do not force energy. They educate and discipline the mind to handle planetary pressure.',
+        subSections: [
+          {
+            title: 'Example:',
+            points: ['A weak Mars causes anger or fear', 'A Mars mantra does NOT make you aggressive', 'It teaches controlled courage and discipline']
+          }
+        ]
+      },
+      {
+        title: 'Remedy Comparison',
+        subSections: [
+          { title: 'Gemstones', points: ['Work externally', 'Passive support', 'Strengthen a planet blindly (good or bad)', 'Cannot be “adjusted” once worn'] },
+          { title: 'Rituals / Charity', points: ['External actions', 'Event-based', 'Helpful but temporary'] },
+          { title: 'Mantras', points: ['Work internally', 'Conscious and adjustable', 'Directly influence the mind (Moon)', 'Safer than gemstones'] }
+        ]
+      },
+      {
+        title: 'Correcting Behavior, Not Just Fate',
+        description: 'Astrology does not say: "Planet causes problem → suffer helplessly."\nIt says: "Planet creates pressure → correct response reduces suffering."',
+        points: ['Slow down impulsive reactions', 'Improve patience', 'Increase awareness', 'Refine judgment']
+      },
+      {
+        title: 'Why Mantras Require Consistency',
+        description: 'Mantras are not mechanical magic. They work through repetition, rhythm, discipline, and intention.\nJust like physical exercise strengthens the body gradually, mantra strengthens the mental and karmic muscle over time. This is why results are:',
+        points: ['Subtle', 'Progressive', 'Stable', 'Long-lasting']
+      }
+    ],
+    summaryTitle: 'Final',
+    summaryTitleGold: 'Summary',
+    summaryPoints: [
+      'Astrology shows the map',
+      'Mantras give you the steering wheel',
+      'Gemstones give support, not control',
+      'Mantras give control, clarity, and stability'
+    ],
+    summaryFooter: 'That is why mantras are considered the most important remedial measure in astrology.\nPlease consult a qualified Astrologer for the best Mantras for you as per your chart.'
+  }
 };
 
 // ----------------- YANTRA -----------------
@@ -582,6 +838,7 @@ export interface YantraServiceContent {
   benefits: string[];
   guideTitle: string;
   yantras: YantraItem[];
+  premiumDetails?: PremiumDetails;
 }
 export const defaultYantraContent: YantraServiceContent = {
   hero: {
@@ -665,6 +922,7 @@ export const defaultYantraContent: YantraServiceContent = {
 // ----------------- ISHTA DEVATA -----------------
 export interface DeityItem {
   name: string;
+  planet?: string;
   indicator: string;
   worship: string;
   stotra: string;
@@ -683,6 +941,7 @@ export interface IshtaDevataServiceContent {
   benefits: string[];
   guideTitle: string;
   deities: DeityItem[];
+  premiumDetails?: PremiumDetails;
 }
 export const defaultIshtaDevataContent: IshtaDevataServiceContent = {
   hero: {
@@ -719,17 +978,19 @@ export const defaultIshtaDevataContent: IshtaDevataServiceContent = {
       color: 'text-blue-300',
     },
     {
-      name: 'Goddess Durga',
-      indicator: 'Mars dominant / Scorpio rising',
-      worship: 'Tuesday Kumkum archana',
-      stotra: 'Durga Saptashati',
-      color: 'text-red-400',
+      name: 'Maa Durga',
+      planet: 'Rahu',
+      indicator: 'Atmakaraka in Navamsha',
+      worship: 'Durga Saptashati reading, Friday fasting',
+      stotra: 'Argala Stotram',
+      color: 'text-red-500',
     },
     {
       name: 'Lord Ganesha',
-      indicator: 'Ketu in 1st / Moola nakshatra',
-      worship: 'Wednesday modak offering',
-      stotra: 'Ganapathi Atharvashirsha',
+      planet: 'Ketu',
+      indicator: 'Ketu in 9th House',
+      worship: 'Offering Durva grass, Wednesday prayers',
+      stotra: 'Ganesha Pancharatnam',
       color: 'text-orange-400',
     },
     {
@@ -740,13 +1001,52 @@ export const defaultIshtaDevataContent: IshtaDevataServiceContent = {
       color: 'text-pink-400',
     },
     {
-      name: 'Lord Surya',
-      indicator: 'Sun in 1st / Leo rising',
-      worship: 'Sunday Arghya at sunrise',
-      stotra: 'Aditya Hridayam',
-      color: 'text-yellow-400',
+      name: 'Lord Hanuman',
+      indicator: 'Mars in 6th / Rahu dasha',
+      worship: 'Tuesday/Saturday Hanuman Chalisa',
+      stotra: 'Sankat Mochan',
+      color: 'text-orange-500',
     },
   ],
+  premiumDetails: {
+    enabled: true,
+    tagline: 'Devatā Worship / Upasana',
+    titleLine1: 'The Power of',
+    titleLine2Gold: 'Divine Connection',
+    description: 'Devatā worship is one of the most powerful and direct remedies in the Vedic tradition. By connecting with the divine through devotion, mantra, and simple practices, one can bring clarity, strength, and balance into life. This inner alignment naturally reduces obstacles and supports overall well-being.',
+    quote: '“When the mind aligns with the divine, life begins to align naturally.”',
+    sloka: {
+      sanskrit: 'देवताभक्तियुक्तानां न बाधाः स्युः कदाचन ।\nप्रसन्ने तु परे देवि सर्वमङ्गलमस्ति हि ॥',
+      transliteration: 'Devatā-bhakti-yuktānāṁ na bādhāḥ syuḥ kadācana\nPrasanne tu pare devi sarva-maṅgalam asti hi',
+      meaning: '“For those who are devoted to the Divine, obstacles do not persist; when the Deity is pleased, all auspiciousness arises.”'
+    },
+    infoCards: [
+      {
+        title: 'Why Devatā worship is powerful',
+        icon: '🕉️',
+        subtitle: 'Core Principle: Devatā worship aligns the individual with higher intelligence governing life.',
+        subSections: [
+          { title: 'Direct inner transformation', points: ['Calms the mind', 'Increases clarity', 'Builds inner strength'] },
+          { title: 'Aligns with planetary energies', description: 'Each graha is connected to a devatā:', points: ['Sun → Surya', 'Moon → Shiva / Parvati', 'Jupiter → Guru / Vishnu', 'Saturn → Shani / Hanuman', '✨ Worship balances planetary effects naturally.'] },
+          { title: 'Works beyond mechanical remedies', description: 'Unlike gemstones and external corrections:\n✨ Devatā worship transforms consciousness itself' },
+          { title: 'Sustained and self-powered remedy', points: ['✔ Can be done daily', '✔ No dependency', '✔ Grows stronger over time'] },
+          { title: 'Reduces karmic burden', description: 'Through devotion, the experience of karma becomes lighter and more manageable.' }
+        ]
+      },
+      {
+        title: 'Astrological View',
+        icon: '⚖️',
+        points: ['🔻 Graha = karma delivery', '🔺 Devatā = higher intelligence', '✨ Devatā worship helps you rise above karmic difficulty']
+      },
+      {
+        title: 'Positioning in Platform',
+        points: ['Mantra → vibration', 'Homa → action', 'Vāstu → environment', 'Devatā → consciousness transformation', 'Dāna → karmic balance']
+      }
+    ],
+    summaryTitle: '',
+    summaryTitleGold: '',
+    summaryFooter: 'Note: The above guidance is general in nature and based on standard astrological principles. For a more accurate and personalized recommendation tailored to your birth chart and current planetary influences, we strongly advise consulting a qualified astrologer.'
+  }
 };
 
 // ----------------- MUHURTHAM -----------------
@@ -768,6 +1068,7 @@ export interface MuhurthamServiceContent {
   events: EventItem[];
   benefitsTitle: string;
   benefits: string[];
+  premiumDetails?: PremiumDetails;
 }
 export const defaultMuhurthamContent: MuhurthamServiceContent = {
   hero: {
@@ -822,6 +1123,7 @@ export interface VastuServiceContent {
   benefits: string[];
   guideTitle: string;
   directions: DirectionItem[];
+  premiumDetails?: PremiumDetails;
 }
 export const defaultVastuContent: VastuServiceContent = {
   hero: {
@@ -912,6 +1214,9 @@ export const defaultVastuContent: VastuServiceContent = {
 
 // ----------------- CHARITY -----------------
 export interface CharityItem {
+  icon?: string;
+  name?: string;
+  gov?: string;
   planet: string;
   item: string;
   day: string;
@@ -931,6 +1236,7 @@ export interface CharityServiceContent {
   benefits: string[];
   guideTitle: string;
   charityItems: CharityItem[];
+  premiumDetails?: PremiumDetails;
 }
 export const defaultCharityContent: CharityServiceContent = {
   hero: {
@@ -953,69 +1259,310 @@ export const defaultCharityContent: CharityServiceContent = {
   guideTitle: 'Navagraha Dana Guide',
   charityItems: [
     {
+      icon: '☀️',
       planet: 'Sun',
-      item: 'Wheat, Jaggery, Copper',
+      name: 'SUN (Surya)',
+      gov: 'authority, vitality, ego',
+      item: 'Wheat, jaggery, copper items',
       day: 'Sunday',
-      recipient: 'Temples, Brahmins',
+      recipient: 'Father-like figures, government workers',
       color: 'text-red-400',
     },
     {
+      icon: '🌕',
       planet: 'Moon',
-      item: 'Rice, Milk, White cloth',
+      name: 'MOON (Chandra)',
+      gov: 'mind, emotions, stability',
+      item: 'Rice, milk, white clothes, silver',
       day: 'Monday',
-      recipient: 'Women, elderly',
+      recipient: 'Women, mothers, needy families',
       color: 'text-blue-200',
     },
     {
+      icon: '🔴',
       planet: 'Mars',
-      item: 'Red lentils, Red cloth',
+      name: 'MARS (Mangala)',
+      gov: 'energy, courage, aggression',
+      item: 'Red lentils, tools, red cloth',
       day: 'Tuesday',
-      recipient: 'Soldiers, poor',
+      recipient: 'Soldiers, workers, young men',
       color: 'text-orange-400',
     },
     {
+      icon: '🟢',
       planet: 'Mercury',
-      item: 'Green vegetables, Books',
+      name: 'MERCURY (Budha)',
+      gov: 'intellect, communication',
+      item: 'Green gram (moong), books, stationery',
       day: 'Wednesday',
-      recipient: 'Students, teachers',
+      recipient: 'Students, children',
       color: 'text-green-400',
     },
     {
+      icon: '🟡',
       planet: 'Jupiter',
-      item: 'Yellow lentils, Gold',
+      name: 'JUPITER (Guru)',
+      gov: 'wisdom, wealth, children',
+      item: 'Turmeric, yellow cloth, chana dal',
       day: 'Thursday',
-      recipient: 'Brahmins, gurus',
+      recipient: 'Teachers, priests, spiritual institutions',
       color: 'text-yellow-400',
     },
     {
+      icon: '⚪',
       planet: 'Venus',
-      item: 'White sweets, Perfume',
+      name: 'VENUS (Shukra)',
+      gov: 'luxury, relationships, comfort',
+      item: 'White sweets, perfumes, clothes',
       day: 'Friday',
-      recipient: 'Women, artists',
+      recipient: 'Women, artists, brides / poor families',
       color: 'text-pink-300',
     },
     {
+      icon: '⚫',
       planet: 'Saturn',
-      item: 'Black sesame, Iron',
+      name: 'SATURN (Shani)',
+      gov: 'karma, delay, suffering',
+      item: 'Black sesame, iron, blankets',
       day: 'Saturday',
-      recipient: 'Poor, disabled',
-      color: 'text-blue-400',
+      recipient: 'Poor, laborers, disabled',
+      color: 'text-blue-500',
     },
     {
+      icon: '☊',
       planet: 'Rahu',
-      item: 'Blue cloth, Coconut',
+      name: 'RAHU',
+      gov: 'confusion, illusion, sudden events',
+      item: 'Blue/black cloth, mustard oil',
       day: 'Saturday',
-      recipient: 'Outcastes, foreigners',
-      color: 'text-amber-600',
+      recipient: 'Poor, foreigners, marginalized people',
+      color: 'text-amber-700',
     },
     {
+      icon: '☋',
       planet: 'Ketu',
-      item: 'Multi-color cloth, Blanket',
+      name: 'KETU',
+      gov: 'detachment, spirituality',
+      item: 'Multi-colored cloth, blankets, feeding dogs',
       day: 'Tuesday',
-      recipient: 'Spiritual seekers',
+      recipient: 'Spiritual people, monks, animals',
       color: 'text-gray-400',
     },
   ],
+  premiumDetails: {
+    enabled: true,
+    tagline: 'The Power of Dāna',
+    titleLine1: 'Understanding',
+    titleLine2Gold: 'Vedic Charity',
+    description: 'Charity is one of the most powerful and direct remedies in the Vedic tradition. By giving selflessly, one not only supports others but also restores balance in one’s own life. Dāna helps reduce karmic obstacles, promotes positive energy, and supports overall well-being.',
+    quote: '“What is given with sincerity returns as balance in life.”',
+    sloka: {
+      sanskrit: 'दानं तपश्च जपश्चैव पापानां नाशनं परम् ।\nतस्माद् दानं विशेषेण कर्तव्यं शुभमिच्छता ॥',
+      transliteration: 'Dānaṁ tapaś ca japaś caiva pāpānāṁ nāśanaṁ param\nTasmād dānaṁ viśeṣeṇa kartavyaṁ śubham icchatā',
+      meaning: '“Charity, austerity, and mantra are supreme means to reduce negative karma; therefore, one who seeks well-being should especially practice charity.”',
+    },
+    infoCards: [
+      {
+        title: 'Importance of Dāna',
+        icon: '🕉️',
+        subtitle: 'Core Principle: Dāna balances karma through selfless giving.',
+        subSections: [
+          { title: 'Direct karmic correction', points: ['Reduces past negative impressions', 'Creates positive karmic flow'] },
+          { title: 'Removes blockages', description: 'In Jyotish, many problems arise from imbalance of give-and-take.\n✨ Dāna restores this balance.' },
+          { title: 'Softens planetary afflictions', points: ['Saturn → charity reduces suffering', 'Rahu → charity reduces confusion', 'Jupiter → charity enhances blessings'] },
+          { title: 'Immediate impact', points: ['✔ Charity gives quick mental relief', '✔ Creates positive energy instantly'] },
+          { title: 'Accessible to everyone', points: ['✔ No complex rituals', '✔ No special knowledge required', '✔ Universally applicable'] }
+        ]
+      },
+      {
+        title: 'Astrological View',
+        icon: '⚖️',
+        points: ['🔻 Karma creates imbalance', '🔺 Dāna redistributes energy', '✨ Leading to smoother life experience']
+      },
+      {
+        title: 'Remedy Comparison',
+        points: ['Mantra → vibration', 'Homa → action', 'Vāstu → environment', 'Devatā Upasana → spiritual connection', 'Dāna → karmic balance']
+      },
+      {
+        title: 'Universal Charity',
+        icon: '🌍',
+        description: 'If unsure, Food donation (Annadāna) is considered the highest form of charity in tradition.'
+      },
+      {
+        title: 'Important Rules',
+        icon: '⚠️',
+        points: ['✔ Give with humility', '✔ No expectation of return', '✔ Consistency > quantity']
+      }
+    ],
+    summaryTitle: 'Planet-Wise',
+    summaryTitleGold: 'Charity Recommendations',
+    summaryFooter: 'Specific items to donate based on planetary influences'
+  }
+};
+
+// ----------------- RUDRAKSHA -----------------
+export interface RudrakshaItem {
+  mukhi: string;
+  planet: string;
+  deity: string;
+  purpose: string;
+  color: string;
+}
+
+export interface RudrakshaServiceContent {
+  hero: {
+    tag: string;
+    titleLine1: string;
+    titleLine2: string;
+    description: string;
+    primaryBtnText: string;
+    secondaryBtnText: string;
+  };
+  benefitsTitle: string;
+  benefits: string[];
+  guideTitle: string;
+  rudrakshas: RudrakshaItem[];
+  premiumDetails?: PremiumDetails;
+}
+
+export const defaultRudrakshaContent: RudrakshaServiceContent = {
+  hero: {
+    tag: 'Sacred Beads',
+    titleLine1: 'Rudraksha',
+    titleLine2: 'Recommendations',
+    description: 'Rudraksha is the purest of all remedies in the Vedic tradition, born from the tears of Lord Shiva. Discover the right mukhi Rudraksha to harmonize your planetary energies and shield you from negativity.',
+    primaryBtnText: 'Get My Rudraksha Report',
+    secondaryBtnText: 'Consult Astrologer',
+  },
+  benefitsTitle: 'Benefits of Rudraksha',
+  benefits: [
+    'Shields against negative energies and psychic attacks',
+    'Balances planetary doshas without any adverse effects',
+    'Improves concentration, mental peace, and spiritual growth',
+    'Regulates blood pressure and reduces stress (scientifically observed)',
+    'Creates a protective energetic aura around the wearer',
+  ],
+  guideTitle: 'Planetary Rudraksha Guide',
+  rudrakshas: [
+    {
+      mukhi: '1 Mukhi',
+      planet: 'Sun',
+      deity: 'Lord Shiva',
+      purpose: 'Enlightenment, Leadership, Concentration',
+      color: 'text-red-400',
+    },
+    {
+      mukhi: '2 Mukhi',
+      planet: 'Moon',
+      deity: 'Ardhanarishvara',
+      purpose: 'Emotional stability, Relationships',
+      color: 'text-blue-200',
+    },
+    {
+      mukhi: '3 Mukhi',
+      planet: 'Mars',
+      deity: 'Agni',
+      purpose: 'Confidence, Courage, Removes laziness',
+      color: 'text-orange-400',
+    },
+    {
+      mukhi: '4 Mukhi',
+      planet: 'Mercury',
+      deity: 'Brahma',
+      purpose: 'Intelligence, Communication, Creativity',
+      color: 'text-green-400',
+    },
+    {
+      mukhi: '5 Mukhi',
+      planet: 'Jupiter',
+      deity: 'Kalagni Rudra',
+      purpose: 'Wisdom, Health, General well-being',
+      color: 'text-yellow-400',
+    },
+    {
+      mukhi: '6 Mukhi',
+      planet: 'Venus',
+      deity: 'Kartikeya',
+      purpose: 'Focus, Willpower, Luxury, Art',
+      color: 'text-pink-300',
+    },
+    {
+      mukhi: '7 Mukhi',
+      planet: 'Saturn',
+      deity: 'Mahalakshmi',
+      purpose: 'Wealth, Reduces Saturn afflictions (Sade Sati)',
+      color: 'text-blue-400',
+    },
+    {
+      mukhi: '8 Mukhi',
+      planet: 'Rahu',
+      deity: 'Ganesha',
+      purpose: 'Removes obstacles, Success in ventures',
+      color: 'text-amber-600',
+    },
+    {
+      mukhi: '9 Mukhi',
+      planet: 'Ketu',
+      deity: 'Durga',
+      purpose: 'Courage, Protection, Spiritual growth',
+      color: 'text-gray-400',
+    },
+  ],
+  premiumDetails: {
+  "enabled": true,
+  "tagline": "Sacred Beads",
+  "titleLine1": "The Purest",
+  "titleLine2Gold": "Vedic Remedy",
+  "description": "Rudraksha is the purest of all remedies in the Vedic tradition, born from the tears of Lord Shiva. Discover the right mukhi Rudraksha to harmonize your planetary energies and shield you from negativity.",
+  "quote": "“Born from the tears of Shiva, Rudraksha is the ultimate shield.”",
+  "sloka": {
+    "sanskrit": "विना भस्म त्रिपुंड्रेण विना रुद्राक्षमालया ।\nपूजितोऽपि महादेवो न तस्य फलदायकः ॥",
+    "transliteration": "Vinā bhasma tripuṇḍreṇa vinā rudrākṣa-mālayā\nPūjito'pi mahādevo na tasya phaladāyakaḥ",
+    "meaning": "“Without the sacred ash and without wearing Rudraksha, even if one worships Mahadeva, it does not yield the complete fruit of devotion.”"
+  },
+  "infoCards": [
+    {
+      "title": "Why Rudraksha is Unique",
+      "icon": "🌿",
+      "subtitle": "Core Principle: Rudraksha creates an energy shield around the wearer.",
+      "subSections": [
+        {
+          "title": "No negative side effects",
+          "points": [
+            "Unlike gemstones, Rudraksha can never harm the wearer",
+            "It pacifies malefic planets gently"
+          ]
+        },
+        {
+          "title": "Scientific & Spiritual",
+          "points": [
+            "Known to regulate blood pressure and stress",
+            "Enhances focus and meditation"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "How to Wear Rudraksha",
+      "icon": "📿",
+      "points": [
+        "Must be energized with Prana Pratishtha",
+        "Best worn touching the skin (chest or throat)",
+        "Should be removed during impure activities",
+        "Maintained by regular cleaning and oiling"
+      ]
+    }
+  ],
+  "summaryTitle": "Final",
+  "summaryTitleGold": "Thoughts",
+  "summaryPoints": [
+    "✨ Rudraksha is a universal remedy",
+    "🛡️ It acts as a protective energetic shield",
+    "💎 Cannot cause harm, only provides support",
+    "🙏 Deepens spiritual connection"
+  ],
+  "summaryFooter": "Consult our experts to find the right Mukhi for your specific needs."
+}
 };
 
 export async function getServicePageContent<T>(serviceId: string, defaultContent: T): Promise<T> {

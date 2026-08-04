@@ -66,6 +66,7 @@ const sidebarGroups = [
       },
       { icon: Calendar, label: 'Appointments', href: '/admin-panel/appointments', badge: null },
       { icon: CreditCard, label: 'Payments', href: '/admin-panel/payments', badge: null },
+      { icon: Sparkles, label: 'Settings', href: '/admin-panel/settings', badge: null },
     ],
   },
 ];

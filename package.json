@@ -51,17 +51,22 @@
   "dependencies": {
     "@dhiwise/component-tagger": "^1.0.15",
     "@heroicons/react": "^2.2.0",
+    "@stripe/stripe-js": "^9.13.0",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
+    "country-list-with-dial-code-and-flag": "^5.1.1",
     "firebase": "^12.16.0",
+    "firebase-admin": "^14.2.0",
     "framer-motion": "latest",
     "lucide-react": "^1.7.0",
     "next": "15.5.18",
     "react": "19.0.3",
     "react-dom": "19.0.3",
     "react-hook-form": "^7.80.0",
+    "react-phone-input-2": "^2.15.1",
     "recharts": "^2.15.2",
-    "sonner": "latest"
+    "sonner": "latest",
+    "stripe": "^22.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
