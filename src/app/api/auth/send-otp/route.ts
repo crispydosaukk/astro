@@ -3,46 +3,41 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const { phone } = await req.json();
-    
-    // Clean phone number (remove +)
-    const mobile = phone.replace('+', '');
+
+    if (!phone) {
+      return NextResponse.json({ error: 'Phone number is required' }, { status: 400 });
+    }
+
+    // Extract digits and remove the plus sign
+    const cleanPhone = phone.replace(/\D/g, '');
 
     const authKey = process.env.MSG91_AUTH_KEY;
     const templateId = process.env.MSG91_TEMPLATE_ID;
 
     if (!authKey || !templateId) {
-      return NextResponse.json(
-        { error: 'MSG91 credentials not configured in environment variables.' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Server configuration error (MSG91 keys missing)' }, { status: 500 });
     }
 
-    const url = 'https://control.msg91.com/api/v5/otp';
-    const options = {
+    const msg91Url = `https://control.msg91.com/api/v5/otp?template_id=${templateId}&mobile=${cleanPhone}`;
+
+    const response = await fetch(msg91Url, {
       method: 'POST',
       headers: {
         'authkey': authKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        template_id: templateId,
-        mobile: mobile,
-      }),
-    };
+    });
 
-    const response = await fetch(url, options);
     const data = await response.json();
+    console.log('MSG91 Send OTP Response:', data);
 
     if (data.type === 'error') {
-      return NextResponse.json({ error: data.message }, { status: 400 });
+      return NextResponse.json({ error: data.message || 'Failed to send OTP' }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, message: 'OTP sent successfully' });
   } catch (error: any) {
-    console.error('Error sending OTP:', error);
-    return NextResponse.json(
-      { error: 'Failed to send OTP' },
-      { status: 500 }
-    );
+    console.error('Send OTP Error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

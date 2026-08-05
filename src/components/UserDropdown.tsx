@@ -37,19 +37,7 @@ export default function UserDropdown() {
     };
   }, []);
 
-  useEffect(() => {
-    if (user || userData) {
-      fetch('/api/debug-user', {
-        method: 'POST',
-        body: JSON.stringify({
-          uid: user?.uid,
-          email: user?.email,
-          userData,
-          authPhone: user?.phoneNumber,
-        }),
-      }).catch((e) => console.error(e));
-    }
-  }, [user, userData]);
+
 
   const fullName = loading
     ? 'Loading...'

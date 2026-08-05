@@ -48,7 +48,7 @@ export default function AuthScreen() {
       const response = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: '+' + phone }),
+        body: JSON.stringify({ phone }),
       });
       const data = await response.json();
 
@@ -68,8 +68,8 @@ export default function AuthScreen() {
 
   const verifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length !== 6) {
-      toast.error('Please enter a valid 6-digit OTP');
+    if (otp.length < 4) {
+      toast.error('Please enter a valid OTP');
       return;
     }
 
@@ -78,7 +78,7 @@ export default function AuthScreen() {
       const response = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: '+' + phone, otp }),
+        body: JSON.stringify({ phone, otp }),
       });
 
       const data = await response.json();
@@ -95,10 +95,14 @@ export default function AuthScreen() {
       const userDocSnap = await getDoc(userDocRef);
       
       if (userDocSnap.exists()) {
+        const docData = userDocSnap.data();
+        if (!docData.phone) {
+          await setDoc(userDocRef, { phone: '+' + phone.replace(/\D/g, '') }, { merge: true });
+        }
         setShowSuccessPopup(true);
         setTimeout(() => {
-          window.location.href = '/';
-        }, 1500);
+          router.push('/');
+        }, 600);
       } else {
         setStep(3);
       }
@@ -124,14 +128,14 @@ export default function AuthScreen() {
       await setDoc(doc(db, 'users', auth.currentUser.uid), {
         name,
         dob,
-        phone: auth.currentUser.phoneNumber,
+        phone: '+' + phone.replace(/\D/g, ''),
         createdAt: new Date().toISOString(),
       });
       
       setShowSuccessPopup(true);
       setTimeout(() => {
-        window.location.href = '/';
-      }, 1500);
+        router.push('/');
+      }, 600);
     } catch (error: any) {
       console.error(error);
       toast.error('Failed to save profile. Try again.');
@@ -263,7 +267,7 @@ export default function AuthScreen() {
               >
                 <h1 className="text-2xl font-bold text-foreground mb-1">Verify OTP</h1>
                 <p className="text-sm text-muted-foreground mb-8">
-                  Enter the 6-digit code sent to +{phone}
+                  Enter the code sent to +{phone}
                 </p>
 
                 <form onSubmit={verifyOTP} className="space-y-5">
@@ -283,7 +287,7 @@ export default function AuthScreen() {
                         value={otp}
                         onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                         className="w-full pl-10 pr-4 py-3 rounded-xl bg-input border border-border focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none text-sm transition-all text-center tracking-widest font-mono text-lg"
-                        placeholder="••••••"
+                        placeholder="••••"
                       />
                     </div>
                   </div>
@@ -298,7 +302,7 @@ export default function AuthScreen() {
                     </button>
                     <button
                       type="submit"
-                      disabled={isLoading || otp.length !== 6}
+                      disabled={isLoading || otp.length < 4}
                       className="flex-[2] py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                     >
                       {isLoading ? (

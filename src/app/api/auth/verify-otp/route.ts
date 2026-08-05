@@ -4,45 +4,48 @@ import { adminAuth } from '@/lib/firebase/admin';
 export async function POST(req: Request) {
   try {
     const { phone, otp } = await req.json();
-    
-    // Clean phone number (remove +)
-    const mobile = phone.replace('+', '');
 
-    const authKey = process.env.MSG91_AUTH_KEY;
-
-    if (!authKey) {
-      return NextResponse.json(
-        { error: 'MSG91 credentials not configured in environment variables.' },
-        { status: 500 }
-      );
+    if (!phone || !otp) {
+      return NextResponse.json({ error: 'Phone number and OTP are required' }, { status: 400 });
     }
 
-    const url = `https://control.msg91.com/api/v5/otp/verify?otp=${otp}&mobile=${mobile}`;
-    const options = {
+    // Extract digits
+    const cleanPhone = phone.replace(/\D/g, '');
+    const formattedPhone = '+' + cleanPhone; // Firebase expects E.164
+
+    const authKey = process.env.MSG91_AUTH_KEY;
+    if (!authKey) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    }
+
+    const msg91Url = `https://control.msg91.com/api/v5/otp/verify?otp=${otp}&mobile=${cleanPhone}`;
+
+    const response = await fetch(msg91Url, {
       method: 'GET',
       headers: {
         'authkey': authKey,
       },
-    };
+    });
 
-    const response = await fetch(url, options);
     const data = await response.json();
+    console.log('MSG91 Verify OTP Response:', data);
 
     if (data.type === 'error') {
-      return NextResponse.json({ error: data.message }, { status: 400 });
+      return NextResponse.json({ error: data.message || 'Invalid OTP' }, { status: 400 });
     }
 
-    // OTP Verified Successfully!
-    // Generate Firebase Custom Token
-    const uid = phone; // Using the E.164 phone number as UID
-    const customToken = await adminAuth.createCustomToken(uid);
+    // Successfully verified. Mint a custom Firebase token.
+    // Create a deterministic UID based on the phone number
+    const uid = `phone_${cleanPhone}`;
+    
+    // Create the custom token
+    const customToken = await adminAuth.createCustomToken(uid, {
+      phoneNumber: formattedPhone
+    });
 
     return NextResponse.json({ success: true, token: customToken });
   } catch (error: any) {
-    console.error('Error verifying OTP:', error);
-    return NextResponse.json(
-      { error: 'Failed to verify OTP' },
-      { status: 500 }
-    );
+    console.error('Verify OTP Error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
