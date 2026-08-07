@@ -339,7 +339,13 @@ export default function RecentReports() {
                 </div>
               </div>
 
-              <div className="p-6 border-t border-border bg-muted/30 flex justify-end print:hidden">
+              <div className="p-6 border-t border-border bg-muted/30 flex items-center justify-between print:hidden">
+                <Link
+                  href="/talk-to-astrologer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white gold-gradient-bg hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20"
+                >
+                  Clarify Doubts? Consult Astrologer
+                </Link>
                 <button
                   onClick={() => window.print()}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"
