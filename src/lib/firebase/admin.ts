@@ -4,11 +4,15 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 if (!getApps().length) {
   try {
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY
+      ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n').replace(/^"|"$/g, '')
+      : '-----BEGIN PRIVATE KEY-----\ndemo\n-----END PRIVATE KEY-----\n';
+
     initializeApp({
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID || 'demo-project',
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL || 'demo@demo.com',
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n') || '-----BEGIN PRIVATE KEY-----\ndemo\n-----END PRIVATE KEY-----\n',
+        privateKey: privateKey,
       }),
     });
   } catch (error) {
