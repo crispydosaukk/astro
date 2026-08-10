@@ -13,15 +13,20 @@ import {
 } from 'lucide-react';
 import { auth, db } from '@/lib/firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export default function AstrologerDashboardPage() {
+  const router = useRouter();
   const [astrologerName, setAstrologerName] = useState('Astrologer');
   const [isOnline, setIsOnline] = useState(false);
+  const [activeCalls, setActiveCalls] = useState<any[]>([]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeSnapshot: () => void;
+    
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const docRef = doc(db, 'astrologers', user.uid);
         const docSnap = await getDoc(docRef);
@@ -30,9 +35,28 @@ export default function AstrologerDashboardPage() {
           setAstrologerName(data.name || 'Astrologer');
           setIsOnline(data.isOnline || false);
         }
+
+        // Listen for incoming active calls
+        const q = query(
+          collection(db, 'consultations'),
+          where('astrologerId', '==', user.uid),
+          where('status', '==', 'active')
+        );
+        
+        unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+          const calls: any[] = [];
+          snapshot.forEach((doc) => {
+            calls.push({ id: doc.id, ...doc.data() });
+          });
+          setActiveCalls(calls);
+        });
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+    };
   }, []);
 
   const toggleOnlineStatus = async () => {
@@ -77,6 +101,40 @@ export default function AstrologerDashboardPage() {
           </button>
         </div>
       </div>
+
+      {/* Active Calls Banner */}
+      {activeCalls.length > 0 && (
+        <div className="space-y-4">
+          {activeCalls.map((call) => (
+            <motion.div
+              key={call.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#C9952B]/10 border border-[#C9952B]/30 rounded-2xl p-6 flex items-center justify-between shadow-[0_0_30px_rgba(201,149,43,0.15)]"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[#C9952B]/20 flex items-center justify-center animate-pulse">
+                  {call.type === 'video' ? <Phone className="text-[#C9952B]" /> : <MessageSquare className="text-[#C9952B]" />}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                    Incoming {call.type} Call <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-white">{call.customerName}</span> is waiting for you to join the session.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => router.push(`/call/${call.roomID}`)}
+                className="px-6 py-3 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-90 transition-all flex items-center gap-2 shadow-lg"
+              >
+                Join Call Now
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

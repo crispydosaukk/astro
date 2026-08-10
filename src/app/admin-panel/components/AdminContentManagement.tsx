@@ -6,6 +6,8 @@ import {
   HomepageContent,
   defaultHomepageContent,
 } from '@/lib/cms';
+import { storage } from '@/lib/firebase/config';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import AdminServicePagesEditor from './AdminServicePagesEditor';
 import {
   Save,
@@ -17,6 +19,8 @@ import {
   Star,
   ChevronUp,
   ChevronDown,
+  ImagePlus,
+  X,
 } from 'lucide-react';
 
 const contentTabs = [
@@ -33,6 +37,7 @@ export default function AdminContentManagement() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState('tab-hero');
+  const [uploadingImage, setUploadingImage] = useState<{ [key: number]: boolean }>({});
 
   useEffect(() => {
     async function fetchContent() {
@@ -72,6 +77,36 @@ export default function AdminContentManagement() {
     const newItems = [...content.services.items];
     newItems[index] = { ...newItems[index], [field]: val };
     setContent({ ...content, services: { ...content.services, items: newItems } });
+  };
+
+  const handleImageUpload = async (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingImage(prev => ({ ...prev, [idx]: true }));
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await res.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Upload failed');
+      }
+      
+      handleServiceChange(idx, 'image', data.url);
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      alert("Failed to upload image: " + error.message);
+    } finally {
+      setUploadingImage(prev => ({ ...prev, [idx]: false }));
+    }
   };
 
   const moveService = (index: number, direction: 'up' | 'down') => {
@@ -417,13 +452,26 @@ export default function AdminContentManagement() {
                       <div className="grid md:grid-cols-5 gap-4 mt-4">
                         <div className="space-y-2">
                           <label className="text-xs font-medium text-muted-foreground">
-                            Price (£)
+                            Price (Base INR)
                           </label>
                           <input
                             type="number"
-                            value={svc.price || 8}
-                            onChange={(e) => handleServiceChange(idx, 'price' as any, e.target.value)}
+                            value={svc.price || 100}
+                            onChange={(e) => handleServiceChange(idx, 'price' as any, Number(e.target.value))}
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-muted-foreground">
+                            Price (USD)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={svc.priceUSD || ''}
+                            onChange={(e) => handleServiceChange(idx, 'priceUSD' as any, Number(e.target.value))}
+                            className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+                            placeholder="e.g. 10.00"
                           />
                         </div>
                         <div className="space-y-2">
@@ -458,6 +506,44 @@ export default function AdminContentManagement() {
                             onChange={(e) => handleServiceChange(idx, 'href', e.target.value)}
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
                           />
+                        </div>
+                      </div>
+                      <div className="space-y-2 mt-4">
+                        <label className="text-xs font-medium text-muted-foreground flex justify-between items-center">
+                          <span>Remedy Image</span>
+                          {uploadingImage[idx] && <Loader2 size={12} className="animate-spin text-accent" />}
+                        </label>
+                        <div className="flex gap-4 items-start">
+                          <div className="relative w-32 h-20 rounded-lg overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center">
+                            {svc.image ? (
+                              <img src={svc.image} alt="Preview" className="w-full h-full object-cover" />
+                            ) : (
+                              <ImagePlus className="text-muted-foreground opacity-50" size={24} />
+                            )}
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <label className="cursor-pointer flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm font-medium">
+                              <ImagePlus size={16} />
+                              Upload Image
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handleImageUpload(idx, e)}
+                                disabled={uploadingImage[idx]}
+                              />
+                            </label>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">or URL:</span>
+                              <input
+                                type="text"
+                                value={svc.image || ''}
+                                onChange={(e) => handleServiceChange(idx, 'image', e.target.value)}
+                                className="flex-1 px-3 py-1.5 rounded-lg bg-card border border-border text-xs"
+                                placeholder="https://..."
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

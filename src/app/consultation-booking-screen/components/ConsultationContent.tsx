@@ -61,8 +61,6 @@ const bookedSlots = ['10:00 AM', '11:30 AM', '3:00 PM', '6:00 PM'];
 const currencies = [
   { code: 'INR', symbol: '₹', label: 'Indian Rupee', rate: 1 },
   { code: 'USD', symbol: '$', label: 'US Dollar', rate: 0.012 },
-  { code: 'GBP', symbol: '£', label: 'British Pound', rate: 0.0095 },
-  { code: 'EUR', symbol: '€', label: 'Euro', rate: 0.011 },
 ];
 
 export default function ConsultationContent() {
@@ -73,12 +71,11 @@ export default function ConsultationContent() {
   const [filterSpecialty, setFilterSpecialty] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('rating');
   const [selectedAstrologer, setSelectedAstrologer] = useState<Astrologer | null>(null);
-  const [bookingStep, setBookingStep] = useState<1 | 2 | 3>(1);
+  const [bookingStep, setBookingStep] = useState<1 | 2>(1);
   const [consultationType, setConsultationType] = useState<'video' | 'call'>('video');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [duration, setDuration] = useState(30);
+  const [duration, setDuration] = useState(5);
   const [isBooking, setIsBooking] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
 
   React.useEffect(() => {
@@ -151,14 +148,18 @@ export default function ConsultationContent() {
 
   const handleBook = async () => {
     setIsBooking(true);
-    // Backend: POST /api/appointments/book
-    await new Promise((r) => setTimeout(r, 2000));
+    // Simulate booking API
+    await new Promise((r) => setTimeout(r, 1000));
+    setIsWaiting(true);
+    toast.success('Request sent! Waiting for astrologer to accept...');
+    
+    // Simulate wait time
+    await new Promise((r) => setTimeout(r, 3000));
+    setIsWaiting(false);
     setIsBooking(false);
     setSelectedAstrologer(null);
     setBookingStep(1);
-    toast.success(
-      `Consultation booked with ${selectedAstrologer?.name}! You'll receive a confirmation on WhatsApp.`
-    );
+    toast.success(`Connected to ${selectedAstrologer?.name}! Redirecting...`);
   };
 
   const totalCost = selectedAstrologer ? selectedAstrologer.pricePerMin * duration : 0;
@@ -459,33 +460,26 @@ export default function ConsultationContent() {
               </div>
 
               {/* Step indicator */}
-              <div className="flex items-center gap-0 p-5 border-b border-border">
-                {[
-                  { n: 1, label: 'Type' },
-                  { n: 2, label: 'Schedule' },
-                  { n: 3, label: 'Payment' },
-                ].map((s, si) => (
-                  <React.Fragment key={`booking-step-${s.n}`}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${bookingStep >= s.n ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground'}`}
-                      >
-                        {bookingStep > s.n ? <Check size={12} /> : s.n}
-                      </div>
-                      <span
-                        className={`text-xs font-medium ${bookingStep >= s.n ? 'text-foreground' : 'text-muted-foreground'}`}
-                      >
-                        {s.label}
-                      </span>
+              <div className="flex items-center justify-between relative">
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border -z-10" />
+                      {[
+                        { step: 1, label: 'Type' },
+                        { step: 2, label: 'Payment' },
+                      ].map((s) => (
+                        <div key={`step-${s.step}`} className="flex items-center gap-3 bg-card px-2">
+                          <div
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${bookingStep >= s.step ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground'}`}
+                          >
+                            {s.step}
+                          </div>
+                          <span
+                            className={`text-xs font-semibold ${bookingStep >= s.step ? 'text-foreground' : 'text-muted-foreground'}`}
+                          >
+                            {s.label}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                    {si < 2 && (
-                      <div
-                        className={`flex-1 h-0.5 mx-2 transition-all ${bookingStep > s.n ? 'bg-accent' : 'bg-border'}`}
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
 
               <div className="p-5">
                 {/* Step 1: Consultation type */}
@@ -535,7 +529,7 @@ export default function ConsultationContent() {
                     <div>
                       <h3 className="font-semibold text-foreground mb-3">Duration</h3>
                       <div className="flex gap-2 flex-wrap">
-                        {[15, 30, 45, 60].map((d) => (
+                        {[5, 10, 15, 30, 45, 60].map((d) => (
                           <button
                             key={`dur-${d}`}
                             onClick={() => setDuration(d)}
@@ -559,99 +553,13 @@ export default function ConsultationContent() {
                       onClick={() => setBookingStep(2)}
                       className="w-full py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all flex items-center justify-center gap-2"
                     >
-                      Continue to Schedule <ChevronRight size={16} />
+                      Continue to Payment <ChevronRight size={16} />
                     </button>
                   </div>
                 )}
 
-                {/* Step 2: Schedule */}
+                {/* Step 2: Payment */}
                 {bookingStep === 2 && (
-                  <div className="space-y-5">
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-4">
-                        Select Date — July 2026
-                      </h3>
-                      <div className="grid grid-cols-7 gap-1 mb-2">
-                        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
-                          <div
-                            key={`day-header-${d}`}
-                            className="text-center text-xs font-medium text-muted-foreground py-1"
-                          >
-                            {d}
-                          </div>
-                        ))}
-                        {Array.from({ length: firstDay }, (_, i) => (
-                          <div key={`empty-${i}`} />
-                        ))}
-                        {calendarDays.map((day) => {
-                          const dateStr = `2026-07-${day.toString().padStart(2, '0')}`;
-                          const isPast = day < 3;
-                          const isUnavail = unavailableDays.includes(day);
-                          const isSelected = selectedDate === dateStr;
-                          return (
-                            <button
-                              key={`cal-day-${day}`}
-                              onClick={() => !isPast && !isUnavail && setSelectedDate(dateStr)}
-                              disabled={isPast || isUnavail}
-                              className={`aspect-square rounded-lg text-xs font-medium transition-all
-                                ${isSelected ? 'gold-gradient-bg text-white' : ''}
-                                ${!isSelected && !isPast && !isUnavail ? 'hover:bg-muted text-foreground' : ''}
-                                ${isPast || isUnavail ? 'text-muted-foreground/40 cursor-not-allowed' : ''}
-                              `}
-                            >
-                              {day}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {selectedDate && (
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                        <h3 className="font-semibold text-foreground mb-3">Available Time Slots</h3>
-                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                          {timeSlots.map((slot) => {
-                            const isBooked = bookedSlots.includes(slot);
-                            const isSelected = selectedTime === slot;
-                            return (
-                              <button
-                                key={`slot-${slot}`}
-                                onClick={() => !isBooked && setSelectedTime(slot)}
-                                disabled={isBooked}
-                                className={`py-2 rounded-lg text-xs font-medium transition-all
-                                  ${isSelected ? 'gold-gradient-bg text-white' : ''}
-                                  ${!isSelected && !isBooked ? 'bg-muted hover:bg-muted/80 text-foreground' : ''}
-                                  ${isBooked ? 'bg-muted/30 text-muted-foreground/40 cursor-not-allowed line-through' : ''}
-                                `}
-                              >
-                                {slot}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setBookingStep(1)}
-                        className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold hover:border-accent/50 transition-all"
-                      >
-                        Back
-                      </button>
-                      <button
-                        onClick={() => selectedDate && selectedTime && setBookingStep(3)}
-                        disabled={!selectedDate || !selectedTime}
-                        className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-                      >
-                        Continue to Payment <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Payment */}
-                {bookingStep === 3 && (
                   <div className="space-y-5">
                     <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
                       <h3 className="font-semibold text-foreground">Booking Summary</h3>
@@ -664,8 +572,7 @@ export default function ConsultationContent() {
                               ? 'Video Consultation'
                               : 'Phone Consultation',
                         },
-                        { label: 'Date', value: selectedDate },
-                        { label: 'Time', value: selectedTime + ' IST' },
+                        { label: 'Mode', value: 'Instant Connect' },
                         { label: 'Duration', value: `${duration} minutes` },
                         {
                           label: 'Rate',
@@ -719,17 +626,22 @@ export default function ConsultationContent() {
 
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setBookingStep(2)}
+                        onClick={() => setBookingStep(1)}
                         className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold hover:border-accent/50 transition-all"
                       >
                         Back
                       </button>
                       <button
                         onClick={handleBook}
-                        disabled={isBooking}
+                        disabled={isBooking || isWaiting}
                         className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                       >
-                        {isBooking ? (
+                        {isWaiting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Connecting...
+                          </>
+                        ) : isBooking ? (
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                           <>

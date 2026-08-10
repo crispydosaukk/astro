@@ -8,17 +8,22 @@ import { auth } from '@/lib/firebase/config';
 import { signOut as firebaseSignOut } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, userData, loading } = useUserData();
   const router = useRouter();
+  const { formatPrice } = useCurrency();
 
   const handleLogout = async () => {
+
     try {
       await firebaseSignOut(auth);
       setIsOpen(false);
+      setShowLogoutConfirm(false);
       router.push('/');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -100,7 +105,10 @@ export default function UserDropdown() {
                 className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors flex justify-between items-center"
               >
                 <span>Wallet Transactions</span>
-                <span className="font-bold text-black">₹ {walletBalance}</span>
+                <div className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 flex flex-col items-end">
+                  <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider">Wallet Balance</span>
+                  <span className="font-bold text-black">{formatPrice(walletBalance)}</span>
+                </div>
               </Link>
               <Link
                 href="/order-history"
@@ -125,13 +133,54 @@ export default function UserDropdown() {
               </Link>
 
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  setIsOpen(false);
+                  setShowLogoutConfirm(true);
+                }}
                 className="px-6 py-3 text-[17px] text-gray-700 hover:bg-slate-50 transition-colors text-left"
               >
                 Logout
               </button>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowLogoutConfirm(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden relative z-10"
+            >
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <UserIcon size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Sign Out</h3>
+                <p className="text-gray-500 text-sm">Are you sure you want to sign out of your account?</p>
+              </div>
+              <div className="flex border-t border-gray-100 bg-gray-50/50">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-4 text-gray-600 font-semibold hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <div className="w-px bg-gray-200" />
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 py-4 text-red-600 font-bold hover:bg-red-50 transition-colors"
+                >
+                  Yes, Sign out
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

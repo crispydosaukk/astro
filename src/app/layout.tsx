@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { CurrencyProvider } from '@/lib/CurrencyContext';
 import '../styles/tailwind.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -36,8 +37,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${ibmPlexMono.variable} dark`}>
       <body className={plusJakartaSans.className} suppressHydrationWarning>
-        {children}
-        <Toaster position="bottom-right" richColors />
+        <CurrencyProvider>
+          {children}
+          <Toaster position="bottom-right" richColors />
+        </CurrencyProvider>
       </body>
     </html>
   );

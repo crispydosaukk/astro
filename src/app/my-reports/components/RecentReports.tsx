@@ -206,7 +206,7 @@ export default function RecentReports() {
             >
               {/* Print Header with Logo */}
               <div className="hidden print:flex flex-col items-center justify-center pb-6 mb-6 border-b-2 border-black">
-                 <img src="/AstroParihar_Logo.png" alt="AstroParihar Logo" className="h-24 object-contain" />
+                <img src="/AstroParihar_Logo.png" alt="AstroParihar Logo" className="h-24 object-contain" />
               </div>
 
               <div className="p-6 sm:p-8 border-b border-border flex items-center justify-between bg-muted/30 print:bg-transparent print:border-none print:p-0">
@@ -233,109 +233,109 @@ export default function RecentReports() {
                       if (data && data.recommendationTitle) {
                         return (
                           <div className="space-y-6">
-                          <div className="p-5 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 print:break-inside-avoid print:border-gray-300 print:bg-transparent">
-                            <p className="text-xs text-[#C9952B] font-semibold mb-1 uppercase tracking-wider print:text-black">
-                              {data.recommendationTitle
-                                .replace(/Recommended /i, '')
-                                .replace(/Get Your /i, '')}
-                            </p>
-                            <h2 className="text-2xl font-bold text-foreground mb-2 print:text-black">
-                              {data.recommendationName}
-                            </h2>
-                            <p className="text-sm text-muted-foreground font-medium flex items-center gap-2 print:text-gray-700">
-                              {data.timing}{' '}
-                              {data.duration && data.duration !== 'N/A' && `· ${data.duration}`}
-                            </p>
+                            <div className="p-5 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 print:break-inside-avoid print:border-gray-300 print:bg-transparent">
+                              <p className="text-xs text-[#C9952B] font-semibold mb-1 uppercase tracking-wider print:text-black">
+                                {data.recommendationTitle
+                                  .replace(/Recommended /i, '')
+                                  .replace(/Get Your /i, '')}
+                              </p>
+                              <h2 className="text-2xl font-bold text-foreground mb-2 print:text-black">
+                                {data.recommendationName}
+                              </h2>
+                              <p className="text-sm text-muted-foreground font-medium flex items-center gap-2 print:text-gray-700">
+                                {data.timing}{' '}
+                                {data.duration && data.duration !== 'N/A' && `· ${data.duration}`}
+                              </p>
+                            </div>
+
+                            {data.materials && (
+                              <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
+                                <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
+                                  Materials / Requirements
+                                </p>
+                                <p className="text-sm text-foreground leading-relaxed print:text-black">
+                                  {data.materials}
+                                </p>
+                              </div>
+                            )}
+
+                            {(data.astrologicalAnalysis || data.description) && (
+                              <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
+                                <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
+                                  Astrological Insights
+                                </p>
+                                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap print:text-black">
+                                  {data.astrologicalAnalysis || data.description}
+                                </p>
+                              </div>
+                            )}
+
+                            {data.procedure && (
+                              <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
+                                <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
+                                  Procedure / Methodology
+                                </p>
+                                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap print:text-black">
+                                  {data.procedure}
+                                </p>
+                              </div>
+                            )}
+
+                            {data.rules && (
+                              <div className="p-5 rounded-2xl bg-card border border-[#C9952B]/20 shadow-sm relative overflow-hidden print:break-inside-avoid print:shadow-none print:border-gray-300">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-[#C9952B] print:hidden" />
+                                <p className="text-xs text-[#C9952B] font-semibold mb-2 uppercase tracking-wider pl-2 print:pl-0 print:text-black">
+                                  Rules & Restrictions
+                                </p>
+                                <p className="text-sm text-foreground leading-relaxed pl-2 print:pl-0 print:text-black">
+                                  {data.rules}
+                                </p>
+                              </div>
+                            )}
                           </div>
-
-                          {data.materials && (
-                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
-                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
-                                Materials / Requirements
-                              </p>
-                              <p className="text-sm text-foreground leading-relaxed print:text-black">
-                                {data.materials}
-                              </p>
-                            </div>
-                          )}
-
-                          {(data.astrologicalAnalysis || data.description) && (
-                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
-                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
-                                Astrological Insights
-                              </p>
-                              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap print:text-black">
-                                {data.astrologicalAnalysis || data.description}
-                              </p>
-                            </div>
-                          )}
-
-                          {data.procedure && (
-                            <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300">
-                              <p className="text-xs text-muted-foreground font-semibold mb-2 uppercase tracking-wider print:text-black">
-                                Procedure / Methodology
-                              </p>
-                              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap print:text-black">
-                                {data.procedure}
-                              </p>
-                            </div>
-                          )}
-
-                          {data.rules && (
-                            <div className="p-5 rounded-2xl bg-card border border-[#C9952B]/20 shadow-sm relative overflow-hidden print:break-inside-avoid print:shadow-none print:border-gray-300">
-                              <div className="absolute top-0 left-0 w-1 h-full bg-[#C9952B] print:hidden" />
-                              <p className="text-xs text-[#C9952B] font-semibold mb-2 uppercase tracking-wider pl-2 print:pl-0 print:text-black">
-                                Rules & Restrictions
-                              </p>
-                              <p className="text-sm text-foreground leading-relaxed pl-2 print:pl-0 print:text-black">
-                                {data.rules}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    }
-                  } catch (e) {
-                    // Not JSON, fallback to markdown
-                  }
-
-                  return (
-                    <div className="prose prose-invert prose-p:text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground max-w-none">
-                      {selectedReport.reportContent?.split('\n').map((line: string, i: number) => {
-                        if (line.startsWith('### '))
-                          return (
-                            <h4 key={i} className="text-lg font-bold mt-6 mb-3 text-[#C9952B]">
-                              {line.replace('### ', '')}
-                            </h4>
-                          );
-                        if (line.startsWith('## '))
-                          return (
-                            <h3 key={i} className="text-xl font-bold mt-8 mb-4 text-[#C9952B]">
-                              {line.replace('## ', '')}
-                            </h3>
-                          );
-                        if (line.startsWith('# '))
-                          return (
-                            <h2 key={i} className="text-2xl font-bold mt-8 mb-4 text-[#C9952B]">
-                              {line.replace('# ', '')}
-                            </h2>
-                          );
-                        if (line.startsWith('- '))
-                          return (
-                            <li key={i} className="ml-4 mb-1">
-                              {line.substring(2)}
-                            </li>
-                          );
-                        if (line.trim() === '') return <br key={i} />;
-                        return (
-                          <p key={i} className="mb-4 leading-relaxed">
-                            {line.replace(/\*\*(.*?)\*\*/g, '$1')}
-                          </p>
                         );
-                      })}
-                    </div>
-                  );
-                })()}
+                      }
+                    } catch (e) {
+                      // Not JSON, fallback to markdown
+                    }
+
+                    return (
+                      <div className="prose prose-invert prose-p:text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground max-w-none">
+                        {selectedReport.reportContent?.split('\n').map((line: string, i: number) => {
+                          if (line.startsWith('### '))
+                            return (
+                              <h4 key={i} className="text-lg font-bold mt-6 mb-3 text-[#C9952B]">
+                                {line.replace('### ', '')}
+                              </h4>
+                            );
+                          if (line.startsWith('## '))
+                            return (
+                              <h3 key={i} className="text-xl font-bold mt-8 mb-4 text-[#C9952B]">
+                                {line.replace('## ', '')}
+                              </h3>
+                            );
+                          if (line.startsWith('# '))
+                            return (
+                              <h2 key={i} className="text-2xl font-bold mt-8 mb-4 text-[#C9952B]">
+                                {line.replace('# ', '')}
+                              </h2>
+                            );
+                          if (line.startsWith('- '))
+                            return (
+                              <li key={i} className="ml-4 mb-1">
+                                {line.substring(2)}
+                              </li>
+                            );
+                          if (line.trim() === '') return <br key={i} />;
+                          return (
+                            <p key={i} className="mb-4 leading-relaxed">
+                              {line.replace(/\*\*(.*?)\*\*/g, '$1')}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -344,7 +344,7 @@ export default function RecentReports() {
                   href="/talk-to-astrologer"
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white gold-gradient-bg hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20"
                 >
-                  Clarify Doubts? Consult Astrologer
+                  Clarify Doubts? Talk to our Astrologer
                 </Link>
                 <button
                   onClick={() => window.print()}

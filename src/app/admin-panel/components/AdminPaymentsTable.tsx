@@ -3,90 +3,12 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Download, RefreshCw, Eye } from 'lucide-react';
 
-const payments = [
-  {
-    id: 'pay-001',
-    txnId: 'TXN-AP-84920',
-    user: 'Arjun Sharma',
-    type: 'Premium Subscription',
-    amount: '₹499',
-    gateway: 'Razorpay',
-    date: '3 Jul 2026',
-    status: 'success',
-  },
-  {
-    id: 'pay-002',
-    txnId: 'TXN-AP-84919',
-    user: 'Ananya K.',
-    type: 'Consultation (45 min)',
-    amount: '₹1,350',
-    gateway: 'Stripe',
-    date: '3 Jul 2026',
-    status: 'success',
-  },
-  {
-    id: 'pay-003',
-    txnId: 'TXN-AP-84918',
-    user: 'Rajan Mehta',
-    type: 'Annual Subscription',
-    amount: '₹3,999',
-    gateway: 'Razorpay',
-    date: '2 Jul 2026',
-    status: 'success',
-  },
-  {
-    id: 'pay-004',
-    txnId: 'TXN-AP-84917',
-    user: 'Suresh Pillai',
-    type: 'Consultation (60 min)',
-    amount: '₹2,100',
-    gateway: 'UPI',
-    date: '2 Jul 2026',
-    status: 'success',
-  },
-  {
-    id: 'pay-005',
-    txnId: 'TXN-AP-84916',
-    user: 'Deepak Nambiar',
-    type: 'Premium Subscription',
-    amount: '₹499',
-    gateway: 'Razorpay',
-    date: '1 Jul 2026',
-    status: 'refunded',
-  },
-  {
-    id: 'pay-006',
-    txnId: 'TXN-AP-84915',
-    user: 'Kavitha Reddy',
-    type: 'Consultation (30 min)',
-    amount: '₹750',
-    gateway: 'UPI',
-    date: '1 Jul 2026',
-    status: 'failed',
-  },
-  {
-    id: 'pay-007',
-    txnId: 'TXN-AP-84914',
-    user: 'Meera Iyer',
-    type: 'Annual Subscription',
-    amount: '₹3,999',
-    gateway: 'Stripe',
-    date: '30 Jun 2026',
-    status: 'success',
-  },
-  {
-    id: 'pay-008',
-    txnId: 'TXN-AP-84913',
-    user: 'Preethi Sundaram',
-    type: 'Consultation (15 min)',
-    amount: '₹375',
-    gateway: 'Razorpay',
-    date: '30 Jun 2026',
-    status: 'success',
-  },
-];
+import { db } from '@/lib/firebase/config';
+import { collectionGroup, getDocs, query } from 'firebase/firestore';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 const statusColors: Record<string, string> = {
+  completed: 'bg-green-500/15 text-green-400',
   success: 'bg-green-500/15 text-green-400',
   failed: 'bg-red-500/15 text-red-400',
   refunded: 'bg-amber-500/15 text-amber-400',
@@ -94,25 +16,58 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminPaymentsTable() {
+  const { formatPrice } = useCurrency();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterGateway, setFilterGateway] = useState('all');
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        const q = query(collectionGroup(db, 'wallet_transactions'));
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Sort locally to avoid needing a composite index in Firestore
+        data.sort((a, b) => {
+          if (!a.date) return 1;
+          if (!b.date) return -1;
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+        
+        setPayments(data);
+      } catch (error) {
+        console.error('Error fetching payments:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayments();
+  }, []);
 
   const filtered = payments.filter((p) => {
+    const pId = p.stripeSessionId || p.id || '';
     const matchSearch =
-      p.user.toLowerCase().includes(search.toLowerCase()) ||
-      p.txnId.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === 'all' || p.status === filterStatus;
-    const matchGateway = filterGateway === 'all' || p.gateway === filterGateway;
+      (p.user || '').toLowerCase().includes(search.toLowerCase()) ||
+      pId.toLowerCase().includes(search.toLowerCase()) ||
+      (p.description || '').toLowerCase().includes(search.toLowerCase());
+    
+    // Default our status logic for 'completed' vs 'success'
+    const status = p.status || 'completed';
+    const mappedStatus = status === 'completed' ? 'success' : status;
+    const matchStatus = filterStatus === 'all' || mappedStatus === filterStatus;
+    
+    const gateway = p.stripeSessionId ? 'Stripe' : 'Wallet';
+    const matchGateway = filterGateway === 'all' || gateway === filterGateway;
+    
     return matchSearch && matchStatus && matchGateway;
   });
 
   const totalRevenue = filtered
-    .filter((p) => p.status === 'success')
-    .reduce((sum, p) => {
-      const num = parseInt(p.amount.replace(/[^0-9]/g, ''));
-      return sum + num;
-    }, 0);
+    .filter((p) => (p.status === 'completed' || p.status === 'success') && p.type === 'credit')
+    .reduce((sum, p) => sum + (p.amount || 0), 0);
 
   return (
     <div className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden">
@@ -120,8 +75,8 @@ export default function AdminPaymentsTable() {
         <div className="flex-1">
           <h2 className="text-base font-bold text-foreground">Payment Transactions</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Filtered total:{' '}
-            <span className="text-accent font-semibold">₹{totalRevenue.toLocaleString()}</span>
+            Filtered Revenue (Top-ups):{' '}
+            <span className="text-accent font-semibold">{formatPrice(totalRevenue)}</span>
           </p>
         </div>
         <div className="relative">
@@ -153,9 +108,8 @@ export default function AdminPaymentsTable() {
           className="px-3 py-2 rounded-xl bg-muted border border-border text-sm outline-none"
         >
           <option value="all">All Gateways</option>
-          <option value="Razorpay">Razorpay</option>
           <option value="Stripe">Stripe</option>
-          <option value="UPI">UPI</option>
+          <option value="Wallet">Wallet Deductions</option>
         </select>
         <button className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border hover:border-accent/50 text-sm hover:text-accent transition-all">
           <Download size={13} /> Export CSV
@@ -186,63 +140,89 @@ export default function AdminPaymentsTable() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((pay, i) => (
-              <motion.tr
-                key={pay.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
-                className="border-b border-border/50 hover:bg-muted/30 transition-colors group"
-              >
-                <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{pay.txnId}</td>
-                <td className="px-5 py-4 font-medium text-foreground">{pay.user}</td>
-                <td className="px-5 py-4 text-muted-foreground">{pay.type}</td>
-                <td className="px-5 py-4 font-bold text-foreground tabular-nums">{pay.amount}</td>
-                <td className="px-5 py-4">
-                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-                    {pay.gateway}
-                  </span>
+            {loading ? (
+              <tr>
+                <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">
+                  Loading payments...
                 </td>
-                <td className="px-5 py-4 text-muted-foreground whitespace-nowrap">{pay.date}</td>
-                <td className="px-5 py-4">
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[pay.status] || 'bg-muted text-muted-foreground'}`}
+              </tr>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">
+                  No payments found
+                </td>
+              </tr>
+            ) : (
+              filtered.map((pay, i) => {
+                const gateway = pay.stripeSessionId ? 'Stripe' : 'Wallet';
+                const status = pay.status || 'completed';
+                const mappedStatus = status === 'completed' ? 'success' : status;
+                let dateStr = 'Unknown';
+                if (pay.date) {
+                   dateStr = new Date(pay.date).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                }
+
+                return (
+                  <motion.tr
+                    key={pay.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="border-b border-border/50 hover:bg-muted/30 transition-colors group"
                   >
-                    {pay.status.charAt(0).toUpperCase() + pay.status.slice(1)}
-                  </span>
-                </td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      className="p-1.5 rounded-lg hover:bg-muted transition-all"
-                      title="View transaction"
-                    >
-                      <Eye size={13} className="text-muted-foreground" />
-                    </button>
-                    {pay.status === 'success' && (
-                      <button
-                        className="p-1.5 rounded-lg hover:bg-muted transition-all"
-                        title="Process refund"
+                    <td className="px-5 py-4 font-mono text-xs text-muted-foreground">{pay.stripeSessionId?.substring(0,12) || pay.id.substring(0,8)}...</td>
+                    <td className="px-5 py-4 font-medium text-foreground">{pay.user || 'Customer'}</td>
+                    <td className="px-5 py-4 text-muted-foreground">{pay.description || 'Transaction'}</td>
+                    <td className={`px-5 py-4 font-bold tabular-nums ${pay.type === 'credit' ? 'text-green-400' : 'text-foreground'}`}>
+                      {pay.type === 'credit' ? '+' : '-'}{formatPrice(pay.amount || 0)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                        {gateway}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground whitespace-nowrap">{dateStr}</td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[mappedStatus] || 'bg-muted text-muted-foreground'}`}
                       >
-                        <RefreshCw size={13} className="text-amber-400" />
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </motion.tr>
-            ))}
+                        {mappedStatus.charAt(0).toUpperCase() + mappedStatus.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          className="p-1.5 rounded-lg hover:bg-muted transition-all"
+                          title="View transaction"
+                        >
+                          <Eye size={13} className="text-muted-foreground" />
+                        </button>
+                        {mappedStatus === 'success' && (
+                          <button
+                            className="p-1.5 rounded-lg hover:bg-muted transition-all"
+                            title="Process refund"
+                          >
+                            <RefreshCw size={13} className="text-amber-400" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </motion.tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
 
       <div className="px-5 py-4 border-t border-border flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
-          {filtered.length} transactions · {filtered.filter((p) => p.status === 'success').length}{' '}
+          {filtered.length} transactions · {filtered.filter((p) => p.status === 'completed' || p.status === 'success').length}{' '}
           successful
         </span>
         <div className="flex items-center gap-4 text-xs">
           <span className="text-green-400 font-semibold">
-            ✓ {filtered.filter((p) => p.status === 'success').length} Success
+            ✓ {filtered.filter((p) => p.status === 'completed' || p.status === 'success').length} Success
           </span>
           <span className="text-red-400 font-semibold">
             ✗ {filtered.filter((p) => p.status === 'failed').length} Failed

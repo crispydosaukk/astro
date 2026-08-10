@@ -10,6 +10,7 @@ export interface ServiceItem {
   iconColor: string;
   href: string;
   badge: string;
+  image?: string;
   price?: number;
 }
 
@@ -78,6 +79,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-amber-400',
         href: '/remedies/gemstone',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_gemstone_1785738400359.png',
       },
       {
         id: 'svc-mantra',
@@ -89,6 +91,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-blue-400',
         href: '/remedies/mantra',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_mantra_1785738410624.png',
       },
       {
         id: 'svc-yantra',
@@ -99,6 +102,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-green-400',
         href: '/remedies/yantra',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_yantra_1785738431966.png',
       },
       {
         id: 'svc-homam',
@@ -110,6 +114,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-orange-400',
         href: '/remedies/homa',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_homam_1785738443734.png',
       },
       {
         id: 'svc-ishta',
@@ -121,6 +126,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-pink-400',
         href: '/remedies/ishta-devata',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_ishta_1785738453810.png',
       },
       {
         id: 'svc-muhurtha',
@@ -131,6 +137,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-violet-400',
         href: '/remedies/muhurtham',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_muhurtham_1785738473891.png',
       },
       {
         id: 'svc-vastu',
@@ -141,6 +148,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-teal-400',
         href: '/remedies/vastu',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_vastu_1785738485180.png',
       },
       {
         id: 'svc-charity',
@@ -151,6 +159,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-purple-400',
         href: '/remedies/charity',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_charity_1785738494717.png',
       },
       {
         id: 'svc-rudraksha',
@@ -161,6 +170,7 @@ export const defaultHomepageContent: HomepageContent = {
         iconColor: 'text-orange-400',
         href: '/remedies/rudraksha',
         badge: 'Premium',
+        image: '/assets/images/remedies/remedies_homam_1785738443734.png',
       },
     ],
   },

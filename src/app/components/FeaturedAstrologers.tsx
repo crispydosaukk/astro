@@ -8,8 +8,10 @@ import AppImage from '@/components/ui/AppImage';
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function FeaturedAstrologers() {
+  const { formatPrice } = useCurrency();
   const [astrologers, setAstrologers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +29,7 @@ export default function FeaturedAstrologers() {
             experience: `${data.experienceYears || 0} yrs`,
             rating: data.rating || 4.5,
             reviews: data.reviews || 0,
-            price: `₹${data.amount || 0}/min`,
+            price: data.amount || 0,
             languages: data.languages ? data.languages.split(',').map((l:string)=>l.trim()) : ['English'],
             status: data.isOnline ? 'online' : 'offline',
             image: data.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
@@ -126,7 +128,7 @@ export default function FeaturedAstrologers() {
               </div>
 
               <div className="flex items-center justify-between mb-3">
-                <span className="text-base font-bold text-accent tabular-nums">{ast?.price}</span>
+                <span className="text-base font-bold text-accent tabular-nums">{formatPrice(ast?.price)}/min</span>
                 <span
                   className={`text-xs font-medium ${ast?.status === 'online' ? 'text-green-400' : 'text-amber-400'}`}
                 >

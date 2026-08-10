@@ -10,6 +10,7 @@ import { db } from '@/lib/firebase/config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useUserData } from '@/lib/useUserData';
 import { getHomepageContent } from '@/lib/cms';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 interface ServiceReportFormProps {
   titleText: string;
@@ -44,22 +45,27 @@ export default function ServiceReportForm({
   const router = useRouter();
 
   const { user, loading } = useUserData();
+  const { convertPrice, currencyCode, formatPrice } = useCurrency();
 
   const [price, setPrice] = useState<number | null>(null);
+  const [priceUSD, setPriceUSD] = useState<number | null>(null);
 
   useEffect(() => {
     if (!serviceId) return;
     let isMounted = true;
     getHomepageContent().then((content) => {
       if (!isMounted) return;
-      let p = 8;
+      let p = 100;
+      let pUsd = null;
       if (content?.services?.items) {
         const item = content.services.items.find((i) => i.id === serviceId);
-        if (item && item.price !== undefined) {
-          p = item.price;
+        if (item) {
+          if (item.price !== undefined) p = item.price;
+          if (item.priceUSD !== undefined) pUsd = item.priceUSD;
         }
       }
       setPrice(p);
+      setPriceUSD(pUsd);
     }).catch(console.error);
     
     return () => {
@@ -116,8 +122,10 @@ export default function ServiceReportForm({
         userId: user?.uid || 'demo-user-id',
         userEmail: user?.email || 'demo@example.com',
         type: `${titleText} ${highlightText}`,
-        serviceId: serviceId, // Send serviceId to backend
+        serviceId: serviceId,
         details: { dob, time, place },
+        currency: currencyCode.toLowerCase(),
+        displayAmount: convertPrice(price || 100, priceUSD !== null ? priceUSD : undefined)
       };
       localStorage.setItem('pending_report', JSON.stringify(reportDetails));
 
@@ -255,7 +263,7 @@ export default function ServiceReportForm({
                   </span>
                 ) : (
                   <>
-                    <Icon size={16} /> {buttonText} {price !== null ? `— £${price}` : ''}
+                    <Icon size={16} /> {buttonText} {price !== null ? `— ${formatPrice(price, priceUSD !== null ? priceUSD : undefined)}` : ''}
                     <ArrowRight size={16} />
                   </>
                 )}

@@ -22,6 +22,11 @@ import AppImage from '@/components/ui/AppImage';
 import { toast } from 'sonner';
 import Icon from '@/components/ui/AppIcon';
 import Navbar from '@/components/Navbar';
+import { useCurrency } from '@/lib/CurrencyContext';
+import { useUserData } from '@/lib/useUserData';
+import { useRouter } from 'next/navigation';
+import { db } from '@/lib/firebase/config';
+import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
 
 const astrologersData: Record<
   string,
@@ -257,13 +262,6 @@ const astrologersData: Record<
   },
 };
 
-const currencies = [
-  { code: 'USD', symbol: '$', label: 'US Dollar', rate: 0.012 },
-  { code: 'INR', symbol: '₹', label: 'Indian Rupee', rate: 1 },
-  { code: 'GBP', symbol: '£', label: 'British Pound', rate: 0.0095 },
-  { code: 'EUR', symbol: '€', label: 'Euro', rate: 0.011 },
-];
-
 const timeSlots = [
   '9:00 AM',
   '9:30 AM',
@@ -295,13 +293,13 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
   const { id } = React.use(params);
   
   const [dbAstrologer, setDbAstrologer] = useState<any>(null);
+  const { user, userData } = useUserData();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
     const fetchAstrologer = async () => {
       try {
-        const { doc, getDoc } = await import('firebase/firestore');
-        const { db } = await import('@/lib/firebase/config');
         const docRef = doc(db, 'astrologers', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -334,7 +332,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
     };
   }, [dbAstrologer, fallbackData]);
 
-  const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]); // Default USD
+  const { currencyCode, currencySymbol, formatPrice, convertPrice } = useCurrency();
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
   const [selectedTime, setSelectedTime] = useState('');
   const [consultationType, setConsultationType] = useState<'video' | 'call'>('video');
@@ -342,25 +340,61 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
   const [activeTab, setActiveTab] = useState<'about' | 'reviews'>('about');
   const [isBooking, setIsBooking] = useState(false);
 
-  const convertPrice = (inrPrice: number) => {
-    const converted = inrPrice * selectedCurrency.rate;
-    return converted < 1 ? converted.toFixed(2) : Math.round(converted).toString();
-  };
-
   const hourlyRate = astrologer.pricePerMin * 60;
   const totalCost = astrologer.pricePerMin * duration;
 
   const handleBook = async () => {
+    if (!user || !userData) {
+      toast.error('Please log in to book a consultation');
+      return;
+    }
+    
     if (!selectedDate || !selectedTime) {
       toast.error('Please select a date and time slot');
       return;
     }
+
+    const currentBalance = userData.walletBalance || 0;
+
+    if (currentBalance < totalCost) {
+      toast.error('Insufficient wallet balance. Please recharge your wallet.');
+      router.push('/wallet');
+      return;
+    }
+
     setIsBooking(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setIsBooking(false);
-    toast.success(`Consultation booked with ${astrologer.name}! Confirmation sent to your email.`);
-    setSelectedDate(null);
-    setSelectedTime('');
+    
+    try {
+      const roomID = `room_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      
+      await updateDoc(doc(db, 'users', user.uid), {
+        walletBalance: increment(-totalCost)
+      });
+
+      await addDoc(collection(db, 'consultations'), {
+        astrologerId: astrologer.id,
+        astrologerName: astrologer.name,
+        customerId: user.uid,
+        customerName: user.displayName || user.email,
+        roomID,
+        type: consultationType,
+        status: 'pending',
+        date: selectedDate,
+        time: selectedTime,
+        duration,
+        price: totalCost,
+        createdAt: serverTimestamp(),
+      });
+      
+      toast.success(`Consultation booked with ${astrologer.name}! Joining call room...`);
+      setSelectedDate(null);
+      setSelectedTime('');
+      router.push(`/call/${roomID}`);
+    } catch (error) {
+      console.error('Error booking:', error);
+      toast.error('Failed to book consultation');
+      setIsBooking(false);
+    }
   };
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -699,21 +733,9 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                 <h3 className="font-bold text-foreground">Book Consultation</h3>
                 <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20">
                   <Globe size={12} className="text-[#C9952B]" />
-                  <select
-                    value={selectedCurrency.code}
-                    onChange={(e) =>
-                      setSelectedCurrency(
-                        currencies.find((c) => c.code === e.target.value) || currencies[0]
-                      )
-                    }
-                    className="bg-transparent text-xs font-semibold text-[#C9952B] outline-none cursor-pointer"
-                  >
-                    {currencies.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.code}
-                      </option>
-                    ))}
-                  </select>
+                  <span className="text-xs font-semibold text-[#C9952B] outline-none">
+                    {currencyCode} ({currencySymbol})
+                  </span>
                 </div>
               </div>
 
@@ -721,8 +743,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
               <div className="p-4 rounded-xl bg-gradient-to-br from-[#6B0F1A]/10 to-[#C9952B]/10 border border-[#C9952B]/20 mb-5">
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold text-[#C9952B] tabular-nums">
-                    {selectedCurrency.symbol}
-                    {convertPrice(astrologer.pricePerMin)}
+                    {formatPrice(astrologer.pricePerMin)}
                   </span>
                   <span className="text-sm text-muted-foreground">/min</span>
                 </div>
@@ -852,43 +873,72 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                 </motion.div>
               )}
 
-              {/* Total Cost */}
+              {/* Total Cost & Wallet */}
               {selectedDate && selectedTime && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="p-3 rounded-xl bg-muted/50 border border-border mb-4"
+                  className="space-y-3 mb-4"
                 >
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {duration} min × {selectedCurrency.symbol}
-                      {convertPrice(astrologer.pricePerMin)}/min
-                    </span>
-                    <span className="font-bold text-foreground">
-                      {selectedCurrency.symbol}
-                      {convertPrice(totalCost)}
-                    </span>
+                  <div className="p-3 rounded-xl bg-muted/50 border border-border">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        {duration} min × {formatPrice(astrologer.pricePerMin)}/min
+                      </span>
+                      <span className="font-bold text-foreground">
+                        {formatPrice(totalCost)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-3 rounded-xl border border-border flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">👛</span>
+                      <div>
+                        <p className="text-xs text-muted-foreground font-semibold uppercase">Wallet Balance</p>
+                        <p className={`text-sm font-bold ${(userData?.walletBalance || 0) >= totalCost ? 'text-green-500' : 'text-red-500'}`}>
+                          {formatPrice(userData?.walletBalance || 0)}
+                        </p>
+                      </div>
+                    </div>
+                    {(userData?.walletBalance || 0) < totalCost && (
+                      <button 
+                        onClick={() => router.push('/wallet')}
+                        className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-semibold hover:bg-red-500/20 transition-colors"
+                      >
+                        Recharge
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               )}
 
               {/* Book Button */}
-              <button
-                onClick={handleBook}
-                disabled={isBooking || astrologer.status === 'offline'}
-                className="w-full py-3.5 rounded-xl font-semibold text-sm gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isBooking ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{' '}
-                    Booking...
-                  </>
-                ) : (
-                  <>
-                    <Zap size={15} /> Book Now
-                  </>
-                )}
-              </button>
+              {(userData?.walletBalance || 0) < totalCost ? (
+                <button
+                  onClick={() => router.push('/wallet')}
+                  className="w-full py-3.5 rounded-xl font-semibold text-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <Zap size={15} /> Recharge Wallet
+                </button>
+              ) : (
+                <button
+                  onClick={handleBook}
+                  disabled={isBooking || astrologer.status === 'offline'}
+                  className="w-full py-3.5 rounded-xl font-semibold text-sm gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isBooking ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{' '}
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Zap size={15} /> Book Now
+                    </>
+                  )}
+                </button>
+              )}
 
               {/* Trust Badges */}
               <div className="grid grid-cols-2 gap-2 mt-4">

@@ -2,18 +2,24 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Compass, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
 import ServiceReportForm from '@/components/ServiceReportForm';
-import { getServicePageContent, VastuServiceContent, defaultVastuContent } from '@/lib/cms';
+import { getServicePageContent, VastuServiceContent, defaultVastuContent, getHomepageContent, HomepageContent } from '@/lib/cms';
 
 export default function VastuServicePage() {
   const [content, setContent] = useState<VastuServiceContent | null>(null);
+  const [homepageContent, setHomepageContent] = useState<HomepageContent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadContent() {
-      const data = await getServicePageContent('vastu', defaultVastuContent);
+      const [data, homeData] = await Promise.all([
+        getServicePageContent('vastu', defaultVastuContent),
+        getHomepageContent()
+      ]);
+      setHomepageContent(homeData);
       setContent(data);
       setLoading(false);
     }
@@ -31,74 +37,77 @@ export default function VastuServicePage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <section className="relative pt-24 py-20 cosmic-bg overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-[#8B1A2A]/20 blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#C9952B]/15 blur-3xl" />
-        </div>
-        <div className="relative max-w-screen-xl mx-auto px-6 lg:px-10">
-          <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
-            <Link href="/" className="hover:text-[#C9952B] transition-colors">
+            {/* Hero */}
+      <section className="relative min-h-screen overflow-hidden border-b border-white/5 flex flex-col pt-20 lg:pt-0 cosmic-bg">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#8B1A2A]/20 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex-1 flex items-center justify-center">
+          <div className="max-w-[2000px] w-full mx-auto">
+            <div className="grid lg:grid-cols-2 items-center min-h-screen">
+              
+              {/* Left Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="px-6 lg:px-12 xl:px-20 space-y-8 py-20 lg:py-0 order-2 lg:order-1"
+              >
+                <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
+                  <Link href="/" className="hover:text-[#C9952B] transition-colors">
               Home
             </Link>
             <span>/</span>
             <Link href="/remedies" className="hover:text-[#C9952B] transition-colors">Remedies</Link>
             <span>/</span>
             <span className="text-[#C9952B]">Interactive Vastu</span>
-          </div>
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7 }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
-                <Compass size={12} /> {content.hero.tag}
-              </div>
-              <h1 className="text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
-                {content.hero.titleLine1}
-                <br />
-                <span className="text-gradient-gold">{content.hero.titleLine2}</span>
-              </h1>
-              <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                {content.hero.description}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="#get-report"
-                  className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow"
-                >
-                  <Compass size={16} /> {content.hero.primaryBtnText}
-                </Link>
-                <Link
-                  href="/talk-to-astrologer"
-                  className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all"
-                >
-                  {content.hero.secondaryBtnText}
-                </Link>
-              </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="flex justify-center"
-            >
-              {/* Vastu compass visual */}
-              <div className="relative w-64 h-64">
-                <div className="absolute inset-0 rounded-full border-2 border-[#C9952B]/30 animate-spin-slow" />
-                <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1 p-8">
-                  {['NW', 'N', 'NE', 'W', '🏠', 'E', 'SW', 'S', 'SE']?.map((d, i) => (
-                    <div
-                      key={i}
-                      className={`rounded-lg flex items-center justify-center text-xs font-bold ${d === '🏠' ? 'gold-gradient-bg text-white text-lg' : 'glass-card text-[#C9952B]'}`}
-                    >
-                      {d}
-                    </div>
-                  ))}
                 </div>
-              </div>
-            </motion.div>
+                <div>
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
+                    <Compass size={12} /> {content.hero.tag}
+                  </div>
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground mb-6 tracking-tight leading-tight">
+                    {content.hero.titleLine1}
+                    <br />
+                    <span className="text-gradient-gold">{content.hero.titleLine2}</span>
+                  </h1>
+                  <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
+                    {content.hero.description}
+                  </p>
+                  <div className="flex flex-wrap gap-3 mt-8">
+                    <a
+                      href="#get-report"
+                      className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow"
+                    >
+                      <Compass size={16} /> {content.hero.primaryBtnText}
+                    </a>
+                    <Link
+                      href="/talk-to-astrologer"
+                      className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold glass-card border border-white/20 text-white hover:border-[#C9952B]/50 hover:text-[#C9952B] transition-all"
+                    >
+                      {content.hero.secondaryBtnText}
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Right Visual */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+                className="relative h-[40vh] lg:h-[80vh] w-full order-1 lg:order-2 flex items-center justify-center p-6 lg:p-12"
+              >
+                <div className="relative w-full h-full max-w-lg lg:max-w-xl">
+                  <Image
+                    src={homepageContent?.services.items.find(s => s.id === 'svc-vastu')?.image || '/assets/images/remedies/remedies_vastu_1785738485180.png'}
+                    alt="Interactive Vastu"
+                    fill
+                    className="object-contain drop-shadow-2xl"
+                    priority
+                  />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>

@@ -3,113 +3,46 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Video, Phone, Eye, X } from 'lucide-react';
 
-const appointments = [
-  {
-    id: 'appt-001',
-    user: 'Arjun Sharma',
-    astrologer: 'Pt. Rajendra Sharma',
-    type: 'Video',
-    date: '6 Jul 2026',
-    time: '3:00 PM',
-    duration: '45 min',
-    amount: '₹1,125',
-    status: 'confirmed',
-  },
-  {
-    id: 'appt-002',
-    user: 'Ananya K.',
-    astrologer: 'Jyotishi Meera Devi',
-    type: 'Call',
-    date: '4 Jul 2026',
-    time: '11:00 AM',
-    duration: '30 min',
-    amount: '₹900',
-    status: 'completed',
-  },
-  {
-    id: 'appt-003',
-    user: 'Rajan Mehta',
-    astrologer: 'Dr. Priya Nair',
-    type: 'Video',
-    date: '3 Jul 2026',
-    time: '5:00 PM',
-    duration: '60 min',
-    amount: '₹1,080',
-    status: 'in-progress',
-  },
-  {
-    id: 'appt-004',
-    user: 'Suresh Pillai',
-    astrologer: 'Pt. Suresh Iyer',
-    type: 'Video',
-    date: '5 Jul 2026',
-    time: '10:00 AM',
-    duration: '45 min',
-    amount: '₹1,575',
-    status: 'confirmed',
-  },
-  {
-    id: 'appt-005',
-    user: 'Preethi Sundaram',
-    astrologer: 'Acharya Vikram Joshi',
-    type: 'Call',
-    date: '2 Jul 2026',
-    time: '2:30 PM',
-    duration: '30 min',
-    amount: '₹600',
-    status: 'completed',
-  },
-  {
-    id: 'appt-006',
-    user: 'Deepak Nambiar',
-    astrologer: 'Jyotishi Meera Devi',
-    type: 'Video',
-    date: '8 Jul 2026',
-    time: '4:00 PM',
-    duration: '60 min',
-    amount: '₹1,800',
-    status: 'pending',
-  },
-  {
-    id: 'appt-007',
-    user: 'Kavitha Reddy',
-    astrologer: 'Pt. Rajendra Sharma',
-    type: 'Call',
-    date: '1 Jul 2026',
-    time: '9:00 AM',
-    duration: '15 min',
-    amount: '₹375',
-    status: 'cancelled',
-  },
-  {
-    id: 'appt-008',
-    user: 'Meera Iyer',
-    astrologer: 'Dr. Priya Nair',
-    type: 'Video',
-    date: '9 Jul 2026',
-    time: '11:30 AM',
-    duration: '45 min',
-    amount: '₹810',
-    status: 'confirmed',
-  },
-];
+import { db } from '@/lib/firebase/config';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 const statusColors: Record<string, string> = {
-  confirmed: 'bg-blue-500/15 text-blue-400',
+  active: 'bg-amber-500/15 text-amber-400',
   completed: 'bg-green-500/15 text-green-400',
-  'in-progress': 'bg-amber-500/15 text-amber-400',
-  pending: 'bg-purple-500/15 text-purple-400',
+  pending: 'bg-blue-500/15 text-blue-400',
   cancelled: 'bg-red-500/15 text-red-400',
+  declined: 'bg-red-500/15 text-red-400',
+  missed: 'bg-red-500/15 text-red-400',
 };
 
 export default function AdminAppointmentsTable() {
+  const { formatPrice } = useCurrency();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const q = query(collection(db, 'consultations'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setAppointments(data);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAppointments();
+  }, []);
 
   const filtered = appointments.filter((a) => {
-    const matchSearch =
-      a.user.toLowerCase().includes(search.toLowerCase()) ||
-      a.astrologer.toLowerCase().includes(search.toLowerCase());
+    const userMatch = a.customerName?.toLowerCase().includes(search.toLowerCase()) || '';
+    const astroMatch = a.astrologerName?.toLowerCase().includes(search.toLowerCase()) || '';
+    const matchSearch = userMatch || astroMatch;
     const matchStatus = filterStatus === 'all' || a.status === filterStatus;
     return matchSearch && matchStatus;
   });
@@ -137,11 +70,12 @@ export default function AdminAppointmentsTable() {
           className="px-3 py-2 rounded-xl bg-muted border border-border text-sm outline-none"
         >
           <option value="all">All Status</option>
-          <option value="confirmed">Confirmed</option>
+          <option value="active">Active</option>
           <option value="completed">Completed</option>
-          <option value="in-progress">In Progress</option>
           <option value="pending">Pending</option>
           <option value="cancelled">Cancelled</option>
+          <option value="declined">Declined</option>
+          <option value="missed">Missed</option>
         </select>
       </div>
 
@@ -169,56 +103,81 @@ export default function AdminAppointmentsTable() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((appt, i) => (
-              <motion.tr
-                key={appt.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.04 }}
-                className="border-b border-border/50 hover:bg-muted/30 transition-colors group"
-              >
-                <td className="px-5 py-4 font-medium text-foreground">{appt.user}</td>
-                <td className="px-5 py-4 text-muted-foreground">{appt.astrologer}</td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    {appt.type === 'Video' ? <Video size={12} /> : <Phone size={12} />}
-                    {appt.type}
-                  </div>
+            {loading ? (
+              <tr>
+                <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">
+                  Loading appointments...
                 </td>
-                <td className="px-5 py-4 text-muted-foreground whitespace-nowrap">
-                  {appt.date} · {appt.time}
+              </tr>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">
+                  No appointments found
                 </td>
-                <td className="px-5 py-4 text-muted-foreground">{appt.duration}</td>
-                <td className="px-5 py-4 font-semibold text-foreground tabular-nums">
-                  {appt.amount}
-                </td>
-                <td className="px-5 py-4">
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[appt.status] || 'bg-muted text-muted-foreground'}`}
+              </tr>
+            ) : (
+              filtered.map((appt, i) => {
+                let dateStr = appt.date || 'Unknown';
+                let timeStr = appt.time || '';
+                
+                if (appt.createdAt) {
+                  const d = appt.createdAt.toDate ? appt.createdAt.toDate() : new Date(appt.createdAt);
+                  dateStr = d.toLocaleDateString();
+                  timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
+                return (
+                  <motion.tr
+                    key={appt.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="border-b border-border/50 hover:bg-muted/30 transition-colors group"
                   >
-                    {appt.status.charAt(0).toUpperCase() + appt.status.slice(1).replace('-', ' ')}
-                  </span>
-                </td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      className="p-1.5 rounded-lg hover:bg-muted transition-all"
-                      title="View details"
-                    >
-                      <Eye size={13} className="text-muted-foreground" />
-                    </button>
-                    {appt.status !== 'completed' && appt.status !== 'cancelled' && (
-                      <button
-                        className="p-1.5 rounded-lg hover:bg-muted transition-all"
-                        title="Cancel appointment"
+                    <td className="px-5 py-4 font-medium text-foreground">{appt.customerName || 'Unknown'}</td>
+                    <td className="px-5 py-4 text-muted-foreground">{appt.astrologerName || 'Unknown'}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        {appt.type === 'video' || appt.type === 'Video' ? <Video size={12} /> : <Phone size={12} />}
+                        <span className="capitalize">{appt.type || 'Unknown'}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground whitespace-nowrap">
+                      {dateStr} · {timeStr}
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground">{appt.duration} min</td>
+                    <td className="px-5 py-4 font-semibold text-foreground tabular-nums">
+                      {formatPrice(appt.price || 0)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[appt.status] || 'bg-muted text-muted-foreground'}`}
                       >
-                        <X size={13} className="text-red-400" />
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </motion.tr>
-            ))}
+                        {appt.status ? appt.status.charAt(0).toUpperCase() + appt.status.slice(1).replace('-', ' ') : 'Unknown'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          className="p-1.5 rounded-lg hover:bg-muted transition-all"
+                          title="View details"
+                        >
+                          <Eye size={13} className="text-muted-foreground" />
+                        </button>
+                        {appt.status !== 'completed' && appt.status !== 'cancelled' && (
+                          <button
+                            className="p-1.5 rounded-lg hover:bg-muted transition-all"
+                            title="Cancel appointment"
+                          >
+                            <X size={13} className="text-red-400" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </motion.tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

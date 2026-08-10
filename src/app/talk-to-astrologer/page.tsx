@@ -18,16 +18,10 @@ import AppImage from '@/components/ui/AppImage';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-
-
-
-const currencies = [
-  { code: 'INR', symbol: '₹', label: 'Indian Rupee', rate: 1 },
-  { code: 'USD', symbol: '$', label: 'US Dollar', rate: 0.012 },
-  { code: 'GBP', symbol: '£', label: 'British Pound', rate: 0.0095 },
-  { code: 'EUR', symbol: '€', label: 'Euro', rate: 0.011 },
-];
+import { collection, query, where, getDocs, addDoc, serverTimestamp, updateDoc, doc, increment, onSnapshot } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { useUserData } from '@/lib/useUserData';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 const timeSlots = [
   '9:00 AM',
@@ -52,20 +46,20 @@ const timeSlots = [
 const bookedSlots = ['10:00 AM', '11:30 AM', '3:00 PM', '6:00 PM'];
 
 export default function TalkToAstrologerPage() {
+  const router = useRouter();
+  const { user, userData } = useUserData();
   const [astrologers, setAstrologers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterSpecialty, setFilterSpecialty] = useState('all');
-  const [sortBy, setSortBy] = useState('rating');
-  const [selectedAstrologer, setSelectedAstrologer] = useState<any | null>(null);
-  const [bookingStep, setBookingStep] = useState<1 | 2 | 3>(1);
+  const [sortBy, setSortBy] = useState<string>('rating');
+  const [selectedAstrologer, setSelectedAstrologer] = useState<any>(null);
+  const [bookingStep, setBookingStep] = useState<1 | 2>(1);
   const [consultationType, setConsultationType] = useState<'video' | 'call'>('video');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [duration, setDuration] = useState(30);
   const [isBooking, setIsBooking] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
+  const [isWaiting, setIsWaiting] = useState(false);
+  const { currencyCode, currencySymbol, formatPrice, convertPrice } = useCurrency();
 
   useEffect(() => {
     const fetchAstrologers = async () => {
@@ -112,11 +106,6 @@ export default function TalkToAstrologerPage() {
     'Marriage',
   ];
 
-  const convertPrice = (inrPrice: number) => {
-    const converted = inrPrice * selectedCurrency.rate;
-    return converted < 1 ? converted.toFixed(2) : Math.round(converted).toString();
-  };
-
   const filtered = astrologers
     .filter((a: any) => {
       const matchSearch =
@@ -135,24 +124,84 @@ export default function TalkToAstrologerPage() {
     });
 
   const handleBook = async () => {
+    if (!user || !userData) {
+      toast.error('Please log in to book a consultation');
+      return;
+    }
+
+    const pricePerMin = selectedAstrologer?.pricePerMin || 1;
+    const currentBalance = userData.walletBalance || 0;
+    const minRequired = pricePerMin * 5;
+
+    if (currentBalance < minRequired) {
+      toast.error(`Minimum wallet balance of ${formatPrice(minRequired)} (5 mins) required.`);
+      router.push('/wallet');
+      return;
+    }
+    
+    const maxDuration = Math.floor(currentBalance / pricePerMin);
+    
     setIsBooking(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setIsBooking(false);
-    setSelectedAstrologer(null);
-    setBookingStep(1);
-    toast.success(
-      `Consultation booked with ${selectedAstrologer?.name}! You'll receive a confirmation shortly.`
-    );
+    
+    try {
+      const roomID = `room_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+      // Create a consultation record in Firestore with pending status
+      const docRef = await addDoc(collection(db, 'consultations'), {
+        astrologerId: selectedAstrologer?.id,
+        astrologerName: selectedAstrologer?.name,
+        customerId: user.uid,
+        customerName: user.displayName || user.email,
+        roomID,
+        type: consultationType,
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString('en-US', { hour12: false }).slice(0, 5), // HH:MM
+        duration: maxDuration,
+        price: pricePerMin, // Saving the per-minute price for dynamic billing
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      });
+      
+      setIsWaiting(true);
+      toast.success('Request sent! Waiting for astrologer to accept...');
+
+      // Setup timeout to cancel if not accepted in 60 seconds
+      const timeoutId = setTimeout(async () => {
+        setIsWaiting(false);
+        setIsBooking(false);
+        toast.error('Astrologer did not respond in time. Please try another astrologer.');
+        try {
+          await updateDoc(doc(db, 'consultations', docRef.id), { status: 'cancelled' });
+        } catch (e) {
+          console.error(e);
+        }
+      }, 60000);
+
+      // Listen for astrologer acceptance
+      const unsubscribe = onSnapshot(doc(db, 'consultations', docRef.id), (snapshot) => {
+        const data = snapshot.data();
+        if (data && data.status === 'active') {
+          clearTimeout(timeoutId);
+          unsubscribe();
+          setIsWaiting(false);
+          router.push(`/call/${roomID}`);
+        } else if (data && data.status === 'cancelled' && isWaiting) {
+           clearTimeout(timeoutId);
+           unsubscribe();
+           setIsWaiting(false);
+           setIsBooking(false);
+           toast.error('Astrologer is currently unavailable.');
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error booking consultation:', error);
+      toast.error('Failed to book consultation. Please try again.');
+      setIsBooking(false);
+      setIsWaiting(false);
+    }
   };
 
-  const totalCostINR = selectedAstrologer ? selectedAstrologer.pricePerMin * duration : 0;
-  const totalCostConverted = convertPrice(totalCostINR);
-
-  const today = new Date(2026, 6, 3);
-  const daysInMonth = new Date(2026, 7, 0).getDate();
-  const firstDay = new Date(2026, 6, 1).getDay();
-  const calendarDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const unavailableDays = [5, 12, 19, 26, 13, 20];
 
   return (
     <div className="min-h-screen bg-background">
@@ -237,24 +286,11 @@ export default function TalkToAstrologerPage() {
             <option value="price-high">Price: High to Low</option>
             <option value="experience">Most Experienced</option>
           </select>
-          {/* Currency Selector */}
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/30">
             <Globe size={14} className="text-[#C9952B]" />
-            <select
-              value={selectedCurrency.code}
-              onChange={(e) =>
-                setSelectedCurrency(
-                  currencies.find((c) => c.code === e.target.value) || currencies[0]
-                )
-              }
-              className="bg-transparent text-sm font-semibold text-[#C9952B] outline-none cursor-pointer"
-            >
-              {currencies.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.code} ({c.symbol})
-                </option>
-              ))}
-            </select>
+            <span className="text-sm font-semibold text-[#C9952B] outline-none">
+              {currencyCode} ({currencySymbol})
+            </span>
           </div>
           <div className="text-sm text-muted-foreground ml-auto">{filtered.length} astrologers</div>
         </div>
@@ -326,8 +362,7 @@ export default function TalkToAstrologerPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <span className="text-lg font-bold text-[#C9952B] tabular-nums">
-                      {selectedCurrency.symbol}
-                      {convertPrice(ast.pricePerMin)}
+                      {formatPrice(ast.pricePerMin)}
                     </span>
                     <span className="text-xs text-muted-foreground">/min</span>
                   </div>
@@ -423,8 +458,7 @@ export default function TalkToAstrologerPage() {
                   <div>
                     <h2 className="font-bold text-foreground">{selectedAstrologer.name}</h2>
                     <p className="text-xs text-muted-foreground">
-                      {selectedAstrologer.specialty[0]} · {selectedCurrency.symbol}
-                      {convertPrice(selectedAstrologer.pricePerMin)}/min
+                      {selectedAstrologer.specialty[0]} · {formatPrice(selectedAstrologer.pricePerMin)}/min
                     </p>
                   </div>
                 </div>
@@ -440,31 +474,24 @@ export default function TalkToAstrologerPage() {
               </div>
 
               {/* Step Indicator */}
-              <div className="flex items-center gap-0 p-5 border-b border-border">
+              <div className="flex items-center justify-between relative p-5 border-b border-border">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border -z-10" />
                 {[
-                  { n: 1, label: 'Type' },
-                  { n: 2, label: 'Schedule' },
-                  { n: 3, label: 'Payment' },
-                ].map((s, si) => (
-                  <React.Fragment key={s.n}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${bookingStep >= s.n ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground'}`}
-                      >
-                        {bookingStep > s.n ? <Check size={12} /> : s.n}
-                      </div>
-                      <span
-                        className={`text-xs font-medium ${bookingStep >= s.n ? 'text-foreground' : 'text-muted-foreground'}`}
-                      >
-                        {s.label}
-                      </span>
+                  { step: 1, label: 'Type' },
+                  { step: 2, label: 'Payment' },
+                ].map((s) => (
+                  <div key={s.step} className="flex items-center gap-3 bg-card px-2">
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${bookingStep >= s.step ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground'}`}
+                    >
+                      {s.step}
                     </div>
-                    {si < 2 && (
-                      <div
-                        className={`flex-1 h-0.5 mx-2 transition-all ${bookingStep > s.n ? 'bg-[#C9952B]' : 'bg-border'}`}
-                      />
-                    )}
-                  </React.Fragment>
+                    <span
+                      className={`text-xs font-semibold ${bookingStep >= s.step ? 'text-foreground' : 'text-muted-foreground'}`}
+                    >
+                      {s.label}
+                    </span>
+                  </div>
                 ))}
               </div>
 
@@ -512,21 +539,6 @@ export default function TalkToAstrologerPage() {
                         ))}
                       </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-3">Duration</h3>
-                      <div className="flex gap-2 flex-wrap">
-                        {[15, 30, 45, 60].map((d) => (
-                          <button
-                            key={d}
-                            onClick={() => setDuration(d)}
-                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${duration === d ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
-                          >
-                            {d} min — {selectedCurrency.symbol}
-                            {convertPrice(selectedAstrologer.pricePerMin * d)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                     <div className="p-4 rounded-xl bg-muted/50 border border-border">
                       <p className="text-xs text-muted-foreground mb-1">
                         About {selectedAstrologer.name}
@@ -537,89 +549,13 @@ export default function TalkToAstrologerPage() {
                       onClick={() => setBookingStep(2)}
                       className="w-full py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all flex items-center justify-center gap-2"
                     >
-                      Continue to Schedule <ChevronRight size={16} />
+                      Continue to Payment <ChevronRight size={16} />
                     </button>
                   </div>
                 )}
 
-                {/* Step 2 */}
+                {/* Step 2 (Payment) */}
                 {bookingStep === 2 && (
-                  <div className="space-y-5">
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-4">
-                        Select Date — July 2026
-                      </h3>
-                      <div className="grid grid-cols-7 gap-1 mb-2">
-                        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
-                          <div
-                            key={d}
-                            className="text-center text-xs font-medium text-muted-foreground py-1"
-                          >
-                            {d}
-                          </div>
-                        ))}
-                        {Array.from({ length: firstDay }, (_, i) => (
-                          <div key={`empty-${i}`} />
-                        ))}
-                        {calendarDays.map((day) => {
-                          const dateStr = `2026-07-${day.toString().padStart(2, '0')}`;
-                          const isPast = day < 3;
-                          const isUnavail = unavailableDays.includes(day);
-                          const isSelected = selectedDate === dateStr;
-                          return (
-                            <button
-                              key={day}
-                              onClick={() => !isPast && !isUnavail && setSelectedDate(dateStr)}
-                              disabled={isPast || isUnavail}
-                              className={`aspect-square rounded-lg text-xs font-medium transition-all ${isSelected ? 'gold-gradient-bg text-white' : ''} ${!isSelected && !isPast && !isUnavail ? 'hover:bg-muted text-foreground' : ''} ${isPast || isUnavail ? 'text-muted-foreground/40 cursor-not-allowed' : ''}`}
-                            >
-                              {day}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {selectedDate && (
-                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                        <h3 className="font-semibold text-foreground mb-3">Available Time Slots</h3>
-                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                          {timeSlots.map((slot) => {
-                            const isBooked = bookedSlots.includes(slot);
-                            const isSelected = selectedTime === slot;
-                            return (
-                              <button
-                                key={slot}
-                                onClick={() => !isBooked && setSelectedTime(slot)}
-                                disabled={isBooked}
-                                className={`py-2 rounded-lg text-xs font-medium transition-all ${isSelected ? 'gold-gradient-bg text-white' : ''} ${!isSelected && !isBooked ? 'bg-muted hover:bg-muted/80 text-foreground' : ''} ${isBooked ? 'bg-muted/30 text-muted-foreground/40 cursor-not-allowed line-through' : ''}`}
-                              >
-                                {slot}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setBookingStep(1)}
-                        className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold hover:border-[#C9952B]/50 transition-all"
-                      >
-                        Back
-                      </button>
-                      <button
-                        onClick={() => selectedDate && selectedTime && setBookingStep(3)}
-                        disabled={!selectedDate || !selectedTime}
-                        className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-                      >
-                        Continue to Payment <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3 */}
-                {bookingStep === 3 && (
                   <div className="space-y-5">
                     <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
                       <h3 className="font-semibold text-foreground">Booking Summary</h3>
@@ -632,24 +568,24 @@ export default function TalkToAstrologerPage() {
                               ? 'Video Consultation'
                               : 'Phone Consultation',
                         },
-                        { label: 'Date', value: selectedDate },
-                        { label: 'Time', value: selectedTime + ' IST' },
-                        { label: 'Duration', value: `${duration} minutes` },
+                        {
+                          label: 'Max Duration',
+                          value: `${Math.floor((userData?.walletBalance || 0) / (selectedAstrologer?.pricePerMin || 1))} mins (based on balance)`,
+                        },
                         {
                           label: 'Rate',
-                          value: `${selectedCurrency.symbol}${convertPrice(selectedAstrologer.pricePerMin)}/min`,
+                          value: `${formatPrice(selectedAstrologer.pricePerMin)}/min`,
                         },
                       ].map((item) => (
                         <div key={item.label} className="flex justify-between text-sm">
                           <span className="text-muted-foreground">{item.label}</span>
-                          <span className="font-medium text-foreground">{item.value}</span>
+                          <span className="font-medium text-foreground text-right">{item.value}</span>
                         </div>
                       ))}
                       <div className="border-t border-border pt-3 flex justify-between">
-                        <span className="font-semibold text-foreground">Total</span>
+                        <span className="font-semibold text-foreground">Min Balance Required</span>
                         <span className="text-xl font-bold text-[#C9952B] tabular-nums">
-                          {selectedCurrency.symbol}
-                          {totalCostConverted}
+                          {formatPrice(selectedAstrologer.pricePerMin * 5)}
                         </span>
                       </div>
                     </div>
@@ -660,52 +596,74 @@ export default function TalkToAstrologerPage() {
                       <p className="text-xs text-muted-foreground">
                         Paying in{' '}
                         <span className="font-semibold text-[#C9952B]">
-                          {selectedCurrency.label} ({selectedCurrency.code})
+                          {currencyCode === 'INR' ? 'Indian Rupee' : 'US Dollar'} ({currencyCode})
                         </span>{' '}
-                        · Exchange rates are approximate
+                        · Automatically detected for your region
                       </p>
                     </div>
 
                     <div>
                       <h3 className="font-semibold text-foreground mb-3">Payment Method</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { id: 'pay-upi', label: 'UPI', icon: '📱' },
-                          { id: 'pay-card', label: 'Card', icon: '💳' },
-                          { id: 'pay-nb', label: 'Net Banking', icon: '🏦' },
-                          { id: 'pay-wallet', label: 'Wallet', icon: '👛' },
-                        ].map((method) => (
-                          <button
-                            key={method.id}
-                            className="flex items-center gap-2 p-3 rounded-xl border border-border hover:border-[#C9952B]/50 text-sm font-medium hover:text-[#C9952B] transition-all"
+                      <div className="p-4 rounded-xl border border-border flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-[#C9952B]/20 flex items-center justify-center">
+                            <span className="text-xl">👛</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">My Wallet</p>
+                            <p className={`text-sm ${(userData?.walletBalance || 0) >= selectedAstrologer.pricePerMin * 5 ? 'text-green-500' : 'text-red-500'}`}>
+                              Available: {formatPrice(userData?.walletBalance || 0)}
+                            </p>
+                          </div>
+                        </div>
+                        {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 && (
+                          <button 
+                            onClick={() => router.push('/wallet')}
+                            className="px-4 py-2 rounded-lg bg-red-500/10 text-red-500 text-sm font-semibold hover:bg-red-500/20 transition-colors"
                           >
-                            <span>{method.icon}</span> {method.label}
+                            Recharge
                           </button>
-                        ))}
+                        )}
                       </div>
+                      {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 && (
+                         <p className="text-xs text-red-500 mt-2 text-center">Minimum 5 mins required. Please recharge your wallet to continue.</p>
+                      )}
                     </div>
 
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setBookingStep(2)}
+                        onClick={() => setBookingStep(1)}
                         className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold hover:border-[#C9952B]/50 transition-all"
                       >
                         Back
                       </button>
-                      <button
-                        onClick={handleBook}
-                        disabled={isBooking}
-                        className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                      >
-                        {isBooking ? (
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <CreditCard size={16} /> Pay {selectedCurrency.symbol}
-                            {totalCostConverted}
-                          </>
-                        )}
-                      </button>
+                      {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 ? (
+                        <button
+                          onClick={() => router.push('/wallet')}
+                          className="flex-1 py-3 rounded-xl font-semibold bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
+                        >
+                          Recharge Wallet
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleBook}
+                          disabled={isBooking || isWaiting}
+                          className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                        >
+                          {isWaiting ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Connecting...
+                            </>
+                          ) : isBooking ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <Phone size={16} /> Connect Now
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
