@@ -3,16 +3,23 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
 if (!getApps().length) {
+
   try {
-    let privateKey = process.env.FIREBASE_PRIVATE_KEY || '-----BEGIN PRIVATE KEY-----\ndemo\n-----END PRIVATE KEY-----\n';
+    let privateKey = '';
     
-    // Handle cases where the platform injects it with surrounding quotes and escaped newlines
-    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-      try { privateKey = JSON.parse(privateKey); } catch (e) {}
+    if (process.env.FIREBASE_PRIVATE_KEY_BASE64) {
+      privateKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64').toString('ascii');
+    } else {
+      privateKey = process.env.FIREBASE_PRIVATE_KEY || '-----BEGIN PRIVATE KEY-----\ndemo\n-----END PRIVATE KEY-----\n';
+      
+      // Handle cases where the platform injects it with surrounding quotes and escaped newlines
+      if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+        try { privateKey = JSON.parse(privateKey); } catch (e) {}
+      }
+      
+      // Fallback: replace any remaining literal \n with real newlines and strip loose quotes
+      privateKey = privateKey.replace(/\\n/g, '\n').replace(/^["']|["']$/g, '');
     }
-    
-    // Fallback: replace any remaining literal \n with real newlines and strip loose quotes
-    privateKey = privateKey.replace(/\\n/g, '\n').replace(/^["']|["']$/g, '');
 
     initializeApp({
       credential: cert({
