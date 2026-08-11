@@ -2,29 +2,22 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
-if (!getApps().length) {
+function initFirebaseAdmin() {
+  if (getApps().length > 0) return true;
 
   try {
     let privateKey = '';
-    
     if (process.env.FIREBASE_PRIVATE_KEY_BASE64) {
       privateKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64').toString('ascii');
     } else {
       privateKey = process.env.FIREBASE_PRIVATE_KEY || '-----BEGIN PRIVATE KEY-----\ndemo\n-----END PRIVATE KEY-----\n';
-      
-      // Handle cases where the platform injects it with surrounding quotes and escaped newlines
       if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
         try { privateKey = JSON.parse(privateKey); } catch (e) {}
       }
-      
-      // Fallback: replace any remaining literal \n with real newlines and strip loose quotes
       privateKey = privateKey.replace(/\\n/g, '\n').replace(/^["']|["']$/g, '');
       
-      // If the user pasted the key WITHOUT the -----BEGIN PRIVATE KEY----- headers, add them back!
       if (!privateKey.includes('BEGIN PRIVATE KEY') && privateKey.length > 100) {
-        // Remove all spaces and newlines to get the raw base64 payload
         const rawKey = privateKey.replace(/\s+/g, '');
-        // Break into 64-character lines as required by PEM format
         const formattedKey = rawKey.match(/.{1,64}/g)?.join('\n') || rawKey;
         privateKey = `-----BEGIN PRIVATE KEY-----\n${formattedKey}\n-----END PRIVATE KEY-----\n`;
       }
@@ -37,10 +30,26 @@ if (!getApps().length) {
         privateKey: privateKey,
       }),
     });
+    return true;
   } catch (error) {
-    console.error('Firebase admin initialization error', error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Firebase admin initialization error', error);
+    }
+    return false;
   }
 }
 
-export const adminAuth = getApps().length > 0 ? getAuth() : null as any;
-export const adminDb = getApps().length > 0 ? getFirestore() : null as any;
+// Lazy initialization proxies
+export const adminAuth = new Proxy({} as any, {
+  get: (target, prop) => {
+    initFirebaseAdmin();
+    return (getAuth() as any)[prop];
+  }
+});
+
+export const adminDb = new Proxy({} as any, {
+  get: (target, prop) => {
+    initFirebaseAdmin();
+    return (getFirestore() as any)[prop];
+  }
+});
