@@ -10,6 +10,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ['400', '500', '600', '700', '800'],
   variable: '--font-plus-jakarta-sans',
   display: 'swap',
+  preload: false,
+  adjustFontFallback: false,
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -17,6 +19,8 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ['400', '500', '600'],
   variable: '--font-ibm-plex-mono',
   display: 'swap',
+  preload: false,
+  adjustFontFallback: false,
 });
 
 export const viewport: Viewport = {
