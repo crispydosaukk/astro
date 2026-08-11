@@ -28,7 +28,7 @@ export default function AdminPaymentsTable() {
       try {
         const q = query(collectionGroup(db, 'wallet_transactions'));
         const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
         
         // Sort locally to avoid needing a composite index in Firestore
         data.sort((a, b) => {

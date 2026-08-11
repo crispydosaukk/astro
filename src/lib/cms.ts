@@ -12,6 +12,7 @@ export interface ServiceItem {
   badge: string;
   image?: string;
   price?: number;
+  priceUSD?: number;
 }
 
 export interface HomepageContent {

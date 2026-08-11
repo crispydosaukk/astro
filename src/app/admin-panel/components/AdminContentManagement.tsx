@@ -72,7 +72,7 @@ export default function AdminContentManagement() {
   const handleServiceChange = (
     index: number,
     field: keyof (typeof content.services.items)[0],
-    val: string
+    val: any
   ) => {
     const newItems = [...content.services.items];
     newItems[index] = { ...newItems[index], [field]: val };

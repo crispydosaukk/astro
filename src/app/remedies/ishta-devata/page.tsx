@@ -11,6 +11,9 @@ import {
   getServicePageContent,
   IshtaDevataServiceContent,
   defaultIshtaDevataContent,
+  HomepageContent,
+  getHomepageContent,
+  ServiceItem,
 } from '@/lib/cms';
 
 export default function IshtaDevataServicePage() {
@@ -104,7 +107,7 @@ export default function IshtaDevataServicePage() {
               >
                 <div className="relative w-full h-full max-w-lg lg:max-w-xl">
                   <Image
-                    src={homepageContent?.services.items.find(s => s.id === 'svc-ishta')?.image || '/assets/images/remedies/remedies_ishta_1785738453810.png'}
+                    src={homepageContent?.services.items.find((s: ServiceItem) => s.id === 'svc-ishta')?.image || '/assets/images/remedies/remedies_ishta_1785738453810.png'}
                     alt="Ishta Devata"
                     fill
                     className="object-contain drop-shadow-2xl"
