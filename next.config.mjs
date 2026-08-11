@@ -3,7 +3,7 @@ import { imageHosts } from './image-hosts.config.mjs';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   productionBrowserSourceMaps: true,
-  output: 'standalone',
+  // output: 'standalone',
   distDir: process.env.DIST_DIR || '.next',
   devIndicators: {
     appIsrStatus: false,
