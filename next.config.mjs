@@ -2,13 +2,15 @@ import { imageHosts } from './image-hosts.config.mjs';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  productionBrowserSourceMaps: true,
+  productionBrowserSourceMaps: false, // Disabled to save memory
   // output: 'standalone',
   distDir: process.env.DIST_DIR || '.next',
-  devIndicators: {
-    appIsrStatus: false,
-    buildActivity: false,
+  experimental: {
+    // Reduce memory usage during build on limited GoDaddy servers
+    workerThreads: false,
+    cpus: 1,
   },
+
 
   typescript: {
     ignoreBuildErrors: true,
