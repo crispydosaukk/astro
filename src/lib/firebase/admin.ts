@@ -19,6 +19,15 @@ if (!getApps().length) {
       
       // Fallback: replace any remaining literal \n with real newlines and strip loose quotes
       privateKey = privateKey.replace(/\\n/g, '\n').replace(/^["']|["']$/g, '');
+      
+      // If the user pasted the key WITHOUT the -----BEGIN PRIVATE KEY----- headers, add them back!
+      if (!privateKey.includes('BEGIN PRIVATE KEY') && privateKey.length > 100) {
+        // Remove all spaces and newlines to get the raw base64 payload
+        const rawKey = privateKey.replace(/\s+/g, '');
+        // Break into 64-character lines as required by PEM format
+        const formattedKey = rawKey.match(/.{1,64}/g)?.join('\n') || rawKey;
+        privateKey = `-----BEGIN PRIVATE KEY-----\n${formattedKey}\n-----END PRIVATE KEY-----\n`;
+      }
     }
 
     initializeApp({
