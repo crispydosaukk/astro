@@ -90,6 +90,43 @@ export default function RecentReports() {
     return 'bg-purple-500/10';
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const element = document.getElementById('report-pdf-content');
+      if (element) {
+        // Temporarily prepare for PDF capture
+        const originalMaxHeight = element.style.maxHeight;
+        const scrollDiv = element.querySelector('.overflow-y-auto') as HTMLElement;
+        const originalOverflow = scrollDiv ? scrollDiv.style.overflow : '';
+        
+        element.style.maxHeight = 'none';
+        if (scrollDiv) scrollDiv.style.overflow = 'visible';
+
+        const opt = {
+          margin: 0.5,
+          filename: `${selectedReport?.type || 'Report'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            ignoreElements: (el: Element) => el.classList.contains('pdf-exclude')
+          },
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        
+        await html2pdf().set(opt).from(element).save();
+        
+        // Restore
+        element.style.maxHeight = originalMaxHeight;
+        if (scrollDiv) scrollDiv.style.overflow = originalOverflow;
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      window.print();
+    }
+  };
+
   return (
     <>
       <div
@@ -186,43 +223,6 @@ export default function RecentReports() {
           )}
         </div>
       </div>
-
-  const handleDownloadPDF = async () => {
-    try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const element = document.getElementById('report-pdf-content');
-      if (element) {
-        // Temporarily prepare for PDF capture
-        const originalMaxHeight = element.style.maxHeight;
-        const scrollDiv = element.querySelector('.overflow-y-auto') as HTMLElement;
-        const originalOverflow = scrollDiv ? scrollDiv.style.overflow : '';
-        
-        element.style.maxHeight = 'none';
-        if (scrollDiv) scrollDiv.style.overflow = 'visible';
-
-        const opt = {
-          margin: [0.5, 0.5, 0.5, 0.5],
-          filename: `${selectedReport?.type || 'Report'}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
-            scale: 2, 
-            useCORS: true,
-            ignoreElements: (el: Element) => el.classList.contains('pdf-exclude')
-          },
-          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        
-        await html2pdf().set(opt).from(element).save();
-        
-        // Restore
-        element.style.maxHeight = originalMaxHeight;
-        if (scrollDiv) scrollDiv.style.overflow = originalOverflow;
-      }
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      window.print();
-    }
-  };
 
       {/* Report Modal */}
       <AnimatePresence>
