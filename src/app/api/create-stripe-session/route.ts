@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      customer_email: userEmail !== 'demo@example.com' ? userEmail : undefined,
+      customer_email: (userEmail && userEmail !== 'demo@example.com') ? userEmail : undefined,
       line_items: [
         {
           price_data: {
