@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     // We run a transaction to securely deduct balance
     let remainingBalance = 0;
     
-    await adminDb.runTransaction(async (transaction) => {
+    await adminDb.runTransaction(async (transaction: any) => {
       const consultationDoc = await transaction.get(consultationRef);
       
       if (!consultationDoc.exists) {

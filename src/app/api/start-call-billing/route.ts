@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const consultationRef = adminDb.collection('consultations').doc(consultationId);
     
     // We run a transaction to securely deduct balance and mark as billed
-    await adminDb.runTransaction(async (transaction) => {
+    await adminDb.runTransaction(async (transaction: any) => {
       const consultationDoc = await transaction.get(consultationRef);
       
       if (!consultationDoc.exists) {
