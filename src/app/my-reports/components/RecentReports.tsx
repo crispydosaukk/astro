@@ -106,13 +106,11 @@ export default function RecentReports() {
         const opt = {
           margin: 0.5,
           filename: `${selectedReport?.type || 'Report'}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { 
             scale: 2, 
             useCORS: true,
             ignoreElements: (el: Element) => el.classList.contains('pdf-exclude')
-          },
-          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+          }
         };
         
         await html2pdf().set(opt).from(element).save();
