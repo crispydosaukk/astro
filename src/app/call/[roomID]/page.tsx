@@ -6,6 +6,7 @@ import { useUserData } from '@/lib/useUserData';
 import { Loader2 } from 'lucide-react';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { getSettings } from '@/lib/settings';
 
 export default function CallPage() {
   const { roomID } = useParams();
@@ -49,13 +50,18 @@ export default function CallPage() {
         setActiveConsultationId(consultationId);
         setIsCustomerRole(isCustomer);
 
-        // Using placeholder AppID and ServerSecret if env vars are not set
-        const appID = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID 
-          ? parseInt(process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID)
-          : 123456789; // PLACEHOLDER
-        
-        const serverSecret = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET 
-          || "PLACEHOLDER_SECRET";
+        // Fetch dynamic platform settings for ZegoCloud credentials if env vars are missing
+        const dbSettings = await getSettings();
+        const rawAppId = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID || dbSettings?.zegoAppId;
+        const serverSecret = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET || dbSettings?.zegoServerSecret;
+
+        if (!rawAppId || !serverSecret || rawAppId === '123456789' || serverSecret === 'PLACEHOLDER_SECRET') {
+          console.error("ZegoCloud credentials missing or invalid placeholder.");
+          setInitFailed(true);
+          return;
+        }
+
+        const appID = parseInt(rawAppId.toString());
 
         // Add a random string to userID so you can test in multiple tabs with the same logged-in account
         const uniqueUserID = `${user.uid}_${Math.floor(Math.random() * 10000)}`;

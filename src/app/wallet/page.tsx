@@ -46,6 +46,12 @@ export default function WalletPage() {
     }
   }, [user, userLoading]);
 
+  const isUSD = currencyCode === 'USD';
+  const presets = isUSD ? [1, 5, 10] : [50, 100, 500];
+  const minAllowed = isUSD ? 0.50 : 10;
+  const numAmount = parseFloat(amount);
+  const isTooLow = amount !== '' && !isNaN(numAmount) && numAmount < minAllowed;
+
   const handleAddFunds = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -54,21 +60,24 @@ export default function WalletPage() {
     }
 
     const val = parseFloat(amount);
-    if (isNaN(val) || val <= 0) {
-      toast.error('Please enter a valid amount');
+    if (isNaN(val) || val < minAllowed) {
+      toast.error(`Minimum transaction amount is ${currencySymbol}${minAllowed.toFixed(isUSD ? 2 : 0)}. Payments below this amount are not accepted.`);
       return;
     }
 
     setIsProcessing(true);
     try {
+      const displayAmount = val;
+      const baseInrAmount = isUSD ? Math.round(val / 0.012) : val;
+
       const response = await fetch('/api/create-wallet-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.uid,
           userEmail: user.email || userData?.email || '',
-          amount: val, // Base INR amount
-          displayAmount: convertPrice(val),
+          amount: baseInrAmount,
+          displayAmount: displayAmount,
           currency: currencyCode.toLowerCase(),
         }),
       });
@@ -154,39 +163,51 @@ export default function WalletPage() {
               <h3 className="text-xl font-bold text-foreground mb-4">Add Funds</h3>
               
               <div className="grid grid-cols-3 gap-3 mb-6">
-                {[10, 50, 100].map((preset) => (
+                {presets.map((preset) => (
                   <button
                     key={preset}
                     type="button"
                     onClick={() => setAmount(preset.toString())}
-                    className={`py-2 rounded-xl border ${amount === preset.toString() ? 'border-[#C9952B] bg-[#C9952B]/10 text-[#C9952B]' : 'border-white/10 text-white/60 hover:border-white/30'} font-semibold transition-all`}
+                    className={`py-2 rounded-xl border ${amount === preset.toString() ? 'border-[#C9952B] bg-[#C9952B]/10 text-[#C9952B]' : 'border-white/10 text-white/60 hover:border-white/30'} font-semibold transition-all flex items-center justify-center`}
                   >
-                    {formatPrice(preset)}
+                    {currencySymbol}{preset}
                   </button>
                 ))}
               </div>
 
               <form onSubmit={handleAddFunds} className="space-y-4">
                 <div>
-                  <label className="text-sm font-semibold text-white/60 mb-1.5 block">Custom Amount</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-semibold text-white/60">Custom Amount</label>
+                    <span className="text-xs text-white/40">Min: {currencySymbol}{minAllowed.toFixed(isUSD ? 2 : 0)}</span>
+                  </div>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-semibold">{currencySymbol}</span>
                     <input
                       type="number"
-                      min="1"
-                      step="1"
+                      min={isUSD ? "0.50" : "10"}
+                      step={isUSD ? "0.01" : "1"}
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      placeholder="Enter amount"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-8 pr-4 text-white focus:outline-none focus:border-[#C9952B] transition-colors"
+                      placeholder={`Enter amount (Min ${currencySymbol}${minAllowed.toFixed(isUSD ? 2 : 0)})`}
+                      className={`w-full bg-white/5 border ${isTooLow ? 'border-red-500 bg-red-500/10 focus:border-red-500' : 'border-white/10 focus:border-[#C9952B]'} rounded-xl py-3 pl-8 pr-4 text-white focus:outline-none transition-colors`}
                       required
                     />
                   </div>
+                  {isTooLow && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-xs text-red-400 mt-2 flex items-center gap-1.5 font-medium"
+                    >
+                      <span>⚠️ Minimum transaction amount is {currencySymbol}{minAllowed.toFixed(isUSD ? 2 : 0)}. Payments below this amount are not accepted.</span>
+                    </motion.p>
+                  )}
                 </div>
                 
                 <button
                   type="submit"
-                  disabled={isProcessing || !amount || parseFloat(amount) <= 0}
+                  disabled={isProcessing || !amount || isNaN(numAmount) || numAmount < minAllowed}
                   className="w-full py-3.5 rounded-xl gold-gradient-bg text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />}

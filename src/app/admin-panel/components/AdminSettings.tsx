@@ -109,6 +109,51 @@ export default function AdminSettings() {
           </div>
         </div>
 
+        {/* ZegoCloud Call Integration Keys */}
+        <div className="bg-card border border-border rounded-2xl p-6 lg:p-8 space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-border">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Key size={20} className="text-accent" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">ZegoCloud Call Keys</h3>
+              <p className="text-xs text-muted-foreground">Required for 1-on-1 audio and video calls between customers & astrologers.</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">ZegoCloud App ID</label>
+              <input
+                type="text"
+                value={settings.zegoAppId || ''}
+                onChange={(e) =>
+                  setSettings({ ...settings, zegoAppId: e.target.value })
+                }
+                placeholder="e.g. 123456789"
+                autoComplete="off"
+                className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">Obtained from your ZegoCloud Admin Console project dashboard.</p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">ZegoCloud Server Secret</label>
+              <input
+                type={showSecret ? 'text' : 'password'}
+                value={settings.zegoServerSecret || ''}
+                onChange={(e) =>
+                  setSettings({ ...settings, zegoServerSecret: e.target.value })
+                }
+                placeholder="e.g. 4a5b6c7d..."
+                autoComplete="off"
+                className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">Secret key used to generate room tokens.</p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end pt-4">
           <button
             type="submit"
