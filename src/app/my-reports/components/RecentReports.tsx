@@ -187,6 +187,43 @@ export default function RecentReports() {
         </div>
       </div>
 
+  const handleDownloadPDF = async () => {
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const element = document.getElementById('report-pdf-content');
+      if (element) {
+        // Temporarily prepare for PDF capture
+        const originalMaxHeight = element.style.maxHeight;
+        const scrollDiv = element.querySelector('.overflow-y-auto') as HTMLElement;
+        const originalOverflow = scrollDiv ? scrollDiv.style.overflow : '';
+        
+        element.style.maxHeight = 'none';
+        if (scrollDiv) scrollDiv.style.overflow = 'visible';
+
+        const opt = {
+          margin: [0.5, 0.5, 0.5, 0.5],
+          filename: `${selectedReport?.type || 'Report'}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            ignoreElements: (el: Element) => el.classList.contains('pdf-exclude')
+          },
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        
+        await html2pdf().set(opt).from(element).save();
+        
+        // Restore
+        element.style.maxHeight = originalMaxHeight;
+        if (scrollDiv) scrollDiv.style.overflow = originalOverflow;
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      window.print();
+    }
+  };
+
       {/* Report Modal */}
       <AnimatePresence>
         {selectedReport && (
@@ -199,6 +236,7 @@ export default function RecentReports() {
               onClick={() => setSelectedReport(null)}
             />
             <motion.div
+              id="report-pdf-content"
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -219,7 +257,7 @@ export default function RecentReports() {
                 </div>
                 <button
                   onClick={() => setSelectedReport(null)}
-                  className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground print:hidden"
+                  className="pdf-exclude p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground print:hidden"
                 >
                   <X size={20} />
                 </button>
@@ -339,7 +377,7 @@ export default function RecentReports() {
                 </div>
               </div>
 
-              <div className="p-6 border-t border-border bg-muted/30 flex items-center justify-between print:hidden">
+              <div className="pdf-exclude p-6 border-t border-border bg-muted/30 flex items-center justify-between print:hidden">
                 <Link
                   href="/talk-to-astrologer"
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white gold-gradient-bg hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20"
@@ -347,7 +385,7 @@ export default function RecentReports() {
                   Clarify Doubts? Talk to our Astrologer
                 </Link>
                 <button
-                  onClick={() => window.print()}
+                  onClick={handleDownloadPDF}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"
                 >
                   <Download size={16} /> Download PDF
