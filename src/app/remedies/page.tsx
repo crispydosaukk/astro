@@ -113,6 +113,23 @@ export default function RemediesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {remediesList.map((remedy, index) => {
               const Icon = iconMap[remedy.icon] || CircleDot;
+              const defaultImageMap: Record<string, string> = {
+                'svc-gemstone': '/assets/images/remedies/remedies_gemstone_1785738400359.png',
+                'svc-mantra': '/assets/images/remedies/remedies_mantra_1785738410624.png',
+                'svc-yantra': '/assets/images/remedies/remedies_yantra_1785738431966.png',
+                'svc-homam': '/assets/images/remedies/remedies_homam_1785738443734.png',
+                'svc-ishta': '/assets/images/remedies/remedies_ishta_1785738453810.png',
+                'svc-muhurtha': '/assets/images/remedies/remedies_muhurtham_1785738473891.png',
+                'svc-vastu': '/assets/images/remedies/remedies_vastu_1785738485180.png',
+                'svc-charity': '/assets/images/remedies/remedies_charity_1785738494717.png',
+                'svc-rudraksha': '/assets/images/remedies/remedies_homam_1785738443734.png',
+              };
+              const imageSrc =
+                remedy.image &&
+                (remedy.image !== '/assets/images/remedies/remedies_homam_1785738443734.png' ||
+                  remedy.id === 'svc-homam')
+                  ? remedy.image
+                  : defaultImageMap[remedy.id] || remedy.image || '/assets/images/remedies/remedies_homam_1785738443734.png';
               return (
                 <motion.div
                   key={remedy.id}
@@ -128,7 +145,7 @@ export default function RemediesPage() {
                   >
                     <div className="relative h-56 w-full overflow-hidden bg-muted flex-shrink-0">
                       <Image
-                        src={remedy.image || '/assets/images/remedies/remedies_homam_1785738443734.png'}
+                        src={imageSrc}
                         alt={remedy.title}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"

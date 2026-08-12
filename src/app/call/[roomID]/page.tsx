@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useUserData } from '@/lib/useUserData';
 import { Loader2 } from 'lucide-react';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, onSnapshot } from 'firebase/firestore';
 import { getSettings } from '@/lib/settings';
 
 export default function CallPage() {
@@ -19,6 +19,23 @@ export default function CallPage() {
   const [isJoined, setIsJoined] = useState(false);
   const [activeConsultationId, setActiveConsultationId] = useState<string | null>(null);
   const [isCustomerRole, setIsCustomerRole] = useState(false);
+
+  // Real-time listener for consultation status changes (e.g. if ended by recipient)
+  useEffect(() => {
+    if (!roomID || !user) return;
+    const q = query(collection(db, 'consultations'), where('roomID', '==', roomID));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const docData = snapshot.docs[0].data();
+        if (docData.status === 'completed' || docData.status === 'cancelled' || docData.status === 'declined') {
+          console.log("Consultation status changed to ended in database.");
+          const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+          router.push(isAstrologer ? '/astrologer-dashboard' : '/');
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [roomID, user, router, userData]);
 
   useEffect(() => {
     let zp: any = null;
@@ -40,11 +57,18 @@ export default function CallPage() {
         let isCustomer = false;
 
         if (!querySnapshot.empty) {
-          const doc = querySnapshot.docs[0];
-          const docData = doc.data();
-          consultationId = doc.id;
+          const docData = querySnapshot.docs[0].data();
+          consultationId = querySnapshot.docs[0].id;
           isCustomer = user.uid === docData.customerId;
           if (docData.duration) fetchedDuration = docData.duration;
+
+          // If consultation has already ended, do not join
+          if (docData.status === 'completed' || docData.status === 'cancelled' || docData.status === 'declined') {
+            alert('This consultation call has already ended.');
+            const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+            router.push(isAstrologer ? '/astrologer-dashboard' : '/');
+            return;
+          }
         }
         setDurationLimit(fetchedDuration);
         setActiveConsultationId(consultationId);
@@ -157,8 +181,13 @@ export default function CallPage() {
     if (!isJoined || timeLeft === null) return;
     
     if (timeLeft <= 0) {
-      alert("Time limit completed. Your wallet amount for this session is exhausted.");
-      router.push('/');
+      if (activeConsultationId) {
+        const docRef = doc(db, 'consultations', activeConsultationId);
+        updateDoc(docRef, { status: 'completed' }).catch(console.error);
+      }
+      alert("Time limit completed. Your call session has ended.");
+      const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+      router.push(isAstrologer ? '/astrologer-dashboard' : '/');
       return;
     }
     
@@ -181,8 +210,14 @@ export default function CallPage() {
           });
           
           if (res.status === 402) {
-            // Insufficient balance, force disconnect
-            setTimeLeft(0);
+            // Insufficient balance, mark call as completed and force disconnect
+            if (activeConsultationId) {
+              const docRef = doc(db, 'consultations', activeConsultationId);
+              await updateDoc(docRef, { status: 'completed' }).catch(console.error);
+            }
+            alert("Your wallet balance is exhausted. The call has ended.");
+            const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+            router.push(isAstrologer ? '/astrologer-dashboard' : '/');
           }
         } catch (e) {
           console.error("Failed to deduct minute", e);
@@ -194,7 +229,7 @@ export default function CallPage() {
       clearInterval(timer);
       clearInterval(billingTimer);
     };
-  }, [timeLeft, isJoined, router, isCustomerRole, activeConsultationId]);
+  }, [timeLeft, isJoined, router, isCustomerRole, activeConsultationId, userData]);
 
   if (loading) {
     return (
@@ -230,14 +265,35 @@ export default function CallPage() {
 
   return (
     <div className="h-screen w-full bg-black overflow-hidden flex flex-col relative">
-      {isJoined && timeLeft !== null && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[9999] bg-black/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 shadow-xl flex items-center gap-3">
-           <div className={`w-2 h-2 rounded-full ${timeLeft < 60 ? 'bg-red-500 animate-pulse' : 'bg-green-500 animate-pulse'}`} />
-           <span className={`font-mono font-bold text-lg ${timeLeft < 60 ? 'text-red-400' : 'text-white'}`}>
-             {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:
-             {(timeLeft % 60).toString().padStart(2, '0')}
-           </span>
-           <span className="text-white/70 text-xs">Remaining</span>
+      {isJoined && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[9999] bg-black/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 shadow-xl flex items-center gap-4">
+           {timeLeft !== null && (
+             <div className="flex items-center gap-2">
+               <div className={`w-2 h-2 rounded-full ${timeLeft < 60 ? 'bg-red-500 animate-pulse' : 'bg-green-500 animate-pulse'}`} />
+               <span className={`font-mono font-bold text-lg ${timeLeft < 60 ? 'text-red-400' : 'text-white'}`}>
+                 {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:
+                 {(timeLeft % 60).toString().padStart(2, '0')}
+               </span>
+               <span className="text-white/70 text-xs">Remaining</span>
+             </div>
+           )}
+           <button
+             onClick={async () => {
+               if (activeConsultationId) {
+                 try {
+                   const docRef = doc(db, 'consultations', activeConsultationId);
+                   await updateDoc(docRef, { status: 'completed' });
+                 } catch (e) {
+                   console.error(e);
+                 }
+               }
+               const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+               router.push(isAstrologer ? '/astrologer-dashboard' : '/');
+             }}
+             className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-full transition-colors cursor-pointer"
+           >
+             End Call
+           </button>
         </div>
       )}
       <div 

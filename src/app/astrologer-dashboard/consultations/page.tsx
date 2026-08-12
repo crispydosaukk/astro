@@ -243,12 +243,28 @@ export default function ConsultationsPage() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => router.push(`/call/${session.roomID}`)}
-                      className="w-full py-2.5 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 transition-colors text-sm font-semibold flex items-center justify-center gap-2"
-                    >
-                      <VideoIcon size={16} /> Rejoin Call
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => router.push(`/call/${session.roomID}`)}
+                        className="flex-1 py-2.5 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 transition-colors text-sm font-semibold flex items-center justify-center gap-2"
+                      >
+                        <VideoIcon size={16} /> Rejoin Call
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const docRef = doc(db, 'consultations', session.id);
+                            await updateDoc(docRef, { status: 'completed' });
+                            toast.success('Consultation ended successfully.');
+                          } catch (e) {
+                            toast.error('Failed to end consultation.');
+                          }
+                        }}
+                        className="py-2.5 px-4 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 transition-colors text-sm font-semibold flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        End Call
+                      </button>
+                    </div>
                   </div>
                 ))
               )}

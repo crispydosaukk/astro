@@ -199,11 +199,30 @@ export async function getHomepageContent(): Promise<HomepageContent> {
 
     if (docSnap.exists()) {
       const data = docSnap.data() as Partial<HomepageContent>;
+      const mergedServices = data.services
+        ? {
+            ...defaultHomepageContent.services,
+            ...data.services,
+            items: (data.services.items || defaultHomepageContent.services.items).map((item) => {
+              const defaultItem = defaultHomepageContent.services.items.find((d) => d.id === item.id);
+              const isGenericFallback =
+                !item.image ||
+                (item.image === '/assets/images/remedies/remedies_homam_1785738443734.png' &&
+                  item.id !== 'svc-homam');
+              return {
+                ...defaultItem,
+                ...item,
+                image: isGenericFallback ? defaultItem?.image || item.image : item.image,
+              };
+            }),
+          }
+        : defaultHomepageContent.services;
+
       return {
         ...defaultHomepageContent,
         ...data,
         panchang: data.panchang || defaultHomepageContent.panchang,
-        services: data.services || defaultHomepageContent.services,
+        services: mergedServices,
       } as HomepageContent;
     } else {
       // If no document exists, return the defaults
