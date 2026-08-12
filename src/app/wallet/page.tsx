@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import { useUserData } from '@/lib/useUserData';
 import { db } from '@/lib/firebase/config';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import { Loader2, Plus, Wallet, ArrowUpRight, ArrowDownLeft, Clock, XCircle } from 'lucide-react';
+import { Loader2, Plus, Wallet, ArrowUpRight, ArrowDownLeft, Clock, XCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { useCurrency } from '@/lib/CurrencyContext';
@@ -135,7 +135,12 @@ export default function WalletPage() {
                 <h2 className="text-5xl font-bold text-white mb-2 tracking-tight">
                   {formatPrice(currentBalance)}
                 </h2>
-                <p className="text-sm text-white/40">Securely store funds for instant bookings</p>
+                <p className="text-sm text-white/40 mb-4">Securely store funds for instant bookings</p>
+                
+                <div className="pt-3 border-t border-white/10 flex items-start gap-2.5 text-xs text-[#C9952B] bg-[#C9952B]/10 p-3 rounded-xl">
+                  <Info size={16} className="flex-shrink-0 mt-0.5" />
+                  <span>Note: A minimum wallet balance for <strong>5 minutes</strong> of consultation is required to connect with an astrologer.</span>
+                </div>
               </div>
             </motion.div>
 
