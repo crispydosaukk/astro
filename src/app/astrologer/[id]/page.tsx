@@ -318,17 +318,44 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
 
   const astrologer = React.useMemo(() => {
     if (!dbAstrologer) return fallbackData;
+    const certs = Array.isArray(dbAstrologer.certifications)
+      ? dbAstrologer.certifications
+      : dbAstrologer.certifications
+      ? dbAstrologer.certifications.split(',').map((c: string) => c.trim())
+      : fallbackData.certifications;
+
+    const skillsList = dbAstrologer.skills
+      ? dbAstrologer.skills.split(',').map((s: string) => s.trim())
+      : fallbackData.specialty;
+
+    // Generate dynamic expertise bars based on skills
+    const dynamicExpertise = skillsList.map((skill: string, idx: number) => ({
+      name: skill,
+      level: Math.max(80, 98 - idx * 3),
+    }));
+
     return {
       ...fallbackData,
       name: dbAstrologer.name || fallbackData.name,
-      experience: dbAstrologer.experience || fallbackData.experience,
-      rating: dbAstrologer.rating || fallbackData.rating,
+      location: dbAstrologer.city || dbAstrologer.location || fallbackData.location,
+      experience: Number(dbAstrologer.experienceYears || dbAstrologer.experience) || fallbackData.experience,
+      rating: Number(dbAstrologer.rating) || fallbackData.rating,
+      reviews: Number(dbAstrologer.reviewsCount || dbAstrologer.reviews) || fallbackData.reviews,
       pricePerMin: Number(dbAstrologer.amount) || fallbackData.pricePerMin,
-      specialty: dbAstrologer.skills ? dbAstrologer.skills.split(',').map((s: string) => s.trim()) : fallbackData.specialty,
+      specialty: skillsList,
       image: dbAstrologer.profileImageUrl || dbAstrologer.avatar || fallbackData.image,
-      consultations: dbAstrologer.consultations || fallbackData.consultations,
-      about: dbAstrologer.bio || fallbackData.about,
-      languages: dbAstrologer.languages ? dbAstrologer.languages.split(',').map((s: string) => s.trim()) : fallbackData.languages,
+      consultations: Number(dbAstrologer.consultations) || fallbackData.consultations,
+      badge: dbAstrologer.badge !== undefined ? dbAstrologer.badge : fallbackData.badge,
+      about: dbAstrologer.bio || dbAstrologer.about || fallbackData.about,
+      education: dbAstrologer.education || fallbackData.education,
+      certifications: certs,
+      languages: dbAstrologer.languages
+        ? dbAstrologer.languages.split(',').map((s: string) => s.trim())
+        : fallbackData.languages,
+      expertise: dynamicExpertise.length > 0 ? dynamicExpertise : fallbackData.expertise,
+      reviewsList: Array.isArray(dbAstrologer.reviewsList) && dbAstrologer.reviewsList.length > 0
+        ? dbAstrologer.reviewsList
+        : fallbackData.reviewsList,
     };
   }, [dbAstrologer, fallbackData]);
 
@@ -358,7 +385,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
 
     if (currentBalance < totalCost) {
       toast.error('Insufficient wallet balance. Please recharge your wallet.');
-      router.push('/wallet');
+      router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
@@ -570,7 +597,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     <div>
                       <h3 className="font-semibold text-foreground mb-3">Certifications</h3>
                       <div className="flex flex-wrap gap-2">
-                        {astrologer.certifications.map((cert) => (
+                        {astrologer.certifications.map((cert: string) => (
                           <div
                             key={cert}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-500/10 border border-green-500/20 text-xs font-medium text-green-600 dark:text-green-400"
@@ -601,7 +628,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     <div>
                       <h3 className="font-semibold text-foreground mb-4">Areas of Expertise</h3>
                       <div className="space-y-3">
-                        {astrologer.expertise.map((exp) => (
+                        {astrologer.expertise.map((exp: { name: string; level: number }) => (
                           <div key={exp.name}>
                             <div className="flex items-center justify-between mb-1.5">
                               <span className="text-sm text-foreground">{exp.name}</span>
@@ -669,7 +696,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     </div>
 
                     {/* Review Cards */}
-                    {astrologer.reviewsList.map((review, i) => (
+                    {astrologer.reviewsList.map((review: any, i: number) => (
                       <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 10 }}
@@ -903,7 +930,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     </div>
                     {(userData?.walletBalance || 0) < totalCost && (
                       <button 
-                        onClick={() => router.push('/wallet')}
+                        onClick={() => router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`)}
                         className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-semibold hover:bg-red-500/20 transition-colors"
                       >
                         Recharge
@@ -916,7 +943,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
               {/* Book Button */}
               {(userData?.walletBalance || 0) < totalCost ? (
                 <button
-                  onClick={() => router.push('/wallet')}
+                  onClick={() => router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`)}
                   className="w-full py-3.5 rounded-xl font-semibold text-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
                 >
                   <Zap size={15} /> Recharge Wallet

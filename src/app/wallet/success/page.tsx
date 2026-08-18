@@ -42,16 +42,30 @@ function WalletSuccessContent() {
           toast.success('Payment verified.');
         }
         
-        // Wait a moment so user sees success
+        // Wait a moment so user sees success and then return to original page or wallet
         setTimeout(() => {
-          router.push('/wallet');
+          const returnUrl = searchParams?.get('redirect') || localStorage.getItem('wallet_return_url');
+          if (returnUrl) {
+            localStorage.removeItem('wallet_return_url');
+            router.push(returnUrl);
+          } else {
+            router.push('/wallet');
+          }
         }, 2000);
 
       } catch (error: any) {
         console.error(error);
         setStatus('error');
         toast.error(error.message || 'Error processing payment');
-        setTimeout(() => router.push('/wallet'), 2500);
+        setTimeout(() => {
+          const returnUrl = searchParams?.get('redirect') || localStorage.getItem('wallet_return_url');
+          if (returnUrl) {
+            localStorage.removeItem('wallet_return_url');
+            router.push(returnUrl);
+          } else {
+            router.push('/wallet');
+          }
+        }, 2500);
       }
     }
 

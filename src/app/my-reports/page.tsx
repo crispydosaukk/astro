@@ -7,9 +7,8 @@ import { Bell, User } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MyReportsPage() {
-  const { userData } = useUserData();
-  const firstName = userData?.firstName || 'User';
-  const fullName = userData?.name || 'Loading...';
+  const { user, userData, loading } = useUserData();
+  const fullName = userData?.name || user?.displayName || user?.email?.split('@')[0] || (loading ? 'Loading...' : 'Guest');
 
   // Get current date formatted
   const currentDate = new Date();
@@ -41,15 +40,21 @@ export default function MyReportsPage() {
                 <Bell size={18} className="text-muted-foreground" />
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent" />
               </button>
-              <Link
-                href="/my-reports"
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-all"
-              >
-                <div className="w-7 h-7 rounded-full indigo-gradient-bg flex items-center justify-center">
-                  <User size={13} className="text-white" />
+              {user ? (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted transition-all">
+                  <div className="w-7 h-7 rounded-full gold-gradient-bg flex items-center justify-center">
+                    <User size={13} className="text-white" />
+                  </div>
+                  <span className="text-sm font-medium hidden sm:block">{fullName}</span>
                 </div>
-                <span className="text-sm font-medium hidden sm:block">{fullName}</span>
-              </Link>
+              ) : (
+                <Link
+                  href="/sign-up-login-screen"
+                  className="px-4 py-2 rounded-xl gold-gradient-bg text-white font-semibold text-xs shadow hover:opacity-90 transition-opacity"
+                >
+                  Sign In
+                </Link>
+              )}
             </div>
           </div>
         </div>

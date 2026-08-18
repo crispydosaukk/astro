@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import { useUserData } from '@/lib/useUserData';
 import { db } from '@/lib/firebase/config';
@@ -9,14 +9,25 @@ import { Loader2, Plus, Wallet, ArrowUpRight, ArrowDownLeft, Clock, XCircle, Inf
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { useCurrency } from '@/lib/CurrencyContext';
+import { loadRazorpayScript } from '@/lib/razorpay';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function WalletPage() {
+function WalletContent() {
   const { user, userData, loading: userLoading } = useUserData();
   const { formatPrice, currencySymbol, convertPrice, currencyCode } = useCurrency();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loadingTx, setLoadingTx] = useState(true);
   const [amount, setAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    const redirectParam = searchParams.get('redirect');
+    if (redirectParam) {
+      localStorage.setItem('wallet_return_url', redirectParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     async function fetchTransactions() {
@@ -61,35 +72,110 @@ export default function WalletPage() {
 
     const val = parseFloat(amount);
     if (isNaN(val) || val < minAllowed) {
-      toast.error(`Minimum transaction amount is ${currencySymbol}${minAllowed.toFixed(isUSD ? 2 : 0)}. Payments below this amount are not accepted.`);
+      toast.error(`Minimum transaction amount is ${currencySymbol}${minAllowed.toFixed(isUSD ? 2 : 0)}.`);
       return;
     }
 
     setIsProcessing(true);
     try {
-      const displayAmount = val;
+      const resLoaded = await loadRazorpayScript();
+      if (!resLoaded) {
+        toast.error('Failed to load Razorpay SDK. Please check your internet connection.');
+        setIsProcessing(false);
+        return;
+      }
+
       const baseInrAmount = isUSD ? Math.round(val / 0.012) : val;
 
-      const response = await fetch('/api/create-wallet-session', {
+      // 1. Create Razorpay order
+      const orderRes = await fetch('/api/create-razorpay-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user.uid,
-          userEmail: user.email || userData?.email || '',
           amount: baseInrAmount,
-          displayAmount: displayAmount,
-          currency: currencyCode.toLowerCase(),
+          currency: 'INR',
+          notes: {
+            userId: user.uid,
+            userEmail: user.email || userData?.email || '',
+            type: 'wallet_recharge',
+          },
         }),
       });
 
-      const data = await response.json();
+      const orderData = await orderRes.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create payment session');
+      if (!orderRes.ok) {
+        throw new Error(orderData.error || 'Failed to create payment order');
       }
 
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
+      // 2. Open Razorpay Modal
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'AstroParihar',
+        description: 'Wallet Balance Recharge',
+        image: '/AstroParihar_Top_Logo.jpg',
+        order_id: orderData.orderId,
+        prefill: {
+          name: userData?.name || user.displayName || '',
+          email: user.email || userData?.email || '',
+          contact: userData?.phone || '',
+        },
+        theme: {
+          color: '#C9952B',
+        },
+        handler: async function (response: any) {
+          try {
+            // 3. Verify payment signature and update wallet balance
+            const verifyRes = await fetch('/api/verify-razorpay-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                paymentType: 'wallet',
+                userId: user.uid,
+                amount: baseInrAmount,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) {
+              throw new Error(verifyData.error || 'Payment verification failed');
+            }
+
+            toast.success('Funds added to wallet successfully!');
+            setAmount('');
+
+            // Check return URL if user came from booking/remedy page
+            const returnUrl = searchParams?.get('redirect') || localStorage.getItem('wallet_return_url');
+            if (returnUrl) {
+              localStorage.removeItem('wallet_return_url');
+              setTimeout(() => {
+                router.push(returnUrl);
+              }, 1000);
+            } else {
+              window.location.reload();
+            }
+          } catch (err: any) {
+            console.error(err);
+            toast.error(err.message || 'Error updating wallet');
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+            toast.info('Payment process cancelled');
+          },
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Error processing request');
@@ -273,5 +359,18 @@ export default function WalletPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WalletPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Loader2 className="animate-spin text-[#C9952B] mb-4" size={36} />
+        <p className="text-muted-foreground text-sm">Loading Wallet...</p>
+      </div>
+    }>
+      <WalletContent />
+    </Suspense>
   );
 }

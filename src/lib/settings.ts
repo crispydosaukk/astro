@@ -2,17 +2,23 @@ import { db } from './firebase/config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export interface GlobalSettings {
-  stripeSecretKey: string;
-  stripePublishableKey: string;
+  razorpayKeyId?: string;
+  razorpayKeySecret?: string;
+  stripeSecretKey?: string;
+  stripePublishableKey?: string;
   zegoAppId?: string;
   zegoServerSecret?: string;
+  openaiApiKey?: string;
 }
 
 const defaultSettings: GlobalSettings = {
+  razorpayKeyId: '',
+  razorpayKeySecret: '',
   stripeSecretKey: '',
   stripePublishableKey: '',
   zegoAppId: '1951519898',
   zegoServerSecret: 'd68c140051b7d8f2404c2b2b9b586886',
+  openaiApiKey: '',
 };
 
 export async function getSettings(): Promise<GlobalSettings> {

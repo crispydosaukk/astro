@@ -1,5 +1,5 @@
 import { db } from './firebase/config';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 export interface ServiceItem {
   id: string;
@@ -13,6 +13,24 @@ export interface ServiceItem {
   image?: string;
   price?: number;
   priceUSD?: number;
+}
+
+export interface CoreServiceItem {
+  id: string;
+  title: string;
+  desc: string;
+  badge: string;
+  color: string;
+  iconColor: string;
+  href: string;
+}
+
+export interface ComprehensiveServicesSection {
+  tagline: string;
+  title: string;
+  titleHighlight: string;
+  subtitle: string;
+  items: CoreServiceItem[];
 }
 
 export interface HomepageContent {
@@ -31,6 +49,7 @@ export interface HomepageContent {
     subtitle: string;
     items: ServiceItem[];
   };
+  comprehensiveServices: ComprehensiveServicesSection;
   panchang: {
     dateLabel: string;
     tithiValue: string;
@@ -45,6 +64,9 @@ export interface HomepageContent {
     varaSub: string;
     rahuKalamValue: string;
     rahuKalamSub: string;
+    abhijitMuhurat?: string;
+    sunrise?: string;
+    sunset?: string;
   };
 }
 
@@ -71,107 +93,206 @@ export const defaultHomepageContent: HomepageContent = {
       'We stand for: Genuine help, Practical solutions, No fear-based astrology, Spiritual clarity, Long-term transformation.',
     items: [
       {
-        id: 'svc-gemstone',
-        icon: 'Gem',
-        title: 'Gemstone Advice',
-        description:
-          'Personalized gemstone recommendations based on your planetary analysis and birth chart',
-        color: 'from-amber-500/15 to-yellow-500/10',
-        iconColor: 'text-amber-400',
-        href: '/remedies/gemstone',
-        badge: 'Premium',
-        image: '/assets/images/remedies/remedies_gemstone_1785738400359.png',
-      },
-      {
         id: 'svc-mantra',
         icon: 'Music',
-        title: 'Mantra Guidance',
+        title: '1. Mantra Shakti (मन्त्र शक्ति)',
         description:
-          'Sacred mantras tailored to strengthen your weak planets and amplify positive energies',
+          'ॐ ऐं ह्रीं क्लीं चामुण्डायै विच्चे ॥ Sacred mantras to purify mind, speech, & actions and protect all directions.',
         color: 'from-blue-500/15 to-cyan-500/10',
         iconColor: 'text-blue-400',
         href: '/remedies/mantra',
-        badge: 'Premium',
+        badge: 'North (N)',
+        price: 99,
+        priceUSD: 1.99,
         image: '/assets/images/remedies/remedies_mantra_1785738410624.png',
+      },
+      {
+        id: 'svc-gemstone',
+        icon: 'Gem',
+        title: '2. Gemstones (रत्न)',
+        description:
+          'ॐ ग्रहहाय नमः ॥ Empower weak planets, restore life balance, and bring positive cosmic energy through sacred gems.',
+        color: 'from-amber-500/15 to-yellow-500/10',
+        iconColor: 'text-amber-400',
+        href: '/remedies/gemstone',
+        badge: 'North-East (NE)',
+        price: 99,
+        priceUSD: 1.99,
+        image: '/assets/images/remedies/remedies_gemstone_1785738400359.png',
       },
       {
         id: 'svc-yantra',
         icon: 'Triangle',
-        title: 'Yantra Recommendations',
-        description: 'Sacred geometric tools for specific planetary remedies and energy balancing',
+        title: '3. Yanthra (यन्त्र)',
+        description:
+          'ॐ श्रीं ह्रीं क्लीं नमः ॥ Sacred geometric Yantras for energy preservation, spatial stability, and victory.',
         color: 'from-green-500/15 to-emerald-500/10',
         iconColor: 'text-green-400',
         href: '/remedies/yantra',
-        badge: 'Premium',
+        badge: 'East (E)',
+        price: 99,
+        priceUSD: 1.99,
         image: '/assets/images/remedies/remedies_yantra_1785738431966.png',
       },
       {
         id: 'svc-homam',
         icon: 'Flame',
-        title: 'Homam & Puja',
+        title: '4. Homa (हवन)',
         description:
-          'Recommended fire rituals and pujas for planetary appeasement and divine blessings',
+          'ॐ अग्नये स्वाहा ॥ Sacred fire rituals to destroy negative energy, pacify planetary afflictions, and bring auspiciousness.',
         color: 'from-orange-500/15 to-red-500/10',
         iconColor: 'text-orange-400',
         href: '/remedies/homa',
-        badge: 'Premium',
+        badge: 'South-East (SE)',
+        price: 99,
+        priceUSD: 1.99,
         image: '/assets/images/remedies/remedies_homam_1785738443734.png',
       },
       {
         id: 'svc-ishta',
         icon: 'Heart',
-        title: 'Ishta Devata',
+        title: '5. Devata Upasana (देवता उपासना)',
         description:
-          'Discover your personal deity and daily worship practices for spiritual growth',
+          'ॐ नमः शिवाय ॥ Worship of personal Ishta Devata for ultimate spiritual protection and divine grace.',
         color: 'from-pink-500/15 to-rose-500/10',
         iconColor: 'text-pink-400',
         href: '/remedies/ishta-devata',
-        badge: 'Premium',
+        badge: 'South (S)',
+        price: 99,
+        priceUSD: 1.99,
         image: '/assets/images/remedies/remedies_ishta_1785738453810.png',
-      },
-      {
-        id: 'svc-muhurtha',
-        icon: 'Moon',
-        title: 'Muhurtham Generator',
-        description: 'Find the most auspicious time for marriage, business, travel and more',
-        color: 'from-violet-500/15 to-purple-500/10',
-        iconColor: 'text-violet-400',
-        href: '/remedies/muhurtham',
-        badge: 'Premium',
-        image: '/assets/images/remedies/remedies_muhurtham_1785738473891.png',
       },
       {
         id: 'svc-vastu',
         icon: 'Compass',
-        title: 'Interactive Vastu',
-        description: 'Room-by-room Vastu analysis with remedies for every direction of your home',
+        title: '6. Vasthu (वास्तु)',
+        description:
+          'ॐ वास्तुपुरुषाय नमः ॥ Directional Vastu balancing to enhance harmony, prosperity, and peace at home & workplace.',
         color: 'from-teal-500/15 to-cyan-500/10',
         iconColor: 'text-teal-400',
         href: '/remedies/vastu',
-        badge: 'Premium',
+        badge: 'South-West (SW)',
+        price: 99,
+        priceUSD: 1.99,
         image: '/assets/images/remedies/remedies_vastu_1785738485180.png',
-      },
-      {
-        id: 'svc-charity',
-        icon: 'Gift',
-        title: 'Charity Planner',
-        description: 'Karma-aligned giving schedule based on your planetary positions and doshas',
-        color: 'from-purple-500/15 to-indigo-500/10',
-        iconColor: 'text-purple-400',
-        href: '/remedies/charity',
-        badge: 'Premium',
-        image: '/assets/images/remedies/remedies_charity_1785738494717.png',
       },
       {
         id: 'svc-rudraksha',
         icon: 'CircleDot',
-        title: 'Rudraksha Guide',
-        description: 'Discover the right Mukhi Rudraksha to balance your planetary energies and doshas',
+        title: '7. Rudraksha (रुद्राक्ष)',
+        description:
+          'ॐ नमः शिवाय ॥ Pure Mukhi Rudraksha to pacify planetary doshas, stabilize the mind, and amplify spiritual power.',
         color: 'from-orange-500/15 to-yellow-500/10',
         iconColor: 'text-orange-400',
         href: '/remedies/rudraksha',
-        badge: 'Premium',
+        badge: 'West (W)',
+        price: 99,
+        priceUSD: 1.99,
         image: '/assets/images/remedies/remedies_homam_1785738443734.png',
+      },
+      {
+        id: 'svc-homa-puja',
+        icon: 'Flame',
+        title: '8. Homa / Puja (हवन / पूजा)',
+        description:
+          'ॐ स्वाहा ॥ Sacred Agni Dev fire offerings and Pujas for purification, peace, and spiritual siddhi across all directions.',
+        color: 'from-purple-500/15 to-rose-500/10',
+        iconColor: 'text-purple-400',
+        href: '/remedies/homa',
+        badge: 'North-West (NW)',
+        price: 99,
+        priceUSD: 1.99,
+        image: '/assets/images/remedies/remedies_homam_1785738443734.png',
+      },
+    ],
+  },
+  comprehensiveServices: {
+    tagline: 'ASTROPARIHAR SERVICES',
+    title: 'Our Comprehensive',
+    titleHighlight: 'Vedic Services & Guides',
+    subtitle:
+      'Free daily Panchang, Horoscope forecasts, Kundli Matching, Meditation guides, Fasting Planners & Mahadasha Survival PDF Guides.',
+    items: [
+      {
+        id: 'free-janam-kundli',
+        title: 'Free Janam Kundli',
+        desc: 'Detailed Vedic birth chart, Lagna report, planetary placements, and future life predictions.',
+        badge: 'Free',
+        color: 'from-blue-500/15 to-indigo-500/10',
+        iconColor: 'text-blue-400',
+        href: '/services/free-horoscope',
+      },
+      {
+        id: 'free-kundli-matching',
+        title: 'Free Kundli Matching',
+        desc: '36-point Gun Milan, marital compatibility check, and Manglik Dosha analysis for Bride & Groom.',
+        badge: 'Free',
+        color: 'from-pink-500/15 to-rose-500/10',
+        iconColor: 'text-pink-400',
+        href: '/services/free-kundli-matching',
+      },
+      {
+        id: 'free-daily-horoscope',
+        title: 'Free Daily Horoscope',
+        desc: 'Today\'s 12-Zodiac sign predictions for Career, Love, Health, Money, Lucky Numbers & Colors.',
+        badge: 'Free',
+        color: 'from-amber-500/15 to-yellow-500/10',
+        iconColor: 'text-amber-400',
+        href: '/services/free-daily-horoscope',
+      },
+      {
+        id: 'free-panchang',
+        title: 'Free Daily Panchang',
+        desc: 'Accurate Tithi, Nakshatra, Yoga, Karana, Abhijit Muhurat & Rahu Kaal calculations for your location.',
+        badge: 'Free',
+        color: 'from-orange-500/15 to-amber-500/10',
+        iconColor: 'text-orange-400',
+        href: '/services/free-panchang',
+      },
+      {
+        id: 'free-fasting',
+        title: 'Free Fasting Planner',
+        desc: 'Personalized weekly fasting days and sacred Ekadashi & Pradosham vrat calendars based on your Rashi.',
+        badge: 'Free',
+        color: 'from-purple-500/15 to-indigo-500/10',
+        iconColor: 'text-purple-400',
+        href: '/services/free-fasting-planner',
+      },
+      {
+        id: 'free-meditation',
+        title: 'Free Meditation Guide',
+        desc: 'Classical Vedic meditation practices, breathing exercises, and mantras for daily focus.',
+        badge: 'Free',
+        color: 'from-emerald-500/15 to-teal-500/10',
+        iconColor: 'text-emerald-400',
+        href: '/services/free-meditation-guide',
+      },
+      {
+        id: 'rahu-stabilisation',
+        title: 'Rahu Dasha Stabilisation (PDF)',
+        desc: 'Harmonize intense Rahu 18-year transit with classical remedies, mantras & lifestyle shield.',
+        badge: '₹499',
+        color: 'from-red-500/15 to-rose-500/10',
+        iconColor: 'text-red-400',
+        href: '/services/rahu-mahadasha-stabilisation-guide',
+      },
+      {
+        id: 'rahu-survival',
+        title: 'Rahu Dasha Survival (PDF)',
+        desc: 'Tactical survival strategies, spiritual shield and karmic remedies for intense Rahu periods.',
+        badge: '₹999',
+        color: 'from-[#C9952B]/15 to-amber-500/10',
+        iconColor: 'text-[#C9952B]',
+        href: '/services/rahu-mahadasha-survival-guide',
+      },
+      {
+        id: 'sani-survival',
+        title: 'Sani Dasha Survival (PDF)',
+        desc: 'Saturn discipline, Sade Sati pacification, endurance strategies and karmic remedies.',
+        badge: '₹999',
+        color: 'from-slate-500/15 to-zinc-500/10',
+        iconColor: 'text-slate-300',
+        href: '/services/sani-mahadasha-survival-guide',
       },
     ],
   },
@@ -189,6 +310,9 @@ export const defaultHomepageContent: HomepageContent = {
     varaSub: 'Thursday',
     rahuKalamValue: '01:30 – 03:00 PM',
     rahuKalamSub: 'Avoid this time',
+    abhijitMuhurat: '11:58 AM – 12:48 PM',
+    sunrise: '05:42 AM',
+    sunset: '07:12 PM',
   },
 };
 
@@ -199,30 +323,46 @@ export async function getHomepageContent(): Promise<HomepageContent> {
 
     if (docSnap.exists()) {
       const data = docSnap.data() as Partial<HomepageContent>;
-      const mergedServices = data.services
-        ? {
-            ...defaultHomepageContent.services,
-            ...data.services,
-            items: (data.services.items || defaultHomepageContent.services.items).map((item) => {
-              const defaultItem = defaultHomepageContent.services.items.find((d) => d.id === item.id);
-              const isGenericFallback =
-                !item.image ||
-                (item.image === '/assets/images/remedies/remedies_homam_1785738443734.png' &&
-                  item.id !== 'svc-homam');
-              return {
-                ...defaultItem,
-                ...item,
-                image: isGenericFallback ? defaultItem?.image || item.image : item.image,
-              };
-            }),
-          }
-        : defaultHomepageContent.services;
+      const mergedServices = {
+        ...defaultHomepageContent.services,
+        ...(data.services || {}),
+        items: defaultHomepageContent.services.items.map((defaultItem) => {
+          const customItem = (data.services?.items || []).find((item) => item.id === defaultItem.id);
+          if (!customItem) return defaultItem;
+          return {
+            ...defaultItem,
+            ...customItem,
+          };
+        }),
+      };
+
+      const mergedComprehensiveServices = {
+        ...defaultHomepageContent.comprehensiveServices,
+        ...(data.comprehensiveServices || {}),
+        items: defaultHomepageContent.comprehensiveServices.items.map((defaultItem) => {
+          const customItem = (data.comprehensiveServices?.items || []).find((item) => item.id === defaultItem.id);
+          if (!customItem) return defaultItem;
+          return {
+            ...defaultItem,
+            ...customItem,
+          };
+        }),
+      };
 
       return {
         ...defaultHomepageContent,
         ...data,
-        panchang: data.panchang || defaultHomepageContent.panchang,
+        hero: {
+          ...defaultHomepageContent.hero,
+          ...(data.hero || {}),
+          stats: data.hero?.stats || defaultHomepageContent.hero.stats,
+        },
         services: mergedServices,
+        comprehensiveServices: mergedComprehensiveServices,
+        panchang: {
+          ...defaultHomepageContent.panchang,
+          ...(data.panchang || {}),
+        },
       } as HomepageContent;
     } else {
       // If no document exists, return the defaults
@@ -231,6 +371,72 @@ export async function getHomepageContent(): Promise<HomepageContent> {
   } catch (error) {
     console.error('Error fetching homepage content:', error);
     return defaultHomepageContent;
+  }
+}
+
+export function subscribeHomepageContent(
+  callback: (content: HomepageContent) => void
+): () => void {
+  try {
+    const docRef = doc(db, 'content', 'homepage');
+    return onSnapshot(
+      docRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data() as Partial<HomepageContent>;
+          const mergedServices = {
+            ...defaultHomepageContent.services,
+            ...(data.services || {}),
+            items: defaultHomepageContent.services.items.map((defaultItem) => {
+              const customItem = (data.services?.items || []).find((item) => item.id === defaultItem.id);
+              if (!customItem) return defaultItem;
+              return {
+                ...defaultItem,
+                ...customItem,
+              };
+            }),
+          };
+
+          const mergedComprehensiveServices = {
+            ...defaultHomepageContent.comprehensiveServices,
+            ...(data.comprehensiveServices || {}),
+            items: defaultHomepageContent.comprehensiveServices.items.map((defaultItem) => {
+              const customItem = (data.comprehensiveServices?.items || []).find((item) => item.id === defaultItem.id);
+              if (!customItem) return defaultItem;
+              return {
+                ...defaultItem,
+                ...customItem,
+              };
+            }),
+          };
+
+          callback({
+            ...defaultHomepageContent,
+            ...data,
+            hero: {
+              ...defaultHomepageContent.hero,
+              ...(data.hero || {}),
+              stats: data.hero?.stats || defaultHomepageContent.hero.stats,
+            },
+            services: mergedServices,
+            comprehensiveServices: mergedComprehensiveServices,
+            panchang: {
+              ...defaultHomepageContent.panchang,
+              ...(data.panchang || {}),
+            },
+          } as HomepageContent);
+        } else {
+          callback(defaultHomepageContent);
+        }
+      },
+      (error) => {
+        console.error('Error subscribing to homepage content:', error);
+        callback(defaultHomepageContent);
+      }
+    );
+  } catch (error) {
+    console.error('Error setting up homepage subscription:', error);
+    return () => {};
   }
 }
 

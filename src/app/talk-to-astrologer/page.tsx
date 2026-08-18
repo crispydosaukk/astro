@@ -72,16 +72,16 @@ export default function TalkToAstrologerPage() {
             id: doc.id,
             name: data.name || 'Astrologer',
             specialty: data.skills ? data.skills.split(',').map((s:string) => s.trim()) : ['Vedic Astrology'],
-            experience: Number(data.experienceYears) || 0,
-            rating: data.rating || 4.5,
-            reviews: data.reviews || 0,
-            pricePerMin: Number(data.amount) || 0,
-            languages: data.languages ? data.languages.split(',').map((l:string)=>l.trim()) : ['English'],
-            status: data.isOnline ? 'online' : 'offline',
-            image: data.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
-            consultations: data.consultations || 0,
-            badge: data.badge || null,
-            about: data.learningSource || 'Experienced astrologer offering insightful guidance.',
+            experience: Number(data.experienceYears || data.experience) || 10,
+            rating: Number(data.rating) || 4.9,
+            reviews: Number(data.reviewsCount || data.reviews) || 2847,
+            pricePerMin: Number(data.amount) || 20,
+            languages: data.languages ? data.languages.split(',').map((l:string)=>l.trim()) : ['English', 'Hindi'],
+            status: data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
+            image: data.profileImageUrl || data.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
+            consultations: Number(data.consultations) || 12480,
+            badge: data.badge !== undefined ? data.badge : 'Top Rated',
+            about: data.bio || data.about || 'Experienced astrologer offering insightful guidance.',
           };
         });
         setAstrologers(fetchedData);
@@ -135,7 +135,7 @@ export default function TalkToAstrologerPage() {
 
     if (currentBalance < minRequired) {
       toast.error(`Minimum wallet balance of ${formatPrice(minRequired)} (5 mins) required.`);
-      router.push('/wallet');
+      router.push(`/wallet?redirect=${encodeURIComponent('/talk-to-astrologer')}`);
       return;
     }
     
@@ -618,7 +618,7 @@ export default function TalkToAstrologerPage() {
                         </div>
                         {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 && (
                           <button 
-                            onClick={() => router.push('/wallet')}
+                            onClick={() => router.push(`/wallet?redirect=${encodeURIComponent('/talk-to-astrologer')}`)}
                             className="px-4 py-2 rounded-lg bg-red-500/10 text-red-500 text-sm font-semibold hover:bg-red-500/20 transition-colors"
                           >
                             Recharge
@@ -639,7 +639,7 @@ export default function TalkToAstrologerPage() {
                       </button>
                       {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 ? (
                         <button
-                          onClick={() => router.push('/wallet')}
+                          onClick={() => router.push(`/wallet?redirect=${encodeURIComponent('/talk-to-astrologer')}`)}
                           className="flex-1 py-3 rounded-xl font-semibold bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
                         >
                           Recharge Wallet

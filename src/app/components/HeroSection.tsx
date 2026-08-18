@@ -76,13 +76,13 @@ export default function HeroSection({ content }: HeroSectionProps) {
             >
               {/* Headline */}
               <div className="space-y-4">
-                <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight hero-text-glow">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight hero-text-glow max-w-xl">
                   {content?.headline1 || 'Discover Your'}
                   <span className="block text-gradient-gold">
                     {content?.headline2 || 'Cosmic Destiny'}
                   </span>
                 </h1>
-                <p className="text-lg lg:text-xl text-white/70 leading-relaxed max-w-lg">
+                <p className="text-sm sm:text-base lg:text-lg text-white/70 leading-relaxed max-w-lg">
                   {content?.subtitle ||
                     'Ancient Vedic wisdom meets modern precision. Get your personalized Kundli, sacred gemstone & mantra recommendations, and consult expert astrologers — all in one platform.'}
                 </p>

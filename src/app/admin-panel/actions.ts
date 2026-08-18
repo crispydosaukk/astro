@@ -5,8 +5,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 
 export async function loginAdmin(prevState: any, formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  const email = ((formData.get('email') as string) || '').trim();
+  const password = ((formData.get('password') as string) || '').trim();
 
   if (!email || !password) {
     return { error: 'Email and password are required' };

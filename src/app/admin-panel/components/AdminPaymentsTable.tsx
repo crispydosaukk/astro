@@ -59,7 +59,7 @@ export default function AdminPaymentsTable() {
     const mappedStatus = status === 'completed' ? 'success' : status;
     const matchStatus = filterStatus === 'all' || mappedStatus === filterStatus;
     
-    const gateway = p.stripeSessionId ? 'Stripe' : 'Wallet';
+    const gateway = (p.paymentId || p.orderId || p.razorpayPaymentId || p.stripeSessionId) ? 'Razorpay' : 'Wallet';
     const matchGateway = filterGateway === 'all' || gateway === filterGateway;
     
     return matchSearch && matchStatus && matchGateway;
@@ -108,7 +108,7 @@ export default function AdminPaymentsTable() {
           className="px-3 py-2 rounded-xl bg-muted border border-border text-sm outline-none"
         >
           <option value="all">All Gateways</option>
-          <option value="Stripe">Stripe</option>
+          <option value="Razorpay">Razorpay</option>
           <option value="Wallet">Wallet Deductions</option>
         </select>
         <button className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border hover:border-accent/50 text-sm hover:text-accent transition-all">
@@ -154,7 +154,7 @@ export default function AdminPaymentsTable() {
               </tr>
             ) : (
               filtered.map((pay, i) => {
-                const gateway = pay.stripeSessionId ? 'Stripe' : 'Wallet';
+                const gateway = (pay.paymentId || pay.orderId || pay.razorpayPaymentId || pay.stripeSessionId) ? 'Razorpay' : 'Wallet';
                 const status = pay.status || 'completed';
                 const mappedStatus = status === 'completed' ? 'success' : status;
                 let dateStr = 'Unknown';

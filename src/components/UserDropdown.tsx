@@ -44,12 +44,8 @@ export default function UserDropdown() {
 
 
 
-  const fullName = loading
-    ? 'Loading...'
-    : userData?.name || user?.displayName || user?.email?.split('@')[0] || 'User';
-  const phoneNumber = loading
-    ? '...'
-    : user?.phoneNumber || userData?.phone || userData?.phoneNumber || '';
+  const fullName = userData?.name || user?.displayName || user?.email?.split('@')[0] || (loading ? 'Loading...' : 'User');
+  const phoneNumber = user?.phoneNumber || userData?.phone || userData?.phoneNumber || (loading ? '...' : '');
   const walletBalance = userData?.walletBalance || 0;
 
   return (

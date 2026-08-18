@@ -60,37 +60,40 @@ export default function AdminSettings() {
             <div className="p-2 bg-accent/10 rounded-lg">
               <Key size={20} className="text-accent" />
             </div>
-            <h3 className="text-lg font-bold text-foreground">Stripe Integration Keys</h3>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Razorpay Payment Integration Keys</h3>
+              <p className="text-xs text-muted-foreground">Dynamic Razorpay credentials for wallet recharges & service purchases.</p>
+            </div>
           </div>
 
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Publishable Key</label>
+              <label className="text-sm font-medium text-foreground">Razorpay Key ID</label>
               <input
                 type="text"
-                value={settings.stripePublishableKey}
+                value={settings.razorpayKeyId || ''}
                 onChange={(e) =>
-                  setSettings({ ...settings, stripePublishableKey: e.target.value })
+                  setSettings({ ...settings, razorpayKeyId: e.target.value })
                 }
-                placeholder="pk_live_..."
+                placeholder="e.g. rzp_test_... or rzp_live_..."
                 autoComplete="off"
                 spellCheck="false"
                 data-lpignore="true"
                 className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-mono text-sm"
               />
-              <p className="text-xs text-muted-foreground">Used on the frontend for rendering elements if needed.</p>
+              <p className="text-xs text-muted-foreground">Public Key ID obtained from your Razorpay Dashboard API Keys section.</p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Secret Key</label>
+              <label className="text-sm font-medium text-foreground">Razorpay Key Secret</label>
               <div className="relative">
                 <input
                   type={showSecret ? 'text' : 'password'}
-                  value={settings.stripeSecretKey}
+                  value={settings.razorpayKeySecret || ''}
                   onChange={(e) =>
-                    setSettings({ ...settings, stripeSecretKey: e.target.value })
+                    setSettings({ ...settings, razorpayKeySecret: e.target.value })
                   }
-                  placeholder="sk_live_..."
+                  placeholder="e.g. Secret Key"
                   autoComplete="new-password"
                   spellCheck="false"
                   data-lpignore="true"
@@ -104,7 +107,7 @@ export default function AdminSettings() {
                   {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">Keep this secure. Used by the backend to create checkout sessions.</p>
+              <p className="text-xs text-muted-foreground">Keep this secure. Used by backend to verify Razorpay HMAC signatures.</p>
             </div>
           </div>
         </div>
@@ -150,6 +153,47 @@ export default function AdminSettings() {
                 className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">Secret key used to generate room tokens.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* OpenAI AI Astrological Engine Integration */}
+        <div className="bg-card border border-border rounded-2xl p-6 lg:p-8 space-y-6">
+          <div className="flex items-center gap-3 pb-4 border-b border-border">
+            <div className="p-2 bg-accent/10 rounded-lg">
+              <Sparkles size={20} className="text-accent" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">OpenAI AI Astrology Engine Keys</h3>
+              <p className="text-xs text-muted-foreground">Generates Astrotalk-grade dynamic Vedic chart analyses, compatibility reports, and remedial guidance.</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">OpenAI API Key (sk-...)</label>
+              <div className="relative">
+                <input
+                  type={showSecret ? 'text' : 'password'}
+                  value={settings.openaiApiKey || ''}
+                  onChange={(e) =>
+                    setSettings({ ...settings, openaiApiKey: e.target.value })
+                  }
+                  placeholder="sk-proj-..."
+                  autoComplete="off"
+                  spellCheck="false"
+                  data-lpignore="true"
+                  className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-mono text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSecret(!showSecret)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">If left empty, AstroParihar uses its internal high-precision mathematical Vedic calculation engine.</p>
             </div>
           </div>
         </div>

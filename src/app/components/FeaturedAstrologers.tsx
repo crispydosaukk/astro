@@ -1,17 +1,13 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Star, Video, Phone, Clock, ArrowRight } from 'lucide-react';
 import AppImage from '@/components/ui/AppImage';
-
-import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function FeaturedAstrologers() {
-  const { formatPrice } = useCurrency();
   const [astrologers, setAstrologers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,25 +16,31 @@ export default function FeaturedAstrologers() {
       try {
         const q = query(collection(db, 'astrologers'), where('status', '==', 'approved'), limit(4));
         const querySnapshot = await getDocs(q);
-        const fetchedData = querySnapshot.docs.map(doc => {
-          const data = doc.data();
+        const fetchedData = querySnapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          const skillsList = data.skills
+            ? data.skills.split(',').map((s: string) => s.trim())
+            : ['Vedic Astrology'];
           return {
-            id: doc.id,
-            name: data.name || 'Astrologer',
-            specialty: data.skills || 'Vedic Astrology',
-            experience: `${data.experienceYears || 0} yrs`,
-            rating: data.rating || 4.5,
-            reviews: data.reviews || 0,
-            price: data.amount || 0,
-            languages: data.languages ? data.languages.split(',').map((l:string)=>l.trim()) : ['English'],
-            status: data.isOnline ? 'online' : 'offline',
-            image: data.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
-            badge: data.badge || null,
+            id: docSnap.id,
+            name: data.name || 'Pt. Astrologer',
+            specialties: skillsList,
+            experience: `${data.experienceYears || data.experience || 12} yrs experience`,
+            rating: Number(data.rating) || 4.9,
+            reviews: Number(data.reviewsCount || data.reviews) || 2847,
+            price: Number(data.amount) || 20,
+            languages: data.languages ? data.languages.split(',').map((l: string) => l.trim()) : ['English'],
+            status: data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
+            image:
+              data.profileImageUrl ||
+              data.avatar ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
+            badge: data.badge || 'Top Rated',
           };
         });
         setAstrologers(fetchedData);
       } catch (error) {
-        console.error("Failed to fetch astrologers", error);
+        console.error('Failed to fetch featured astrologers:', error);
       } finally {
         setLoading(false);
       }
@@ -56,110 +58,134 @@ export default function FeaturedAstrologers() {
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-12"
         >
           <div>
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 mb-3">
-              Expert Astrologers
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-3">
+              Verified Expert Astrologers
             </span>
-            <h2 className="text-4xl font-bold text-foreground">
-              Talk to the <span className="text-gradient-gold">Best</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+              Talk to India's <span className="text-gradient-gold">Best Astrologers</span>
             </h2>
-            <p className="text-muted-foreground mt-2">
-              Verified experts with thousands of consultations
+            <p className="text-sm text-muted-foreground mt-1">
+              Connect instantly for career, marriage, health, and life guidance.
             </p>
           </div>
           <Link
-            href="/consultation-booking-screen"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border hover:border-accent/50 text-sm font-medium hover:text-accent transition-all"
+            href="/talk-to-astrologer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 hover:border-[#C9952B]/50 text-sm font-semibold hover:text-[#C9952B] transition-all bg-card shadow-sm"
           >
-            View All <ArrowRight size={14} />
+            View All Astrologers <ArrowRight size={14} />
           </Link>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {astrologers?.map((ast, i) => (
-            <motion.div
-              key={ast?.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="glass-card-light dark:glass-card rounded-2xl p-5 border border-border card-hover group"
-            >
-              {/* Avatar + status */}
-              <div className="relative mb-4">
-                <AppImage
-                  src={ast?.image}
-                  alt={`${ast?.name} - professional astrologer specializing in ${ast?.specialty}`}
-                  width={64}
-                  height={64}
-                  className="w-16 h-16 rounded-2xl object-cover"
-                />
-                <div
-                  className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-card ${ast?.status === 'online' ? 'bg-green-400' : 'bg-amber-400'}`}
-                />
-                {ast?.badge && (
-                  <span className="absolute -top-2 -right-2 text-xs px-2 py-0.5 rounded-full font-semibold bg-accent text-accent-foreground">
-                    {ast?.badge}
-                  </span>
-                )}
-              </div>
-
-              <h3 className="font-semibold text-foreground text-sm mb-0.5">{ast?.name}</h3>
-              <p className="text-xs text-muted-foreground mb-2">{ast?.specialty}</p>
-
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                <span className="flex items-center gap-1">
-                  <Clock size={10} /> {ast?.experience}
-                </span>
-                <span className="flex items-center gap-1 text-accent">
-                  <Star size={10} fill="currentColor" /> {ast?.rating} (
-                  {ast?.reviews?.toLocaleString()})
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-1 mb-4">
-                {ast?.languages?.map((lang: string) => (
-                  <span
-                    key={`lang-${ast?.id}-${lang}`}
-                    className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
-                  >
-                    {lang}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-base font-bold text-accent tabular-nums">{formatPrice(ast?.price)}/min</span>
-                <span
-                  className={`text-xs font-medium ${ast?.status === 'online' ? 'text-green-400' : 'text-amber-400'}`}
-                >
-                  {ast?.status === 'online' ? '● Online' : '● Busy'}
-                </span>
-              </div>
-
-              <Link
-                href={`/astrologer/${ast?.id}`}
-                className="block w-full text-center py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-[#C9952B] border border-border hover:border-[#C9952B]/40 transition-all mb-2"
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((n) => (
+              <div key={n} className="glass-card rounded-3xl p-6 h-72 animate-pulse bg-muted/40" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {astrologers.map((ast, i) => (
+              <motion.div
+                key={ast.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="glass-card-light dark:glass-card rounded-3xl p-6 border border-white/10 hover:border-[#C9952B]/40 transition-all duration-300 card-hover flex flex-col justify-between"
               >
-                View Full Profile →
-              </Link>
+                <div>
+                  {/* Top Avatar & Name Header */}
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <AppImage
+                          src={ast.image}
+                          alt={ast.name}
+                          width={56}
+                          height={56}
+                          className="w-14 h-14 rounded-2xl object-cover border border-white/10"
+                        />
+                        <span
+                          className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-card ${
+                            ast.status === 'online' ? 'bg-green-400' : 'bg-amber-400'
+                          }`}
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-foreground text-base leading-snug">{ast.name}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">{ast.experience}</p>
+                        <div className="flex items-center gap-1 text-xs text-[#C9952B] font-semibold mt-1">
+                          <Star size={12} fill="currentColor" />
+                          <span>{ast.rating}</span>
+                          <span className="text-muted-foreground text-[10px]">
+                            ({ast.reviews.toLocaleString()})
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  href="/consultation-booking-screen"
-                  className="flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-all"
-                >
-                  <Video size={12} /> Video
-                </Link>
-                <Link
-                  href="/consultation-booking-screen"
-                  className="flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all"
-                >
-                  <Phone size={12} /> Call
-                </Link>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                    {ast.badge && (
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#C9952B]/20 text-[#C9952B] border border-[#C9952B]/30 flex-shrink-0">
+                        {ast.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Specialty Tags */}
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {ast.specialties.slice(0, 3).map((spec: string, idx: number) => (
+                      <span
+                        key={idx}
+                        className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/5 text-foreground/80 border border-white/5 font-medium"
+                      >
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Rate & Languages */}
+                  <div className="flex items-center justify-between pt-2 border-t border-white/5 mb-4 text-xs">
+                    <span className="text-base font-bold text-[#C9952B] tabular-nums">
+                      ₹{ast.price}/min
+                    </span>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      {ast.languages.slice(0, 2).map((lang: string, idx: number) => (
+                        <span key={idx} className="px-2 py-0.5 rounded bg-muted text-[10px] font-medium">
+                          {lang}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Action Buttons */}
+                <div className="space-y-2 pt-2">
+                  <Link
+                    href={`/astrologer/${ast.id}`}
+                    className="block w-full text-center py-2 rounded-xl text-xs font-semibold text-muted-foreground hover:text-[#C9952B] bg-white/5 border border-white/10 hover:border-[#C9952B]/40 transition-colors"
+                  >
+                    View Full Profile →
+                  </Link>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      href={`/astrologer/${ast.id}`}
+                      className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold bg-white/5 text-foreground border border-white/10 hover:bg-white/10 transition-colors"
+                    >
+                      <Video size={13} className="text-[#C9952B]" /> Video
+                    </Link>
+                    <Link
+                      href={`/astrologer/${ast.id}`}
+                      className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold gold-gradient-bg text-white hover:opacity-90 transition-opacity shadow-md shadow-[#C9952B]/20"
+                    >
+                      <Phone size={13} /> Call
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

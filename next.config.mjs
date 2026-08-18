@@ -26,11 +26,16 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      {
-        source: '/services/:path*',
-        destination: '/remedies/:path*',
-        permanent: true,
-      },
+      { source: '/services/gemstone', destination: '/remedies/gemstone', permanent: false },
+      { source: '/services/mantra', destination: '/remedies/mantra', permanent: false },
+      { source: '/services/yantra', destination: '/remedies/yantra', permanent: false },
+      { source: '/services/homa', destination: '/remedies/homa', permanent: false },
+      { source: '/services/ishta-devata', destination: '/remedies/ishta-devata', permanent: false },
+      { source: '/services/muhurtham', destination: '/remedies/muhurtham', permanent: false },
+      { source: '/services/vastu', destination: '/remedies/vastu', permanent: false },
+      { source: '/services/charity', destination: '/remedies/charity', permanent: false },
+      { source: '/services/rudraksha', destination: '/remedies/rudraksha', permanent: false },
+      { source: '/services/fasting', destination: '/remedies/fasting', permanent: false },
     ];
   },
 };
