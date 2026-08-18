@@ -12,8 +12,8 @@ export interface GlobalSettings {
 }
 
 const defaultSettings: GlobalSettings = {
-  razorpayKeyId: '',
-  razorpayKeySecret: '',
+  razorpayKeyId: 'rzp_test_TRAxs3TPMmg5AY',
+  razorpayKeySecret: 'JADF4vK8qAQAvTMokzVXbYxr',
   stripeSecretKey: '',
   stripePublishableKey: '',
   zegoAppId: '1951519898',
