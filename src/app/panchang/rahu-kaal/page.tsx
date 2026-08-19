@@ -61,7 +61,7 @@ export default function RahuKaalPage() {
   const relatedPages = [
     { title: 'Today Panchang', href: '/panchang/today-panchang' },
     { title: 'Tomorrow Panchang', href: '/panchang/tomorrow-panchang' },
-    { title: 'Daily Horoscope', href: '/services/free-daily-horoscope' },
+    { title: 'Daily Horoscope', href: '/services/daily-horoscope' },
     { title: 'Tithi', href: '/panchang/tithi' },
     { title: 'Vaar', href: '/panchang/vaar' },
     { title: 'Yoga', href: '/panchang/yoga' },
@@ -108,7 +108,7 @@ export default function RahuKaalPage() {
         )}
       </AnimatePresence>
 
-      <div className="pt-24 lg:pt-28 pb-16 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-12">
+      <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         <div className="text-center space-y-3">
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20 backdrop-blur-md">
             INAUSPICIOUS TIME CALCULATOR

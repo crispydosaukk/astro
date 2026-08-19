@@ -167,8 +167,8 @@ export function calculateAshtakootGunMilan(
   brideDob: string,
   brideTob: string,
   bridePob: string,
-  groomName: string = 'Groom',
-  brideName: string = 'Bride'
+  groomName: string = 'Your Name',
+  brideName: string = "Partner's Name"
 ): KundliMatchingResult {
   const groomAstro = calculateAstroPlacement(groomDob, groomTob);
   const brideAstro = calculateAstroPlacement(brideDob, brideTob);
@@ -188,8 +188,8 @@ export function calculateAshtakootGunMilan(
     obtainedScore: varnaScore,
     desc:
       varnaScore === 1
-        ? `Groom (${groomAstro.varna}) and Bride (${brideAstro.varna}) possess balanced spiritual harmony and mutual respect.`
-        : `Groom (${groomAstro.varna}) and Bride (${brideAstro.varna}) require gentle conscious communication regarding mutual egos.`,
+        ? `${groomName} (${groomAstro.varna}) and ${brideName} (${brideAstro.varna}) possess balanced spiritual harmony and mutual respect.`
+        : `${groomName} (${groomAstro.varna}) and ${brideName} (${brideAstro.varna}) require gentle conscious communication regarding mutual egos.`,
     status: varnaScore === 1 ? 'Excellent' : 'Average',
   });
 
@@ -445,7 +445,7 @@ export function calculateAshtakootGunMilan(
       brideManglik: isBrideManglik,
       cancelled: isManglikCancelled,
       summary: isManglikCancelled
-        ? 'Both Groom & Bride are Manglik — Manglik Dosha is naturally neutralized.'
+        ? 'Both partners are Manglik — Manglik Dosha is naturally neutralized.'
         : isGroomManglik || isBrideManglik
         ? 'One partner is Manglik. Chanting Hanuman Chalisa and Tuesday fasting balances Mangal energy.'
         : 'Neither partner is affected by Manglik Dosha.',

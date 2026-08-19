@@ -30,13 +30,19 @@ export function useUserData() {
             const data = docSnap.data();
             const name = data.name || defaultName;
             const firstName = data.firstName || name.split(' ')[0];
-            setUserData({ ...data, name, firstName, email: currentUser.email || '' } as UserData);
+            const email = currentUser.email || data.email || '';
+            const phone = currentUser.phoneNumber || data.phone || data.phoneNumber || '';
+            setUserData({ ...data, name, firstName, email, phone } as UserData);
           } else {
-            setUserData({ name: defaultName, firstName: defaultFirstName, email: currentUser.email || '' } as UserData);
+            const email = currentUser.email || '';
+            const phone = currentUser.phoneNumber || '';
+            setUserData({ name: defaultName, firstName: defaultFirstName, email, phone } as UserData);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
-          setUserData({ name: defaultName, firstName: defaultFirstName, email: currentUser.email || '' } as UserData);
+          const email = currentUser.email || '';
+          const phone = currentUser.phoneNumber || '';
+          setUserData({ name: defaultName, firstName: defaultFirstName, email, phone } as UserData);
         }
       } else {
         setUserData(null);

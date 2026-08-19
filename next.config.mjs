@@ -26,6 +26,14 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      { source: '/services/free-horoscope', destination: '/services/free-janam-kundli', permanent: false },
+      { source: '/remedies/free-horoscope', destination: '/services/free-janam-kundli', permanent: false },
+      { source: '/remedies/free-janam-kundli', destination: '/services/free-janam-kundli', permanent: false },
+      { source: '/remedies/free-kundli-matching', destination: '/services/free-kundli-matching', permanent: false },
+      { source: '/remedies/free-daily-horoscope', destination: '/services/free-daily-horoscope', permanent: false },
+      { source: '/remedies/free-panchang', destination: '/services/free-panchang', permanent: false },
+      { source: '/remedies/free-fasting-planner', destination: '/services/free-fasting-planner', permanent: false },
+      { source: '/remedies/free-meditation-guide', destination: '/services/free-meditation-guide', permanent: false },
       { source: '/services/gemstone', destination: '/remedies/gemstone', permanent: false },
       { source: '/services/mantra', destination: '/remedies/mantra', permanent: false },
       { source: '/services/yantra', destination: '/remedies/yantra', permanent: false },

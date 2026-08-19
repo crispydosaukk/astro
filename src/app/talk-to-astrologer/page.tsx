@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -13,10 +13,21 @@ import {
   Check,
   CreditCard,
   Globe,
+  SlidersHorizontal,
+  ChevronUp,
+  ChevronDown,
+  RotateCcw,
+  Sparkles,
+  Award,
+  Users,
 } from 'lucide-react';
 import AppImage from '@/components/ui/AppImage';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
+import AstrologerFilterModal, {
+  AstrologerFilterState,
+  defaultFilterState,
+} from '@/components/AstrologerFilterModal';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, updateDoc, doc, increment, onSnapshot } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
@@ -51,9 +62,10 @@ export default function TalkToAstrologerPage() {
   const [astrologers, setAstrologers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterSpecialty, setFilterSpecialty] = useState('all');
-  const [sortBy, setSortBy] = useState<string>('rating');
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [filterModalState, setFilterModalState] = useState<AstrologerFilterState>(defaultFilterState);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
   const [selectedAstrologer, setSelectedAstrologer] = useState<any>(null);
   const [bookingStep, setBookingStep] = useState<1 | 2>(1);
   const [consultationType, setConsultationType] = useState<'video' | 'call'>('video');
@@ -66,27 +78,170 @@ export default function TalkToAstrologerPage() {
       try {
         const q = query(collection(db, 'astrologers'), where('status', '==', 'approved'));
         const querySnapshot = await getDocs(q);
-        const fetchedData = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            name: data.name || 'Astrologer',
-            specialty: data.skills ? data.skills.split(',').map((s:string) => s.trim()) : ['Vedic Astrology'],
-            experience: Number(data.experienceYears || data.experience) || 10,
-            rating: Number(data.rating) || 4.9,
-            reviews: Number(data.reviewsCount || data.reviews) || 2847,
-            pricePerMin: Number(data.amount) || 20,
-            languages: data.languages ? data.languages.split(',').map((l:string)=>l.trim()) : ['English', 'Hindi'],
-            status: data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
-            image: data.profileImageUrl || data.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
-            consultations: Number(data.consultations) || 12480,
-            badge: data.badge !== undefined ? data.badge : 'Top Rated',
-            about: data.bio || data.about || 'Experienced astrologer offering insightful guidance.',
-          };
-        });
-        setAstrologers(fetchedData);
+        if (!querySnapshot.empty) {
+          const fetchedData = querySnapshot.docs.map((doc: any) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              name: data.name || 'Astrologer',
+              specialty: data.skills ? data.skills.split(',').map((s: string) => s.trim()) : ['Vedic Astrology'],
+              experience: Number(data.experienceYears || data.experience) || 10,
+              rating: Number(data.rating) || 4.9,
+              reviews: Number(data.reviewsCount || data.reviews) || 2847,
+              pricePerMin: Number(data.amount) || 20,
+              languages: data.languages ? data.languages.split(',').map((l: string) => l.trim()) : ['English', 'Hindi'],
+              gender: data.gender || (data.name?.toLowerCase().includes('dr. kavya') || data.name?.toLowerCase().includes('meera') || data.name?.toLowerCase().includes('priya') || data.name?.toLowerCase().includes('ananya') ? 'Female' : 'Male'),
+              country: data.country || 'India',
+              status: data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
+              image: data.profileImageUrl || data.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
+              consultations: Number(data.consultations || data.orders) || 12480,
+              badge: data.badge !== undefined ? data.badge : 'VERIFIED',
+              about: data.bio || data.about || 'Experienced astrologer offering insightful guidance.',
+            };
+          });
+          setAstrologers(fetchedData);
+        } else {
+          setAstrologers([
+            {
+              id: 'dr-anil-sharma',
+              name: 'Dr. Anil Sharma',
+              specialty: ['Vedic Astrology', 'Love & Relationship', 'Career & Business'],
+              experience: 25,
+              rating: 4.9,
+              reviews: 1287,
+              pricePerMin: 25,
+              languages: ['Hindi', 'English', 'Sanskrit'],
+              gender: 'Male',
+              country: 'India',
+              status: 'online',
+              image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=600&h=600&fit=crop&crop=face',
+              consultations: 15400,
+              badge: 'Celebrity Astrologer',
+              about: 'Specialist in Vedic Kundli, career breakthroughs, and love marriage compatibility.',
+            },
+            {
+              id: 'prof-meera-iyer',
+              name: 'Prof. Meera Iyer',
+              specialty: ['KP Astrology', 'Marriage & Gun Milan', 'Education & Study'],
+              experience: 18,
+              rating: 4.9,
+              reviews: 956,
+              pricePerMin: 20,
+              languages: ['English', 'Tamil', 'Hindi'],
+              gender: 'Female',
+              country: 'India',
+              status: 'online',
+              image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=600&fit=crop&crop=face',
+              consultations: 14120,
+              badge: 'VERIFIED',
+              about: 'Master of KP astrology, timing of events, Prashna, and academic prosperity.',
+            },
+            {
+              id: 'acharya-r-vedant',
+              name: 'Acharya R. Vedant',
+              specialty: ['Vastu Shastra', 'Wealth & Finance', 'Vedic Astrology'],
+              experience: 20,
+              rating: 4.9,
+              reviews: 1103,
+              pricePerMin: 30,
+              languages: ['Hindi', 'Sanskrit', 'English', 'Gujarati'],
+              gender: 'Male',
+              country: 'India',
+              status: 'online',
+              image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face',
+              consultations: 16300,
+              badge: 'Senior Master',
+              about: 'Expert in Vastu Shastra remedies, corporate wealth alignment, and planetary balancing.',
+            },
+            {
+              id: 'dr-kavya-nair',
+              name: 'Dr. Kavya Nair',
+              specialty: ['Health & Medical Astrology', 'Vedic Astrology', 'Gemstone Therapy'],
+              experience: 15,
+              rating: 4.8,
+              reviews: 789,
+              pricePerMin: 22,
+              languages: ['Malayalam', 'English', 'Hindi'],
+              gender: 'Female',
+              country: 'India',
+              status: 'online',
+              image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&h=600&fit=crop&crop=face',
+              consultations: 13890,
+              badge: 'VERIFIED',
+              about: 'Vedic health chart diagnosis, Tridosha balance, and Ayurvedic mantra prescription.',
+            },
+            {
+              id: 'astro-rohit-verma',
+              name: 'Astro Rohit Verma',
+              specialty: ['Tarot Reading', 'Numerology', 'Career & Business', 'Love & Relationship'],
+              experience: 12,
+              rating: 4.7,
+              reviews: 654,
+              pricePerMin: 18,
+              languages: ['Hindi', 'English', 'Punjabi'],
+              gender: 'Male',
+              country: 'India',
+              status: 'online',
+              image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face',
+              consultations: 9980,
+              badge: 'Rising Star',
+              about: 'Modern Vedic & Tarot consultations for youth career, startups, and relationship clarity.',
+            },
+            {
+              id: 'ananya-mukherjee',
+              name: 'Ananya Mukherjee',
+              specialty: ['Tarot Reading', 'Psychic Reading', 'Love & Relationship'],
+              experience: 14,
+              rating: 4.9,
+              reviews: 840,
+              pricePerMin: 24,
+              languages: ['Bengali', 'English', 'Hindi'],
+              gender: 'Female',
+              country: 'India',
+              status: 'online',
+              image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face',
+              consultations: 11200,
+              badge: 'VERIFIED',
+              about: 'Intuitive Tarot reader, psychic aura counseling, and soulmate connection guidance.',
+            },
+            {
+              id: 'vashikant-shastri',
+              name: 'Vashikant Shastri',
+              specialty: ['Vedic Astrology', 'Lal Kitab', 'Marriage & Gun Milan'],
+              experience: 16,
+              rating: 5.0,
+              reviews: 2150,
+              pricePerMin: 18,
+              languages: ['English', 'Hindi', 'Marathi'],
+              gender: 'Male',
+              country: 'India',
+              status: 'online',
+              image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face',
+              consultations: 18500,
+              badge: 'Top Rated',
+              about: 'Specialist in Lal Kitab remedies, Manglik Dosha parihar, and marital peace.',
+            },
+            {
+              id: 'siddharth-deshmukh',
+              name: 'Pt. Siddharth Deshmukh',
+              specialty: ['Numerology', 'Nadi Astrology', 'Wealth & Finance'],
+              experience: 22,
+              rating: 4.8,
+              reviews: 1430,
+              pricePerMin: 28,
+              languages: ['Marathi', 'Hindi', 'English'],
+              gender: 'Male',
+              country: 'India',
+              status: 'offline',
+              image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face',
+              consultations: 14750,
+              badge: 'Senior Master',
+              about: 'Nadi palm-leaf astrology, business name numerology, and financial wealth attraction.',
+            },
+          ]);
+        }
       } catch (error) {
-        console.error("Failed to fetch astrologers", error);
+        console.error('Failed to fetch astrologers', error);
       } finally {
         setLoading(false);
       }
@@ -94,32 +249,187 @@ export default function TalkToAstrologerPage() {
     fetchAstrologers();
   }, []);
 
-  const specialties = [
-    'all',
-    'Vedic',
-    'KP Astrology',
-    'Nadi',
-    'Lal Kitab',
-    'Vastu',
-    'Numerology',
-    'Muhurtham',
-    'Marriage',
-  ];
+  // Dynamically extract all unique skills/talents from registered astrologers with count
+  const dynamicSkills = useMemo(() => {
+    const map = new Map<string, number>();
+    astrologers.forEach((ast) => {
+      const list = Array.isArray(ast.specialty)
+        ? ast.specialty
+        : typeof ast.specialty === 'string'
+        ? ast.specialty.split(',')
+        : [];
+      list.forEach((s: string) => {
+        const cleaned = s.trim();
+        if (cleaned) {
+          map.set(cleaned, (map.get(cleaned) || 0) + 1);
+        }
+      });
+    });
+    return Array.from(map.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [astrologers]);
 
+  // Dynamically extract all spoken languages from registered astrologers with count
+  const dynamicLanguages = useMemo(() => {
+    const map = new Map<string, number>();
+    astrologers.forEach((ast) => {
+      const list = Array.isArray(ast.languages)
+        ? ast.languages
+        : typeof ast.languages === 'string'
+        ? ast.languages.split(',')
+        : [];
+      list.forEach((l: string) => {
+        const cleaned = l.trim();
+        if (cleaned) {
+          map.set(cleaned, (map.get(cleaned) || 0) + 1);
+        }
+      });
+    });
+    return Array.from(map.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [astrologers]);
+
+  // Dynamically extract all registered countries & cities with count
+  const dynamicCountries = useMemo(() => {
+    const map = new Map<string, number>();
+    astrologers.forEach((ast) => {
+      if (ast.country && typeof ast.country === 'string') {
+        const c = ast.country.trim();
+        if (c) map.set(c, (map.get(c) || 0) + 1);
+      }
+      if (ast.city && typeof ast.city === 'string' && ast.city.trim() !== ast.country) {
+        const city = ast.city.trim();
+        if (city) map.set(city, (map.get(city) || 0) + 1);
+      }
+    });
+    return Array.from(map.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [astrologers]);
+
+  // Dynamically compute gender counts
+  const dynamicGenders = useMemo(() => {
+    const maleCount = astrologers.filter((a) => a.gender?.toLowerCase() === 'male').length;
+    const femaleCount = astrologers.filter((a) => a.gender?.toLowerCase() === 'female').length;
+    return [
+      { id: 'male', label: 'Male', count: maleCount },
+      { id: 'female', label: 'Female', count: femaleCount },
+    ];
+  }, [astrologers]);
+
+  // Dynamically generate top horizontal category pills from registered skills/talents
+  const quickTopics = useMemo(() => {
+    const topics = ['All'];
+    dynamicSkills.forEach((s) => {
+      if (!topics.includes(s.name) && topics.length < 20) {
+        topics.push(s.name);
+      }
+    });
+    return topics;
+  }, [dynamicSkills]);
+
+  // Active filters count calculation
+  const activeFiltersCount =
+    (filterModalState.sortBy !== 'popularity' ? 1 : 0) +
+    filterModalState.skills.length +
+    filterModalState.languages.length +
+    (filterModalState.gender !== 'all' ? 1 : 0) +
+    filterModalState.countries.length +
+    (filterModalState.topAstrologer !== 'all' ? 1 : 0) +
+    (activeCategory !== 'All' ? 1 : 0);
+
+  // Filtering Engine
   const filtered = astrologers
     .filter((a: any) => {
+      // 1. Search filter
+      const term = search.toLowerCase();
       const matchSearch =
-        a.name.toLowerCase().includes(search.toLowerCase()) ||
-        a.specialty.some((s: string) => s.toLowerCase().includes(search.toLowerCase()));
-      const matchStatus = filterStatus === 'all' || a.status === filterStatus;
-      const matchSpec = filterSpecialty === 'all' || a.specialty.includes(filterSpecialty);
-      return matchSearch && matchStatus && matchSpec;
+        !term ||
+        a.name.toLowerCase().includes(term) ||
+        a.about?.toLowerCase().includes(term) ||
+        a.specialty.some((s: string) => s.toLowerCase().includes(term)) ||
+        a.languages.some((l: string) => l.toLowerCase().includes(term));
+
+      // 2. Quick Category Topic Pill
+      let matchCategory = true;
+      if (activeCategory !== 'All') {
+        const cat = activeCategory.toLowerCase();
+        matchCategory =
+          a.specialty.some((s: string) => s.toLowerCase().includes(cat)) ||
+          a.about?.toLowerCase().includes(cat);
+      }
+
+      // 3. Skills Filter from Modal
+      let matchSkills = true;
+      if (filterModalState.skills.length > 0) {
+        matchSkills = filterModalState.skills.some((sk) =>
+          a.specialty.some((s: string) => s.toLowerCase().includes(sk.toLowerCase())) ||
+          a.about?.toLowerCase().includes(sk.toLowerCase())
+        );
+      }
+
+      // 4. Languages Filter from Modal
+      let matchLanguages = true;
+      if (filterModalState.languages.length > 0) {
+        matchLanguages = filterModalState.languages.some((lang) =>
+          a.languages.some((l: string) => l.toLowerCase().includes(lang.toLowerCase()))
+        );
+      }
+
+      // 5. Gender Filter
+      let matchGender = true;
+      if (filterModalState.gender !== 'all') {
+        matchGender = a.gender?.toLowerCase() === filterModalState.gender.toLowerCase();
+      }
+
+      // 6. Country Filter
+      let matchCountry = true;
+      if (filterModalState.countries.length > 0) {
+        matchCountry = filterModalState.countries.some((c) =>
+          a.country?.toLowerCase().includes(c.toLowerCase())
+        );
+      }
+
+      // 7. Top Astrologer Filter
+      let matchTop = true;
+      if (filterModalState.topAstrologer === 'celebrity') {
+        matchTop =
+          a.badge?.toLowerCase().includes('celebrity') ||
+          a.badge?.toLowerCase().includes('master') ||
+          a.rating >= 4.9;
+      } else if (filterModalState.topAstrologer === 'rising-star') {
+        matchTop = a.rating >= 4.8;
+      } else if (filterModalState.topAstrologer === 'master') {
+        matchTop = a.experience >= 15;
+      } else if (filterModalState.topAstrologer === 'online-now') {
+        matchTop = a.status === 'online';
+      }
+
+      return (
+        matchSearch &&
+        matchCategory &&
+        matchSkills &&
+        matchLanguages &&
+        matchGender &&
+        matchCountry &&
+        matchTop
+      );
     })
     .sort((a: any, b: any) => {
-      if (sortBy === 'rating') return b.rating - a.rating;
-      if (sortBy === 'price-low') return a.pricePerMin - b.pricePerMin;
-      if (sortBy === 'price-high') return b.pricePerMin - a.pricePerMin;
-      if (sortBy === 'experience') return b.experience - a.experience;
+      const mode = filterModalState.sortBy;
+      if (mode === 'popularity' || mode === 'orders-high') {
+        return (b.consultations || b.reviews || 0) - (a.consultations || a.reviews || 0);
+      }
+      if (mode === 'orders-low') {
+        return (a.consultations || a.reviews || 0) - (b.consultations || b.reviews || 0);
+      }
+      if (mode === 'exp-high') return (b.experience || 0) - (a.experience || 0);
+      if (mode === 'exp-low') return (a.experience || 0) - (b.experience || 0);
+      if (mode === 'price-high') return (b.pricePerMin || 0) - (a.pricePerMin || 0);
+      if (mode === 'price-low') return (a.pricePerMin || 0) - (b.pricePerMin || 0);
+      if (mode === 'rating-high') return (b.rating || 0) - (a.rating || 0);
       return 0;
     });
 
@@ -209,7 +519,7 @@ export default function TalkToAstrologerPage() {
       {/* Hero Banner */}
       <section className="relative pt-32 py-16 cosmic-bg overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-[#8B1A2A]/20 blur-3xl" />
+          <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-[#713B32]/20 blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full bg-[#C9952B]/15 blur-3xl" />
         </div>
         <div className="relative max-w-screen-2xl mx-auto px-6 lg:px-10 text-center">
@@ -240,161 +550,302 @@ export default function TalkToAstrologerPage() {
         </div>
       </section>
 
-      {/* Filters + Currency */}
-      <div className="sticky top-0 z-30 bg-card/90 backdrop-blur-md border-b border-border px-6 lg:px-8 py-4">
-        <div className="max-w-screen-2xl mx-auto flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-48">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <input
-              type="text"
-              placeholder="Search astrologer or specialty..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-muted border border-border focus:border-[#C9952B] outline-none text-sm transition-all"
-            />
+      {/* Sticky Filters & Topic Pills Bar */}
+      <div className="sticky top-0 z-30 bg-card/95 backdrop-blur-xl border-b border-border px-6 lg:px-8 py-3.5 space-y-3 shadow-md">
+        <div className="max-w-screen-2xl mx-auto flex flex-col gap-3">
+          {/* Row 1: Filter Trigger Button, Search, Currency & Counter */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Main Filters Modal Trigger (Yellow pill like screenshot) */}
+            <button
+              type="button"
+              onClick={() => setIsFilterModalOpen(true)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold border transition-all shadow-sm shrink-0 ${
+                activeFiltersCount > 0
+                  ? 'bg-[#FACC15] hover:bg-[#EAB308] text-black border-yellow-400 font-extrabold shadow-yellow-500/20'
+                  : 'bg-muted/90 hover:bg-muted text-foreground border-border'
+              }`}
+            >
+              <SlidersHorizontal size={14} className={activeFiltersCount > 0 ? 'text-black' : 'text-[#C9952B]'} />
+              <span>Filters {activeFiltersCount > 0 ? `· ${activeFiltersCount}` : ''}</span>
+              <ChevronDown size={14} className="ml-0.5" />
+            </button>
+
+            {/* Quick Horizontal Topic Pills Bar (Scrollable) */}
+            <div className="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide py-0.5">
+              {quickTopics.map((topic) => {
+                const isActive = activeCategory === topic;
+                return (
+                  <button
+                    key={topic}
+                    type="button"
+                    onClick={() => setActiveCategory(topic)}
+                    className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold shrink-0 transition-all ${
+                      isActive
+                        ? 'bg-[#FACC15] text-black shadow-sm'
+                        : 'bg-muted/60 hover:bg-muted text-foreground/80 hover:text-foreground border border-border/50'
+                    }`}
+                  >
+                    {topic}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative min-w-48 sm:min-w-64">
+              <Search
+                size={15}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <input
+                type="text"
+                placeholder="Search astrologer, skill..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-8 py-2 rounded-full bg-muted border border-border focus:border-[#C9952B] outline-none text-xs sm:text-sm transition-all"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Currency Pill */}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#C9952B]/10 border border-[#C9952B]/30 shrink-0">
+              <Globe size={13} className="text-[#C9952B]" />
+              <span className="text-xs font-bold text-[#C9952B]">
+                {currencyCode} ({currencySymbol})
+              </span>
+            </div>
+
+            {/* Count */}
+            <div className="text-xs text-muted-foreground font-medium shrink-0">
+              <span className="text-foreground font-bold">{filtered.length}</span> Astrologers
+            </div>
           </div>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2.5 rounded-xl bg-muted border border-border text-sm outline-none focus:border-[#C9952B] transition-all"
-          >
-            <option value="all">All Status</option>
-            <option value="online">Online Now</option>
-            <option value="busy">Busy</option>
-          </select>
-          <select
-            value={filterSpecialty}
-            onChange={(e) => setFilterSpecialty(e.target.value)}
-            className="px-4 py-2.5 rounded-xl bg-muted border border-border text-sm outline-none focus:border-[#C9952B] transition-all"
-          >
-            {specialties.map((s) => (
-              <option key={s} value={s}>
-                {s === 'all' ? 'All Specialties' : s}
-              </option>
-            ))}
-          </select>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-2.5 rounded-xl bg-muted border border-border text-sm outline-none focus:border-[#C9952B] transition-all"
-          >
-            <option value="rating">Top Rated</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="experience">Most Experienced</option>
-          </select>
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/30">
-            <Globe size={14} className="text-[#C9952B]" />
-            <span className="text-sm font-semibold text-[#C9952B] outline-none">
-              {currencyCode} ({currencySymbol})
-            </span>
-          </div>
-          <div className="text-sm text-muted-foreground ml-auto">{filtered.length} astrologers</div>
+
+          {/* Row 2: Active Applied Filter Tags Strip (Shown when any filters are active) */}
+          {activeFiltersCount > 0 && (
+            <div className="flex items-center gap-2 flex-wrap pt-1 text-xs border-t border-border/40">
+              <span className="text-muted-foreground font-medium flex items-center gap-1">
+                <Sparkles size={12} className="text-[#C9952B]" /> Active Filters:
+              </span>
+
+              {activeCategory !== 'All' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-400/10 text-yellow-500 border border-yellow-400/30 font-semibold">
+                  Category: {activeCategory}
+                  <button type="button" onClick={() => setActiveCategory('All')} className="hover:text-foreground">
+                    <X size={11} />
+                  </button>
+                </span>
+              )}
+
+              {filterModalState.sortBy !== 'popularity' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/30 font-semibold">
+                  Sort: {filterModalState.sortBy}
+                  <button
+                    type="button"
+                    onClick={() => setFilterModalState({ ...filterModalState, sortBy: 'popularity' })}
+                    className="hover:text-foreground"
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              )}
+
+              {filterModalState.skills.map((sk) => (
+                <span key={sk} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium">
+                  {sk}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFilterModalState({
+                        ...filterModalState,
+                        skills: filterModalState.skills.filter((s) => s !== sk),
+                      })
+                    }
+                    className="hover:text-rose-400"
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+
+              {filterModalState.languages.map((lang) => (
+                <span key={lang} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium">
+                  🗣️ {lang}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFilterModalState({
+                        ...filterModalState,
+                        languages: filterModalState.languages.filter((l) => l !== lang),
+                      })
+                    }
+                    className="hover:text-rose-400"
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+
+              {filterModalState.gender !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium capitalize">
+                  Gender: {filterModalState.gender}
+                  <button
+                    type="button"
+                    onClick={() => setFilterModalState({ ...filterModalState, gender: 'all' })}
+                    className="hover:text-rose-400"
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              )}
+
+              {filterModalState.countries.map((c) => (
+                <span key={c} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium">
+                  📍 {c}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFilterModalState({
+                        ...filterModalState,
+                        countries: filterModalState.countries.filter((x) => x !== c),
+                      })
+                    }
+                    className="hover:text-rose-400"
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              ))}
+
+              {filterModalState.topAstrologer !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-[#C9952B] border border-border font-medium capitalize">
+                  ⭐ {filterModalState.topAstrologer}
+                  <button
+                    type="button"
+                    onClick={() => setFilterModalState({ ...filterModalState, topAstrologer: 'all' })}
+                    className="hover:text-rose-400"
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterModalState(defaultFilterState);
+                  setActiveCategory('All');
+                  setSearch('');
+                }}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-rose-400 hover:bg-rose-500/10 transition-colors ml-auto"
+              >
+                <RotateCcw size={11} /> Clear All
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Astrologer Grid */}
       <div className="px-6 lg:px-8 py-8 max-w-screen-2xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-8">
           {filtered.map((ast, i) => (
             <motion.div
               key={ast.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-card-light dark:glass-card rounded-2xl border border-border overflow-hidden card-hover group"
+              className="bg-card dark:bg-[#1a1416] rounded-2xl border border-border/80 hover:border-[#C9952B]/50 transition-all duration-300 shadow-sm hover:shadow-lg card-hover flex flex-col overflow-hidden group w-full"
             >
-              <div className="p-5">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="relative flex-shrink-0">
-                    <AppImage
-                      src={ast.image}
-                      alt={`${ast.name} - verified astrologer specializing in ${ast.specialty[0]}`}
-                      width={56}
-                      height={56}
-                      className="w-14 h-14 rounded-xl object-cover"
-                    />
-                    <div
-                      className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-card ${ast.status === 'online' ? 'bg-green-400' : ast.status === 'busy' ? 'bg-amber-400' : 'bg-gray-400'}`}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-1">
-                      <h3 className="font-semibold text-foreground text-sm leading-tight">
-                        {ast.name}
-                      </h3>
-                      {ast.badge && (
-                        <span className="text-xs px-1.5 py-0.5 rounded-full bg-[#C9952B]/15 text-[#C9952B] font-semibold flex-shrink-0">
-                          {ast.badge}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {ast.experience} yrs experience
-                    </p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Star size={10} fill="currentColor" className="text-[#C9952B]" />
-                      <span className="text-xs font-semibold text-foreground">{ast.rating}</span>
-                      <span className="text-xs text-muted-foreground">
-                        ({ast.reviews.toLocaleString()})
-                      </span>
-                    </div>
-                  </div>
+              {/* Profile Image (Complete Image Visible) */}
+              <div className="relative w-full aspect-[4/3] bg-muted/20 p-2 overflow-hidden flex items-center justify-center">
+                <img
+                  src={
+                    ast.image && typeof ast.image === 'string' && ast.image.trim() !== ''
+                      ? ast.image
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=8B1A2A&color=fff&size=512`
+                  }
+                  alt={`${ast.name} - verified astrologer`}
+                  className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=8B1A2A&color=fff&size=512`;
+                  }}
+                />
+                {/* Verified Badge */}
+                <div className="absolute top-3 left-3 z-10 bg-[#15803d] text-white text-[9px] font-bold px-2 py-0.5 rounded tracking-wider uppercase shadow-md flex items-center gap-1">
+                  VERIFIED
                 </div>
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {ast.specialty.slice(0, 2).map((s: string) => (
-                    <span
-                      key={s}
-                      className="text-xs px-2 py-0.5 rounded-full bg-[#6B0F1A]/10 text-[#6B0F1A] dark:text-[#C9952B] font-medium"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                  {ast.specialty.length > 2 && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                      +{ast.specialty.length - 2}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <span className="text-lg font-bold text-[#C9952B] tabular-nums">
-                      {formatPrice(ast.pricePerMin)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">/min</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {ast.languages.slice(0, 2).map((l: string) => (
-                      <span
-                        key={l}
-                        className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
-                      >
-                        {l}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <Link
-                  href={`/astrologer/${ast.id}`}
-                  className="block w-full text-center py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-[#C9952B] border border-border hover:border-[#C9952B]/40 transition-all mb-2"
-                >
-                  View Full Profile →
-                </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => {
-                      setSelectedAstrologer(ast);
-                      setConsultationType('video');
-                      setBookingStep(1);
-                    }}
-                    disabled={ast.status === 'offline'}
-                    className="flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold bg-[#6B0F1A]/10 text-[#6B0F1A] dark:text-[#C9952B] hover:bg-[#6B0F1A] hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+
+                {/* Online Status Pill */}
+                <div className="absolute top-3 right-3 z-10">
+                  <span
+                    className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold backdrop-blur-md ${
+                      ast.status === 'online'
+                        ? 'bg-black/60 text-green-400 border border-green-500/30'
+                        : 'bg-black/60 text-gray-400'
+                    }`}
                   >
-                    <Video size={12} /> Video
-                  </button>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full mr-1 ${
+                        ast.status === 'online' ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
+                      }`}
+                    />
+                    {ast.status === 'online' ? 'Online' : 'Offline'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Content Section (Centered, Clean & Balanced) */}
+              <div className="p-3 sm:p-3.5 text-center flex-1 flex flex-col justify-between space-y-1.5">
+                <div className="space-y-1">
+                  {/* Name */}
+                  <h3 className="font-bold text-foreground text-sm leading-tight truncate capitalize">
+                    {ast.name}
+                  </h3>
+
+                  {/* Specialty */}
+                  <p className="text-[11px] text-muted-foreground font-medium truncate capitalize">
+                    {Array.isArray(ast.specialty) ? ast.specialty.join(', ') : ast.specialty}
+                  </p>
+
+                  {/* Experience */}
+                  <p className="text-[11px] text-muted-foreground/80">
+                    {ast.experience}+ Years Exp.
+                  </p>
+
+                  {/* Rating */}
+                  <div className="flex items-center justify-center gap-1 text-xs font-semibold text-foreground pt-0.5">
+                    <Star size={12} fill="#EAB308" className="text-yellow-500 flex-shrink-0" />
+                    <span>{ast.rating}</span>
+                    <span className="text-muted-foreground font-normal text-[11px]">
+                      ({ast.reviews.toLocaleString()})
+                    </span>
+                  </div>
+
+                  {/* Price & Languages */}
+                  <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground pt-1 border-t border-border/40 mt-1">
+                    <span className="font-bold text-[#C9952B] text-xs tabular-nums">
+                      {formatPrice(ast.pricePerMin)}/min
+                    </span>
+                    {ast.languages && ast.languages.length > 0 && (
+                      <>
+                        <span className="opacity-40">•</span>
+                        <span className="truncate max-w-[90px]">{ast.languages.slice(0, 2).join(', ')}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Consult Now Button & Profile Link */}
+                <div className="pt-1.5 space-y-1">
                   <button
                     onClick={() => {
                       setSelectedAstrologer(ast);
@@ -402,10 +853,16 @@ export default function TalkToAstrologerPage() {
                       setBookingStep(1);
                     }}
                     disabled={ast.status === 'offline'}
-                    className="flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full inline-flex items-center justify-center py-1.5 px-3 rounded-full font-bold text-[11px] sm:text-xs text-white uppercase tracking-wider bg-[#963725] hover:bg-[#802a1b] shadow-sm hover:shadow transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    <Phone size={12} /> Call
+                    CONSULT NOW
                   </button>
+                  <Link
+                    href={`/astrologer/${ast.id}`}
+                    className="block text-center text-[10px] font-medium text-muted-foreground hover:text-[#C9952B] transition-colors"
+                  >
+                    View Full Profile →
+                  </Link>
                 </div>
               </div>
             </motion.div>
@@ -672,6 +1129,23 @@ export default function TalkToAstrologerPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Comprehensive Astrologer Filters Modal (Matching Design & Dynamic Data) */}
+      <AstrologerFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        filterState={filterModalState}
+        onApply={(newState) => setFilterModalState(newState)}
+        onReset={() => {
+          setFilterModalState(defaultFilterState);
+          setActiveCategory('All');
+          setSearch('');
+        }}
+        dynamicSkills={dynamicSkills}
+        dynamicLanguages={dynamicLanguages}
+        dynamicCountries={dynamicCountries}
+        dynamicGenders={dynamicGenders}
+      />
     </div>
   );
 }

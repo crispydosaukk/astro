@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import LandingFooter from '@/app/components/LandingFooter';
 
 import AshtaDigbandhanaWheel from '@/components/AshtaDigbandhanaWheel';
+import DynamicPageContent from '@/components/DynamicPageContent';
 import { getHomepageContent, HomepageContent, defaultHomepageContent, subscribeHomepageContent } from '@/lib/cms';
 
 const iconMap: Record<string, any> = {
@@ -47,10 +48,10 @@ export default function RemediesPage() {
 
       {/* Hero Banner Section */}
       <section className="relative overflow-hidden border-b border-white/5 pt-28 lg:pt-32 pb-16 lg:pb-20 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#8B1A2A]/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
         
-        <div className="relative z-10 max-w-[2000px] w-full mx-auto px-6 lg:px-16 xl:px-20">
+        <div className="relative z-10 max-w-screen-2xl w-full mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 items-center gap-8 lg:gap-16 min-h-[65vh]">
             
             {/* Left Content */}
@@ -189,6 +190,11 @@ export default function RemediesPage() {
             })}
           </div>
         </div>
+      </section>
+
+      {/* Dynamic Content Managed via Admin Panel */}
+      <section className="max-w-7xl mx-auto px-6">
+        <DynamicPageContent pageId="remedies-overview" />
       </section>
 
       <LandingFooter />

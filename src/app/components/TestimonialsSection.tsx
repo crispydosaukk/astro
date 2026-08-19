@@ -57,7 +57,7 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   return (
-    <section className="py-20 bg-muted/20">
+    <section className="py-20 bg-[#F8F3EA]">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -65,13 +65,13 @@ export default function TestimonialsSection() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20 mb-4">
-            Testimonials
+          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8] mb-4">
+            Seeker Reviews
           </span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-4xl lg:text-5xl font-bold text-[#292522] mb-4">
             What Our <span className="text-gradient-gold">Community Says</span>
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-[#6B5E55] font-medium">
             Trusted by 2,50,000+ spiritual seekers across India and beyond
           </p>
         </motion.div>
@@ -84,32 +84,37 @@ export default function TestimonialsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="glass-card-light dark:glass-card rounded-2xl p-6 border border-border card-hover"
+              className="bg-[#FFFDFC] rounded-3xl p-7 border border-[#E5D9C8] shadow-sm hover:shadow-xl transition-all card-hover flex flex-col justify-between"
             >
-              <Quote size={24} className="text-accent/40 mb-4" />
-              <p className="text-sm text-foreground/80 leading-relaxed mb-6">{t?.text}</p>
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(t?.rating)]?.map((_, ri) => (
-                  <Star
-                    key={`star-${t?.id}-${ri}`}
-                    size={12}
-                    fill="currentColor"
-                    className="text-accent"
-                  />
-                ))}
+              <div>
+                <Quote size={28} className="text-[#713B32]/30 mb-4" />
+                <p className="text-sm text-[#292522]/90 leading-relaxed mb-6 font-normal">{t?.text}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <AppImage
-                  src={t?.avatar}
-                  alt={`${t?.name} - ${t?.role} testimonial`}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
 
-                <div>
-                  <div className="text-sm font-semibold text-foreground">{t?.name}</div>
-                  <div className="text-xs text-muted-foreground">{t?.role}</div>
+              <div>
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(t?.rating)]?.map((_, ri) => (
+                    <Star
+                      key={`star-${t?.id}-${ri}`}
+                      size={14}
+                      fill="#D8B66A"
+                      className="text-[#B88A44]"
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-3 pt-3 border-t border-[#E5D9C8]">
+                  <AppImage
+                    src={t?.avatar}
+                    alt={`${t?.name} - ${t?.role} testimonial`}
+                    width={42}
+                    height={42}
+                    className="w-10 h-10 rounded-full object-cover border border-[#E5D9C8]"
+                  />
+
+                  <div>
+                    <div className="text-sm font-bold text-[#292522]">{t?.name}</div>
+                    <div className="text-xs text-[#6B5E55]">{t?.role}</div>
+                  </div>
                 </div>
               </div>
             </motion.div>

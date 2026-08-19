@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Triangle, Check, ArrowRight, Lock, Loader2, Compass } from 'lucide-react';
 import ServiceReportForm from '@/components/ServiceReportForm';
 import PremiumSection from '@/components/PremiumSection';
+import DynamicPageContent from '@/components/DynamicPageContent';
 import { getServicePageContent, YantraServiceContent, defaultYantraContent, getHomepageContent, HomepageContent } from '@/lib/cms';
 
 export default function YantraServicePage() {
@@ -38,12 +39,12 @@ export default function YantraServicePage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-            {/* Hero */}
+      {/* Hero */}
       <section className="relative min-h-screen overflow-hidden border-b border-white/5 flex flex-col pt-20 lg:pt-0 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#8B1A2A]/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
         <div className="relative z-10 flex-1 flex items-center justify-center">
-          <div className="max-w-[2000px] w-full mx-auto">
+          <div className="max-w-screen-2xl w-full mx-auto px-6 lg:px-10">
             <div className="grid lg:grid-cols-2 items-center min-h-screen">
               
               {/* Left Content */}
@@ -51,16 +52,16 @@ export default function YantraServicePage() {
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="px-6 lg:px-12 xl:px-20 space-y-8 py-20 lg:py-0 order-2 lg:order-1"
+                className="space-y-8 py-20 lg:py-0 order-2 lg:order-1"
               >
                 <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
                   <Link href="/" className="hover:text-[#C9952B] transition-colors">
-              Home
-            </Link>
-            <span>/</span>
-            <Link href="/remedies" className="hover:text-[#C9952B] transition-colors">Remedies</Link>
-            <span>/</span>
-            <span className="text-[#C9952B]">Yantra Recommendations</span>
+                    Home
+                  </Link>
+                  <span>/</span>
+                  <Link href="/remedies" className="hover:text-[#C9952B] transition-colors">Remedies</Link>
+                  <span>/</span>
+                  <span className="text-[#C9952B]">Yantra Recommendations</span>
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold glass-card border border-[#C9952B]/30 text-[#C9952B] mb-5">
@@ -112,8 +113,10 @@ export default function YantraServicePage() {
           </div>
         </div>
       </section>
+
+      {/* Benefits */}
       <section className="py-16 bg-background">
-        <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-foreground mb-6">
@@ -164,8 +167,10 @@ export default function YantraServicePage() {
           </div>
         </div>
       </section>
+
+      {/* Yantra Table */}
       <section className="py-16 bg-muted/30">
-        <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
           <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
             {content.guideTitle.split(' ')[0]}{' '}
             <span className="text-gradient-gold">
@@ -193,6 +198,11 @@ export default function YantraServicePage() {
         </div>
       </section>
 
+      {/* Dynamic Educational Content Container (Admin CMS Integration) */}
+      <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 py-8">
+        <DynamicPageContent pageId="remedies-yantra" />
+      </div>
+
       <ServiceReportForm
         titleText="Get Your"
         highlightText="Yantra Report"
@@ -202,8 +212,10 @@ export default function YantraServicePage() {
         serviceId="svc-yantra"
         premiumInfo="Full report with specific Yantra placement, activation rituals, and mantra associations requires Premium membership"
       />
+
+      {/* CTA */}
       <section className="py-16 cosmic-bg">
-        <div className="max-w-screen-xl mx-auto px-6 lg:px-10 text-center">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Unlock Your <span className="text-gradient-gold">Yantra Report</span>
           </h2>

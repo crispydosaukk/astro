@@ -3,50 +3,74 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Sparkles, Compass, Calendar, Sun, HeartHandshake, BookOpen, ShieldCheck, Flame, Zap, ArrowRight } from 'lucide-react';
+import { Sparkles, Compass, Calendar, Sun, HeartHandshake, BookOpen, ShieldCheck, Flame, Zap, ArrowRight, Heart, Coins, Activity } from 'lucide-react';
+import DynamicPageContent from '@/components/DynamicPageContent';
+import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function ServicesOverviewPage() {
+  const { formatPrice } = useCurrency();
   const freeServices = [
     {
-      title: 'Free Janam Kundli',
+      title: 'Janam Kundli',
       desc: 'Get your detailed Janma Kundli, planetary alignments, Lagna report and house predictions.',
       icon: Sparkles,
-      href: '/services/free-horoscope',
+      href: '/services/janam-kundli',
       badge: 'Free',
     },
     {
-      title: 'Free Kundli Matching',
-      desc: '36-point Ashtakoot Gun Milan & marital compatibility score for Bride and Groom.',
+      title: 'Kundli Matching',
+      desc: '36-point Ashtakoot Gun Milan & marital compatibility score for you and your partner.',
       icon: Compass,
-      href: '/services/free-kundli-matching',
+      href: '/services/kundli-matching',
       badge: 'Free',
     },
     {
-      title: 'Free Panchang',
-      desc: 'Daily Tithi, Nakshatra, Yoga, Karana, Abhijit Muhurat and Rahu Kaal timings.',
-      icon: Calendar,
-      href: '/services/free-panchang',
+      title: 'Love Horoscope',
+      desc: 'Discover 7th House (Kalatra Bhava), Venusian strength, relationship harmony, and soulmate timing.',
+      icon: Heart,
+      href: '/services/horoscope/love',
       badge: 'Free',
     },
     {
-      title: 'Free Daily Horoscope',
+      title: 'Finance Horoscope',
+      desc: 'Analyze Dhana Bhava (2nd House), Labha Bhava (11th House), wealth yogas, and investment timing.',
+      icon: Coins,
+      href: '/services/horoscope/finance',
+      badge: 'Free',
+    },
+    {
+      title: 'Health Horoscope',
+      desc: 'Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance, and restorative remedies.',
+      icon: Activity,
+      href: '/services/horoscope/health',
+      badge: 'Free',
+    },
+    {
+      title: 'Daily Horoscope',
       desc: 'Daily zodiac predictions for Career, Love, Health, Finance, Lucky Number & Color.',
       icon: Sun,
-      href: '/services/free-daily-horoscope',
+      href: '/services/daily-horoscope',
       badge: 'Free',
     },
     {
-      title: 'Free Meditation Guide',
+      title: 'Panchang',
+      desc: 'Daily Tithi, Nakshatra, Yoga, Karana, Abhijit Muhurat and Rahu Kaal timings.',
+      icon: Calendar,
+      href: '/services/panchang',
+      badge: 'Free',
+    },
+    {
+      title: 'Meditation Guide',
       desc: 'The Art of Meditation — classical Vedic Dhyana, mantras & 15-minute practice protocol.',
       icon: HeartHandshake,
-      href: '/services/free-meditation-guide',
+      href: '/services/meditation-guide',
       badge: 'Free',
     },
     {
-      title: 'Free Fasting Planner',
+      title: 'Fasting Planner',
       desc: 'Personalized Vrat calendar generator based on your Moon Rashi & planetary alignment.',
       icon: BookOpen,
-      href: '/services/free-fasting-planner',
+      href: '/services/fasting-planner',
       badge: 'Free',
     },
   ];
@@ -56,28 +80,32 @@ export default function ServicesOverviewPage() {
       title: 'Rahu Mahadasha Stabilisation Guide (PDF)',
       desc: 'Harmonize intense Rahu transit with exact mantras and protective rituals.',
       icon: ShieldCheck,
-      price: '₹499',
+      priceINR: 499,
+      priceUSD: 19,
       href: '/services/rahu-mahadasha-stabilisation-guide',
     },
     {
       title: 'Rahu Mahadasha Survival Guide (PDF)',
       desc: 'Tactical survival strategies, spiritual shield and karmic remedies.',
       icon: Flame,
-      price: '₹999',
+      priceINR: 999,
+      priceUSD: 29,
       href: '/services/rahu-mahadasha-survival-guide',
     },
     {
       title: 'Sani Mahadasha Stabilisation Guide (PDF)',
       desc: 'Saturn discipline, endurance, Sade Sati pacification & remedies.',
       icon: ShieldCheck,
-      price: '₹499',
+      priceINR: 499,
+      priceUSD: 19,
       href: '/services/sani-mahadasha-stabilisation-guide',
     },
     {
       title: 'Sani Mahadasha Survival Guide (PDF)',
       desc: 'Navigating Saturn trials, karmic lessons & long-term stability.',
       icon: Zap,
-      price: '₹999',
+      priceINR: 999,
+      priceUSD: 29,
       href: '/services/sani-mahadasha-survival-guide',
     },
   ];
@@ -86,18 +114,18 @@ export default function ServicesOverviewPage() {
     <div className="min-h-screen bg-background dark text-foreground">
       {/* Fullscreen Hero Section - Spans logo to right edge */}
       <section className="relative min-h-screen overflow-hidden border-b border-white/5 flex flex-col pt-20 lg:pt-0 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#8B1A2A]/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex-1 flex items-center justify-center">
-          <div className="w-full">
+          <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
             <div className="grid lg:grid-cols-2 items-center min-h-screen">
               {/* Left Content */}
               <motion.div
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="px-6 lg:px-12 xl:px-20 space-y-8 py-20 lg:py-0 order-2 lg:order-1"
+                className="space-y-8 py-20 lg:py-0 order-2 lg:order-1"
               >
                 <div>
                   <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-6 backdrop-blur-md">
@@ -155,7 +183,7 @@ export default function ServicesOverviewPage() {
 
       {/* Services Grid Section - Compact padding below hero */}
       <section id="services-grid" className="py-8 lg:py-12 bg-background relative z-10 space-y-10">
-        <div className="max-w-6xl mx-auto px-6 space-y-10">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-10">
           {/* Free Services */}
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-foreground flex items-center gap-2.5">
@@ -229,7 +257,7 @@ export default function ServicesOverviewPage() {
                             {guide.title}
                           </h3>
                           <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full gold-gradient-bg text-white shrink-0">
-                            {guide.price}
+                            {formatPrice(guide.priceINR, guide.priceUSD)}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground leading-relaxed">{guide.desc}</p>
@@ -240,6 +268,9 @@ export default function ServicesOverviewPage() {
               })}
             </div>
           </div>
+
+          {/* Dynamic Content Managed via Admin Panel */}
+          <DynamicPageContent pageId="services-overview" />
         </div>
       </section>
     </div>

@@ -505,7 +505,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     {astrologer.specialty.map((s: string) => (
                       <span
                         key={s}
-                        className="text-xs px-2.5 py-1 rounded-full bg-[#6B0F1A]/10 text-[#6B0F1A] dark:text-[#C9952B] font-medium border border-[#C9952B]/20"
+                        className="text-xs px-2.5 py-1 rounded-full bg-[#EDE4D5] text-[#713B32] font-semibold border border-[#E5D9C8]"
                       >
                         {s}
                       </span>
@@ -767,12 +767,12 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
               </div>
 
               {/* Pricing */}
-              <div className="p-4 rounded-xl bg-gradient-to-br from-[#6B0F1A]/10 to-[#C9952B]/10 border border-[#C9952B]/20 mb-5">
+              <div className="p-4 rounded-2xl bg-[#EDE4D5] border border-[#E5D9C8] mb-5">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-[#C9952B] tabular-nums">
+                  <span className="text-3xl font-bold text-[#713B32] tabular-nums">
                     {formatPrice(astrologer.pricePerMin)}
                   </span>
-                  <span className="text-sm text-muted-foreground">/min</span>
+                  <span className="text-sm text-[#6B5E55]">/min</span>
                 </div>
               </div>
 

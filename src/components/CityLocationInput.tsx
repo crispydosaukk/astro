@@ -66,44 +66,45 @@ export default function CityLocationInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const detectCurrentLocation = (userInitiated = true) => {
-    if (typeof window === 'undefined' || !navigator.geolocation) return;
-
+  const detectCurrentLocation = async (manual = false) => {
+    if (!navigator.geolocation) return;
     setIsLocating(true);
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const lat = pos.coords.latitude.toString();
-          const lon = pos.coords.longitude.toString();
+          const { latitude, longitude } = pos.coords;
+          setSelectedCoords({ lat: latitude.toString(), lon: longitude.toString() });
 
+          // Reverse geocode via free Nominatim OpenStreetMap
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`,
+            { headers: { 'User-Agent': 'AstroParihar-LocationService/1.0' } }
           );
           const data = await res.json();
+          if (data && data.address) {
+            const city = data.address.city || data.address.town || data.address.village || data.address.state_district || 'Detected Location';
+            const state = data.address.state || '';
+            const country = data.address.country || 'India';
+            const fullLoc = [city, state, country].filter(Boolean).join(', ');
 
-          if (data && data.display_name) {
-            const address = data.address || {};
-            const city = address.city || address.town || address.village || address.suburb || address.county || data.display_name.split(',')[0];
-            const state = address.state || '';
-            const country = address.country || 'India';
-
-            const formatted = state ? `${city}, ${state}, ${country}` : `${city}, ${country}`;
-
-            setQuery(formatted);
-            setSelectedCoords({ lat, lon });
-            onChange(formatted, { lat, lon, country });
+            setQuery(fullLoc);
+            onChange(fullLoc, {
+              lat: latitude.toString(),
+              lon: longitude.toString(),
+              country: data.address.country_code?.toUpperCase() || 'IN',
+            });
           }
         } catch (err) {
-          console.error('Reverse geocode error:', err);
+          console.error('Reverse geocoding error:', err);
         } finally {
           setIsLocating(false);
+          setShowDropdown(false);
         }
       },
       (err) => {
-        if (userInitiated) {
-          console.warn('Geolocation permission denied or unavailable:', err.message);
-        }
         setIsLocating(false);
+        if (manual) console.log('Location permission denied or unavailable');
       },
       { timeout: 8000, maximumAge: 60000 }
     );
@@ -113,30 +114,27 @@ export default function CityLocationInput({
     const val = e.target.value;
     setQuery(val);
     onChange(val);
-
-    if (val.trim().length < 2) {
-      setSuggestions(POPULAR_CITIES);
-      setShowDropdown(true);
-      return;
-    }
-
     setShowDropdown(true);
-    setIsSearching(true);
 
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
+    if (!val || val.trim().length < 2) {
+      setSuggestions(POPULAR_CITIES);
+      return;
+    }
+
+    setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=6`
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&addressdetails=1&limit=6&accept-language=en`,
+          { headers: { 'User-Agent': 'AstroParihar-LocationService/1.0' } }
         );
         const data = await res.json();
-        if (data && data.length > 0) {
+        if (Array.isArray(data) && data.length > 0) {
           setSuggestions(data);
         } else {
-          setSuggestions(
-            POPULAR_CITIES.filter((c) => c.display_name.toLowerCase().includes(val.toLowerCase()))
-          );
+          setSuggestions(POPULAR_CITIES.filter((c) => c.display_name.toLowerCase().includes(val.toLowerCase())));
         }
       } catch (err) {
         console.error('Location search error:', err);
@@ -158,8 +156,8 @@ export default function CityLocationInput({
   return (
     <div ref={containerRef} className="relative w-full">
       {label && (
-        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-          <MapPin size={14} className="text-[#C9952B]" /> {label}
+        <label className="block text-xs font-bold text-[#6B5E55] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+          <MapPin size={14} className="text-[#713B32]" /> {label}
         </label>
       )}
 
@@ -174,15 +172,15 @@ export default function CityLocationInput({
           }}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className={`w-full px-4 py-3 pl-10 pr-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm outline-none focus:border-[#C9952B] transition-colors ${className}`}
+          className={`w-full px-4 py-3 pl-10 pr-10 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-sm outline-none focus:border-[#B88A44] transition-colors shadow-sm ${className}`}
         />
-        <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B]" />
+        <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#713B32]" />
 
         <button
           type="button"
           onClick={() => detectCurrentLocation(true)}
           title="Detect Current Location"
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-[#C9952B] hover:bg-[#C9952B]/20 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-[#713B32] hover:bg-[#EDE4D5] transition-colors"
         >
           {isLocating ? (
             <Loader2 size={16} className="animate-spin" />
@@ -193,33 +191,33 @@ export default function CityLocationInput({
       </div>
 
       {selectedCoords?.lat && (
-        <div className="mt-1 flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono">
+        <div className="mt-1 flex items-center gap-1.5 text-[10px] text-emerald-700 font-mono">
           <Globe size={11} /> Coordinates: {Number(selectedCoords.lat).toFixed(2)}° N, {Number(selectedCoords.lon).toFixed(2)}° E
         </div>
       )}
 
       {/* Autocomplete Dropdown */}
       {showDropdown && (
-        <div className="absolute z-[100] left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-2xl bg-slate-950/95 border border-[#C9952B]/50 backdrop-blur-xl shadow-2xl shadow-black/90 space-y-0.5 p-1.5 text-left">
+        <div className="absolute z-[100] left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] shadow-2xl space-y-0.5 p-2 text-left">
           <button
             type="button"
             onClick={() => detectCurrentLocation(true)}
-            className="w-full px-3 py-2 text-left rounded-xl bg-[#C9952B]/15 hover:bg-[#C9952B]/30 text-[#C9952B] font-bold text-xs flex items-center justify-between transition-colors border border-[#C9952B]/30 mb-1"
+            className="w-full px-3 py-2 text-left rounded-xl bg-[#EDE4D5] hover:bg-[#EDE4D5]/80 text-[#713B32] font-bold text-xs flex items-center justify-between transition-colors border border-[#E5D9C8] mb-1"
           >
             <div className="flex items-center gap-2">
               <Navigation size={14} className={isLocating ? 'animate-spin' : ''} />
               <span>Use Current Location</span>
             </div>
-            <span className="text-[10px] text-amber-300">GPS Auto-Detect</span>
+            <span className="text-[10px] text-[#713B32]/80">GPS Auto-Detect</span>
           </button>
 
-          <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#C9952B] border-b border-white/5 flex justify-between items-center">
+          <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#6B5E55] border-b border-[#E5D9C8] flex justify-between items-center">
             <span>Location Suggestions</span>
-            <span className="text-[9px] text-muted-foreground">OpenStreetMap Maps API</span>
+            <span className="text-[9px] text-[#6B5E55]/80">OpenStreetMap API</span>
           </div>
 
           {suggestions.length === 0 ? (
-            <div className="px-4 py-3 text-xs text-muted-foreground text-center">
+            <div className="px-4 py-3 text-xs text-[#6B5E55] text-center">
               No matching cities found. Type exact city name.
             </div>
           ) : (
@@ -228,14 +226,14 @@ export default function CityLocationInput({
                 key={idx}
                 type="button"
                 onClick={() => handleSelectCity(item)}
-                className="w-full px-3 py-2 text-left rounded-xl hover:bg-[#C9952B]/20 transition-colors flex items-center justify-between text-xs text-foreground group"
+                className="w-full px-3 py-2 text-left rounded-xl hover:bg-[#F8F3EA] transition-colors flex items-center justify-between text-xs text-[#292522] group"
               >
                 <div className="flex items-center gap-2 truncate pr-2">
-                  <MapPin size={13} className="text-[#C9952B] shrink-0 group-hover:scale-110 transition-transform" />
-                  <span className="truncate">{item.display_name}</span>
+                  <MapPin size={13} className="text-[#713B32] shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="truncate font-medium">{item.display_name}</span>
                 </div>
                 {item.lat && (
-                  <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                  <span className="text-[10px] font-mono text-[#6B5E55] shrink-0">
                     {Number(item.lat).toFixed(1)}°, {Number(item.lon).toFixed(1)}°
                   </span>
                 )}

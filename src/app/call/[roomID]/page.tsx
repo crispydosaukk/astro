@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useUserData } from '@/lib/useUserData';
-import { Loader2, FileText, User, X, Eye, Calendar, Sparkles, ShieldCheck, Download, ChevronRight, Phone, Mail } from 'lucide-react';
+import { Loader2, FileText, User, X, Eye, Calendar, Sparkles, ShieldCheck, ChevronRight, Phone, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, getDoc, updateDoc, doc, onSnapshot } from 'firebase/firestore';

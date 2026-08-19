@@ -58,86 +58,79 @@ function WalletContent() {
   }, [user, userLoading]);
 
   const isUSD = currencyCode === 'USD';
-  const presets = isUSD ? [1, 5, 10] : [50, 100, 500];
+  const presets = isUSD ? [5, 10, 25, 50, 100, 250] : [100, 200, 500, 1000, 2000, 5000];
   const minAllowed = isUSD ? 0.50 : 10;
   const numAmount = parseFloat(amount);
   const isTooLow = amount !== '' && !isNaN(numAmount) && numAmount < minAllowed;
 
   const handleAddFunds = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast.error('Please log in to add funds');
-      return;
-    }
-
-    const val = parseFloat(amount);
-    if (isNaN(val) || val < minAllowed) {
+    if (!amount || isNaN(numAmount) || numAmount < minAllowed) {
       toast.error(`Minimum transaction amount is ${currencySymbol}${minAllowed.toFixed(isUSD ? 2 : 0)}.`);
       return;
     }
 
+    if (!user) {
+      toast.error('Please login to add funds');
+      return;
+    }
+
     setIsProcessing(true);
+
     try {
-      const resLoaded = await loadRazorpayScript();
-      if (!resLoaded) {
-        toast.error('Failed to load Razorpay SDK. Please check your internet connection.');
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        toast.error('Failed to load Razorpay SDK. Please check your connection.');
         setIsProcessing(false);
         return;
       }
 
-      const baseInrAmount = isUSD ? Math.round(val / 0.012) : val;
+      // Convert user input amount to base INR amount for Razorpay
+      const finalInrAmount = isUSD ? Math.round(numAmount * 85) : Math.round(numAmount);
 
-      // 1. Create Razorpay order
-      const orderRes = await fetch('/api/create-razorpay-order', {
+      const res = await fetch('/api/create-razorpay-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: baseInrAmount,
+          amount: finalInrAmount,
           currency: 'INR',
-          notes: {
-            userId: user.uid,
-            userEmail: user.email || userData?.email || '',
-            type: 'wallet_recharge',
-          },
+          paymentType: 'wallet_recharge',
+          userId: user.uid,
         }),
       });
 
-      const orderData = await orderRes.json();
-
-      if (!orderRes.ok) {
+      const orderData = await res.json();
+      if (!res.ok) {
         throw new Error(orderData.error || 'Failed to create payment order');
       }
 
-      // 2. Open Razorpay Modal
       const options = {
-        key: orderData.keyId,
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'AstroParihar',
-        description: 'Wallet Balance Recharge',
-        image: '/AstroParihar_Top_Logo.jpg',
-        order_id: orderData.orderId,
+        description: 'Wallet Recharge',
+        image: '/AstroParihar_Logo.png',
+        order_id: orderData.id,
         prefill: {
-          name: userData?.name || user.displayName || '',
-          email: user.email || userData?.email || '',
-          contact: userData?.phone || '',
+          name: userData?.name || user?.displayName || '',
+          email: user?.email || '',
         },
         theme: {
-          color: '#C9952B',
+          color: '#713B32',
         },
-        handler: async function (response: any) {
+        handler: async function (paymentRes: any) {
           try {
-            // 3. Verify payment signature and update wallet balance
             const verifyRes = await fetch('/api/verify-razorpay-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                paymentType: 'wallet',
+                razorpay_order_id: paymentRes.razorpay_order_id,
+                razorpay_payment_id: paymentRes.razorpay_payment_id,
+                razorpay_signature: paymentRes.razorpay_signature,
+                paymentType: 'wallet_recharge',
                 userId: user.uid,
-                amount: baseInrAmount,
+                amount: finalInrAmount,
               }),
             });
 
@@ -146,22 +139,20 @@ function WalletContent() {
               throw new Error(verifyData.error || 'Payment verification failed');
             }
 
-            toast.success('Funds added to wallet successfully!');
+            toast.success('Funds added successfully!');
             setAmount('');
-
-            // Check return URL if user came from booking/remedy page
-            const returnUrl = searchParams?.get('redirect') || localStorage.getItem('wallet_return_url');
+            
+            // Check for redirect return url
+            const returnUrl = localStorage.getItem('wallet_return_url');
             if (returnUrl) {
               localStorage.removeItem('wallet_return_url');
-              setTimeout(() => {
-                router.push(returnUrl);
-              }, 1000);
+              router.push(returnUrl);
             } else {
               window.location.reload();
             }
           } catch (err: any) {
             console.error(err);
-            toast.error(err.message || 'Error updating wallet');
+            toast.error(err.message || 'Error verifying payment');
           } finally {
             setIsProcessing(false);
           }
@@ -169,7 +160,7 @@ function WalletContent() {
         modal: {
           ondismiss: function () {
             setIsProcessing(false);
-            toast.info('Payment process cancelled');
+            toast.info('Payment cancelled');
           },
         },
       };
@@ -178,26 +169,29 @@ function WalletContent() {
       rzp.open();
     } catch (error: any) {
       console.error(error);
-      toast.error(error.message || 'Error processing request');
+      toast.error(error.message || 'Failed to initiate payment');
       setIsProcessing(false);
     }
   };
 
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+      <div className="min-h-screen bg-[#F8F3EA] text-[#292522]">
+        <Navbar />
+        <div className="container mx-auto p-6 max-w-6xl pt-32 flex flex-col items-center justify-center">
+          <Loader2 className="animate-spin text-[#713B32] mb-4" size={36} />
+          <p className="text-[#6B5E55] text-sm">Loading your wallet...</p>
+        </div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background dark">
+      <div className="min-h-screen bg-[#F8F3EA] text-[#292522]">
         <Navbar />
-        <div className="container mx-auto p-8 max-w-4xl pt-32 text-center">
-          <h1 className="text-3xl font-bold mb-4 text-foreground">Wallet</h1>
-          <p className="text-muted-foreground">Please log in to view your wallet.</p>
+        <div className="container mx-auto p-6 max-w-6xl pt-32 text-center">
+          <p className="text-[#6B5E55]">Please log in to view your wallet.</p>
         </div>
       </div>
     );
@@ -206,7 +200,7 @@ function WalletContent() {
   const currentBalance = userData?.walletBalance || 0;
 
   return (
-    <div className="min-h-screen bg-background dark cosmic-bg">
+    <div className="min-h-screen bg-[#F8F3EA] text-[#292522]">
       <Navbar />
       <div className="container mx-auto p-6 max-w-6xl pt-32">
         <div className="grid lg:grid-cols-3 gap-8">
@@ -218,22 +212,22 @@ function WalletContent() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-card border border-white/10 rounded-3xl p-8 relative overflow-hidden"
+              className="bg-[#FFFDFC] border border-[#E5D9C8] rounded-3xl p-8 relative overflow-hidden shadow-xl"
             >
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[#C9952B]/20 flex items-center justify-center">
-                    <Wallet size={20} className="text-[#C9952B]" />
+                  <div className="w-10 h-10 rounded-full bg-[#EDE4D5] text-[#713B32] flex items-center justify-center">
+                    <Wallet size={20} />
                   </div>
-                  <p className="text-sm font-semibold text-white/60 uppercase tracking-wider">Available Balance</p>
+                  <p className="text-xs font-bold text-[#6B5E55] uppercase tracking-wider">Available Balance</p>
                 </div>
-                <h2 className="text-5xl font-bold text-white mb-2 tracking-tight">
+                <h2 className="text-4xl sm:text-5xl font-extrabold text-[#292522] mb-2 tracking-tight">
                   {formatPrice(currentBalance)}
                 </h2>
-                <p className="text-sm text-white/40 mb-4">Securely store funds for instant bookings</p>
+                <p className="text-xs text-[#6B5E55] mb-4">Securely store funds for instant consultations</p>
                 
-                <div className="pt-3 border-t border-white/10 flex items-start gap-2.5 text-xs text-[#C9952B] bg-[#C9952B]/10 p-3 rounded-xl">
-                  <Info size={16} className="flex-shrink-0 mt-0.5" />
+                <div className="pt-3 border-t border-[#E5D9C8] flex items-start gap-2.5 text-xs text-[#713B32] bg-[#EDE4D5]/60 p-3 rounded-2xl">
+                  <Info size={16} className="flex-shrink-0 mt-0.5 text-[#713B32]" />
                   <span>Note: A minimum wallet balance for <strong>5 minutes</strong> of consultation is required to connect with an astrologer.</span>
                 </div>
               </div>
@@ -244,9 +238,9 @@ function WalletContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="glass-card border border-white/10 rounded-3xl p-6"
+              className="bg-[#FFFDFC] border border-[#E5D9C8] rounded-3xl p-6 shadow-xl"
             >
-              <h3 className="text-xl font-bold text-foreground mb-4">Add Funds</h3>
+              <h3 className="text-xl font-bold text-[#292522] mb-4">Add Funds</h3>
               
               <div className="grid grid-cols-3 gap-3 mb-6">
                 {presets.map((preset) => (
@@ -254,7 +248,7 @@ function WalletContent() {
                     key={preset}
                     type="button"
                     onClick={() => setAmount(preset.toString())}
-                    className={`py-2 rounded-xl border ${amount === preset.toString() ? 'border-[#C9952B] bg-[#C9952B]/10 text-[#C9952B]' : 'border-white/10 text-white/60 hover:border-white/30'} font-semibold transition-all flex items-center justify-center`}
+                    className={`py-2 rounded-xl border ${amount === preset.toString() ? 'border-[#713B32] bg-[#713B32] text-white' : 'border-[#E5D9C8] bg-[#F8F3EA] text-[#292522] hover:bg-[#EDE4D5]'} font-bold text-sm transition-all flex items-center justify-center`}
                   >
                     {currencySymbol}{preset}
                   </button>
@@ -264,11 +258,11 @@ function WalletContent() {
               <form onSubmit={handleAddFunds} className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-sm font-semibold text-white/60">Custom Amount</label>
-                    <span className="text-xs text-white/40">Min: {currencySymbol}{minAllowed.toFixed(isUSD ? 2 : 0)}</span>
+                    <label className="text-xs font-bold text-[#6B5E55]">Custom Amount</label>
+                    <span className="text-xs text-[#6B5E55]">Min: {currencySymbol}{minAllowed.toFixed(isUSD ? 2 : 0)}</span>
                   </div>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-semibold">{currencySymbol}</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B5E55] font-bold">{currencySymbol}</span>
                     <input
                       type="number"
                       min={isUSD ? "0.50" : "10"}
@@ -276,7 +270,7 @@ function WalletContent() {
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       placeholder={`Enter amount (Min ${currencySymbol}${minAllowed.toFixed(isUSD ? 2 : 0)})`}
-                      className={`w-full bg-white/5 border ${isTooLow ? 'border-red-500 bg-red-500/10 focus:border-red-500' : 'border-white/10 focus:border-[#C9952B]'} rounded-xl py-3 pl-8 pr-4 text-white focus:outline-none transition-colors`}
+                      className={`w-full bg-[#FFFDFC] border ${isTooLow ? 'border-red-500 bg-red-50 focus:border-red-500' : 'border-[#E5D9C8] focus:border-[#B88A44]'} rounded-xl py-3 pl-8 pr-4 text-[#292522] focus:outline-none transition-colors shadow-sm font-semibold text-sm`}
                       required
                     />
                   </div>
@@ -284,7 +278,7 @@ function WalletContent() {
                     <motion.p
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-xs text-red-400 mt-2 flex items-center gap-1.5 font-medium"
+                      className="text-xs text-red-600 mt-2 flex items-center gap-1.5 font-medium"
                     >
                       <span>⚠️ Minimum transaction amount is {currencySymbol}{minAllowed.toFixed(isUSD ? 2 : 0)}. Payments below this amount are not accepted.</span>
                     </motion.p>
@@ -294,7 +288,7 @@ function WalletContent() {
                 <button
                   type="submit"
                   disabled={isProcessing || !amount || isNaN(numAmount) || numAmount < minAllowed}
-                  className="w-full py-3.5 rounded-xl gold-gradient-bg text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white font-bold flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Plus size={20} />}
                   {isProcessing ? 'Processing...' : 'Proceed to Payment'}
@@ -309,43 +303,43 @@ function WalletContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="glass-card border border-white/10 rounded-3xl p-6 h-full flex flex-col"
+              className="bg-[#FFFDFC] border border-[#E5D9C8] rounded-3xl p-6 h-full flex flex-col shadow-xl"
             >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-foreground">Transaction History</h3>
-                <span className="text-sm text-muted-foreground">{transactions.length} records</span>
+              <div className="flex items-center justify-between mb-6 border-b border-[#E5D9C8] pb-4">
+                <h3 className="text-xl font-bold text-[#292522]">Transaction History</h3>
+                <span className="text-xs font-bold text-[#6B5E55] bg-[#EDE4D5] px-3 py-1 rounded-full">{transactions.length} records</span>
               </div>
 
               {loadingTx ? (
                 <div className="flex-1 flex items-center justify-center py-20">
-                  <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+                  <Loader2 className="animate-spin text-[#713B32]" size={32} />
                 </div>
               ) : transactions.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
-                  <Clock size={48} className="text-white/20 mb-4" />
-                  <p className="text-lg font-semibold text-white/60 mb-2">No transactions yet</p>
-                  <p className="text-sm text-white/40">Your wallet history will appear here once you add funds.</p>
+                  <Clock size={48} className="text-[#6B5E55]/30 mb-4" />
+                  <p className="text-base font-bold text-[#292522] mb-1">No transactions yet</p>
+                  <p className="text-xs text-[#6B5E55]">Your wallet history will appear here once you add funds.</p>
                 </div>
               ) : (
                 <div className="space-y-3 overflow-y-auto pr-2 max-h-[600px] custom-scrollbar">
                   {transactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5">
+                    <div key={tx.id} className="flex items-center justify-between p-4 rounded-2xl bg-[#F8F3EA] hover:bg-[#EDE4D5]/60 transition-colors border border-[#E5D9C8]">
                       <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.status === 'failed' ? 'bg-red-500/20 text-red-400' : tx.type === 'credit' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.status === 'failed' ? 'bg-red-100 text-red-600' : tx.type === 'credit' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
                           {tx.status === 'failed' ? <XCircle size={20} /> : tx.type === 'credit' ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
                         </div>
                         <div>
-                          <p className="font-semibold text-white">{tx.description || (tx.type === 'credit' ? 'Funds Added' : 'Payment Made')}</p>
-                          <p className="text-xs text-white/50">{new Date(tx.date).toLocaleString(undefined, {
+                          <p className="font-bold text-[#292522] text-sm">{tx.description || (tx.type === 'credit' ? 'Funds Added' : 'Payment Made')}</p>
+                          <p className="text-xs text-[#6B5E55]">{new Date(tx.date).toLocaleString(undefined, {
                             year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                           })}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`font-bold ${tx.status === 'failed' ? 'text-red-400 line-through opacity-70' : tx.type === 'credit' ? 'text-green-400' : 'text-foreground'}`}>
+                        <p className={`font-bold text-sm ${tx.status === 'failed' ? 'text-red-500 line-through opacity-70' : tx.type === 'credit' ? 'text-green-700' : 'text-[#292522]'}`}>
                           {tx.type === 'credit' ? '+' : '-'}{formatPrice(tx.amount)}
                         </p>
-                        <p className={`text-xs capitalize font-semibold ${tx.status === 'failed' ? 'text-red-500' : 'text-white/50'}`}>
+                        <p className={`text-xs capitalize font-bold ${tx.status === 'failed' ? 'text-red-500' : 'text-[#6B5E55]'}`}>
                           {tx.status}
                         </p>
                       </div>
@@ -365,9 +359,9 @@ function WalletContent() {
 export default function WalletPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <Loader2 className="animate-spin text-[#C9952B] mb-4" size={36} />
-        <p className="text-muted-foreground text-sm">Loading Wallet...</p>
+      <div className="min-h-screen bg-[#F8F3EA] flex flex-col items-center justify-center">
+        <Loader2 className="animate-spin text-[#713B32] mb-4" size={36} />
+        <p className="text-[#6B5E55] text-sm">Loading Wallet...</p>
       </div>
     }>
       <WalletContent />

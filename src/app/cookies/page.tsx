@@ -7,21 +7,21 @@ import { Cookie, ShieldCheck, Building2, Mail } from 'lucide-react';
 
 export default function CookiePolicyPage() {
   return (
-    <div className="min-h-screen bg-background dark text-foreground">
+    <div className="min-h-screen bg-[#F8F3EA] text-[#292522]">
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-6 pt-32 pb-20 space-y-8">
-        <div className="text-center space-y-4 border-b border-border pb-8">
+        <div className="text-center space-y-4 border-b border-[#E5D9C8] pb-8">
           <div className="w-16 h-16 rounded-2xl gold-gradient-bg text-white flex items-center justify-center mx-auto shadow-xl">
             <Cookie size={32} />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground">Cookie &amp; Tracking Policy</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#292522]">Cookie &amp; Tracking Policy</h1>
+          <p className="text-sm text-[#6B5E55]">
             Effective Date: 14/08/2026 • Operator: VAYORIX PRIVATE LIMITED
           </p>
         </div>
 
-        <div className="space-y-6 text-sm text-muted-foreground leading-relaxed glass-card p-8 sm:p-10 rounded-3xl border border-white/10">
+        <div className="space-y-6 text-sm text-[#6B5E55] leading-relaxed bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#E5D9C8] shadow-xl">
           
           <section className="space-y-2">
             <h2 className="text-lg font-bold text-foreground">1. What Are Cookies?</h2>

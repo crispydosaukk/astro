@@ -8,12 +8,10 @@ import {
   ShieldCheck,
   Flame,
   Zap,
-  Download,
   Eye,
   CheckCircle2,
   Lock,
   ArrowRight,
-  Printer,
   X,
   FileText,
   Sparkles,
@@ -28,6 +26,7 @@ import { toast } from 'sonner';
 
 import { useRouter } from 'next/navigation';
 import { loadRazorpayScript } from '@/lib/razorpay';
+import DynamicPageContent from '@/components/DynamicPageContent';
 
 interface MahadashaGuidePageViewProps {
   guideId: string;
@@ -89,7 +88,7 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
         return;
       }
 
-      const rawPrice = currencyCode === 'USD' ? guide.priceUSD : guide.price;
+      const rawPrice = currencyCode === 'USD' ? (guide.priceUSD || 19) : (guide.price || 499);
 
       const reportDetails = {
         userId: user.uid,
@@ -187,17 +186,6 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
     }
   };
 
-  const handleDirectDownload = () => {
-    if (!guide) return;
-    const link = document.createElement('a');
-    link.href = guide.pdfUrl;
-    link.download = guide.pdfTitle || `${guide.id}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Download started!');
-  };
-
   if (loadingGuide || !guide) {
     return (
       <div className="min-h-screen bg-background dark flex items-center justify-center">
@@ -206,36 +194,30 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
     );
   }
 
-  const displayPrice = currencyCode === 'USD' ? `$${guide.priceUSD}` : `₹${guide.price}`;
+  const displayPrice = formatPrice(guide.price || 499, guide.priceUSD || 19);
 
   return (
     <div className="min-h-screen bg-background dark text-foreground">
-      {/* Fullscreen Hero Section */}
+      {/* Fullscreen Hero Section - Spans logo to right edge */}
       <section className="relative min-h-screen overflow-hidden border-b border-white/5 flex flex-col pt-20 lg:pt-0 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#8B1A2A]/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex-1 flex items-center justify-center">
-          <div className="w-full">
+          <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
             <div className="grid lg:grid-cols-2 items-center min-h-screen">
               {/* Left Content */}
               <motion.div
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="px-6 lg:px-12 xl:px-20 space-y-8 py-20 lg:py-0 order-2 lg:order-1"
+                className="space-y-8 py-20 lg:py-0 order-2 lg:order-1"
               >
                 <div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 backdrop-blur-md">
-                      {guide.badge}
-                    </span>
-                    <span className="px-4 py-1.5 rounded-full text-xs font-extrabold gold-gradient-bg text-white shadow">
-                      {displayPrice}
-                    </span>
-                  </div>
-
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight leading-tight">
+                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-6 backdrop-blur-md">
+                    Official Vedic Guide Publication
+                  </span>
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight max-w-xl">
                     {guide.title}
                   </h1>
                   <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
@@ -244,20 +226,12 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
 
                   <div className="flex flex-wrap items-center gap-4 pt-6">
                     {hasPurchased ? (
-                      <>
-                        <button
-                          onClick={() => setShowPdfModal(true)}
-                          className="px-8 py-3.5 rounded-full gold-gradient-bg text-white font-bold flex items-center gap-2 shadow-lg hover:opacity-90 transition-opacity"
-                        >
-                          <Eye size={18} /> View PDF Online 📄
-                        </button>
-                        <button
-                          onClick={handleDirectDownload}
-                          className="px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-foreground font-bold hover:bg-white/10 transition-colors flex items-center gap-2"
-                        >
-                          <Download size={18} className="text-[#C9952B]" /> Download PDF Guide ⬇️
-                        </button>
-                      </>
+                      <button
+                        onClick={() => setShowPdfModal(true)}
+                        className="px-8 py-3.5 rounded-full gold-gradient-bg text-white font-bold flex items-center gap-2 shadow-lg hover:opacity-90 transition-opacity"
+                      >
+                        <Eye size={18} /> View Guide Online 📄
+                      </button>
                     ) : (
                       <>
                         <button
@@ -306,7 +280,7 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
 
       {/* Overview & Topics Section */}
       <section className="py-12 lg:py-16 bg-background relative z-10 space-y-12">
-        <div className="max-w-5xl mx-auto px-6 space-y-8">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-8">
           <div className="glass-card p-8 lg:p-10 rounded-3xl border border-white/10 space-y-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">What This Guide Covers</h2>
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">{guide.description}</p>
@@ -326,11 +300,16 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
             </div>
           </div>
 
+          {/* Dynamic Content Published from Admin CMS */}
+          <div className="py-2">
+            <DynamicPageContent pageId={guideId} />
+          </div>
+
           {/* Action Card */}
           <div className="glass-card p-8 rounded-3xl border border-[#C9952B]/30 bg-[#C9952B]/5 flex flex-wrap items-center justify-between gap-6">
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-foreground">Ready to Download {guide.title}?</h3>
-              <p className="text-xs text-muted-foreground">Instant PDF access after payment • Available anytime under My Reports</p>
+              <h3 className="text-xl font-bold text-foreground">Ready to Access {guide.title}?</h3>
+              <p className="text-xs text-muted-foreground">Instant online access after payment • Available anytime under My Reports</p>
             </div>
 
             {hasPurchased ? (
@@ -340,12 +319,6 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
                   className="px-6 py-3 rounded-full gold-gradient-bg text-white font-bold text-xs flex items-center gap-2 shadow"
                 >
                   <Eye size={16} /> View Online
-                </button>
-                <button
-                  onClick={handleDirectDownload}
-                  className="px-6 py-3 rounded-full bg-white/10 text-foreground font-bold text-xs flex items-center gap-2"
-                >
-                  <Download size={16} className="text-[#C9952B]" /> Download PDF
                 </button>
               </div>
             ) : (
@@ -396,10 +369,10 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
               <div className="p-5 border-t border-white/10 bg-muted/30 flex items-center justify-between flex-wrap gap-3">
                 <span className="text-xs text-muted-foreground font-mono">Status: Verified Purchase</span>
                 <button
-                  onClick={handleDirectDownload}
-                  className="px-6 py-2.5 rounded-full gold-gradient-bg text-white text-xs font-bold flex items-center gap-2 shadow"
+                  onClick={() => setShowPdfModal(false)}
+                  className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-foreground text-xs font-bold transition-colors"
                 >
-                  <Download size={14} /> Download PDF File
+                  Close
                 </button>
               </div>
             </motion.div>

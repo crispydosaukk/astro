@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { CurrencyProvider } from '@/lib/CurrencyContext';
+import GlobalFooterAndBottomBar from '@/components/GlobalFooterAndBottomBar';
 import '../styles/tailwind.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={plusJakartaSans.className} suppressHydrationWarning>
         <CurrencyProvider>
           {children}
+          <GlobalFooterAndBottomBar />
           <Toaster position="bottom-right" richColors />
         </CurrencyProvider>
       </body>

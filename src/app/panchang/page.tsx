@@ -1,5 +1,5 @@
-import FreePanchangPage from '../services/free-panchang/page';
+import PanchangServicePage from '../services/panchang/page';
 
 export default function PanchangPage() {
-  return <FreePanchangPage />;
+  return <PanchangServicePage />;
 }

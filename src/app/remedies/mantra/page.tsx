@@ -16,6 +16,7 @@ import {
 import Navbar from '@/components/Navbar';
 import ServiceReportForm from '@/components/ServiceReportForm';
 import PremiumSection from '@/components/PremiumSection';
+import DynamicPageContent from '@/components/DynamicPageContent';
 import { getServicePageContent, MantraServiceContent, defaultMantraContent, getHomepageContent, HomepageContent } from '@/lib/cms';
 
 export default function MantraServicePage() {
@@ -50,10 +51,10 @@ export default function MantraServicePage() {
       <Navbar />
             {/* Hero */}
       <section className="relative min-h-screen overflow-hidden border-b border-white/5 flex flex-col pt-20 lg:pt-0 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#8B1A2A]/20 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
         <div className="relative z-10 flex-1 flex items-center justify-center">
-          <div className="max-w-[2000px] w-full mx-auto">
+          <div className="max-w-screen-2xl w-full mx-auto px-6 lg:px-10">
             <div className="grid lg:grid-cols-2 items-center min-h-screen">
               
               {/* Left Content */}
@@ -61,7 +62,7 @@ export default function MantraServicePage() {
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="px-6 lg:px-12 xl:px-20 space-y-8 py-20 lg:py-0 order-2 lg:order-1"
+                className="space-y-8 py-20 lg:py-0 order-2 lg:order-1"
               >
                 <div className="flex items-center gap-2 text-sm text-white/50 mb-6">
                   <Link href="/" className="hover:text-[#C9952B] transition-colors">
@@ -124,7 +125,7 @@ export default function MantraServicePage() {
       </section>
       {/* Benefits */}
       <section className="py-16 bg-background">
-        <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-foreground mb-6">
@@ -183,7 +184,7 @@ export default function MantraServicePage() {
       </section>
       {/* Mantra Table */}
       <section className="py-16 bg-muted/30">
-        <div className="max-w-screen-xl mx-auto px-6 lg:px-10">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
           <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
             {content.guideTitle.split(' ')[0]}{' '}
             <span className="text-gradient-gold">
@@ -193,7 +194,7 @@ export default function MantraServicePage() {
           <div className="overflow-x-auto rounded-2xl border border-border">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#6B0F1A]/10 border-b border-border">
+                <tr className="bg-[#EDE4D5] border-b border-[#E5D9C8]">
                   <th className="text-left px-5 py-4 text-sm font-semibold text-foreground">
                     Planet
                   </th>
@@ -225,6 +226,11 @@ export default function MantraServicePage() {
           </div>
         </div>
       </section>
+
+      {/* Dynamic Educational Content Container (Admin CMS Integration) */}
+      <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 py-8">
+        <DynamicPageContent pageId="remedies-mantra" />
+      </div>
 
       <PremiumSection data={content.premiumDetails} />
 

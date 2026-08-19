@@ -49,6 +49,12 @@ const iconDict: Record<string, any> = {
   'free-kundli-matching': Users,
   'free-meditation': HeartHandshake,
   'free-fasting': BookOpen,
+  'janam-kundli': Users,
+  'kundli-matching': Users,
+  'daily-horoscope': Sun,
+  'panchang': Sun,
+  'fasting': BookOpen,
+  'meditation': HeartHandshake,
   'rahu-stabilisation': ShieldCheck,
   'rahu-survival': Flame,
   'sani-survival': Zap,
@@ -65,7 +71,7 @@ export default function ServicesSection({ content, comprehensiveContent }: Servi
   const coreServicesList = comprehensiveSection?.items || defaultHomepageContent.comprehensiveServices.items;
 
   return (
-    <div className="space-y-24 py-20 bg-background">
+    <div className="space-y-24 py-20 bg-[#F8F3EA]">
       {/* 8 Ashta-Digbandhan Remedies Section */}
       <section id="remedies" className="max-w-screen-2xl mx-auto px-6 lg:px-10">
         <motion.div
@@ -74,14 +80,14 @@ export default function ServicesSection({ content, comprehensiveContent }: Servi
           viewport={{ once: true }}
           className="text-center mb-14 space-y-3"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20">
+          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8]">
             {content?.tagline || 'ASHTA-DIGBANDHAN MANDALA'}
           </span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground">
+          <h2 className="text-4xl lg:text-5xl font-bold text-[#292522]">
             {content?.title || 'Sacred Ashta-Digbandhan'}{' '}
             <span className="text-gradient-gold">{content?.titleHighlight || 'Vedic Remedies'}</span>
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-[#6B5E55] max-w-2xl mx-auto font-medium">
             {content?.subtitle || '|| आठों दिशाओं की रक्षा – जीवन की पूर्ण स्थिरता और समृद्धि ||'}
           </p>
         </motion.div>
@@ -96,30 +102,28 @@ export default function ServicesSection({ content, comprehensiveContent }: Servi
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className={`relative group rounded-3xl p-6 bg-gradient-to-br ${remedy.color || 'from-amber-500/15 to-yellow-500/10'} border border-white/10 hover:border-[#C9952B]/40 transition-all duration-300 card-hover`}
+                className="relative group rounded-3xl p-6 bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#B88A44] transition-all duration-300 shadow-sm hover:shadow-xl card-hover"
               >
                 <Link href={remedy.href} className="block h-full flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-4">
-                      <div
-                        className={`w-12 h-12 rounded-2xl bg-card/80 border border-white/10 flex items-center justify-center shadow-lg ${remedy.iconColor || 'text-[#C9952B]'} group-hover:scale-110 transition-transform`}
-                      >
+                      <div className="w-12 h-12 rounded-2xl bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8] flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:bg-[#713B32] group-hover:text-white transition-all">
                         <Icon size={22} />
                       </div>
-                      <span className="text-[10px] px-2.5 py-1 rounded-full font-bold bg-black/60 text-[#C9952B] border border-[#C9952B]/30">
+                      <span className="text-[10px] px-2.5 py-1 rounded-full font-bold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8]">
                         {remedy.badge}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-[#C9952B] transition-colors">
+                    <h3 className="text-base font-bold text-[#292522] mb-2 group-hover:text-[#713B32] transition-colors">
                       {remedy.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                    <p className="text-xs text-[#6B5E55] leading-relaxed line-clamp-3">
                       {remedy.description}
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-[#C9952B]">
+                  <div className="mt-6 pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs font-bold text-[#713B32]">
                     <span>Explore Remedy</span>
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -138,14 +142,14 @@ export default function ServicesSection({ content, comprehensiveContent }: Servi
           viewport={{ once: true }}
           className="text-center mb-14 space-y-3"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8]">
             {comprehensiveSection?.tagline || 'ASTROPARIHAR SERVICES'}
           </span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground">
+          <h2 className="text-4xl lg:text-5xl font-bold text-[#292522]">
             {comprehensiveSection?.title || 'Our Comprehensive'}{' '}
             <span className="text-gradient-gold">{comprehensiveSection?.titleHighlight || 'Vedic Services & Guides'}</span>
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-[#6B5E55] max-w-2xl mx-auto">
             {comprehensiveSection?.subtitle || 'Free daily Panchang, Horoscope forecasts, Kundli Matching, Meditation guides, Fasting Planners & Mahadasha Survival PDF Guides.'}
           </p>
         </motion.div>
@@ -160,32 +164,30 @@ export default function ServicesSection({ content, comprehensiveContent }: Servi
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className={`relative group rounded-3xl p-6 bg-gradient-to-br ${service.color || 'from-emerald-500/15 to-teal-500/10'} border border-white/10 hover:border-[#C9952B]/40 transition-all duration-300 card-hover`}
+                className="relative group rounded-3xl p-6 bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#B88A44] transition-all duration-300 shadow-sm hover:shadow-xl card-hover"
               >
                 <Link href={service.href} className="block h-full flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-4">
-                      <div
-                        className={`w-12 h-12 rounded-2xl bg-card/80 border border-white/10 flex items-center justify-center shadow-lg ${service.iconColor || 'text-emerald-400'} group-hover:scale-110 transition-transform`}
-                      >
+                      <div className="w-12 h-12 rounded-2xl bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8] flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:bg-[#713B32] group-hover:text-white transition-all">
                         <Icon size={22} />
                       </div>
-                      <span className="text-[10px] px-2.5 py-1 rounded-full font-bold bg-[#C9952B]/20 text-[#C9952B] border border-[#C9952B]/30">
+                      <span className="text-[10px] px-2.5 py-1 rounded-full font-bold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8]">
                         {service.badge}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-[#C9952B] transition-colors">
+                    <h3 className="text-base font-bold text-[#292522] mb-2 group-hover:text-[#713B32] transition-colors">
                       {service.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                    <p className="text-xs text-[#6B5E55] leading-relaxed line-clamp-3">
                       {service.desc}
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-emerald-400">
+                  <div className="mt-6 pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs font-bold text-[#713B32]">
                     <span>Access Service</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-[#C9952B]" />
+                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                 </Link>
               </motion.div>

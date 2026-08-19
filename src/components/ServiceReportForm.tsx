@@ -200,7 +200,7 @@ export default function ServiceReportForm({
           email: user?.email || '',
         },
         theme: {
-          color: '#C9952B',
+          color: '#713B32',
         },
         handler: async function (paymentRes: any) {
           try {
@@ -249,18 +249,18 @@ export default function ServiceReportForm({
   };
 
   return (
-    <section id="get-report" className="pt-8 pb-16 bg-background">
+    <section id="get-report" className="pt-8 pb-16 bg-[#F8F3EA]">
       <div className="max-w-2xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-foreground mb-3">
+          <h2 className="text-3xl font-bold text-[#292522] mb-3">
             {titleText} <span className="text-gradient-gold">{highlightText}</span>
           </h2>
-          <p className="text-muted-foreground">{subtitle}</p>
+          <p className="text-[#6B5E55] font-medium">{subtitle}</p>
         </div>
-        <div className="relative rounded-2xl border border-border bg-card p-8 shadow-lg overflow-hidden">
+        <div className="relative rounded-3xl border border-[#E5D9C8] bg-[#FFFDFC] p-8 sm:p-10 shadow-xl overflow-hidden text-[#292522]">
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label className="block text-sm font-bold text-[#292522] mb-2">
                 Date of Birth
               </label>
               <input
@@ -271,11 +271,11 @@ export default function ServiceReportForm({
                   saveDraft(e.target.value, time, place);
                 }}
                 onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all custom-calendar-icon cursor-pointer"
+                className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-sm transition-all cursor-pointer shadow-sm font-medium"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label className="block text-sm font-bold text-[#292522] mb-2">
                 Time of Birth
               </label>
               <input
@@ -286,11 +286,11 @@ export default function ServiceReportForm({
                   saveDraft(dob, e.target.value, place);
                 }}
                 onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all custom-clock-icon cursor-pointer"
+                className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-sm transition-all cursor-pointer shadow-sm font-medium"
               />
             </div>
             <div className="relative">
-              <label className="block text-sm font-semibold text-foreground mb-2">
+              <label className="block text-sm font-bold text-[#292522] mb-2">
                 Place of Birth
               </label>
               <input
@@ -303,13 +303,13 @@ export default function ServiceReportForm({
                 }}
                 onFocus={() => place.length >= 3 && setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="w-full px-4 py-3 rounded-xl bg-muted border border-border text-foreground focus:border-[#C9952B] outline-none text-sm transition-all placeholder:text-muted-foreground"
+                className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-sm transition-all placeholder:text-[#6B5E55]/60 shadow-sm font-medium"
               />
               {/* Location Suggestions Dropdown */}
               {showSuggestions && (
-                <div className="absolute z-20 w-full mt-2 bg-card border border-border rounded-xl shadow-lg overflow-hidden">
+                <div className="absolute z-20 w-full mt-2 bg-[#FFFDFC] border border-[#E5D9C8] rounded-2xl shadow-2xl overflow-hidden">
                   {isSearching ? (
-                    <div className="p-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                    <div className="p-4 text-center text-sm text-[#6B5E55] flex items-center justify-center gap-2">
                       <Loader2 className="animate-spin" size={14} /> Searching locations...
                     </div>
                   ) : suggestions.length > 0 ? (
@@ -321,15 +321,15 @@ export default function ServiceReportForm({
                             handleSelectLocation(s.display_name);
                             saveDraft(dob, time, s.display_name);
                           }}
-                          className="px-4 py-3 hover:bg-muted cursor-pointer flex items-start gap-3 transition-colors border-b border-border/50 last:border-0"
+                          className="px-4 py-3 hover:bg-[#F8F3EA] cursor-pointer flex items-start gap-3 transition-colors border-b border-[#E5D9C8]/50 last:border-0"
                         >
-                          <MapPin size={16} className="text-[#C9952B] flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-foreground">{s.display_name}</span>
+                          <MapPin size={16} className="text-[#713B32] flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-[#292522] font-medium">{s.display_name}</span>
                         </li>
                       ))}
                     </ul>
                   ) : place.length >= 3 ? (
-                    <div className="p-4 text-center text-sm text-muted-foreground">
+                    <div className="p-4 text-center text-sm text-[#6B5E55]">
                       No locations found
                     </div>
                   ) : null}
@@ -338,11 +338,11 @@ export default function ServiceReportForm({
             </div>
 
             {premiumInfo && (
-              <div className="rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20 p-4 flex items-start gap-3">
-                <Lock size={16} className="text-[#C9952B] flex-shrink-0 mt-0.5" />
+              <div className="rounded-2xl bg-[#EDE4D5] border border-[#E5D9C8] p-4 flex items-start gap-3">
+                <Lock size={16} className="text-[#713B32] flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Premium Report</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{premiumInfo}</p>
+                  <p className="text-sm font-bold text-[#292522]">Premium Report</p>
+                  <p className="text-xs text-[#6B5E55] mt-0.5">{premiumInfo}</p>
                 </div>
               </div>
             )}
@@ -354,7 +354,7 @@ export default function ServiceReportForm({
                   const returnUrl = typeof window !== 'undefined' ? `${window.location.pathname}#get-report` : '/remedies';
                   router.push(`/sign-up-login-screen?redirect=${encodeURIComponent(returnUrl)}`);
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow"
+                className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all shadow-md"
               >
                 <Lock size={16} /> Sign In to Continue <ArrowRight size={16} />
               </button>
@@ -362,7 +362,7 @@ export default function ServiceReportForm({
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting || loading}
-                className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all gold-shadow disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all shadow-md disabled:opacity-50"
               >
                 {isSubmitting || loading ? (
                   <span className="flex items-center gap-2">
@@ -378,14 +378,14 @@ export default function ServiceReportForm({
             )}
 
             {/* Option to Contact Human Astrologer */}
-            <div className="pt-4 mt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div className="pt-4 mt-4 border-t border-[#E5D9C8] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
               <div>
-                <p className="text-xs font-bold text-foreground">Prefer Live Personal Guidance?</p>
-                <p className="text-[11px] text-muted-foreground">Discuss your birth chart & remedies live with verified Human Astrologers.</p>
+                <p className="text-xs font-bold text-[#292522]">Prefer Live Personal Guidance?</p>
+                <p className="text-[11px] text-[#6B5E55]">Discuss your birth chart & remedies live with verified Human Astrologers.</p>
               </div>
               <Link
                 href="/talk-to-astrologer"
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-white/5 border border-[#C9952B]/40 text-[#C9952B] hover:bg-[#C9952B]/10 transition-colors whitespace-nowrap"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#EDE4D5] border border-[#E5D9C8] text-[#713B32] hover:bg-[#EDE4D5]/80 transition-colors whitespace-nowrap"
               >
                 Consult Astrologer →
               </Link>

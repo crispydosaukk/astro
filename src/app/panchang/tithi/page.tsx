@@ -40,7 +40,7 @@ export default function TithiPage() {
     <div className="min-h-screen bg-background dark text-foreground">
       <Navbar />
 
-      <div className="pt-24 lg:pt-28 pb-16 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto space-y-12">
+      <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         <div className="text-center space-y-3">
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 backdrop-blur-md">
             LUNAR DAY ALMANAC

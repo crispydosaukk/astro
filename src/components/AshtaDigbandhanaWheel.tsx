@@ -3,14 +3,22 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Trophy } from 'lucide-react';
 
 interface SpokeItem {
   id: string;
+  number: string;
   name: string;
   sanskrit: string;
+  direction: string;
+  directionFull: string;
+  mantra: string;
+  explanation: string;
   href: string;
-  angle: number; // center angle in degrees (top is -90)
+  angle: number; // center angle in degrees (N is -90)
+  bgGradientId: string;
+  startColor: string;
+  endColor: string;
+  accentColor: string;
   icon: React.ReactNode;
 }
 
@@ -42,7 +50,7 @@ function describeDonutSegment(
     'A', rOuter, rOuter, 0, largeArcFlag, 1, outerEnd.x, outerEnd.y,
     'L', innerEnd.x, innerEnd.y,
     'A', rInner, rInner, 0, largeArcFlag, 0, innerStart.x, innerStart.y,
-    'Z'
+    'Z',
   ].join(' ');
 }
 
@@ -50,371 +58,529 @@ export default function AshtaDigbandhanaWheel() {
   const router = useRouter();
   const [hoveredSpoke, setHoveredSpoke] = useState<string | null>(null);
 
-  const center = 270;
-  const rOuter = 252;
-  const rInner = 90;
-  const rMid = 184;
+  const center = 360;
+  const rOuter = 330;
+  const rInner = 115;
+  const rMid = 226;
 
-  // 8 spokes matching the user's diagram clockwise starting from top
+  // 8 Spokes matching the user's reference diagram clockwise starting from North
   const spokes: SpokeItem[] = [
     {
-      id: 'gemstone',
-      name: 'GEMSTONE',
-      sanskrit: 'रत्न',
-      href: '/remedies/gemstone',
-      angle: -90, // Top
+      id: 'mantra',
+      number: '1',
+      name: 'MANTRA शक्ति',
+      sanskrit: 'मन्त्र शक्ति',
+      direction: 'N',
+      directionFull: 'उत्तर (North)',
+      mantra: 'ॐ ह्रीं श्रीं क्लीं चामुण्डायै विच्चे ॥',
+      explanation: 'जप से मन, वाणी और कर्म की शुद्धि व रक्षा होती है।',
+      href: '/remedies/mantra',
+      angle: -90, // North (Top)
+      bgGradientId: 'grad-n-mantra',
+      startColor: '#5C111A',
+      endColor: '#36060C',
+      accentColor: '#FBD38D',
       icon: (
-        <g stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="-7,-8 7,-8 12,-2 0,10 -12,-2" />
-          <line x1="-12" y1="-2" x2="12" y2="-2" />
-          <line x1="-7" y1="-8" x2="-3" y2="-2" />
-          <line x1="-3" y1="-2" x2="0" y2="10" />
-          <line x1="7" y1="-8" x2="3" y2="-2" />
-          <line x1="3" y1="-2" x2="0" y2="10" />
+        // Japa Mala & Sacred ॐ - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <ellipse cx="0" cy="1" rx="13" ry="9" fill="none" stroke="#F6AD55" strokeWidth="1.8" strokeDasharray="3.2 3.2" />
+          <circle cx="0" cy="10" r="2" fill="#ECC94B" stroke="#742A2A" strokeWidth="0.8" />
+          <path d="M0,12 L-2,18 L2,18 Z" fill="#E53E3E" />
+          <text x="0" y="4.5" fontSize="11" fontWeight="900" textAnchor="middle" fill="#FFFFFF" fontFamily="serif">
+            ॐ
+          </text>
         </g>
       ),
     },
     {
-      id: 'mantra',
-      name: 'MANTRA',
-      sanskrit: 'मन्त्र',
-      href: '/remedies/mantra',
-      angle: -45, // Top-Right
+      id: 'gemstone',
+      number: '2',
+      name: 'GEMSTONES',
+      sanskrit: 'रत्न',
+      direction: 'NE',
+      directionFull: 'ईशान (North-East)',
+      mantra: 'ॐ ग्रहाय नमः ॥',
+      explanation: 'उचित रत्न धारण से ग्रह बलवान, जीवन में संतुलन और सकारात्मकता आती है।',
+      href: '/remedies/gemstone',
+      angle: -45, // North-East (Top-Right)
+      bgGradientId: 'grad-ne-gemstone',
+      startColor: '#7C5214',
+      endColor: '#4A2E05',
+      accentColor: '#FEEBC8',
       icon: (
-        <text
-          x="0"
-          y="3"
-          fontSize="20"
-          fontWeight="bold"
-          textAnchor="middle"
-          fill="currentColor"
-          fontFamily="serif"
-        >
-          ॐ
-        </text>
+        // Navaratna Gems Cluster - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <polygon points="0,-11 4.5,-7 4.5,-3 -4.5,-3 -4.5,-7" fill="#E53E3E" stroke="#FFF" strokeWidth="0.6" />
+          <circle cx="9" cy="-5" r="3.6" fill="#3182CE" stroke="#FFF" strokeWidth="0.6" />
+          <circle cx="-9" cy="-5" r="3.6" fill="#ECC94B" stroke="#FFF" strokeWidth="0.6" />
+          <circle cx="-8" cy="4" r="3.6" fill="#38A169" stroke="#FFF" strokeWidth="0.6" />
+          <polygon points="0,-1 4,3 0,7 -4,3" fill="#EDF2F7" stroke="#CBD5E0" strokeWidth="0.7" />
+          <circle cx="8" cy="4" r="3.6" fill="#ED8936" stroke="#FFF" strokeWidth="0.6" />
+        </g>
       ),
     },
     {
       id: 'yantra',
-      name: 'YANTRA',
+      number: '3',
+      name: 'YANTHRA',
       sanskrit: 'यन्त्र',
+      direction: 'E',
+      directionFull: 'पूर्व (East)',
+      mantra: 'ॐ श्रीं ह्रीं क्लीं नमः ॥',
+      explanation: 'यंत्र स्थापना से ऊर्जा का संरक्षण, दिशाओं की स्थिरता और सफलता मिलती हैं।',
       href: '/remedies/yantra',
-      angle: 0, // Right
+      angle: 0, // East (Right)
+      bgGradientId: 'grad-e-yantra',
+      startColor: '#8C6216',
+      endColor: '#543806',
+      accentColor: '#FEEBC8',
       icon: (
-        <g stroke="currentColor" strokeWidth="1.2" fill="none">
-          <rect x="-10" y="-10" width="20" height="20" rx="2" />
-          <circle cx="0" cy="0" r="8" />
-          <polygon points="0,-7 6,4 -6,4" />
-          <polygon points="0,7 6,-4 -6,-4" />
+        // Sri Yantra Sacred Geometry - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <rect x="-12" y="-12" width="24" height="24" rx="2" fill="none" stroke="#F6E05E" strokeWidth="1.4" />
+          <circle cx="0" cy="0" r="10" fill="none" stroke="#F6E05E" strokeWidth="1" />
+          <polygon points="0,-9 8,5 -8,5" fill="none" stroke="#ECC94B" strokeWidth="1.2" />
+          <polygon points="0,9 8,-5 -8,-5" fill="none" stroke="#ECC94B" strokeWidth="1.2" />
+          <circle cx="0" cy="0" r="2" fill="#F6AD55" />
         </g>
       ),
     },
     {
-      id: 'homa-puja',
-      name: 'HOMA & PUJA',
-      sanskrit: 'हवन / पूजा',
+      id: 'homa-se',
+      number: '4',
+      name: 'HOMA',
+      sanskrit: 'हवन',
+      direction: 'SE',
+      directionFull: 'आग्नेय (South-East)',
+      mantra: 'ॐ अग्नये स्वाहा ॥',
+      explanation: 'हवन से नकारात्मक ऊर्जा नष्ट, ग्रह शांति और मंगलमय परिणाम प्राप्त होते हैं।',
       href: '/remedies/homa',
-      angle: 45, // Bottom-Right
+      angle: 45, // South-East (Bottom-Right)
+      bgGradientId: 'grad-se-homa',
+      startColor: '#5E5318',
+      endColor: '#362F09',
+      accentColor: '#FAF089',
       icon: (
-        <g stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M-8,6 L8,6 L6,0 L-6,0 Z" />
-          <path d="M-4,0 L0,-8 L4,0" />
-          <path d="M0,-3 C2,-5 3,-8 0,-11 C-3,-8 -2,-5 0,-3" fill="currentColor" opacity="0.6" />
+        // Sacred Homa Kund with Agni Flames - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <polygon points="-12,6 12,6 9,11 -9,11" fill="#C05621" stroke="#D69E2E" strokeWidth="0.8" />
+          <polygon points="-9,2 9,2 12,6 -12,6" fill="#DD6B20" stroke="#ECC94B" strokeWidth="0.8" />
+          <polygon points="-6,-1 6,-1 9,2 -9,2" fill="#ED8936" />
+          <path d="M-3,-1 C-5,-6 -1,-11 0,-14 C1,-11 5,-6 3,-1 Z" fill="#ECC94B" />
+          <path d="M-1.5,-1 C-2.5,-4 -0.5,-8 0,-10 C0.5,-8 2.5,-4 1.5,-1 Z" fill="#F56565" />
         </g>
       ),
     },
     {
       id: 'devata',
+      number: '5',
       name: 'DEVATA UPASANA',
       sanskrit: 'देवता उपासना',
-      href: '/remedies/ishta-devata',
-      angle: 90, // Bottom
+      direction: 'S',
+      directionFull: 'दक्षिण (South)',
+      mantra: 'ॐ नमः शिवाय ॥',
+      explanation: 'इष्ट देव की उपासना से आध्यात्मिक संरक्षण और कृपा प्राप्त होती है।',
+      href: '/remedies/mantra',
+      angle: 90, // South (Bottom)
+      bgGradientId: 'grad-s-devata',
+      startColor: '#13562B',
+      endColor: '#072C14',
+      accentColor: '#9AE6B4',
       icon: (
-        <g stroke="currentColor" strokeWidth="1.3" fill="none">
-          <circle cx="0" cy="-6" r="3.5" />
-          <path d="M-7,7 C-7,1 -3.5,-2 0,-2 C3.5,-2 7,1 7,7" />
-          <path d="M-2.5,-2 C-2.5,-5.5 0,-8 0,-8 C0,-8 2.5,-5.5 2.5,-2" />
-        </g>
-      ),
-    },
-    {
-      id: 'dana',
-      name: 'DĀNA',
-      sanskrit: 'दान',
-      href: '/remedies/charity',
-      angle: 135, // Bottom-Left
-      icon: (
-        <g stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round">
-          <path d="M0,-6 C-2,-9 -7,-7 -7,-3 C-7,1 0,6 0,6 C0,6 7,1 7,-3 C7,-7 2,-9 0,-6 Z" fill="currentColor" opacity="0.4" />
-          <path d="M-10,4 C-6,2 -2,4 0,7 C2,4 6,2 10,4" />
-        </g>
-      ),
-    },
-    {
-      id: 'vrata',
-      name: 'VRATA',
-      sanskrit: 'व्रत',
-      href: '/remedies/fasting',
-      angle: 180, // Left
-      icon: (
-        <g stroke="currentColor" strokeWidth="1.4" fill="none">
-          <ellipse cx="0" cy="2" rx="7" ry="6" />
-          <rect x="-4" y="-5" width="8" height="3" rx="1" />
-          <path d="M-2,-5 L-4,-8 L4,-8 L2,-5" />
-          <path d="M0,-8 L0,-11" strokeWidth="1.5" />
+        // Lord Shiva Trishula & Damru - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <line x1="0" y1="-14" x2="0" y2="12" stroke="#ECC94B" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M-7,-7 C-7,-1 0,1 0,1 C0,1 7,-1 7,-7" fill="none" stroke="#ECC94B" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="-7" y1="-12" x2="-7" y2="-7" stroke="#ECC94B" strokeWidth="1.5" />
+          <line x1="7" y1="-12" x2="7" y2="-7" stroke="#ECC94B" strokeWidth="1.5" />
+          <polygon points="-4,-2 4,-2 0,2" fill="#ED8936" />
+          <polygon points="-4,6 4,6 0,2" fill="#ED8936" />
         </g>
       ),
     },
     {
       id: 'vastu',
-      name: 'VASTU',
+      number: '6',
+      name: 'VASTHU',
       sanskrit: 'वास्तु',
+      direction: 'SW',
+      directionFull: 'नैऋत्य (South-West)',
+      mantra: 'ॐ वास्तुपुरुषाय नमः ॥',
+      explanation: 'वास्तु संतुलन से घर, कार्यस्थल और जीवन में समृद्धि व सौहार्द बढ़ता है।',
       href: '/remedies/vastu',
-      angle: 225, // Top-Left
+      angle: 135, // South-West (Bottom-Left)
+      bgGradientId: 'grad-sw-vastu',
+      startColor: '#0E535C',
+      endColor: '#042C32',
+      accentColor: '#81E6D9',
       icon: (
-        <g stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M-9,2 L0,-7 L9,2 L9,9 L-9,9 Z" />
-          <path d="M-3,9 L-3,4 L3,4 L3,9" />
-          <circle cx="0" cy="-1" r="1.5" fill="currentColor" />
+        // Vastu Purusha Mandala Compass Grid - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <rect x="-11" y="-11" width="22" height="22" rx="1.5" fill="none" stroke="#81E6D9" strokeWidth="1.4" />
+          <line x1="-11" y1="0" x2="11" y2="0" stroke="#81E6D9" strokeWidth="1" />
+          <line x1="0" y1="-11" x2="0" y2="11" stroke="#81E6D9" strokeWidth="1" />
+          <circle cx="0" cy="0" r="7" fill="none" stroke="#ECC94B" strokeWidth="1" />
+          <circle cx="0" cy="0" r="2.2" fill="#ECC94B" />
+        </g>
+      ),
+    },
+    {
+      id: 'rudraksha',
+      number: '7',
+      name: 'RUDRAKSHA',
+      sanskrit: 'रुद्राक्ष',
+      direction: 'W',
+      directionFull: 'पश्चिम (West)',
+      mantra: 'ॐ नमः शिवाय ॥',
+      explanation: 'रुद्राक्ष धारण से ग्रह दोष शांत, मन स्थिर और आध्यात्मिक शक्ति की वृद्धि होती है।',
+      href: '/remedies/rudraksha',
+      angle: 180, // West (Left)
+      bgGradientId: 'grad-w-rudraksha',
+      startColor: '#122E5C',
+      endColor: '#07152D',
+      accentColor: '#90CDF4',
+      icon: (
+        // 5-Mukhi Sacred Rudraksha Bead - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <circle cx="0" cy="0" r="10.5" fill="#9C4221" stroke="#DD6B20" strokeWidth="1.2" />
+          <path d="M0,-10.5 C-3,-4 -3,4 0,10.5" fill="none" stroke="#4A1E0D" strokeWidth="1.4" />
+          <path d="M0,-10.5 C3,-4 3,4 0,10.5" fill="none" stroke="#4A1E0D" strokeWidth="1.4" />
+          <path d="M-8,-4 C-3,0 -3,0 -8,4" fill="none" stroke="#4A1E0D" strokeWidth="1.2" />
+          <path d="M8,-4 C3,0 3,0 8,4" fill="none" stroke="#4A1E0D" strokeWidth="1.2" />
+          <circle cx="0" cy="0" r="1.6" fill="#ECC94B" />
+        </g>
+      ),
+    },
+    {
+      id: 'homa-puja',
+      number: '8',
+      name: 'HOMA / PUJA',
+      sanskrit: 'हवन / पूजा',
+      direction: 'NW',
+      directionFull: 'वायव्य (North-West)',
+      mantra: 'ॐ स्वाहा',
+      explanation: 'अग्नि देव के माध्यम से सभी दिशाओं में शुद्धि, शांति और सिद्धि।',
+      href: '/remedies/homa',
+      angle: 225, // North-West (Top-Left)
+      bgGradientId: 'grad-nw-homa',
+      startColor: '#401A4F',
+      endColor: '#200929',
+      accentColor: '#D6BCFA',
+      icon: (
+        // Hawan Puja Kund with Agni - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <polygon points="-12,6 12,6 9,11 -9,11" fill="#805AD5" stroke="#D6BCFA" strokeWidth="0.8" />
+          <polygon points="-9,2 9,2 12,6 -12,6" fill="#6B46C1" stroke="#ECC94B" strokeWidth="0.8" />
+          <polygon points="-6,-2 6,-2 9,2 -9,2" fill="#553C9A" />
+          <path d="M-3,-2 C-5,-7 -1,-11 0,-14 C1,-11 5,-7 3,-2 Z" fill="#F6E05E" />
+          <path d="M-1.5,-2 C-2.5,-5 -0.5,-8 0,-10 C0.5,-8 2.5,-5 1.5,-2 Z" fill="#ED8936" />
         </g>
       ),
     },
   ];
 
+  const activeSpoke = hoveredSpoke
+    ? spokes.find((s) => s.id === hoveredSpoke)
+    : spokes[0];
+
   return (
-    <div className="relative w-full max-w-[540px] aspect-square mx-auto flex items-center justify-center p-2 select-none">
-      {/* Ambient Radial Glow Behind Wheel */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#C9952B]/10 via-[#8B1A2A]/20 to-[#C9952B]/10 blur-3xl pointer-events-none animate-pulse" />
+    <div className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none space-y-5">
+      {/* Title & Vedic Banner */}
+      <div className="text-center space-y-1.5 px-2">
+        <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#F3C068] tracking-wider uppercase font-serif drop-shadow-lg">
+          ASHTADIGBANDHANA WHEEL
+        </h3>
+        <p className="text-xs sm:text-base text-slate-200 font-serif tracking-wide">
+          ॥ आठों दिशाओं की रक्षा – जीवन की पूर्ण स्थिरता और समृद्धि ॥
+        </p>
+      </div>
 
-      {/* Interactive Animated SVG Wheel */}
-      <svg
-        viewBox="0 0 540 540"
-        className="w-full h-full drop-shadow-[0_10px_35px_rgba(201,149,43,0.2)]"
-      >
-        <defs>
-          {/* Inner Maroon Hub Gradient */}
-          <radialGradient id="hubMaroonGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#6E1515" />
-            <stop offset="70%" stopColor="#450A0A" />
-            <stop offset="100%" stopColor="#2D0505" />
-          </radialGradient>
+      {/* Main Wheel Container */}
+      <div className="relative w-full aspect-square flex items-center justify-center p-1 sm:p-2">
+        {/* Ambient Radial Background Glow */}
+        <div className="absolute inset-4 rounded-full bg-gradient-to-r from-amber-500/20 via-rose-500/10 to-indigo-500/20 blur-3xl pointer-events-none" />
 
-          {/* Spoke Default Gradient */}
-          <radialGradient id="spokeBgGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#FFFDF7" />
-            <stop offset="100%" stopColor="#F7EEDD" />
-          </radialGradient>
+        <svg
+          viewBox="0 0 720 720"
+          className="w-full h-full drop-shadow-[0_16px_50px_rgba(0,0,0,0.7)]"
+        >
+          <defs>
+            {/* Center Hub Clip Path */}
+            <clipPath id="centerHubClip">
+              <circle cx={center} cy={center} r={rInner} />
+            </clipPath>
 
-          {/* Spoke Hover Golden Gradient */}
-          <radialGradient id="spokeHoverGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#FFF8E7" />
-            <stop offset="100%" stopColor="#F3D899" />
-          </radialGradient>
-
-          {/* Outer Ring Gold Glow */}
-          <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
-
-        {/* Outer Decorative Ring */}
-        <circle
-          cx={center}
-          cy={center}
-          r={rOuter}
-          fill="none"
-          stroke="#C9952B"
-          strokeWidth="2.5"
-          opacity="0.8"
-        />
-        <circle
-          cx={center}
-          cy={center}
-          r={rOuter + 6}
-          fill="none"
-          stroke="#C9952B"
-          strokeWidth="1"
-          strokeDasharray="4 6"
-          opacity="0.5"
-        />
-
-        {/* 8 Sector Segments */}
-        {spokes.map((spoke) => {
-          const startAngle = spoke.angle - 22.5;
-          const endAngle = spoke.angle + 22.5;
-          const pathData = describeDonutSegment(center, center, rInner, rOuter, startAngle, endAngle);
-          const isHovered = hoveredSpoke === spoke.id;
-          const pos = polarToCartesian(center, center, rMid, spoke.angle);
-
-          // Dot on outer border tip
-          const tipPos = polarToCartesian(center, center, rOuter, spoke.angle);
-
-          return (
-            <g
-              key={spoke.id}
-              onClick={() => router.push(spoke.href)}
-              onMouseEnter={() => setHoveredSpoke(spoke.id)}
-              onMouseLeave={() => setHoveredSpoke(null)}
-              className="cursor-pointer transition-all duration-300"
-            >
-              {/* Wedge Background */}
-              <path
-                d={pathData}
-                fill={isHovered ? 'url(#spokeHoverGrad)' : 'url(#spokeBgGrad)'}
-                stroke="#C9952B"
-                strokeWidth={isHovered ? '2.5' : '1.5'}
-                opacity={isHovered ? 1 : 0.95}
-                className="transition-all duration-300"
-                style={{
-                  filter: isHovered ? 'drop-shadow(0 0 12px rgba(201,149,43,0.6))' : 'none',
-                }}
-              />
-
-              {/* Radial Dividing Line */}
-              <line
-                x1={polarToCartesian(center, center, rInner, startAngle).x}
-                y1={polarToCartesian(center, center, rInner, startAngle).y}
-                x2={polarToCartesian(center, center, rOuter, startAngle).x}
-                y2={polarToCartesian(center, center, rOuter, startAngle).y}
-                stroke="#C9952B"
-                strokeWidth="1.5"
-                opacity="0.7"
-              />
-
-              {/* Tip Decorative Gem Dot */}
-              <circle
-                cx={tipPos.x}
-                cy={tipPos.y}
-                r="4"
-                fill="#FFFDF7"
-                stroke="#C9952B"
-                strokeWidth="1.5"
-              />
-
-              {/* Spoke Content (Icon + Name) */}
-              <g
-                transform={`translate(${pos.x}, ${pos.y}) scale(${isHovered ? 1.08 : 1})`}
-                className="transition-transform duration-300"
-                style={{ transformOrigin: `${pos.x}px ${pos.y}px` }}
+            {/* Segment Gradients matching the reference image */}
+            {spokes.map((spoke) => (
+              <radialGradient
+                key={spoke.bgGradientId}
+                id={spoke.bgGradientId}
+                cx="50%"
+                cy="50%"
+                r="65%"
               >
-                {/* Icon Container */}
-                <g
-                  transform="translate(0, -12)"
-                  className={isHovered ? 'text-[#8B1A2A]' : 'text-[#4A1010]'}
-                >
-                  {spoke.icon}
-                </g>
+                <stop offset="0%" stopColor={spoke.startColor} />
+                <stop offset="100%" stopColor={spoke.endColor} />
+              </radialGradient>
+            ))}
 
-                {/* Remedy Label */}
-                <text
-                  x="0"
-                  y="16"
-                  textAnchor="middle"
-                  fontSize={spoke.name.length > 10 ? '8.5' : '9.5'}
-                  fontWeight="800"
-                  letterSpacing={spoke.name.length > 10 ? '0.3' : '0.6'}
-                  fill={isHovered ? '#6E1515' : '#333333'}
-                  fontFamily="sans-serif"
-                >
-                  {spoke.name}
-                </text>
-              </g>
-            </g>
-          );
-        })}
+            {/* Hover Highlight Gradient */}
+            <radialGradient id="hoverHighlighter" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.28" />
+              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.0" />
+            </radialGradient>
 
-        {/* Center Maroon Hub */}
-        <g onClick={() => router.push('#remedies-grid')} className="cursor-pointer">
-          {/* Outer Hub Border Ring */}
+            {/* Gold Glow Filter */}
+            <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          {/* Outer Decorative Gold Rim Circles */}
           <circle
             cx={center}
             cy={center}
-            r={rInner + 2}
+            r={rOuter + 10}
             fill="none"
             stroke="#C9952B"
-            strokeWidth="2.5"
-            filter="url(#goldGlow)"
-          />
-          <circle
-            cx={center}
-            cy={center}
-            r={rInner - 2}
-            fill="none"
-            stroke="#F3D899"
-            strokeWidth="1"
-            opacity="0.8"
-          />
-
-          {/* Central Maroon Circle */}
-          <circle
-            cx={center}
-            cy={center}
-            r={rInner}
-            fill="url(#hubMaroonGrad)"
-          />
-
-          {/* Central Logo Emblem */}
-          <g transform={`translate(${center}, ${center - 20})`}>
-            {/* Emblem Star */}
-            <polygon
-              points="0,-13 3,-5 11,-5 5,0 7,8 0,3 -7,8 -5,0 -11,-5 -3,-5"
-              fill="#C9952B"
-              opacity="0.9"
-            />
-            {/* Stylized 'A' */}
-            <text
-              x="0"
-              y="8"
-              fontSize="28"
-              fontWeight="900"
-              textAnchor="middle"
-              fill="#FFFDF7"
-              fontFamily="serif"
-              style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
-            >
-              A
-            </text>
-          </g>
-
-          {/* Center Brand Text */}
-          <text
-            x={center}
-            y={center + 18}
-            textAnchor="middle"
-            fontSize="11.5"
-            fontWeight="900"
-            letterSpacing="1.5"
-            fill="#F3D899"
-            fontFamily="serif"
-          >
-            ASTROPARIHAR
-          </text>
-
-          {/* Center Subtitle Text */}
-          <text
-            x={center}
-            y={center + 32}
-            textAnchor="middle"
-            fontSize="7"
-            fontWeight="700"
-            letterSpacing="1.2"
-            fill="#EAD292"
-            opacity="0.9"
-          >
-            ASHTA DIGBANDHANA
-          </text>
-
-          {/* Decorative Bottom Ornament Line */}
-          <path
-            d={`M ${center - 20} ${center + 38} Q ${center} ${center + 42} ${center + 20} ${center + 38}`}
-            fill="none"
-            stroke="#C9952B"
-            strokeWidth="1"
+            strokeWidth="1.8"
+            strokeDasharray="5 5"
             opacity="0.7"
           />
-        </g>
-      </svg>
+          <circle
+            cx={center}
+            cy={center}
+            r={rOuter}
+            fill="none"
+            stroke="#D69E2E"
+            strokeWidth="4"
+            opacity="0.95"
+          />
+
+          {/* 8 Sector Segments */}
+          {spokes.map((spoke) => {
+            const startAngle = spoke.angle - 22.5;
+            const endAngle = spoke.angle + 22.5;
+            const pathData = describeDonutSegment(center, center, rInner, rOuter, startAngle, endAngle);
+            const isHovered = hoveredSpoke === spoke.id;
+
+            // Anchor center of each sector
+            const pos = polarToCartesian(center, center, rMid, spoke.angle);
+            const badgePos = polarToCartesian(center, center, rOuter + 2, spoke.angle);
+
+            return (
+              <g
+                key={spoke.id}
+                onClick={() => router.push(spoke.href)}
+                onMouseEnter={() => setHoveredSpoke(spoke.id)}
+                onMouseLeave={() => setHoveredSpoke(null)}
+                className="cursor-pointer transition-all duration-300 group"
+              >
+                {/* Sector Wedge Background */}
+                <path
+                  d={pathData}
+                  fill={`url(#${spoke.bgGradientId})`}
+                  stroke="#ECC94B"
+                  strokeWidth={isHovered ? '3.5' : '2'}
+                  className="transition-all duration-300"
+                  style={{
+                    filter: isHovered ? 'drop-shadow(0 0 20px rgba(246, 173, 85, 0.8))' : 'none',
+                  }}
+                />
+
+                {/* Hover overlay brightness */}
+                {isHovered && (
+                  <path
+                    d={pathData}
+                    fill="url(#hoverHighlighter)"
+                    pointerEvents="none"
+                  />
+                )}
+
+                {/* Radial Dividing Boundary Line */}
+                <line
+                  x1={polarToCartesian(center, center, rInner, startAngle).x}
+                  y1={polarToCartesian(center, center, rInner, startAngle).y}
+                  x2={polarToCartesian(center, center, rOuter, startAngle).x}
+                  y2={polarToCartesian(center, center, rOuter, startAngle).y}
+                  stroke="#ECC94B"
+                  strokeWidth="2"
+                  opacity="0.85"
+                />
+
+                {/* Sector Content Group (Rock-solid static position with zero shift on hover) */}
+                <g transform={`translate(${pos.x}, ${pos.y})`}>
+                  {/* 1. SECTOR TITLE (Top of the wedge) */}
+                  <text
+                    x="0"
+                    y="-48"
+                    textAnchor="middle"
+                    fontSize={
+                      spoke.name.length > 13
+                        ? '11.5'
+                        : spoke.name.length > 10
+                        ? '12'
+                        : '13'
+                    }
+                    fontWeight="900"
+                    letterSpacing="0.4"
+                    fill="#FFFFFF"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                    style={{
+                      filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.95))',
+                    }}
+                  >
+                    {spoke.number}. {spoke.name}
+                  </text>
+
+                  {/* 2. SANSKRIT SUB-TITLE (Below Title with ample spacing) */}
+                  <text
+                    x="0"
+                    y="-30"
+                    textAnchor="middle"
+                    fontSize="11.5"
+                    fontWeight="800"
+                    fill={spoke.accentColor}
+                    fontFamily="serif"
+                    style={{
+                      filter: 'drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.95))',
+                    }}
+                  >
+                    {spoke.sanskrit}
+                  </text>
+
+                  {/* 3. CENTER VECTOR ICON (With comfortable top and bottom padding) */}
+                  <g transform="translate(0, 2)">
+                    {spoke.icon}
+                  </g>
+
+                  {/* 4. SACRED SHLOKA / MANTRA (Bottom with generous spacing) */}
+                  <text
+                    x="0"
+                    y="36"
+                    textAnchor="middle"
+                    fontSize={spoke.mantra.length > 20 ? '9.5' : '11'}
+                    fontWeight="800"
+                    fill="#FFFFFF"
+                    fontFamily="serif"
+                    style={{
+                      filter: 'drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.95))',
+                    }}
+                  >
+                    {spoke.mantra}
+                  </text>
+                </g>
+
+                {/* Direction Badge on Outer Rim (N, NE, E, SE, S, SW, W, NW) */}
+                <g transform={`translate(${badgePos.x}, ${badgePos.y})`}>
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="17"
+                    fill={spoke.startColor}
+                    stroke="#ECC94B"
+                    strokeWidth="2.5"
+                    filter="url(#goldGlow)"
+                  />
+                  <text
+                    x="0"
+                    y="5"
+                    textAnchor="middle"
+                    fontSize="12"
+                    fontWeight="900"
+                    fill="#FFFFFF"
+                    fontFamily="system-ui, sans-serif"
+                    style={{
+                      filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.8))',
+                    }}
+                  >
+                    {spoke.direction}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+
+          {/* Center Logo Emblem Hub (COMPLETELY PRESERVED AS REQUESTED) */}
+          <g onClick={() => router.push('#remedies-grid')} className="cursor-pointer group">
+            {/* Outer Hub Border Rings */}
+            <circle
+              cx={center}
+              cy={center}
+              r={rInner + 3}
+              fill="none"
+              stroke="#ECC94B"
+              strokeWidth="3.5"
+              filter="url(#goldGlow)"
+            />
+
+            {/* High-Resolution AstroParihar Logo Emblem in the Middle */}
+            <image
+              href="/AstroParihar_Emblem.png"
+              x={center - rInner}
+              y={center - rInner}
+              width={rInner * 2}
+              height={rInner * 2}
+              preserveAspectRatio="xMidYMid meet"
+              clipPath="url(#centerHubClip)"
+              className="transition-transform duration-500 group-hover:scale-105"
+              style={{ transformOrigin: `${center}px ${center}px` }}
+            />
+
+            {/* Inner Hub Border Ring */}
+            <circle
+              cx={center}
+              cy={center}
+              r={rInner}
+              fill="none"
+              stroke="#C9952B"
+              strokeWidth="2"
+            />
+          </g>
+        </svg>
+      </div>
+
+      {/* Interactive Active Spoke Detailed Information Card */}
+      {activeSpoke && (
+        <motion.div
+          key={activeSpoke.id}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="w-full p-5 sm:p-6 rounded-3xl border border-amber-500/40 bg-slate-950/95 backdrop-blur-md shadow-2xl text-center space-y-3"
+        >
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <span
+              className="px-4 py-1 rounded-full text-xs font-extrabold text-slate-950 shadow-md"
+              style={{ backgroundColor: activeSpoke.accentColor }}
+            >
+              दिशा: {activeSpoke.directionFull}
+            </span>
+            <h4 className="text-lg sm:text-2xl font-bold text-white font-serif">
+              {activeSpoke.number}. {activeSpoke.name} ({activeSpoke.sanskrit})
+            </h4>
+          </div>
+
+          <p className="text-base sm:text-lg font-bold text-amber-300 font-serif">
+            {activeSpoke.mantra}
+          </p>
+
+          <p className="text-sm sm:text-base text-slate-200 leading-relaxed max-w-2xl mx-auto font-medium">
+            {activeSpoke.explanation}
+          </p>
+        </motion.div>
+      )}
+
+      {/* Bottom Classical Vedic Shloka Footer */}
+      <div className="text-center text-sm sm:text-base text-amber-300 font-serif pt-2 space-y-1">
+        <p className="font-bold">
+          मंत्र – रत्न – यंत्र – हवन – देवता उपासना – वास्तु – रुद्राक्ष – हवन / पूजा
+        </p>
+        <p className="text-xs sm:text-sm text-slate-300 font-medium">
+          इन आठ स्तम्भों से होता है सम्पूर्ण अष्टदिग्बन्धन और जीवन का संरक्षण।
+        </p>
+      </div>
     </div>
   );
 }

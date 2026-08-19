@@ -34,6 +34,32 @@ module.exports = {
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',
+        // Vedic Warm Ivory Palette
+        ivory: '#F8F3EA',
+        terracotta: {
+          DEFAULT: '#713B32',
+          light: '#8E4C41',
+          dark: '#552B24',
+        },
+        plum: {
+          DEFAULT: '#352433',
+          light: '#4A3347',
+          dark: '#241822',
+        },
+        copper: {
+          DEFAULT: '#B88A44',
+          light: '#D8B66A',
+          dark: '#966F33',
+        },
+        gold: {
+          DEFAULT: '#B88A44',
+          light: '#D8B66A',
+          dark: '#966F33',
+        },
+        champagne: '#D8B66A',
+        highlight: '#D8B66A',
+        espresso: '#292522',
+        cream: '#FFFDFC',
       },
       borderRadius: {
         DEFAULT: 'var(--radius)',

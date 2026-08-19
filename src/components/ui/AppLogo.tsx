@@ -9,19 +9,21 @@ interface AppLogoProps {
   iconName?: string; // Icon name when no image
   size?: number; // Size for icon/image
   className?: string; // Additional classes
+  imageClassName?: string; // Classes for the image
   onClick?: () => void; // Click handler
 }
 
 const AppLogo = memo(function AppLogo({
-  src = '/AstroParihar_Top_Logo.jpg',
+  src = '/AstroParihar_Logo.png',
   iconName = 'SparklesIcon',
-  size = 64,
+  size = 48,
   className = '',
+  imageClassName = '',
   onClick,
 }: AppLogoProps) {
   const containerClassName = useMemo(() => {
     const classes = ['flex items-center'];
-    if (onClick) classes.push('cursor-pointer hover:opacity-80 transition-opacity');
+    if (onClick) classes.push('cursor-pointer hover:opacity-90 transition-opacity');
     if (className) classes.push(className);
     return classes.join(' ');
   }, [onClick, className]);
@@ -32,11 +34,11 @@ const AppLogo = memo(function AppLogo({
       {src ? (
         <AppImage
           src={src}
-          alt="Logo"
-          width={size * 8}
-          height={size * 1.75}
-          className="flex-shrink-0 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
-          style={{ width: 'auto', height: size * 1.75 }}
+          alt="AstroParihar"
+          width={size * 6}
+          height={size * 1.5}
+          className={`flex-shrink-0 object-contain ${imageClassName}`}
+          style={{ width: 'auto', height: size * 1.4 }}
           priority={true}
           unoptimized={src.endsWith('.svg')}
         />

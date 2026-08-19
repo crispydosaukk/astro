@@ -56,6 +56,7 @@ const sidebarGroups = [
     items: [
       { icon: Shield, label: 'Overview', href: '/admin-panel', badge: null },
       { icon: LayoutTemplate, label: 'Content', href: '/admin-panel/content', badge: null },
+      { icon: FileText, label: 'Page Content', href: '/admin-panel/page-content', badge: null },
       { icon: Users, label: 'Users', href: '/admin-panel/users', badge: null },
       { icon: Star, label: 'Astrologers', href: '/admin-panel/astrologers', badge: null },
       {
@@ -133,7 +134,7 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
       <div
         className={`flex items-center h-16 px-4 border-b border-border ${collapsed ? 'justify-center' : 'gap-3'}`}
       >
-        <AppLogo src="/AstroParihar_Top_Logo.jpg" size={32} />
+        <AppLogo src="/AstroParihar_Logo.png" size={34} />
       </div>
 
       {/* Nav Groups */}

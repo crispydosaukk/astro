@@ -9,5 +9,5 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
     redirect('/admin-panel/login');
   }
 
-  return <div className="min-h-screen bg-slate-50">{children}</div>;
+  return <div className="min-h-screen bg-[#F8F3EA] text-[#292522]">{children}</div>;
 }

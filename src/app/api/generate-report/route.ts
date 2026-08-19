@@ -70,6 +70,9 @@ export async function POST(request: Request) {
     if (openaiApiKey && reportJsonObj) {
       try {
         const isMatching = type.includes('Matching') || reportJsonObj.ashtakoot;
+        const isLove = type.includes('Love') || type.includes('Relationship');
+        const isFinance = type.includes('Finance') || type.includes('Wealth');
+        const isHealth = type.includes('Health') || type.includes('Vitality');
 
         let systemPrompt = '';
         let userPrompt = '';
@@ -95,6 +98,51 @@ Respond ONLY with a JSON object in this exact format:
 {
   "astrologicalAnalysis": "Detailed 3-paragraph personalized astrological synthesis covering emotional/mental bond, career growth after marriage, and recommended pre-marital Vedic rituals or pujas.",
   "verdict": "A concise 2-sentence executive summary of the marital compatibility."
+}`;
+        } else if (isLove) {
+          systemPrompt = `You are a master Vedic Astrologer at AstroParihar specializing in Love, Romance, 7th House Kalatra Bhava, and Venusian Relationship Yogas. Generate a deeply personalized, compassionate, and precise Love & Relationship Vedic forecast.`;
+          userPrompt = `Service: Love & Relationship Horoscope
+Name: ${details.name || details.fullName || 'Devotee'}
+Gender: ${details.gender || 'N/A'}
+DOB: ${details.dob || 'N/A'}, Time: ${details.time || details.tob || '12:00 PM'}, Place: ${details.place || details.pob || 'India'}
+Status: ${details.relationshipStatus || 'Seeking Insights'}
+Current Date: ${currentDate}
+
+Respond ONLY with a JSON object:
+{
+  "astrologicalAnalysis": "Detailed 3-paragraph analysis of 7th house (Kalatra), 5th house (Romance), Venus (Shukra) placement, Manglik balance, marriage timing window, and emotional harmony.",
+  "procedure": "1. Chanting Shukra Beej Mantra (Om Shum Shukraya Namah) on Friday mornings\\n2. Offering white fragrant flowers or kheer at Lakshmi Narayan temple\\n3. Friday fasting guidelines for marital blessing.",
+  "materials": "White Zircon / Diamond / Rose Quartz, pure cow ghee, white lotus or jasmine flowers"
+}`;
+        } else if (isFinance) {
+          systemPrompt = `You are a master Vedic Astrologer at AstroParihar specializing in Wealth (Dhana Bhava - 2nd House), Profit (Labha Bhava - 11th House), Fortune (Bhagya - 9th House), and Jupiterian/Mercurial Wealth Yogas. Generate a highly actionable, encouraging, and detailed Financial Astrology forecast.`;
+          userPrompt = `Service: Finance & Wealth Horoscope
+Name: ${details.name || details.fullName || 'Devotee'}
+Gender: ${details.gender || 'N/A'}
+DOB: ${details.dob || 'N/A'}, Time: ${details.time || details.tob || '12:00 PM'}, Place: ${details.place || details.pob || 'India'}
+Category: ${details.careerCategory || 'General Wealth'}
+Current Date: ${currentDate}
+
+Respond ONLY with a JSON object:
+{
+  "astrologicalAnalysis": "Detailed 3-paragraph breakdown of 2nd House savings, 11th House income growth, Jupiter (Dhanakaraka) strength, Mercury business intelligence, favorable investment timing, and debt elimination strategies.",
+  "procedure": "1. Daily morning recitation of Sri Kanakadhara Stotram\\n2. Establishing energized Kubera / Shree Yantra in North direction\\n3. Thursday charity of yellow pulses/bananas to Brahmins or students.",
+  "materials": "Energized Kubera Yantra, Yellow Sapphire / Emerald, pure brass lamp, turmeric and akshat"
+}`;
+        } else if (isHealth) {
+          systemPrompt = `You are a master Vedic Astrologer & Medical Astrologer (Ayur-Jyotish) at AstroParihar analyzing 1st House Lagna vitality, 6th House Roga Bhava, 8th House Longevity, and Ayurvedic Tridosha balance (Vata/Pitta/Kapha). Generate a caring, holistic, and reassuring Health & Vitality forecast.`;
+          userPrompt = `Service: Health & Vitality Horoscope
+Name: ${details.name || details.fullName || 'Devotee'}
+Gender: ${details.gender || 'N/A'}
+DOB: ${details.dob || 'N/A'}, Time: ${details.time || details.tob || '12:00 PM'}, Place: ${details.place || details.pob || 'India'}
+Focus: ${details.healthFocus || 'Overall Vitality'}
+Current Date: ${currentDate}
+
+Respond ONLY with a JSON object:
+{
+  "astrologicalAnalysis": "Detailed 3-paragraph analysis of Lagna vitality, Sun/Moon mental-physical balance, 6th house immunity resilience, Ayurvedic element alignment, and stress prevention recommendations.",
+  "procedure": "1. Chanting Maha Mrityunjaya Mantra 108 times at sunrise\\n2. Offering water (Arghya) to Surya Dev in a copper vessel\\n3. Daily Pranayama and herbal Sattvic diet alignment.",
+  "materials": "Energized Panchmukhi Rudraksha, copper Kalash, sacred Bilva leaves, pure sesame oil lamp"
 }`;
         } else {
           systemPrompt = `You are a master Vedic Astrologer at AstroParihar (similar to Astrotalk). Generate a highly personalized Vedic astrology analysis and remedial guidance for this individual.`;

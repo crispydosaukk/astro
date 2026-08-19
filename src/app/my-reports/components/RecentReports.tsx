@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText,
-  Download,
   Eye,
   Gem,
   Music,
@@ -17,6 +16,10 @@ import {
   ShieldCheck,
   Compass,
   BookOpen,
+  Heart,
+  Coins,
+  Activity,
+  PhoneCall,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useUserData } from '@/lib/useUserData';
@@ -124,7 +127,10 @@ export default function RecentReports() {
     if (type.includes('Gemstone')) return Gem;
     if (type.includes('Mantra')) return Music;
     if (type.includes('Yantra')) return Triangle;
-    if (type.includes('Kundli')) return Sparkles;
+    if (type.includes('Love') || type.includes('Relationship')) return Heart;
+    if (type.includes('Finance') || type.includes('Wealth')) return Coins;
+    if (type.includes('Health') || type.includes('Vitality')) return Activity;
+    if (type.includes('Kundli') || type.includes('Horoscope')) return Sparkles;
     return FileText;
   };
 
@@ -134,6 +140,9 @@ export default function RecentReports() {
     if (type.includes('Gemstone')) return 'text-red-400';
     if (type.includes('Mantra')) return 'text-blue-400';
     if (type.includes('Yantra')) return 'text-green-400';
+    if (type.includes('Love') || type.includes('Relationship')) return 'text-rose-400';
+    if (type.includes('Finance') || type.includes('Wealth')) return 'text-emerald-400';
+    if (type.includes('Health') || type.includes('Vitality')) return 'text-cyan-400';
     return 'text-purple-400';
   };
 
@@ -143,6 +152,9 @@ export default function RecentReports() {
     if (type.includes('Gemstone')) return 'bg-red-500/10';
     if (type.includes('Mantra')) return 'bg-blue-500/10';
     if (type.includes('Yantra')) return 'bg-green-500/10';
+    if (type.includes('Love') || type.includes('Relationship')) return 'bg-rose-500/10';
+    if (type.includes('Finance') || type.includes('Wealth')) return 'bg-emerald-500/10';
+    if (type.includes('Health') || type.includes('Vitality')) return 'bg-cyan-500/10';
     return 'bg-purple-500/10';
   };
 
@@ -155,44 +167,11 @@ export default function RecentReports() {
   const remediesCount = reports.filter((r) => getReportCategory(r.type) === 'remedies').length;
   const mahadashaCount = reports.filter((r) => getReportCategory(r.type) === 'mahadasha').length;
 
-  const handleDownloadPDF = async () => {
-    try {
-      const html2pdf = (await import('html2pdf.js')).default;
-      const element = document.getElementById('report-pdf-content');
-      if (element) {
-        const originalMaxHeight = element.style.maxHeight;
-        const scrollDiv = element.querySelector('.overflow-y-auto') as HTMLElement;
-        const originalOverflow = scrollDiv ? scrollDiv.style.overflow : '';
-
-        element.style.maxHeight = 'none';
-        if (scrollDiv) scrollDiv.style.overflow = 'visible';
-
-        const opt = {
-          margin: 0.5,
-          filename: `${selectedReport?.type || 'Report'}.pdf`,
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            ignoreElements: (el: Element) => el.classList.contains('pdf-exclude'),
-          },
-        };
-
-        await html2pdf().set(opt).from(element).save();
-
-        element.style.maxHeight = originalMaxHeight;
-        if (scrollDiv) scrollDiv.style.overflow = originalOverflow;
-      }
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      window.print();
-    }
-  };
-
   return (
     <>
       <div
         id="recent-reports"
-        className="glass-card-light dark:glass-card rounded-3xl border border-border overflow-hidden print:hidden space-y-4"
+        className="glass-card-light dark:glass-card rounded-3xl border border-border overflow-hidden space-y-4"
       >
         {/* Header with Title */}
         <div className="p-6 border-b border-border flex items-center justify-between flex-wrap gap-4">
@@ -269,7 +248,6 @@ export default function RecentReports() {
                 {filteredReports.map((rep, i) => {
                   const Icon = getIconForType(rep.type);
                   const category = getReportCategory(rep.type);
-                  const pdfDownloadUrl = getGuidePdfUrl(rep);
 
                   return (
                     <motion.tr
@@ -321,30 +299,14 @@ export default function RecentReports() {
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Direct PDF Download link for Mahadasha PDF guides uploaded by admin */}
-                          {category === 'mahadasha' && (
-                            <a
-                              href={pdfDownloadUrl}
-                              download
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 rounded-xl bg-[#C9952B]/10 hover:bg-[#C9952B]/20 text-[#C9952B] font-bold transition-all text-xs flex items-center gap-1 border border-[#C9952B]/30"
-                              title="Download Admin PDF File"
-                            >
-                              <Download size={14} /> Download PDF
-                            </a>
-                          )}
-
-                          <button
-                            onClick={() => setSelectedReport(rep)}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-foreground transition-all hover:text-[#C9952B]"
-                            title="View Report Details"
-                          >
-                            <Eye size={14} />
-                          </button>
-                        </div>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => setSelectedReport(rep)}
+                          className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-foreground transition-all hover:text-[#C9952B] text-xs font-semibold inline-flex items-center gap-1.5 border border-white/10"
+                          title="View Report Details"
+                        >
+                          <Eye size={14} /> View
+                        </button>
                       </td>
                     </motion.tr>
                   );
@@ -483,7 +445,7 @@ export default function RecentReports() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 text-left">
                                       {data.groomAstro && (
                                         <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                                          <div className="text-[10px] text-muted-foreground uppercase font-bold">Groom Planetary Alignment</div>
+                                          <div className="text-[10px] text-muted-foreground uppercase font-bold">Your Planetary Alignment</div>
                                           <div className="text-xs font-bold text-[#C9952B]">{data.groomAstro.rashiName}</div>
                                           <div className="text-[11px] text-muted-foreground">
                                             {data.groomAstro.nakshatraName} · {data.groomAstro.gana} Gana · {data.groomAstro.nadi} Nadi
@@ -493,7 +455,7 @@ export default function RecentReports() {
 
                                       {data.brideAstro && (
                                         <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                                          <div className="text-[10px] text-muted-foreground uppercase font-bold">Bride Planetary Alignment</div>
+                                          <div className="text-[10px] text-muted-foreground uppercase font-bold">Partner's Planetary Alignment</div>
                                           <div className="text-xs font-bold text-rose-400">{data.brideAstro.rashiName}</div>
                                           <div className="text-[11px] text-muted-foreground">
                                             {data.brideAstro.nakshatraName} · {data.brideAstro.gana} Gana · {data.brideAstro.nadi} Nadi
@@ -721,31 +683,19 @@ export default function RecentReports() {
                 </div>
               </div>
 
-              <div className="pdf-exclude p-6 border-t border-border bg-muted/30 flex items-center justify-between print:hidden">
+              <div className="p-6 border-t border-border bg-muted/30 flex items-center justify-between flex-wrap gap-3">
                 <Link
                   href="/talk-to-astrologer"
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white gold-gradient-bg hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-500 transition-colors shadow-lg"
                 >
-                  Clarify Doubts? Talk to our Astrologer
+                  <PhoneCall size={15} /> Clarify Doubts? Talk to Astrologer 📞
                 </Link>
-                {getReportCategory(selectedReport.type) === 'mahadasha' ? (
-                  <a
-                    href={getGuidePdfUrl(selectedReport)}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full gold-gradient-bg text-white text-xs font-bold shadow"
-                  >
-                    <Download size={15} /> Download Admin PDF File
-                  </a>
-                ) : (
-                  <button
-                    onClick={handleDownloadPDF}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"
-                  >
-                    <Download size={16} /> Download PDF
-                  </button>
-                )}
+                <button
+                  onClick={() => setSelectedReport(null)}
+                  className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"
+                >
+                  Close
+                </button>
               </div>
             </motion.div>
           </div>
