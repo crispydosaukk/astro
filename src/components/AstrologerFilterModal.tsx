@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, ArrowUpDown, Award, Globe, Users, Star, Sparkles, Search } from 'lucide-react';
 
@@ -124,9 +125,14 @@ export default function AstrologerFilterModal({
   dynamicCountries = [],
   dynamicGenders = [],
 }: AstrologerFilterModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('sorting');
   const [draftFilters, setDraftFilters] = useState<AstrologerFilterState>(filterState);
   const [tabSearch, setTabSearch] = useState<string>('');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Sync draft state whenever modal opens
   useEffect(() => {
@@ -136,7 +142,7 @@ export default function AstrologerFilterModal({
     }
   }, [isOpen, filterState]);
 
-  if (!isOpen) return null;
+  if (!mounted || !isOpen) return null;
 
   // Derive final lists combining dynamic data with fallbacks
   const effectiveSkills: DynamicFilterOption[] =
@@ -215,9 +221,9 @@ export default function AstrologerFilterModal({
     onClose();
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -250,8 +256,12 @@ export default function AstrologerFilterModal({
                 if (tab.id === 'language') activeCountInTab = draftFilters.languages.length;
                 if (tab.id === 'country') activeCountInTab = draftFilters.countries.length;
                 if (tab.id === 'gender' && draftFilters.gender !== 'all') activeCountInTab = 1;
-                if (tab.id === 'topAstrologers' && draftFilters.topAstrologer !== 'all') activeCountInTab = 1;
-                if (tab.id === 'sorting' && draftFilters.sortBy !== 'popularity') activeCountInTab = 1;
+                if (tab.id === 'topAstrologers' && draftFilters.topAstrologer !== 'all')
+                  activeCountInTab = 1;
+                if (tab.id === 'sorting' && draftFilters.sortBy !== 'popularity')
+                  activeCountInTab = 1;
+
+                const TabIcon = tab.icon;
 
                 return (
                   <button
@@ -261,259 +271,294 @@ export default function AstrologerFilterModal({
                       setActiveTab(tab.id);
                       setTabSearch('');
                     }}
-                    className={`text-left px-4 sm:px-5 py-3.5 text-xs sm:text-sm font-medium transition-all flex items-center justify-between relative ${
+                    className={`flex items-center justify-between px-4 py-3 text-xs font-bold transition-all text-left relative ${
                       isActive
-                        ? 'bg-muted text-foreground font-bold border-l-4 border-yellow-400 dark:border-[#FACC15]'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border-l-4 border-transparent'
+                        ? 'bg-card text-foreground font-extrabold shadow-sm'
+                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
                     }`}
                   >
-                    <span>{tab.label}</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <TabIcon
+                        size={15}
+                        className={isActive ? 'text-[#FACC15]' : 'text-muted-foreground'}
+                      />
+                      <span className="truncate">{tab.label}</span>
+                    </div>
+
                     {activeCountInTab > 0 && (
-                      <span className="w-4 h-4 rounded-full bg-yellow-400 text-black text-[10px] font-black flex items-center justify-center shrink-0 ml-1">
+                      <span className="w-4 h-4 rounded-full bg-[#FACC15] text-black text-[9px] font-black flex items-center justify-center shrink-0">
                         {activeCountInTab}
                       </span>
+                    )}
+
+                    {isActive && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FACC15] rounded-r" />
                     )}
                   </button>
                 );
               })}
             </div>
 
-            {/* Right Options Content */}
-            <div className="flex-1 p-5 sm:p-6 overflow-y-auto space-y-3 flex flex-col">
-              {/* Search within tab (for Skill, Language, Country) */}
-              {(activeTab === 'skill' || activeTab === 'language' || activeTab === 'country') && (
-                <div className="relative mb-2 shrink-0">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            {/* Right Tab Content */}
+            <div className="flex-1 p-5 overflow-y-auto flex flex-col">
+              {/* Search within tab if applicable */}
+              {['skill', 'language', 'country'].includes(activeTab) && (
+                <div className="relative mb-4 shrink-0">
+                  <Search
+                    size={14}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                   <input
                     type="text"
                     value={tabSearch}
                     onChange={(e) => setTabSearch(e.target.value)}
-                    placeholder={`Search registered ${activeTab}...`}
-                    className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-muted/60 border border-border text-xs outline-none focus:border-yellow-400"
+                    placeholder={`Search ${filterTabs.find((t) => t.id === activeTab)?.label}...`}
+                    className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-border bg-muted/40 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#FACC15]"
                   />
                 </div>
               )}
 
-              <div className="space-y-3 flex-1 overflow-y-auto pr-1">
-                {/* 1. Sorting */}
-                {activeTab === 'sorting' && (
-                  <>
-                    {sortingOptions.map((opt) => {
-                      const isSelected = draftFilters.sortBy === opt.id;
-                      return (
-                        <label
-                          key={opt.id}
-                          onClick={() => setDraftFilters({ ...draftFilters, sortBy: opt.id })}
-                          className="flex items-center gap-3 cursor-pointer py-1.5 group select-none text-xs sm:text-sm text-foreground/90 hover:text-foreground transition-colors"
+              {/* Sorting Tab */}
+              {activeTab === 'sorting' && (
+                <div className="space-y-1">
+                  {sortingOptions.map((opt) => {
+                    const isSelected = draftFilters.sortBy === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() =>
+                          setDraftFilters((prev) => ({ ...prev, sortBy: opt.id }))
+                        }
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-left ${
+                          isSelected
+                            ? 'bg-[#FACC15]/15 text-foreground font-bold border border-[#FACC15]/30'
+                            : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            isSelected
+                              ? 'border-[#FACC15] bg-[#FACC15] text-black'
+                              : 'border-muted-foreground/40'
+                          }`}
                         >
-                          <div
-                            className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                              isSelected
-                                ? 'border-yellow-400 bg-yellow-400 text-black'
-                                : 'border-muted-foreground/40 group-hover:border-foreground'
-                            }`}
-                          >
-                            {isSelected && <div className="w-2 h-2 rounded-full bg-black" />}
-                          </div>
-                          <span className={isSelected ? 'font-semibold text-foreground' : ''}>
-                            {opt.label}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </>
-                )}
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
-                {/* 2. Dynamic Skills / Talents */}
-                {activeTab === 'skill' && (
-                  <>
-                    {filteredSkills.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-4 text-center">No matching registered skills found.</p>
-                    ) : (
-                      filteredSkills.map((item) => {
-                        const isSelected = draftFilters.skills.includes(item.name);
-                        return (
-                          <label
-                            key={item.name}
-                            onClick={() => handleToggleSkill(item.name)}
-                            className="flex items-center justify-between cursor-pointer py-1.5 group select-none text-xs sm:text-sm text-foreground/90 hover:text-foreground transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
-                                  isSelected
-                                    ? 'border-yellow-400 bg-yellow-400 text-black'
-                                    : 'border-muted-foreground/40 group-hover:border-foreground'
-                                }`}
-                              >
-                                {isSelected && <Check size={14} strokeWidth={3} />}
-                              </div>
-                              <span className={isSelected ? 'font-semibold text-foreground' : ''}>
-                                {item.name}
-                              </span>
-                            </div>
-                            {item.count !== undefined && item.count > 0 && (
-                              <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">
-                                {item.count}
-                              </span>
-                            )}
-                          </label>
-                        );
-                      })
-                    )}
-                  </>
-                )}
-
-                {/* 3. Dynamic Languages */}
-                {activeTab === 'language' && (
-                  <>
-                    {filteredLanguages.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-4 text-center">No matching languages found.</p>
-                    ) : (
-                      filteredLanguages.map((item) => {
-                        const isSelected = draftFilters.languages.includes(item.name);
-                        return (
-                          <label
-                            key={item.name}
-                            onClick={() => handleToggleLanguage(item.name)}
-                            className="flex items-center justify-between cursor-pointer py-1.5 group select-none text-xs sm:text-sm text-foreground/90 hover:text-foreground transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
-                                  isSelected
-                                    ? 'border-yellow-400 bg-yellow-400 text-black'
-                                    : 'border-muted-foreground/40 group-hover:border-foreground'
-                                }`}
-                              >
-                                {isSelected && <Check size={14} strokeWidth={3} />}
-                              </div>
-                              <span className={isSelected ? 'font-semibold text-foreground' : ''}>
-                                {item.name}
-                              </span>
-                            </div>
-                            {item.count !== undefined && item.count > 0 && (
-                              <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">
-                                {item.count}
-                              </span>
-                            )}
-                          </label>
-                        );
-                      })
-                    )}
-                  </>
-                )}
-
-                {/* 4. Dynamic Gender */}
-                {activeTab === 'gender' && (
-                  <>
-                    {effectiveGenders.map((g) => {
-                      const isSelected = draftFilters.gender === g.id;
+              {/* Skills Tab */}
+              {activeTab === 'skill' && (
+                <div className="space-y-1">
+                  {filteredSkills.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic py-4 text-center">
+                      No skills found
+                    </p>
+                  ) : (
+                    filteredSkills.map((sk) => {
+                      const isChecked = draftFilters.skills.includes(sk.name);
                       return (
-                        <label
-                          key={g.id}
-                          onClick={() => setDraftFilters({ ...draftFilters, gender: g.id })}
-                          className="flex items-center justify-between cursor-pointer py-1.5 group select-none text-xs sm:text-sm text-foreground/90 hover:text-foreground transition-colors"
+                        <button
+                          key={sk.name}
+                          type="button"
+                          onClick={() => handleToggleSkill(sk.name)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all text-left ${
+                            isChecked
+                              ? 'bg-[#FACC15]/15 text-foreground font-bold border border-[#FACC15]/30'
+                              : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                          }`}
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 min-w-0">
                             <div
-                              className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                                isSelected
-                                  ? 'border-yellow-400 bg-yellow-400 text-black'
-                                  : 'border-muted-foreground/40 group-hover:border-foreground'
+                              className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
+                                isChecked
+                                  ? 'border-[#FACC15] bg-[#FACC15] text-black'
+                                  : 'border-muted-foreground/40'
                               }`}
                             >
-                              {isSelected && <div className="w-2 h-2 rounded-full bg-black" />}
+                              {isChecked && <Check size={11} strokeWidth={3} />}
                             </div>
-                            <span className={isSelected ? 'font-semibold text-foreground' : ''}>
-                              {g.label}
-                            </span>
+                            <span className="truncate">{sk.name}</span>
                           </div>
-                          {g.count !== undefined && g.count > 0 && (
-                            <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">
-                              {g.count}
+                          {sk.count !== undefined && sk.count > 0 && (
+                            <span className="text-[10px] text-muted-foreground ml-2">
+                              ({sk.count})
                             </span>
                           )}
-                        </label>
+                        </button>
                       );
-                    })}
-                  </>
-                )}
+                    })
+                  )}
+                </div>
+              )}
 
-                {/* 5. Dynamic Countries / Cities */}
-                {activeTab === 'country' && (
-                  <>
-                    {filteredCountries.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-4 text-center">No matching countries or locations found.</p>
-                    ) : (
-                      filteredCountries.map((item) => {
-                        const isSelected = draftFilters.countries.includes(item.name);
-                        return (
-                          <label
-                            key={item.name}
-                            onClick={() => handleToggleCountry(item.name)}
-                            className="flex items-center justify-between cursor-pointer py-1.5 group select-none text-xs sm:text-sm text-foreground/90 hover:text-foreground transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
-                                  isSelected
-                                    ? 'border-yellow-400 bg-yellow-400 text-black'
-                                    : 'border-muted-foreground/40 group-hover:border-foreground'
-                                }`}
-                              >
-                                {isSelected && <Check size={14} strokeWidth={3} />}
-                              </div>
-                              <span className={isSelected ? 'font-semibold text-foreground' : ''}>
-                                {item.name}
-                              </span>
-                            </div>
-                            {item.count !== undefined && item.count > 0 && (
-                              <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">
-                                {item.count}
-                              </span>
-                            )}
-                          </label>
-                        );
-                      })
-                    )}
-                  </>
-                )}
-
-                {/* 6. Top Astrologers */}
-                {activeTab === 'topAstrologers' && (
-                  <>
-                    {topAstrologerOptions.map((topOpt) => {
-                      const isSelected = draftFilters.topAstrologer === topOpt.id;
+              {/* Languages Tab */}
+              {activeTab === 'language' && (
+                <div className="space-y-1">
+                  {filteredLanguages.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic py-4 text-center">
+                      No languages found
+                    </p>
+                  ) : (
+                    filteredLanguages.map((lg) => {
+                      const isChecked = draftFilters.languages.includes(lg.name);
                       return (
-                        <label
-                          key={topOpt.id}
-                          onClick={() => setDraftFilters({ ...draftFilters, topAstrologer: topOpt.id })}
-                          className="flex items-center gap-3 cursor-pointer py-1.5 group select-none text-xs sm:text-sm text-foreground/90 hover:text-foreground transition-colors"
+                        <button
+                          key={lg.name}
+                          type="button"
+                          onClick={() => handleToggleLanguage(lg.name)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all text-left ${
+                            isChecked
+                              ? 'bg-[#FACC15]/15 text-foreground font-bold border border-[#FACC15]/30'
+                              : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                          }`}
                         >
-                          <div
-                            className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                              isSelected
-                                ? 'border-yellow-400 bg-yellow-400 text-black'
-                                : 'border-muted-foreground/40 group-hover:border-foreground'
-                            }`}
-                          >
-                            {isSelected && <div className="w-2 h-2 rounded-full bg-black" />}
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div
+                              className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
+                                isChecked
+                                  ? 'border-[#FACC15] bg-[#FACC15] text-black'
+                                  : 'border-muted-foreground/40'
+                              }`}
+                            >
+                              {isChecked && <Check size={11} strokeWidth={3} />}
+                            </div>
+                            <span className="truncate">{lg.name}</span>
                           </div>
-                          <span className={isSelected ? 'font-semibold text-foreground' : ''}>
-                            {topOpt.label}
-                          </span>
-                        </label>
+                          {lg.count !== undefined && lg.count > 0 && (
+                            <span className="text-[10px] text-muted-foreground ml-2">
+                              ({lg.count})
+                            </span>
+                          )}
+                        </button>
                       );
-                    })}
-                  </>
-                )}
-              </div>
+                    })
+                  )}
+                </div>
+              )}
+
+              {/* Gender Tab */}
+              {activeTab === 'gender' && (
+                <div className="space-y-1">
+                  {effectiveGenders.map((gen) => {
+                    const isSelected = draftFilters.gender === gen.id;
+                    return (
+                      <button
+                        key={gen.id}
+                        type="button"
+                        onClick={() =>
+                          setDraftFilters((prev) => ({ ...prev, gender: gen.id }))
+                        }
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-left ${
+                          isSelected
+                            ? 'bg-[#FACC15]/15 text-foreground font-bold border border-[#FACC15]/30'
+                            : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <span>{gen.label}</span>
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            isSelected
+                              ? 'border-[#FACC15] bg-[#FACC15] text-black'
+                              : 'border-muted-foreground/40'
+                          }`}
+                        >
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Country Tab */}
+              {activeTab === 'country' && (
+                <div className="space-y-1">
+                  {filteredCountries.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic py-4 text-center">
+                      No countries found
+                    </p>
+                  ) : (
+                    filteredCountries.map((c) => {
+                      const isChecked = draftFilters.countries.includes(c.name);
+                      return (
+                        <button
+                          key={c.name}
+                          type="button"
+                          onClick={() => handleToggleCountry(c.name)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all text-left ${
+                            isChecked
+                              ? 'bg-[#FACC15]/15 text-foreground font-bold border border-[#FACC15]/30'
+                              : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div
+                              className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
+                                isChecked
+                                  ? 'border-[#FACC15] bg-[#FACC15] text-black'
+                                  : 'border-muted-foreground/40'
+                              }`}
+                            >
+                              {isChecked && <Check size={11} strokeWidth={3} />}
+                            </div>
+                            <span className="truncate">{c.name}</span>
+                          </div>
+                          {c.count !== undefined && c.count > 0 && (
+                            <span className="text-[10px] text-muted-foreground ml-2">
+                              ({c.count})
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+
+              {/* Top Astrologers Tab */}
+              {activeTab === 'topAstrologers' && (
+                <div className="space-y-1">
+                  {topAstrologerOptions.map((opt) => {
+                    const isSelected = draftFilters.topAstrologer === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() =>
+                          setDraftFilters((prev) => ({ ...prev, topAstrologer: opt.id }))
+                        }
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-left ${
+                          isSelected
+                            ? 'bg-[#FACC15]/15 text-foreground font-bold border border-[#FACC15]/30'
+                            : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                            isSelected
+                              ? 'border-[#FACC15] bg-[#FACC15] text-black'
+                              : 'border-muted-foreground/40'
+                          }`}
+                        >
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Footer Action Bar */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/20">
+          {/* Footer Controls */}
+          <div className="px-6 py-4 border-t border-border bg-card flex items-center justify-between">
             <button
               type="button"
               onClick={handleResetClick}
@@ -531,6 +576,7 @@ export default function AstrologerFilterModal({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

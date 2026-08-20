@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { User as UserIcon } from 'lucide-react';
 import { useUserData } from '@/lib/useUserData';
@@ -13,10 +14,15 @@ import { useCurrency } from '@/lib/CurrencyContext';
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, userData, loading } = useUserData();
   const router = useRouter();
   const { formatPrice, currencyCode, setCurrencyCode } = useCurrency();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -166,43 +172,56 @@ export default function UserDropdown() {
         )}
       </AnimatePresence>
 
-      {/* Logout Confirmation Modal */}
-      <AnimatePresence>
-        {showLogoutConfirm && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLogoutConfirm(false)} />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#FFFDFC] border border-[#E5D9C8] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden relative z-10"
-            >
-              <div className="p-6 text-center">
-                <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <UserIcon size={28} />
-                </div>
-                <h3 className="text-xl font-bold text-[#292522] mb-1">Sign Out</h3>
-                <p className="text-[#6B5E55] text-sm">Are you sure you want to sign out of your account?</p>
-              </div>
-              <div className="flex border-t border-[#E5D9C8] bg-[#F8F3EA]">
-                <button
+      {/* Logout Confirmation Modal Portaled to Body for Perfect Fullscreen Centering */}
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showLogoutConfirm && (
+              <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm"
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 py-3.5 text-[#292522] font-semibold hover:bg-[#EDE4D5] transition-colors text-sm"
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: 15 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="bg-[#FFFDFC] border border-[#E5D9C8] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden relative z-10 mx-auto"
                 >
-                  Cancel
-                </button>
-                <div className="w-px bg-[#E5D9C8]" />
-                <button
-                  onClick={handleLogout}
-                  className="flex-1 py-3.5 text-red-600 font-bold hover:bg-red-50 transition-colors text-sm"
-                >
-                  Yes, Sign out
-                </button>
+                  <div className="p-6 text-center">
+                    <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                      <UserIcon size={28} />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#292522] mb-1">Sign Out</h3>
+                    <p className="text-[#6B5E55] text-sm">Are you sure you want to sign out of your account?</p>
+                  </div>
+                  <div className="flex border-t border-[#E5D9C8] bg-[#F8F3EA]">
+                    <button
+                      type="button"
+                      onClick={() => setShowLogoutConfirm(false)}
+                      className="flex-1 py-3.5 text-[#292522] font-semibold hover:bg-[#EDE4D5] transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <div className="w-px bg-[#E5D9C8]" />
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex-1 py-3.5 text-red-600 font-bold hover:bg-red-50 transition-colors text-sm"
+                    >
+                      Yes, Sign out
+                    </button>
+                  </div>
+                </motion.div>
               </div>
-            </motion.div>
-          </div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }

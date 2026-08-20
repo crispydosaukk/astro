@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -61,6 +62,7 @@ export default function AdminPaymentsTable() {
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Filters & Search
   const [search, setSearch] = useState('');
@@ -179,6 +181,7 @@ export default function AdminPaymentsTable() {
   };
 
   useEffect(() => {
+    setMounted(true);
     fetchTransactions();
   }, []);
 
@@ -598,150 +601,154 @@ export default function AdminPaymentsTable() {
       </div>
 
       {/* Transaction Details Modal */}
-      <AnimatePresence>
-        {selectedTxn && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-lg bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950">
-                <div className="flex items-center gap-2">
-                  <Receipt size={16} className="text-amber-400" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                    Transaction Details
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedTxn(null)}
-                  className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {selectedTxn && (
+              <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                  className="relative w-full max-w-lg bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                 >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <div className="p-6 space-y-5 overflow-y-auto">
-                {/* Amount Header */}
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-slate-400 uppercase font-semibold">Amount</p>
-                    <p
-                      className={`text-2xl font-extrabold font-mono mt-0.5 ${
-                        selectedTxn.type === 'credit' ? 'text-emerald-400' : 'text-white'
-                      }`}
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950">
+                    <div className="flex items-center gap-2">
+                      <Receipt size={16} className="text-amber-400" />
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                        Transaction Details
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTxn(null)}
+                      className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                     >
-                      {selectedTxn.type === 'credit' ? '+' : '-'}
-                      {formatPrice(selectedTxn.amount)}
-                    </p>
+                      <X size={18} />
+                    </button>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${
-                      statusBadgeStyles[selectedTxn.status]
-                    }`}
-                  >
-                    {selectedTxn.status}
-                  </span>
-                </div>
 
-                {/* Customer Details */}
-                <div className="space-y-2">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Customer Profile</p>
-                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-center gap-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={selectedTxn.userAvatar}
-                      alt={selectedTxn.userName}
-                      className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-white truncate">{selectedTxn.userName}</p>
-                      <p className="text-xs text-slate-400 truncate">{selectedTxn.userEmail}</p>
-                      {selectedTxn.userPhone && (
-                        <p className="text-xs text-slate-400 font-mono mt-0.5">{selectedTxn.userPhone}</p>
-                      )}
+                  {/* Modal Body */}
+                  <div className="p-6 space-y-5 overflow-y-auto">
+                    {/* Amount Header */}
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-slate-400 uppercase font-semibold">Amount</p>
+                        <p
+                          className={`text-2xl font-extrabold font-mono mt-0.5 ${
+                            selectedTxn.type === 'credit' ? 'text-emerald-400' : 'text-white'
+                          }`}
+                        >
+                          {selectedTxn.type === 'credit' ? '+' : '-'}
+                          {formatPrice(selectedTxn.amount)}
+                        </p>
+                      </div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${
+                          statusBadgeStyles[selectedTxn.status]
+                        }`}
+                      >
+                        {selectedTxn.status}
+                      </span>
                     </div>
-                  </div>
-                </div>
 
-                {/* Metadata Grid */}
-                <div className="space-y-2">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Technical Reference</p>
-                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <span className="text-slate-400">Payment Gateway:</span>
-                      <p className="font-semibold text-white mt-0.5">{selectedTxn.gateway}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-400">Transaction Type:</span>
-                      <p className="font-semibold text-white mt-0.5 capitalize">{selectedTxn.type}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-400">Date & Timestamp:</span>
-                      <p className="font-semibold text-white mt-0.5">{new Date(selectedTxn.date).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <span className="text-slate-400">Description:</span>
-                      <p className="font-semibold text-white mt-0.5">{selectedTxn.description}</p>
-                    </div>
-                    {selectedTxn.orderId && (
-                      <div className="sm:col-span-2">
-                        <span className="text-slate-400">Gateway Order ID:</span>
-                        <p className="font-mono text-slate-200 mt-0.5 select-all bg-slate-950 px-2 py-1 rounded border border-slate-800">
-                          {selectedTxn.orderId}
-                        </p>
+                    {/* Customer Details */}
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Customer Profile</p>
+                      <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-center gap-3">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={selectedTxn.userAvatar}
+                          alt={selectedTxn.userName}
+                          className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-white truncate">{selectedTxn.userName}</p>
+                          <p className="text-xs text-slate-400 truncate">{selectedTxn.userEmail}</p>
+                          {selectedTxn.userPhone && (
+                            <p className="text-xs text-slate-400 font-mono mt-0.5">{selectedTxn.userPhone}</p>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    {selectedTxn.paymentId && (
-                      <div className="sm:col-span-2">
-                        <span className="text-slate-400">Gateway Payment ID:</span>
-                        <p className="font-mono text-slate-200 mt-0.5 select-all bg-slate-950 px-2 py-1 rounded border border-slate-800">
-                          {selectedTxn.paymentId}
-                        </p>
+                    </div>
+
+                    {/* Metadata Grid */}
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Technical Reference</p>
+                      <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <span className="text-slate-400">Payment Gateway:</span>
+                          <p className="font-semibold text-white mt-0.5">{selectedTxn.gateway}</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-400">Transaction Type:</span>
+                          <p className="font-semibold text-white mt-0.5 capitalize">{selectedTxn.type}</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-400">Date & Timestamp:</span>
+                          <p className="font-semibold text-white mt-0.5">{new Date(selectedTxn.date).toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-400">Description:</span>
+                          <p className="font-semibold text-white mt-0.5">{selectedTxn.description}</p>
+                        </div>
+                        {selectedTxn.orderId && (
+                          <div className="sm:col-span-2">
+                            <span className="text-slate-400">Gateway Order ID:</span>
+                            <p className="font-mono text-slate-200 mt-0.5 select-all bg-slate-950 px-2 py-1 rounded border border-slate-800">
+                              {selectedTxn.orderId}
+                            </p>
+                          </div>
+                        )}
+                        {selectedTxn.paymentId && (
+                          <div className="sm:col-span-2">
+                            <span className="text-slate-400">Gateway Payment ID:</span>
+                            <p className="font-mono text-slate-200 mt-0.5 select-all bg-slate-950 px-2 py-1 rounded border border-slate-800">
+                              {selectedTxn.paymentId}
+                            </p>
+                          </div>
+                        )}
+                        {selectedTxn.stripeSessionId && (
+                          <div className="sm:col-span-2">
+                            <span className="text-slate-400">Stripe Session ID:</span>
+                            <p className="font-mono text-slate-200 mt-0.5 select-all bg-slate-950 px-2 py-1 rounded border border-slate-800">
+                              {selectedTxn.stripeSessionId}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {selectedTxn.stripeSessionId && (
-                      <div className="sm:col-span-2">
-                        <span className="text-slate-400">Stripe Session ID:</span>
-                        <p className="font-mono text-slate-200 mt-0.5 select-all bg-slate-950 px-2 py-1 rounded border border-slate-800">
-                          {selectedTxn.stripeSessionId}
-                        </p>
-                      </div>
-                    )}
+                    </div>
                   </div>
-                </div>
+
+                  {/* Modal Footer Actions */}
+                  <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950">
+                    {selectedTxn.status === 'success' && selectedTxn.type === 'credit' ? (
+                      <button
+                        type="button"
+                        onClick={() => handleProcessRefund(selectedTxn)}
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition-colors flex items-center gap-1.5"
+                      >
+                        <RefreshCw size={12} /> Process Refund
+                      </button>
+                    ) : (
+                      <div />
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTxn(null)}
+                      className="px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </motion.div>
               </div>
-
-              {/* Modal Footer Actions */}
-              <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950">
-                {selectedTxn.status === 'success' && selectedTxn.type === 'credit' ? (
-                  <button
-                    type="button"
-                    onClick={() => handleProcessRefund(selectedTxn)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition-colors flex items-center gap-1.5"
-                  >
-                    <RefreshCw size={12} /> Process Refund
-                  </button>
-                ) : (
-                  <div />
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedTxn(null)}
-                  className="px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }

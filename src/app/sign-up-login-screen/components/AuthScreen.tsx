@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -62,9 +63,14 @@ export default function AuthScreen() {
   const [authorizedContact, setAuthorizedContact] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
   
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auto detect user country code via timezone and IP lookup
   useEffect(() => {
@@ -550,146 +556,158 @@ export default function AuthScreen() {
       </div>
 
       {/* Success Popup Modal */}
-      <AnimatePresence>
-        {showSuccessPopup && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-[#FFFDFC] border border-[#E5D9C8] p-10 rounded-3xl shadow-2xl flex flex-col items-center max-w-md w-full mx-4 text-center relative overflow-hidden"
-            >
-              <div className="w-20 h-20 rounded-full bg-[#EDE4D5] flex items-center justify-center mb-6 text-[#713B32]">
-                <Sparkles size={40} className="animate-float" />
-              </div>
-              <h3 className="text-3xl font-bold text-[#292522] mb-3">
-                Success!
-              </h3>
-              <p className="text-base text-[#6B5E55]">
-                Welcome! Redirecting you to your Vedic portal...
-              </p>
-
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showSuccessPopup && (
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: 'spring' }}
-                className="mt-8 text-emerald-600"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
               >
-                <CheckCircle2 size={36} className="mx-auto" />
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  className="bg-[#FFFDFC] border border-[#E5D9C8] p-10 rounded-3xl shadow-2xl flex flex-col items-center max-w-md w-full mx-4 text-center relative overflow-hidden"
+                >
+                  <div className="w-20 h-20 rounded-full bg-[#EDE4D5] flex items-center justify-center mb-6 text-[#713B32]">
+                    <Sparkles size={40} className="animate-float" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-[#292522] mb-3">
+                    Success!
+                  </h3>
+                  <p className="text-base text-[#6B5E55]">
+                    Welcome! Redirecting you to your Vedic portal...
+                  </p>
+
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: 'spring' }}
+                    className="mt-8 text-emerald-600"
+                  >
+                    <CheckCircle2 size={36} className="mx-auto" />
+                  </motion.div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
 
       {/* Terms of Use Modal */}
-      <AnimatePresence>
-        {showTermsModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="bg-[#FFFDFC] border border-[#E5D9C8] max-w-2xl w-full max-h-[85vh] rounded-3xl p-6 sm:p-8 flex flex-col shadow-2xl relative"
-            >
-              <div className="flex items-center justify-between pb-4 border-b border-[#E5D9C8]">
-                <h3 className="text-xl font-bold text-[#292522]">Terms of Use</h3>
-                <button
-                  onClick={() => setShowTermsModal(false)}
-                  className="p-2 rounded-full hover:bg-[#EDE4D5] text-[#6B5E55] hover:text-[#292522] transition-colors"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showTermsModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                  className="bg-[#FFFDFC] border border-[#E5D9C8] max-w-2xl w-full max-h-[85vh] rounded-3xl p-6 sm:p-8 flex flex-col shadow-2xl relative"
                 >
-                  <span className="text-xl font-bold">✕</span>
-                </button>
-              </div>
+                  <div className="flex items-center justify-between pb-4 border-b border-[#E5D9C8]">
+                    <h3 className="text-xl font-bold text-[#292522]">Terms of Use</h3>
+                    <button
+                      onClick={() => setShowTermsModal(false)}
+                      className="p-2 rounded-full hover:bg-[#EDE4D5] text-[#6B5E55] hover:text-[#292522] transition-colors"
+                    >
+                      <span className="text-xl font-bold">✕</span>
+                    </button>
+                  </div>
 
-              <div className="overflow-y-auto py-6 space-y-4 text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-                <p><strong className="text-[#292522]">1. Introduction:</strong> Welcome to AstroParihar. By signing up or using our services, you agree to these Terms of Use and Privacy Policy.</p>
-                <p><strong className="text-[#292522]">2. Communication Consent:</strong> By providing your mobile number, you authorize AstroParihar & authorized associates to send authentication OTPs, booking updates, and service communication. Standard carrier rates may apply.</p>
-                <p><strong className="text-[#292522]">3. Astrological Guidance:</strong> AstroParihar provides digital Kundli analysis, Vedic remedies, and consultation services. Reports and advice are intended for personal guidance.</p>
-                <p><strong className="text-[#292522]">4. Privacy & Payments:</strong> All transactions are securely processed via Razorpay. Your personal details and consultation records remain strictly private.</p>
-              </div>
+                  <div className="overflow-y-auto py-6 space-y-4 text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
+                    <p><strong className="text-[#292522]">1. Introduction:</strong> Welcome to AstroParihar. By signing up or using our services, you agree to these Terms of Use and Privacy Policy.</p>
+                    <p><strong className="text-[#292522]">2. Communication Consent:</strong> By providing your mobile number, you authorize AstroParihar & authorized associates to send authentication OTPs, booking updates, and service communication. Standard carrier rates may apply.</p>
+                    <p><strong className="text-[#292522]">3. Astrological Guidance:</strong> AstroParihar provides digital Kundli analysis, Vedic remedies, and consultation services. Reports and advice are intended for personal guidance.</p>
+                    <p><strong className="text-[#292522]">4. Privacy & Payments:</strong> All transactions are securely processed via Razorpay. Your personal details and consultation records remain strictly private.</p>
+                  </div>
 
-              <div className="pt-4 border-t border-[#E5D9C8] flex items-center justify-between">
-                <a
-                  href="/terms"
-                  target="_blank"
-                  className="text-xs text-[#713B32] underline font-semibold hover:text-[#552B24]"
-                >
-                  Read Full Terms Page →
-                </a>
-                <button
-                  onClick={() => setShowTermsModal(false)}
-                  className="px-6 py-2.5 rounded-xl gold-gradient-bg text-white font-bold text-xs shadow-sm hover:opacity-95"
-                >
-                  I Understand
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+                  <div className="pt-4 border-t border-[#E5D9C8] flex items-center justify-between">
+                    <a
+                      href="/terms"
+                      target="_blank"
+                      className="text-xs text-[#713B32] underline font-semibold hover:text-[#552B24]"
+                    >
+                      Read Full Terms Page →
+                    </a>
+                    <button
+                      onClick={() => setShowTermsModal(false)}
+                      className="px-6 py-2.5 rounded-xl gold-gradient-bg text-white font-bold text-xs shadow-sm hover:opacity-95"
+                    >
+                      I Understand
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
 
       {/* Privacy Policy Modal */}
-      <AnimatePresence>
-        {showPrivacyModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="bg-[#FFFDFC] border border-[#E5D9C8] max-w-2xl w-full max-h-[85vh] rounded-3xl p-6 sm:p-8 flex flex-col shadow-2xl relative"
-            >
-              <div className="flex items-center justify-between pb-4 border-b border-[#E5D9C8]">
-                <h3 className="text-xl font-bold text-[#292522]">Privacy Policy</h3>
-                <button
-                  onClick={() => setShowPrivacyModal(false)}
-                  className="p-2 rounded-full hover:bg-[#EDE4D5] text-[#6B5E55] hover:text-[#292522] transition-colors"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showPrivacyModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                  className="bg-[#FFFDFC] border border-[#E5D9C8] max-w-2xl w-full max-h-[85vh] rounded-3xl p-6 sm:p-8 flex flex-col shadow-2xl relative"
                 >
-                  <span className="text-xl font-bold">✕</span>
-                </button>
-              </div>
+                  <div className="flex items-center justify-between pb-4 border-b border-[#E5D9C8]">
+                    <h3 className="text-xl font-bold text-[#292522]">Privacy Policy</h3>
+                    <button
+                      onClick={() => setShowPrivacyModal(false)}
+                      className="p-2 rounded-full hover:bg-[#EDE4D5] text-[#6B5E55] hover:text-[#292522] transition-colors"
+                    >
+                      <span className="text-xl font-bold">✕</span>
+                    </button>
+                  </div>
 
-              <div className="overflow-y-auto py-6 space-y-4 text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-                <p><strong className="text-[#292522]">1. Data Security:</strong> AstroParihar protects your personal birth details, mobile phone numbers, and astrological reports with strict confidentiality.</p>
-                <p><strong className="text-[#292522]">2. Usage:</strong> Information collected during registration is used exclusively for generating accurate Vedic astrological charts and verifying account authentication.</p>
-                <p><strong className="text-[#292522]">3. Call Encryption:</strong> Audio/video consultations with astrologers are encrypted, ensuring complete privacy during your session.</p>
-              </div>
+                  <div className="overflow-y-auto py-6 space-y-4 text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
+                    <p><strong className="text-[#292522]">1. Data Security:</strong> AstroParihar protects your personal birth details, mobile phone numbers, and astrological reports with strict confidentiality.</p>
+                    <p><strong className="text-[#292522]">2. Usage:</strong> Information collected during registration is used exclusively for generating accurate Vedic astrological charts and verifying account authentication.</p>
+                    <p><strong className="text-[#292522]">3. Call Encryption:</strong> Audio/video consultations with astrologers are encrypted, ensuring complete privacy during your session.</p>
+                  </div>
 
-              <div className="pt-4 border-t border-[#E5D9C8] flex items-center justify-between">
-                <a
-                  href="/privacy"
-                  target="_blank"
-                  className="text-xs text-[#713B32] underline font-semibold hover:text-[#552B24]"
-                >
-                  Read Full Privacy Policy Page →
-                </a>
-                <button
-                  onClick={() => setShowPrivacyModal(false)}
-                  className="px-6 py-2.5 rounded-xl gold-gradient-bg text-white font-bold text-xs shadow-sm hover:opacity-95"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+                  <div className="pt-4 border-t border-[#E5D9C8] flex items-center justify-between">
+                    <a
+                      href="/privacy"
+                      target="_blank"
+                      className="text-xs text-[#713B32] underline font-semibold hover:text-[#552B24]"
+                    >
+                      Read Full Privacy Policy Page →
+                    </a>
+                    <button
+                      onClick={() => setShowPrivacyModal(false)}
+                      className="px-6 py-2.5 rounded-xl gold-gradient-bg text-white font-bold text-xs shadow-sm hover:opacity-95"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }

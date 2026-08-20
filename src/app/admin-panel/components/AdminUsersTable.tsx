@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,6 +47,7 @@ export default function AdminUsersTable() {
   const { formatPrice } = useCurrency();
   const [users, setUsers] = useState<AdminUserItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
   const [filterPlan, setFilterPlan] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -53,6 +55,10 @@ export default function AdminUsersTable() {
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<AdminUserItem | null>(null);
   const perPage = 8;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -419,136 +425,140 @@ export default function AdminUsersTable() {
       </div>
 
       {/* User Inspection Modal */}
-      <AnimatePresence>
-        {selectedUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-md bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col"
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                  <UserIcon size={16} className="text-amber-400" /> User Profile
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setSelectedUser(null)}
-                  className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {selectedUser && (
+              <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                  className="relative w-full max-w-md bg-slate-900 text-white rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col"
                 >
-                  <X size={18} />
-                </button>
-              </div>
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                      <UserIcon size={16} className="text-amber-400" /> User Profile
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedUser(null)}
+                      className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
 
-              {/* Modal Body */}
-              <div className="p-6 space-y-5">
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-950 border border-slate-800">
-                  <AppImage
-                    src={selectedUser.avatar}
-                    alt={selectedUser.name}
-                    width={56}
-                    height={56}
-                    className="w-14 h-14 rounded-full object-cover bg-slate-800 border border-slate-700"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-base font-bold text-white truncate">{selectedUser.name}</h4>
-                    <span
-                      className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                  {/* Modal Body */}
+                  <div className="p-6 space-y-5">
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-950 border border-slate-800">
+                      <AppImage
+                        src={selectedUser.avatar}
+                        alt={selectedUser.name}
+                        width={56}
+                        height={56}
+                        className="w-14 h-14 rounded-full object-cover bg-slate-800 border border-slate-700"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-base font-bold text-white truncate">{selectedUser.name}</h4>
+                        <span
+                          className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            selectedUser.status === 'active'
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                              : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                          }`}
+                        >
+                          ● {selectedUser.status.toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3 text-xs">
+                      {/* Phone */}
+                      <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
+                        <span className="text-slate-400 flex items-center gap-1.5">
+                          <Phone size={13} className="text-emerald-400" /> Phone Number:
+                        </span>
+                        <span className="font-mono font-bold text-emerald-400">
+                          {selectedUser.phone || 'Not provided'}
+                        </span>
+                      </div>
+
+                      {/* Email */}
+                      <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
+                        <span className="text-slate-400 flex items-center gap-1.5">
+                          <Mail size={13} className="text-blue-400" /> Email:
+                        </span>
+                        <span className="font-semibold text-slate-200">
+                          {selectedUser.email || 'Not provided'}
+                        </span>
+                      </div>
+
+                      {/* DOB */}
+                      {selectedUser.dob && (
+                        <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
+                          <span className="text-slate-400 flex items-center gap-1.5">
+                            <Calendar size={13} className="text-amber-400" /> Date of Birth:
+                          </span>
+                          <span className="font-semibold text-slate-200">{selectedUser.dob}</span>
+                        </div>
+                      )}
+
+                      {/* Wallet Balance */}
+                      <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
+                        <span className="text-slate-400 flex items-center gap-1.5">
+                          <Wallet size={13} className="text-emerald-400" /> Wallet Balance:
+                        </span>
+                        <span className="font-mono font-extrabold text-emerald-400 text-sm">
+                          {formatPrice(selectedUser.walletBalance)}
+                        </span>
+                      </div>
+
+                      {/* Joined Date */}
+                      <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
+                        <span className="text-slate-400">Joined Date:</span>
+                        <span className="text-slate-200">{selectedUser.joined}</span>
+                      </div>
+
+                      {/* UID */}
+                      <div className="flex flex-col gap-1 py-1">
+                        <span className="text-slate-400 text-[11px]">Firebase User UID:</span>
+                        <span className="font-mono text-[11px] bg-slate-950 px-2 py-1 rounded border border-slate-800 text-slate-300 select-all break-all">
+                          {selectedUser.id}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(selectedUser.id, selectedUser.status)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold border transition-colors ${
                         selectedUser.status === 'active'
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                          : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                          ? 'border-rose-500/40 text-rose-300 hover:bg-rose-500/10'
+                          : 'border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10'
                       }`}
                     >
-                      ● {selectedUser.status.toUpperCase()}
-                    </span>
-                  </div>
-                </div>
+                      {selectedUser.status === 'active' ? 'Suspend Account' : 'Reactivate Account'}
+                    </button>
 
-                <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3 text-xs">
-                  {/* Phone */}
-                  <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                    <span className="text-slate-400 flex items-center gap-1.5">
-                      <Phone size={13} className="text-emerald-400" /> Phone Number:
-                    </span>
-                    <span className="font-mono font-bold text-emerald-400">
-                      {selectedUser.phone || 'Not provided'}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedUser(null)}
+                      className="px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
+                    >
+                      Close
+                    </button>
                   </div>
-
-                  {/* Email */}
-                  <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                    <span className="text-slate-400 flex items-center gap-1.5">
-                      <Mail size={13} className="text-blue-400" /> Email:
-                    </span>
-                    <span className="font-semibold text-slate-200">
-                      {selectedUser.email || 'Not provided'}
-                    </span>
-                  </div>
-
-                  {/* DOB */}
-                  {selectedUser.dob && (
-                    <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                      <span className="text-slate-400 flex items-center gap-1.5">
-                        <Calendar size={13} className="text-amber-400" /> Date of Birth:
-                      </span>
-                      <span className="font-semibold text-slate-200">{selectedUser.dob}</span>
-                    </div>
-                  )}
-
-                  {/* Wallet Balance */}
-                  <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                    <span className="text-slate-400 flex items-center gap-1.5">
-                      <Wallet size={13} className="text-emerald-400" /> Wallet Balance:
-                    </span>
-                    <span className="font-mono font-extrabold text-emerald-400 text-sm">
-                      {formatPrice(selectedUser.walletBalance)}
-                    </span>
-                  </div>
-
-                  {/* Joined Date */}
-                  <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                    <span className="text-slate-400">Joined Date:</span>
-                    <span className="text-slate-200">{selectedUser.joined}</span>
-                  </div>
-
-                  {/* UID */}
-                  <div className="flex flex-col gap-1 py-1">
-                    <span className="text-slate-400 text-[11px]">Firebase User UID:</span>
-                    <span className="font-mono text-[11px] bg-slate-950 px-2 py-1 rounded border border-slate-800 text-slate-300 select-all break-all">
-                      {selectedUser.id}
-                    </span>
-                  </div>
-                </div>
+                </motion.div>
               </div>
-
-              {/* Modal Footer */}
-              <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950">
-                <button
-                  type="button"
-                  onClick={() => handleToggleStatus(selectedUser.id, selectedUser.status)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-colors ${
-                    selectedUser.status === 'active'
-                      ? 'border-rose-500/40 text-rose-300 hover:bg-rose-500/10'
-                      : 'border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10'
-                  }`}
-                >
-                  {selectedUser.status === 'active' ? 'Suspend Account' : 'Reactivate Account'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedUser(null)}
-                  className="px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </div>
   );
 }

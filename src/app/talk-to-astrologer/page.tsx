@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -57,7 +58,13 @@ const timeSlots = [
 const bookedSlots = ['10:00 AM', '11:30 AM', '3:00 PM', '6:00 PM'];
 
 export default function TalkToAstrologerPage() {
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { user, userData } = useUserData();
   const [astrologers, setAstrologers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -881,80 +888,81 @@ export default function TalkToAstrologerPage() {
       </div>
 
       {/* Booking Modal */}
-      <AnimatePresence>
-        {selectedAstrologer && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setSelectedAstrologer(null);
-                setBookingStep(1);
-              }
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-card rounded-2xl border border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-            >
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-card border-b border-border p-5 flex items-center justify-between z-10">
-                <div className="flex items-center gap-3">
-                  <AppImage
-                    src={selectedAstrologer.image}
-                    alt={`${selectedAstrologer.name} booking`}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-xl object-cover"
-                  />
-                  <div>
-                    <h2 className="font-bold text-foreground">{selectedAstrologer.name}</h2>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedAstrologer.specialty[0]} · {formatPrice(selectedAstrologer.pricePerMin)}/min
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {selectedAstrologer && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) {
                     setSelectedAstrologer(null);
                     setBookingStep(1);
-                  }}
-                  className="p-2 rounded-xl hover:bg-muted transition-all"
+                  }
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="bg-card rounded-2xl border border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto"
                 >
-                  <X size={18} className="text-muted-foreground" />
-                </button>
-              </div>
-
-              {/* Step Indicator */}
-              <div className="flex items-center justify-between relative p-5 border-b border-border">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border -z-10" />
-                {[
-                  { step: 1, label: 'Type' },
-                  { step: 2, label: 'Payment' },
-                ].map((s) => (
-                  <div key={s.step} className="flex items-center gap-3 bg-card px-2">
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${bookingStep >= s.step ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground'}`}
-                    >
-                      {s.step}
+                  {/* Modal Header */}
+                  <div className="sticky top-0 bg-card border-b border-border p-5 flex items-center justify-between z-10">
+                    <div className="flex items-center gap-3">
+                      <AppImage
+                        src={selectedAstrologer.image}
+                        alt={`${selectedAstrologer.name} booking`}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-xl object-cover"
+                      />
+                      <div>
+                        <h2 className="font-bold text-foreground">{selectedAstrologer.name}</h2>
+                        <p className="text-xs text-muted-foreground">
+                          {selectedAstrologer.specialty[0]} · {formatPrice(selectedAstrologer.pricePerMin)}/min
+                        </p>
+                      </div>
                     </div>
-                    <span
-                      className={`text-xs font-semibold ${bookingStep >= s.step ? 'text-foreground' : 'text-muted-foreground'}`}
+                    <button
+                      onClick={() => {
+                        setSelectedAstrologer(null);
+                        setBookingStep(1);
+                      }}
+                      className="p-2 rounded-xl hover:bg-muted transition-all"
                     >
-                      {s.label}
-                    </span>
+                      <X size={18} className="text-muted-foreground" />
+                    </button>
                   </div>
-                ))}
-              </div>
 
-              <div className="p-5">
-                {/* Step 1 */}
-                {bookingStep === 1 && (
+                  {/* Step Indicator */}
+                  <div className="flex items-center justify-between relative p-5 border-b border-border">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border -z-10" />
+                    {[
+                      { step: 1, label: 'Type' },
+                      { step: 2, label: 'Payment' },
+                    ].map((s) => (
+                      <div key={s.step} className="flex items-center gap-3 bg-card px-2">
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${bookingStep >= s.step ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground'}`}
+                        >
+                          {s.step}
+                        </div>
+                        <span
+                          className={`text-xs font-semibold ${bookingStep >= s.step ? 'text-foreground' : 'text-muted-foreground'}`}
+                        >
+                          {s.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-5">
+                    {bookingStep === 1 && (
                   <div className="space-y-5">
                     <div>
                       <h3 className="font-semibold text-foreground mb-4">
@@ -1128,7 +1136,9 @@ export default function TalkToAstrologerPage() {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
 
       {/* Comprehensive Astrologer Filters Modal (Matching Design & Dynamic Data) */}
       <AstrologerFilterModal

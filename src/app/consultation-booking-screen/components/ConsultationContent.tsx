@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -66,6 +67,7 @@ const currencies = [
 export default function ConsultationContent() {
   const [astrologers, setAstrologers] = useState<Astrologer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterSpecialty, setFilterSpecialty] = useState<string>('all');
@@ -78,7 +80,11 @@ export default function ConsultationContent() {
   const [isWaiting, setIsWaiting] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     const fetchAstrologers = async () => {
       try {
         const q = query(collection(db, 'astrologers'), where('status', '==', 'approved'));
@@ -400,182 +406,184 @@ export default function ConsultationContent() {
       </div>
 
       {/* Booking Modal */}
-      <AnimatePresence>
-        {selectedAstrologer && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setSelectedAstrologer(null);
-                setBookingStep(1);
-              }
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-card rounded-2xl border border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-            >
-              {/* Modal header */}
-              <div className="sticky top-0 bg-card border-b border-border p-5 flex items-center justify-between z-10">
-                <div className="flex items-center gap-3">
-                  <AppImage
-                    src={selectedAstrologer.image}
-                    alt={`${selectedAstrologer.name} booking modal profile`}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-xl object-cover"
-                  />
-
-                  <div>
-                    <h2 className="font-bold text-foreground">{selectedAstrologer.name}</h2>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedAstrologer.specialty[0]} · {selectedCurrency.symbol}
-                      {convertPrice(selectedAstrologer.pricePerMin)}/min
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {selectedAstrologer && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) {
                     setSelectedAstrologer(null);
                     setBookingStep(1);
-                  }}
-                  className="p-2 rounded-xl hover:bg-muted transition-all"
+                  }
+                }}
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="bg-card rounded-2xl border border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto"
                 >
-                  <X size={18} className="text-muted-foreground" />
-                </button>
-              </div>
+                  {/* Modal header */}
+                  <div className="sticky top-0 bg-card border-b border-border p-5 flex items-center justify-between z-10">
+                    <div className="flex items-center gap-3">
+                      <AppImage
+                        src={selectedAstrologer.image}
+                        alt={`${selectedAstrologer.name} booking modal profile`}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 rounded-xl object-cover"
+                      />
 
-              {/* Step indicator */}
-              <div className="flex items-center justify-between relative">
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border -z-10" />
-                      {[
-                        { step: 1, label: 'Type' },
-                        { step: 2, label: 'Payment' },
-                      ].map((s) => (
-                        <div key={`step-${s.step}`} className="flex items-center gap-3 bg-card px-2">
-                          <div
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${bookingStep >= s.step ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground'}`}
-                          >
-                            {s.step}
-                          </div>
-                          <span
-                            className={`text-xs font-semibold ${bookingStep >= s.step ? 'text-foreground' : 'text-muted-foreground'}`}
-                          >
-                            {s.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-              <div className="p-5">
-                {/* Step 1: Consultation type */}
-                {bookingStep === 1 && (
-                  <div className="space-y-5">
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-4">
-                        Choose Consultation Type
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {(['video', 'call'] as const).map((type) => (
-                          <button
-                            key={`type-${type}`}
-                            onClick={() => setConsultationType(type)}
-                            className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${consultationType === type ? 'border-accent bg-accent/10' : 'border-border hover:border-accent/50'}`}
-                          >
-                            {type === 'video' ? (
-                              <Video
-                                size={24}
-                                className={
-                                  consultationType === type
-                                    ? 'text-accent'
-                                    : 'text-muted-foreground'
-                                }
-                              />
-                            ) : (
-                              <Phone
-                                size={24}
-                                className={
-                                  consultationType === type
-                                    ? 'text-accent'
-                                    : 'text-muted-foreground'
-                                }
-                              />
-                            )}
-                            <span className="font-semibold text-sm text-foreground capitalize">
-                              {type} Consultation
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {type === 'video' ? 'Face-to-face via video' : 'Audio only'}
-                            </span>
-                          </button>
-                        ))}
+                      <div>
+                        <h2 className="font-bold text-foreground">{selectedAstrologer.name}</h2>
+                        <p className="text-xs text-muted-foreground">
+                          {selectedAstrologer.specialty[0]} · {selectedCurrency.symbol}
+                          {convertPrice(selectedAstrologer.pricePerMin)}/min
+                        </p>
                       </div>
                     </div>
-
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-3">Duration</h3>
-                      <div className="flex gap-2 flex-wrap">
-                        {[5, 10, 15, 30, 45, 60].map((d) => (
-                          <button
-                            key={`dur-${d}`}
-                            onClick={() => setDuration(d)}
-                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${duration === d ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
-                          >
-                            {d} min — {selectedCurrency.symbol}
-                            {convertPrice(selectedAstrologer.pricePerMin * d)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-muted/50 border border-border">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        About {selectedAstrologer.name}
-                      </p>
-                      <p className="text-sm text-foreground">{selectedAstrologer.about}</p>
-                    </div>
-
                     <button
-                      onClick={() => setBookingStep(2)}
-                      className="w-full py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                      onClick={() => {
+                        setSelectedAstrologer(null);
+                        setBookingStep(1);
+                      }}
+                      className="p-2 rounded-xl hover:bg-muted transition-all"
                     >
-                      Continue to Payment <ChevronRight size={16} />
+                      <X size={18} className="text-muted-foreground" />
                     </button>
                   </div>
-                )}
 
-                {/* Step 2: Payment */}
-                {bookingStep === 2 && (
-                  <div className="space-y-5">
-                    <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
-                      <h3 className="font-semibold text-foreground">Booking Summary</h3>
-                      {[
-                        { label: 'Astrologer', value: selectedAstrologer.name },
-                        {
-                          label: 'Type',
-                          value:
-                            consultationType === 'video'
-                              ? 'Video Consultation'
-                              : 'Phone Consultation',
-                        },
-                        { label: 'Mode', value: 'Instant Connect' },
-                        { label: 'Duration', value: `${duration} minutes` },
-                        {
-                          label: 'Rate',
-                          value: `${selectedCurrency.symbol}${convertPrice(selectedAstrologer.pricePerMin)}/min`,
-                        },
-                      ].map((item) => (
-                        <div key={`summary-${item.label}`} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">{item.label}</span>
-                          <span className="font-medium text-foreground">{item.value}</span>
+                  {/* Step indicator */}
+                  <div className="flex items-center justify-between relative p-5 border-b border-border">
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border -z-10" />
+                    {[
+                      { step: 1, label: 'Type' },
+                      { step: 2, label: 'Payment' },
+                    ].map((s) => (
+                      <div key={`step-${s.step}`} className="flex items-center gap-3 bg-card px-2">
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${bookingStep >= s.step ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground'}`}
+                        >
+                          {s.step}
                         </div>
-                      ))}
+                        <span
+                          className={`text-xs font-semibold ${bookingStep >= s.step ? 'text-foreground' : 'text-muted-foreground'}`}
+                        >
+                          {s.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-5">
+                    {/* Step 1: Consultation type */}
+                    {bookingStep === 1 && (
+                      <div className="space-y-5">
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-4">
+                            Choose Consultation Type
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {(['video', 'call'] as const).map((type) => (
+                              <button
+                                key={`type-${type}`}
+                                onClick={() => setConsultationType(type)}
+                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${consultationType === type ? 'border-accent bg-accent/10' : 'border-border hover:border-accent/50'}`}
+                              >
+                                {type === 'video' ? (
+                                  <Video
+                                    size={24}
+                                    className={
+                                      consultationType === type
+                                        ? 'text-accent'
+                                        : 'text-muted-foreground'
+                                    }
+                                  />
+                                ) : (
+                                  <Phone
+                                    size={24}
+                                    className={
+                                      consultationType === type
+                                        ? 'text-accent'
+                                        : 'text-muted-foreground'
+                                    }
+                                  />
+                                )}
+                                <span className="font-semibold text-sm text-foreground capitalize">
+                                  {type} Consultation
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {type === 'video' ? 'Face-to-face via video' : 'Audio only'}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-3">Duration</h3>
+                          <div className="flex gap-2 flex-wrap">
+                            {[5, 10, 15, 30, 45, 60].map((d) => (
+                              <button
+                                key={`dur-${d}`}
+                                onClick={() => setDuration(d)}
+                                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${duration === d ? 'gold-gradient-bg text-white' : 'bg-muted text-muted-foreground hover:text-foreground'}`}
+                              >
+                                {d} min — {selectedCurrency.symbol}
+                                {convertPrice(selectedAstrologer.pricePerMin * d)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            About {selectedAstrologer.name}
+                          </p>
+                          <p className="text-sm text-foreground">{selectedAstrologer.about}</p>
+                        </div>
+
+                        <button
+                          onClick={() => setBookingStep(2)}
+                          className="w-full py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                        >
+                          Continue to Payment <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Step 2: Payment */}
+                    {bookingStep === 2 && (
+                      <div className="space-y-5">
+                        <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
+                          <h3 className="font-semibold text-foreground">Booking Summary</h3>
+                          {[
+                            { label: 'Astrologer', value: selectedAstrologer.name },
+                            {
+                              label: 'Type',
+                              value:
+                                consultationType === 'video'
+                                  ? 'Video Consultation'
+                                  : 'Phone Consultation',
+                            },
+                            { label: 'Mode', value: 'Instant Connect' },
+                            { label: 'Duration', value: `${duration} minutes` },
+                            {
+                              label: 'Rate',
+                              value: `${selectedCurrency.symbol}${convertPrice(selectedAstrologer.pricePerMin)}/min`,
+                            },
+                          ].map((item) => (
+                            <div key={`summary-${item.label}`} className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">{item.label}</span>
+                              <span className="font-medium text-foreground">{item.value}</span>
+                            </div>
+                          ))}
                       <div className="border-t border-border pt-3 flex justify-between">
                         <span className="font-semibold text-foreground">Total</span>
                         <span className="text-xl font-bold text-accent tabular-nums">
@@ -649,7 +657,9 @@ export default function ConsultationContent() {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
     </div>
   );
 }

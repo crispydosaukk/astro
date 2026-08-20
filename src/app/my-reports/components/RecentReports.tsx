@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText,
@@ -34,6 +35,11 @@ export default function RecentReports() {
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<any>(null);
   const [activeCategory, setActiveCategory] = useState<'all' | 'services' | 'remedies' | 'mahadasha'>('all');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     async function fetchReportsAndGuides() {
@@ -318,68 +324,83 @@ export default function RecentReports() {
       </div>
 
       {/* Report Modal */}
-      <AnimatePresence>
-        {selectedReport && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 print:p-0 print:static print:inset-auto print:z-auto">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-background/80 backdrop-blur-sm print:hidden"
-              onClick={() => setSelectedReport(null)}
-            />
-            <motion.div
-              id="report-pdf-content"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl max-h-[85vh] print:max-h-none print:h-auto print:shadow-none print:border-none print:bg-transparent bg-card border border-border rounded-3xl shadow-2xl flex flex-col overflow-hidden print:overflow-visible"
-            >
-              {/* Print Header with Logo */}
-              <div className="hidden print:flex flex-col items-center justify-center pb-6 mb-6 border-b-2 border-black">
-                <img src="/AstroParihar_Logo.png" alt="AstroParihar Logo" className="h-24 object-contain" />
-              </div>
-
-              <div className="p-6 sm:p-8 border-b border-border flex items-center justify-between bg-muted/30 print:bg-transparent print:border-none print:p-0">
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground print:text-black">{selectedReport.type}</h3>
-                  {selectedReport.details?.dob && (
-                    <p className="text-sm text-muted-foreground mt-1 print:text-gray-600">
-                      Generated for {selectedReport.details?.dob} | {selectedReport.details?.time} |{' '}
-                      {selectedReport.details?.place}
-                    </p>
-                  )}
-                </div>
-                <button
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {selectedReport && (
+              <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 sm:p-6 print:p-0 print:static print:inset-auto print:z-auto">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-background/80 backdrop-blur-sm print:hidden"
                   onClick={() => setSelectedReport(null)}
-                  className="pdf-exclude p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground print:hidden"
+                />
+                <motion.div
+                  id="report-pdf-content"
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  className="relative w-full max-w-3xl max-h-[85vh] print:max-h-none print:h-auto print:shadow-none print:border-none print:bg-transparent bg-card border border-border rounded-3xl shadow-2xl flex flex-col overflow-hidden print:overflow-visible z-10"
                 >
-                  <X size={20} />
-                </button>
-              </div>
+                  {/* Print Header with Logo */}
+                  <div className="hidden print:flex flex-col items-center justify-center pb-6 mb-6 border-b-2 border-black">
+                    <img src="/AstroParihar_Logo.png" alt="AstroParihar Logo" className="h-24 object-contain" />
+                  </div>
 
-              <div className="overflow-y-auto custom-scrollbar print:overflow-visible print:h-auto">
-                <div className="p-4 sm:p-6 space-y-6 print:p-0 print:py-6">
-                  {getReportCategory(selectedReport.type) === 'mahadasha' ? (
-                    <div className="space-y-4">
-                      <div className="p-3 rounded-2xl bg-black/40 border border-[#C9952B]/30 flex items-center justify-between flex-wrap gap-2 text-xs">
-                        <span className="text-[#C9952B] font-bold">📄 Official Admin Uploaded PDF Document</span>
-                        <a
-                          href={getGuidePdfUrl(selectedReport)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-400 hover:underline font-bold"
-                        >
-                          Open PDF in New Window ↗
-                        </a>
-                      </div>
-                      <iframe
-                        src={getGuidePdfUrl(selectedReport)}
-                        title={selectedReport.type}
-                        className="w-full h-[60vh] sm:h-[65vh] rounded-2xl border border-white/10 bg-white shadow-inner"
-                      />
+                  <div className="p-6 sm:p-8 border-b border-border flex items-center justify-between bg-muted/30 print:bg-transparent print:border-none print:p-0">
+                    <div>
+                      <h3 className="text-2xl font-bold text-foreground print:text-black">{selectedReport.type}</h3>
+                      {selectedReport.details?.dob && (
+                        <p className="text-sm text-muted-foreground mt-1 print:text-gray-600">
+                          Generated for {selectedReport.details?.dob} | {selectedReport.details?.time} |{' '}
+                          {selectedReport.details?.place}
+                        </p>
+                      )}
                     </div>
-                  ) : (
+                    <button
+                      onClick={() => setSelectedReport(null)}
+                      className="pdf-exclude p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground print:hidden"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="overflow-y-auto custom-scrollbar print:overflow-visible print:h-auto">
+                    <div className="p-4 sm:p-6 space-y-6 print:p-0 print:py-6">
+                      {getReportCategory(selectedReport.type) === 'mahadasha' ? (
+                        <div className="space-y-4">
+                          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#EDE4D5] dark:bg-amber-950/40 border border-[#E5D9C8] dark:border-amber-500/30 flex items-center justify-between flex-wrap gap-3 shadow-sm">
+                            <div className="flex items-center gap-3">
+                              <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/20 text-amber-950 dark:text-amber-200 font-bold text-sm shadow-inner">
+                                📄
+                              </span>
+                              <div>
+                                <span className="text-[#292522] dark:text-amber-100 font-bold text-xs sm:text-sm block">
+                                  Official Admin Uploaded PDF Document
+                                </span>
+                                <span className="text-[11px] text-[#713B32] dark:text-amber-300/80 font-medium block">
+                                  Kundli Mahadasha calculations & Vedic analysis guide
+                                </span>
+                              </div>
+                            </div>
+                            <a
+                              href={getGuidePdfUrl(selectedReport)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl gold-gradient-bg hover:opacity-95 text-white font-bold text-xs shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                              <span>Open PDF in New Window</span>
+                              <span className="text-sm font-black">↗</span>
+                            </a>
+                          </div>
+                          <iframe
+                            src={getGuidePdfUrl(selectedReport)}
+                            title={selectedReport.type}
+                            className="w-full h-[60vh] sm:h-[65vh] rounded-2xl border border-border bg-white shadow-inner"
+                          />
+                        </div>
+                      ) : (
                     (() => {
                       try {
                         const data = typeof selectedReport.reportContent === 'string'
@@ -771,7 +792,9 @@ export default function RecentReports() {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+    )}
     </>
   );
 }
