@@ -249,10 +249,10 @@ export default function ServiceReportForm({
   };
 
   return (
-    <section id="get-report" className="pt-8 pb-16 bg-[#F8F3EA]">
+    <section id="get-report" className="pt-4 pb-12 bg-[#F8F3EA]">
       <div className="max-w-2xl mx-auto px-6 lg:px-10">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-[#292522] mb-3">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-[#292522] mb-2">
             {titleText} <span className="text-gradient-gold">{highlightText}</span>
           </h2>
           <p className="text-[#6B5E55] font-medium">{subtitle}</p>

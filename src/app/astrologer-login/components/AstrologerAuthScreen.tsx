@@ -20,6 +20,7 @@ import {
   Star,
   ChevronRight,
   CheckCircle2,
+  ArrowLeft,
 } from 'lucide-react';
 import { auth, db } from '@/lib/firebase/config';
 import {
@@ -64,7 +65,6 @@ export default function AstrologerAuthScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState<'login' | null>(null);
   const [signupSuccessToken, setSignupSuccessToken] = useState<string | null>(null);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
@@ -126,19 +126,12 @@ export default function AstrologerAuthScreen() {
     }
   }, [step, isGoogleLoaded, signupForm]);
 
-  const handleCopy = (text: string, field: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 1500);
-  };
-
   const onLogin = async (data: LoginForm) => {
     setIsLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
-      // Fetch astrologer document
       const astDocRef = doc(db, 'astrologers', user.uid);
       const astDocSnap = await getDoc(astDocRef);
 
@@ -162,90 +155,113 @@ export default function AstrologerAuthScreen() {
 
       setShowSuccessPopup('login');
       setTimeout(() => {
-        window.location.href = '/astrologer-dashboard';
-      }, 2500);
+        router.push('/astrologer-dashboard');
+      }, 1500);
     } catch (error: any) {
-      loginForm.setError('email', { message: 'Invalid email or password. Please try again.' });
+      console.error(error);
+      loginForm.setError('email', {
+        message: 'Invalid email or password. Please try again.',
+      });
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const onSignup = async (data: SignupForm) => {
-    if (step === 1) {
-      setStep(2);
+  const onSignupStep1 = (data: any) => {
+    if (data.password !== data.confirmPassword) {
+      signupForm.setError('confirmPassword', { message: 'Passwords do not match' });
       return;
     }
+    setStep(2);
+  };
+
+  const onSignupStep2 = async (data: SignupForm) => {
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
-      let tokenValue = 1;
-      const counterRef = doc(db, 'system', 'astrologerCounter');
+      let generatedTokenNumber = '';
 
-      try {
-        await runTransaction(db, async (transaction) => {
-          const counterDoc = await transaction.get(counterRef);
-          if (!counterDoc.exists()) {
-            transaction.set(counterRef, { count: 1 });
-          } else {
-            tokenValue = counterDoc.data().count + 1;
-            transaction.update(counterRef, { count: tokenValue });
-          }
+      await runTransaction(db, async (transaction) => {
+        const counterRef = doc(db, 'system_counters', 'astrologer_tokens');
+        const counterSnap = await transaction.get(counterRef);
+
+        let currentCount = 1000;
+        if (counterSnap.exists()) {
+          currentCount = counterSnap.data().lastToken || 1000;
+        }
+
+        const nextToken = currentCount + 1;
+        generatedTokenNumber = String(nextToken);
+
+        transaction.set(counterRef, { lastToken: nextToken }, { merge: true });
+
+        const astrologerRef = doc(db, 'astrologers', user.uid);
+        transaction.set(astrologerRef, {
+          uid: user.uid,
+          tokenNumber: generatedTokenNumber,
+          name: data.name,
+          email: data.email,
+          dob: data.dob,
+          city: data.city,
+          gender: data.gender,
+          languages: data.languages ? data.languages.split(',').map((s) => s.trim()) : [],
+          skills: data.skills ? data.skills.split(',').map((s) => s.trim()) : [],
+          phoneType: data.phoneType,
+          workingElsewhere: data.workingElsewhere,
+          dailyHours: data.dailyHours,
+          learningSource: data.learningSource,
+          status: 'pending',
+          isOnline: false,
+          rating: 5.0,
+          totalCalls: 0,
+          totalEarnings: 0,
+          createdAt: new Date().toISOString(),
         });
-      } catch (err) {
-        console.error('Transaction failed: ', err);
-        // Fallback to random if transaction fails for any reason
-        tokenValue = Math.floor(100 + Math.random() * 900);
-      }
-
-      const formattedToken = tokenValue.toString().padStart(3, '0');
-
-      await setDoc(doc(db, 'astrologers', user.uid), {
-        name: data.name,
-        email: data.email,
-        dob: data.dob,
-        city: data.city,
-        gender: data.gender,
-        languages: data.languages,
-        skills: data.skills,
-        phoneType: data.phoneType,
-        workingElsewhere: data.workingElsewhere,
-        dailyHours: data.dailyHours,
-        learningSource: data.learningSource,
-        role: 'astrologer',
-        status: 'pending',
-        tokenNumber: formattedToken,
-        createdAt: new Date().toISOString(),
       });
 
       await signOut(auth);
 
-      setSignupSuccessToken(formattedToken);
-      setIsLoading(false);
-      loginForm.setValue('email', data.email);
+      setSignupSuccessToken(generatedTokenNumber);
+      toast.success('Registration submitted successfully!');
     } catch (error: any) {
-      console.error(error);
-      let errorMessage = 'Failed to create account. Please try again.';
+      console.error('Signup error:', error);
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'An account with this email already exists.';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Password is too weak. Please use a stronger password.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
+        signupForm.setError('email', { message: 'This email is already registered.' });
+        setStep(1);
+      } else {
+        toast.error(error.message || 'Failed to submit registration. Please try again.');
       }
-      toast.error(errorMessage);
+    } finally {
       setIsLoading(false);
     }
   };
 
+  const onSignup = (data: SignupForm) => {
+    if (step === 1) {
+      onSignupStep1(data);
+    } else {
+      onSignupStep2(data);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex bg-[#F8F3EA] text-[#292522]">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#F8F3EA] text-[#292522] relative">
       <Script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-CXsyKpvFtpidpOkhOiIQGfXFO3O5lKA&libraries=places"
         strategy="lazyOnload"
         onReady={() => setIsGoogleLoaded(true)}
       />
+
+      <Link
+        href="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFFDFC]/95 backdrop-blur-md border border-[#E5D9C8] text-xs sm:text-sm font-bold text-[#713B32] hover:bg-[#EDE4D5] hover:text-[#552B24] transition-all shadow-md group"
+      >
+        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-[#B88A44]" />
+        <span>Back to Home</span>
+      </Link>
+
       {/* Left panel - Celestial Showcase */}
       <div className="hidden lg:flex lg:w-1/2 cosmic-bg flex-col items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
@@ -268,13 +284,12 @@ export default function AstrologerAuthScreen() {
         <div className="absolute bottom-1/3 right-1/4 w-60 h-60 rounded-full bg-[#B88A44]/20 blur-3xl" />
 
         <div className="relative text-center space-y-8 max-w-md z-10">
-          {/* Framed Luxury Logo Capsule */}
-          <div className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-[#FFFDFC]/95 backdrop-blur-md border border-[#D8B66A]/40 shadow-2xl">
-            <AppLogo src="/AstroParihar_Logo.png" size={52} />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#D8B66A]/40 text-[#F6D075] text-xs font-bold uppercase tracking-widest shadow-lg">
+            <Sparkles size={14} className="text-[#D8B66A]" /> Verified Vedic Platform
           </div>
 
-          <div className="w-44 h-44 mx-auto rounded-full gold-gradient-bg flex items-center justify-center animate-float shadow-2xl border-4 border-[#FFFDFC]/20">
-            <span className="text-7xl drop-shadow-md">✨</span>
+          <div className="w-40 h-40 mx-auto rounded-full gold-gradient-bg flex items-center justify-center animate-float shadow-2xl border-4 border-[#FFFDFC]/20">
+            <span className="text-6xl drop-shadow-md">✨</span>
           </div>
 
           <div className="space-y-3">
@@ -295,7 +310,7 @@ export default function AstrologerAuthScreen() {
                 className="bg-[#FFFDFC]/10 backdrop-blur-md rounded-2xl p-3 text-center border border-[#D8B66A]/30 shadow-lg"
               >
                 <div className="text-lg font-bold text-[#D8B66A] tabular-nums">{s.value}</div>
-                <div className="text-[11px] text-white/70 mt-0.5">{s.label}</div>
+                <div className="text-[11px] text-white/80 mt-0.5">{s.label}</div>
               </div>
             ))}
           </div>
@@ -303,13 +318,12 @@ export default function AstrologerAuthScreen() {
       </div>
 
       {/* Right panel - Astrologer Auth Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 bg-[#F8F3EA] overflow-y-auto">
-        <div className="w-full max-w-md bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#E5D9C8] shadow-xl">
-          {/* Mobile logo */}
-          <div className="flex items-center justify-center gap-2 mb-8 lg:hidden">
-            <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] shadow-sm">
-              <AppLogo src="/AstroParihar_Logo.png" size={38} />
-            </div>
+      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 bg-[#F8F3EA] overflow-y-auto pt-20 lg:pt-12">
+        <div className="w-full max-w-md bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#E5D9C8] shadow-2xl">
+          <div className="flex items-center justify-center mb-6">
+            <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
+              <AppLogo src="/AstroParihar_Logo.png" size={46} />
+            </Link>
           </div>
 
           {signupSuccessToken ? (

@@ -153,6 +153,12 @@ export default function FreeJanamKundliPage() {
       const data = await res.json();
       if (data?.reportData) {
         setApiReportData(data.reportData);
+        setHoroscopeReport((prev: any) => ({
+          ...prev,
+          ...data.reportData,
+          predictions: data.reportData.predictions || prev?.predictions,
+          astrologicalAnalysis: data.reportData.astrologicalAnalysis || prev?.astrologicalAnalysis,
+        }));
       }
     } catch (err) {
       console.warn('API report call error:', err);
@@ -181,81 +187,113 @@ export default function FreeJanamKundliPage() {
 
   return (
     <div className="min-h-screen bg-background dark text-foreground">
-      {/* Fullscreen Hero Section */}
-      <section className="relative overflow-hidden border-b border-white/5 flex flex-col pt-28 lg:pt-36 pb-16 lg:pb-20 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
+      {/* Fullscreen Hero Section with Image as Background */}
+      <section className="relative overflow-hidden border-b border-[#B88A44]/20 flex flex-col justify-center min-h-[85vh] lg:min-h-[90vh] pt-24 lg:pt-28 pb-16 lg:pb-24">
+        {/* Background Image with Vedic Cosmic Overlay */}
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <Image
+            src="/images/horoscope_banner.jpg"
+            alt="Vedic Janam Kundli Background"
+            fill
+            className="object-cover object-center lg:object-right scale-100"
+            priority
+          />
+          {/* Targeted overlays: dark gradient on left for crisp readability, open on right for vivid zodiac mandala */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#170b16]/95 via-[#230f20]/85 to-[#170b16]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1b0d1a] via-transparent to-[#150914]/50" />
+        </div>
 
-        <div className="relative z-10 flex-1 flex items-center justify-center">
+        {/* Ambient Glows */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/30 blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 rounded-full bg-[#C9952B]/20 blur-3xl pointer-events-none z-0" />
+
+        <div className="relative z-10 flex-1 flex items-center">
           <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
-            <div className="grid lg:grid-cols-2 items-center gap-12">
-              {/* Left Content */}
+            <div className="max-w-3xl space-y-6">
+              {/* Badge */}
               <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="space-y-6 order-2 lg:order-1"
+                initial={{ opacity: 0, y: -15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
               >
-                <div>
-                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-6 backdrop-blur-md">
-                    Free Janam Kundli
-                  </span>
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight max-w-xl">
-                    Free Online <br />
-                    <span className="text-gradient-gold">Janam Kundli</span>
-                  </h1>
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-lg">
-                    Generate your free Vedic birth chart (Kundli) with Lagna, Rashi, Nakshatra, planetary positions, and future predictions.
-                  </p>
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 shadow-xl shadow-black/20 backdrop-blur-md">
+                  <Sparkles size={15} className="text-[#F6D075] animate-pulse" />
+                  Free Authentic Vedic Janam Kundli
+                </span>
+              </motion.div>
 
-                  <div className="flex flex-wrap items-center gap-3 pt-4">
-                    <button
-                      onClick={() => {
-                        document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="px-7 py-3 rounded-full gold-gradient-bg text-white font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20 text-xs sm:text-sm"
-                    >
-                      Check Your Kundli <ArrowRight size={16} />
-                    </button>
-                    <Link
-                      href="/services/horoscope/love"
-                      className="px-4 py-3 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 font-semibold hover:bg-rose-500/20 transition-colors flex items-center gap-1.5 text-xs"
-                    >
-                      <Heart size={13} className="text-rose-400" /> Love
-                    </Link>
-                    <Link
-                      href="/services/horoscope/finance"
-                      className="px-4 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-semibold hover:bg-emerald-500/20 transition-colors flex items-center gap-1.5 text-xs"
-                    >
-                      <Coins size={13} className="text-emerald-400" /> Finance
-                    </Link>
-                    <Link
-                      href="/services/horoscope/health"
-                      className="px-4 py-3 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-semibold hover:bg-cyan-500/20 transition-colors flex items-center gap-1.5 text-xs"
-                    >
-                      <Activity size={13} className="text-cyan-400" /> Health
-                    </Link>
-                  </div>
+              {/* Main Headline */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="space-y-4"
+              >
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.12] drop-shadow-lg">
+                  Free Online <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">
+                    Janam Kundli
+                  </span>
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
+                  Generate your authentic Vedic birth chart (Kundli) with exact Lagna, Moon Rashi, Nakshatra, planetary positions, D9 Navamsha, and lifetime Dasha predictions.
+                </p>
+              </motion.div>
+
+              {/* Feature Highlights */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="flex flex-wrap gap-3 pt-2"
+              >
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
+                  <Star size={16} className="text-[#F6D075]" />
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">100% Accurate Vedic Math</span>
+                </div>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
+                  <Sun size={16} className="text-[#F6D075]" />
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">Lagna & D9 Navamsha</span>
+                </div>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
+                  <Compass size={16} className="text-[#F6D075]" />
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">Vimshottari Dasha Analysis</span>
                 </div>
               </motion.div>
 
-              {/* Right Visual */}
+              {/* Action Buttons */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-                className="relative h-[40vh] lg:h-[80vh] w-full order-1 lg:order-2 flex items-center justify-center p-6 lg:p-12"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="flex flex-wrap items-center gap-3.5 pt-3"
               >
-                <div className="relative w-full h-full max-w-lg lg:max-w-xl rounded-3xl overflow-hidden shadow-2xl border border-[#C9952B]/30">
-                  <Image
-                    src="/images/horoscope_banner.jpg"
-                    alt="AstroParihar Kundli Banner"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
-                </div>
+                <button
+                  onClick={() => {
+                    document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#C9952B]/40 text-sm sm:text-base"
+                >
+                  Check Your Kundli <ArrowRight size={18} />
+                </button>
+                <Link
+                  href="/services/horoscope/love"
+                  className="px-5 py-3.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-100 font-bold hover:bg-rose-500/30 hover:scale-[1.02] transition-all flex items-center gap-2 text-xs sm:text-sm backdrop-blur-md shadow-md"
+                >
+                  <Heart size={15} className="text-rose-400" /> Love
+                </Link>
+                <Link
+                  href="/services/horoscope/finance"
+                  className="px-5 py-3.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-100 font-bold hover:bg-emerald-500/30 hover:scale-[1.02] transition-all flex items-center gap-2 text-xs sm:text-sm backdrop-blur-md shadow-md"
+                >
+                  <Coins size={15} className="text-emerald-400" /> Finance
+                </Link>
+                <Link
+                  href="/services/horoscope/health"
+                  className="px-5 py-3.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-100 font-bold hover:bg-cyan-500/30 hover:scale-[1.02] transition-all flex items-center gap-2 text-xs sm:text-sm backdrop-blur-md shadow-md"
+                >
+                  <Activity size={15} className="text-cyan-400" /> Health
+                </Link>
               </motion.div>
             </div>
           </div>
@@ -263,91 +301,163 @@ export default function FreeJanamKundliPage() {
       </section>
 
       {/* Input Form Section */}
-      <section id="form-section" className="py-8 lg:py-12 bg-background relative z-10">
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
-          <div className="glass-card border border-white/10 rounded-3xl p-6 sm:p-10 space-y-6 shadow-xl">
-            <div className="text-center space-y-1">
-              <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">New Kundli Generation</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Enter Birth Details</h2>
-              <p className="text-xs text-muted-foreground">Accurate birth parameters unlock exact Lagna, Nakshatra & Dasha predictions</p>
+      <section id="form-section" className="py-12 lg:py-16 bg-background relative z-10">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            {/* Left/Main Compact Form Card */}
+            <div className="lg:col-span-7 glass-card border border-[#B88A44]/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-[#713B32] uppercase tracking-widest bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
+                  New Kundli Generation
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#292522] pt-1">Enter Birth Details</h2>
+                <p className="text-xs sm:text-sm text-[#6B5E55]">Accurate birth parameters unlock exact Lagna, Nakshatra & Dasha predictions</p>
+              </div>
+
+              <form onSubmit={handleCalculate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
+                    <User size={14} className="text-[#B88A44]" /> Full Name*
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Rahul Sharma"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 text-[#292522] placeholder:text-[#6B5E55]/60 text-sm outline-none shadow-sm transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
+                    <User size={14} className="text-[#B88A44]" /> Gender*
+                  </label>
+                  <select
+                    value={formData.gender}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 text-[#292522] text-sm outline-none shadow-sm transition-all cursor-pointer"
+                  >
+                    <option value="Male" className="bg-[#FFFDFC] text-[#292522]">Male</option>
+                    <option value="Female" className="bg-[#FFFDFC] text-[#292522]">Female</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
+                    <Calendar size={14} className="text-[#B88A44]" /> Birth Date*
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.dob}
+                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                    onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                    className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 text-[#292522] text-sm outline-none shadow-sm transition-all cursor-pointer"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
+                    <Clock size={14} className="text-[#B88A44]" /> Birth Time*
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={formData.tob}
+                    onChange={(e) => setFormData({ ...formData, tob: e.target.value })}
+                    onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                    className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 text-[#292522] text-sm outline-none shadow-sm transition-all cursor-pointer"
+                  />
+                </div>
+
+                {/* City Autocomplete with OpenStreetMap Coordinates */}
+                <div className="sm:col-span-2 space-y-1.5">
+                  <CityLocationInput
+                    label="Birth Place (City Search & Map Location)*"
+                    value={formData.pob}
+                    onChange={handleLocationChange}
+                    required
+                  />
+                </div>
+
+                <div className="sm:col-span-2 pt-2">
+                  <button
+                    type="submit"
+                    disabled={isCalculating}
+                    className="w-full py-3.5 rounded-full gold-gradient-bg text-[#292522] font-extrabold text-sm sm:text-base shadow-xl hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Sparkles size={18} />
+                    <span>{isCalculating ? 'Generating AI Kundli Report...' : 'Generate Free Janam Kundli'}</span>
+                  </button>
+                </div>
+              </form>
             </div>
 
-            <form onSubmit={handleCalculate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <User size={14} className="text-[#C9952B]" /> Full Name*
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Rahul Sharma"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-[#C9952B] text-foreground text-sm outline-none"
-                />
+            {/* Right Information & Value Card */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="glass-card border border-[#B88A44]/20 rounded-3xl p-6 sm:p-7 space-y-4 shadow-lg">
+                <div className="flex items-center gap-2 text-[#713B32] font-bold text-sm">
+                  <Sparkles size={16} className="text-[#B88A44]" />
+                  <span>What Your Free Kundli Includes</span>
+                </div>
+
+                <ul className="space-y-3 text-xs sm:text-sm text-[#292522]">
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-[#713B32]">Lagna Chart (D1) & Moon Chart</strong>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">Exact planetary house placements, signs & exact degrees.</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-[#713B32]">D9 Navamsha Chart</strong>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">Crucial divisional chart revealing spouse & second-half life destiny.</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-[#713B32]">Vimshottari Dasha Analysis</strong>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">Detailed current Mahadasha, Antardasha & timeline forecasts.</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-[#713B32]">Manglik & Planetary Dosha Checks</strong>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">In-depth evaluations of Manglik, Sade Sati & Kaal Sarp Yogas.</p>
+                    </div>
+                  </li>
+                </ul>
+
+                <div className="pt-2 border-t border-[#E5D9C8] flex items-center justify-between text-xs text-[#6B5E55]">
+                  <span className="flex items-center gap-1 font-semibold text-[#713B32]">
+                    <ShieldCheck size={14} className="text-emerald-600" /> 100% Private & Free
+                  </span>
+                  <span>Vedic Astronomical Math</span>
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <User size={14} className="text-[#C9952B]" /> Gender*
-                </label>
-                <select
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/10 focus:border-[#C9952B] text-foreground text-sm outline-none"
+              {/* Quick Astrologer CTA */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#281123] to-[#170b16] text-white border border-[#B88A44]/30 space-y-2.5 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#F6D075] uppercase tracking-wider">Need Personal Guidance?</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Online Now</span>
+                </div>
+                <p className="text-xs text-[#F8F3EA]/90 leading-relaxed">
+                  Have a certified Vedic Astrologer review your birth chart live for career, marriage, or financial decisions.
+                </p>
+                <Link
+                  href="/talk-to-astrologer"
+                  className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl gold-gradient-bg text-[#292522] font-extrabold text-xs hover:brightness-110 transition-all shadow-md"
                 >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
+                  <PhoneCall size={13} /> Consult Astrologer Live
+                </Link>
               </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Calendar size={14} className="text-[#C9952B]" /> Birth Date*
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={formData.dob}
-                  onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-[#C9952B] text-foreground text-sm outline-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Clock size={14} className="text-[#C9952B]" /> Birth Time*
-                </label>
-                <input
-                  type="time"
-                  required
-                  value={formData.tob}
-                  onChange={(e) => setFormData({ ...formData, tob: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-[#C9952B] text-foreground text-sm outline-none"
-                />
-              </div>
-
-              {/* City Autocomplete with OpenStreetMap Coordinates */}
-              <div className="sm:col-span-2 space-y-1.5">
-                <CityLocationInput
-                  label="Birth Place (City Search & Map Location)*"
-                  value={formData.pob}
-                  onChange={handleLocationChange}
-                  required
-                />
-              </div>
-
-              <div className="sm:col-span-2 pt-2">
-                <button
-                  type="submit"
-                  disabled={isCalculating}
-                  className="w-full py-4 rounded-full gold-gradient-bg text-white font-bold text-base shadow-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                >
-                  <Sparkles size={18} />
-                  <span>{isCalculating ? 'Generating AI Kundli Report...' : 'Generate Kundli'}</span>
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       </section>

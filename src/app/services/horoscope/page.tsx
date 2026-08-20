@@ -154,6 +154,12 @@ export default function FreeHoroscopePage() {
       const data = await res.json();
       if (data?.reportData) {
         setApiReportData(data.reportData);
+        setHoroscopeReport((prev: any) => ({
+          ...prev,
+          ...data.reportData,
+          predictions: data.reportData.predictions || prev?.predictions,
+          astrologicalAnalysis: data.reportData.astrologicalAnalysis || prev?.astrologicalAnalysis,
+        }));
       }
     } catch (err) {
       console.warn('API report call error:', err);
@@ -193,173 +199,217 @@ export default function FreeHoroscopePage() {
 
   return (
     <div className="min-h-screen bg-background dark text-foreground">
-      {/* Fullscreen Hero Section - Spans logo to right edge */}
-      <section className="relative overflow-hidden border-b border-white/5 flex flex-col pt-28 lg:pt-36 pb-16 lg:pb-20 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex-1 flex items-center justify-center">
-          <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
-            <div className="grid lg:grid-cols-2 items-center gap-12">
-              {/* Left Content */}
-              <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="space-y-6 order-2 lg:order-1"
-              >
-                <div>
-                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-6 backdrop-blur-md">
-                    Free Vedic Horoscope & Janam Kundli
-                  </span>
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight max-w-xl">
-                    Vedic Horoscope & <br />
-                    <span className="text-gradient-gold">Janam Kundli Report</span>
-                  </h1>
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-lg">
-                    Generate your free Vedic birth chart (Kundli) with Lagna, Rashi, Nakshatra, planetary positions, D9 Navamsha, and lifetime predictions.
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-3 pt-4">
-                    <button
-                      onClick={() => {
-                        document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="px-7 py-3 rounded-full gold-gradient-bg text-white font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20 text-xs sm:text-sm"
-                    >
-                      Calculate Kundli <ArrowRight size={16} />
-                    </button>
-                    <Link
-                      href="/services/horoscope/love"
-                      className="px-4 py-3 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 font-semibold hover:bg-rose-500/20 transition-colors flex items-center gap-1.5 text-xs"
-                    >
-                      <Heart size={13} className="text-rose-400" /> Love Horoscope
-                    </Link>
-                    <Link
-                      href="/services/horoscope/finance"
-                      className="px-4 py-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-semibold hover:bg-emerald-500/20 transition-colors flex items-center gap-1.5 text-xs"
-                    >
-                      <Coins size={13} className="text-emerald-400" /> Finance Horoscope
-                    </Link>
-                    <Link
-                      href="/services/horoscope/health"
-                      className="px-4 py-3 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-semibold hover:bg-cyan-500/20 transition-colors flex items-center gap-1.5 text-xs"
-                    >
-                      <Activity size={13} className="text-cyan-400" /> Health Horoscope
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Right Visual */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-                className="relative h-[40vh] lg:h-[80vh] w-full order-1 lg:order-2 flex items-center justify-center p-6 lg:p-12"
-              >
-                <div className="relative w-full h-full max-w-lg lg:max-w-xl rounded-3xl overflow-hidden shadow-2xl border border-[#C9952B]/30">
-                  <Image
-                    src="/images/horoscope_banner.jpg"
-                    alt="AstroParihar Kundli Banner"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
-                </div>
-              </motion.div>
-            </div>
-          </div>
+      {/* Fullscreen Hero Section with Integrated Form */}
+      <section className="relative overflow-hidden border-b border-[#B88A44]/20 flex flex-col justify-center min-h-[85vh] lg:min-h-[90vh] pt-24 lg:pt-28 pb-16 lg:pb-24">
+        {/* Background Image with Vedic Cosmic Overlay */}
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <Image
+            src="/images/horoscope_banner.jpg"
+            alt="Vedic Horoscope & Kundli Background"
+            fill
+            className="object-cover object-center lg:object-right scale-100"
+            priority
+          />
+          {/* Targeted overlays: dark gradient on left for crisp readability, open on right for vivid artwork */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#170b16]/95 via-[#230f20]/85 to-[#170b16]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1b0d1a] via-transparent to-[#150914]/50" />
         </div>
-      </section>
 
-      {/* Input Form Section with Map Location Integration */}
-      <section id="form-section" className="py-8 lg:py-12 bg-background relative z-10">
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
-          <div className="glass-card border border-white/10 rounded-3xl p-6 sm:p-10 space-y-6 shadow-xl">
-            <div className="text-center space-y-1">
-              <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">New Kundli Generation</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Enter Birth Details</h2>
-              <p className="text-xs text-muted-foreground">Accurate birth parameters & map coordinates unlock exact Lagna, Nakshatra & Dasha predictions</p>
-            </div>
+        {/* Ambient Glows */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/30 blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/20 blur-3xl pointer-events-none z-0" />
 
-            <form onSubmit={handleCalculate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <User size={14} className="text-[#C9952B]" /> Full Name*
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Rahul Sharma"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-[#C9952B] text-foreground text-sm outline-none"
-                />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 w-full">
+          <div className="grid lg:grid-cols-12 items-start gap-8 lg:gap-12 w-full">
+            {/* Left Form Section */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="lg:col-span-7 space-y-6"
+            >
+              <div>
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 mb-4 backdrop-blur-md shadow-xl shadow-black/20">
+                  <Sparkles size={15} className="text-[#F6D075] animate-pulse" /> Free Vedic Horoscope & Janam Kundli
+                </span>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight max-w-xl drop-shadow-lg">
+                  Free Vedic <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">Horoscope & Kundli</span>
+                </h1>
+                <p className="text-base sm:text-lg text-[#F8F3EA]/90 font-medium leading-relaxed max-w-lg drop-shadow">
+                  Enter your birth details to generate your complete Vedic birth chart with AI-powered planetary predictions, Dasha timeline, and authentic remedies.
+                </p>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <User size={14} className="text-[#C9952B]" /> Gender*
-                </label>
-                <select
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/10 focus:border-[#C9952B] text-foreground text-sm outline-none"
+              {/* Form Card */}
+              <div id="form-section" className="glass-card p-6 sm:p-8 rounded-3xl border border-[#B88A44]/30 shadow-2xl backdrop-blur-xl bg-card/90 space-y-4">
+                <form onSubmit={handleCalculate} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
+                        <User size={13} className="text-[#C9952B]" /> Full Name*
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Your Full Name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] placeholder:text-[#6B5E55]/60 text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Gender*</label>
+                      <select
+                        value={formData.gender}
+                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm cursor-pointer"
+                      >
+                        <option value="Male" className="bg-[#FFFDFC] text-[#292522]">Male</option>
+                        <option value="Female" className="bg-[#FFFDFC] text-[#292522]">Female</option>
+                        <option value="Other" className="bg-[#FFFDFC] text-[#292522]">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
+                        <Calendar size={13} className="text-[#C9952B]" /> Date of Birth*
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        value={formData.dob}
+                        onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                        onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                        className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock size={13} className="text-[#C9952B]" /> Time of Birth*
+                      </label>
+                      <input
+                        type="time"
+                        required
+                        value={formData.tob}
+                        onChange={(e) => setFormData({ ...formData, tob: e.target.value })}
+                        onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                        className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <CityLocationInput
+                      label="Place of Birth (City Search & Map Location)*"
+                      value={formData.pob}
+                      onChange={handleLocationChange}
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isCalculating}
+                    className="w-full py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-[#C9952B]/30 cursor-pointer pt-3"
+                  >
+                    {isCalculating ? (
+                      <span className="flex items-center gap-2">
+                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Generating AI Horoscope...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Sparkles size={18} className="text-[#292522]" /> Generate Free AI Horoscope
+                      </span>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+
+            {/* Right Side Category Cards & Trust Badges */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+              className="lg:col-span-5 space-y-4 pt-4 lg:pt-8"
+            >
+              <div className="glass-card border border-[#B88A44]/30 rounded-3xl p-6 space-y-4 shadow-2xl backdrop-blur-xl bg-card/85">
+                <h3 className="text-sm font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-2">
+                  <Star size={16} className="text-[#C9952B]" /> Specialized Horoscopes
+                </h3>
+                <div className="space-y-2.5">
+                  <Link
+                    href="/services/horoscope/love"
+                    className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 hover:border-rose-500 flex items-center justify-between transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-500">
+                        <Heart size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-[#292522] group-hover:text-rose-700">Love & Marriage Horoscope</div>
+                        <div className="text-xs text-[#6B5E55]">7th house, Venus & soulmate timing</div>
+                      </div>
+                    </div>
+                    <ArrowRight size={16} className="text-rose-500 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <Link
+                    href="/services/horoscope/finance"
+                    className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:border-emerald-500 flex items-center justify-between transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-600">
+                        <Coins size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-[#292522] group-hover:text-emerald-700">Finance & Wealth Horoscope</div>
+                        <div className="text-xs text-[#6B5E55]">2nd/11th house, Dhana yogas & investments</div>
+                      </div>
+                    </div>
+                    <ArrowRight size={16} className="text-emerald-600 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <Link
+                    href="/services/horoscope/health"
+                    className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 hover:border-cyan-500 flex items-center justify-between transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-600">
+                        <Activity size={18} />
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-[#292522] group-hover:text-cyan-700">Health & Vitality Horoscope</div>
+                        <div className="text-xs text-[#6B5E55]">Lagna vitality, Tridoshas & Ayurveda</div>
+                      </div>
+                    </div>
+                    <ArrowRight size={16} className="text-cyan-600 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Trust Box */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#281123] to-[#170b16] text-white border border-[#B88A44]/30 space-y-2 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#F6D075] uppercase tracking-wider">Need Personal Consultation?</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Online</span>
+                </div>
+                <p className="text-xs text-[#F8F3EA]/90 leading-relaxed">
+                  Have a verified Vedic astrologer analyze your chart live over phone for precise life guidance.
+                </p>
+                <Link
+                  href="/talk-to-astrologer"
+                  className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl gold-gradient-bg text-[#292522] font-extrabold text-xs hover:brightness-110 transition-all shadow-md"
                 >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
+                  <PhoneCall size={13} /> Consult Astrologer Live
+                </Link>
               </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Calendar size={14} className="text-[#C9952B]" /> Birth Date*
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={formData.dob}
-                  onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-[#C9952B] text-foreground text-sm outline-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Clock size={14} className="text-[#C9952B]" /> Birth Time*
-                </label>
-                <input
-                  type="time"
-                  required
-                  value={formData.tob}
-                  onChange={(e) => setFormData({ ...formData, tob: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-[#C9952B] text-foreground text-sm outline-none"
-                />
-              </div>
-
-              {/* City Autocomplete with OpenStreetMap Coordinates */}
-              <div className="sm:col-span-2 space-y-1.5">
-                <CityLocationInput
-                  label="Birth Place (City Search & Map Location)*"
-                  value={formData.pob}
-                  onChange={handleLocationChange}
-                  required
-                />
-              </div>
-
-              <div className="sm:col-span-2 pt-2">
-                <button
-                  type="submit"
-                  disabled={isCalculating}
-                  className="w-full py-4 rounded-full gold-gradient-bg text-white font-bold text-base shadow-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                >
-                  <Sparkles size={18} />
-                  <span>{isCalculating ? 'Generating AI Kundli Report...' : 'Generate Kundli'}</span>
-                </button>
-              </div>
-            </form>
+            </motion.div>
           </div>
         </div>
       </section>

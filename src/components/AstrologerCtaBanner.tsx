@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { PhoneCall, MessageSquare, Sparkles, ShieldCheck } from 'lucide-react';
+import { PhoneCall, Sparkles, ShieldCheck } from 'lucide-react';
 
 interface AstrologerCtaBannerProps {
   title?: string;
@@ -45,18 +45,12 @@ export default function AstrologerCtaBanner({
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           <Link
             href={targetUrl}
-            className="px-7 py-3.5 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg bg-[#713B32] hover:bg-[#552B24] text-white transition-all"
+            className="px-8 py-3.5 rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg bg-[#713B32] hover:bg-[#552B24] text-white transition-all"
           >
             <PhoneCall size={16} /> Talk to Astrologer
-          </Link>
-          <Link
-            href={targetUrl}
-            className="px-6 py-3.5 rounded-full bg-[#EDE4D5] border border-[#E5D9C8] text-[#292522] font-bold text-xs sm:text-sm hover:bg-[#EDE4D5]/80 transition-colors flex items-center justify-center gap-2"
-          >
-            <MessageSquare size={16} /> Chat Online
           </Link>
         </div>
       </div>

@@ -145,12 +145,26 @@ export default function FinanceHoroscopePage() {
 
   return (
     <div className="min-h-screen bg-background dark text-foreground">
-      {/* Hero Section with generous top padding to prevent fixed navbar clipping */}
-      <section className="relative overflow-hidden border-b border-white/5 flex flex-col pt-28 lg:pt-36 pb-16 lg:pb-20 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-emerald-500/20 flex flex-col justify-center min-h-[85vh] lg:min-h-[90vh] pt-24 lg:pt-28 pb-16 lg:pb-24">
+        {/* Background Image with Vedic Cosmic Overlay */}
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <Image
+            src="/images/horoscope_banner.jpg"
+            alt="Vedic Finance Horoscope Background"
+            fill
+            className="object-cover object-center lg:object-right scale-100"
+            priority
+          />
+          {/* Targeted overlays: dark gradient on left for crisp readability, open on right for vivid artwork */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#170b16]/95 via-[#230f20]/85 to-[#170b16]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1b0d1a] via-transparent to-[#150914]/50" />
+        </div>
 
-        <div className="relative z-10 max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/15 blur-3xl pointer-events-none z-0" />
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 w-full">
           <div className="grid lg:grid-cols-12 items-start gap-8 lg:gap-12 w-full">
             {/* Left Form Section */}
             <motion.div
@@ -160,24 +174,24 @@ export default function FinanceHoroscopePage() {
               className="lg:col-span-7 space-y-6"
             >
               <div>
-                <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 mb-4 backdrop-blur-md">
-                  <Coins size={14} className="text-emerald-400" /> Vedic Finance & Wealth Horoscope
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 mb-4 backdrop-blur-md shadow-xl shadow-black/20">
+                  <Coins size={15} className="text-emerald-400" /> Vedic Finance & Wealth Horoscope
                 </span>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3 tracking-tight leading-tight max-w-xl">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight max-w-xl drop-shadow-lg">
                   Unlock Your <br />
-                  <span className="text-gradient-gold">Vedic Wealth Potential</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">Vedic Wealth Potential</span>
                 </h1>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-lg">
+                <p className="text-base sm:text-lg text-[#F8F3EA]/90 font-medium leading-relaxed max-w-lg drop-shadow">
                   Discover your 2nd House (Dhana Bhava), 11th House (Profits), Dhana Yogas, and favorable wealth-building transit cycles with authentic Vedic astrology.
                 </p>
               </div>
 
               {/* Form Card */}
-              <div className="glass-card p-6 sm:p-8 rounded-3xl border border-emerald-500/20 shadow-2xl backdrop-blur-xl bg-card/80 space-y-4">
+              <div className="glass-card p-6 sm:p-8 rounded-3xl border border-emerald-500/30 shadow-2xl backdrop-blur-xl bg-card/90 space-y-4">
                 <form onSubmit={handleCalculate} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <User size={13} className="text-[#C9952B]" /> Full Name
                       </label>
                       <input
@@ -186,27 +200,27 @@ export default function FinanceHoroscopePage() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="Your Full Name"
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] placeholder:text-[#6B5E55]/60 text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground">Gender</label>
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Gender</label>
                       <select
                         value={formData.gender}
                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       >
-                        <option value="Male" className="bg-background">Male</option>
-                        <option value="Female" className="bg-background">Female</option>
-                        <option value="Other" className="bg-background">Other</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <Calendar size={13} className="text-[#C9952B]" /> Date of Birth
                       </label>
                       <input
@@ -214,12 +228,12 @@ export default function FinanceHoroscopePage() {
                         required
                         value={formData.dob}
                         onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <Clock size={13} className="text-[#C9952B]" /> Time of Birth
                       </label>
                       <input
@@ -227,14 +241,14 @@ export default function FinanceHoroscopePage() {
                         required
                         value={formData.tob}
                         onChange={(e) => setFormData({ ...formData, tob: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <MapPin size={13} className="text-[#C9952B]" /> Place of Birth
                       </label>
                       <CityLocationInput
@@ -245,13 +259,13 @@ export default function FinanceHoroscopePage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <Briefcase size={13} className="text-emerald-400" /> Financial Focus
                       </label>
                       <select
                         value={formData.financialGoal}
                         onChange={(e) => setFormData({ ...formData, financialGoal: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       >
                         <option value="Wealth Accumulation & Investments" className="bg-background">Wealth Accumulation & Investments</option>
                         <option value="Business Expansion & Profit" className="bg-background">Business Expansion & Profits</option>
@@ -264,17 +278,16 @@ export default function FinanceHoroscopePage() {
                   <button
                     type="submit"
                     disabled={isCalculating}
-                    className="w-full py-3.5 rounded-2xl gold-gradient-bg text-white font-bold text-sm shadow-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-2"
+                    className="w-full py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-[#C9952B]/30 cursor-pointer pt-3"
                   >
                     {isCalculating ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Calculating Vedic Dhana Yogas...
-                      </>
+                      <span className="flex items-center gap-2">
+                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Calculating Dhana Yogas...
+                      </span>
                     ) : (
-                      <>
-                        <Sparkles size={16} /> Generate Free Finance Horoscope
-                      </>
+                      <span className="flex items-center gap-2">
+                        <Sparkles size={18} className="text-[#292522]" /> Reveal Wealth Horoscope
+                      </span>
                     )}
                   </button>
                 </form>

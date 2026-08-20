@@ -198,80 +198,105 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
 
   return (
     <div className="min-h-screen bg-background dark text-foreground">
-      {/* Fullscreen Hero Section - Spans logo to right edge */}
-      <section className="relative min-h-screen overflow-hidden border-b border-white/5 flex flex-col pt-20 lg:pt-0 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
+      {/* Fullscreen Hero Section with Image as Background */}
+      <section className="relative overflow-hidden border-b border-[#B88A44]/20 flex flex-col justify-center min-h-[85vh] lg:min-h-[90vh] pt-24 lg:pt-28 pb-16 lg:pb-24">
+        {/* Background Image with Vedic Cosmic Overlay */}
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <Image
+            src="/images/horoscope_banner.jpg"
+            alt="Mahadasha Guide Background"
+            fill
+            className="object-cover object-center lg:object-right scale-100"
+            priority
+          />
+          {/* Targeted overlays: dark gradient on left for crisp readability, open on right for vivid artwork */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#170b16]/95 via-[#230f20]/85 to-[#170b16]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1b0d1a] via-transparent to-[#150914]/50" />
+        </div>
 
-        <div className="relative z-10 flex-1 flex items-center justify-center">
+        {/* Ambient Glows */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/30 blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/20 blur-3xl pointer-events-none z-0" />
+
+        <div className="relative z-10 flex-1 flex items-center">
           <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
-            <div className="grid lg:grid-cols-2 items-center min-h-screen">
-              {/* Left Content */}
+            <div className="max-w-3xl space-y-6">
+              {/* Badge */}
               <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="space-y-8 py-20 lg:py-0 order-2 lg:order-1"
+                initial={{ opacity: 0, y: -15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
               >
-                <div>
-                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-6 backdrop-blur-md">
-                    Official Vedic Guide Publication
-                  </span>
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight max-w-xl">
-                    {guide.title}
-                  </h1>
-                  <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
-                    {guide.subtitle}
-                  </p>
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 shadow-xl shadow-black/20 backdrop-blur-md">
+                  <Sparkles size={15} className="text-[#F6D075] animate-pulse" />
+                  Official Vedic Mahadasha Guide
+                </span>
+              </motion.div>
 
-                  <div className="flex flex-wrap items-center gap-4 pt-6">
-                    {hasPurchased ? (
-                      <button
-                        onClick={() => setShowPdfModal(true)}
-                        className="px-8 py-3.5 rounded-full gold-gradient-bg text-white font-bold flex items-center gap-2 shadow-lg hover:opacity-90 transition-opacity"
-                      >
-                        <Eye size={18} /> View Guide Online 📄
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          onClick={handleBuyGuide}
-                          disabled={isProcessingPayment}
-                          className="px-8 py-3.5 rounded-full gold-gradient-bg text-white font-bold flex items-center gap-2 shadow-xl hover:opacity-90 transition-opacity"
-                        >
-                          <Lock size={18} />
-                          <span>{isProcessingPayment ? 'Opening Razorpay...' : `Buy & Instant Access (${displayPrice})`}</span>
-                        </button>
-                        <Link
-                          href="/my-reports"
-                          className="px-6 py-3.5 rounded-full bg-white/5 border border-white/10 text-foreground font-semibold hover:bg-white/10 transition-colors text-sm"
-                        >
-                          View My Orders 📄
-                        </Link>
-                      </>
-                    )}
-                  </div>
+              {/* Main Headline */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="space-y-4"
+              >
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.12] drop-shadow-lg">
+                  {guide.title}
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
+                  {guide.subtitle}
+                </p>
+              </motion.div>
+
+              {/* Feature Highlights */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="flex flex-wrap gap-3 pt-2"
+              >
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
+                  <ShieldCheck size={16} className="text-[#F6D075]" />
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">100% Authentic Remedies</span>
+                </div>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
+                  <CheckCircle2 size={16} className="text-emerald-400" />
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">Official PDF Publication</span>
                 </div>
               </motion.div>
 
-              {/* Right Visual Frame */}
+              {/* Action Buttons */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-                className="relative h-[40vh] lg:h-[80vh] w-full order-1 lg:order-2 flex items-center justify-center p-6 lg:p-12"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="flex flex-wrap items-center gap-4 pt-3"
               >
-                <div className="relative w-full h-full max-w-lg lg:max-w-xl rounded-3xl overflow-hidden shadow-2xl border border-[#C9952B]/30 bg-black/40 flex flex-col items-center justify-center p-8 text-center space-y-4">
-                  <div className="w-20 h-20 rounded-3xl gold-gradient-bg flex items-center justify-center text-white shadow-2xl">
-                    <ShieldCheck size={44} />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gradient-gold">{guide.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed max-w-md">{guide.description}</p>
-
-                  <div className="pt-2 flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
-                    <CheckCircle2 size={14} /> Official AstroParihar PDF Publication
-                  </div>
-                </div>
+                {hasPurchased ? (
+                  <button
+                    onClick={() => setShowPdfModal(true)}
+                    className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 shadow-2xl shadow-[#C9952B]/40 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm sm:text-base"
+                  >
+                    <Eye size={18} /> View Guide Online 📄
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleBuyGuide}
+                      disabled={isProcessingPayment}
+                      className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 shadow-2xl shadow-[#C9952B]/40 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm sm:text-base"
+                    >
+                      <Lock size={18} />
+                      <span>{isProcessingPayment ? 'Opening Razorpay...' : `Buy & Instant Access (${displayPrice})`}</span>
+                    </button>
+                    <Link
+                      href="/my-reports"
+                      className="px-7 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md"
+                    >
+                      View My Orders 📄
+                    </Link>
+                  </>
+                )}
               </motion.div>
             </div>
           </div>

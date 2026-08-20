@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Sparkles, User, ArrowRight, ChevronDown, Globe, CheckCircle2, FileText, PhoneCall } from 'lucide-react';
+import { Heart, Sparkles, User, ArrowRight, ChevronDown, Globe, CheckCircle2, FileText, PhoneCall, Star, ShieldCheck } from 'lucide-react';
 import CityLocationInput from '@/components/CityLocationInput';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
@@ -83,69 +83,101 @@ export default function FreeKundliMatchingPage() {
 
   return (
     <div className="min-h-screen bg-background dark text-foreground">
-      {/* Fullscreen Hero Section */}
-      <section className="relative overflow-hidden border-b border-white/5 flex flex-col pt-28 lg:pt-36 pb-16 lg:pb-20 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
+      {/* Fullscreen Hero Section with Image as Background */}
+      <section className="relative overflow-hidden border-b border-[#B88A44]/20 flex flex-col justify-center min-h-[85vh] lg:min-h-[90vh] pt-24 lg:pt-28 pb-16 lg:pb-24">
+        {/* Background Image with Vedic Cosmic Overlay */}
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <Image
+            src="/images/kundli_matching_banner.jpg"
+            alt="Kundli Matching Background"
+            fill
+            className="object-cover object-center lg:object-right scale-100"
+            priority
+          />
+          {/* Targeted overlays: dark gradient on left for crisp readability, open on right for vivid artwork */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#170b16]/95 via-[#230f20]/85 to-[#170b16]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1b0d1a] via-transparent to-[#150914]/50" />
+        </div>
 
-        <div className="relative z-10 flex-1 flex items-center justify-center">
+        {/* Ambient Glows */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/30 blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/20 blur-3xl pointer-events-none z-0" />
+
+        <div className="relative z-10 flex-1 flex items-center">
           <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
-            <div className="grid lg:grid-cols-2 items-center gap-12">
-              {/* Left Content */}
+            <div className="max-w-3xl space-y-6">
+              {/* Badge */}
               <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="space-y-6 order-2 lg:order-1"
+                initial={{ opacity: 0, y: -15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
               >
-                <div>
-                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-6 backdrop-blur-md">
-                    Free Kundli Matching
-                  </span>
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight max-w-xl">
-                    Free Online <br />
-                    <span className="text-gradient-gold">Kundli Matching</span>
-                  </h1>
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-lg">
-                    Check marriage compatibility, Gun Milan score, and Manglik Dosha between you and your partner for a happy married life.
-                  </p>
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 shadow-xl shadow-black/20 backdrop-blur-md">
+                  <Sparkles size={15} className="text-[#F6D075] animate-pulse" />
+                  Free Vedic Gun Milan & Compatibility
+                </span>
+              </motion.div>
 
-                  <div className="flex flex-wrap items-center gap-4 pt-4">
-                    <button
-                      onClick={() => {
-                        document.getElementById('matching-form')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="px-8 py-3.5 rounded-full gold-gradient-bg text-white font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20"
-                    >
-                      Match Kundli Now <ArrowRight size={18} />
-                    </button>
-                    <Link
-                      href="/talk-to-astrologer"
-                      className="px-8 py-3.5 rounded-full bg-white/5 border border-white/10 text-foreground font-semibold hover:bg-white/10 transition-colors backdrop-blur-sm"
-                    >
-                      Consult Astrologer
-                    </Link>
-                  </div>
+              {/* Main Headline */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="space-y-4"
+              >
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.12] drop-shadow-lg">
+                  Free Online <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">
+                    Kundli Matching
+                  </span>
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
+                  Check marriage compatibility, Ashta Koota 36 Gun Milan score, Nadi Dosha, and Manglik alignment between you and your partner.
+                </p>
+              </motion.div>
+
+              {/* Feature Highlights */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="flex flex-wrap gap-3 pt-2"
+              >
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
+                  <Star size={16} className="text-[#F6D075]" />
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">36 Gun Milan Score</span>
+                </div>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
+                  <Heart size={16} className="text-rose-400" />
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">Manglik Dosha Check</span>
+                </div>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
+                  <ShieldCheck size={16} className="text-[#F6D075]" />
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">Ashta Koota Analysis</span>
                 </div>
               </motion.div>
 
-              {/* Right Visual */}
+              {/* Action Buttons */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-                className="relative h-[40vh] lg:h-[80vh] w-full order-1 lg:order-2 flex items-center justify-center p-6 lg:p-12"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="flex flex-wrap items-center gap-4 pt-3"
               >
-                <div className="relative w-full h-full max-w-lg lg:max-w-xl rounded-3xl overflow-hidden shadow-2xl border border-[#C9952B]/30">
-                  <Image
-                    src="/images/kundli_matching_banner.jpg"
-                    alt="Kundli Matching Banner"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
-                </div>
+                <button
+                  onClick={() => {
+                    document.getElementById('matching-form')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#C9952B]/40 text-sm sm:text-base"
+                >
+                  Match Kundli Now <ArrowRight size={18} />
+                </button>
+                <Link
+                  href="/talk-to-astrologer"
+                  className="px-7 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md"
+                >
+                  Consult Astrologer
+                </Link>
               </motion.div>
             </div>
           </div>
@@ -153,40 +185,61 @@ export default function FreeKundliMatchingPage() {
       </section>
 
       {/* Matching Form Section */}
-      <section id="matching-form" className="py-8 lg:py-12 bg-background relative z-10">
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
+      <section id="matching-form" className="py-12 lg:py-16 bg-background relative z-10">
+        <div className="max-w-5xl mx-auto px-6 lg:px-10">
+          <div className="text-center space-y-2 mb-8">
+            <span className="text-xs font-bold text-[#713B32] uppercase tracking-widest bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
+              Kundli Milan Matrix
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#292522]">Enter Partner Details for 36 Gun Milan</h2>
+            <p className="text-xs sm:text-sm text-[#6B5E55]">Calculate Ashta Koota compatibility, Nadi Dosha, and Manglik cancellation</p>
+          </div>
+
           <form onSubmit={handleMatch} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Your Details */}
-              <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
-                <h3 className="text-lg font-bold text-foreground flex items-center gap-2 text-[#C9952B]">
-                  <User size={18} /> Your Details
+              {/* Boy Details */}
+              <div className="glass-card p-6 sm:p-7 rounded-3xl border border-[#B88A44]/30 space-y-4 shadow-xl">
+                <h3 className="text-base sm:text-lg font-bold flex items-center gap-2 text-[#713B32]">
+                  <User size={18} className="text-[#B88A44]" /> Boy Details
                 </h3>
                 <div className="space-y-3">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Your Full Name"
-                    value={groomData.name}
-                    onChange={(e) => setGroomData({ ...groomData, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm outline-none focus:border-[#C9952B]"
-                  />
-                  <input
-                    type="date"
-                    required
-                    value={groomData.dob}
-                    onChange={(e) => setGroomData({ ...groomData, dob: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm outline-none focus:border-[#C9952B]"
-                  />
-                  <input
-                    type="time"
-                    required
-                    value={groomData.tob}
-                    onChange={(e) => setGroomData({ ...groomData, tob: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm outline-none focus:border-[#C9952B]"
-                  />
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#713B32]">Full Name*</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Boy's Full Name"
+                      value={groomData.name}
+                      onChange={(e) => setGroomData({ ...groomData, name: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] placeholder:text-[#6B5E55]/60 text-sm outline-none focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 shadow-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-[#713B32]">Birth Date*</label>
+                      <input
+                        type="date"
+                        required
+                        value={groomData.dob}
+                        onChange={(e) => setGroomData({ ...groomData, dob: e.target.value })}
+                        onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                        className="w-full px-3 py-2.5 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-xs sm:text-sm outline-none focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 shadow-sm cursor-pointer"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-[#713B32]">Birth Time*</label>
+                      <input
+                        type="time"
+                        required
+                        value={groomData.tob}
+                        onChange={(e) => setGroomData({ ...groomData, tob: e.target.value })}
+                        onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                        className="w-full px-3 py-2.5 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-xs sm:text-sm outline-none focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 shadow-sm cursor-pointer"
+                      />
+                    </div>
+                  </div>
                   <CityLocationInput
-                    label="Your Birth Place"
+                    label="Birth Place (City Search)*"
                     value={groomData.pob}
                     onChange={(city, details) => setGroomData({ ...groomData, pob: city, lat: details?.lat || '', lon: details?.lon || '' })}
                     required
@@ -194,36 +247,49 @@ export default function FreeKundliMatchingPage() {
                 </div>
               </div>
 
-              {/* Partner's Details */}
-              <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
-                <h3 className="text-lg font-bold text-foreground flex items-center gap-2 text-rose-400">
-                  <User size={18} /> Partner's Details
+              {/* Girl Details */}
+              <div className="glass-card p-6 sm:p-7 rounded-3xl border border-rose-500/30 space-y-4 shadow-xl">
+                <h3 className="text-base sm:text-lg font-bold flex items-center gap-2 text-rose-700">
+                  <Heart size={18} className="text-rose-500" /> Girl Details
                 </h3>
                 <div className="space-y-3">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Partner's Full Name"
-                    value={brideData.name}
-                    onChange={(e) => setBrideData({ ...brideData, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm outline-none focus:border-[#C9952B]"
-                  />
-                  <input
-                    type="date"
-                    required
-                    value={brideData.dob}
-                    onChange={(e) => setBrideData({ ...brideData, dob: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm outline-none focus:border-[#C9952B]"
-                  />
-                  <input
-                    type="time"
-                    required
-                    value={brideData.tob}
-                    onChange={(e) => setBrideData({ ...brideData, tob: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm outline-none focus:border-[#C9952B]"
-                  />
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#713B32]">Full Name*</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Girl's Full Name"
+                      value={brideData.name}
+                      onChange={(e) => setBrideData({ ...brideData, name: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] placeholder:text-[#6B5E55]/60 text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 shadow-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-[#713B32]">Birth Date*</label>
+                      <input
+                        type="date"
+                        required
+                        value={brideData.dob}
+                        onChange={(e) => setBrideData({ ...brideData, dob: e.target.value })}
+                        onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                        className="w-full px-3 py-2.5 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-xs sm:text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 shadow-sm cursor-pointer"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-[#713B32]">Birth Time*</label>
+                      <input
+                        type="time"
+                        required
+                        value={brideData.tob}
+                        onChange={(e) => setBrideData({ ...brideData, tob: e.target.value })}
+                        onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
+                        className="w-full px-3 py-2.5 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-xs sm:text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 shadow-sm cursor-pointer"
+                      />
+                    </div>
+                  </div>
                   <CityLocationInput
-                    label="Partner's Birth Place"
+                    label="Birth Place (City Search)*"
                     value={brideData.pob}
                     onChange={(city, details) => setBrideData({ ...brideData, pob: city, lat: details?.lat || '', lon: details?.lon || '' })}
                     required
@@ -232,14 +298,16 @@ export default function FreeKundliMatchingPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isMatching}
-              className="w-full py-4 rounded-full gold-gradient-bg text-white font-bold text-base shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-            >
-              <Sparkles size={18} />
-              <span>{isMatching ? 'Matching Kundli...' : 'Match Kundli Now'}</span>
-            </button>
+            <div className="text-center pt-2">
+              <button
+                type="submit"
+                disabled={isMatching}
+                className="w-full sm:w-auto px-10 py-3.5 rounded-full gold-gradient-bg text-[#292522] font-extrabold text-sm sm:text-base shadow-xl hover:brightness-110 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Sparkles size={18} />
+                <span>{isMatching ? 'Calculating Gun Milan Score...' : 'Calculate Marriage Compatibility'}</span>
+              </button>
+            </div>
           </form>
         </div>
       </section>

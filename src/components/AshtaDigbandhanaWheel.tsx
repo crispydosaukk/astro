@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
-interface SpokeItem {
+export interface SpokeItem {
   id: string;
   number: string;
   name: string;
@@ -54,9 +54,25 @@ function describeDonutSegment(
   ].join(' ');
 }
 
-export default function AshtaDigbandhanaWheel() {
+export interface AshtaDigbandhanaWheelProps {
+  onHoverSpoke?: (spoke: SpokeItem | null) => void;
+  activeSpokeId?: string | null;
+  hideInfoCard?: boolean;
+  hideFooter?: boolean;
+}
+
+export default function AshtaDigbandhanaWheel({
+  onHoverSpoke,
+  activeSpokeId,
+  hideInfoCard = false,
+  hideFooter = false,
+}: AshtaDigbandhanaWheelProps) {
   const router = useRouter();
-  const [hoveredSpoke, setHoveredSpoke] = useState<string | null>(null);
+  const [internalHoveredSpoke, setInternalHoveredSpoke] = useState<string | null>(null);
+
+  const hoveredSpoke = activeSpokeId !== undefined && activeSpokeId !== null
+    ? activeSpokeId
+    : internalHoveredSpoke;
 
   const center = 360;
   const rOuter = 330;
@@ -373,8 +389,14 @@ export default function AshtaDigbandhanaWheel() {
               <g
                 key={spoke.id}
                 onClick={() => router.push(spoke.href)}
-                onMouseEnter={() => setHoveredSpoke(spoke.id)}
-                onMouseLeave={() => setHoveredSpoke(null)}
+                onMouseEnter={() => {
+                  setInternalHoveredSpoke(spoke.id);
+                  if (onHoverSpoke) onHoverSpoke(spoke);
+                }}
+                onMouseLeave={() => {
+                  setInternalHoveredSpoke(null);
+                  if (onHoverSpoke) onHoverSpoke(null);
+                }}
                 className="cursor-pointer transition-all duration-300 group"
               >
                 {/* Sector Wedge Background */}
@@ -541,8 +563,8 @@ export default function AshtaDigbandhanaWheel() {
         </svg>
       </div>
 
-      {/* Interactive Active Spoke Detailed Information Card */}
-      {activeSpoke && (
+      {/* Interactive Active Spoke Detailed Information Card (Only if not hidden) */}
+      {!hideInfoCard && activeSpoke && (
         <motion.div
           key={activeSpoke.id}
           initial={{ opacity: 0, y: 8 }}
@@ -572,15 +594,17 @@ export default function AshtaDigbandhanaWheel() {
         </motion.div>
       )}
 
-      {/* Bottom Classical Vedic Shloka Footer */}
-      <div className="text-center text-sm sm:text-base text-amber-300 font-serif pt-2 space-y-1">
-        <p className="font-bold">
-          मंत्र – रत्न – यंत्र – हवन – देवता उपासना – वास्तु – रुद्राक्ष – हवन / पूजा
-        </p>
-        <p className="text-xs sm:text-sm text-slate-300 font-medium">
-          इन आठ स्तम्भों से होता है सम्पूर्ण अष्टदिग्बन्धन और जीवन का संरक्षण।
-        </p>
-      </div>
+      {/* Bottom Classical Vedic Shloka Footer (Only if not hidden) */}
+      {!hideFooter && (
+        <div className="text-center text-sm sm:text-base text-amber-300 font-serif pt-2 space-y-1">
+          <p className="font-bold">
+            मंत्र – रत्न – यंत्र – हवन – देवता उपासना – वास्तु – रुद्राक्ष – हवन / पूजा
+          </p>
+          <p className="text-xs sm:text-sm text-slate-300 font-medium">
+            इन आठ स्तम्भों से होता है सम्पूर्ण अष्टदिग्बन्धन और जीवन का संरक्षण।
+          </p>
+        </div>
+      )}
     </div>
   );
 }

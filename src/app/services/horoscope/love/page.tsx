@@ -148,12 +148,26 @@ export default function LoveHoroscopePage() {
 
   return (
     <div className="min-h-screen bg-background dark text-foreground">
-      {/* Hero Section with generous top padding to prevent fixed navbar clipping */}
-      <section className="relative overflow-hidden border-b border-white/5 flex flex-col pt-28 lg:pt-36 pb-16 lg:pb-20 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-rose-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-rose-500/20 flex flex-col justify-center min-h-[85vh] lg:min-h-[90vh] pt-24 lg:pt-28 pb-16 lg:pb-24">
+        {/* Background Image with Vedic Cosmic Overlay */}
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <Image
+            src="/images/kundli_matching_banner.jpg"
+            alt="Vedic Love Horoscope Background"
+            fill
+            className="object-cover object-center lg:object-right scale-100"
+            priority
+          />
+          {/* Targeted overlays: dark gradient on left for crisp readability, open on right for vivid artwork */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#170b16]/95 via-[#230f20]/85 to-[#170b16]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1b0d1a] via-transparent to-[#150914]/50" />
+        </div>
 
-        <div className="relative z-10 max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-rose-500/20 blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/15 blur-3xl pointer-events-none z-0" />
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 w-full">
           <div className="grid lg:grid-cols-12 items-start gap-8 lg:gap-12 w-full">
             {/* Left Form Section */}
             <motion.div
@@ -163,24 +177,24 @@ export default function LoveHoroscopePage() {
               className="lg:col-span-7 space-y-6"
             >
               <div>
-                <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-300 border border-rose-500/20 mb-4 backdrop-blur-md">
-                  <Heart size={14} className="text-rose-400" /> Vedic Love & Relationship Horoscope
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-rose-500/20 text-rose-200 border border-rose-500/40 mb-4 backdrop-blur-md shadow-xl shadow-black/20">
+                  <Heart size={15} className="text-rose-400" /> Vedic Love & Relationship Horoscope
                 </span>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3 tracking-tight leading-tight max-w-xl">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight max-w-xl drop-shadow-lg">
                   Discover Your <br />
-                  <span className="text-gradient-gold">Love & Marriage Destiny</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">Love & Marriage Destiny</span>
                 </h1>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-lg">
+                <p className="text-base sm:text-lg text-[#F8F3EA]/90 font-medium leading-relaxed max-w-lg drop-shadow">
                   Analyze your 7th House (Kalatra Bhava), Venusian strength, Manglik alignment, and soulmate timing with authentic Vedic astrology.
                 </p>
               </div>
 
               {/* Form Card */}
-              <div className="glass-card p-6 sm:p-8 rounded-3xl border border-rose-500/20 shadow-2xl backdrop-blur-xl bg-card/80 space-y-4">
+              <div className="glass-card p-6 sm:p-8 rounded-3xl border border-rose-500/30 shadow-2xl backdrop-blur-xl bg-card/90 space-y-4">
                 <form onSubmit={handleCalculate} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <User size={13} className="text-[#C9952B]" /> Full Name
                       </label>
                       <input
@@ -189,27 +203,27 @@ export default function LoveHoroscopePage() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="Your Full Name"
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] placeholder:text-[#6B5E55]/60 text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground">Gender</label>
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Gender</label>
                       <select
                         value={formData.gender}
                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       >
-                        <option value="Female" className="bg-background">Female</option>
-                        <option value="Male" className="bg-background">Male</option>
-                        <option value="Other" className="bg-background">Other</option>
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                        <option value="Other">Other</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <Calendar size={13} className="text-[#C9952B]" /> Date of Birth
                       </label>
                       <input
@@ -217,12 +231,12 @@ export default function LoveHoroscopePage() {
                         required
                         value={formData.dob}
                         onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <Clock size={13} className="text-[#C9952B]" /> Time of Birth
                       </label>
                       <input
@@ -230,14 +244,14 @@ export default function LoveHoroscopePage() {
                         required
                         value={formData.tob}
                         onChange={(e) => setFormData({ ...formData, tob: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <MapPin size={13} className="text-[#C9952B]" /> Place of Birth
                       </label>
                       <CityLocationInput
@@ -248,19 +262,19 @@ export default function LoveHoroscopePage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                         <Heart size={13} className="text-rose-400" /> Relationship Status
                       </label>
                       <select
                         value={formData.relationshipStatus}
                         onChange={(e) => setFormData({ ...formData, relationshipStatus: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-foreground text-sm focus:outline-none focus:border-[#C9952B] transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       >
-                        <option value="Single" className="bg-background">Single (Seeking Love)</option>
-                        <option value="In a Relationship" className="bg-background">In a Relationship</option>
-                        <option value="Engaged" className="bg-background">Engaged</option>
-                        <option value="Married" className="bg-background">Married</option>
-                        <option value="Complicated" className="bg-background">Seeking Guidance</option>
+                        <option value="Single">Single (Seeking Love)</option>
+                        <option value="In a Relationship">In a Relationship</option>
+                        <option value="Engaged">Engaged</option>
+                        <option value="Married">Married</option>
+                        <option value="Complicated">Seeking Guidance</option>
                       </select>
                     </div>
                   </div>

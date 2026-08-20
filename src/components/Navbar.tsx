@@ -143,6 +143,7 @@ export default function Navbar() {
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isPanchangOpen, setIsPanchangOpen] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
+  const [isMobilePanchangOpen, setIsMobilePanchangOpen] = useState(false);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
   const { formatPrice } = useCurrency();
@@ -482,6 +483,63 @@ export default function Navbar() {
                               );
                             })}
                           </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Mobile Panchang Accordion */}
+                <div>
+                  <button
+                    onClick={() => setIsMobilePanchangOpen(!isMobilePanchangOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold hover:bg-[#EDE4D5]/60 hover:text-[#713B32] text-[#292522] transition-all"
+                  >
+                    <span>Panchang</span>
+                    <ChevronDown
+                      size={18}
+                      className={`transition-transform duration-200 ${isMobilePanchangOpen ? 'rotate-180 text-[#713B32]' : ''}`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {isMobilePanchangOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden pl-3 pr-2 py-2 space-y-1 bg-[#F8F3EA] rounded-xl my-1 border border-[#E5D9C8]"
+                      >
+                        <Link
+                          href="/services/panchang"
+                          onClick={() => {
+                            setIsMobilePanchangOpen(false);
+                            setIsOpen(false);
+                          }}
+                          className="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-bold text-[#713B32] bg-[#EDE4D5] hover:bg-[#E5D9C8] transition-all mb-1"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} className="text-[#B88A44]" />
+                            <span>Today&apos;s Full Panchang</span>
+                          </div>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                            Live
+                          </span>
+                        </Link>
+
+                        {panchangItems.map((item) => (
+                          <Link
+                            key={`mobile-panchang-${item.label}`}
+                            href={item.href}
+                            onClick={() => {
+                              setIsMobilePanchangOpen(false);
+                              setIsOpen(false);
+                            }}
+                            className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-semibold text-[#292522] hover:bg-[#EDE4D5] hover:text-[#713B32] transition-all"
+                          >
+                            <Calendar size={13} className="text-[#B88A44]" />
+                            <span>{item.label}</span>
+                          </Link>
                         ))}
                       </motion.div>
                     )}

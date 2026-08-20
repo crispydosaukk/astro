@@ -478,6 +478,7 @@ export interface PremiumDetails {
   summaryTitleGold: string;
   summaryPoints?: string[];
   summaryFooter?: string;
+  bottomNote?: string;
 }
 
 export interface HomaItem {

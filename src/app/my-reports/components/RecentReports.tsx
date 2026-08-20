@@ -408,6 +408,12 @@ export default function RecentReports() {
                             data.recommendedVrats ||
                             data.weeklyFastingDay;
 
+                          const isVastu =
+                            selectedReport.type?.toLowerCase().includes('vastu') ||
+                            selectedReport.type?.toLowerCase().includes('vāstu') ||
+                            data.directionalAnalysis ||
+                            data.propertySummary;
+
                           return (
                             <div className="space-y-6">
                               {/* Primary Header Card */}
@@ -422,6 +428,71 @@ export default function RecentReports() {
                                   {data.timing || 'Active'} {data.duration && data.duration !== 'N/A' && `· ${data.duration}`}
                                 </p>
                               </div>
+
+                              {/* VASTU CONSULTATION SPECIFIC VIEW */}
+                              {isVastu && (
+                                <div className="space-y-6">
+                                  {/* Property Summary Bar */}
+                                  {data.propertySummary && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold">Property Type</span>
+                                        <p className="text-xs sm:text-sm font-bold text-foreground">{data.propertySummary.propertyType}</p>
+                                      </div>
+                                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold">Entrance Facing</span>
+                                        <p className="text-xs sm:text-sm font-bold text-[#C9952B]">{data.propertySummary.entranceFacing}</p>
+                                      </div>
+                                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold">Spatial Score</span>
+                                        <p className="text-xs sm:text-sm font-bold text-emerald-400">{data.propertySummary.overallEnergyScore || '84/100 (Auspicious)'}</p>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 8-Direction Zone Alignment Grid */}
+                                  {data.directionalAnalysis && Array.isArray(data.directionalAnalysis) && (
+                                    <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                                      <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                                        <Compass size={16} className="text-[#C9952B]" /> 8-Directional Energy &amp; Remedial Audit
+                                      </h3>
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {data.directionalAnalysis.map((dir: any, idx: number) => (
+                                          <div key={idx} className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs">
+                                            <div className="flex justify-between items-center font-bold">
+                                              <span className="text-foreground">{dir.direction}</span>
+                                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#C9952B]/20 text-[#C9952B] border border-[#C9952B]/30">
+                                                {dir.status}
+                                              </span>
+                                            </div>
+                                            <p className="text-muted-foreground leading-relaxed">{dir.observation}</p>
+                                            <div className="p-2 rounded-lg bg-black/30 border border-white/5 text-[11px] text-[#C9952B] font-medium">
+                                              ✨ <strong>Remedy:</strong> {dir.remedy}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Non-Demolition Dosha Corrections */}
+                                  {data.doshaCorrections && Array.isArray(data.doshaCorrections) && (
+                                    <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                                      <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                                        <ShieldCheck size={16} className="text-emerald-400" /> Non-Demolition Rectification Protocols
+                                      </h3>
+                                      <div className="space-y-2">
+                                        {data.doshaCorrections.map((corr: string, idx: number) => (
+                                          <div key={idx} className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-foreground leading-relaxed flex items-start gap-2">
+                                            <span className="text-emerald-400 font-bold">✓</span>
+                                            <span>{corr}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
 
                               {/* 1. KUNDLI MATCHING SPECIFIC REPORT VIEW */}
                               {isKundliMatching && (

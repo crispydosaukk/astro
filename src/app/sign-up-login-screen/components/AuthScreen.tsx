@@ -1,10 +1,11 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
-import { Phone, CheckCircle2, User, Calendar, Sparkles, ChevronRight, Loader2, KeyRound } from 'lucide-react';
+import { Phone, CheckCircle2, User, Calendar, Sparkles, ChevronRight, Loader2, KeyRound, ArrowLeft } from 'lucide-react';
 import { auth, db } from '@/lib/firebase/config';
 import { signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -233,10 +234,9 @@ export default function AuthScreen() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F8F3EA] text-[#292522]">
-      <style dangerouslySetInnerHTML={{__html: `
-        .react-tel-input .country-list .country.highlight,
-        .react-tel-input .country-list .country:hover {
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#F8F3EA] text-[#292522] relative">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .react-tel-input .country-list .country.highlight {
           background-color: #EDE4D5 !important;
           color: #292522 !important;
         }
@@ -246,6 +246,15 @@ export default function AuthScreen() {
           border: 1px solid #E5D9C8 !important;
         }
       `}} />
+
+      {/* Back to Home Floating Navigation Button */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFFDFC]/95 backdrop-blur-md border border-[#E5D9C8] text-xs sm:text-sm font-bold text-[#713B32] hover:bg-[#EDE4D5] hover:text-[#552B24] transition-all shadow-md group"
+      >
+        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-[#B88A44]" />
+        <span>Back to Home</span>
+      </Link>
 
       {/* Left panel - Cosmic Celestial Brand Showcase */}
       <div className="hidden lg:flex lg:w-1/2 cosmic-bg flex-col items-center justify-center p-12 relative overflow-hidden">
@@ -269,13 +278,12 @@ export default function AuthScreen() {
         <div className="absolute bottom-1/3 right-1/4 w-60 h-60 rounded-full bg-[#B88A44]/20 blur-3xl" />
 
         <div className="relative text-center space-y-8 max-w-md z-10">
-          {/* Framed Luxury Logo Capsule */}
-          <div className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-[#FFFDFC]/95 backdrop-blur-md border border-[#D8B66A]/40 shadow-2xl">
-            <AppLogo src="/AstroParihar_Logo.png" size={52} />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#D8B66A]/40 text-[#F6D075] text-xs font-bold uppercase tracking-widest shadow-lg">
+            <Sparkles size={14} className="text-[#D8B66A]" /> Authentic Vedic Guidance
           </div>
 
-          <div className="w-44 h-44 mx-auto rounded-full gold-gradient-bg flex items-center justify-center animate-float shadow-2xl border-4 border-[#FFFDFC]/20">
-            <span className="text-7xl drop-shadow-md">🔮</span>
+          <div className="w-40 h-40 mx-auto rounded-full gold-gradient-bg flex items-center justify-center animate-float shadow-2xl border-4 border-[#FFFDFC]/20">
+            <span className="text-6xl drop-shadow-md">🔮</span>
           </div>
 
           <div className="space-y-3">
@@ -299,13 +307,13 @@ export default function AuthScreen() {
       </div>
 
       {/* Right panel - Auth Form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 bg-[#F8F3EA] overflow-y-auto">
-        <div className="w-full max-w-md bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#E5D9C8] shadow-xl">
-          {/* Mobile Logo */}
-          <div className="flex items-center justify-center gap-2 mb-8 lg:hidden">
-            <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] shadow-sm">
-              <AppLogo src="/AstroParihar_Logo.png" size={38} />
-            </div>
+      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 bg-[#F8F3EA] overflow-y-auto pt-20 lg:pt-12">
+        <div className="w-full max-w-md bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#E5D9C8] shadow-2xl">
+          {/* Brand Logo matching Header */}
+          <div className="flex items-center justify-center mb-6">
+            <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
+              <AppLogo src="/AstroParihar_Logo.png" size={46} />
+            </Link>
           </div>
 
           <AnimatePresence mode="wait">

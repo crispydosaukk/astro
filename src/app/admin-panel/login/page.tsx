@@ -1,9 +1,10 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import Link from 'next/link';
 import { loginAdmin } from '../actions';
 import AppLogo from '@/components/ui/AppLogo';
-import { Loader2, Mail, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 const initialState = {
   error: '',
@@ -14,15 +15,26 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F8F3EA] text-[#292522] flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-[#FFFDFC] rounded-3xl shadow-2xl overflow-hidden border border-[#E5D9C8]">
+    <div className="min-h-screen bg-[#F8F3EA] text-[#292522] flex items-center justify-center p-4 relative">
+      {/* Back to Home Floating Navigation Button */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFFDFC]/95 backdrop-blur-md border border-[#E5D9C8] text-xs sm:text-sm font-bold text-[#713B32] hover:bg-[#EDE4D5] hover:text-[#552B24] transition-all shadow-md group"
+      >
+        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-[#B88A44]" />
+        <span>Back to Home</span>
+      </Link>
+
+      <div className="max-w-md w-full bg-[#FFFDFC] rounded-3xl shadow-2xl overflow-hidden border border-[#E5D9C8] mt-12 sm:mt-0">
         <div className="p-8 sm:p-10">
           <div className="flex flex-col items-center justify-center mb-6 text-center">
-            <div className="inline-flex items-center justify-center px-5 py-2.5 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] shadow-sm mb-4">
-              <AppLogo src="/AstroParihar_Logo.png" size={54} />
+            <div className="flex items-center justify-center mb-4">
+              <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
+                <AppLogo src="/AstroParihar_Logo.png" size={50} />
+              </Link>
             </div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full inline-flex items-center gap-1 mb-2">
-              <ShieldCheck size={13} /> Administrative Portal
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#713B32] bg-[#EDE4D5] px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 mb-2 border border-[#E5D9C8]">
+              <ShieldCheck size={13} className="text-[#B88A44]" /> Administrative Portal
             </span>
             <h2 className="text-2xl font-bold text-[#292522]">Admin Sign In</h2>
             <p className="text-[#6B5E55] text-xs sm:text-sm mt-1">Sign in to manage AstroParihar operations</p>
@@ -30,7 +42,7 @@ export default function AdminLogin() {
 
           <form action={formAction} className="space-y-5">
             {state?.error && (
-              <div className="bg-red-50 text-red-700 p-3.5 rounded-xl text-xs sm:text-sm text-center border border-red-200 font-medium">
+              <div className="bg-rose-50 text-[#713B32] p-3.5 rounded-xl text-xs sm:text-sm text-center border border-rose-200 font-medium">
                 {state.error}
               </div>
             )}
@@ -81,10 +93,10 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full mt-6 py-3.5 rounded-xl gold-gradient-bg text-white font-bold hover:opacity-95 transition-all flex justify-center items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full mt-6 py-3.5 rounded-xl gold-gradient-bg text-[#292522] font-extrabold hover:brightness-110 active:scale-[0.98] transition-all flex justify-center items-center gap-2 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
             >
-              {isPending && <Loader2 className="animate-spin h-4 w-4" />}
-              {isPending ? 'Authenticating...' : 'Sign In as Administrator'}
+              {isPending && <Loader2 className="animate-spin h-4 w-4 text-[#292522]" />}
+              <span>{isPending ? 'Authenticating...' : 'Sign In as Administrator'}</span>
             </button>
           </form>
         </div>

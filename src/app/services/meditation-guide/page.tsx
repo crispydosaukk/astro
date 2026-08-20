@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Sparkles, Flame, Eye, Compass, Moon, Sun, Heart, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Play, Pause, RotateCcw, Sparkles, CheckCircle2, ChevronRight, Heart, Compass, ShieldCheck } from 'lucide-react';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
 
@@ -37,74 +37,83 @@ export default function FreeMeditationGuidePage() {
 
   return (
     <div className="min-h-screen bg-background dark text-foreground">
-      {/* Fullscreen Hero Section */}
-      <section className="relative min-h-screen overflow-hidden border-b border-white/5 flex flex-col pt-20 lg:pt-0 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
+      {/* Fullscreen Hero Section with Image as Background */}
+      <section className="relative overflow-hidden border-b border-[#B88A44]/20 flex flex-col justify-center min-h-[85vh] lg:min-h-[90vh] pt-24 lg:pt-28 pb-16 lg:pb-24">
+        {/* Background Image with Vedic Cosmic Overlay */}
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <Image
+            src="/images/meditation_guide_hero.jpg"
+            alt="Vedic Meditation Background"
+            fill
+            className="object-cover object-center lg:object-right scale-100"
+            priority
+          />
+          {/* Targeted overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#170b16]/95 via-[#230f20]/85 to-[#170b16]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1b0d1a] via-transparent to-[#150914]/50" />
+        </div>
 
-        <div className="relative z-10 flex-1 flex items-center justify-center">
+        {/* Ambient Glows */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/30 blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/20 blur-3xl pointer-events-none z-0" />
+
+        <div className="relative z-10 flex-1 flex items-center">
           <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 w-full">
-            <div className="grid lg:grid-cols-2 items-center min-h-screen gap-12">
-              {/* Left Content */}
+            <div className="max-w-3xl space-y-6">
+              {/* Badge */}
               <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="space-y-8 py-20 lg:py-0 order-2 lg:order-1"
+                initial={{ opacity: 0, y: -15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
               >
-                <div>
-                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 mb-6 backdrop-blur-md">
-                    Free Meditation guide
-                  </span>
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight max-w-xl">
-                    ASTROPARIHAR — <br />
-                    <span className="text-gradient-gold">THE ART OF MEDITATION</span>
-                  </h1>
-                  <p className="text-lg font-medium text-[#C9952B] italic mb-2">
-                    Still the Mind. Discover the Self.
-                  </p>
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-lg">
-                    Ancient Vedic meditation practices, personalised for your journey—helping you cultivate clarity, steadiness, awareness and inner peace.
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-4 pt-6">
-                    <button
-                      onClick={() => setIsTimerRunning(!isTimerRunning)}
-                      className="px-8 py-3.5 rounded-full gold-gradient-bg text-white font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20"
-                    >
-                      {isTimerRunning ? <Pause size={18} /> : <Play size={18} />}
-                      <span>{isTimerRunning ? 'Pause Practice' : 'Start 15-Minute Practice'}</span>
-                    </button>
-                    <button
-                      onClick={resetTimer}
-                      className="p-3.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
-                      title="Reset 15-Min Timer"
-                    >
-                      <RotateCcw size={18} />
-                    </button>
-                    <div className="px-5 py-3 rounded-full bg-white/5 border border-white/10 text-[#C9952B] font-mono text-lg font-bold backdrop-blur-sm">
-                      ⏱ {formatTime(timerSeconds)}
-                    </div>
-                  </div>
-                </div>
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 shadow-xl shadow-black/20 backdrop-blur-md">
+                  <Sparkles size={15} className="text-[#F6D075] animate-pulse" />
+                  Free Vedic Meditation & Mindfulness Guide
+                </span>
               </motion.div>
 
-              {/* Right Visual */}
+              {/* Main Headline */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-                className="relative h-[45vh] lg:h-[75vh] w-full order-1 lg:order-2 flex items-center justify-center p-4 lg:p-8"
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="space-y-4"
               >
-                <div className="relative w-full h-full max-w-lg lg:max-w-xl rounded-3xl overflow-hidden shadow-2xl border border-[#C9952B]/30 bg-black/40">
-                  <Image
-                    src="/images/meditation_guide_hero.jpg"
-                    alt="AstroParihar Meditation"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent pointer-events-none" />
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.12] drop-shadow-lg">
+                  AstroParihar — <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">
+                    The Art of Meditation
+                  </span>
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
+                  Ancient Vedic meditation practices, personalised for your journey—cultivating clarity, steadiness, awareness, and inner stillness.
+                </p>
+              </motion.div>
+
+              {/* Action Buttons & Timer */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="flex flex-wrap items-center gap-4 pt-3"
+              >
+                <button
+                  onClick={() => setIsTimerRunning(!isTimerRunning)}
+                  className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#C9952B]/40 text-sm sm:text-base cursor-pointer"
+                >
+                  {isTimerRunning ? <Pause size={18} /> : <Play size={18} />}
+                  <span>{isTimerRunning ? 'Pause Practice' : 'Start 15-Min Practice'}</span>
+                </button>
+                <button
+                  onClick={resetTimer}
+                  className="p-4 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-all shadow-md cursor-pointer"
+                  title="Reset 15-Min Timer"
+                >
+                  <RotateCcw size={18} />
+                </button>
+                <div className="px-6 py-3.5 rounded-full bg-black/50 border border-[#B88A44]/40 text-[#F6D075] font-mono text-xl font-bold backdrop-blur-md shadow-lg flex items-center gap-2">
+                  <span>⏱</span>
+                  <span>{formatTime(timerSeconds)}</span>
                 </div>
               </motion.div>
             </div>
@@ -112,359 +121,368 @@ export default function FreeMeditationGuidePage() {
         </div>
       </section>
 
-      {/* Main Full Unbroken Meditation Guide Content */}
-      <section className="py-16 lg:py-24 bg-background relative z-10 space-y-16">
-        <div className="max-w-4xl mx-auto px-6 space-y-14">
+      {/* Main Full Meditation Guide Content - 2 Cards Per Row from Logo to Profile End */}
+      <section className="py-12 lg:py-16 bg-[#F8F3EA] relative z-10">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-8">
 
-          {/* Section 1: What Is Meditation? */}
-          <div className="glass-card p-8 sm:p-10 rounded-3xl border border-white/10 space-y-6">
-            <div className="space-y-2 border-b border-white/10 pb-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#C9952B]">Section 1</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">1. What Is Meditation?</h2>
-            </div>
-
-            <p className="text-base text-foreground leading-relaxed">
-              The Sanskrit word <strong>Dhyāna (ध्यान)</strong> refers to meditation or sustained contemplative awareness.
-            </p>
-
-            <p className="text-base text-foreground leading-relaxed">
-              It is important that AstroParihar doesn&apos;t describe meditation simply as &quot;emptying your mind.&quot;
-            </p>
-
-            <div className="p-5 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 space-y-2">
-              <p className="text-xs uppercase font-bold text-[#C9952B] tracking-wider">A better explanation is:</p>
-              <p className="text-base font-medium text-foreground leading-relaxed">
-                Meditation is the disciplined practice of directing and sustaining awareness upon a chosen object, mantra, deity, breath or inner principle.
-              </p>
-            </div>
-
-            <div className="space-y-4 pt-2">
-              <p className="text-sm font-bold text-[#C9952B] uppercase tracking-wider">
-                In the classical progression:
-              </p>
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/10 text-center font-bold text-[#C9952B] text-sm sm:text-base">
-                Pratyāhāra → Dhāraṇā → Dhyāna → Samādhi
-              </div>
-
-              <ul className="space-y-2.5 pt-2 text-sm text-foreground/90">
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-[#C9952B] mt-2 shrink-0" />
-                  <span><strong>Pratyāhāra</strong> — withdrawal of the senses</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-[#C9952B] mt-2 shrink-0" />
-                  <span><strong>Dhāraṇā</strong> — concentration</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-[#C9952B] mt-2 shrink-0" />
-                  <span><strong>Dhyāna</strong> — sustained meditation</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-[#C9952B] mt-2 shrink-0" />
-                  <span><strong>Samādhi</strong> — deep absorption</span>
-                </li>
-              </ul>
-            </div>
-
-            <p className="text-sm text-muted-foreground leading-relaxed pt-2">
-              Classical sources distinguish dhāraṇā from dhyāna by the continuity of attention: concentration fixes awareness on an object, while meditation sustains that awareness.
-            </p>
-          </div>
-
-          <div className="w-full border-t border-white/10 my-8" />
-
-          {/* Section 2: Why Meditation Matters in Vedic Practice */}
-          <div className="glass-card p-8 sm:p-10 rounded-3xl border border-white/10 space-y-6">
-            <div className="space-y-2 border-b border-white/10 pb-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#C9952B]">Section 2</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">2. Why Meditation Matters in Vedic Practice</h2>
-            </div>
-
-            <p className="text-base text-foreground leading-relaxed">
-              Meditation should not be presented as a quick remedy for every problem.
-            </p>
-
-            <p className="text-sm font-bold text-[#C9952B] uppercase tracking-wider">
-              Its deeper purpose is to cultivate:
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                <div className="text-base font-bold text-foreground flex items-center gap-2">
-                  <span>🧘</span> Manas Śuddhi
+          {/* Row 1: Section 1 & Section 2 Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            {/* Section 1: What Is Meditation? */}
+            <div className="bg-[#FFFDFC] p-6 sm:p-8 rounded-3xl border border-[#E5D9C8] space-y-5 shadow-xl text-[#292522] flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="space-y-1.5 border-b border-[#E5D9C8] pb-3">
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
+                    Section 1
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-[#292522]">1. What Is Meditation?</h2>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Purification and steadiness of the mind.
+
+                <p className="text-sm sm:text-base text-[#292522] leading-relaxed">
+                  The Sanskrit word <strong className="text-[#713B32]">Dhyāna (ध्यान)</strong> refers to meditation or sustained contemplative awareness.
                 </p>
+
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#EDE4D5]/60 border border-[#E5D9C8] space-y-1.5">
+                  <p className="text-xs uppercase font-bold text-[#713B32] tracking-wider">A better explanation is:</p>
+                  <p className="text-sm sm:text-base font-semibold text-[#292522] leading-relaxed">
+                    Meditation is the disciplined practice of directing and sustaining awareness upon a chosen object, mantra, deity, breath or inner principle.
+                  </p>
+                </div>
+
+                <div className="space-y-3 pt-1">
+                  <p className="text-xs sm:text-sm font-bold text-[#713B32] uppercase tracking-wider">
+                    In the classical progression:
+                  </p>
+
+                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#281123] via-[#1f0d1b] to-[#150914] text-white border border-[#B88A44]/40 text-center font-bold text-[#F6D075] text-xs sm:text-sm shadow-md tracking-wide">
+                    Pratyāhāra → Dhāraṇā → Dhyāna → Samādhi
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <div className="flex items-start gap-2.5 bg-[#F8F3EA] p-3 rounded-xl border border-[#E5D9C8]">
+                      <span className="w-2 h-2 rounded-full bg-[#B88A44] mt-1.5 shrink-0" />
+                      <span className="text-xs sm:text-sm"><strong className="text-[#713B32]">Pratyāhāra</strong> — sense withdrawal</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 bg-[#F8F3EA] p-3 rounded-xl border border-[#E5D9C8]">
+                      <span className="w-2 h-2 rounded-full bg-[#B88A44] mt-1.5 shrink-0" />
+                      <span className="text-xs sm:text-sm"><strong className="text-[#713B32]">Dhāraṇā</strong> — concentration</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 bg-[#F8F3EA] p-3 rounded-xl border border-[#E5D9C8]">
+                      <span className="w-2 h-2 rounded-full bg-[#B88A44] mt-1.5 shrink-0" />
+                      <span className="text-xs sm:text-sm"><strong className="text-[#713B32]">Dhyāna</strong> — sustained flow</span>
+                    </div>
+                    <div className="flex items-start gap-2.5 bg-[#F8F3EA] p-3 rounded-xl border border-[#E5D9C8]">
+                      <span className="w-2 h-2 rounded-full bg-[#B88A44] mt-1.5 shrink-0" />
+                      <span className="text-xs sm:text-sm"><strong className="text-[#713B32]">Samādhi</strong> — absorption</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                <div className="text-base font-bold text-foreground flex items-center gap-2">
-                  <span>🔥</span> Ekāgratā
+              <p className="text-xs text-[#6B5E55] leading-relaxed pt-3 border-t border-[#E5D9C8]">
+                Classical sources distinguish dhāraṇā from dhyāna by continuity of attention: concentration fixes awareness, while meditation sustains it.
+              </p>
+            </div>
+
+            {/* Section 2: Why Meditation Matters in Vedic Practice */}
+            <div className="bg-[#FFFDFC] p-6 sm:p-8 rounded-3xl border border-[#E5D9C8] space-y-5 shadow-xl text-[#292522] flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="space-y-1.5 border-b border-[#E5D9C8] pb-3">
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
+                    Section 2
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-[#292522]">2. Why Meditation Matters in Vedic Practice</h2>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  One-pointed attention.
+
+                <p className="text-sm sm:text-base text-[#292522] leading-relaxed">
+                  Meditation is not merely a temporary remedy—its deeper Vedic purpose is to cultivate internal mastery:
                 </p>
-              </div>
 
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                <div className="text-base font-bold text-foreground flex items-center gap-2">
-                  <span>🌿</span> Śānti
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="p-3.5 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-1 shadow-sm">
+                    <div className="text-sm font-bold text-[#713B32] flex items-center gap-1.5">
+                      <span>🧘</span> Manas Śuddhi
+                    </div>
+                    <p className="text-xs text-[#6B5E55] leading-relaxed">
+                      Purification and steadiness of the mind.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-1 shadow-sm">
+                    <div className="text-sm font-bold text-[#713B32] flex items-center gap-1.5">
+                      <span>🔥</span> Ekāgratā
+                    </div>
+                    <p className="text-xs text-[#6B5E55] leading-relaxed">
+                      One-pointed sustained attention.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-1 shadow-sm">
+                    <div className="text-sm font-bold text-[#713B32] flex items-center gap-1.5">
+                      <span>🌿</span> Śānti
+                    </div>
+                    <p className="text-xs text-[#6B5E55] leading-relaxed">
+                      Unshakeable inner tranquility.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-1 shadow-sm">
+                    <div className="text-sm font-bold text-[#713B32] flex items-center gap-1.5">
+                      <span>👁️</span> Viveka
+                    </div>
+                    <p className="text-xs text-[#6B5E55] leading-relaxed">
+                      Spiritual discernment and wisdom.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-1 sm:col-span-2 shadow-sm">
+                    <div className="text-sm font-bold text-[#713B32] flex items-center gap-1.5">
+                      <span>🙏</span> Īśvara Praṇidhāna
+                    </div>
+                    <p className="text-xs text-[#6B5E55] leading-relaxed">
+                      Devotional surrender and attunement to Divine consciousness.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Inner peace.
-                </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                <div className="text-base font-bold text-foreground flex items-center gap-2">
-                  <span>👁️</span> Viveka
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Discernment.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-1 sm:col-span-2">
-                <div className="text-base font-bold text-foreground flex items-center gap-2">
-                  <span>🙏</span> ĪśvaraPraṇidhāna
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Devotional surrender to the Divine.
-                </p>
-              </div>
-            </div>
-
-            <p className="text-sm text-muted-foreground leading-relaxed pt-2">
-              The Bhagavad Gītā describes disciplined regulation of the mind and body as part of dhyāna-yoga.
-            </p>
-          </div>
-
-          <div className="w-full border-t border-white/10 my-8" />
-
-          {/* Section 3: AstroParihar's Core Meditation Method */}
-          <div className="glass-card p-8 sm:p-10 rounded-3xl border border-white/10 space-y-8">
-            <div className="space-y-2 border-b border-white/10 pb-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#C9952B]">Section 3</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">3. AstroParihar&apos;s Core Meditation Method</h2>
-              <p className="text-sm text-muted-foreground">
-                I recommend making this the basic meditation protocol available to every user.
+              <p className="text-xs text-[#6B5E55] leading-relaxed pt-3 border-t border-[#E5D9C8]">
+                The Bhagavad Gītā describes disciplined regulation of the mind and body as an indispensable part of dhyāna-yoga.
               </p>
-            </div>
-
-            <div className="text-center py-2">
-              <h3 className="text-xl sm:text-2xl font-bold text-gradient-gold">
-                The 15-Minute AstroParihar Meditation
-              </h3>
-            </div>
-
-            {/* Step 1 */}
-            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="text-lg font-bold text-[#C9952B]">Step 1 — Prepare</h4>
-              <p className="text-sm text-foreground">Choose a clean, quiet place.</p>
-              <p className="text-sm text-foreground">Sit comfortably.</p>
-              <div className="space-y-2 pt-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase">You can sit:</p>
-                <ul className="space-y-1.5 text-sm text-foreground/90 pl-2">
-                  <li>• Padmāsana</li>
-                  <li>• Siddhāsana</li>
-                  <li>• Sukhasana</li>
-                  <li>• or simply on a chair with the spine comfortably upright.</li>
-                </ul>
-              </div>
-              <p className="text-xs text-muted-foreground italic pt-1">
-                Don&apos;t make difficult postures a requirement.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="text-lg font-bold text-[#C9952B]">Step 2 — Establish the Sankalpa</h4>
-              <p className="text-sm text-foreground">Close your eyes.</p>
-              <p className="text-sm text-foreground">Take three slow, natural breaths.</p>
-              <p className="text-sm text-foreground">Then mentally say:</p>
-
-              <div className="p-5 rounded-2xl bg-black/50 border border-[#C9952B]/30 space-y-3 text-center">
-                <div className="text-xl sm:text-2xl font-serif font-bold text-gradient-gold leading-relaxed">
-                  मममनःशान्त्यर्थं<br />
-                  आत्मविचारसिद्ध्यर्थं<br />
-                  ध्यानंकरिष्ये।
-                </div>
-                <div className="text-xs sm:text-sm text-foreground/80 font-mono leading-relaxed">
-                  Mama manaḥ-śānty-arthaṃ<br />
-                  ātma-vicāra-siddhy-arthaṃ<br />
-                  dhyānaṃkariṣye.
-                </div>
-                <p className="text-xs sm:text-sm italic text-[#C9952B] pt-2 border-t border-white/10">
-                  &quot;For the peace of my mind and the cultivation of self-awareness, I undertake this meditation.&quot;
-                </p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="text-lg font-bold text-[#C9952B]">Step 3 — Breath Awareness</h4>
-              <p className="text-sm text-foreground">Don&apos;t force the breath.</p>
-              <div className="space-y-2">
-                <p className="text-xs font-bold text-muted-foreground uppercase">Simply observe:</p>
-                <div className="p-3 rounded-xl bg-black/40 border border-white/10 text-center font-bold text-[#C9952B] text-sm">
-                  Inhale → Pause naturally → Exhale
-                </div>
-              </div>
-              <p className="text-sm text-foreground">Do this for approximately 2–3 minutes.</p>
-              <p className="text-xs text-muted-foreground italic">
-                The objective is awareness, not aggressive breath manipulation.
-              </p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="text-lg font-bold text-[#C9952B]">Step 4 — Mantra</h4>
-              <p className="text-sm text-foreground">Choose one mantra.</p>
-              <p className="text-sm text-foreground">For the general AstroParihar programme:</p>
-
-              <div className="p-5 rounded-2xl bg-black/50 border border-[#C9952B]/30 space-y-2 text-center">
-                <div className="text-2xl sm:text-3xl font-serif font-bold text-gradient-gold">
-                  ॐनमःशिवाय॥
-                </div>
-                <div className="text-sm text-foreground font-mono">
-                  Om NamaḥŚivāya
-                </div>
-              </div>
-
-              <p className="text-sm text-foreground">Repeat mentally.</p>
-              <div className="space-y-2 pt-1">
-                <p className="text-xs font-bold text-muted-foreground uppercase">The user can use:</p>
-                <ul className="space-y-1.5 text-sm text-foreground/90 pl-2">
-                  <li>• 27 repetitions</li>
-                  <li>• 54 repetitions</li>
-                  <li>• 108 repetitions</li>
-                  <li>• 1008 repetitions</li>
-                </ul>
-              </div>
-              <p className="text-xs text-muted-foreground italic pt-1">
-                depending on experience and available time.
-              </p>
-            </div>
-
-            {/* Step 5 */}
-            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="text-lg font-bold text-[#C9952B]">Step 5 — Dharana</h4>
-              <p className="text-sm text-foreground">
-                After the mantra, allow attention to rest on one point.
-              </p>
-              <div className="space-y-2">
-                <p className="text-xs font-bold text-muted-foreground uppercase">For example:</p>
-                <ul className="space-y-1.5 text-sm text-foreground/90 pl-2">
-                  <li>• breath at the nostrils,</li>
-                  <li>• the mantra,</li>
-                  <li>• a deity image,</li>
-                  <li>• a diya flame,</li>
-                  <li>• or a chosen spiritual symbol.</li>
-                </ul>
-              </div>
-
-              <div className="space-y-2 pt-2 border-t border-white/10">
-                <p className="text-xs font-bold text-muted-foreground uppercase">When the mind wanders:</p>
-                <div className="p-3 rounded-xl bg-black/40 border border-white/10 text-center font-bold text-[#C9952B] text-sm">
-                  Notice → Don&apos;t judge → Return.
-                </div>
-              </div>
-
-              <p className="text-sm text-[#C9952B] font-bold">This is crucial.</p>
-              <p className="text-sm text-foreground">The objective isn&apos;t to prevent thoughts.</p>
-              <p className="text-sm text-foreground">The objective is to stop being carried away by every thought.</p>
-            </div>
-
-            {/* Step 6 */}
-            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="text-lg font-bold text-[#C9952B]">Step 6 — Dhyāna</h4>
-              <p className="text-sm font-bold text-[#C9952B]">For approximately five minutes:</p>
-              <ul className="space-y-2 text-sm text-foreground/90">
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C9952B]" />
-                  Don&apos;t actively repeat instructions.
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C9952B]" />
-                  Don&apos;t analyse.
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C9952B]" />
-                  Don&apos;t fight thoughts.
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C9952B]" />
-                  Remain aware.
-                </li>
-              </ul>
-              <p className="text-sm text-foreground pt-1">
-                Mantra may continue softly in the background if that is your chosen method.
-              </p>
-              <p className="text-xs text-muted-foreground italic">
-                This is the transition from deliberate concentration toward sustained meditation.
-              </p>
-            </div>
-
-            {/* Step 7 */}
-            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="text-lg font-bold text-[#C9952B]">Step 7 — Closing</h4>
-              <p className="text-sm text-foreground">Place your palms together.</p>
-              <p className="text-sm text-foreground">Take three gentle breaths.</p>
-              <p className="text-sm text-foreground">Then recite:</p>
-
-              <div className="p-5 rounded-2xl bg-black/50 border border-[#C9952B]/30 space-y-2 text-center">
-                <div className="text-2xl sm:text-3xl font-serif font-bold text-gradient-gold">
-                  ॐशान्तिःशान्तिःशान्तिः॥
-                </div>
-                <div className="text-sm text-foreground font-mono">
-                  Om ŚāntiḥŚāntiḥŚāntiḥ
-                </div>
-              </div>
-
-              <p className="text-sm text-foreground">Remain seated for another 30 seconds.</p>
-              <p className="text-sm text-foreground">Then slowly open your eyes.</p>
             </div>
           </div>
 
-          <div className="w-full border-t border-white/10 my-8" />
+          {/* Section 3: AstroParihar's Core 15-Minute Meditation Method Container */}
+          <div className="bg-[#FFFDFC] p-6 sm:p-8 lg:p-10 rounded-3xl border border-[#E5D9C8] space-y-6 shadow-xl text-[#292522]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5D9C8] pb-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block mb-1.5">
+                  Section 3
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#292522]">
+                  3. AstroParihar&apos;s Core Meditation Method
+                </h2>
+                <p className="text-xs sm:text-sm text-[#6B5E55]">
+                  The foundational 15-minute daily Vedic protocol for steadiness, clarity, and peace.
+                </p>
+              </div>
 
-          {/* Section 4: What Should you Do When Thoughts Come? */}
-          <div className="glass-card p-8 sm:p-10 rounded-3xl border border-white/10 space-y-6">
-            <div className="space-y-2 border-b border-white/10 pb-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#C9952B]">Section 4</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                4. What Should you Do When Thoughts Come?
-              </h2>
-              <p className="text-sm text-[#C9952B] font-semibold">
-                AstroPariharsays.
+              <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#EDE4D5] text-[#713B32] text-xs sm:text-sm font-bold border border-[#E5D9C8] shrink-0 self-start sm:self-auto shadow-sm">
+                <Sparkles size={14} className="text-[#B88A44]" /> 15-Minute Protocol
+              </span>
+            </div>
+
+            {/* 2-Column Grid of 7 Steps */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+              {/* Step 1 */}
+              <div className="space-y-3 p-5 sm:p-6 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-base sm:text-lg font-bold text-[#713B32]">Step 1 — Prepare</h4>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white border border-[#E5D9C8] text-[#713B32]">1–2 Mins</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#292522]">Choose a clean, quiet place and sit comfortably with spine upright.</p>
+                  <div className="space-y-1.5 pt-1">
+                    <p className="text-[11px] font-bold text-[#713B32] uppercase">Recommended Postures:</p>
+                    <ul className="space-y-1 text-xs text-[#3D332A] pl-2">
+                      <li>• Padmāsana (Lotus) or Siddhāsana</li>
+                      <li>• Sukhasana (Easy cross-legged)</li>
+                      <li>• Or comfortably on a chair with upright spine.</li>
+                    </ul>
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#6B5E55] italic pt-2 border-t border-[#E5D9C8]/60">
+                  Comfortable posture is priority over difficult contortions.
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="space-y-3 p-5 sm:p-6 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-base sm:text-lg font-bold text-[#713B32]">Step 2 — Sankalpa</h4>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white border border-[#E5D9C8] text-[#713B32]">Mantra</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#292522]">Close your eyes, take 3 deep breaths, and mentally recite the sacred resolve:</p>
+
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-[#281123] via-[#1f0d1b] to-[#150914] text-white border border-[#B88A44]/40 space-y-2 text-center shadow-md">
+                    <div className="text-lg sm:text-xl font-serif font-extrabold text-[#F6D075] leading-snug">
+                      मममनःशान्त्यर्थं आत्मविचारसिद्ध्यर्थं ध्यानंकरिष्ये।
+                    </div>
+                    <div className="text-[11px] text-white/90 font-mono">
+                      Mama manaḥ-śānty-arthaṃ ātma-vicāra-siddhy-arthaṃ dhyānaṃkariṣye.
+                    </div>
+                    <p className="text-[11px] italic text-[#FFE29F] pt-1 border-t border-white/20">
+                      &quot;For the peace of my mind and self-awareness, I undertake this meditation.&quot;
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="space-y-3 p-5 sm:p-6 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-base sm:text-lg font-bold text-[#713B32]">Step 3 — Breath Awareness</h4>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white border border-[#E5D9C8] text-[#713B32]">2–3 Mins</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#292522]">Do not force or manipulate the breath. Simply witness the natural respiratory cycle:</p>
+
+                  <div className="p-3.5 rounded-xl bg-gradient-to-r from-[#281123] to-[#170b16] text-[#F6D075] border border-[#B88A44]/40 text-center font-bold text-xs sm:text-sm shadow-md">
+                    Inhale → Pause naturally → Exhale
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#6B5E55] italic pt-2 border-t border-[#E5D9C8]/60">
+                  The objective is passive awareness, not forceful breath retention.
+                </p>
+              </div>
+
+              {/* Step 4 */}
+              <div className="space-y-3 p-5 sm:p-6 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-base sm:text-lg font-bold text-[#713B32]">Step 4 — Mantra Japa</h4>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white border border-[#E5D9C8] text-[#713B32]">5–7 Mins</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#292522]">Repeat your chosen sacred mantra mentally with deep reverence (27, 54, or 108 times):</p>
+
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-[#281123] to-[#150914] text-white border border-[#B88A44]/40 space-y-1 text-center shadow-md">
+                    <div className="text-2xl font-serif font-extrabold text-[#F6D075]">
+                      ॐ नमः शिवाय ॥
+                    </div>
+                    <div className="text-xs text-white/90 font-mono tracking-widest">
+                      Om Namaḥ Śivāya
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 5 */}
+              <div className="space-y-3 p-5 sm:p-6 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-base sm:text-lg font-bold text-[#713B32]">Step 5 — Dhāraṇā (Focus)</h4>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white border border-[#E5D9C8] text-[#713B32]">Concentration</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#292522]">Rest attention on one focal point (breath at nostrils, third eye, diya flame, or deity image).</p>
+
+                  <div className="space-y-1.5 pt-1">
+                    <p className="text-[11px] font-bold text-[#713B32] uppercase">When Mind Wanders:</p>
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-[#281123] to-[#170b16] text-[#F6D075] border border-[#B88A44]/40 text-center font-bold text-xs shadow-md">
+                      Notice → Don&apos;t judge → Return gently
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#6B5E55] italic pt-2 border-t border-[#E5D9C8]/60">
+                  You are training awareness not to get hijacked by every incoming thought.
+                </p>
+              </div>
+
+              {/* Step 6 & 7 */}
+              <div className="space-y-3 p-5 sm:p-6 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] flex flex-col justify-between">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-base sm:text-lg font-bold text-[#713B32]">Step 6 & 7 — Dhyāna & Closing</h4>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white border border-[#E5D9C8] text-[#713B32]">Stillness & Peace</span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#292522]">Rest in sustained silent awareness for 3–5 minutes. To conclude, join palms and chant:</p>
+
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-[#281123] to-[#150914] text-white border border-[#B88A44]/40 space-y-1 text-center shadow-md">
+                    <div className="text-xl font-serif font-extrabold text-[#F6D075]">
+                      ॐ शान्तिः शान्तिः शान्तिः ॥
+                    </div>
+                    <div className="text-xs text-white/90 font-mono tracking-wide">
+                      Om Śāntiḥ Śāntiḥ Śāntiḥ
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#6B5E55] italic pt-2 border-t border-[#E5D9C8]/60">
+                  Remain seated for 30 seconds before slowly opening your eyes.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 3: Section 4 & Sadhana Principles Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            {/* Section 4: What Should you Do When Thoughts Come? */}
+            <div className="bg-[#FFFDFC] p-6 sm:p-8 rounded-3xl border border-[#E5D9C8] space-y-5 shadow-xl text-[#292522] flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="space-y-1.5 border-b border-[#E5D9C8] pb-3">
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
+                    Section 4
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-[#292522]">
+                    4. Handling Wandering Thoughts
+                  </h2>
+                </div>
+
+                <div className="space-y-2.5">
+                  <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs sm:text-sm font-medium">
+                    <strong className="text-rose-700">Don&apos;t say:</strong> &quot;Stop thinking.&quot;
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs sm:text-sm font-medium">
+                    <strong className="text-emerald-700">Instead:</strong> &quot;A thought has appeared. Notice it. Let it pass. Return to your chosen object.&quot;
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-2">
+                  <p className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Practical Example:</p>
+                  <p className="text-xs sm:text-sm text-[#292522]">Thought arises: <em>&quot;I need to call someone.&quot;</em></p>
+                  <p className="text-xs sm:text-sm text-[#292522]">Do not follow the storyline. Label it gently: <strong className="text-[#713B32]">Thinking</strong>.</p>
+                  <p className="text-xs sm:text-sm text-[#292522]">Return to your breath or mantra smoothly.</p>
+                </div>
+              </div>
+
+              <p className="text-xs font-bold text-[#713B32] pt-3 border-t border-[#E5D9C8]">
+                This constant gentle returning is the true muscle of meditation.
               </p>
             </div>
 
-            <div className="space-y-3">
-              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm">
-                <strong>Don&apos;t say:</strong> &quot;Stop thinking.&quot;
+            {/* Section 5: Astrological Meditation Benefits */}
+            <div className="bg-[#FFFDFC] p-6 sm:p-8 rounded-3xl border border-[#E5D9C8] space-y-5 shadow-xl text-[#292522] flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="space-y-1.5 border-b border-[#E5D9C8] pb-3">
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
+                    Vedic Principles
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-[#292522]">
+                    Astrological Alignment for Dhyāna
+                  </h2>
+                </div>
+
+                <ul className="space-y-3 text-xs sm:text-sm text-[#292522]">
+                  <li className="flex items-start gap-2.5 bg-[#F8F3EA] p-3 rounded-xl border border-[#E5D9C8]">
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center shrink-0 text-xs mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-[#713B32]">Brahma Muhurat (4:00 – 6:00 AM)</strong>
+                      <p className="text-xs text-[#6B5E55] mt-0.5">Peak Sattvic energy ideal for deep Dhyana and mantra absorption.</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2.5 bg-[#F8F3EA] p-3 rounded-xl border border-[#E5D9C8]">
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center shrink-0 text-xs mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-[#713B32]">Moon & Mercury Pacification</strong>
+                      <p className="text-xs text-[#6B5E55] mt-0.5">Calms an agitated Moon (emotions) and restless Mercury (overthinking).</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2.5 bg-[#F8F3EA] p-3 rounded-xl border border-[#E5D9C8]">
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center shrink-0 text-xs mt-0.5">✓</span>
+                    <div>
+                      <strong className="text-[#713B32]">Ishta Devata Connection</strong>
+                      <p className="text-xs text-[#6B5E55] mt-0.5">Chanting your 5th/9th house Ishta mantra accelerates spiritual breakthroughs.</p>
+                    </div>
+                  </li>
+                </ul>
               </div>
 
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm">
-                <strong>Instead:</strong> &quot;A thought has appeared. Notice it. Let it pass. Return to your chosen object.&quot;
+              <div className="pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs text-[#6B5E55]">
+                <span className="flex items-center gap-1 font-semibold text-[#713B32]">
+                  <ShieldCheck size={14} className="text-emerald-600" /> Sacred Vedic Practice
+                </span>
+                <span>Self-Paced Spiritual Discipline</span>
               </div>
             </div>
-
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">For example:</p>
-              <p className="text-sm text-foreground font-medium">Thought: &quot;I need to call someone.&quot;</p>
-              <p className="text-sm text-foreground">Don&apos;t follow it.</p>
-              <div className="space-y-1 py-1">
-                <p className="text-xs font-bold text-[#C9952B] uppercase">Simply recognise:</p>
-                <p className="text-sm font-semibold text-foreground">Thinking.</p>
-              </div>
-              <p className="text-sm text-foreground">Return to the breath/mantra.</p>
-            </div>
-
-            <p className="text-base font-bold text-[#C9952B] pt-2">
-              This is meditation practice.
-            </p>
           </div>
 
           {/* Dynamic Content Managed via Admin Panel */}
