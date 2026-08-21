@@ -60,30 +60,26 @@ const iconDict: Record<string, any> = {
   'sani-survival': Zap,
 };
 
-interface ServicesSectionProps {
+interface RemediesSectionProps {
   content?: any;
-  comprehensiveContent?: any;
 }
 
-export default function ServicesSection({ content, comprehensiveContent }: ServicesSectionProps) {
+export function RemediesSection({ content }: RemediesSectionProps) {
   const remediesList = content?.items || defaultHomepageContent.services.items;
-  const comprehensiveSection = comprehensiveContent || defaultHomepageContent.comprehensiveServices;
-  const coreServicesList = comprehensiveSection?.items || defaultHomepageContent.comprehensiveServices.items;
 
   return (
-    <div className="space-y-24 py-20 bg-[#F8F3EA]">
-      {/* 8 Ashta-Digbandhan Remedies Section */}
-      <section id="remedies" className="max-w-screen-2xl mx-auto px-6 lg:px-10">
+    <section id="remedies" className="pt-16 pb-8 bg-[#F8F3EA]">
+      <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14 space-y-3"
+          className="text-center mb-10 space-y-2.5"
         >
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8]">
             {content?.tagline || 'ASHTA-DIGBANDHAN MANDALA'}
           </span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-[#292522]">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#292522]">
             {content?.title || 'Sacred Ashta-Digbandhan'}{' '}
             <span className="text-gradient-gold">{content?.titleHighlight || 'Vedic Remedies'}</span>
           </h2>
@@ -132,20 +128,32 @@ export default function ServicesSection({ content, comprehensiveContent }: Servi
             );
           })}
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* Comprehensive Services Section */}
-      <section id="services" className="max-w-screen-2xl mx-auto px-6 lg:px-10">
+interface ComprehensiveServicesSectionProps {
+  comprehensiveContent?: any;
+}
+
+export function ComprehensiveServicesSection({ comprehensiveContent }: ComprehensiveServicesSectionProps) {
+  const comprehensiveSection = comprehensiveContent || defaultHomepageContent.comprehensiveServices;
+  const coreServicesList = comprehensiveSection?.items || defaultHomepageContent.comprehensiveServices.items;
+
+  return (
+    <section id="services" className="pt-8 pb-16 bg-[#F8F3EA]">
+      <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14 space-y-3"
+          className="text-center mb-10 space-y-2.5"
         >
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8]">
             {comprehensiveSection?.tagline || 'ASTROPARIHAR SERVICES'}
           </span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-[#292522]">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#292522]">
             {comprehensiveSection?.title || 'Our Comprehensive'}{' '}
             <span className="text-gradient-gold">{comprehensiveSection?.titleHighlight || 'Vedic Services & Guides'}</span>
           </h2>
@@ -194,7 +202,21 @@ export default function ServicesSection({ content, comprehensiveContent }: Servi
             );
           })}
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
+  );
+}
+
+interface ServicesSectionProps {
+  content?: any;
+  comprehensiveContent?: any;
+}
+
+export default function ServicesSection({ content, comprehensiveContent }: ServicesSectionProps) {
+  return (
+    <>
+      <RemediesSection content={content} />
+      <ComprehensiveServicesSection comprehensiveContent={comprehensiveContent} />
+    </>
   );
 }

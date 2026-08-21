@@ -15,7 +15,9 @@ import {
   CheckCircle2,
   ChevronRight,
   Loader2,
+  Check,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import CityLocationInput from '@/components/CityLocationInput';
 import Navbar from '@/components/Navbar';
 import { useUserData } from '@/lib/useUserData';
@@ -37,6 +39,7 @@ export default function TomorrowPanchangPage() {
     calculatePanchang(tomorrowDateStr(), 'New Delhi, Delhi, India')
   );
   const [isGenerating, setIsGenerating] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setPanchang(calculatePanchang(selectedDate, location));
@@ -45,43 +48,46 @@ export default function TomorrowPanchangPage() {
   const handleGeneratePanchang = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    if (!user) {
-      window.location.href = `/sign-up-login-screen?redirect=${encodeURIComponent(window.location.pathname)}`;
-      return;
-    }
-
     setIsGenerating(true);
-    try {
-      const calculated = calculatePanchang(selectedDate, location);
-      setPanchang(calculated);
+    setToastMessage(null);
 
-      await fetch('/api/generate-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.uid || 'guest-user',
-          userEmail: user?.email || '',
-          type: 'Tomorrow Panchang Report',
-          details: {
-            date: selectedDate,
-            place: location || 'New Delhi, Delhi, India',
-            generatedAt: new Date().toISOString(),
-          },
-          reportContent: JSON.stringify({
-            recommendationTitle: 'Tomorrow Panchang & Vedic Timing',
-            recommendationName: `Tomorrow Panchang for ${location || 'New Delhi'} on ${calculated.formattedDate}`,
-            timing: `Sunrise ${calculated.sunrise} - Sunset ${calculated.sunset}`,
-            duration: 'Tomorrow Full Day Cosmic Overview',
-            materials: 'Kusha Mat, Copper Lota, Diya',
-            astrologicalAnalysis: `Tomorrow ${calculated.tithi} Tithi with ${calculated.nakshatra} brings steady planetary alignment. Rahu Kaal window is (${calculated.rahuKaal.start} - ${calculated.rahuKaal.end}).`,
-            procedure: `Prepare for tomorrow's morning rituals at ${calculated.sunrise}. Recite mantras during Abhijit Muhurat (${calculated.abhijitMuhurat.start} - ${calculated.abhijitMuhurat.end}).`,
+    await new Promise((res) => setTimeout(res, 350));
+
+    const calculated = calculatePanchang(selectedDate, location);
+    setPanchang(calculated);
+    setIsGenerating(false);
+
+    setToastMessage(`Tomorrow Panchang updated for ${calculated.formattedDate} (${location})`);
+    setTimeout(() => setToastMessage(null), 3000);
+
+    if (user) {
+      try {
+        await fetch('/api/generate-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.uid,
+            userEmail: user.email || '',
+            type: 'Tomorrow Panchang Report',
+            details: {
+              date: selectedDate,
+              place: location || 'New Delhi, Delhi, India',
+              generatedAt: new Date().toISOString(),
+            },
+            reportContent: JSON.stringify({
+              recommendationTitle: 'Tomorrow Panchang & Vedic Timing',
+              recommendationName: `Tomorrow Panchang for ${location || 'New Delhi'} on ${calculated.formattedDate}`,
+              timing: `Sunrise ${calculated.sunrise} - Sunset ${calculated.sunset}`,
+              duration: 'Tomorrow Full Day Cosmic Overview',
+              materials: 'Kusha Mat, Copper Lota, Diya',
+              astrologicalAnalysis: `Tomorrow ${calculated.tithi} Tithi with ${calculated.nakshatra} brings steady planetary alignment. Rahu Kaal window is (${calculated.rahuKaal.start} - ${calculated.rahuKaal.end}).`,
+              procedure: `Prepare for tomorrow's morning rituals at ${calculated.sunrise}. Recite mantras during Abhijit Muhurat (${calculated.abhijitMuhurat.start} - ${calculated.abhijitMuhurat.end}).`,
+            }),
           }),
-        }),
-      });
-    } catch (err) {
-      console.error('Tomorrow Panchang generation error:', err);
-    } finally {
-      setIsGenerating(false);
+        });
+      } catch (err) {
+        console.error('Tomorrow Panchang save error:', err);
+      }
     }
   };
 
@@ -100,6 +106,21 @@ export default function TomorrowPanchangPage() {
   return (
     <div className="min-h-screen bg-background dark text-foreground">
       <Navbar />
+
+      {/* Success Toast Banner */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[150] px-5 py-3 rounded-2xl bg-emerald-500 text-black font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400"
+          >
+            <Check size={16} />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         <div className="text-center space-y-3">

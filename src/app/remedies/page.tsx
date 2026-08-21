@@ -3,14 +3,13 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Gem, Music, Triangle, Flame, Heart, Compass, CircleDot, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, Gem, Music, Triangle, Flame, Heart, Compass, CircleDot, ShieldCheck, Sparkles, ChevronRight, ChevronDown } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import LandingFooter from '@/app/components/LandingFooter';
 
 import AshtaDigbandhanaWheel, { SpokeItem } from '@/components/AshtaDigbandhanaWheel';
 import DynamicPageContent from '@/components/DynamicPageContent';
 import { getHomepageContent, HomepageContent, defaultHomepageContent, subscribeHomepageContent } from '@/lib/cms';
-import { ChevronRight } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
   Music,
@@ -138,136 +137,160 @@ export default function RemediesPage() {
       if (updated) setContent(updated);
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
-  const remediesList = content?.services?.items || defaultHomepageContent.services.items;
-
   return (
-    <div className="min-h-screen bg-background dark text-foreground">
+    <div className="min-h-screen bg-[#FFFDFC] text-[#292522]">
       <Navbar />
 
-      {/* Hero Banner Section */}
-      <section className="relative overflow-hidden border-b border-white/5 pt-24 lg:pt-28 pb-16 lg:pb-20 cosmic-bg">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#C9952B]/10 blur-3xl pointer-events-none" />
+      {/* Hero Banner Section (Matches Home Page Full min-h-screen Height & Atmosphere) */}
+      <section className="relative min-h-screen cosmic-bg overflow-hidden flex flex-col">
+        {/* Star field background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(60)]?.map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="absolute rounded-full bg-white animate-twinkle"
+              style={{
+                width: `${(i % 3) + 1}px`,
+                height: `${(i % 3) + 1}px`,
+                left: `${(i * 17) % 100}%`,
+                top: `${(i * 13) % 100}%`,
+                animationDelay: `${i * 0.1}s`,
+                opacity: 0.4 + (i % 5) * 0.1,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Glowing orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/30 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#B88A44]/20 blur-3xl pointer-events-none" />
         
-        <div className="relative z-10 max-w-screen-2xl w-full mx-auto px-6 lg:px-10">
-          <div className="grid lg:grid-cols-2 items-start gap-8 lg:gap-12">
-            
-            {/* Left Content - Fully populated with Headline, Pillars, Buttons, and Live Remedy Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: 'easeOut' }}
-              className="space-y-6 order-2 lg:order-1"
-            >
-              <div>
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 mb-4 backdrop-blur-md shadow-lg shadow-black/20">
-                  <Sparkles size={14} className="text-[#F6D075]" />
-                  Complete Vedic Healing & Planetary Shield
-                </span>
-                
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 tracking-tight leading-[1.15] drop-shadow-lg">
-                  Transform Your Life With <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">
-                    Sacred Vedic Remedies
+        {/* Main content */}
+        <div className="flex-1 flex items-center justify-center pt-24 pb-8">
+          <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 xl:px-16 w-full">
+            <div className="grid lg:grid-cols-12 items-center gap-8 lg:gap-12">
+              
+              {/* Left Content - Headline, Description, Buttons, and Active Remedy Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="lg:col-span-6 space-y-6 order-2 lg:order-1"
+              >
+                <div>
+                  <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 mb-3.5 backdrop-blur-md shadow-sm">
+                    <Sparkles size={14} className="text-[#F6D075]" />
+                    Complete Vedic Healing & Planetary Shield
                   </span>
-                </h1>
-                
-                <p className="text-sm sm:text-base text-[#F8F3EA]/90 font-medium leading-relaxed max-w-xl mb-5 drop-shadow">
-                  Explore our 8 powerful Vedic remedy modules designed to balance planetary energies, remove obstacles, and propel your spiritual and material growth.
-                </p>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3.5 mb-6">
-                  <Link
-                    href="/talk-to-astrologer"
-                    className="px-7 py-3.5 rounded-full gold-gradient-bg text-[#292522] font-extrabold text-sm sm:text-base flex items-center gap-2 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#C9952B]/40 cursor-pointer"
-                  >
-                    Consult Astrologer <ArrowRight size={18} />
-                  </Link>
-                  <button
-                    onClick={() => {
-                      document.getElementById('remedies-grid')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="px-6 py-3.5 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md cursor-pointer"
-                  >
-                    Explore 8 Remedies
-                  </button>
-                </div>
-
-                {/* Interactive Active Remedy Showcase Card (Eliminates Left Void) */}
-                <motion.div
-                  key={selectedSpoke.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="p-5 sm:p-6 rounded-3xl border border-[#B88A44]/40 bg-black/60 backdrop-blur-md shadow-2xl space-y-3"
-                >
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <span
-                      className="px-3.5 py-1 rounded-full text-xs font-extrabold text-[#292522] shadow-sm"
-                      style={{ backgroundColor: selectedSpoke.accentColor }}
-                    >
-                      दिशा: {selectedSpoke.directionFull}
+                  
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight hero-text-glow max-w-xl mb-3.5">
+                    Transform Your Life With <br />
+                    <span className="block text-gradient-gold">
+                      Sacred Vedic Remedies
                     </span>
-                    <h4 className="text-base sm:text-lg font-bold text-white font-serif">
-                      {selectedSpoke.number}. {selectedSpoke.name} ({selectedSpoke.sanskrit})
-                    </h4>
-                  </div>
-
-                  <p className="text-base sm:text-lg font-bold text-[#F6D075] font-serif">
-                    {selectedSpoke.mantra}
+                  </h1>
+                  
+                  <p className="text-sm sm:text-base lg:text-lg text-white/80 leading-relaxed max-w-lg mb-5">
+                    Explore our 8 powerful Vedic remedy modules designed to balance planetary energies, remove obstacles, and propel your spiritual and material growth.
                   </p>
 
-                  <p className="text-xs sm:text-sm text-white/85 leading-relaxed font-medium">
-                    {selectedSpoke.explanation}
-                  </p>
-
-                  <div className="pt-2 border-t border-white/10 flex items-center justify-between flex-wrap gap-2">
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap items-center gap-4 mb-5">
                     <Link
-                      href={selectedSpoke.href}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F6D075] hover:text-[#FFE29F] transition-colors"
+                      href="/talk-to-astrologer"
+                      className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all duration-200 gold-shadow animate-pulse-gold cursor-pointer"
                     >
-                      <span>Explore {selectedSpoke.name.split(' ')[0]} Module</span>
-                      <ChevronRight size={14} />
+                      ✦ Consult Astrologer
+                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </Link>
-                    <span className="text-[11px] text-white/50 italic">Hover/click any sector on the wheel</span>
+                    <button
+                      onClick={() => {
+                        document.getElementById('remedies-grid')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold bg-[#FFFDFC]/10 backdrop-blur-md border border-[#D8B66A]/30 text-white hover:border-[#D8B66A] hover:text-[#D8B66A] transition-all duration-200 cursor-pointer"
+                    >
+                      Explore 8 Remedies
+                    </button>
                   </div>
-                </motion.div>
-              </div>
-            </motion.div>
 
-            {/* Right Visual Animated Wheel */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, ease: 'easeOut', delay: 0.2 }}
-              className="relative w-full order-1 lg:order-2 flex items-center justify-center"
-            >
-              <AshtaDigbandhanaWheel
-                hideInfoCard={true}
-                hideFooter={true}
-                onHoverSpoke={(spoke) => {
-                  if (spoke) setSelectedSpoke(spoke);
-                }}
-              />
-            </motion.div>
+                  {/* Interactive Active Remedy Showcase Card */}
+                  <motion.div
+                    key={selectedSpoke.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="p-4 sm:p-5 rounded-2xl border border-[#D8B66A]/30 bg-[#FFFDFC]/10 backdrop-blur-md shadow-2xl space-y-2.5 max-w-xl"
+                  >
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span
+                        className="px-3 py-0.5 rounded-full text-[11px] font-extrabold text-[#292522] shadow-sm"
+                        style={{ backgroundColor: selectedSpoke.accentColor }}
+                      >
+                        दिशा: {selectedSpoke.directionFull}
+                      </span>
+                      <h4 className="text-sm sm:text-base font-bold text-white font-serif">
+                        {selectedSpoke.number}. {selectedSpoke.name} ({selectedSpoke.sanskrit})
+                      </h4>
+                    </div>
 
+                    <p className="text-sm sm:text-base font-bold text-[#F6D075] font-serif">
+                      {selectedSpoke.mantra}
+                    </p>
+
+                    <p className="text-xs sm:text-sm text-white/85 leading-relaxed font-medium">
+                      {selectedSpoke.explanation}
+                    </p>
+
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between flex-wrap gap-2">
+                      <Link
+                        href={selectedSpoke.href}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F6D075] hover:text-[#FFE29F] transition-colors"
+                      >
+                        <span>Explore {selectedSpoke.name.split(' ')[0]} Module</span>
+                        <ChevronRight size={13} />
+                      </Link>
+                      <span className="text-[10px] text-white/50 italic">Hover/click any sector on the wheel</span>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              {/* Right Visual Animated Wheel */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+                className="lg:col-span-6 relative w-full order-1 lg:order-2 flex items-center justify-center"
+              >
+                <AshtaDigbandhanaWheel
+                  hideInfoCard={true}
+                  hideFooter={true}
+                  onHoverSpoke={(spoke) => {
+                    if (spoke) setSelectedSpoke(spoke);
+                  }}
+                />
+              </motion.div>
+
+            </div>
           </div>
+        </div>
 
-          {/* Full Width Bottom Shloka Banner */}
-          <div className="pt-10 mt-10 border-t border-white/10 text-center space-y-1.5">
-            <p className="text-sm sm:text-base text-[#F6D075] font-serif font-bold tracking-wide">
-              मंत्र – रत्न – यंत्र – हवन – देवता उपासना – वास्तु – रुद्राक्ष – हवन / पूजा
-            </p>
-            <p className="text-xs sm:text-sm text-white/70 font-medium">
-              ॥ इन आठ स्तम्भों से होता है सम्पूर्ण अष्टदिग्बन्धन और जीवन का संरक्षण ॥
-            </p>
-          </div>
+        {/* Scroll indicator */}
+        <div className="flex justify-center pb-8 pt-2">
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="flex flex-col items-center gap-2 text-white/50 text-xs font-medium cursor-pointer hover:text-white/80 transition-colors"
+            onClick={() => {
+              document.getElementById('remedies-grid')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <span>Scroll to explore remedies</span>
+            <ChevronDown size={16} />
+          </motion.div>
         </div>
       </section>
 

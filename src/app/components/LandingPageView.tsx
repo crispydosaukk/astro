@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import HeroSection from './HeroSection';
-import ServicesSection from './ServicesSection';
+import { RemediesSection, ComprehensiveServicesSection } from './ServicesSection';
 import FeaturedAstrologers from './FeaturedAstrologers';
 import TestimonialsSection from './TestimonialsSection';
 import LandingFooter from './LandingFooter';
@@ -40,11 +40,9 @@ export default function LandingPageView({ initialContent }: LandingPageViewProps
     <div className="min-h-screen bg-background dark">
       <Navbar />
       <HeroSection content={content.hero} />
-      <ServicesSection
-        content={content.services}
-        comprehensiveContent={content.comprehensiveServices}
-      />
+      <RemediesSection content={content.services} />
       <FeaturedAstrologers />
+      <ComprehensiveServicesSection comprehensiveContent={content.comprehensiveServices} />
       <TestimonialsSection />
       <LandingFooter />
     </div>

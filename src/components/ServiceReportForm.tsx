@@ -188,13 +188,13 @@ export default function ServiceReportForm({
 
       // 2. Open Razorpay Modal
       const options = {
-        key: data.keyId,
+        key: data.keyId || data.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: data.amount,
         currency: data.currency,
         name: 'AstroParihar',
         description: `Report: ${titleText} ${highlightText}`,
         image: '/AstroParihar_Top_Logo.jpg',
-        order_id: data.orderId,
+        order_id: data.orderId || data.id,
         prefill: {
           name: user?.displayName || '',
           email: user?.email || '',

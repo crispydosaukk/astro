@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Sparkles, ChevronRight, Moon } from 'lucide-react';
+import { Calendar, MapPin, Sparkles, ChevronRight, Moon, Loader2, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import CityLocationInput from '@/components/CityLocationInput';
 import Navbar from '@/components/Navbar';
 import { calculatePanchang, PanchangData } from '@/lib/panchangEngine';
@@ -13,10 +14,22 @@ export default function TithiPage() {
   const [panchang, setPanchang] = useState<PanchangData>(() =>
     calculatePanchang(new Date().toISOString().split('T')[0], 'New Delhi, Delhi, India')
   );
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setPanchang(calculatePanchang(selectedDate, location));
   }, [selectedDate, location]);
+
+  const handleCalculate = async () => {
+    setIsCalculating(true);
+    await new Promise((res) => setTimeout(res, 350));
+    const calculated = calculatePanchang(selectedDate, location);
+    setPanchang(calculated);
+    setIsCalculating(false);
+    setToastMessage(`Tithi calculated for ${calculated.formattedDate} (${location})`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const tithiList = [
     { name: 'Pratipada', deity: 'Agni', nature: 'Growth & Auspicious' },
@@ -39,6 +52,21 @@ export default function TithiPage() {
   return (
     <div className="min-h-screen bg-background dark text-foreground">
       <Navbar />
+
+      {/* Success Toast Banner */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[150] px-5 py-3 rounded-2xl bg-emerald-500 text-black font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400"
+          >
+            <Check size={16} />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         <div className="text-center space-y-3">
@@ -75,10 +103,12 @@ export default function TithiPage() {
               <CityLocationInput value={location} onChange={(city: string) => setLocation(city)} placeholder="Search city" />
             </div>
             <button
-              onClick={() => setPanchang(calculatePanchang(selectedDate, location))}
-              className="w-full py-3.5 rounded-2xl gold-gradient-bg text-white font-bold text-sm shadow-lg"
+              onClick={handleCalculate}
+              disabled={isCalculating}
+              className="w-full py-3.5 rounded-2xl gold-gradient-bg text-white font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#C9952B]/20 active:scale-95 cursor-pointer disabled:opacity-75"
             >
-              Check Tithi
+              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              <span>{isCalculating ? 'Calculating...' : 'Check Tithi'}</span>
             </button>
           </div>
           <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-sm font-bold text-[#C9952B]">

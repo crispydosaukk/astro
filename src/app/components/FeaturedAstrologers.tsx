@@ -124,13 +124,13 @@ export default function FeaturedAstrologers() {
   }, []);
 
   return (
-    <section id="astrologers" className="py-20 bg-[#F8F3EA]">
+    <section id="astrologers" className="py-8 bg-[#F8F3EA]">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-12"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
         >
           <div>
             <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8] mb-3">

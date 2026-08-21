@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
     // Fetch Razorpay Secret Key dynamically from Platform Settings
     const dbSettings = await getSettings();
-    const key_secret = process.env.RAZORPAY_KEY_SECRET || dbSettings?.razorpayKeySecret;
+    const key_secret = (process.env.RAZORPAY_KEY_SECRET || dbSettings?.razorpayKeySecret || '').trim();
 
     if (!key_secret) {
       return NextResponse.json({ error: 'Razorpay Secret Key missing in settings' }, { status: 500 });
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     }
 
     // Process Post-Payment Execution
-    if (paymentType === 'wallet' && userId) {
+    if ((paymentType === 'wallet' || paymentType === 'wallet_recharge') && userId) {
       const userRef = doc(db, 'users', userId);
       const userSnap = await getDoc(userRef);
       const currentBalance = userSnap.exists() ? userSnap.data()?.walletBalance || 0 : 0;
@@ -52,10 +52,12 @@ export async function POST(req: Request) {
 
       // Record transaction
       await addDoc(collection(db, 'users', userId, 'wallet_transactions'), {
+        userId,
         amount: rechargeAmount,
         type: 'credit',
         description: `Wallet Recharge (Razorpay #${razorpay_payment_id})`,
         date: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         status: 'success',
         orderId: razorpay_order_id,
         paymentId: razorpay_payment_id,

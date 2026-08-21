@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Sparkles, ShieldAlert, CheckCircle2, XCircle, Info, ChevronRight, HelpCircle, Sun, Moon, Clock } from 'lucide-react';
+import { Calendar, MapPin, Sparkles, ShieldAlert, CheckCircle2, XCircle, Info, ChevronRight, HelpCircle, Sun, Moon, Clock, Loader2, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import CityLocationInput from '@/components/CityLocationInput';
 import Navbar from '@/components/Navbar';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
@@ -150,10 +151,22 @@ export default function KaranaPage() {
   const [panchang, setPanchang] = useState<PanchangData>(() =>
     calculatePanchang(new Date().toISOString().split('T')[0], 'New Delhi, Delhi, India')
   );
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setPanchang(calculatePanchang(selectedDate, location));
   }, [selectedDate, location]);
+
+  const handleCalculate = async () => {
+    setIsCalculating(true);
+    await new Promise((res) => setTimeout(res, 350));
+    const calculated = calculatePanchang(selectedDate, location);
+    setPanchang(calculated);
+    setIsCalculating(false);
+    setToastMessage(`Karana timings calculated for ${calculated.formattedDate} (${location})`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // Find active Karana details
   const activeKaranaName = panchang.karana || 'Balav';
@@ -185,6 +198,21 @@ export default function KaranaPage() {
   return (
     <div className="min-h-screen bg-background dark text-foreground">
       <Navbar />
+
+      {/* Success Toast Banner */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[150] px-5 py-3 rounded-2xl bg-emerald-500 text-black font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400"
+          >
+            <Check size={16} />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         {/* Header */}
@@ -223,10 +251,12 @@ export default function KaranaPage() {
               <CityLocationInput value={location} onChange={(city: string) => setLocation(city)} placeholder="Search city" />
             </div>
             <button
-              onClick={() => setPanchang(calculatePanchang(selectedDate, location))}
-              className="w-full py-3.5 rounded-2xl gold-gradient-bg text-[#292522] font-bold text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+              onClick={handleCalculate}
+              disabled={isCalculating}
+              className="w-full py-3.5 rounded-2xl gold-gradient-bg text-[#292522] font-bold text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
             >
-              Get Karana Timings
+              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              <span>{isCalculating ? 'Calculating...' : 'Get Karana Timings'}</span>
             </button>
           </div>
 
@@ -238,71 +268,71 @@ export default function KaranaPage() {
         </div>
 
         {/* Active Karana Spotlight Card */}
-        <div className="glass-card p-6 sm:p-8 lg:p-10 rounded-3xl border border-[#C9952B]/40 bg-gradient-to-br from-[#281123]/90 via-[#1f0d1b]/80 to-[#150914]/95 shadow-2xl text-white space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div className="p-6 sm:p-8 lg:p-10 rounded-3xl border border-[#B88A44]/50 bg-gradient-to-br from-[#2D1B28] via-[#432332] to-[#1E111B] shadow-2xl text-white space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/15 pb-4">
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#F6D075] bg-white/10 px-3 py-1 rounded-full border border-white/15 inline-block mb-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#F6D075] bg-white/10 px-3.5 py-1 rounded-full border border-white/15 inline-block mb-2">
                 Active Half-Lunar Ruler
               </span>
-              <div className="flex items-center gap-3">
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-[#F6D075]">
-                  {activeKaranaInfo.name} ({activeKaranaInfo.sanskrit})
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+                  {activeKaranaInfo.name} <span className="text-xl font-serif text-[#F6D075]">({activeKaranaInfo.sanskrit})</span>
                 </h2>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                   activeKaranaInfo.nature === 'Auspicious'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                     : activeKaranaInfo.nature === 'Moderate'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                 }`}>
                   {activeKaranaInfo.nature}
                 </span>
               </div>
             </div>
 
-            <div className="text-right sm:text-right">
-              <p className="text-xs text-white/70 uppercase">Classification</p>
-              <p className="text-sm sm:text-base font-bold text-white/90">{activeKaranaInfo.type}</p>
+            <div className="text-left sm:text-right bg-white/10 sm:bg-transparent p-3 sm:p-0 rounded-2xl border border-white/10 sm:border-0">
+              <p className="text-xs text-white/75 uppercase tracking-wider">Classification</p>
+              <p className="text-sm sm:text-base font-bold text-[#F6D075]">{activeKaranaInfo.type}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <span className="text-xs text-white/70">Ruling Deity</span>
+            <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
+              <span className="text-xs text-white/75">Ruling Deity</span>
               <p className="text-sm font-bold text-[#F6D075]">{activeKaranaInfo.ruler}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <span className="text-xs text-white/70">Cosmic Symbol</span>
+            <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
+              <span className="text-xs text-white/75">Cosmic Symbol</span>
               <p className="text-sm font-bold text-white">{activeKaranaInfo.symbol}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <span className="text-xs text-white/70">Tithi Alignment</span>
+            <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
+              <span className="text-xs text-white/75">Tithi Alignment</span>
               <p className="text-sm font-bold text-white">{panchang.tithi}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <span className="text-xs text-white/70">Sunrise – Sunset</span>
+            <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
+              <span className="text-xs text-white/75">Sunrise – Sunset</span>
               <p className="text-sm font-bold text-[#F6D075] font-mono">{panchang.sunrise} – {panchang.sunset}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
+            <div className="p-4.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 uppercase">
-                <CheckCircle2 size={14} /> Recommended Activities
+                <CheckCircle2 size={15} /> Recommended Activities
               </div>
               <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{activeKaranaInfo.bestFor}</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-1">
+            <div className="p-4.5 rounded-2xl bg-rose-950/50 border border-rose-500/30 space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-rose-300 uppercase">
-                <XCircle size={14} /> Activities to Avoid
+                <XCircle size={15} /> Activities to Avoid
               </div>
               <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{activeKaranaInfo.avoidFor}</p>
             </div>
           </div>
 
-          <p className="text-xs sm:text-sm text-white/80 leading-relaxed pt-1">
-            <strong>Vedic Insights:</strong> {activeKaranaInfo.description}
+          <p className="text-xs sm:text-sm text-white/85 leading-relaxed pt-1 border-t border-white/15">
+            <strong className="text-[#F6D075]">Vedic Insights:</strong> {activeKaranaInfo.description}
           </p>
         </div>
 
@@ -319,32 +349,44 @@ export default function KaranaPage() {
               </div>
 
               <p className="text-xs sm:text-sm text-[#6B5E55]">
-                Each lunar Tithi is split into two halves (Karanas). Here is the sequence of Karanas governing the current Tithi:
+                Each lunar Tithi is split into two halves (Karanas). Here is the location-synchronized sequence of Karanas for {location}:
               </p>
 
               <div className="space-y-3 pt-1">
                 {/* 1st Half */}
                 <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#713B32] uppercase">1st Half Karana (Prathama)</span>
-                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Auspicious</span>
+                    <span className="text-xs font-bold text-[#713B32] uppercase">{panchang.firstHalfKarana?.type || '1st Half Karana (Prathama)'}</span>
+                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                      panchang.firstHalfKarana?.nature?.includes('Inauspicious') ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
+                    }`}>
+                      {panchang.firstHalfKarana?.nature || 'Auspicious'}
+                    </span>
                   </div>
-                  <div className="text-lg font-bold text-[#292522] flex items-center justify-between">
-                    <span>{panchang.karana}</span>
-                    <span className="text-xs font-mono text-[#713B32]">Sunrise → Midday</span>
+                  <div className="text-lg font-bold text-[#292522] flex items-center justify-between flex-wrap gap-2">
+                    <span>{panchang.firstHalfKarana?.name || panchang.karana}</span>
+                    <span className="text-xs font-mono font-bold text-[#713B32] bg-white px-2.5 py-1 rounded-lg border border-[#E5D9C8]">
+                      {panchang.firstHalfKarana?.start} – {panchang.firstHalfKarana?.end}
+                    </span>
                   </div>
-                  <p className="text-xs text-[#6B5E55]">Favorable for general transactions, writing, and constructive actions.</p>
+                  <p className="text-xs text-[#6B5E55]">Favorable for general transactions, writing, commercial trade, and constructive actions.</p>
                 </div>
 
                 {/* 2nd Half */}
                 <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#713B32] uppercase">2nd Half Karana (Dwitiya)</span>
-                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#EDE4D5] text-[#713B32]">Next Phase</span>
+                    <span className="text-xs font-bold text-[#713B32] uppercase">{panchang.secondHalfKarana?.type || '2nd Half Karana (Dwitiya)'}</span>
+                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                      panchang.secondHalfKarana?.nature?.includes('Inauspicious') ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
+                    }`}>
+                      {panchang.secondHalfKarana?.nature || 'Auspicious'}
+                    </span>
                   </div>
-                  <div className="text-lg font-bold text-[#292522] flex items-center justify-between">
-                    <span>{ALL_11_KARANAS[(ALL_11_KARANAS.findIndex(k => k.name.includes(panchang.karana)) + 1) % 7].name}</span>
-                    <span className="text-xs font-mono text-[#713B32]">Midday → Sunset</span>
+                  <div className="text-lg font-bold text-[#292522] flex items-center justify-between flex-wrap gap-2">
+                    <span>{panchang.secondHalfKarana?.name || 'Kaulav'}</span>
+                    <span className="text-xs font-mono font-bold text-[#713B32] bg-white px-2.5 py-1 rounded-lg border border-[#E5D9C8]">
+                      {panchang.secondHalfKarana?.start} – {panchang.secondHalfKarana?.end}
+                    </span>
                   </div>
                   <p className="text-xs text-[#6B5E55]">Follows continuous cyclical movement through the 7 Chara Karanas.</p>
                 </div>
@@ -497,45 +539,45 @@ export default function KaranaPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <Link
             href="/panchang/tithi"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Moon size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Today Tithi</p>
+            <Moon size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Today Tithi</p>
           </Link>
           <Link
             href="/panchang/hora"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Clock size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Hora Timings</p>
+            <Clock size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Hora Timings</p>
           </Link>
           <Link
             href="/panchang/choghadiya"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Sun size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Choghadiya</p>
+            <Sun size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Choghadiya</p>
           </Link>
           <Link
             href="/panchang/rahu-kaal"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <ShieldAlert size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Rahu Kaal</p>
+            <ShieldAlert size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Rahu Kaal</p>
           </Link>
           <Link
             href="/panchang/shubh-muhurat"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Sparkles size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Shubh Muhurat</p>
+            <Sparkles size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Shubh Muhurat</p>
           </Link>
           <Link
             href="/panchang/today-panchang"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Calendar size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Full Panchang</p>
+            <Calendar size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Full Panchang</p>
           </Link>
         </div>
 

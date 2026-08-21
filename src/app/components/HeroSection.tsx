@@ -1,8 +1,11 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Star, ArrowRight, Play, ChevronDown } from 'lucide-react';
+import { ArrowRight, Play, ChevronDown } from 'lucide-react';
+import RotatingRemediesWheel from '@/components/RotatingRemediesWheel';
+import { HomepageContent } from '@/lib/cms';
+import { useUserData } from '@/lib/useUserData';
 
 const stats = [
   { label: 'Happy Users', value: '2,50,000+' },
@@ -11,34 +14,12 @@ const stats = [
   { label: 'Countries', value: '42+' },
 ];
 
-const zodiacSigns = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
-
-const zodiacPositions = zodiacSigns?.map((_, i) => {
-  const angle = (i * 360) / 12;
-  const radian = (angle * Math.PI) / 180;
-  const r = 130;
-  const x = 50 + (r / 2.0) * Math.sin(radian);
-  const y = 50 - (r / 2.0) * Math.cos(radian);
-  return { x: parseFloat(x?.toFixed(4)), y: parseFloat(y?.toFixed(4)) };
-});
-
-import { HomepageContent } from '@/lib/cms';
-import { useUserData } from '@/lib/useUserData';
-
 interface HeroSectionProps {
   content?: HomepageContent['hero'];
 }
 
 export default function HeroSection({ content }: HeroSectionProps) {
-  const [currentZodiac, setCurrentZodiac] = useState(0);
   const { user } = useUserData();
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentZodiac((prev) => (prev + 1) % zodiacSigns?.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <section className="relative min-h-screen cosmic-bg overflow-hidden flex flex-col">
@@ -64,7 +45,7 @@ export default function HeroSection({ content }: HeroSectionProps) {
       <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#B88A44]/20 blur-3xl pointer-events-none" />
       
       {/* Main content */}
-      <div className="flex-1 flex items-center justify-center pt-20">
+      <div className="flex-1 flex items-center justify-center pt-24 pb-8">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 xl:px-16 w-full">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left content */}
@@ -122,113 +103,14 @@ export default function HeroSection({ content }: HeroSectionProps) {
               </div>
             </motion.div>
 
-            {/* Right visual */}
+            {/* Right visual - Rotating Sacred Vedic Remedies Wheel */}
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
               className="relative flex items-center justify-center"
             >
-              {/* Central mandala/zodiac wheel */}
-              <div className="relative w-72 h-72 lg:w-96 lg:h-96">
-                {/* Outer ring */}
-                <div className="absolute inset-0 rounded-full border-2 border-[#D8B66A]/40 animate-spin-slow" />
-                {/* Inner glow */}
-                <div className="absolute inset-8 rounded-full bg-gradient-to-br from-[#713B32]/40 to-[#352433]/70 blur-sm" />
-                {/* Center */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full gold-gradient-bg flex items-center justify-center shadow-2xl animate-float border-2 border-[#FFFDFC]/20">
-                    <span className="text-6xl lg:text-7xl font-bold text-white">
-                      {zodiacSigns?.[currentZodiac]}
-                    </span>
-                  </div>
-                </div>
-                {/* Zodiac signs around ring */}
-                {zodiacSigns?.map((sign, i) => {
-                  const { x, y } = zodiacPositions?.[i];
-                  return (
-                    <div
-                      key={`zodiac-${i}`}
-                      className={`absolute w-8 h-8 flex items-center justify-center rounded-full text-lg transition-all duration-500 ${i === currentZodiac ? 'bg-[#FFFDFC]/20 backdrop-blur-md border border-[#D8B66A] text-[#D8B66A] scale-125 shadow-lg' : 'text-white/60'}`}
-                      style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
-                    >
-                      {sign}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Floating cards */}
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute top-4 -left-4 bg-[#FFFDFC]/15 backdrop-blur-md rounded-2xl p-3 border border-[#D8B66A]/30 shadow-xl"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#B88A44]/30 flex items-center justify-center">
-                    <Star size={14} className="text-[#D8B66A]" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-white/70">Today&apos;s Rashi</div>
-                    <div className="text-sm font-semibold text-white">Mithuna (♊)</div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Floating cards */}
-              <Link href="/remedies/gemstone">
-                <motion.div
-                  animate={{ y: [0, 8, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                  className="absolute bottom-8 -right-4 bg-[#FFFDFC]/15 backdrop-blur-md rounded-2xl p-3 border border-[#D8B66A]/30 shadow-xl hover:border-[#D8B66A] transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#713B32]/40 flex items-center justify-center">
-                      <span className="text-sm">💎</span>
-                    </div>
-                    <div>
-                      <div className="text-xs text-white/70">Report Ready</div>
-                      <div className="text-sm font-semibold text-white">Gemstone: Ruby</div>
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
-
-              <Link href="/remedies/mantra">
-                <motion.div
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                  className="absolute bottom-8 -left-8 bg-[#FFFDFC]/15 backdrop-blur-md rounded-2xl p-3 border border-[#D8B66A]/30 shadow-xl hover:border-[#D8B66A] transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#352433]/50 flex items-center justify-center">
-                      <span className="text-sm">🎵</span>
-                    </div>
-                    <div>
-                      <div className="text-xs text-white/70">Remedy</div>
-                      <div className="text-sm font-semibold text-white">Mantra Guidance</div>
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
-
-              <Link href="/remedies/yantra">
-                <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-                  className="absolute top-12 -right-12 bg-[#FFFDFC]/15 backdrop-blur-md rounded-2xl p-3 border border-[#D8B66A]/30 shadow-xl hover:border-[#D8B66A] transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#713B32]/40 flex items-center justify-center">
-                      <span className="text-sm">🔺</span>
-                    </div>
-                    <div>
-                      <div className="text-xs text-white/70">Remedy</div>
-                      <div className="text-sm font-semibold text-white">Yantra Rituals</div>
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
+              <RotatingRemediesWheel />
             </motion.div>
           </div>
         </div>
@@ -238,7 +120,10 @@ export default function HeroSection({ content }: HeroSectionProps) {
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className="flex flex-col items-center gap-2 text-white/50 text-xs font-medium"
+          className="flex flex-col items-center gap-2 text-white/50 text-xs font-medium cursor-pointer hover:text-white/80 transition-colors"
+          onClick={() => {
+            document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+          }}
         >
           <span>Scroll to explore</span>
           <ChevronDown size={16} />

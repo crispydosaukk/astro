@@ -99,12 +99,17 @@ function WalletSuccessContent() {
   );
 }
 
+import Navbar from '@/components/Navbar';
+
 export default function WalletSuccessPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center cosmic-bg">
-      <Suspense fallback={<Loader2 className="animate-spin text-[#C9952B]" size={32} />}>
-        <WalletSuccessContent />
-      </Suspense>
+    <div className="min-h-screen bg-background flex flex-col justify-between cosmic-bg">
+      <Navbar />
+      <div className="flex-1 flex items-center justify-center p-6 text-center">
+        <Suspense fallback={<Loader2 className="animate-spin text-[#C9952B]" size={32} />}>
+          <WalletSuccessContent />
+        </Suspense>
+      </div>
     </div>
   );
 }

@@ -262,33 +262,6 @@ const astrologersData: Record<
   },
 };
 
-const timeSlots = [
-  '9:00 AM',
-  '9:30 AM',
-  '10:00 AM',
-  '10:30 AM',
-  '11:00 AM',
-  '11:30 AM',
-  '12:00 PM',
-  '2:00 PM',
-  '2:30 PM',
-  '3:00 PM',
-  '3:30 PM',
-  '4:00 PM',
-  '5:00 PM',
-  '6:00 PM',
-  '7:00 PM',
-];
-const bookedSlots = ['10:00 AM', '11:30 AM', '3:00 PM', '6:00 PM'];
-
-// Generate calendar for July 2026
-const calendarYear = 2026;
-const calendarMonth = 6; // July (0-indexed)
-const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-const firstDayOfMonth = new Date(calendarYear, calendarMonth, 1).getDay();
-const unavailableDays = [6, 7, 13, 14, 20, 21, 27, 28]; // weekends
-const fullyBookedDays = [8, 15, 22];
-
 export default function AstrologerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
   
@@ -360,10 +333,8 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
   }, [dbAstrologer, fallbackData]);
 
   const { currencyCode, currencySymbol, formatPrice, convertPrice } = useCurrency();
-  const [selectedDate, setSelectedDate] = useState<number | null>(null);
-  const [selectedTime, setSelectedTime] = useState('');
   const [consultationType, setConsultationType] = useState<'video' | 'call'>('video');
-  const [duration, setDuration] = useState(30);
+  const [duration, setDuration] = useState(15);
   const [activeTab, setActiveTab] = useState<'about' | 'reviews'>('about');
   const [isBooking, setIsBooking] = useState(false);
 
@@ -372,19 +343,22 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
 
   const handleBook = async () => {
     if (!user || !userData) {
-      toast.error('Please log in to book a consultation');
-      return;
-    }
-    
-    if (!selectedDate || !selectedTime) {
-      toast.error('Please select a date and time slot');
+      toast.error('Please log in to start a live consultation');
+      router.push(`/sign-up-login-screen?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
     const currentBalance = userData.walletBalance || 0;
+    const minRequired = astrologer.pricePerMin * 5;
+
+    if (currentBalance < minRequired) {
+      toast.error(`Minimum wallet balance of ${formatPrice(minRequired)} (5 mins) required.`);
+      router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
 
     if (currentBalance < totalCost) {
-      toast.error('Insufficient wallet balance. Please recharge your wallet.');
+      toast.error(`Insufficient wallet balance for ${duration} min consultation. Please recharge.`);
       router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
@@ -402,29 +376,27 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
         astrologerId: astrologer.id,
         astrologerName: astrologer.name,
         customerId: user.uid,
-        customerName: user.displayName || user.email,
+        customerName: user.displayName || user.email || 'Client',
+        customerPhone: user.phoneNumber || userData?.phone || '',
         roomID,
         type: consultationType,
         status: 'pending',
-        date: selectedDate,
-        time: selectedTime,
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toLocaleTimeString('en-US', { hour12: false }).slice(0, 5),
         duration,
-        price: totalCost,
+        price: astrologer.pricePerMin,
+        totalAmount: totalCost,
         createdAt: serverTimestamp(),
       });
       
-      toast.success(`Consultation booked with ${astrologer.name}! Joining call room...`);
-      setSelectedDate(null);
-      setSelectedTime('');
+      toast.success(`Starting Live ${consultationType === 'video' ? 'Video' : 'Voice'} Call with ${astrologer.name}!`);
       router.push(`/call/${roomID}`);
     } catch (error) {
-      console.error('Error booking:', error);
-      toast.error('Failed to book consultation');
+      console.error('Error starting live call:', error);
+      toast.error('Failed to start consultation. Please try again.');
       setIsBooking(false);
     }
   };
-
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   if (loading) {
     return (
@@ -454,7 +426,7 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       <div className="max-w-screen-xl mx-auto px-6 lg:px-10 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Left Column — Profile */}
           <div className="lg:col-span-2 space-y-6">
             {/* Profile Header */}
@@ -630,18 +602,15 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                       <div className="space-y-3">
                         {astrologer.expertise.map((exp: { name: string; level: number }) => (
                           <div key={exp.name}>
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-sm text-foreground">{exp.name}</span>
-                              <span className="text-xs font-semibold text-[#C9952B]">
-                                {exp.level}%
-                              </span>
+                            <div className="flex justify-between text-xs font-medium mb-1">
+                              <span className="text-foreground">{exp.name}</span>
+                              <span className="text-[#C9952B]">{exp.level}%</span>
                             </div>
-                            <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-2 rounded-full bg-muted overflow-hidden">
                               <motion.div
                                 initial={{ width: 0 }}
-                                whileInView={{ width: `${exp.level}%` }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 1, ease: 'easeOut' }}
+                                animate={{ width: `${exp.level}%` }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
                                 className="h-full rounded-full gold-gradient-bg"
                               />
                             </div>
@@ -653,49 +622,51 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                 )}
 
                 {activeTab === 'reviews' && (
-                  <div className="space-y-5">
-                    {/* Rating Summary */}
-                    <div className="flex items-center gap-6 p-4 rounded-xl bg-muted/50">
+                  <div className="space-y-4">
+                    {/* Rating Overview */}
+                    <div className="p-4 rounded-xl bg-muted/50 border border-border flex items-center gap-6">
                       <div className="text-center">
                         <div className="text-4xl font-bold text-foreground">
                           {astrologer.rating}
                         </div>
-                        <div className="flex items-center justify-center gap-0.5 my-1">
+                        <div className="flex items-center gap-0.5 justify-center mt-1">
                           {[1, 2, 3, 4, 5].map((s) => (
                             <Star
                               key={s}
                               size={12}
-                              fill={s <= Math.round(astrologer.rating) ? 'currentColor' : 'none'}
+                              fill="currentColor"
                               className="text-[#C9952B]"
                             />
                           ))}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {astrologer.reviews.toLocaleString()} reviews
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {astrologer.reviews.toLocaleString()} ratings
                         </div>
                       </div>
                       <div className="flex-1 space-y-1.5">
-                        {[5, 4, 3, 2, 1].map((star) => {
-                          const pct =
-                            star === 5 ? 72 : star === 4 ? 20 : star === 3 ? 5 : star === 2 ? 2 : 1;
-                          return (
-                            <div key={star} className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground w-3">{star}</span>
-                              <Star size={10} fill="currentColor" className="text-[#C9952B]" />
-                              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className="h-full gold-gradient-bg rounded-full"
-                                  style={{ width: `${pct}%` }}
-                                />
-                              </div>
-                              <span className="text-xs text-muted-foreground w-8">{pct}%</span>
+                        {[
+                          { star: 5, pct: 85 },
+                          { star: 4, pct: 10 },
+                          { star: 3, pct: 3 },
+                          { star: 2, pct: 1 },
+                          { star: 1, pct: 1 },
+                        ].map(({ star, pct }) => (
+                          <div key={star} className="flex items-center gap-2 text-xs">
+                            <span className="text-muted-foreground w-3">{star}</span>
+                            <Star size={9} fill="currentColor" className="text-[#C9952B]" />
+                            <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full rounded-full gold-gradient-bg"
+                                style={{ width: `${pct}%` }}
+                              />
                             </div>
-                          );
-                        })}
+                            <span className="text-muted-foreground w-6 text-right">{pct}%</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
-                    {/* Review Cards */}
+                    {/* Reviews List */}
                     {astrologer.reviewsList.map((review: any, i: number) => (
                       <motion.div
                         key={i}
@@ -746,66 +717,119 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
             </motion.div>
           </div>
 
-          {/* Right Column — Booking */}
-          <div className="space-y-5">
-            {/* Pricing Card */}
+          {/* Right Column — Instant Live Consultation (Self-contained sticky sidebar) */}
+          <div className="lg:col-span-1 space-y-6 sticky top-24 self-start">
+            {/* Live Consultation Card */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.15 }}
-              className="glass-card rounded-2xl border border-[#C9952B]/30 p-5 sticky top-24"
+              className="bg-[#FFFDF9] dark:bg-[#1E1714] rounded-3xl border-2 border-[#E8DCB9] dark:border-[#B88A44]/40 p-5 lg:p-6 shadow-2xl space-y-0"
             >
-              {/* Currency Selector */}
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-foreground">Book Consultation</h3>
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20">
-                  <Globe size={12} className="text-[#C9952B]" />
-                  <span className="text-xs font-semibold text-[#C9952B] outline-none">
+              {/* Status Header */}
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#E8DCB9] dark:border-[#3D2C24]">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-600"></span>
+                  </span>
+                  <span className="text-xs font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
+                    Online • Instant Connect
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#713B32]/10 dark:bg-[#C9952B]/20 border border-[#713B32]/20 dark:border-[#C9952B]/30">
+                  <Globe size={11} className="text-[#713B32] dark:text-[#E6CA65]" />
+                  <span className="text-[11px] font-bold text-[#713B32] dark:text-[#E6CA65]">
                     {currencyCode} ({currencySymbol})
                   </span>
                 </div>
               </div>
 
-              {/* Pricing */}
-              <div className="p-4 rounded-2xl bg-[#EDE4D5] border border-[#E5D9C8] mb-5">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-[#713B32] tabular-nums">
-                    {formatPrice(astrologer.pricePerMin)}
+              {/* Live Rate Display (Vivid, High-Contrast & Clear) */}
+              <div className="p-4 rounded-2xl bg-[#F8F4EC] dark:bg-[#2A1F1B] border-2 border-[#E5D9C8] dark:border-[#4D382D] mb-5">
+                <div className="flex items-baseline justify-between flex-wrap gap-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl sm:text-4xl font-black text-[#713B32] dark:text-[#F6D075] tabular-nums tracking-tight">
+                      {formatPrice(astrologer.pricePerMin)}
+                    </span>
+                    <span className="text-sm font-bold text-[#8C5D53] dark:text-[#D1A056]">/min</span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/70 px-3 py-1.5 rounded-full border border-emerald-300 dark:border-emerald-700 shadow-xs">
+                    <Zap size={12} className="fill-emerald-600 dark:fill-emerald-400 text-emerald-600 dark:text-emerald-400" />
+                    0 Min Wait Time
                   </span>
-                  <span className="text-sm text-[#6B5E55]">/min</span>
+                </div>
+                <p className="text-xs font-bold text-[#5A483E] dark:text-[#D8C7B8] mt-2.5 leading-relaxed">
+                  Start instant 1-on-1 private live consultation with {astrologer.name}.
+                </p>
+              </div>
+
+              {/* Consultation Type Selector */}
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-2.5">
+                  <p className="text-xs font-black text-[#5A483E] dark:text-[#D8C7B8] uppercase tracking-wider">
+                    Select Consultation Mode
+                  </p>
+                  <span className="text-[10px] text-[#713B32] dark:text-[#E6CA65] font-extrabold bg-[#713B32]/10 dark:bg-[#E6CA65]/10 px-2 py-0.5 rounded-full">
+                    100% Private
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setConsultationType('video')}
+                    className={`flex flex-col items-center justify-center p-3.5 rounded-2xl text-xs font-bold border-2 transition-all cursor-pointer ${
+                      consultationType === 'video'
+                        ? 'border-[#C9952B] bg-[#FFF8EB] dark:bg-[#38261E] text-[#713B32] dark:text-[#F6D075] shadow-md shadow-[#C9952B]/20'
+                        : 'border-[#E5D9C8] dark:border-[#3D2C24] bg-white dark:bg-[#221815] text-[#5A483E] dark:text-[#C5B3A3] hover:border-[#C9952B]/60 hover:bg-[#FAF6EE]'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 ${consultationType === 'video' ? 'bg-[#713B32] text-[#F6D075] shadow-sm' : 'bg-[#EDE4D5] dark:bg-[#3D2C24] text-[#713B32] dark:text-[#E6CA65]'}`}>
+                      <Video size={18} />
+                    </div>
+                    <span className="font-extrabold text-sm text-[#292522] dark:text-white">Live Video Call</span>
+                    <span className="text-[11px] font-bold text-[#8C5D53] dark:text-[#D1A056] mt-0.5">Face-to-Face HD</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setConsultationType('call')}
+                    className={`flex flex-col items-center justify-center p-3.5 rounded-2xl text-xs font-bold border-2 transition-all cursor-pointer ${
+                      consultationType === 'call'
+                        ? 'border-[#C9952B] bg-[#FFF8EB] dark:bg-[#38261E] text-[#713B32] dark:text-[#F6D075] shadow-md shadow-[#C9952B]/20'
+                        : 'border-[#E5D9C8] dark:border-[#3D2C24] bg-white dark:bg-[#221815] text-[#5A483E] dark:text-[#C5B3A3] hover:border-[#C9952B]/60 hover:bg-[#FAF6EE]'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 ${consultationType === 'call' ? 'bg-[#713B32] text-[#F6D075] shadow-sm' : 'bg-[#EDE4D5] dark:bg-[#3D2C24] text-[#713B32] dark:text-[#E6CA65]'}`}>
+                      <Phone size={18} />
+                    </div>
+                    <span className="font-extrabold text-sm text-[#292522] dark:text-white">Live Voice Call</span>
+                    <span className="text-[11px] font-bold text-[#8C5D53] dark:text-[#D1A056] mt-0.5">Direct Voice Line</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Consultation Type */}
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                  Consultation Type
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {(['video', 'call'] as const).map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setConsultationType(type)}
-                      className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border-2 transition-all ${consultationType === type ? 'border-[#C9952B] bg-[#C9952B]/10 text-[#C9952B]' : 'border-border text-muted-foreground hover:border-[#C9952B]/40'}`}
-                    >
-                      {type === 'video' ? <Video size={13} /> : <Phone size={13} />}
-                      {type === 'video' ? 'Video' : 'Voice Call'}
-                    </button>
-                  ))}
+              {/* Session Duration Selector */}
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-2.5">
+                  <p className="text-xs font-black text-[#5A483E] dark:text-[#D8C7B8] uppercase tracking-wider">
+                    Select Initial Duration
+                  </p>
+                  <span className="text-[11px] font-bold text-[#8C5D53] dark:text-[#D1A056]">
+                    Extendable during call
+                  </span>
                 </div>
-              </div>
-
-              {/* Duration */}
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                  Duration
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {[15, 30, 60].map((d) => (
+                <div className="grid grid-cols-4 gap-2">
+                  {[5, 15, 30, 60].map((d) => (
                     <button
                       key={d}
+                      type="button"
                       onClick={() => setDuration(d)}
-                      className={`py-2 rounded-xl text-xs font-semibold border-2 transition-all ${duration === d ? 'border-[#C9952B] bg-[#C9952B]/10 text-[#C9952B]' : 'border-border text-muted-foreground hover:border-[#C9952B]/40'}`}
+                      className={`py-2.5 rounded-xl text-xs font-black border-2 transition-all cursor-pointer ${
+                        duration === d
+                          ? 'border-[#C9952B] bg-[#FFF8EB] dark:bg-[#38261E] text-[#713B32] dark:text-[#F6D075] shadow-sm'
+                          : 'border-[#E5D9C8] dark:border-[#3D2C24] bg-white dark:bg-[#221815] text-[#5A483E] dark:text-[#C5B3A3] hover:border-[#C9952B]/60'
+                      }`}
                     >
                       {d} min
                     </button>
@@ -813,186 +837,112 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                 </div>
               </div>
 
-              {/* Availability Calendar */}
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                  <Calendar size={12} />
-                  Select Date — July 2026
-                </p>
-                <div className="rounded-xl border border-border overflow-hidden">
-                  <div className="grid grid-cols-7 bg-muted/50">
-                    {weekDays.map((d) => (
-                      <div
-                        key={d}
-                        className="py-1.5 text-center text-xs font-semibold text-muted-foreground"
-                      >
-                        {d}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7 p-1 gap-0.5">
-                    {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                      <div key={`empty-${i}`} />
-                    ))}
-                    {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-                      const isUnavailable = unavailableDays.includes(day);
-                      const isFullyBooked = fullyBookedDays.includes(day);
-                      const isPast = day < 3;
-                      const isSelected = selectedDate === day;
-                      const isToday = day === 3;
-                      const disabled = isUnavailable || isFullyBooked || isPast;
-                      return (
-                        <button
-                          key={day}
-                          disabled={disabled}
-                          onClick={() => setSelectedDate(day)}
-                          className={`aspect-square flex items-center justify-center text-xs rounded-lg transition-all font-medium
-                            ${isSelected ? 'gold-gradient-bg text-white font-bold' : ''}
-                            ${isToday && !isSelected ? 'border border-[#C9952B] text-[#C9952B]' : ''}
-                            ${disabled ? 'opacity-30 cursor-not-allowed' : !isSelected ? 'hover:bg-[#C9952B]/10 hover:text-[#C9952B] text-foreground' : ''}
-                          `}
-                        >
-                          {day}
-                        </button>
-                      );
-                    })}
+              {/* Cost Calculation & Wallet Status */}
+              <div className="space-y-3 mb-5">
+                <div className="p-3.5 rounded-xl bg-[#F8F4EC] dark:bg-[#2A1F1B] border border-[#E5D9C8] dark:border-[#3D2C24]">
+                  <div className="flex items-center justify-between text-xs sm:text-sm">
+                    <span className="font-bold text-[#5A483E] dark:text-[#D8C7B8]">
+                      {duration} mins × {formatPrice(astrologer.pricePerMin)}/min
+                    </span>
+                    <span className="font-black text-[#713B32] dark:text-[#F6D075] text-sm sm:text-base tabular-nums">
+                      {formatPrice(totalCost)}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <div className="w-2.5 h-2.5 rounded-sm gold-gradient-bg" /> Selected
+
+                <div className="p-3.5 rounded-xl border border-[#E5D9C8] dark:border-[#3D2C24] flex items-center justify-between bg-white dark:bg-[#221815] shadow-xs">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl">👛</span>
+                    <div>
+                      <p className="text-[10px] text-[#8C5D53] dark:text-[#D1A056] font-black uppercase tracking-wider">
+                        Your Wallet Balance
+                      </p>
+                      <p className={`text-sm font-black tabular-nums ${(userData?.walletBalance || 0) >= totalCost ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                        {formatPrice(userData?.walletBalance || 0)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-2.5 h-2.5 rounded-sm border border-[#C9952B]" /> Today
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-2.5 h-2.5 rounded-sm bg-muted opacity-30" /> Unavailable
-                  </div>
+                  {(userData?.walletBalance || 0) < totalCost ? (
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`)}
+                      className="px-3.5 py-1.5 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-black border border-rose-200 dark:border-rose-800 hover:bg-rose-200 transition-colors cursor-pointer"
+                    >
+                      + Recharge
+                    </button>
+                  ) : (
+                    <span className="text-[11px] font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/70 px-2.5 py-1 rounded-full border border-emerald-300 dark:border-emerald-700">
+                      ✓ Ready
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* Time Slots */}
-              {selectedDate && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mb-4"
-                >
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                    <Clock size={12} />
-                    Available Time Slots
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto pr-1">
-                    {timeSlots.map((slot) => {
-                      const isBooked = bookedSlots.includes(slot);
-                      return (
-                        <button
-                          key={slot}
-                          disabled={isBooked}
-                          onClick={() => setSelectedTime(slot)}
-                          className={`py-1.5 px-1 rounded-lg text-xs font-medium transition-all border ${selectedTime === slot ? 'gold-gradient-bg text-white border-transparent' : isBooked ? 'bg-muted/50 text-muted-foreground/40 border-border cursor-not-allowed line-through' : 'border-border text-foreground hover:border-[#C9952B] hover:text-[#C9952B]'}`}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Total Cost & Wallet */}
-              {selectedDate && selectedTime && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="space-y-3 mb-4"
-                >
-                  <div className="p-3 rounded-xl bg-muted/50 border border-border">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        {duration} min × {formatPrice(astrologer.pricePerMin)}/min
-                      </span>
-                      <span className="font-bold text-foreground">
-                        {formatPrice(totalCost)}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-3 rounded-xl border border-border flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">👛</span>
-                      <div>
-                        <p className="text-xs text-muted-foreground font-semibold uppercase">Wallet Balance</p>
-                        <p className={`text-sm font-bold ${(userData?.walletBalance || 0) >= totalCost ? 'text-green-500' : 'text-red-500'}`}>
-                          {formatPrice(userData?.walletBalance || 0)}
-                        </p>
-                      </div>
-                    </div>
-                    {(userData?.walletBalance || 0) < totalCost && (
-                      <button 
-                        onClick={() => router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`)}
-                        className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-semibold hover:bg-red-500/20 transition-colors"
-                      >
-                        Recharge
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Book Button */}
+              {/* Live Call Action Button */}
               {(userData?.walletBalance || 0) < totalCost ? (
-                <button
-                  onClick={() => router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`)}
-                  className="w-full py-3.5 rounded-xl font-semibold text-sm bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
-                >
-                  <Zap size={15} /> Recharge Wallet
-                </button>
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`)}
+                    className="w-full py-4 rounded-2xl font-black text-sm gold-gradient-bg text-[#292522] hover:brightness-110 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-xl shadow-[#C9952B]/30 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Zap size={16} /> Recharge Wallet ({formatPrice(totalCost - (userData?.walletBalance || 0))} Needed)
+                  </button>
+                  <p className="text-[11px] text-center font-bold text-[#7C6A5E] dark:text-[#BAA797]">
+                    Instant recharge via UPI / GooglePay / Cards / NetBanking
+                  </p>
+                </div>
               ) : (
                 <button
+                  type="button"
                   onClick={handleBook}
                   disabled={isBooking || astrologer.status === 'offline'}
-                  className="w-full py-3.5 rounded-xl font-semibold text-sm gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-2xl font-black text-sm gold-gradient-bg text-[#292522] hover:brightness-110 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-xl shadow-[#C9952B]/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 cursor-pointer animate-pulse-gold"
                 >
                   {isBooking ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{' '}
-                      Processing...
+                      <div className="w-4 h-4 border-2 border-[#292522]/30 border-t-[#292522] rounded-full animate-spin" />
+                      Connecting to Live Call...
                     </>
                   ) : (
                     <>
-                      <Zap size={15} /> Book Now
+                      {consultationType === 'video' ? <Video size={18} /> : <Phone size={18} />}
+                      <span>
+                        Start Live {consultationType === 'video' ? 'Video Call' : 'Voice Call'} Now
+                      </span>
                     </>
                   )}
                 </button>
               )}
 
-              {/* Trust Badges */}
-              <div className="grid grid-cols-2 gap-2 mt-4">
+              {/* Trust & Live Highlights */}
+              <div className="grid grid-cols-2 gap-2.5 mt-5 pt-4 border-t border-[#E8DCB9] dark:border-[#3D2C24]">
                 {[
-                  { icon: Shield, text: 'Verified Expert' },
-                  { icon: Check, text: 'Secure Payment' },
+                  { icon: Shield, text: '100% Private & Secure' },
+                  { icon: Check, text: 'Verified Jyotish Master' },
+                  { icon: Zap, text: 'Instant Connection' },
+                  { icon: Award, text: 'Fair Per-Min Billing' },
                 ].map(({ icon: Icon, text }) => (
                   <div
                     key={text}
-                    className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    className="flex items-center gap-1.5 text-[11px] font-bold text-[#5A483E] dark:text-[#D8C7B8]"
                   >
-                    <Icon size={11} className="text-green-500" />
-                    {text}
+                    <Icon size={12} className="text-[#713B32] dark:text-[#F6D075] flex-shrink-0" />
+                    <span>{text}</span>
                   </div>
                 ))}
               </div>
             </motion.div>
 
-            {/* Quick Stats */}
+            {/* Quick Stats Highlights */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.25 }}
-              className="glass-card rounded-2xl border border-border p-5"
+              className="bg-[#FFFDF9] dark:bg-[#1E1714] rounded-3xl border border-[#E8DCB9] dark:border-[#3D2C24] p-5 shadow-md"
             >
-              <h3 className="font-semibold text-foreground mb-4 text-sm">
-                Why Choose {astrologer.name.split(' ')[0]}?
+              <h3 className="font-bold text-[#292522] dark:text-white mb-3.5 text-sm">
+                Why Consult with {astrologer.name.split(' ')[0]}?
               </h3>
               <div className="space-y-3">
                 {[
@@ -1008,10 +958,10 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                   { icon: Globe, text: `Speaks ${astrologer.languages.join(', ')}` },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-start gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-[#C9952B]/10 flex items-center justify-center flex-shrink-0">
-                      <Icon size={13} className="text-[#C9952B]" />
+                    <div className="w-7 h-7 rounded-lg bg-[#F8F4EC] dark:bg-[#2A1F1B] border border-[#E5D9C8] dark:border-[#3D2C24] flex items-center justify-center flex-shrink-0 text-[#713B32] dark:text-[#F6D075]">
+                      <Icon size={13} />
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{text}</p>
+                    <p className="text-xs font-medium text-[#5A483E] dark:text-[#D8C7B8] leading-relaxed">{text}</p>
                   </div>
                 ))}
               </div>

@@ -59,6 +59,7 @@ export interface AshtaDigbandhanaWheelProps {
   activeSpokeId?: string | null;
   hideInfoCard?: boolean;
   hideFooter?: boolean;
+  className?: string;
 }
 
 export default function AshtaDigbandhanaWheel({
@@ -66,6 +67,7 @@ export default function AshtaDigbandhanaWheel({
   activeSpokeId,
   hideInfoCard = false,
   hideFooter = false,
+  className = '',
 }: AshtaDigbandhanaWheelProps) {
   const router = useRouter();
   const [internalHoveredSpoke, setInternalHoveredSpoke] = useState<string | null>(null);
@@ -300,19 +302,9 @@ export default function AshtaDigbandhanaWheel({
     : spokes[0];
 
   return (
-    <div className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none space-y-5">
-      {/* Title & Vedic Banner */}
-      <div className="text-center space-y-1.5 px-2">
-        <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#F3C068] tracking-wider uppercase font-serif drop-shadow-lg">
-          ASHTADIGBANDHANA WHEEL
-        </h3>
-        <p className="text-xs sm:text-base text-slate-200 font-serif tracking-wide">
-          ॥ आठों दिशाओं की रक्षा – जीवन की पूर्ण स्थिरता और समृद्धि ॥
-        </p>
-      </div>
-
+    <div className={`w-full max-w-[475px] sm:max-w-[500px] md:max-w-[530px] lg:max-w-[560px] xl:max-w-[590px] mx-auto flex flex-col items-center select-none space-y-2 ${className}`}>
       {/* Main Wheel Container */}
-      <div className="relative w-full aspect-square flex items-center justify-center p-1 sm:p-2">
+      <div className="relative w-full aspect-square flex items-center justify-center p-0.5 sm:p-1">
         {/* Ambient Radial Background Glow */}
         <div className="absolute inset-4 rounded-full bg-gradient-to-r from-amber-500/20 via-rose-500/10 to-indigo-500/20 blur-3xl pointer-events-none" />
 
@@ -561,6 +553,16 @@ export default function AshtaDigbandhanaWheel({
             />
           </g>
         </svg>
+      </div>
+
+      {/* Title & Vedic Banner Below The Wheel */}
+      <div className="text-center space-y-0.5 px-2 pt-1">
+        <h3 className="text-lg sm:text-xl md:text-2xl font-extrabold text-[#F3C068] tracking-wider uppercase font-serif drop-shadow-md">
+          ASHTADIGBANDHANA WHEEL
+        </h3>
+        <p className="text-[11px] sm:text-xs text-slate-200 font-serif tracking-wide">
+          ॥ आठों दिशाओं की रक्षा – जीवन की पूर्ण स्थिरता और समृद्धि ॥
+        </p>
       </div>
 
       {/* Interactive Active Spoke Detailed Information Card (Only if not hidden) */}

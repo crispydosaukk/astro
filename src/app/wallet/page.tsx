@@ -104,14 +104,19 @@ function WalletContent() {
         throw new Error(orderData.error || 'Failed to create payment order');
       }
 
+      const orderKey = orderData.keyId || orderData.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      if (!orderKey) {
+        throw new Error('Razorpay Key not found. Please verify keys in Admin Settings.');
+      }
+
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
+        key: orderKey,
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'AstroParihar',
         description: 'Wallet Recharge',
         image: '/AstroParihar_Logo.png',
-        order_id: orderData.id,
+        order_id: orderData.orderId || orderData.id,
         prefill: {
           name: userData?.name || user?.displayName || '',
           email: user?.email || '',

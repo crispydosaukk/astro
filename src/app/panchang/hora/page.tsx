@@ -2,7 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Clock, Sun, Moon, Sparkles, CheckCircle2, XCircle, Info, ChevronRight, HelpCircle, ShieldCheck } from 'lucide-react';
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  Sun,
+  Moon,
+  Sparkles,
+  CheckCircle2,
+  XCircle,
+  ChevronRight,
+  HelpCircle,
+  ShieldCheck,
+  Loader2,
+  Check,
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import CityLocationInput from '@/components/CityLocationInput';
 import Navbar from '@/components/Navbar';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
@@ -24,13 +39,13 @@ const PLANETARY_HORA_PROFILES: Record<string, PlanetHoraInfo> = {
   Sun: {
     planet: 'Sun (Surya)',
     sanskrit: 'सूर्य होरा',
-    element: 'Fire / Tejas',
-    nature: 'Auspicious',
+    element: 'Fire / Agni',
+    nature: 'Moderate',
     deity: 'Lord Surya / Shiva',
-    color: '#F59E0B',
-    bestFor: 'Executive decisions, government work, meeting authorities, career promotions, leadership speeches, purchasing gold/copper, eye health treatments.',
-    avoidFor: 'Submissive negotiation, clandestine deals, borrowing money.',
-    description: 'Surya Hora infuses actions with vitality, authority, solar radiance, and commanding influence. Ideal for administrative and royal tasks.',
+    color: '#D97706',
+    bestFor: 'Meeting government officials, executive meetings, applying for tenders, buying gold/copper, taking leadership oaths, political campaigning.',
+    avoidFor: 'Signing long-term marriage agreements, starting peaceful spiritual retreats.',
+    description: 'Surya Hora ignites executive authority, vitality, administrative power, and official recognition. Ideal for tasks requiring courage and boldness.',
   },
   Venus: {
     planet: 'Venus (Shukra)',
@@ -39,20 +54,20 @@ const PLANETARY_HORA_PROFILES: Record<string, PlanetHoraInfo> = {
     nature: 'Highly Auspicious',
     deity: 'Goddess Lakshmi',
     color: '#EC4899',
-    bestFor: 'Romantic dates, purchasing vehicles, luxury shopping, wearing new clothes/gems, art & music creation, weddings, beauty treatments.',
-    avoidFor: 'Arguments, competitive sports, surgical cuts.',
-    description: 'Shukra Hora enhances beauty, love, wealth, and artistic elegance. Actions initiated here yield sensual joy and financial prosperity.',
+    bestFor: 'Purchasing luxury goods, jewelry, wedding clothing, artistic endeavors, romantic dates, beauty treatments, buying vehicles, financial trading.',
+    avoidFor: 'Engaging in legal battles, competitive arguments, intense martial training.',
+    description: 'Shukra Hora channels divine grace, romance, artistic mastery, wealth attraction, and harmonious negotiations. One of the most fortunate horas.',
   },
   Mercury: {
     planet: 'Mercury (Budh)',
     sanskrit: 'बुध होरा',
     element: 'Earth / Prithvi',
-    nature: 'Auspicious',
-    deity: 'Lord Vishnu / Ganesha',
+    nature: 'Highly Auspicious',
+    deity: 'Lord Vishnu / Saraswati',
     color: '#10B981',
-    bestFor: 'Signing business contracts, trade, banking transactions, intellectual writing, study, learning astrology, accounting, media broadcasts.',
-    avoidFor: 'Emotional disputes, impulsive speculations.',
-    description: 'Budh Hora bestows quick wit, communicative eloquence, analytical sharpness, and trade success. Optimal for commercial negotiations.',
+    bestFor: 'Signing business contracts, accounting, journalism, launching digital platforms, educational admissions, publishing books, short journeys.',
+    avoidFor: 'Taking aggressive physical risks, hostile litigation.',
+    description: 'Budh Hora stimulates intellect, analytical clarity, commercial trade, writing, and strategic communication. Excellent for commerce and study.',
   },
   Moon: {
     planet: 'Moon (Chandra)',
@@ -61,9 +76,9 @@ const PLANETARY_HORA_PROFILES: Record<string, PlanetHoraInfo> = {
     nature: 'Auspicious',
     deity: 'Lord Shiva / Parvati',
     color: '#60A5FA',
-    bestFor: 'Travel, starting journeys, water-related business, gardening, public relations, purchasing silver/pearls, emotional reconciliations, culinary arts.',
-    avoidFor: 'Deep surgeries, long-term rigid commitments during a weak moon.',
-    description: 'Chandra Hora brings emotional fluidity, soothing peace, social receptivity, and success in public-facing interactions.',
+    bestFor: 'Spiritual initiation, travel across water, gardening, dairy/water investments, social gatherings, public relations, maternal blessings.',
+    avoidFor: 'Aggressive disputes, surgical procedures involving blood, harsh disciplining.',
+    description: 'Chandra Hora brings emotional peace, intuitive insight, social popularity, and calm contemplation. Highly favorable for Shukla Paksha ventures.',
   },
   Saturn: {
     planet: 'Saturn (Shani)',
@@ -71,10 +86,10 @@ const PLANETARY_HORA_PROFILES: Record<string, PlanetHoraInfo> = {
     element: 'Air / Vayu',
     nature: 'Fierce / Caution',
     deity: 'Lord Shani / Hanuman',
-    color: '#6B7280',
-    bestFor: 'Real estate, laying building foundations, land purchases, construction, dealing with heavy machinery/iron/oil, debt repayments, deep meditation.',
-    avoidFor: 'Starting joyous celebrations, weddings, starting journeys, buying new luxury clothing.',
-    description: 'Shani Hora brings endurance, discipline, karmic focus, and grounded stability. Excellent for long-term construction and clearing liabilities.',
+    color: '#6366F1',
+    bestFor: 'Laying property foundations, purchasing agricultural land, mining/oil deals, hiring labor, discipline rituals, charity to the underprivileged.',
+    avoidFor: 'Marriage ceremonies, buying new clothes, medical surgeries, joyous beginnings.',
+    description: 'Shani Hora represents delay, deep perseverance, karma, and structural foundation. Best used for heavy labor, iron/land deals, and ascetic sadhana.',
   },
   Jupiter: {
     planet: 'Jupiter (Guru)',
@@ -82,10 +97,10 @@ const PLANETARY_HORA_PROFILES: Record<string, PlanetHoraInfo> = {
     element: 'Ether / Akasha',
     nature: 'Highly Auspicious',
     deity: 'Lord Brihaspati / Brahma',
-    color: '#EAB308',
-    bestFor: 'Supreme for all auspicious beginnings: opening bank accounts, purchasing gold, wedding rituals, higher education, consulting gurus, legal victories.',
-    avoidFor: 'Unethical practices, gambling, negative speech.',
-    description: 'Guru Hora is the most benevolent of all planetary hours. Blessed with divine grace, wisdom, and auspicious abundance.',
+    color: '#F59E0B',
+    bestFor: 'Starting new businesses, marriage negotiations, spiritual ceremonies, opening bank accounts, legal counseling, meeting teachers/gurus, higher education.',
+    avoidFor: 'Harmful or underhanded dealings, destructive demolition.',
+    description: 'Guru Hora is universally auspicious and bestows divine blessing, wisdom, financial expansion, and righteousness upon any undertaken deed.',
   },
   Mars: {
     planet: 'Mars (Mangal)',
@@ -113,8 +128,20 @@ const DAY_FIRST_HORA_PLANET: Record<string, string> = {
   Saturday: 'Saturn',
 };
 
+function parseTimeToMinutes(timeStr?: string): number {
+  if (!timeStr) return 360; // 06:00 AM fallback
+  const match = timeStr.trim().match(/(\d+):(\d+)\s*(am|pm)?/i);
+  if (!match) return 360;
+  let hours = parseInt(match[1], 10);
+  const mins = parseInt(match[2], 10);
+  const meridiem = match[3]?.toLowerCase();
+  if (meridiem === 'pm' && hours < 12) hours += 12;
+  if (meridiem === 'am' && hours === 12) hours = 0;
+  return hours * 60 + mins;
+}
+
 function formatMinsTo12Hr(totalMins: number): string {
-  const m = (Math.round(totalMins) + 1440) % 1440;
+  const m = (Math.round(totalMins) % 1440 + 1440) % 1440;
   const hours = Math.floor(m / 60);
   const mins = Math.floor(m % 60);
   const period = hours >= 12 ? 'PM' : 'AM';
@@ -128,42 +155,53 @@ export default function HoraPage() {
   const [panchang, setPanchang] = useState<PanchangData>(() =>
     calculatePanchang(new Date().toISOString().split('T')[0], 'New Delhi, Delhi, India')
   );
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<'day' | 'night'>('day');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
-    setPanchang(calculatePanchang(selectedDate, location));
+    const fresh = calculatePanchang(selectedDate, location);
+    setPanchang(fresh);
   }, [selectedDate, location]);
 
-  // Compute 24 Horas
-  const targetDate = new Date(selectedDate);
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const dayName = days[targetDate.getDay()] || 'Sunday';
+  const handleCalculate = async () => {
+    setIsCalculating(true);
+    await new Promise((res) => setTimeout(res, 350));
+    const calculated = calculatePanchang(selectedDate, location);
+    setPanchang(calculated);
+    setIsCalculating(false);
+    setToastMessage(`Hora timings calculated for ${calculated.formattedDate} (${location})`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
-  const monthFactor = Math.sin((targetDate.getMonth() / 12) * Math.PI * 2);
-  const sunriseMins = 350 + monthFactor * 15; // approx 05:50 AM
-  const sunsetMins = 1120 - monthFactor * 20; // approx 06:40 PM
+  // Determine Sunrise and Sunset in exact minutes
+  const sunriseMins = parseTimeToMinutes(panchang?.sunrise) || 342; // default ~05:42 AM
+  const sunsetMins = parseTimeToMinutes(panchang?.sunset) || 1130;  // default ~06:50 PM
 
-  const dayDurationMins = sunsetMins - sunriseMins;
+  const dayDurationMins = sunsetMins > sunriseMins ? sunsetMins - sunriseMins : 720;
   const nightDurationMins = 1440 - dayDurationMins;
 
   const dayHoraDuration = dayDurationMins / 12;
   const nightHoraDuration = nightDurationMins / 12;
 
+  // Day ruler from Panchang
+  const dayName = panchang?.weekday || 'Sunday';
   const firstDayPlanet = DAY_FIRST_HORA_PLANET[dayName] || 'Sun';
   const firstDayPlanetIdx = PLANETARY_ORDER.indexOf(firstDayPlanet);
 
   const now = new Date();
-  const isToday = now.toDateString() === targetDate.toDateString();
   const currentNowMins = now.getHours() * 60 + now.getMinutes();
+  const todayDateStr = now.toISOString().split('T')[0];
+  const isSelectedDateToday = selectedDate === todayDateStr;
 
-  // 12 Daytime Horas
+  // Compute 12 Daytime Horas
   const dayHoras = Array.from({ length: 12 }).map((_, idx) => {
     const planet = PLANETARY_ORDER[(firstDayPlanetIdx + idx) % 7];
     const sMins = sunriseMins + idx * dayHoraDuration;
     const eMins = sMins + dayHoraDuration;
-    const isCurrent = isToday && currentNowMins >= sMins && currentNowMins < eMins;
+    const isCurrent = isSelectedDateToday && currentNowMins >= sMins && currentNowMins < eMins;
     const profile = PLANETARY_HORA_PROFILES[planet];
 
     return {
@@ -171,34 +209,65 @@ export default function HoraPage() {
       planet,
       startTime: formatMinsTo12Hr(sMins),
       endTime: formatMinsTo12Hr(eMins),
+      rawStart: sMins,
+      rawEnd: eMins,
       isCurrent,
       profile,
     };
   });
 
-  // 12 Nighttime Horas
+  // Compute 12 Nighttime Horas
   const day12thPlanetIdx = (firstDayPlanetIdx + 11) % 7;
   const nightFirstPlanetIdx = (day12thPlanetIdx + 1) % 7;
 
   const nightHoras = Array.from({ length: 12 }).map((_, idx) => {
     const planet = PLANETARY_ORDER[(nightFirstPlanetIdx + idx) % 7];
-    const sMins = sunsetMins + idx * nightHoraDuration;
-    const eMins = sMins + nightHoraDuration;
-    const isCurrent = isToday && (currentNowMins >= sMins || currentNowMins < (sMins + nightHoraDuration - 1440));
+    const rawStart = sunsetMins + idx * nightHoraDuration;
+    const rawEnd = rawStart + nightHoraDuration;
+
+    let isCurrent = false;
+    if (isSelectedDateToday) {
+      if (rawStart < 1440 && rawEnd <= 1440) {
+        isCurrent = currentNowMins >= rawStart && currentNowMins < rawEnd;
+      } else if (rawStart < 1440 && rawEnd > 1440) {
+        isCurrent = currentNowMins >= rawStart || currentNowMins < (rawEnd % 1440);
+      } else {
+        // rawStart >= 1440 (past midnight before next sunrise)
+        const sMod = rawStart % 1440;
+        const eMod = rawEnd % 1440;
+        isCurrent = currentNowMins >= sMod && currentNowMins < eMod;
+      }
+    }
+
     const profile = PLANETARY_HORA_PROFILES[planet];
 
     return {
       num: idx + 13,
       planet,
-      startTime: formatMinsTo12Hr(sMins),
-      endTime: formatMinsTo12Hr(eMins),
+      startTime: formatMinsTo12Hr(rawStart),
+      endTime: formatMinsTo12Hr(rawEnd),
+      rawStart,
+      rawEnd,
       isCurrent,
       profile,
     };
   });
 
   // Determine currently active Hora
-  const currentHora = [...dayHoras, ...nightHoras].find((h) => h.isCurrent) || dayHoras[0];
+  const currentHora =
+    [...dayHoras, ...nightHoras].find((h) => h.isCurrent) ||
+    (currentNowMins >= sunsetMins || currentNowMins < sunriseMins ? nightHoras[0] : dayHoras[0]);
+
+  // Set default tab based on whether current hora is daytime or nighttime
+  useEffect(() => {
+    if (isSelectedDateToday) {
+      if (currentNowMins >= sunsetMins || currentNowMins < sunriseMins) {
+        setActiveTab('night');
+      } else {
+        setActiveTab('day');
+      }
+    }
+  }, [isSelectedDateToday, sunriseMins, sunsetMins, currentNowMins]);
 
   const faqs = [
     {
@@ -206,16 +275,16 @@ export default function HoraPage() {
       a: 'The word "Hora" is the Vedic origin of the English word "Hour". The 24-hour day is divided into 24 planetary hours (12 during the day from Sunrise to Sunset, and 12 during the night from Sunset to Sunrise). Each Hora is ruled by one of the 7 classic visible planets (Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn).',
     },
     {
-      q: 'Which Hora is best for financial and business decisions?',
-      a: 'Guru Hora (Jupiter) and Budh Hora (Mercury) are supreme for finances. Guru Hora is unmatched for long-term investments, buying gold, opening accounts, and major purchases. Budh Hora is ideal for day-to-day trade, signing contracts, marketing, and accounting.',
+      q: 'How does Hora timing change based on location and sunrise?',
+      a: 'Unlike modern standard 60-minute clock hours, Vedic Horas vary slightly in duration depending on sunrise and sunset for your city and season. In summer, day horas are longer than 60 minutes, while in winter, night horas are longer.',
     },
     {
-      q: 'What is the best Hora for marriage proposals, buying vehicles, and arts?',
-      a: 'Shukra Hora (Venus) is the finest hour for romance, marriage proposals, purchasing new luxury vehicles, clothes, cosmetics, jewelry, and artistic performances.',
+      q: 'Which Horas are considered universally auspicious?',
+      a: 'Guru Hora (Jupiter), Shukra Hora (Venus), and Budha Hora (Mercury) are universally considered highly auspicious for starting businesses, marriage preparations, signing agreements, investments, and medical wellness.',
     },
     {
-      q: 'How is the first Hora of the day determined?',
-      a: 'The first Hora at Sunrise is always ruled by the Lord of the Weekday (Ravivar = Sun, Somavar = Moon, Mangalvar = Mars, Budhavar = Mercury, Guruvar = Jupiter, Shukravar = Venus, Shanivar = Saturn). The subsequent hours follow the ancient Chaldean speed sequence: Sun → Venus → Mercury → Moon → Saturn → Jupiter → Mars.',
+      q: 'What should be avoided during Shani (Saturn) and Mangal (Mars) Hora?',
+      a: 'Shani Hora is unsuitable for marriage, joyful celebrations, or signing sensitive agreements, but excellent for heavy property work and charity. Mangal Hora should be avoided for peaceful negotiations and romantic talks, but is ideal for athletic contests, military deeds, and competitive exams.',
     },
   ];
 
@@ -223,11 +292,26 @@ export default function HoraPage() {
     <div className="min-h-screen bg-background dark text-foreground">
       <Navbar />
 
+      {/* Success Toast Banner */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[150] px-5 py-3 rounded-2xl bg-emerald-500 text-black font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400"
+          >
+            <Check size={16} />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         {/* Header */}
         <div className="text-center space-y-3">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/40 shadow-md">
-            <Clock size={14} className="text-blue-400" />
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#B88A44]/20 text-[#C9952B] border border-[#B88A44]/40 shadow-md">
+            <Clock size={14} className="text-[#C9952B]" />
             24-HOUR PLANETARY HORA CALCULATOR
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
@@ -260,10 +344,12 @@ export default function HoraPage() {
               <CityLocationInput value={location} onChange={(city: string) => setLocation(city)} placeholder="Search city" />
             </div>
             <button
-              onClick={() => setPanchang(calculatePanchang(selectedDate, location))}
-              className="w-full py-3.5 rounded-2xl gold-gradient-bg text-[#292522] font-bold text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+              onClick={handleCalculate}
+              disabled={isCalculating}
+              className="w-full py-3.5 rounded-2xl gold-gradient-bg text-[#292522] font-bold text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
             >
-              Get Hora Timings
+              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              <span>{isCalculating ? 'Calculating...' : 'Get Hora Timings'}</span>
             </button>
           </div>
 
@@ -276,73 +362,73 @@ export default function HoraPage() {
         </div>
 
         {/* Current Active Planetary Hora Spotlight Card */}
-        <div className="glass-card p-6 sm:p-8 lg:p-10 rounded-3xl border border-blue-500/40 bg-gradient-to-br from-[#121c2e]/90 via-[#18233c]/80 to-[#0e1626]/95 shadow-2xl text-white space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div className="p-6 sm:p-8 lg:p-10 rounded-3xl border border-[#B88A44]/50 bg-gradient-to-br from-[#2D1B28] via-[#432332] to-[#1E111B] shadow-2xl text-white space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/15 pb-4">
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-blue-400 bg-white/10 px-3 py-1 rounded-full border border-white/15 inline-flex items-center gap-1.5 mb-2">
-                <Sparkles size={13} /> Active Planetary Ruler
+              <span className="text-xs font-bold uppercase tracking-widest text-[#F6D075] bg-white/10 px-3.5 py-1 rounded-full border border-white/15 inline-flex items-center gap-1.5 mb-2">
+                <Sparkles size={13} className="text-[#F6D075]" /> Active Planetary Ruler
               </span>
-              <div className="flex items-center gap-3">
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-blue-300">
-                  {currentHora.profile.planet} <span className="text-xl font-serif text-white/80">({currentHora.profile.sanskrit})</span>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+                  {currentHora.profile.planet} <span className="text-xl font-serif text-[#F6D075]">({currentHora.profile.sanskrit})</span>
                 </h2>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                   currentHora.profile.nature === 'Highly Auspicious'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                     : currentHora.profile.nature === 'Auspicious'
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
                     : currentHora.profile.nature === 'Moderate'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                 }`}>
                   {currentHora.profile.nature}
                 </span>
               </div>
             </div>
 
-            <div className="text-left sm:text-right">
-              <p className="text-xs text-white/70 uppercase">Active Timing Slot</p>
-              <p className="text-lg sm:text-2xl font-bold font-mono text-[#F6D075]">{currentHora.startTime} – {currentHora.endTime}</p>
+            <div className="text-left sm:text-right bg-white/10 sm:bg-transparent p-3 sm:p-0 rounded-2xl border border-white/10 sm:border-0">
+              <p className="text-xs text-white/75 uppercase tracking-wider">Active Timing Slot</p>
+              <p className="text-xl sm:text-2xl font-extrabold font-mono text-[#F6D075]">{currentHora.startTime} – {currentHora.endTime}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <span className="text-xs text-white/70">Ruling Deity</span>
+            <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
+              <span className="text-xs text-white/75">Ruling Deity</span>
               <p className="text-sm font-bold text-[#F6D075]">{currentHora.profile.deity}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <span className="text-xs text-white/70">Cosmic Element</span>
+            <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
+              <span className="text-xs text-white/75">Cosmic Element</span>
               <p className="text-sm font-bold text-white">{currentHora.profile.element}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <span className="text-xs text-white/70">Weekday Ruler</span>
+            <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
+              <span className="text-xs text-white/75">Weekday Ruler</span>
               <p className="text-sm font-bold text-white">{dayName}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-              <span className="text-xs text-white/70">Day Slot No.</span>
+            <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
+              <span className="text-xs text-white/75">Day Slot No.</span>
               <p className="text-sm font-bold text-white">Hora #{currentHora.num}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
+            <div className="p-4.5 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 uppercase">
-                <CheckCircle2 size={14} /> Highly Recommended Actions
+                <CheckCircle2 size={15} /> Highly Recommended Actions
               </div>
               <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{currentHora.profile.bestFor}</p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-1">
+            <div className="p-4.5 rounded-2xl bg-rose-950/50 border border-rose-500/30 space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-rose-300 uppercase">
-                <XCircle size={14} /> Inadvisable Activities
+                <XCircle size={15} /> Inadvisable Activities
               </div>
               <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{currentHora.profile.avoidFor}</p>
             </div>
           </div>
 
-          <p className="text-xs sm:text-sm text-white/80 leading-relaxed pt-1">
-            <strong>Planetary Influence:</strong> {currentHora.profile.description}
+          <p className="text-xs sm:text-sm text-white/85 leading-relaxed pt-1 border-t border-white/15">
+            <strong className="text-[#F6D075]">Planetary Influence:</strong> {currentHora.profile.description}
           </p>
         </div>
 
@@ -544,45 +630,45 @@ export default function HoraPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <Link
             href="/panchang/tithi"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Moon size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Today Tithi</p>
+            <Moon size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Today Tithi</p>
           </Link>
           <Link
             href="/panchang/karana"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Sparkles size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Karana Timings</p>
+            <Sparkles size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Karana Timings</p>
           </Link>
           <Link
             href="/panchang/choghadiya"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Sun size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Choghadiya</p>
+            <Sun size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Choghadiya</p>
           </Link>
           <Link
             href="/panchang/rahu-kaal"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Clock size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Rahu Kaal</p>
+            <Clock size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Rahu Kaal</p>
           </Link>
           <Link
             href="/panchang/shubh-muhurat"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <ShieldCheck size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Shubh Muhurat</p>
+            <ShieldCheck size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Shubh Muhurat</p>
           </Link>
           <Link
             href="/panchang/today-panchang"
-            className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#C9952B] transition-all text-center space-y-1 group"
+            className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Calendar size={20} className="mx-auto text-[#F6D075] group-hover:scale-110 transition-transform" />
-            <p className="text-xs font-bold text-foreground">Full Panchang</p>
+            <Calendar size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <p className="text-xs font-bold text-[#292522]">Full Panchang</p>
           </Link>
         </div>
 
