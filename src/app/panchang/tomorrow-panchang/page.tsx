@@ -124,8 +124,9 @@ export default function TomorrowPanchangPage() {
 
       <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         <div className="text-center space-y-3">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#C9952B]/10 text-[#C9952B] border border-[#C9952B]/20 backdrop-blur-md">
-            ADVANCE VEDIC ALMANAC
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8] shadow-sm">
+            <Sparkles size={14} className="text-[#B88A44]" />
+            Advance Vedic Almanac
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
             Tomorrow Panchang (Panchangam)

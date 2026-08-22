@@ -217,9 +217,9 @@ export default function KaranaPage() {
       <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         {/* Header */}
         <div className="text-center space-y-3">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 shadow-md">
-            <Sparkles size={14} className="text-[#F6D075]" />
-            HALF LUNAR DAY CALCULATOR & GUIDE
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8] shadow-sm">
+            <Sparkles size={14} className="text-[#B88A44]" />
+            Half Lunar Day Calculator & Guide
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
             Today Karana Timings

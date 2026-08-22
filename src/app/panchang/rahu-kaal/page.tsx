@@ -110,8 +110,9 @@ export default function RahuKaalPage() {
 
       <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         <div className="text-center space-y-3">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20 backdrop-blur-md">
-            INAUSPICIOUS TIME CALCULATOR
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 shadow-sm">
+            <Clock size={14} className="text-rose-600" />
+            Inauspicious Time Window Calculator
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
             Rahu Kaal Today

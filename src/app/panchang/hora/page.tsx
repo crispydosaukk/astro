@@ -310,9 +310,9 @@ export default function HoraPage() {
       <div className="pt-24 lg:pt-28 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
         {/* Header */}
         <div className="text-center space-y-3">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-[#B88A44]/20 text-[#C9952B] border border-[#B88A44]/40 shadow-md">
-            <Clock size={14} className="text-[#C9952B]" />
-            24-HOUR PLANETARY HORA CALCULATOR
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8] shadow-sm">
+            <Clock size={14} className="text-[#B88A44]" />
+            24-Hour Planetary Hora Calculator
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground">
             Today Hora Timings (Planetary Hours)
