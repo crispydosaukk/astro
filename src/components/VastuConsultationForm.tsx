@@ -177,7 +177,7 @@ export default function VastuConsultationForm() {
         currency: data.currency,
         name: 'AstroParihar',
         description: 'Personalized Vastu Consultation & Remedial Report',
-        image: '/AstroParihar_Top_Logo.jpg',
+        image: '/astrologo.png',
         order_id: data.orderId || data.id,
         prefill: {
           name: user?.displayName || ownerName,

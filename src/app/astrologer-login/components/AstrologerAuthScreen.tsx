@@ -328,7 +328,7 @@ export default function AstrologerAuthScreen() {
         <div className="w-full max-w-md bg-[#FFFDFC] p-8 sm:p-10 rounded-3xl border border-[#E5D9C8] shadow-2xl">
           <div className="flex items-center justify-center mb-6">
             <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
-              <AppLogo src="/AstroParihar_Logo.png" size={46} />
+              <AppLogo src="/astrologo.png" size={85} />
             </Link>
           </div>
 

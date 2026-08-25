@@ -44,6 +44,7 @@ const iconDict: Record<string, any> = {
   'svc-vastu': Compass,
   'svc-rudraksha': CircleDot,
   'svc-homa-puja': Flame,
+  'svc-charity': HeartHandshake,
   'free-panchang': Sun,
   'free-horoscope': Sun,
   'free-kundli-matching': Users,

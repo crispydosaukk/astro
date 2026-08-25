@@ -115,7 +115,7 @@ function WalletContent() {
         currency: orderData.currency,
         name: 'AstroParihar',
         description: 'Wallet Recharge',
-        image: '/AstroParihar_Logo.png',
+        image: '/astrologo.png',
         order_id: orderData.orderId || orderData.id,
         prefill: {
           name: userData?.name || user?.displayName || '',

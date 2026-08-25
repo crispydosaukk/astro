@@ -41,7 +41,7 @@ export async function POST(req: Request) {
             product_data: {
               name: type || 'AstroParihar Premium Report',
               description: `Personalized report for ${details?.dob} | ${details?.place}`,
-              images: ['https://astroparihar.com/AstroParihar_Logo.png'], // Placeholder image
+              images: ['https://astroparihar.com/astrologo.png'],
             },
             unit_amount: Math.round((displayAmount || price) * 100), // Convert to pence/cents
           },

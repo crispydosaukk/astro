@@ -9,6 +9,7 @@ import AdminAppointmentsTable from './AdminAppointmentsTable';
 import AdminPaymentsTable from './AdminPaymentsTable';
 import AdminContentManagement from './AdminContentManagement';
 import AdminDynamicPageEditor from './AdminDynamicPageEditor';
+import AdminAIPrompts from './AdminAIPrompts';
 import { Shield, Bell, Download, LogOut } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
 
@@ -54,6 +55,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
         )}
         {activeTab === 'tab-content' && <AdminContentManagement />}
         {activeTab === 'tab-page-content' && <AdminDynamicPageEditor />}
+        {activeTab === 'tab-prompts' && <AdminAIPrompts />}
         {activeTab === 'tab-users' && <AdminUsersTable />}
         {activeTab === 'tab-astrologers' && <AdminAstrologersTable />}
         {activeTab === 'tab-applications' && <AdminAstrologerApplicationsTable />}

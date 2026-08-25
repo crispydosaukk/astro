@@ -14,7 +14,7 @@ interface AppLogoProps {
 }
 
 const AppLogo = memo(function AppLogo({
-  src = '/AstroParihar_Logo.png',
+  src = '/astrologo.png',
   iconName = 'SparklesIcon',
   size = 48,
   className = '',

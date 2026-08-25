@@ -131,7 +131,7 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
         currency: data.currency,
         name: 'AstroParihar',
         description: `Guide: ${guide.title}`,
-        image: '/AstroParihar_Top_Logo.jpg',
+        image: '/astrologo.png',
         order_id: data.orderId || data.id,
         prefill: {
           name: user.displayName || '',

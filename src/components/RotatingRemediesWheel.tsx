@@ -47,27 +47,10 @@ function describeDonutSegment(
 
 export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
   {
-    id: 'gemstone',
-    name: 'GEMSTONE',
-    href: '/remedies/gemstone',
-    angle: -90, // North / Top
-    icon: (
-      // Clean Linear Diamond
-      <g transform="scale(1.15)">
-        <polygon points="0,-12 11,-12 17,-4 0,14 -17,-4 -11,-12" fill="none" stroke="#221C19" strokeWidth="1.8" strokeLinejoin="round" />
-        <line x1="-11" y1="-12" x2="0" y2="14" stroke="#221C19" strokeWidth="1.1" />
-        <line x1="11" y1="-12" x2="0" y2="14" stroke="#221C19" strokeWidth="1.1" />
-        <line x1="-17" y1="-4" x2="17" y2="-4" stroke="#221C19" strokeWidth="1.1" />
-        <line x1="-11" y1="-12" x2="-5" y2="-4" stroke="#221C19" strokeWidth="1.1" />
-        <line x1="11" y1="-12" x2="5" y2="-4" stroke="#221C19" strokeWidth="1.1" />
-      </g>
-    ),
-  },
-  {
     id: 'mantra',
     name: 'MANTRA',
     href: '/remedies/mantra',
-    angle: -45, // North-East
+    angle: -90, // North (Top) - 1
     icon: (
       // Sacred ॐ (Aum)
       <g transform="scale(1.25)">
@@ -81,7 +64,7 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     id: 'yantra',
     name: 'YANTRA',
     href: '/remedies/yantra',
-    angle: 0, // East / Right
+    angle: -45, // North-East - 2
     icon: (
       // Sacred Yantra geometric emblem
       <g transform="scale(1.1)">
@@ -94,10 +77,10 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     ),
   },
   {
-    id: 'homa-puja',
-    name: 'HOMA & PUJA',
+    id: 'homa',
+    name: 'HOMA',
     href: '/remedies/homa',
-    angle: 45, // South-East
+    angle: 0, // East - 3
     icon: (
       // Sacred Homa Kunda with Fire Flame
       <g transform="scale(1.15)">
@@ -112,7 +95,7 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     id: 'devata-upasana',
     name: 'DEVATA UPASANA',
     href: '/remedies/ishta-devata',
-    angle: 90, // South / Bottom
+    angle: 45, // South-East - 4
     icon: (
       // Meditating Deity in Lotus Posture
       <g transform="scale(1.15)">
@@ -124,30 +107,36 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     ),
   },
   {
-    id: 'dana',
-    name: 'DĀNA',
-    href: '/remedies/charity',
-    angle: 135, // South-West
+    id: 'gemstone',
+    name: 'GEMSTONE',
+    href: '/remedies/gemstone',
+    angle: 90, // South - 5
     icon: (
-      // Giving Hands with Sacred Heart
+      // Clean Linear Diamond
       <g transform="scale(1.15)">
-        <path d="M0,-2 C-2.8,-5.5 -8,-4.5 -8,0 C-8,4.5 0,9.5 0,9.5 C0,9.5 8,4.5 8,0 C8,-4.5 2.8,-5.5 0,-2 Z" fill="#221C19" />
-        <path d="M-11,11 C-7,8.5 -2.5,7.8 0,7.8 C2.5,7.8 7,8.5 11,11" fill="none" stroke="#221C19" strokeWidth="1.7" strokeLinecap="round" />
+        <polygon points="0,-12 11,-12 17,-4 0,14 -17,-4 -11,-12" fill="none" stroke="#221C19" strokeWidth="1.8" strokeLinejoin="round" />
+        <line x1="-11" y1="-12" x2="0" y2="14" stroke="#221C19" strokeWidth="1.1" />
+        <line x1="11" y1="-12" x2="0" y2="14" stroke="#221C19" strokeWidth="1.1" />
+        <line x1="-17" y1="-4" x2="17" y2="-4" stroke="#221C19" strokeWidth="1.1" />
+        <line x1="-11" y1="-12" x2="-5" y2="-4" stroke="#221C19" strokeWidth="1.1" />
+        <line x1="11" y1="-12" x2="5" y2="-4" stroke="#221C19" strokeWidth="1.1" />
       </g>
     ),
   },
   {
-    id: 'vrata',
-    name: 'VRATA',
-    href: '/remedies/fasting',
-    angle: 180, // West / Left
+    id: 'rudraksha',
+    name: 'RUDRAKSHA',
+    href: '/remedies/rudraksha',
+    angle: 135, // South-West - 6
     icon: (
-      // Sacred Kalasha (Pot with Coconut)
+      // Sacred Rudraksha Bead
       <g transform="scale(1.15)">
-        <path d="M-6,10 L6,10 C8,10 9.5,7 9.5,3.5 C9.5,-0.5 6,-2.5 4.5,-2.5 L-4.5,-2.5 C-6,-2.5 -9.5,-0.5 -9.5,3.5 C-9.5,7 -8,10 -6,10 Z" fill="none" stroke="#221C19" strokeWidth="1.7" />
-        <circle cx="0" cy="-6" r="3.5" fill="none" stroke="#221C19" strokeWidth="1.5" />
-        <path d="M-7,-2.5 L0,-10 L7,-2.5" fill="none" stroke="#221C19" strokeWidth="1.3" />
-        <line x1="-4.5" y1="1" x2="4.5" y2="1" stroke="#221C19" strokeWidth="1.1" />
+        <circle cx="0" cy="0" r="10" fill="none" stroke="#221C19" strokeWidth="1.8" />
+        <path d="M0,-10 C-3,-4 -3,4 0,10" fill="none" stroke="#221C19" strokeWidth="1.2" />
+        <path d="M0,-10 C3,-4 3,4 0,10" fill="none" stroke="#221C19" strokeWidth="1.2" />
+        <path d="M-8,-4 C-3,0 -3,0 -8,4" fill="none" stroke="#221C19" strokeWidth="1.1" />
+        <path d="M8,-4 C3,0 3,0 8,4" fill="none" stroke="#221C19" strokeWidth="1.1" />
+        <circle cx="0" cy="0" r="1.5" fill="#221C19" />
       </g>
     ),
   },
@@ -155,13 +144,26 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     id: 'vastu',
     name: 'VASTU',
     href: '/remedies/vastu',
-    angle: 225, // North-West
+    angle: 180, // West - 7
     icon: (
       // Sacred Vastu Home / Directional Temple
       <g transform="scale(1.15)">
         <path d="M0,-11 L-12,-0.5 L-8.5,-0.5 L-8.5,10 L8.5,10 L8.5,-0.5 L12,-0.5 Z" fill="none" stroke="#221C19" strokeWidth="1.7" strokeLinejoin="round" />
         <rect x="-2.5" y="2" width="5" height="8" fill="none" stroke="#221C19" strokeWidth="1.3" />
         <circle cx="0" cy="-4.5" r="1.6" fill="#221C19" />
+      </g>
+    ),
+  },
+  {
+    id: 'dana',
+    name: 'DĀNA & SEVA',
+    href: '/remedies/charity',
+    angle: 225, // North-West - 8
+    icon: (
+      // Giving Hands with Sacred Offering / Charity Heart
+      <g transform="scale(1.15)">
+        <path d="M0,-2 C-2.8,-5.5 -8,-4.5 -8,0 C-8,4.5 0,9.5 0,9.5 C0,9.5 8,4.5 8,0 C8,-4.5 2.8,-5.5 0,-2 Z" fill="#221C19" />
+        <path d="M-11,11 C-7,8.5 -2.5,7.8 0,7.8 C2.5,7.8 7,8.5 11,11" fill="none" stroke="#221C19" strokeWidth="1.7" strokeLinecap="round" />
       </g>
     ),
   },

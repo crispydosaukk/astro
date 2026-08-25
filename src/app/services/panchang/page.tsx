@@ -33,9 +33,32 @@ export default function FreePanchangPage() {
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [aiSummary, setAiSummary] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const fetchAiSynthesis = async (dateStr: string, locStr: string) => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/ai-panchang', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: dateStr, location: locStr }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.aiSummary) setAiSummary(data.aiSummary);
+      }
+    } catch (err) {
+      console.warn('AI Panchang fetch error:', err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setPanchang(calculatePanchang(selectedDate, location));
+    const calculated = calculatePanchang(selectedDate, location);
+    setPanchang(calculated);
+    fetchAiSynthesis(selectedDate, location);
   }, [selectedDate, location]);
 
   const handleGeneratePanchang = async (e?: React.FormEvent) => {
@@ -44,11 +67,9 @@ export default function FreePanchangPage() {
     setIsGenerating(true);
     setToastMessage(null);
 
-    // Simulate 400ms calculation delay for smooth feedback
-    await new Promise((res) => setTimeout(res, 400));
-
     const calculated = calculatePanchang(selectedDate, location);
     setPanchang(calculated);
+    fetchAiSynthesis(selectedDate, location);
     setIsGenerating(false);
 
     setToastMessage(`Panchang calculated successfully for ${calculated.formattedDate} (${location})`);
@@ -294,6 +315,87 @@ export default function FreePanchangPage() {
           transition={{ duration: 0.3 }}
           className="space-y-12"
         >
+          {/* Dynamic AI Cosmic Insights Card (Admin Configured Engine) */}
+          {aiSummary && (
+            <div className="glass-card p-6 sm:p-8 rounded-3xl border border-[#C9952B]/40 bg-gradient-to-br from-[#2A1713]/80 via-[#1F100E]/70 to-[#120807]/90 shadow-2xl space-y-5 relative overflow-hidden">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#C9952B]/20">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-[#C9952B]/20 text-[#F3E5AB]">
+                    <Sparkles size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-[#F3E5AB]">
+                      ✨ AI Vedic Cosmic Weather &amp; Daily Guidance
+                    </h3>
+                    <p className="text-xs text-amber-200/70">
+                      Personalized daily synthesis powered by AstroParihar OpenAI Engine
+                    </p>
+                  </div>
+                </div>
+                {aiLoading && <Loader2 size={16} className="animate-spin text-[#C9952B]" />}
+              </div>
+
+              {aiSummary.dailyVedicSummary && (
+                <p className="text-xs sm:text-sm text-gray-200 leading-relaxed whitespace-pre-line">
+                  {aiSummary.dailyVedicSummary}
+                </p>
+              )}
+
+              {/* Favorable Activities & Precautions Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                {aiSummary.favorableActivities && Array.isArray(aiSummary.favorableActivities) && (
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
+                      ✓ Favorable Deeds &amp; Activities
+                    </span>
+                    <ul className="space-y-1 text-xs text-gray-200">
+                      {aiSummary.favorableActivities.map((act: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-1.5 leading-relaxed">
+                          <span className="text-emerald-400 font-bold">•</span>
+                          <span>{act}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {aiSummary.inauspiciousPrecautions && Array.isArray(aiSummary.inauspiciousPrecautions) && (
+                  <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-2">
+                    <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block">
+                      ⚠ Inauspicious Periods &amp; Precautions
+                    </span>
+                    <ul className="space-y-1 text-xs text-gray-200">
+                      {aiSummary.inauspiciousPrecautions.map((prec: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-1.5 leading-relaxed">
+                          <span className="text-rose-400 font-bold">•</span>
+                          <span>{prec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Sacred Daily Shloka */}
+              {aiSummary.dailyBlessingShloka && (
+                <div className="p-4 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/20 text-center space-y-1">
+                  <span className="text-[10px] uppercase font-bold text-[#F3E5AB]">Daily Sacred Vedic Shloka</span>
+                  <p className="text-xs sm:text-sm font-serif text-[#F3E5AB] italic">
+                    &ldquo;{aiSummary.dailyBlessingShloka}&rdquo;
+                  </p>
+                </div>
+              )}
+
+              {/* Admin Extra Guidance */}
+              {aiSummary.additionalGuidance && (
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300">
+                  <strong className="text-[#C9952B]">Zonal &amp; Lifestyle Guidance: </strong>
+                  <span>{aiSummary.additionalGuidance}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Sun & Moon Timings Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">

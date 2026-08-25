@@ -64,7 +64,7 @@ export default function AstrologerSidebar() {
     <>
       <div className="fixed left-0 top-0 h-screen bg-card border-r border-border flex flex-col z-40 w-64">
         <div className="h-16 flex items-center border-b border-border px-6">
-          <AppLogo />
+          <AppLogo size={44} />
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">

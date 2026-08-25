@@ -345,7 +345,7 @@ export default function RecentReports() {
                 >
                   {/* Print Header with Logo */}
                   <div className="hidden print:flex flex-col items-center justify-center pb-6 mb-6 border-b-2 border-black">
-                    <img src="/AstroParihar_Logo.png" alt="AstroParihar Logo" className="h-24 object-contain" />
+                    <img src="/astrologo.png" alt="AstroParihar Logo" className="h-32 object-contain" />
                   </div>
 
                   <div className="p-6 sm:p-8 border-b border-border flex items-center justify-between bg-muted/30 print:bg-transparent print:border-none print:p-0">
@@ -748,6 +748,153 @@ export default function RecentReports() {
                                   </p>
                                   <p className="text-xs sm:text-sm text-foreground leading-relaxed print:text-black">
                                     {data.materials}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Prescribed Mantras Card */}
+                              {data.prescribedMantras && Array.isArray(data.prescribedMantras) && (
+                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
+                                    <Sparkles size={14} /> Prescribed Vedic Mantras &amp; Japa Protocol
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {data.prescribedMantras.map((m: any, idx: number) => (
+                                      <div key={idx} className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs">
+                                        <div className="flex justify-between items-center font-bold">
+                                          <span className="text-foreground">{m.title || 'Mantra'}</span>
+                                          <span className="text-[#C9952B]">{m.japaCount}</span>
+                                        </div>
+                                        {m.sanskrit && <p className="text-sm font-serif text-[#C9952B]">{m.sanskrit}</p>}
+                                        {m.bestTime && <p className="text-muted-foreground text-[11px]">Best Time: {m.bestTime}</p>}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Primary Gemstone Card */}
+                              {data.primaryGemstone && typeof data.primaryGemstone === 'object' && (
+                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
+                                    💎 Prescribed Astrological Gemstone
+                                  </h4>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Gemstone</span>
+                                      <span className="font-bold text-foreground text-sm">{data.primaryGemstone.name}</span>
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Weight &amp; Metal</span>
+                                      <span className="font-semibold text-foreground">{data.primaryGemstone.caratWeight} in {data.primaryGemstone.metal}</span>
+                                    </div>
+                                    {data.primaryGemstone.wearingFinger && (
+                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Finger &amp; Day</span>
+                                        <span className="font-semibold text-foreground">{data.primaryGemstone.wearingFinger} ({data.primaryGemstone.auspiciousDay})</span>
+                                      </div>
+                                    )}
+                                    {data.primaryGemstone.consecrationMantra && (
+                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Energization Mantra</span>
+                                        <span className="font-serif text-[#C9952B]">{data.primaryGemstone.consecrationMantra}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Prescribed Mukhis Card */}
+                              {data.prescribedMukhis && Array.isArray(data.prescribedMukhis) && (
+                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
+                                    📿 Sacred Mukhi Rudraksha Combination
+                                  </h4>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {data.prescribedMukhis.map((rm: any, idx: number) => (
+                                      <div key={idx} className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs">
+                                        <div className="flex justify-between items-center font-bold">
+                                          <span className="text-foreground">{rm.mukhi}</span>
+                                          <span className="text-[#C9952B] text-[10px]">{rm.planet}</span>
+                                        </div>
+                                        <p className="text-muted-foreground text-[11px]">{rm.benefits}</p>
+                                        <p className="text-[10px] text-muted-foreground font-semibold">Deity: {rm.deity}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Recommended Pre-Marital / Remedial Rituals */}
+                              {data.recommendedRituals && Array.isArray(data.recommendedRituals) && (
+                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-2">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                                    Recommended Remedial Pujas &amp; Rituals
+                                  </h4>
+                                  <div className="space-y-1.5">
+                                    {data.recommendedRituals.map((r: string, idx: number) => (
+                                      <div key={idx} className="flex items-start gap-2 text-xs text-foreground/90 leading-relaxed">
+                                        <span className="text-emerald-400 font-bold">✓</span>
+                                        <span>{r}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Lucky Attributes Card */}
+                              {data.luckyAttributes && typeof data.luckyAttributes === 'object' && (
+                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">
+                                    Cosmic Resonance &amp; Lucky Attributes
+                                  </h4>
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                    {data.luckyAttributes.luckyColor && (
+                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">Lucky Color</span>
+                                        <span className="font-bold text-[#C9952B] mt-0.5 block">{data.luckyAttributes.luckyColor}</span>
+                                      </div>
+                                    )}
+                                    {data.luckyAttributes.luckyNumber && (
+                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">Lucky Number</span>
+                                        <span className="font-bold text-foreground mt-0.5 block">{data.luckyAttributes.luckyNumber}</span>
+                                      </div>
+                                    )}
+                                    {data.luckyAttributes.luckyDirection && (
+                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">Favorable Direction</span>
+                                        <span className="font-bold text-foreground mt-0.5 block">{data.luckyAttributes.luckyDirection}</span>
+                                      </div>
+                                    )}
+                                    {data.luckyAttributes.favorableDay && (
+                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">Auspicious Day</span>
+                                        <span className="font-bold text-emerald-400 mt-0.5 block">{data.luckyAttributes.favorableDay}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Extra Admin-Defined Output Guidance */}
+                              {(data.additionalGuidance || data.customAdminInsights) && (
+                                <div className="p-5 sm:p-6 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 shadow-sm space-y-2">
+                                  <p className="text-xs text-[#C9952B] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <Sparkles size={14} /> Additional Vedic Guidance &amp; Lifestyle Alignment
+                                  </p>
+                                  <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line">
+                                    {data.additionalGuidance || data.customAdminInsights}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Daily Blessing Sanskrit Shloka */}
+                              {data.dailyBlessingShloka && (
+                                <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-center space-y-1">
+                                  <span className="text-[10px] uppercase font-bold text-amber-500">Daily Sacred Shloka</span>
+                                  <p className="text-xs sm:text-sm font-serif text-[#C9952B] italic">
+                                    &ldquo;{data.dailyBlessingShloka}&rdquo;
                                   </p>
                                 </div>
                               )}

@@ -770,20 +770,20 @@ export default function TalkToAstrologerPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-card dark:bg-[#1a1416] rounded-2xl border border-border/80 hover:border-[#C9952B]/50 transition-all duration-300 shadow-sm hover:shadow-lg card-hover flex flex-col overflow-hidden group w-full"
+              className="bg-[#FFFDFC] rounded-2xl border border-[#E5D9C8] hover:border-[#B88A44] transition-all duration-300 shadow-sm hover:shadow-xl card-hover flex flex-col overflow-hidden group w-full"
             >
               {/* Profile Image (Complete Image Visible) */}
-              <div className="relative w-full aspect-[4/3] bg-muted/20 p-2 overflow-hidden flex items-center justify-center">
+              <div className="relative w-full aspect-[4/3] bg-[#F8F3EA] p-2 overflow-hidden flex items-center justify-center">
                 <img
                   src={
                     ast.image && typeof ast.image === 'string' && ast.image.trim() !== ''
                       ? ast.image
-                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=8B1A2A&color=fff&size=512`
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`
                   }
                   alt={`${ast.name} - verified astrologer`}
                   className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=8B1A2A&color=fff&size=512`;
+                    (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`;
                   }}
                 />
                 {/* Verified Badge */}
@@ -797,7 +797,7 @@ export default function TalkToAstrologerPage() {
                     className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold backdrop-blur-md ${
                       ast.status === 'online'
                         ? 'bg-black/60 text-green-400 border border-green-500/30'
-                        : 'bg-black/60 text-gray-400'
+                        : 'bg-black/60 text-gray-300'
                     }`}
                   >
                     <span
@@ -811,41 +811,41 @@ export default function TalkToAstrologerPage() {
               </div>
 
               {/* Content Section (Centered, Clean & Balanced) */}
-              <div className="p-3 sm:p-3.5 text-center flex-1 flex flex-col justify-between space-y-1.5">
+              <div className="p-3.5 text-center flex-1 flex flex-col justify-between space-y-1.5 bg-[#FFFDFC]">
                 <div className="space-y-1">
                   {/* Name */}
-                  <h3 className="font-bold text-foreground text-sm leading-tight truncate capitalize">
+                  <h3 className="font-bold text-[#292522] text-sm sm:text-base leading-tight truncate capitalize">
                     {ast.name}
                   </h3>
 
                   {/* Specialty */}
-                  <p className="text-[11px] text-muted-foreground font-medium truncate capitalize">
+                  <p className="text-xs text-[#6B5E55] font-medium truncate capitalize">
                     {Array.isArray(ast.specialty) ? ast.specialty.join(', ') : ast.specialty}
                   </p>
 
                   {/* Experience */}
-                  <p className="text-[11px] text-muted-foreground/80">
+                  <p className="text-[11px] text-[#6B5E55]/90 font-medium">
                     {ast.experience}+ Years Exp.
                   </p>
 
                   {/* Rating */}
-                  <div className="flex items-center justify-center gap-1 text-xs font-semibold text-foreground pt-0.5">
-                    <Star size={12} fill="#EAB308" className="text-yellow-500 flex-shrink-0" />
-                    <span>{ast.rating}</span>
-                    <span className="text-muted-foreground font-normal text-[11px]">
+                  <div className="flex items-center justify-center gap-1 text-xs font-bold text-[#292522] pt-0.5">
+                    <Star size={13} fill="#D8B66A" className="text-[#B88A44] flex-shrink-0" />
+                    <span className="font-bold text-[#292522]">{ast.rating}</span>
+                    <span className="text-[#6B5E55] font-normal text-[11px]">
                       ({ast.reviews.toLocaleString()})
                     </span>
                   </div>
 
                   {/* Price & Languages */}
-                  <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground pt-1 border-t border-border/40 mt-1">
-                    <span className="font-bold text-[#C9952B] text-xs tabular-nums">
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-[#6B5E55] pt-1.5 border-t border-[#E5D9C8] mt-1">
+                    <span className="font-extrabold text-[#713B32] text-sm tabular-nums">
                       {formatPrice(ast.pricePerMin)}/min
                     </span>
                     {ast.languages && ast.languages.length > 0 && (
                       <>
-                        <span className="opacity-40">•</span>
-                        <span className="truncate max-w-[90px]">{ast.languages.slice(0, 2).join(', ')}</span>
+                        <span className="text-[#E5D9C8]">•</span>
+                        <span className="truncate max-w-[100px] text-[#6B5E55] font-medium">{ast.languages.slice(0, 2).join(', ')}</span>
                       </>
                     )}
                   </div>
@@ -860,13 +860,13 @@ export default function TalkToAstrologerPage() {
                       setBookingStep(1);
                     }}
                     disabled={ast.status === 'offline'}
-                    className="w-full inline-flex items-center justify-center py-1.5 px-3 rounded-full font-bold text-[11px] sm:text-xs text-white uppercase tracking-wider bg-[#963725] hover:bg-[#802a1b] shadow-sm hover:shadow transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="w-full inline-flex items-center justify-center py-2 px-3 rounded-full font-bold text-xs text-white uppercase tracking-wider bg-[#713B32] hover:bg-[#552B24] shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     CONSULT NOW
                   </button>
                   <Link
                     href={`/astrologer/${ast.id}`}
-                    className="block text-center text-[10px] font-medium text-muted-foreground hover:text-[#C9952B] transition-colors"
+                    className="block text-center text-[11px] font-semibold text-[#713B32] hover:text-[#B88A44] transition-colors pt-0.5"
                   >
                     View Full Profile →
                   </Link>

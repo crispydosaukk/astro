@@ -30,7 +30,7 @@ export async function POST(req: Request) {
             product_data: {
               name: 'Wallet Top-up',
               description: 'Add funds to your AstroParihar wallet',
-              images: ['https://astroparihar.com/AstroParihar_Logo.png'],
+              images: ['https://astroparihar.com/astrologo.png'],
             },
             unit_amount: Math.round(displayAmount * 100),
           },

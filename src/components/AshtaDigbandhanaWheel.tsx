@@ -81,19 +81,19 @@ export default function AshtaDigbandhanaWheel({
   const rInner = 115;
   const rMid = 226;
 
-  // 8 Spokes matching the user's reference diagram clockwise starting from North
+  // 8 Spokes matching the reference diagram clockwise starting from North 1 to 8
   const spokes: SpokeItem[] = [
     {
       id: 'mantra',
       number: '1',
-      name: 'MANTRA शक्ति',
-      sanskrit: 'मन्त्र शक्ति',
+      name: 'MANTRA',
+      sanskrit: 'मन्त्र',
       direction: 'N',
       directionFull: 'उत्तर (North)',
       mantra: 'ॐ ह्रीं श्रीं क्लीं चामुण्डायै विच्चे ॥',
-      explanation: 'जप से मन, वाणी और कर्म की शुद्धि व रक्षा होती है।',
+      explanation: 'जप से मन, वाणी और कर्म की शुद्धि, ग्रहों की अनुकूलता और आत्मिक शक्ति प्राप्त होती है।',
       href: '/remedies/mantra',
-      angle: -90, // North (Top)
+      angle: -90, // North (Top) - 1
       bgGradientId: 'grad-n-mantra',
       startColor: '#5C111A',
       endColor: '#36060C',
@@ -111,46 +111,19 @@ export default function AshtaDigbandhanaWheel({
       ),
     },
     {
-      id: 'gemstone',
+      id: 'yantra',
       number: '2',
-      name: 'GEMSTONES',
-      sanskrit: 'रत्न',
+      name: 'YANTRA',
+      sanskrit: 'यन्त्र',
       direction: 'NE',
       directionFull: 'ईशान (North-East)',
-      mantra: 'ॐ ग्रहाय नमः ॥',
-      explanation: 'उचित रत्न धारण से ग्रह बलवान, जीवन में संतुलन और सकारात्मकता आती है।',
-      href: '/remedies/gemstone',
-      angle: -45, // North-East (Top-Right)
-      bgGradientId: 'grad-ne-gemstone',
-      startColor: '#7C5214',
-      endColor: '#4A2E05',
-      accentColor: '#FEEBC8',
-      icon: (
-        // Navaratna Gems Cluster - Large Crisp Vector
-        <g transform="scale(1.35)">
-          <polygon points="0,-11 4.5,-7 4.5,-3 -4.5,-3 -4.5,-7" fill="#E53E3E" stroke="#FFF" strokeWidth="0.6" />
-          <circle cx="9" cy="-5" r="3.6" fill="#3182CE" stroke="#FFF" strokeWidth="0.6" />
-          <circle cx="-9" cy="-5" r="3.6" fill="#ECC94B" stroke="#FFF" strokeWidth="0.6" />
-          <circle cx="-8" cy="4" r="3.6" fill="#38A169" stroke="#FFF" strokeWidth="0.6" />
-          <polygon points="0,-1 4,3 0,7 -4,3" fill="#EDF2F7" stroke="#CBD5E0" strokeWidth="0.7" />
-          <circle cx="8" cy="4" r="3.6" fill="#ED8936" stroke="#FFF" strokeWidth="0.6" />
-        </g>
-      ),
-    },
-    {
-      id: 'yantra',
-      number: '3',
-      name: 'YANTHRA',
-      sanskrit: 'यन्त्र',
-      direction: 'E',
-      directionFull: 'पूर्व (East)',
       mantra: 'ॐ श्रीं ह्रीं क्लीं नमः ॥',
-      explanation: 'यंत्र स्थापना से ऊर्जा का संरक्षण, दिशाओं की स्थिरता और सफलता मिलती हैं।',
+      explanation: 'पवित्र ज्यामिति व यंत्र स्थापना से ऊर्जा का संरक्षण, दिशाओं की स्थिरता और दिव्य संतुलन मिलता है।',
       href: '/remedies/yantra',
-      angle: 0, // East (Right)
-      bgGradientId: 'grad-e-yantra',
-      startColor: '#8C6216',
-      endColor: '#543806',
+      angle: -45, // North-East (Top-Right) - 2
+      bgGradientId: 'grad-ne-yantra',
+      startColor: '#6B3014',
+      endColor: '#3D1706',
       accentColor: '#FEEBC8',
       icon: (
         // Sri Yantra Sacred Geometry - Large Crisp Vector
@@ -164,19 +137,19 @@ export default function AshtaDigbandhanaWheel({
       ),
     },
     {
-      id: 'homa-se',
-      number: '4',
+      id: 'homa',
+      number: '3',
       name: 'HOMA',
-      sanskrit: 'हवन',
-      direction: 'SE',
-      directionFull: 'आग्नेय (South-East)',
+      sanskrit: 'होम',
+      direction: 'E',
+      directionFull: 'पूर्व (East)',
       mantra: 'ॐ अग्नये स्वाहा ॥',
-      explanation: 'हवन से नकारात्मक ऊर्जा नष्ट, ग्रह शांति और मंगलमय परिणाम प्राप्त होते हैं।',
+      explanation: 'पवित्र अग्नि अनुष्ठान नकारात्मकता को भस्म कर ग्रहों को शांत व जीवन में सकारात्मक ऊर्जा लाते हैं।',
       href: '/remedies/homa',
-      angle: 45, // South-East (Bottom-Right)
-      bgGradientId: 'grad-se-homa',
-      startColor: '#5E5318',
-      endColor: '#362F09',
+      angle: 0, // East (Right) - 3
+      bgGradientId: 'grad-e-homa',
+      startColor: '#8C4810',
+      endColor: '#542805',
       accentColor: '#FAF089',
       icon: (
         // Sacred Homa Kund with Agni Flames - Large Crisp Vector
@@ -191,18 +164,18 @@ export default function AshtaDigbandhanaWheel({
     },
     {
       id: 'devata',
-      number: '5',
+      number: '4',
       name: 'DEVATA UPASANA',
       sanskrit: 'देवता उपासना',
-      direction: 'S',
-      directionFull: 'दक्षिण (South)',
+      direction: 'SE',
+      directionFull: 'आग्नेय (South-East)',
       mantra: 'ॐ नमः शिवाय ॥',
-      explanation: 'इष्ट देव की उपासना से आध्यात्मिक संरक्षण और कृपा प्राप्त होती है।',
-      href: '/remedies/mantra',
-      angle: 90, // South (Bottom)
-      bgGradientId: 'grad-s-devata',
-      startColor: '#13562B',
-      endColor: '#072C14',
+      explanation: 'इष्ट देव की उपासना से आध्यात्मिक संरक्षण, दिव्य कृपा, शक्ति और आशीर्वाद प्राप्त होता है।',
+      href: '/remedies/ishta-devata',
+      angle: 45, // South-East (Bottom-Right) - 4
+      bgGradientId: 'grad-se-devata',
+      startColor: '#1B4D2E',
+      endColor: '#0C2B18',
       accentColor: '#9AE6B4',
       icon: (
         // Lord Shiva Trishula & Damru - Large Crisp Vector
@@ -217,43 +190,44 @@ export default function AshtaDigbandhanaWheel({
       ),
     },
     {
-      id: 'vastu',
-      number: '6',
-      name: 'VASTHU',
-      sanskrit: 'वास्तु',
-      direction: 'SW',
-      directionFull: 'नैऋत्य (South-West)',
-      mantra: 'ॐ वास्तुपुरुषाय नमः ॥',
-      explanation: 'वास्तु संतुलन से घर, कार्यस्थल और जीवन में समृद्धि व सौहार्द बढ़ता है।',
-      href: '/remedies/vastu',
-      angle: 135, // South-West (Bottom-Left)
-      bgGradientId: 'grad-sw-vastu',
-      startColor: '#0E535C',
-      endColor: '#042C32',
-      accentColor: '#81E6D9',
+      id: 'gemstone',
+      number: '5',
+      name: 'RATNA',
+      sanskrit: 'रत्न',
+      direction: 'S',
+      directionFull: 'दक्षिण (South)',
+      mantra: 'ॐ ग्रहाय नमः ॥',
+      explanation: 'उचित रत्न धारण से शुभ ग्रह बलवान होते हैं और जीवन में संतुलन व सकारात्मकता आती है।',
+      href: '/remedies/gemstone',
+      angle: 90, // South (Bottom) - 5
+      bgGradientId: 'grad-s-gemstone',
+      startColor: '#7C5814',
+      endColor: '#4A3205',
+      accentColor: '#FEEBC8',
       icon: (
-        // Vastu Purusha Mandala Compass Grid - Large Crisp Vector
+        // Navaratna Gems Cluster - Large Crisp Vector
         <g transform="scale(1.35)">
-          <rect x="-11" y="-11" width="22" height="22" rx="1.5" fill="none" stroke="#81E6D9" strokeWidth="1.4" />
-          <line x1="-11" y1="0" x2="11" y2="0" stroke="#81E6D9" strokeWidth="1" />
-          <line x1="0" y1="-11" x2="0" y2="11" stroke="#81E6D9" strokeWidth="1" />
-          <circle cx="0" cy="0" r="7" fill="none" stroke="#ECC94B" strokeWidth="1" />
-          <circle cx="0" cy="0" r="2.2" fill="#ECC94B" />
+          <polygon points="0,-11 4.5,-7 4.5,-3 -4.5,-3 -4.5,-7" fill="#E53E3E" stroke="#FFF" strokeWidth="0.6" />
+          <circle cx="9" cy="-5" r="3.6" fill="#3182CE" stroke="#FFF" strokeWidth="0.6" />
+          <circle cx="-9" cy="-5" r="3.6" fill="#ECC94B" stroke="#FFF" strokeWidth="0.6" />
+          <circle cx="-8" cy="4" r="3.6" fill="#38A169" stroke="#FFF" strokeWidth="0.6" />
+          <polygon points="0,-1 4,3 0,7 -4,3" fill="#EDF2F7" stroke="#CBD5E0" strokeWidth="0.7" />
+          <circle cx="8" cy="4" r="3.6" fill="#ED8936" stroke="#FFF" strokeWidth="0.6" />
         </g>
       ),
     },
     {
       id: 'rudraksha',
-      number: '7',
-      name: 'RUDRAKSHA',
+      number: '6',
+      name: 'RUDRĀKṢA',
       sanskrit: 'रुद्राक्ष',
-      direction: 'W',
-      directionFull: 'पश्चिम (West)',
+      direction: 'SW',
+      directionFull: 'नैऋत्य (South-West)',
       mantra: 'ॐ नमः शिवाय ॥',
-      explanation: 'रुद्राक्ष धारण से ग्रह दोष शांत, मन स्थिर और आध्यात्मिक शक्ति की वृद्धि होती है।',
+      explanation: 'भगवान शिव के पावन रुद्राक्ष मन को स्थिर, कष्टों का निवारण और आत्मिक ऊर्जा में वृद्धि करते हैं।',
       href: '/remedies/rudraksha',
-      angle: 180, // West (Left)
-      bgGradientId: 'grad-w-rudraksha',
+      angle: 135, // South-West (Bottom-Left) - 6
+      bgGradientId: 'grad-sw-rudraksha',
       startColor: '#122E5C',
       endColor: '#07152D',
       accentColor: '#90CDF4',
@@ -270,28 +244,57 @@ export default function AshtaDigbandhanaWheel({
       ),
     },
     {
-      id: 'homa-puja',
+      id: 'vastu',
+      number: '7',
+      name: 'VĀSTU',
+      sanskrit: 'वास्तु',
+      direction: 'W',
+      directionFull: 'पश्चिम (West)',
+      mantra: 'ॐ वास्तुपुरुषाय नमः ॥',
+      explanation: 'वास्तु संतुलन से घर और कार्यस्थल में ऊर्जा का सकारात्मक प्रवाह, सुख, शांति और समृद्धि आती है।',
+      href: '/remedies/vastu',
+      angle: 180, // West (Left) - 7
+      bgGradientId: 'grad-w-vastu',
+      startColor: '#0E535C',
+      endColor: '#042C32',
+      accentColor: '#81E6D9',
+      icon: (
+        // Vastu Purusha Mandala Compass Grid - Large Crisp Vector
+        <g transform="scale(1.35)">
+          <rect x="-11" y="-11" width="22" height="22" rx="1.5" fill="none" stroke="#81E6D9" strokeWidth="1.4" />
+          <line x1="-11" y1="0" x2="11" y2="0" stroke="#81E6D9" strokeWidth="1" />
+          <line x1="0" y1="-11" x2="0" y2="11" stroke="#81E6D9" strokeWidth="1" />
+          <circle cx="0" cy="0" r="7" fill="none" stroke="#ECC94B" strokeWidth="1" />
+          <circle cx="0" cy="0" r="2.2" fill="#ECC94B" />
+        </g>
+      ),
+    },
+    {
+      id: 'dana',
       number: '8',
-      name: 'HOMA / PUJA',
-      sanskrit: 'हवन / पूजा',
+      name: 'DĀNA & SEVA',
+      sanskrit: 'दान एवं सेवा',
       direction: 'NW',
       directionFull: 'वायव्य (North-West)',
-      mantra: 'ॐ स्वाहा',
-      explanation: 'अग्नि देव के माध्यम से सभी दिशाओं में शुद्धि, शांति और सिद्धि।',
-      href: '/remedies/homa',
-      angle: 225, // North-West (Top-Left)
-      bgGradientId: 'grad-nw-homa',
+      mantra: 'ॐ परोपकाराय नमः ॥',
+      explanation: 'निःस्वार्थ दान और सेवा से कर्मों की शुद्धि होती है, ग्रहों की शांति और जीवन में सुरक्षा मिलती है।',
+      href: '/remedies/charity',
+      angle: 225, // North-West (Top-Left) - 8
+      bgGradientId: 'grad-nw-dana',
       startColor: '#401A4F',
       endColor: '#200929',
       accentColor: '#D6BCFA',
       icon: (
-        // Hawan Puja Kund with Agni - Large Crisp Vector
+        // Cupped Giving Hands with Sacred Offering / Grain Bowl - Large Crisp Vector
         <g transform="scale(1.35)">
-          <polygon points="-12,6 12,6 9,11 -9,11" fill="#805AD5" stroke="#D6BCFA" strokeWidth="0.8" />
-          <polygon points="-9,2 9,2 12,6 -12,6" fill="#6B46C1" stroke="#ECC94B" strokeWidth="0.8" />
-          <polygon points="-6,-2 6,-2 9,2 -9,2" fill="#553C9A" />
-          <path d="M-3,-2 C-5,-7 -1,-11 0,-14 C1,-11 5,-7 3,-2 Z" fill="#F6E05E" />
-          <path d="M-1.5,-2 C-2.5,-5 -0.5,-8 0,-10 C0.5,-8 2.5,-5 1.5,-2 Z" fill="#ED8936" />
+          <ellipse cx="0" cy="-3" rx="8" ry="4.5" fill="#ECC94B" stroke="#D69E2E" strokeWidth="0.8" />
+          <ellipse cx="0" cy="-4.5" rx="5.5" ry="2.5" fill="#FAF089" />
+          <circle cx="-3" cy="-4.5" r="0.8" fill="#D69E2E" />
+          <circle cx="0" cy="-5" r="0.9" fill="#B7791F" />
+          <circle cx="3" cy="-4.5" r="0.8" fill="#D69E2E" />
+          <path d="M-13,5 C-11,2 -7,-1 -1,-1 L-1,1 C-6,1 -9,4 -11,7 Z" fill="#E2E8F0" stroke="#CBD5E0" strokeWidth="0.5" />
+          <path d="M13,5 C11,2 7,-1 1,-1 L1,1 C6,1 9,4 11,7 Z" fill="#E2E8F0" stroke="#CBD5E0" strokeWidth="0.5" />
+          <path d="M0,4 C-1.8,2 -5,3.2 -5,5.5 C-5,8 0,11 0,11 C0,11 5,8 5,5.5 C5,3.2 1.8,2 0,4 Z" fill="#F56565" stroke="#E53E3E" strokeWidth="0.5" />
         </g>
       ),
     },
@@ -600,7 +603,7 @@ export default function AshtaDigbandhanaWheel({
       {!hideFooter && (
         <div className="text-center text-sm sm:text-base text-amber-300 font-serif pt-2 space-y-1">
           <p className="font-bold">
-            मंत्र – रत्न – यंत्र – हवन – देवता उपासना – वास्तु – रुद्राक्ष – हवन / पूजा
+            मंत्र – यंत्र – होम – देवता उपासना – रत्न – रुद्राक्ष – वास्तु – दान एवं सेवा
           </p>
           <p className="text-xs sm:text-sm text-slate-300 font-medium">
             इन आठ स्तम्भों से होता है सम्पूर्ण अष्टदिग्बन्धन और जीवन का संरक्षण।

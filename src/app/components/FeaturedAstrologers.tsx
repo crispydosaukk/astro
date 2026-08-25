@@ -207,53 +207,61 @@ export default function FeaturedAstrologers() {
                 </div>
 
                 {/* Content Section (Centered, Clean & Balanced) */}
-                <div className="p-3 sm:p-3.5 text-center flex-1 flex flex-col justify-between space-y-1.5">
+                <div className="p-3.5 text-center flex-1 flex flex-col justify-between space-y-1.5 bg-[#FFFDFC]">
                   <div className="space-y-1">
                     {/* Name */}
-                    <h3 className="font-bold text-[#292522] text-sm leading-tight truncate capitalize">
+                    <h3 className="font-bold text-[#292522] text-sm sm:text-base leading-tight truncate capitalize">
                       {ast.name}
                     </h3>
 
                     {/* Specialty */}
-                    <p className="text-[11px] text-[#6B5E55] font-medium truncate capitalize">
-                      {Array.isArray(ast.specialties) ? ast.specialties.join(', ') : ast.specialties}
+                    <p className="text-xs text-[#6B5E55] font-medium truncate capitalize">
+                      {Array.isArray(ast.specialties || ast.specialty)
+                        ? (ast.specialties || ast.specialty).join(', ')
+                        : (ast.specialties || ast.specialty)}
                     </p>
 
                     {/* Experience */}
-                    <p className="text-[11px] text-[#6B5E55]/80">
-                      {ast.experience}
+                    <p className="text-[11px] text-[#6B5E55]/90 font-medium">
+                      {ast.experience?.toString().includes('Exp') ? ast.experience : `${ast.experience}+ Years Exp.`}
                     </p>
 
                     {/* Rating */}
                     <div className="flex items-center justify-center gap-1 text-xs font-bold text-[#292522] pt-0.5">
-                      <Star size={12} fill="#D8B66A" className="text-[#B88A44] flex-shrink-0" />
-                      <span>{ast.rating}</span>
+                      <Star size={13} fill="#D8B66A" className="text-[#B88A44] flex-shrink-0" />
+                      <span className="font-bold text-[#292522]">{ast.rating}</span>
                       <span className="text-[#6B5E55] font-normal text-[11px]">
-                        ({ast.reviews.toLocaleString()})
+                        ({ast.reviews?.toLocaleString()})
                       </span>
                     </div>
 
                     {/* Price & Languages */}
-                    <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#6B5E55] pt-1 border-t border-[#E5D9C8] mt-1">
-                      <span className="font-bold text-[#713B32] text-xs tabular-nums">
-                        {formatPrice(ast.price || 20)}/min
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-[#6B5E55] pt-1.5 border-t border-[#E5D9C8] mt-1">
+                      <span className="font-extrabold text-[#713B32] text-sm tabular-nums">
+                        {formatPrice(ast.price || ast.pricePerMin || 20)}/min
                       </span>
                       {ast.languages && ast.languages.length > 0 && (
                         <>
-                          <span className="opacity-40">•</span>
-                          <span className="truncate max-w-[90px]">{ast.languages.slice(0, 2).join(', ')}</span>
+                          <span className="text-[#E5D9C8]">•</span>
+                          <span className="truncate max-w-[100px] text-[#6B5E55] font-medium">{ast.languages.slice(0, 2).join(', ')}</span>
                         </>
                       )}
                     </div>
                   </div>
 
-                  {/* Consult Now Button */}
-                  <div className="pt-1.5">
+                  {/* Consult Now Button & Profile Link */}
+                  <div className="pt-1.5 space-y-1">
                     <Link
-                      href={`/astrologer/${ast.id}`}
-                      className="w-full inline-flex items-center justify-center py-2 px-3 rounded-full font-bold text-[11px] sm:text-xs text-white uppercase tracking-wider bg-[#713B32] hover:bg-[#552B24] shadow-sm hover:shadow transition-all active:scale-[0.98]"
+                      href={`/talk-to-astrologer?astrologer=${ast.id}`}
+                      className="w-full inline-flex items-center justify-center py-2 px-3 rounded-full font-bold text-xs text-white uppercase tracking-wider bg-[#713B32] hover:bg-[#552B24] shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
                     >
                       CONSULT NOW
+                    </Link>
+                    <Link
+                      href={`/astrologer/${ast.id}`}
+                      className="block text-center text-[11px] font-semibold text-[#713B32] hover:text-[#B88A44] transition-colors pt-0.5"
+                    >
+                      View Full Profile →
                     </Link>
                   </div>
                 </div>

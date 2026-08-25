@@ -22,6 +22,7 @@ import {
   Users,
   CreditCard,
   ClipboardList,
+  Bot,
 } from 'lucide-react';
 import AppLogo from '@/components/ui/AppLogo';
 import { useUserData } from '@/lib/useUserData';
@@ -67,6 +68,7 @@ const sidebarGroups = [
       },
       { icon: Calendar, label: 'Appointments', href: '/admin-panel/appointments', badge: null },
       { icon: CreditCard, label: 'Payments', href: '/admin-panel/payments', badge: null },
+      { icon: Bot, label: 'AI Prompts', href: '/admin-panel/prompts', badge: 'AI' },
       { icon: Sparkles, label: 'Settings', href: '/admin-panel/settings', badge: null },
     ],
   },
@@ -134,7 +136,7 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
       <div
         className={`flex items-center h-16 px-4 border-b border-border ${collapsed ? 'justify-center' : 'gap-3'}`}
       >
-        <AppLogo src="/AstroParihar_Logo.png" size={34} />
+        <AppLogo src="/astrologo.png" size={44} />
       </div>
 
       {/* Nav Groups */}

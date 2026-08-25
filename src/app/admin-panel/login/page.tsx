@@ -30,7 +30,7 @@ export default function AdminLogin() {
           <div className="flex flex-col items-center justify-center mb-6 text-center">
             <div className="flex items-center justify-center mb-4">
               <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
-                <AppLogo src="/AstroParihar_Logo.png" size={50} />
+                <AppLogo src="/astrologo.png" size={85} />
               </Link>
             </div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#713B32] bg-[#EDE4D5] px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 mb-2 border border-[#E5D9C8]">
