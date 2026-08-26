@@ -32,12 +32,16 @@ export default function VastuConsultationForm() {
   // Vastu Specific Form State
   const [propertyType, setPropertyType] = useState('Residential Apartment / Flat');
   const [entranceFacing, setEntranceFacing] = useState('North-East (Ishanya — Auspicious)');
-  const [primaryConcern, setPrimaryConcern] = useState('Financial Inflow & Prosperity (North Zone)');
+  const [primaryConcern, setPrimaryConcern] = useState(
+    'Financial Inflow & Prosperity (North Zone)'
+  );
   const [kitchenLocation, setKitchenLocation] = useState('South-East (Agni Zone — Ideal)');
-  const [masterBedroomLocation, setMasterBedroomLocation] = useState('South-West (Nairruti — Ideal)');
+  const [masterBedroomLocation, setMasterBedroomLocation] = useState(
+    'South-West (Nairruti — Ideal)'
+  );
   const [pujaLocation, setPujaLocation] = useState('North-East (Ishanya — Ideal)');
   const [toiletLocation, setToiletLocation] = useState('North-West (Vayavya — Standard)');
-  
+
   // Resident & Location Details
   const [ownerName, setOwnerName] = useState('');
   const [dob, setDob] = useState('');
@@ -265,13 +269,13 @@ export default function VastuConsultationForm() {
             Get Your Complete <span className="text-gradient-gold">Vastu Consultation Report</span>
           </h2>
           <p className="text-xs sm:text-sm text-[#6B5E55] font-medium max-w-xl mx-auto">
-            Enter your property layout and directional coordinates to generate an authentic 8-direction energy audit with 100% non-demolition Vedic remedies.
+            Enter your property layout and directional coordinates to generate an authentic
+            8-direction energy audit with 100% non-demolition Vedic remedies.
           </p>
         </div>
 
         {/* Main Sacred Parchment Card */}
         <div className="relative rounded-3xl border border-[#E5D9C8] bg-[#FFFDFC] p-6 sm:p-10 shadow-xl overflow-hidden text-[#292522] space-y-8">
-          
           {/* Section 1: Property & Directional Profile */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 border-b border-[#E5D9C8] pb-2">
@@ -296,7 +300,9 @@ export default function VastuConsultationForm() {
                   <option value="Independent House / Villa">Independent House / Villa</option>
                   <option value="Commercial Office Space">Commercial Office Space</option>
                   <option value="Retail Shop / Showroom">Retail Shop / Showroom</option>
-                  <option value="Industrial Factory / Warehouse">Industrial Factory / Warehouse</option>
+                  <option value="Industrial Factory / Warehouse">
+                    Industrial Factory / Warehouse
+                  </option>
                   <option value="Plot / Open Land">Plot / Open Land</option>
                 </select>
               </div>
@@ -311,14 +317,30 @@ export default function VastuConsultationForm() {
                   onChange={(e) => setEntranceFacing(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-xs sm:text-sm font-medium shadow-sm transition-all cursor-pointer"
                 >
-                  <option value="North (Kuber — Wealth & Cash Flow)">North (Kuber — Wealth &amp; Cash Flow)</option>
-                  <option value="North-East (Ishanya — Divine Clarity)">North-East (Ishanya — Divine Clarity)</option>
-                  <option value="East (Surya — Vitality & Social Fame)">East (Surya — Vitality &amp; Social Fame)</option>
-                  <option value="South-East (Agneya — Energy & Liquidity)">South-East (Agneya — Energy &amp; Liquidity)</option>
-                  <option value="South (Yama — Stability & Discipline)">South (Yama — Stability &amp; Discipline)</option>
-                  <option value="South-West (Nairruti — Earth Foundation)">South-West (Nairruti — Earth Foundation)</option>
-                  <option value="West (Varuna — Gains & Profits)">West (Varuna — Gains &amp; Profits)</option>
-                  <option value="North-West (Vayavya — Movement & Support)">North-West (Vayavya — Movement &amp; Support)</option>
+                  <option value="North (Kuber — Wealth & Cash Flow)">
+                    North (Kuber — Wealth &amp; Cash Flow)
+                  </option>
+                  <option value="North-East (Ishanya — Divine Clarity)">
+                    North-East (Ishanya — Divine Clarity)
+                  </option>
+                  <option value="East (Surya — Vitality & Social Fame)">
+                    East (Surya — Vitality &amp; Social Fame)
+                  </option>
+                  <option value="South-East (Agneya — Energy & Liquidity)">
+                    South-East (Agneya — Energy &amp; Liquidity)
+                  </option>
+                  <option value="South (Yama — Stability & Discipline)">
+                    South (Yama — Stability &amp; Discipline)
+                  </option>
+                  <option value="South-West (Nairruti — Earth Foundation)">
+                    South-West (Nairruti — Earth Foundation)
+                  </option>
+                  <option value="West (Varuna — Gains & Profits)">
+                    West (Varuna — Gains &amp; Profits)
+                  </option>
+                  <option value="North-West (Vayavya — Movement & Support)">
+                    North-West (Vayavya — Movement &amp; Support)
+                  </option>
                 </select>
               </div>
             </div>
@@ -333,12 +355,24 @@ export default function VastuConsultationForm() {
                 onChange={(e) => setPrimaryConcern(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-xs sm:text-sm font-medium shadow-sm transition-all cursor-pointer"
               >
-                <option value="Financial Inflow & Prosperity (North Zone)">Financial Inflow &amp; Wealth Growth (North / Kuber Zone)</option>
-                <option value="Health, Vitality & Digestion (Agni Zone)">Health, Low Energy &amp; Digestion (Agni Zone)</option>
-                <option value="Marital Harmony & Family Stability (Nairruti Zone)">Marital Harmony &amp; Relationship Peace (Nairruti Zone)</option>
-                <option value="Career Opportunities & Recognition (East Zone)">Career Opportunities &amp; Fame (East / Surya Zone)</option>
-                <option value="Mental Peace & Clarity (Ishanya Zone)">Mental Fog, Anxiety &amp; Lack of Peace (Ishanya Zone)</option>
-                <option value="Complete 360° Vastu Harmony">Complete 360° Property Energy Balance</option>
+                <option value="Financial Inflow & Prosperity (North Zone)">
+                  Financial Inflow &amp; Wealth Growth (North / Kuber Zone)
+                </option>
+                <option value="Health, Vitality & Digestion (Agni Zone)">
+                  Health, Low Energy &amp; Digestion (Agni Zone)
+                </option>
+                <option value="Marital Harmony & Family Stability (Nairruti Zone)">
+                  Marital Harmony &amp; Relationship Peace (Nairruti Zone)
+                </option>
+                <option value="Career Opportunities & Recognition (East Zone)">
+                  Career Opportunities &amp; Fame (East / Surya Zone)
+                </option>
+                <option value="Mental Peace & Clarity (Ishanya Zone)">
+                  Mental Fog, Anxiety &amp; Lack of Peace (Ishanya Zone)
+                </option>
+                <option value="Complete 360° Vastu Harmony">
+                  Complete 360° Property Energy Balance
+                </option>
               </select>
             </div>
           </div>
@@ -364,10 +398,18 @@ export default function VastuConsultationForm() {
                   onChange={(e) => setKitchenLocation(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-xs sm:text-sm font-medium shadow-sm transition-all cursor-pointer"
                 >
-                  <option value="South-East (Agni Zone — Ideal)">South-East (Agni Zone — Ideal)</option>
-                  <option value="North-West (Vayu Zone — Alternative)">North-West (Vayu Zone — Alternative)</option>
-                  <option value="North-East (Ishanya — Major Dosha)">North-East (Ishanya — Major Dosha)</option>
-                  <option value="South-West (Nairruti — Heavy Conflict)">South-West (Nairruti — Heavy Conflict)</option>
+                  <option value="South-East (Agni Zone — Ideal)">
+                    South-East (Agni Zone — Ideal)
+                  </option>
+                  <option value="North-West (Vayu Zone — Alternative)">
+                    North-West (Vayu Zone — Alternative)
+                  </option>
+                  <option value="North-East (Ishanya — Major Dosha)">
+                    North-East (Ishanya — Major Dosha)
+                  </option>
+                  <option value="South-West (Nairruti — Heavy Conflict)">
+                    South-West (Nairruti — Heavy Conflict)
+                  </option>
                   <option value="North Zone">North Zone</option>
                   <option value="East Zone">East Zone</option>
                   <option value="South Zone">South Zone</option>
@@ -386,12 +428,20 @@ export default function VastuConsultationForm() {
                   onChange={(e) => setMasterBedroomLocation(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-xs sm:text-sm font-medium shadow-sm transition-all cursor-pointer"
                 >
-                  <option value="South-West (Nairruti — Ideal Foundation)">South-West (Nairruti — Ideal Foundation)</option>
-                  <option value="South Zone (Strong Stability)">South Zone (Strong Stability)</option>
+                  <option value="South-West (Nairruti — Ideal Foundation)">
+                    South-West (Nairruti — Ideal Foundation)
+                  </option>
+                  <option value="South Zone (Strong Stability)">
+                    South Zone (Strong Stability)
+                  </option>
                   <option value="West Zone (Gains & Sleep)">West Zone (Gains &amp; Sleep)</option>
-                  <option value="North-East (Ishanya — Stress/Instability)">North-East (Ishanya — Stress/Instability)</option>
+                  <option value="North-East (Ishanya — Stress/Instability)">
+                    North-East (Ishanya — Stress/Instability)
+                  </option>
                   <option value="North-West (Vayavya)">North-West (Vayavya)</option>
-                  <option value="South-East (Agneya — Restlessness)">South-East (Agneya — Restlessness)</option>
+                  <option value="South-East (Agneya — Restlessness)">
+                    South-East (Agneya — Restlessness)
+                  </option>
                 </select>
               </div>
 
@@ -406,11 +456,15 @@ export default function VastuConsultationForm() {
                   onChange={(e) => setPujaLocation(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-xs sm:text-sm font-medium shadow-sm transition-all cursor-pointer"
                 >
-                  <option value="North-East (Ishanya — Highest Purity)">North-East (Ishanya — Highest Purity)</option>
+                  <option value="North-East (Ishanya — Highest Purity)">
+                    North-East (Ishanya — Highest Purity)
+                  </option>
                   <option value="East Zone (Surya Alignment)">East Zone (Surya Alignment)</option>
                   <option value="North Zone (Kuber Alignment)">North Zone (Kuber Alignment)</option>
                   <option value="West Zone">West Zone</option>
-                  <option value="South / South-West (Inauspicious)">South / South-West (Inauspicious)</option>
+                  <option value="South / South-West (Inauspicious)">
+                    South / South-West (Inauspicious)
+                  </option>
                   <option value="Other / Not Established">Other / Not Established</option>
                 </select>
               </div>
@@ -426,12 +480,20 @@ export default function VastuConsultationForm() {
                   onChange={(e) => setToiletLocation(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-xs sm:text-sm font-medium shadow-sm transition-all cursor-pointer"
                 >
-                  <option value="North-West (Vayavya — Recommended)">North-West (Vayavya — Recommended)</option>
-                  <option value="South of South-West (SSW — Ideal Disposal)">South of South-West (SSW — Ideal Disposal)</option>
+                  <option value="North-West (Vayavya — Recommended)">
+                    North-West (Vayavya — Recommended)
+                  </option>
+                  <option value="South of South-West (SSW — Ideal Disposal)">
+                    South of South-West (SSW — Ideal Disposal)
+                  </option>
                   <option value="West Zone">West Zone</option>
                   <option value="East of South-East (ESE)">East of South-East (ESE)</option>
-                  <option value="North-East (Severe Ishan Dosha)">North-East (Severe Ishan Dosha)</option>
-                  <option value="South-West (Severe Nairruti Dosha)">South-West (Severe Nairruti Dosha)</option>
+                  <option value="North-East (Severe Ishan Dosha)">
+                    North-East (Severe Ishan Dosha)
+                  </option>
+                  <option value="South-West (Severe Nairruti Dosha)">
+                    South-West (Severe Nairruti Dosha)
+                  </option>
                 </select>
               </div>
             </div>
@@ -539,7 +601,10 @@ export default function VastuConsultationForm() {
               <ShieldCheck size={16} /> 100% Non-Demolition Remedial Guarantee
             </div>
             <p className="text-xs text-[#6B5E55] leading-relaxed">
-              Your personalized consultation report delivers an in-depth room-by-room energy audit, identifies elemental conflicts, and prescribes authentic Vedic remedies (Pyramids, Yantras, color therapy, and metal strips) requiring <strong>zero physical demolition</strong>.
+              Your personalized consultation report delivers an in-depth room-by-room energy audit,
+              identifies elemental conflicts, and prescribes authentic Vedic remedies (Pyramids,
+              Yantras, color therapy, and metal strips) requiring{' '}
+              <strong>zero physical demolition</strong>.
             </p>
           </div>
 
@@ -568,7 +633,8 @@ export default function VastuConsultationForm() {
                   <>
                     <Compass size={18} />
                     <span>
-                      Generate Vastu Consultation Report ({convertPrice(price || 149, priceUSD !== null ? priceUSD : undefined)})
+                      Generate Vastu Consultation Report (
+                      {convertPrice(price || 149, priceUSD !== null ? priceUSD : undefined)})
                     </span>
                   </>
                 )}

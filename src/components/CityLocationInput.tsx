@@ -83,7 +83,12 @@ export default function CityLocationInput({
           );
           const data = await res.json();
           if (data && data.address) {
-            const city = data.address.city || data.address.town || data.address.village || data.address.state_district || 'Detected Location';
+            const city =
+              data.address.city ||
+              data.address.town ||
+              data.address.village ||
+              data.address.state_district ||
+              'Detected Location';
             const state = data.address.state || '';
             const country = data.address.country || 'India';
             const fullLoc = [city, state, country].filter(Boolean).join(', ');
@@ -134,11 +139,15 @@ export default function CityLocationInput({
         if (Array.isArray(data) && data.length > 0) {
           setSuggestions(data);
         } else {
-          setSuggestions(POPULAR_CITIES.filter((c) => c.display_name.toLowerCase().includes(val.toLowerCase())));
+          setSuggestions(
+            POPULAR_CITIES.filter((c) => c.display_name.toLowerCase().includes(val.toLowerCase()))
+          );
         }
       } catch (err) {
         console.error('Location search error:', err);
-        setSuggestions(POPULAR_CITIES.filter((c) => c.display_name.toLowerCase().includes(val.toLowerCase())));
+        setSuggestions(
+          POPULAR_CITIES.filter((c) => c.display_name.toLowerCase().includes(val.toLowerCase()))
+        );
       } finally {
         setIsSearching(false);
       }
@@ -192,7 +201,8 @@ export default function CityLocationInput({
 
       {selectedCoords?.lat && (
         <div className="mt-1 flex items-center gap-1.5 text-[10px] text-emerald-700 font-mono">
-          <Globe size={11} /> Coordinates: {Number(selectedCoords.lat).toFixed(2)}° N, {Number(selectedCoords.lon).toFixed(2)}° E
+          <Globe size={11} /> Coordinates: {Number(selectedCoords.lat).toFixed(2)}° N,{' '}
+          {Number(selectedCoords.lon).toFixed(2)}° E
         </div>
       )}
 
@@ -229,7 +239,10 @@ export default function CityLocationInput({
                 className="w-full px-3 py-2 text-left rounded-xl hover:bg-[#F8F3EA] transition-colors flex items-center justify-between text-xs text-[#292522] group"
               >
                 <div className="flex items-center gap-2 truncate pr-2">
-                  <MapPin size={13} className="text-[#713B32] shrink-0 group-hover:scale-110 transition-transform" />
+                  <MapPin
+                    size={13}
+                    className="text-[#713B32] shrink-0 group-hover:scale-110 transition-transform"
+                  />
                   <span className="truncate font-medium">{item.display_name}</span>
                 </div>
                 {item.lat && (

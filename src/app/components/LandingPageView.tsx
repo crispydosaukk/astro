@@ -7,7 +7,12 @@ import { RemediesSection, ComprehensiveServicesSection } from './ServicesSection
 import FeaturedAstrologers from './FeaturedAstrologers';
 import TestimonialsSection from './TestimonialsSection';
 import LandingFooter from './LandingFooter';
-import { HomepageContent, defaultHomepageContent, subscribeHomepageContent, getHomepageContent } from '@/lib/cms';
+import {
+  HomepageContent,
+  defaultHomepageContent,
+  subscribeHomepageContent,
+  getHomepageContent,
+} from '@/lib/cms';
 
 interface LandingPageViewProps {
   initialContent: HomepageContent;

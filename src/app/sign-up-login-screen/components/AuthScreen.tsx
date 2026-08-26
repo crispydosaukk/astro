@@ -6,7 +6,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
-import { Phone, CheckCircle2, User, Calendar, Sparkles, ChevronRight, Loader2, KeyRound, ArrowLeft } from 'lucide-react';
+import {
+  Phone,
+  CheckCircle2,
+  User,
+  Calendar,
+  Sparkles,
+  ChevronRight,
+  Loader2,
+  KeyRound,
+  ArrowLeft,
+} from 'lucide-react';
 import { auth, db } from '@/lib/firebase/config';
 import { signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -21,7 +31,15 @@ function detectDefaultCountry(): string {
       if (tz.includes('Kolkata') || tz.includes('Calcutta')) return 'in';
       if (tz.includes('London')) return 'gb';
       if (tz.startsWith('America/')) {
-        if (tz.includes('Toronto') || tz.includes('Vancouver') || tz.includes('Edmonton') || tz.includes('Winnipeg') || tz.includes('Halifax') || tz.includes('Montreal')) return 'ca';
+        if (
+          tz.includes('Toronto') ||
+          tz.includes('Vancouver') ||
+          tz.includes('Edmonton') ||
+          tz.includes('Winnipeg') ||
+          tz.includes('Halifax') ||
+          tz.includes('Montreal')
+        )
+          return 'ca';
         return 'us';
       }
       if (tz.startsWith('Australia/')) return 'au';
@@ -64,12 +82,34 @@ export default function AuthScreen() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [mounted, setMounted] = useState(false);
-  
+
+  // Dynamic CMS branding state for left banner
+  const [authCms, setAuthCms] = useState({
+    badge: 'Authentic Vedic Guidance',
+    title: 'Your Stars Await',
+    subtitle:
+      'Join 2,50,000+ seekers discovering their cosmic path through authentic Vedic wisdom and expert guidance.',
+    icon: '🔮',
+    highlight1: 'Certified Astrologers',
+    highlight2: '100% Confidential',
+  });
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
+    async function loadAuthCms() {
+      try {
+        const snap = await getDoc(doc(db, 'settings', 'auth_page'));
+        if (snap.exists()) {
+          setAuthCms((prev) => ({ ...prev, ...snap.data() }));
+        }
+      } catch (_e) {
+        // Fallback to default
+      }
+    }
+    loadAuthCms();
   }, []);
 
   // Auto detect user country code via timezone and IP lookup
@@ -104,7 +144,7 @@ export default function AuthScreen() {
   const getTargetRedirect = useCallback(() => {
     const redirectParam = searchParams.get('redirect');
     const storedRedirect = localStorage.getItem('auth_redirect');
-    
+
     if (redirectParam) {
       localStorage.removeItem('auth_redirect');
       return redirectParam;
@@ -137,7 +177,7 @@ export default function AuthScreen() {
       toast.error('Please enter a valid phone number');
       return;
     }
-    
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/auth/send-otp', {
@@ -185,10 +225,10 @@ export default function AuthScreen() {
       // Login to Firebase with Custom Token
       const userCredential = await signInWithCustomToken(auth, data.token);
       const user = userCredential.user;
-      
+
       const userDocRef = doc(db, 'users', user.uid);
       const userDocSnap = await getDoc(userDocRef);
-      
+
       if (userDocSnap.exists()) {
         const docData = userDocSnap.data();
         if (!docData.phone) {
@@ -215,18 +255,18 @@ export default function AuthScreen() {
       toast.error('Please fill in all fields');
       return;
     }
-    
+
     setIsLoading(true);
     try {
       if (!auth.currentUser) throw new Error('No authenticated user');
-      
+
       await setDoc(doc(db, 'users', auth.currentUser.uid), {
         name,
         dob,
         phone: '+' + phone.replace(/\D/g, ''),
         createdAt: new Date().toISOString(),
       });
-      
+
       setShowSuccessPopup(true);
       setTimeout(() => {
         router.push(getTargetRedirect());
@@ -241,7 +281,9 @@ export default function AuthScreen() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#F8F3EA] text-[#292522] relative">
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .react-tel-input .country-list .country.highlight {
           background-color: #EDE4D5 !important;
           color: #292522 !important;
@@ -251,14 +293,19 @@ export default function AuthScreen() {
           color: #292522 !important;
           border: 1px solid #E5D9C8 !important;
         }
-      `}} />
+      `,
+        }}
+      />
 
       {/* Back to Home Floating Navigation Button */}
       <Link
         href="/"
         className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFFDFC]/95 backdrop-blur-md border border-[#E5D9C8] text-xs sm:text-sm font-bold text-[#713B32] hover:bg-[#EDE4D5] hover:text-[#552B24] transition-all shadow-md group"
       >
-        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-[#B88A44]" />
+        <ArrowLeft
+          size={16}
+          className="group-hover:-translate-x-1 transition-transform text-[#B88A44]"
+        />
         <span>Back to Home</span>
       </Link>
 
@@ -285,28 +332,25 @@ export default function AuthScreen() {
 
         <div className="relative text-center space-y-8 max-w-md z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#D8B66A]/40 text-[#F6D075] text-xs font-bold uppercase tracking-widest shadow-lg">
-            <Sparkles size={14} className="text-[#D8B66A]" /> Authentic Vedic Guidance
+            <Sparkles size={14} className="text-[#D8B66A]" /> {authCms.badge}
           </div>
 
           <div className="w-40 h-40 mx-auto rounded-full gold-gradient-bg flex items-center justify-center animate-float shadow-2xl border-4 border-[#FFFDFC]/20">
-            <span className="text-6xl drop-shadow-md">🔮</span>
+            <span className="text-6xl drop-shadow-md">{authCms.icon}</span>
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-3xl font-bold text-white tracking-tight">Your Stars Await</h2>
-            <p className="text-white/80 text-sm leading-relaxed">
-              Join 2,50,000+ seekers discovering their cosmic path through authentic Vedic wisdom and
-              expert guidance.
-            </p>
+            <h2 className="text-3xl font-bold text-white tracking-tight">{authCms.title}</h2>
+            <p className="text-white/80 text-sm leading-relaxed">{authCms.subtitle}</p>
           </div>
 
           <div className="pt-4 flex items-center justify-center gap-6 text-xs text-white/70">
             <span className="flex items-center gap-1.5">
-              <Sparkles size={14} className="text-[#D8B66A]" /> Certified Astrologers
+              <Sparkles size={14} className="text-[#D8B66A]" /> {authCms.highlight1}
             </span>
             <span className="h-3 w-px bg-white/20" />
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 size={14} className="text-[#D8B66A]" /> 100% Confidential
+              <CheckCircle2 size={14} className="text-[#D8B66A]" /> {authCms.highlight2}
             </span>
           </div>
         </div>
@@ -355,7 +399,7 @@ export default function AuthScreen() {
                         searchPlaceholder="Search country..."
                         inputProps={{
                           required: true,
-                          autoFocus: true
+                          autoFocus: true,
                         }}
                         containerClass="flex rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] focus-within:border-[#B88A44] focus-within:ring-2 focus-within:ring-[#B88A44]/20 transition-all overflow-visible w-full shadow-sm"
                         inputClass="!w-full !pl-[60px] !pr-4 !py-6 !bg-transparent !outline-none !text-sm !text-[#292522] !border-none !font-medium"
@@ -432,7 +476,8 @@ export default function AuthScreen() {
                 <div className="mb-6 text-center sm:text-left">
                   <h1 className="text-2xl font-bold text-[#292522] mb-1">Verify OTP</h1>
                   <p className="text-sm text-[#6B5E55]">
-                    Enter the verification code sent to <strong className="text-[#292522]">+{phone}</strong>
+                    Enter the verification code sent to{' '}
+                    <strong className="text-[#292522]">+{phone}</strong>
                   </p>
                 </div>
 
@@ -474,7 +519,9 @@ export default function AuthScreen() {
                       {isLoading ? (
                         <Loader2 size={20} className="animate-spin" />
                       ) : (
-                        <>Verify & Continue <ChevronRight size={16} /></>
+                        <>
+                          Verify & Continue <ChevronRight size={16} />
+                        </>
                       )}
                     </button>
                   </div>
@@ -545,7 +592,9 @@ export default function AuthScreen() {
                     {isLoading ? (
                       <Loader2 size={20} className="animate-spin" />
                     ) : (
-                      <>Complete Setup <CheckCircle2 size={16} /></>
+                      <>
+                        Complete Setup <CheckCircle2 size={16} />
+                      </>
                     )}
                   </button>
                 </form>
@@ -576,9 +625,7 @@ export default function AuthScreen() {
                   <div className="w-20 h-20 rounded-full bg-[#EDE4D5] flex items-center justify-center mb-6 text-[#713B32]">
                     <Sparkles size={40} className="animate-float" />
                   </div>
-                  <h3 className="text-3xl font-bold text-[#292522] mb-3">
-                    Success!
-                  </h3>
+                  <h3 className="text-3xl font-bold text-[#292522] mb-3">Success!</h3>
                   <p className="text-base text-[#6B5E55]">
                     Welcome! Redirecting you to your Vedic portal...
                   </p>
@@ -626,10 +673,27 @@ export default function AuthScreen() {
                   </div>
 
                   <div className="overflow-y-auto py-6 space-y-4 text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-                    <p><strong className="text-[#292522]">1. Introduction:</strong> Welcome to AstroParihar. By signing up or using our services, you agree to these Terms of Use and Privacy Policy.</p>
-                    <p><strong className="text-[#292522]">2. Communication Consent:</strong> By providing your mobile number, you authorize AstroParihar & authorized associates to send authentication OTPs, booking updates, and service communication. Standard carrier rates may apply.</p>
-                    <p><strong className="text-[#292522]">3. Astrological Guidance:</strong> AstroParihar provides digital Kundli analysis, Vedic remedies, and consultation services. Reports and advice are intended for personal guidance.</p>
-                    <p><strong className="text-[#292522]">4. Privacy & Payments:</strong> All transactions are securely processed via Razorpay. Your personal details and consultation records remain strictly private.</p>
+                    <p>
+                      <strong className="text-[#292522]">1. Introduction:</strong> Welcome to
+                      AstroParihar. By signing up or using our services, you agree to these Terms of
+                      Use and Privacy Policy.
+                    </p>
+                    <p>
+                      <strong className="text-[#292522]">2. Communication Consent:</strong> By
+                      providing your mobile number, you authorize AstroParihar & authorized
+                      associates to send authentication OTPs, booking updates, and service
+                      communication. Standard carrier rates may apply.
+                    </p>
+                    <p>
+                      <strong className="text-[#292522]">3. Astrological Guidance:</strong>{' '}
+                      AstroParihar provides digital Kundli analysis, Vedic remedies, and
+                      consultation services. Reports and advice are intended for personal guidance.
+                    </p>
+                    <p>
+                      <strong className="text-[#292522]">4. Privacy & Payments:</strong> All
+                      transactions are securely processed via Razorpay. Your personal details and
+                      consultation records remain strictly private.
+                    </p>
                   </div>
 
                   <div className="pt-4 border-t border-[#E5D9C8] flex items-center justify-between">
@@ -682,9 +746,21 @@ export default function AuthScreen() {
                   </div>
 
                   <div className="overflow-y-auto py-6 space-y-4 text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-                    <p><strong className="text-[#292522]">1. Data Security:</strong> AstroParihar protects your personal birth details, mobile phone numbers, and astrological reports with strict confidentiality.</p>
-                    <p><strong className="text-[#292522]">2. Usage:</strong> Information collected during registration is used exclusively for generating accurate Vedic astrological charts and verifying account authentication.</p>
-                    <p><strong className="text-[#292522]">3. Call Encryption:</strong> Audio/video consultations with astrologers are encrypted, ensuring complete privacy during your session.</p>
+                    <p>
+                      <strong className="text-[#292522]">1. Data Security:</strong> AstroParihar
+                      protects your personal birth details, mobile phone numbers, and astrological
+                      reports with strict confidentiality.
+                    </p>
+                    <p>
+                      <strong className="text-[#292522]">2. Usage:</strong> Information collected
+                      during registration is used exclusively for generating accurate Vedic
+                      astrological charts and verifying account authentication.
+                    </p>
+                    <p>
+                      <strong className="text-[#292522]">3. Call Encryption:</strong> Audio/video
+                      consultations with astrologers are encrypted, ensuring complete privacy during
+                      your session.
+                    </p>
                   </div>
 
                   <div className="pt-4 border-t border-[#E5D9C8] flex items-center justify-between">

@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { getAllMahadashaGuides, updateMahadashaGuide, MahadashaGuide } from '@/lib/mahadasha';
-import { Save, Loader2, FileText, Upload, DollarSign, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+  Save,
+  Loader2,
+  FileText,
+  Upload,
+  DollarSign,
+  CheckCircle2,
+  AlertCircle,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminMahadashaGuidesEditor() {
@@ -22,9 +30,7 @@ export default function AdminMahadashaGuidesEditor() {
   }, []);
 
   const handleChange = (id: string, field: keyof MahadashaGuide, value: any) => {
-    setGuides((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, [field]: value } : g))
-    );
+    setGuides((prev) => prev.map((g) => (g.id === id ? { ...g, [field]: value } : g)));
   };
 
   const handleSaveGuide = async (guide: MahadashaGuide) => {
@@ -91,13 +97,17 @@ export default function AdminMahadashaGuidesEditor() {
           <FileText className="text-accent" size={22} /> Mahadasha PDF Guides Management
         </h2>
         <p className="text-xs text-muted-foreground">
-          Dynamically manage prices (₹ INR / $ USD) and upload PDF files for Rahu & Sani Mahadasha Guides.
+          Dynamically manage prices (₹ INR / $ USD) and upload PDF files for Rahu & Sani Mahadasha
+          Guides.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {guides.map((g) => (
-          <div key={g.id} className="p-6 rounded-2xl bg-card border border-border space-y-4 shadow-sm">
+          <div
+            key={g.id}
+            className="p-6 rounded-2xl bg-card border border-border space-y-4 shadow-sm"
+          >
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-accent bg-accent/10 px-2.5 py-0.5 rounded-full">
@@ -120,7 +130,9 @@ export default function AdminMahadashaGuidesEditor() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-muted-foreground block mb-1">Price (₹ INR)</label>
+                  <label className="font-bold text-muted-foreground block mb-1">
+                    Price (₹ INR)
+                  </label>
                   <input
                     type="number"
                     value={g.price}
@@ -129,7 +141,9 @@ export default function AdminMahadashaGuidesEditor() {
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-muted-foreground block mb-1">Price ($ USD)</label>
+                  <label className="font-bold text-muted-foreground block mb-1">
+                    Price ($ USD)
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -141,7 +155,9 @@ export default function AdminMahadashaGuidesEditor() {
               </div>
 
               <div>
-                <label className="font-bold text-muted-foreground block mb-1">PDF File URL / Upload</label>
+                <label className="font-bold text-muted-foreground block mb-1">
+                  PDF File URL / Upload
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -164,7 +180,9 @@ export default function AdminMahadashaGuidesEditor() {
               </div>
 
               <div>
-                <label className="font-bold text-muted-foreground block mb-1">Subtitle / Summary</label>
+                <label className="font-bold text-muted-foreground block mb-1">
+                  Subtitle / Summary
+                </label>
                 <textarea
                   rows={2}
                   value={g.subtitle}

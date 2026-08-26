@@ -3,10 +3,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useUserData } from '@/lib/useUserData';
-import { Loader2, FileText, User, X, Eye, Calendar, Sparkles, ShieldCheck, ChevronRight, Phone, Mail } from 'lucide-react';
+import {
+  Loader2,
+  FileText,
+  User,
+  X,
+  Eye,
+  Calendar,
+  Sparkles,
+  ShieldCheck,
+  ChevronRight,
+  Phone,
+  Mail,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs, getDoc, updateDoc, doc, onSnapshot } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  updateDoc,
+  doc,
+  onSnapshot,
+} from 'firebase/firestore';
 import { getSettings } from '@/lib/settings';
 
 export default function CallPage() {
@@ -36,9 +57,14 @@ export default function CallPage() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
         const docData = snapshot.docs[0].data();
-        if (docData.status === 'completed' || docData.status === 'cancelled' || docData.status === 'declined') {
-          console.log("Consultation status changed to ended in database.");
-          const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+        if (
+          docData.status === 'completed' ||
+          docData.status === 'cancelled' ||
+          docData.status === 'declined'
+        ) {
+          console.log('Consultation status changed to ended in database.');
+          const isAstrologer =
+            window.location.href.includes('astrologer') || userData?.role === 'astrologer';
           router.push(isAstrologer ? '/astrologer-dashboard' : '/');
         }
       }
@@ -60,7 +86,7 @@ export default function CallPage() {
         // Fetch consultation to get duration and customer ID
         const q = query(collection(db, 'consultations'), where('roomID', '==', roomID));
         const querySnapshot = await getDocs(q);
-        
+
         let fetchedDuration = 5; // default 5 mins
         let consultationId: string | null = null;
         let isCustomer = false;
@@ -78,9 +104,14 @@ export default function CallPage() {
           }
 
           // If consultation has already ended, do not join
-          if (docData.status === 'completed' || docData.status === 'cancelled' || docData.status === 'declined') {
+          if (
+            docData.status === 'completed' ||
+            docData.status === 'cancelled' ||
+            docData.status === 'declined'
+          ) {
             alert('This consultation call has already ended.');
-            const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+            const isAstrologer =
+              window.location.href.includes('astrologer') || userData?.role === 'astrologer';
             router.push(isAstrologer ? '/astrologer-dashboard' : '/');
             return;
           }
@@ -93,10 +124,16 @@ export default function CallPage() {
         // Fetch dynamic platform settings for ZegoCloud credentials if env vars are missing
         const dbSettings = await getSettings();
         const rawAppId = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID || dbSettings?.zegoAppId;
-        const serverSecret = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET || dbSettings?.zegoServerSecret;
+        const serverSecret =
+          process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER_SECRET || dbSettings?.zegoServerSecret;
 
-        if (!rawAppId || !serverSecret || rawAppId === '123456789' || serverSecret === 'PLACEHOLDER_SECRET') {
-          console.error("ZegoCloud credentials missing or invalid placeholder.");
+        if (
+          !rawAppId ||
+          !serverSecret ||
+          rawAppId === '123456789' ||
+          serverSecret === 'PLACEHOLDER_SECRET'
+        ) {
+          console.error('ZegoCloud credentials missing or invalid placeholder.');
           setInitFailed(true);
           return;
         }
@@ -105,7 +142,7 @@ export default function CallPage() {
 
         // Add a random string to userID so you can test in multiple tabs with the same logged-in account
         const uniqueUserID = `${user.uid}_${Math.floor(Math.random() * 10000)}`;
-        
+
         // Fallback for name if userData is null (e.g. for astrologers)
         const userName = userData?.name || user.displayName || user.email || 'User';
 
@@ -120,9 +157,10 @@ export default function CallPage() {
 
         // Create instance object from kit token
         zp = ZegoUIKitPrebuilt.create(kitToken);
-        
+
         // Check if the user is an astrologer based on path or role (fallback to one-on-one layout)
-        const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+        const isAstrologer =
+          window.location.href.includes('astrologer') || userData?.role === 'astrologer';
 
         // Join room
         zp.joinRoom({
@@ -136,33 +174,33 @@ export default function CallPage() {
           showMyCameraToggleButton: !isAudioCall,
           showPreJoinView: true,
           onJoinRoom: async () => {
-             setIsJoined(true);
-             if (fetchedDuration) {
-               setTimeLeft(fetchedDuration * 60);
-             }
+            setIsJoined(true);
+            if (fetchedDuration) {
+              setTimeLeft(fetchedDuration * 60);
+            }
 
-             if (isCustomer && consultationId) {
-               try {
-                 await fetch('/api/start-call-billing', {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ consultationId })
-                 });
-               } catch (error) {
-                 console.error('Error starting billing:', error);
-               }
-             }
+            if (isCustomer && consultationId) {
+              try {
+                await fetch('/api/start-call-billing', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ consultationId }),
+                });
+              } catch (error) {
+                console.error('Error starting billing:', error);
+              }
+            }
           },
           onLeaveRoom: async () => {
             try {
               // Find the consultation record by roomID and mark it as completed
               const q = query(collection(db, 'consultations'), where('roomID', '==', roomID));
               const querySnapshot = await getDocs(q);
-              
+
               if (!querySnapshot.empty) {
                 const docRef = doc(db, 'consultations', querySnapshot.docs[0].id);
                 await updateDoc(docRef, { status: 'completed' });
-                console.log("Consultation marked as completed in database.");
+                console.log('Consultation marked as completed in database.');
               }
             } catch (error) {
               console.error('Failed to update consultation status:', error);
@@ -177,7 +215,7 @@ export default function CallPage() {
           },
         });
       } catch (error) {
-        console.error("ZegoCloud Initialization Error:", error);
+        console.error('ZegoCloud Initialization Error:', error);
         setInitFailed(true);
       }
     };
@@ -222,7 +260,7 @@ export default function CallPage() {
 
       setCustomerReports(sorted);
     } catch (err) {
-      console.error("Error fetching customer data:", err);
+      console.error('Error fetching customer data:', err);
     } finally {
       setLoadingCustomerReports(false);
     }
@@ -231,52 +269,54 @@ export default function CallPage() {
   // Timer and billing logic
   useEffect(() => {
     if (!isJoined || timeLeft === null) return;
-    
+
     if (timeLeft <= 0) {
       if (activeConsultationId) {
         const docRef = doc(db, 'consultations', activeConsultationId);
         updateDoc(docRef, { status: 'completed' }).catch(console.error);
       }
-      alert("Time limit completed. Your call session has ended.");
-      const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+      alert('Time limit completed. Your call session has ended.');
+      const isAstrologer =
+        window.location.href.includes('astrologer') || userData?.role === 'astrologer';
       router.push(isAstrologer ? '/astrologer-dashboard' : '/');
       return;
     }
-    
+
     const timer = setInterval(() => {
-      setTimeLeft(prev => (prev !== null ? prev - 1 : null));
+      setTimeLeft((prev) => (prev !== null ? prev - 1 : null));
     }, 1000);
 
     // Track total seconds in call to trigger billing every 60s
     let secondsElapsed = 0;
     const billingTimer = setInterval(async () => {
       secondsElapsed += 1;
-      
+
       // We only deduct if it's the customer and 60 seconds have passed
       if (isCustomerRole && activeConsultationId && secondsElapsed % 60 === 0) {
         try {
           const res = await fetch('/api/deduct-minute', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ consultationId: activeConsultationId })
+            body: JSON.stringify({ consultationId: activeConsultationId }),
           });
-          
+
           if (res.status === 402) {
             // Insufficient balance, mark call as completed and force disconnect
             if (activeConsultationId) {
               const docRef = doc(db, 'consultations', activeConsultationId);
               await updateDoc(docRef, { status: 'completed' }).catch(console.error);
             }
-            alert("Your wallet balance is exhausted. The call has ended.");
-            const isAstrologer = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+            alert('Your wallet balance is exhausted. The call has ended.');
+            const isAstrologer =
+              window.location.href.includes('astrologer') || userData?.role === 'astrologer';
             router.push(isAstrologer ? '/astrologer-dashboard' : '/');
           }
         } catch (e) {
-          console.error("Failed to deduct minute", e);
+          console.error('Failed to deduct minute', e);
         }
       }
     }, 1000);
-    
+
     return () => {
       clearInterval(timer);
       clearInterval(billingTimer);
@@ -296,7 +336,9 @@ export default function CallPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
         <p className="text-muted-foreground">Please log in to join the call.</p>
-        <button onClick={() => router.push('/')} className="mt-4 text-[#C9952B]">Return Home</button>
+        <button onClick={() => router.push('/')} className="mt-4 text-[#C9952B]">
+          Return Home
+        </button>
       </div>
     );
   }
@@ -306,8 +348,14 @@ export default function CallPage() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="bg-red-500/10 text-red-500 p-4 rounded-xl border border-red-500/20 max-w-md">
           <h2 className="font-bold text-xl mb-2">Connection Error</h2>
-          <p className="text-sm opacity-80 mb-4">Could not initialize the secure connection. Please make sure the ZegoCloud API keys are configured properly.</p>
-          <button onClick={() => router.back()} className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors">
+          <p className="text-sm opacity-80 mb-4">
+            Could not initialize the secure connection. Please make sure the ZegoCloud API keys are
+            configured properly.
+          </p>
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
+          >
             Go Back
           </button>
         </div>
@@ -315,64 +363,71 @@ export default function CallPage() {
     );
   }
 
-  const isAstrologerUser = window.location.href.includes('astrologer') || userData?.role === 'astrologer';
+  const isAstrologerUser =
+    window.location.href.includes('astrologer') || userData?.role === 'astrologer';
 
   return (
     <div className="h-screen w-full bg-black overflow-hidden flex flex-col relative">
       {isJoined && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[9999] bg-black/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 shadow-xl flex items-center gap-4">
-           {timeLeft !== null && (
-             <div className="flex items-center gap-2">
-               <div className={`w-2 h-2 rounded-full ${timeLeft < 60 ? 'bg-red-500 animate-pulse' : 'bg-green-500 animate-pulse'}`} />
-               <span className={`font-mono font-bold text-lg ${timeLeft < 60 ? 'text-red-400' : 'text-white'}`}>
-                 {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:
-                 {(timeLeft % 60).toString().padStart(2, '0')}
-               </span>
-               <span className="text-white/70 text-xs">Remaining</span>
-             </div>
-           )}
+          {timeLeft !== null && (
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${timeLeft < 60 ? 'bg-red-500 animate-pulse' : 'bg-green-500 animate-pulse'}`}
+              />
+              <span
+                className={`font-mono font-bold text-lg ${timeLeft < 60 ? 'text-red-400' : 'text-white'}`}
+              >
+                {Math.floor(timeLeft / 60)
+                  .toString()
+                  .padStart(2, '0')}
+                :{(timeLeft % 60).toString().padStart(2, '0')}
+              </span>
+              <span className="text-white/70 text-xs">Remaining</span>
+            </div>
+          )}
 
-           {/* Astrologer Customer Profile & Reports Access Button */}
-           {isAstrologerUser && targetCustomerId && (
-             <button
-               onClick={() => {
-                 setShowReportsDrawer(true);
-                 if (targetCustomerId) fetchCustomerData(targetCustomerId);
-               }}
-               className="px-3.5 py-1.5 bg-[#C9952B] hover:bg-[#b08020] text-white font-semibold text-xs rounded-full transition-all shadow-lg flex items-center gap-1.5 cursor-pointer"
-             >
-               <FileText size={14} />
-               <span>Customer Reports</span>
-               {customerReports.length > 0 && (
-                 <span className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                   {customerReports.length}
-                 </span>
-               )}
-             </button>
-           )}
+          {/* Astrologer Customer Profile & Reports Access Button */}
+          {isAstrologerUser && targetCustomerId && (
+            <button
+              onClick={() => {
+                setShowReportsDrawer(true);
+                if (targetCustomerId) fetchCustomerData(targetCustomerId);
+              }}
+              className="px-3.5 py-1.5 bg-[#C9952B] hover:bg-[#b08020] text-white font-semibold text-xs rounded-full transition-all shadow-lg flex items-center gap-1.5 cursor-pointer"
+            >
+              <FileText size={14} />
+              <span>Customer Reports</span>
+              {customerReports.length > 0 && (
+                <span className="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                  {customerReports.length}
+                </span>
+              )}
+            </button>
+          )}
 
-           <button
-             onClick={async () => {
-               if (activeConsultationId) {
-                 try {
-                   const docRef = doc(db, 'consultations', activeConsultationId);
-                   await updateDoc(docRef, { status: 'completed' });
-                 } catch (e) {
-                   console.error(e);
-                 }
-               }
-               router.push(isAstrologerUser ? '/astrologer-dashboard' : '/');
-             }}
-             className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-full transition-colors cursor-pointer"
-           >
-             End Call
-           </button>
+          <button
+            onClick={async () => {
+              if (activeConsultationId) {
+                try {
+                  const docRef = doc(db, 'consultations', activeConsultationId);
+                  await updateDoc(docRef, { status: 'completed' });
+                } catch (e) {
+                  console.error(e);
+                }
+              }
+              router.push(isAstrologerUser ? '/astrologer-dashboard' : '/');
+            }}
+            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-full transition-colors cursor-pointer"
+          >
+            End Call
+          </button>
         </div>
       )}
 
       {/* Main Zego Video / Audio Container */}
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         className="w-full h-full flex-1"
         style={{ width: '100vw', height: '100vh' }}
       />
@@ -423,11 +478,15 @@ export default function CallPage() {
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
                         <span className="text-white/50 block">Name</span>
-                        <span className="font-semibold text-white">{customerDetails.name || 'N/A'}</span>
+                        <span className="font-semibold text-white">
+                          {customerDetails.name || 'N/A'}
+                        </span>
                       </div>
                       <div>
                         <span className="text-white/50 block">Date of Birth</span>
-                        <span className="font-semibold text-white">{customerDetails.dob || 'N/A'}</span>
+                        <span className="font-semibold text-white">
+                          {customerDetails.dob || 'N/A'}
+                        </span>
                       </div>
                       {customerDetails.phone && (
                         <div>
@@ -472,8 +531,12 @@ export default function CallPage() {
                   ) : customerReports.length === 0 ? (
                     <div className="p-8 rounded-2xl bg-white/5 border border-white/10 text-center space-y-2">
                       <FileText size={32} className="mx-auto text-white/30" />
-                      <p className="text-sm font-semibold text-white/80">No reports generated yet</p>
-                      <p className="text-xs text-white/50">This customer hasn't purchased or generated reports on the platform.</p>
+                      <p className="text-sm font-semibold text-white/80">
+                        No reports generated yet
+                      </p>
+                      <p className="text-xs text-white/50">
+                        This customer hasn't purchased or generated reports on the platform.
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -491,7 +554,8 @@ export default function CallPage() {
                             </div>
                             {rep.details?.dob && (
                               <p className="text-[11px] text-white/60">
-                                Details: {rep.details.dob} | {rep.details.time || ''} | {rep.details.place || ''}
+                                Details: {rep.details.dob} | {rep.details.time || ''} |{' '}
+                                {rep.details.place || ''}
                               </p>
                             )}
                           </div>
@@ -511,7 +575,8 @@ export default function CallPage() {
 
               {/* Drawer Footer Notice */}
               <div className="p-4 border-t border-white/10 bg-black/40 text-[11px] text-white/50 text-center">
-                🔒 Temporary access enabled only during active call session. Access expires upon disconnect.
+                🔒 Temporary access enabled only during active call session. Access expires upon
+                disconnect.
               </div>
             </motion.div>
           </div>
@@ -534,7 +599,8 @@ export default function CallPage() {
                   <h3 className="text-lg font-bold text-white">{selectedReport.type}</h3>
                   {selectedReport.details?.dob && (
                     <p className="text-xs text-white/60 mt-0.5">
-                      Target: {selectedReport.details.dob} {selectedReport.details.place ? `| ${selectedReport.details.place}` : ''}
+                      Target: {selectedReport.details.dob}{' '}
+                      {selectedReport.details.place ? `| ${selectedReport.details.place}` : ''}
                     </p>
                   )}
                 </div>
@@ -558,28 +624,42 @@ export default function CallPage() {
                             <span className="text-xs text-[#C9952B] font-bold uppercase tracking-wider block mb-1">
                               {data.recommendationTitle}
                             </span>
-                            <h4 className="text-xl font-bold text-white mb-1">{data.recommendationName}</h4>
+                            <h4 className="text-xl font-bold text-white mb-1">
+                              {data.recommendationName}
+                            </h4>
                             <p className="text-xs text-white/70">{data.timing}</p>
                           </div>
 
                           {data.materials && (
                             <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                              <h5 className="text-xs font-bold text-[#C9952B] uppercase mb-1">Materials / Requirements</h5>
-                              <p className="text-xs leading-relaxed text-white/80">{data.materials}</p>
+                              <h5 className="text-xs font-bold text-[#C9952B] uppercase mb-1">
+                                Materials / Requirements
+                              </h5>
+                              <p className="text-xs leading-relaxed text-white/80">
+                                {data.materials}
+                              </p>
                             </div>
                           )}
 
                           {(data.astrologicalAnalysis || data.description) && (
                             <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                              <h5 className="text-xs font-bold text-[#C9952B] uppercase mb-1">Astrological Analysis</h5>
-                              <p className="text-xs leading-relaxed whitespace-pre-wrap text-white/80">{data.astrologicalAnalysis || data.description}</p>
+                              <h5 className="text-xs font-bold text-[#C9952B] uppercase mb-1">
+                                Astrological Analysis
+                              </h5>
+                              <p className="text-xs leading-relaxed whitespace-pre-wrap text-white/80">
+                                {data.astrologicalAnalysis || data.description}
+                              </p>
                             </div>
                           )}
 
                           {data.procedure && (
                             <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                              <h5 className="text-xs font-bold text-[#C9952B] uppercase mb-1">Procedure</h5>
-                              <p className="text-xs leading-relaxed whitespace-pre-wrap text-white/80">{data.procedure}</p>
+                              <h5 className="text-xs font-bold text-[#C9952B] uppercase mb-1">
+                                Procedure
+                              </h5>
+                              <p className="text-xs leading-relaxed whitespace-pre-wrap text-white/80">
+                                {data.procedure}
+                              </p>
                             </div>
                           )}
                         </div>

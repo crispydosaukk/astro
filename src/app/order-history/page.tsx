@@ -27,10 +27,10 @@ export default function OrderHistoryPage() {
           where('customerId', '==', user.uid),
           where('status', '==', 'completed')
         );
-        
+
         const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
+        const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
         // Sort manually by createdAt if it exists, or just fallback
         data.sort((a: any, b: any) => {
           if (a.createdAt && b.createdAt) {
@@ -41,7 +41,7 @@ export default function OrderHistoryPage() {
 
         setHistory(data);
       } catch (error) {
-        console.error("Error fetching order history:", error);
+        console.error('Error fetching order history:', error);
       } finally {
         setLoading(false);
       }
@@ -60,7 +60,7 @@ export default function OrderHistoryPage() {
           <Clock className="text-[#C9952B]" size={32} />
           Consultation History
         </h1>
-        
+
         {loading || userLoading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-[#C9952B]" size={40} />
@@ -68,7 +68,7 @@ export default function OrderHistoryPage() {
         ) : history.length > 0 ? (
           <div className="space-y-4">
             {history.map((order, i) => (
-              <motion.div 
+              <motion.div
                 key={order.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,8 @@ export default function OrderHistoryPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-lg text-foreground">
-                        {order.type === 'video' ? 'Video' : 'Audio'} Consultation with {order.astrologerName}
+                        {order.type === 'video' ? 'Video' : 'Audio'} Consultation with{' '}
+                        {order.astrologerName}
                       </h3>
                       <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5">
@@ -98,9 +99,11 @@ export default function OrderHistoryPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col md:items-end justify-center bg-muted/50 p-4 rounded-xl border border-border">
-                    <span className="text-xs text-muted-foreground font-medium mb-1 uppercase tracking-wider">Amount Paid</span>
+                    <span className="text-xs text-muted-foreground font-medium mb-1 uppercase tracking-wider">
+                      Amount Paid
+                    </span>
                     <span className="text-2xl font-bold text-[#C9952B] flex items-center gap-1.5">
                       {formatPrice(order.price || 0)}
                     </span>
@@ -118,8 +121,8 @@ export default function OrderHistoryPage() {
             <p className="text-muted-foreground mb-6">
               You haven't completed any consultations with our astrologers yet.
             </p>
-            <button 
-              onClick={() => window.location.href = '/talk-to-astrologer'}
+            <button
+              onClick={() => (window.location.href = '/talk-to-astrologer')}
               className="px-6 py-2.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all"
             >
               Book a Session Now

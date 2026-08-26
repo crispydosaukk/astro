@@ -34,7 +34,9 @@ export default function RecentReports() {
   const [mahadashaGuides, setMahadashaGuides] = useState<Record<string, MahadashaGuide>>({});
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<any>(null);
-  const [activeCategory, setActiveCategory] = useState<'all' | 'services' | 'remedies' | 'mahadasha'>('all');
+  const [activeCategory, setActiveCategory] = useState<
+    'all' | 'services' | 'remedies' | 'mahadasha'
+  >('all');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -107,16 +109,26 @@ export default function RecentReports() {
       return mahadashaGuides[rep.details.guideId].pdfUrl;
     }
     if (rep.type?.includes('Rahu') && rep.type?.includes('Survival')) {
-      return mahadashaGuides['rahu-survival']?.pdfUrl || '/assets/pdfs/rahu_mahadasha_survival_guide.pdf';
+      return (
+        mahadashaGuides['rahu-survival']?.pdfUrl || '/assets/pdfs/rahu_mahadasha_survival_guide.pdf'
+      );
     }
     if (rep.type?.includes('Rahu')) {
-      return mahadashaGuides['rahu-stabilisation']?.pdfUrl || '/assets/pdfs/rahu_mahadasha_stabilisation_guide.pdf';
+      return (
+        mahadashaGuides['rahu-stabilisation']?.pdfUrl ||
+        '/assets/pdfs/rahu_mahadasha_stabilisation_guide.pdf'
+      );
     }
     if (rep.type?.includes('Sani') && rep.type?.includes('Survival')) {
-      return mahadashaGuides['sani-survival']?.pdfUrl || '/assets/pdfs/sani_mahadasha_survival_guide.pdf';
+      return (
+        mahadashaGuides['sani-survival']?.pdfUrl || '/assets/pdfs/sani_mahadasha_survival_guide.pdf'
+      );
     }
     if (rep.type?.includes('Sani')) {
-      return mahadashaGuides['sani-stabilisation']?.pdfUrl || '/assets/pdfs/sani_mahadasha_stabilisation_guide.pdf';
+      return (
+        mahadashaGuides['sani-stabilisation']?.pdfUrl ||
+        '/assets/pdfs/sani_mahadasha_stabilisation_guide.pdf'
+      );
     }
     return '/assets/pdfs/rahu_mahadasha_stabilisation_guide.pdf';
   };
@@ -182,8 +194,12 @@ export default function RecentReports() {
         {/* Header with Title */}
         <div className="p-6 border-b border-border flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h2 className="text-xl font-bold text-foreground">My Astrological Reports & Purchased PDF Guides</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Categorized view of your services reports, remedies, and Mahadasha PDF guides</p>
+            <h2 className="text-xl font-bold text-foreground">
+              My Astrological Reports & Purchased PDF Guides
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Categorized view of your services reports, remedies, and Mahadasha PDF guides
+            </p>
           </div>
           <Link
             href="/services"
@@ -275,7 +291,9 @@ export default function RecentReports() {
                               {rep.type || 'Custom Report'}
                             </span>
                             {rep.details?.name && (
-                              <span className="text-[11px] text-muted-foreground">For: {rep.details.name}</span>
+                              <span className="text-[11px] text-muted-foreground">
+                                For: {rep.details.name}
+                              </span>
                             )}
                           </div>
                         </div>
@@ -287,11 +305,15 @@ export default function RecentReports() {
                             category === 'mahadasha'
                               ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                               : category === 'remedies'
-                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                                : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                           }`}
                         >
-                          {category === 'mahadasha' ? 'PDF Guide' : category === 'remedies' ? 'Remedy' : 'Service'}
+                          {category === 'mahadasha'
+                            ? 'PDF Guide'
+                            : category === 'remedies'
+                              ? 'Remedy'
+                              : 'Service'}
                         </span>
                       </td>
 
@@ -345,16 +367,22 @@ export default function RecentReports() {
                 >
                   {/* Print Header with Logo */}
                   <div className="hidden print:flex flex-col items-center justify-center pb-6 mb-6 border-b-2 border-black">
-                    <img src="/astrologo.png" alt="AstroParihar Logo" className="h-32 object-contain" />
+                    <img
+                      src="/astrologo.png"
+                      alt="AstroParihar Logo"
+                      className="h-32 object-contain"
+                    />
                   </div>
 
                   <div className="p-6 sm:p-8 border-b border-border flex items-center justify-between bg-muted/30 print:bg-transparent print:border-none print:p-0">
                     <div>
-                      <h3 className="text-2xl font-bold text-foreground print:text-black">{selectedReport.type}</h3>
+                      <h3 className="text-2xl font-bold text-foreground print:text-black">
+                        {selectedReport.type}
+                      </h3>
                       {selectedReport.details?.dob && (
                         <p className="text-sm text-muted-foreground mt-1 print:text-gray-600">
-                          Generated for {selectedReport.details?.dob} | {selectedReport.details?.time} |{' '}
-                          {selectedReport.details?.place}
+                          Generated for {selectedReport.details?.dob} |{' '}
+                          {selectedReport.details?.time} | {selectedReport.details?.place}
                         </p>
                       )}
                     </div>
@@ -401,547 +429,756 @@ export default function RecentReports() {
                           />
                         </div>
                       ) : (
-                    (() => {
-                      try {
-                        const data = typeof selectedReport.reportContent === 'string'
-                          ? JSON.parse(selectedReport.reportContent)
-                          : selectedReport.reportContent;
+                        (() => {
+                          try {
+                            const data =
+                              typeof selectedReport.reportContent === 'string'
+                                ? JSON.parse(selectedReport.reportContent)
+                                : selectedReport.reportContent;
 
-                        if (data) {
-                          const isKundliMatching =
-                            selectedReport.type?.toLowerCase().includes('matching') ||
-                            data.recommendationTitle?.toLowerCase().includes('matching') ||
-                            data.ashtakoot;
+                            if (data) {
+                              const isKundliMatching =
+                                selectedReport.type?.toLowerCase().includes('matching') ||
+                                data.recommendationTitle?.toLowerCase().includes('matching') ||
+                                data.ashtakoot;
 
-                          const isJanamKundli =
-                            selectedReport.type?.toLowerCase().includes('janam kundli') ||
-                            selectedReport.type?.toLowerCase().includes('horoscope') ||
-                            data.planetaryDegrees ||
-                            data.ascendant;
+                              const isJanamKundli =
+                                selectedReport.type?.toLowerCase().includes('janam kundli') ||
+                                selectedReport.type?.toLowerCase().includes('horoscope') ||
+                                data.planetaryDegrees ||
+                                data.ascendant;
 
-                          const isPanchang =
-                            selectedReport.type?.toLowerCase().includes('panchang') ||
-                            data.tithi ||
-                            data.rahuKaal;
+                              const isPanchang =
+                                selectedReport.type?.toLowerCase().includes('panchang') ||
+                                data.tithi ||
+                                data.rahuKaal;
 
-                          const isFasting =
-                            selectedReport.type?.toLowerCase().includes('fasting') ||
-                            data.recommendedVrats ||
-                            data.weeklyFastingDay;
+                              const isFasting =
+                                selectedReport.type?.toLowerCase().includes('fasting') ||
+                                data.recommendedVrats ||
+                                data.weeklyFastingDay;
 
-                          const isVastu =
-                            selectedReport.type?.toLowerCase().includes('vastu') ||
-                            selectedReport.type?.toLowerCase().includes('vāstu') ||
-                            data.directionalAnalysis ||
-                            data.propertySummary;
+                              const isVastu =
+                                selectedReport.type?.toLowerCase().includes('vastu') ||
+                                selectedReport.type?.toLowerCase().includes('vāstu') ||
+                                data.directionalAnalysis ||
+                                data.propertySummary;
 
-                          return (
-                            <div className="space-y-6">
-                              {/* Primary Header Card */}
-                              <div className="p-5 sm:p-6 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 print:break-inside-avoid print:border-gray-300 print:bg-transparent space-y-2">
-                                <p className="text-xs text-[#C9952B] font-semibold uppercase tracking-wider print:text-black">
-                                  {data.recommendationTitle || selectedReport.type}
-                                </p>
-                                <h2 className="text-2xl sm:text-3xl font-bold text-foreground print:text-black">
-                                  {data.recommendationName || selectedReport.type}
-                                </h2>
-                                <p className="text-xs sm:text-sm text-muted-foreground font-medium flex items-center gap-2 print:text-gray-700">
-                                  {data.timing || 'Active'} {data.duration && data.duration !== 'N/A' && `· ${data.duration}`}
-                                </p>
-                              </div>
-
-                              {/* VASTU CONSULTATION SPECIFIC VIEW */}
-                              {isVastu && (
+                              return (
                                 <div className="space-y-6">
-                                  {/* Property Summary Bar */}
-                                  {data.propertySummary && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                                        <span className="text-[10px] text-muted-foreground uppercase font-bold">Property Type</span>
-                                        <p className="text-xs sm:text-sm font-bold text-foreground">{data.propertySummary.propertyType}</p>
-                                      </div>
-                                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                                        <span className="text-[10px] text-muted-foreground uppercase font-bold">Entrance Facing</span>
-                                        <p className="text-xs sm:text-sm font-bold text-[#C9952B]">{data.propertySummary.entranceFacing}</p>
-                                      </div>
-                                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                                        <span className="text-[10px] text-muted-foreground uppercase font-bold">Spatial Score</span>
-                                        <p className="text-xs sm:text-sm font-bold text-emerald-400">{data.propertySummary.overallEnergyScore || '84/100 (Auspicious)'}</p>
-                                      </div>
+                                  {/* Primary Header Card */}
+                                  <div className="p-5 sm:p-6 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 print:break-inside-avoid print:border-gray-300 print:bg-transparent space-y-2">
+                                    <p className="text-xs text-[#C9952B] font-semibold uppercase tracking-wider print:text-black">
+                                      {data.recommendationTitle || selectedReport.type}
+                                    </p>
+                                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground print:text-black">
+                                      {data.recommendationName || selectedReport.type}
+                                    </h2>
+                                    <p className="text-xs sm:text-sm text-muted-foreground font-medium flex items-center gap-2 print:text-gray-700">
+                                      {data.timing || 'Active'}{' '}
+                                      {data.duration &&
+                                        data.duration !== 'N/A' &&
+                                        `· ${data.duration}`}
+                                    </p>
+                                  </div>
+
+                                  {/* VASTU CONSULTATION SPECIFIC VIEW */}
+                                  {isVastu && (
+                                    <div className="space-y-6">
+                                      {/* Property Summary Bar */}
+                                      {data.propertySummary && (
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                                            <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                                              Property Type
+                                            </span>
+                                            <p className="text-xs sm:text-sm font-bold text-foreground">
+                                              {data.propertySummary.propertyType}
+                                            </p>
+                                          </div>
+                                          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                                            <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                                              Entrance Facing
+                                            </span>
+                                            <p className="text-xs sm:text-sm font-bold text-[#C9952B]">
+                                              {data.propertySummary.entranceFacing}
+                                            </p>
+                                          </div>
+                                          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                                            <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                                              Spatial Score
+                                            </span>
+                                            <p className="text-xs sm:text-sm font-bold text-emerald-400">
+                                              {data.propertySummary.overallEnergyScore ||
+                                                '84/100 (Auspicious)'}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {/* 8-Direction Zone Alignment Grid */}
+                                      {data.directionalAnalysis &&
+                                        Array.isArray(data.directionalAnalysis) && (
+                                          <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                                            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                                              <Compass size={16} className="text-[#C9952B]" />{' '}
+                                              8-Directional Energy &amp; Remedial Audit
+                                            </h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                              {data.directionalAnalysis.map(
+                                                (dir: any, idx: number) => (
+                                                  <div
+                                                    key={idx}
+                                                    className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs"
+                                                  >
+                                                    <div className="flex justify-between items-center font-bold">
+                                                      <span className="text-foreground">
+                                                        {dir.direction}
+                                                      </span>
+                                                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#C9952B]/20 text-[#C9952B] border border-[#C9952B]/30">
+                                                        {dir.status}
+                                                      </span>
+                                                    </div>
+                                                    <p className="text-muted-foreground leading-relaxed">
+                                                      {dir.observation}
+                                                    </p>
+                                                    <div className="p-2 rounded-lg bg-black/30 border border-white/5 text-[11px] text-[#C9952B] font-medium">
+                                                      ✨ <strong>Remedy:</strong> {dir.remedy}
+                                                    </div>
+                                                  </div>
+                                                )
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                      {/* Non-Demolition Dosha Corrections */}
+                                      {data.doshaCorrections &&
+                                        Array.isArray(data.doshaCorrections) && (
+                                          <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                                            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                                              <ShieldCheck size={16} className="text-emerald-400" />{' '}
+                                              Non-Demolition Rectification Protocols
+                                            </h3>
+                                            <div className="space-y-2">
+                                              {data.doshaCorrections.map(
+                                                (corr: string, idx: number) => (
+                                                  <div
+                                                    key={idx}
+                                                    className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-foreground leading-relaxed flex items-start gap-2"
+                                                  >
+                                                    <span className="text-emerald-400 font-bold">
+                                                      ✓
+                                                    </span>
+                                                    <span>{corr}</span>
+                                                  </div>
+                                                )
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
                                     </div>
                                   )}
 
-                                  {/* 8-Direction Zone Alignment Grid */}
-                                  {data.directionalAnalysis && Array.isArray(data.directionalAnalysis) && (
+                                  {/* 1. KUNDLI MATCHING SPECIFIC REPORT VIEW */}
+                                  {isKundliMatching && (
+                                    <div className="space-y-6">
+                                      {/* Score Box */}
+                                      <div className="p-6 rounded-2xl bg-card border border-border text-center space-y-3 shadow-sm">
+                                        <div className="text-xs font-bold uppercase tracking-widest text-[#C9952B]">
+                                          Total Gun Milan Compatibility Score
+                                        </div>
+                                        <div className="text-5xl font-black text-gradient-gold font-mono">
+                                          {data.totalScore !== undefined ? data.totalScore : 29.5}{' '}
+                                          <span className="text-xl text-muted-foreground">
+                                            / 36
+                                          </span>
+                                        </div>
+                                        <p className="text-emerald-400 font-bold text-base">
+                                          {data.status || 'Highly Compatible'}
+                                        </p>
+                                        {data.verdict && (
+                                          <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed pt-1">
+                                            {data.verdict}
+                                          </p>
+                                        )}
+
+                                        {/* Planetary Signs & Manglik Analysis */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 text-left">
+                                          {data.groomAstro && (
+                                            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                                              <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                                                Your Planetary Alignment
+                                              </div>
+                                              <div className="text-xs font-bold text-[#C9952B]">
+                                                {data.groomAstro.rashiName}
+                                              </div>
+                                              <div className="text-[11px] text-muted-foreground">
+                                                {data.groomAstro.nakshatraName} ·{' '}
+                                                {data.groomAstro.gana} Gana · {data.groomAstro.nadi}{' '}
+                                                Nadi
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {data.brideAstro && (
+                                            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                                              <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                                                Partner's Planetary Alignment
+                                              </div>
+                                              <div className="text-xs font-bold text-rose-400">
+                                                {data.brideAstro.rashiName}
+                                              </div>
+                                              <div className="text-[11px] text-muted-foreground">
+                                                {data.brideAstro.nakshatraName} ·{' '}
+                                                {data.brideAstro.gana} Gana · {data.brideAstro.nadi}{' '}
+                                                Nadi
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {data.manglikStatus && (
+                                          <div className="p-3 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/20 text-xs text-left">
+                                            <span className="font-bold text-[#C9952B]">
+                                              Manglik Compatibility:{' '}
+                                            </span>
+                                            <span className="text-foreground/90">
+                                              {data.manglikStatus.summary}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Ashtakoot Grid */}
+                                      {data.ashtakoot && Array.isArray(data.ashtakoot) && (
+                                        <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
+                                          <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                                            <Sparkles size={16} className="text-[#C9952B]" />{' '}
+                                            Ashtakoot 8-Factor Breakdown
+                                          </h3>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {data.ashtakoot.map((kootItem: any, idx: number) => (
+                                              <div
+                                                key={idx}
+                                                className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1"
+                                              >
+                                                <div className="flex justify-between items-center">
+                                                  <span className="font-bold text-foreground text-xs">
+                                                    {kootItem.koot}
+                                                  </span>
+                                                  <span className="text-xs font-bold text-[#C9952B]">
+                                                    {kootItem.score}
+                                                  </span>
+                                                </div>
+                                                <p className="text-[11px] text-muted-foreground">
+                                                  {kootItem.desc}
+                                                </p>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* 2. JANAM KUNDLI / HOROSCOPE SPECIFIC VIEW */}
+                                  {isJanamKundli && (
+                                    <div className="space-y-6">
+                                      {/* Kundli Key Pillars */}
+                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        {data.ascendant && (
+                                          <div className="p-3 rounded-xl bg-card border border-border text-center">
+                                            <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                                              Lagna (Ascendant)
+                                            </div>
+                                            <div className="text-xs font-bold text-[#C9952B] mt-0.5">
+                                              {data.ascendant}
+                                            </div>
+                                          </div>
+                                        )}
+                                        {data.moonSign && (
+                                          <div className="p-3 rounded-xl bg-card border border-border text-center">
+                                            <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                                              Moon Sign (Rashi)
+                                            </div>
+                                            <div className="text-xs font-bold text-foreground mt-0.5">
+                                              {data.moonSign}
+                                            </div>
+                                          </div>
+                                        )}
+                                        {data.sunSign && (
+                                          <div className="p-3 rounded-xl bg-card border border-border text-center">
+                                            <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                                              Sun Sign (Surya)
+                                            </div>
+                                            <div className="text-xs font-bold text-foreground mt-0.5">
+                                              {data.sunSign}
+                                            </div>
+                                          </div>
+                                        )}
+                                        {data.nakshatra && (
+                                          <div className="p-3 rounded-xl bg-card border border-border text-center">
+                                            <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                                              Birth Nakshatra
+                                            </div>
+                                            <div className="text-xs font-bold text-emerald-400 mt-0.5">
+                                              {data.nakshatra}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Planetary Positions Table */}
+                                      {data.planetaryDegrees &&
+                                        Array.isArray(data.planetaryDegrees) && (
+                                          <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
+                                            <h3 className="text-sm font-bold text-foreground">
+                                              Planetary Positions & House Placements
+                                            </h3>
+                                            <div className="overflow-x-auto">
+                                              <table className="w-full text-xs">
+                                                <thead>
+                                                  <tr className="border-b border-border text-muted-foreground text-left">
+                                                    <th className="pb-2">Planet</th>
+                                                    <th className="pb-2">Rashi</th>
+                                                    <th className="pb-2">Degree</th>
+                                                    <th className="pb-2">House</th>
+                                                    <th className="pb-2 text-right">Status</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-border/50">
+                                                  {data.planetaryDegrees.map(
+                                                    (p: any, idx: number) => (
+                                                      <tr key={idx} className="hover:bg-white/5">
+                                                        <td className="py-2 font-semibold text-foreground">
+                                                          {p.planet}
+                                                        </td>
+                                                        <td className="py-2 text-muted-foreground">
+                                                          {p.rashi}
+                                                        </td>
+                                                        <td className="py-2 font-mono text-[#C9952B]">
+                                                          {p.degree}
+                                                        </td>
+                                                        <td className="py-2 text-muted-foreground">
+                                                          {p.house}
+                                                        </td>
+                                                        <td className="py-2 text-right font-medium text-emerald-400">
+                                                          {p.status}
+                                                        </td>
+                                                      </tr>
+                                                    )
+                                                  )}
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          </div>
+                                        )}
+                                    </div>
+                                  )}
+
+                                  {/* 3. PANCHANG SPECIFIC VIEW */}
+                                  {isPanchang && (
                                     <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
                                       <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                                        <Compass size={16} className="text-[#C9952B]" /> 8-Directional Energy &amp; Remedial Audit
+                                        <Sparkles size={16} className="text-[#C9952B]" /> Panchang
+                                        Key Calculations
                                       </h3>
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {data.directionalAnalysis.map((dir: any, idx: number) => (
-                                          <div key={idx} className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs">
-                                            <div className="flex justify-between items-center font-bold">
-                                              <span className="text-foreground">{dir.direction}</span>
-                                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#C9952B]/20 text-[#C9952B] border border-[#C9952B]/30">
-                                                {dir.status}
+                                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                                        {data.tithi && (
+                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                              Tithi
+                                            </span>
+                                            <span className="font-semibold text-foreground">
+                                              {data.tithi}
+                                            </span>
+                                          </div>
+                                        )}
+                                        {data.nakshatra && (
+                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                              Nakshatra
+                                            </span>
+                                            <span className="font-semibold text-foreground">
+                                              {data.nakshatra}
+                                            </span>
+                                          </div>
+                                        )}
+                                        {data.yoga && (
+                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                              Yoga
+                                            </span>
+                                            <span className="font-semibold text-foreground">
+                                              {data.yoga}
+                                            </span>
+                                          </div>
+                                        )}
+                                        {data.karana && (
+                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                              Karana
+                                            </span>
+                                            <span className="font-semibold text-foreground">
+                                              {data.karana}
+                                            </span>
+                                          </div>
+                                        )}
+                                        {data.abhijitMuhurat && (
+                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                              Abhijit Muhurat
+                                            </span>
+                                            <span className="font-semibold text-emerald-400">
+                                              {data.abhijitMuhurat}
+                                            </span>
+                                          </div>
+                                        )}
+                                        {data.rahuKaal && (
+                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                              Rahu Kaal
+                                            </span>
+                                            <span className="font-semibold text-red-400">
+                                              {data.rahuKaal}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 4. FASTING PLANNER SPECIFIC VIEW */}
+                                  {isFasting &&
+                                    data.recommendedVrats &&
+                                    Array.isArray(data.recommendedVrats) && (
+                                      <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
+                                        <h3 className="text-sm font-bold text-foreground">
+                                          Recommended Vrats & Fasting Schedule
+                                        </h3>
+                                        <div className="space-y-3">
+                                          {data.recommendedVrats.map((vrat: any, idx: number) => (
+                                            <div
+                                              key={idx}
+                                              className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs"
+                                            >
+                                              <div className="flex justify-between items-center font-bold text-foreground">
+                                                <span className="text-[#C9952B]">{vrat.name}</span>
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
+                                                  {vrat.frequency}
+                                                </span>
+                                              </div>
+                                              <p className="text-muted-foreground leading-relaxed">
+                                                {vrat.benefit}
+                                              </p>
+                                              <p className="text-foreground/90 text-[11px] pt-1">
+                                                <strong>Ritual:</strong> {vrat.ritual}
+                                              </p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                  {/* Common Astrological Analysis Section */}
+                                  {(data.astrologicalAnalysis || data.description) && (
+                                    <div className="p-5 sm:p-6 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-2">
+                                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
+                                        Astrological Insights & Analysis
+                                      </p>
+                                      <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line print:text-black">
+                                        {data.astrologicalAnalysis || data.description}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {/* Common Procedure Section */}
+                                  {data.procedure && (
+                                    <div className="p-5 sm:p-6 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-2">
+                                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
+                                        Procedure & Remedial Methodology
+                                      </p>
+                                      <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line print:text-black">
+                                        {data.procedure}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {/* Common Rules / Materials Section */}
+                                  {data.materials && (
+                                    <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-1">
+                                      <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
+                                        Materials / Sacred Offerings
+                                      </p>
+                                      <p className="text-xs sm:text-sm text-foreground leading-relaxed print:text-black">
+                                        {data.materials}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {/* Prescribed Mantras Card */}
+                                  {data.prescribedMantras &&
+                                    Array.isArray(data.prescribedMantras) && (
+                                      <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
+                                          <Sparkles size={14} /> Prescribed Vedic Mantras &amp; Japa
+                                          Protocol
+                                        </h4>
+                                        <div className="space-y-2">
+                                          {data.prescribedMantras.map((m: any, idx: number) => (
+                                            <div
+                                              key={idx}
+                                              className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs"
+                                            >
+                                              <div className="flex justify-between items-center font-bold">
+                                                <span className="text-foreground">
+                                                  {m.title || 'Mantra'}
+                                                </span>
+                                                <span className="text-[#C9952B]">
+                                                  {m.japaCount}
+                                                </span>
+                                              </div>
+                                              {m.sanskrit && (
+                                                <p className="text-sm font-serif text-[#C9952B]">
+                                                  {m.sanskrit}
+                                                </p>
+                                              )}
+                                              {m.bestTime && (
+                                                <p className="text-muted-foreground text-[11px]">
+                                                  Best Time: {m.bestTime}
+                                                </p>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                  {/* Primary Gemstone Card */}
+                                  {data.primaryGemstone &&
+                                    typeof data.primaryGemstone === 'object' && (
+                                      <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
+                                          💎 Prescribed Astrological Gemstone
+                                        </h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                              Gemstone
+                                            </span>
+                                            <span className="font-bold text-foreground text-sm">
+                                              {data.primaryGemstone.name}
+                                            </span>
+                                          </div>
+                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                              Weight &amp; Metal
+                                            </span>
+                                            <span className="font-semibold text-foreground">
+                                              {data.primaryGemstone.caratWeight} in{' '}
+                                              {data.primaryGemstone.metal}
+                                            </span>
+                                          </div>
+                                          {data.primaryGemstone.wearingFinger && (
+                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                              <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                                Finger &amp; Day
+                                              </span>
+                                              <span className="font-semibold text-foreground">
+                                                {data.primaryGemstone.wearingFinger} (
+                                                {data.primaryGemstone.auspiciousDay})
                                               </span>
                                             </div>
-                                            <p className="text-muted-foreground leading-relaxed">{dir.observation}</p>
-                                            <div className="p-2 rounded-lg bg-black/30 border border-white/5 text-[11px] text-[#C9952B] font-medium">
-                                              ✨ <strong>Remedy:</strong> {dir.remedy}
+                                          )}
+                                          {data.primaryGemstone.consecrationMantra && (
+                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                              <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                                Energization Mantra
+                                              </span>
+                                              <span className="font-serif text-[#C9952B]">
+                                                {data.primaryGemstone.consecrationMantra}
+                                              </span>
                                             </div>
-                                          </div>
-                                        ))}
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
 
-                                  {/* Non-Demolition Dosha Corrections */}
-                                  {data.doshaCorrections && Array.isArray(data.doshaCorrections) && (
-                                    <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
-                                      <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                                        <ShieldCheck size={16} className="text-emerald-400" /> Non-Demolition Rectification Protocols
-                                      </h3>
-                                      <div className="space-y-2">
-                                        {data.doshaCorrections.map((corr: string, idx: number) => (
-                                          <div key={idx} className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-foreground leading-relaxed flex items-start gap-2">
-                                            <span className="text-emerald-400 font-bold">✓</span>
-                                            <span>{corr}</span>
-                                          </div>
-                                        ))}
+                                  {/* Prescribed Mukhis Card */}
+                                  {data.prescribedMukhis &&
+                                    Array.isArray(data.prescribedMukhis) && (
+                                      <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
+                                          📿 Sacred Mukhi Rudraksha Combination
+                                        </h4>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                          {data.prescribedMukhis.map((rm: any, idx: number) => (
+                                            <div
+                                              key={idx}
+                                              className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs"
+                                            >
+                                              <div className="flex justify-between items-center font-bold">
+                                                <span className="text-foreground">{rm.mukhi}</span>
+                                                <span className="text-[#C9952B] text-[10px]">
+                                                  {rm.planet}
+                                                </span>
+                                              </div>
+                                              <p className="text-muted-foreground text-[11px]">
+                                                {rm.benefits}
+                                              </p>
+                                              <p className="text-[10px] text-muted-foreground font-semibold">
+                                                Deity: {rm.deity}
+                                              </p>
+                                            </div>
+                                          ))}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
+                                    )}
 
-                              {/* 1. KUNDLI MATCHING SPECIFIC REPORT VIEW */}
-                              {isKundliMatching && (
-                                <div className="space-y-6">
-                                  {/* Score Box */}
-                                  <div className="p-6 rounded-2xl bg-card border border-border text-center space-y-3 shadow-sm">
-                                    <div className="text-xs font-bold uppercase tracking-widest text-[#C9952B]">
-                                      Total Gun Milan Compatibility Score
-                                    </div>
-                                    <div className="text-5xl font-black text-gradient-gold font-mono">
-                                      {data.totalScore !== undefined ? data.totalScore : 29.5} <span className="text-xl text-muted-foreground">/ 36</span>
-                                    </div>
-                                    <p className="text-emerald-400 font-bold text-base">{data.status || 'Highly Compatible'}</p>
-                                    {data.verdict && (
-                                      <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed pt-1">
-                                        {data.verdict}
+                                  {/* Recommended Pre-Marital / Remedial Rituals */}
+                                  {data.recommendedRituals &&
+                                    Array.isArray(data.recommendedRituals) && (
+                                      <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-2">
+                                        <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                                          Recommended Remedial Pujas &amp; Rituals
+                                        </h4>
+                                        <div className="space-y-1.5">
+                                          {data.recommendedRituals.map((r: string, idx: number) => (
+                                            <div
+                                              key={idx}
+                                              className="flex items-start gap-2 text-xs text-foreground/90 leading-relaxed"
+                                            >
+                                              <span className="text-emerald-400 font-bold">✓</span>
+                                              <span>{r}</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                  {/* Lucky Attributes Card */}
+                                  {data.luckyAttributes &&
+                                    typeof data.luckyAttributes === 'object' && (
+                                      <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">
+                                          Cosmic Resonance &amp; Lucky Attributes
+                                        </h4>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                          {data.luckyAttributes.luckyColor && (
+                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                              <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                                                Lucky Color
+                                              </span>
+                                              <span className="font-bold text-[#C9952B] mt-0.5 block">
+                                                {data.luckyAttributes.luckyColor}
+                                              </span>
+                                            </div>
+                                          )}
+                                          {data.luckyAttributes.luckyNumber && (
+                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                              <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                                                Lucky Number
+                                              </span>
+                                              <span className="font-bold text-foreground mt-0.5 block">
+                                                {data.luckyAttributes.luckyNumber}
+                                              </span>
+                                            </div>
+                                          )}
+                                          {data.luckyAttributes.luckyDirection && (
+                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                              <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                                                Favorable Direction
+                                              </span>
+                                              <span className="font-bold text-foreground mt-0.5 block">
+                                                {data.luckyAttributes.luckyDirection}
+                                              </span>
+                                            </div>
+                                          )}
+                                          {data.luckyAttributes.favorableDay && (
+                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                                              <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+                                                Auspicious Day
+                                              </span>
+                                              <span className="font-bold text-emerald-400 mt-0.5 block">
+                                                {data.luckyAttributes.favorableDay}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                  {/* Extra Admin-Defined Output Guidance */}
+                                  {(data.additionalGuidance || data.customAdminInsights) && (
+                                    <div className="p-5 sm:p-6 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 shadow-sm space-y-2">
+                                      <p className="text-xs text-[#C9952B] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                        <Sparkles size={14} /> Additional Vedic Guidance &amp;
+                                        Lifestyle Alignment
                                       </p>
-                                    )}
-
-                                    {/* Planetary Signs & Manglik Analysis */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 text-left">
-                                      {data.groomAstro && (
-                                        <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                                          <div className="text-[10px] text-muted-foreground uppercase font-bold">Your Planetary Alignment</div>
-                                          <div className="text-xs font-bold text-[#C9952B]">{data.groomAstro.rashiName}</div>
-                                          <div className="text-[11px] text-muted-foreground">
-                                            {data.groomAstro.nakshatraName} · {data.groomAstro.gana} Gana · {data.groomAstro.nadi} Nadi
-                                          </div>
-                                        </div>
-                                      )}
-
-                                      {data.brideAstro && (
-                                        <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                                          <div className="text-[10px] text-muted-foreground uppercase font-bold">Partner's Planetary Alignment</div>
-                                          <div className="text-xs font-bold text-rose-400">{data.brideAstro.rashiName}</div>
-                                          <div className="text-[11px] text-muted-foreground">
-                                            {data.brideAstro.nakshatraName} · {data.brideAstro.gana} Gana · {data.brideAstro.nadi} Nadi
-                                          </div>
-                                        </div>
-                                      )}
+                                      <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line">
+                                        {data.additionalGuidance || data.customAdminInsights}
+                                      </p>
                                     </div>
+                                  )}
 
-                                    {data.manglikStatus && (
-                                      <div className="p-3 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/20 text-xs text-left">
-                                        <span className="font-bold text-[#C9952B]">Manglik Compatibility: </span>
-                                        <span className="text-foreground/90">{data.manglikStatus.summary}</span>
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* Ashtakoot Grid */}
-                                  {data.ashtakoot && Array.isArray(data.ashtakoot) && (
-                                    <div className="p-6 rounded-2xl bg-card border border-border space-y-4">
-                                      <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                                        <Sparkles size={16} className="text-[#C9952B]" /> Ashtakoot 8-Factor Breakdown
-                                      </h3>
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {data.ashtakoot.map((kootItem: any, idx: number) => (
-                                          <div key={idx} className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                                            <div className="flex justify-between items-center">
-                                              <span className="font-bold text-foreground text-xs">{kootItem.koot}</span>
-                                              <span className="text-xs font-bold text-[#C9952B]">{kootItem.score}</span>
-                                            </div>
-                                            <p className="text-[11px] text-muted-foreground">{kootItem.desc}</p>
-                                          </div>
-                                        ))}
-                                      </div>
+                                  {/* Daily Blessing Sanskrit Shloka */}
+                                  {data.dailyBlessingShloka && (
+                                    <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-center space-y-1">
+                                      <span className="text-[10px] uppercase font-bold text-amber-500">
+                                        Daily Sacred Shloka
+                                      </span>
+                                      <p className="text-xs sm:text-sm font-serif text-[#C9952B] italic">
+                                        &ldquo;{data.dailyBlessingShloka}&rdquo;
+                                      </p>
                                     </div>
                                   )}
                                 </div>
-                              )}
+                              );
+                            }
+                          } catch (e) {
+                            // Not JSON
+                          }
 
-                              {/* 2. JANAM KUNDLI / HOROSCOPE SPECIFIC VIEW */}
-                              {isJanamKundli && (
-                                <div className="space-y-6">
-                                  {/* Kundli Key Pillars */}
-                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                    {data.ascendant && (
-                                      <div className="p-3 rounded-xl bg-card border border-border text-center">
-                                        <div className="text-[10px] text-muted-foreground uppercase font-bold">Lagna (Ascendant)</div>
-                                        <div className="text-xs font-bold text-[#C9952B] mt-0.5">{data.ascendant}</div>
-                                      </div>
-                                    )}
-                                    {data.moonSign && (
-                                      <div className="p-3 rounded-xl bg-card border border-border text-center">
-                                        <div className="text-[10px] text-muted-foreground uppercase font-bold">Moon Sign (Rashi)</div>
-                                        <div className="text-xs font-bold text-foreground mt-0.5">{data.moonSign}</div>
-                                      </div>
-                                    )}
-                                    {data.sunSign && (
-                                      <div className="p-3 rounded-xl bg-card border border-border text-center">
-                                        <div className="text-[10px] text-muted-foreground uppercase font-bold">Sun Sign (Surya)</div>
-                                        <div className="text-xs font-bold text-foreground mt-0.5">{data.sunSign}</div>
-                                      </div>
-                                    )}
-                                    {data.nakshatra && (
-                                      <div className="p-3 rounded-xl bg-card border border-border text-center">
-                                        <div className="text-[10px] text-muted-foreground uppercase font-bold">Birth Nakshatra</div>
-                                        <div className="text-xs font-bold text-emerald-400 mt-0.5">{data.nakshatra}</div>
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* Planetary Positions Table */}
-                                  {data.planetaryDegrees && Array.isArray(data.planetaryDegrees) && (
-                                    <div className="p-5 rounded-2xl bg-card border border-border space-y-3">
-                                      <h3 className="text-sm font-bold text-foreground">Planetary Positions & House Placements</h3>
-                                      <div className="overflow-x-auto">
-                                        <table className="w-full text-xs">
-                                          <thead>
-                                            <tr className="border-b border-border text-muted-foreground text-left">
-                                              <th className="pb-2">Planet</th>
-                                              <th className="pb-2">Rashi</th>
-                                              <th className="pb-2">Degree</th>
-                                              <th className="pb-2">House</th>
-                                              <th className="pb-2 text-right">Status</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody className="divide-y divide-border/50">
-                                            {data.planetaryDegrees.map((p: any, idx: number) => (
-                                              <tr key={idx} className="hover:bg-white/5">
-                                                <td className="py-2 font-semibold text-foreground">{p.planet}</td>
-                                                <td className="py-2 text-muted-foreground">{p.rashi}</td>
-                                                <td className="py-2 font-mono text-[#C9952B]">{p.degree}</td>
-                                                <td className="py-2 text-muted-foreground">{p.house}</td>
-                                                <td className="py-2 text-right font-medium text-emerald-400">{p.status}</td>
-                                              </tr>
-                                            ))}
-                                          </tbody>
-                                        </table>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* 3. PANCHANG SPECIFIC VIEW */}
-                              {isPanchang && (
-                                <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
-                                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                                    <Sparkles size={16} className="text-[#C9952B]" /> Panchang Key Calculations
-                                  </h3>
-                                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                                    {data.tithi && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Tithi</span>
-                                        <span className="font-semibold text-foreground">{data.tithi}</span>
-                                      </div>
-                                    )}
-                                    {data.nakshatra && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Nakshatra</span>
-                                        <span className="font-semibold text-foreground">{data.nakshatra}</span>
-                                      </div>
-                                    )}
-                                    {data.yoga && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Yoga</span>
-                                        <span className="font-semibold text-foreground">{data.yoga}</span>
-                                      </div>
-                                    )}
-                                    {data.karana && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Karana</span>
-                                        <span className="font-semibold text-foreground">{data.karana}</span>
-                                      </div>
-                                    )}
-                                    {data.abhijitMuhurat && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Abhijit Muhurat</span>
-                                        <span className="font-semibold text-emerald-400">{data.abhijitMuhurat}</span>
-                                      </div>
-                                    )}
-                                    {data.rahuKaal && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Rahu Kaal</span>
-                                        <span className="font-semibold text-red-400">{data.rahuKaal}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* 4. FASTING PLANNER SPECIFIC VIEW */}
-                              {isFasting && data.recommendedVrats && Array.isArray(data.recommendedVrats) && (
-                                <div className="p-5 rounded-2xl bg-card border border-border space-y-4">
-                                  <h3 className="text-sm font-bold text-foreground">Recommended Vrats & Fasting Schedule</h3>
-                                  <div className="space-y-3">
-                                    {data.recommendedVrats.map((vrat: any, idx: number) => (
-                                      <div key={idx} className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs">
-                                        <div className="flex justify-between items-center font-bold text-foreground">
-                                          <span className="text-[#C9952B]">{vrat.name}</span>
-                                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">{vrat.frequency}</span>
-                                        </div>
-                                        <p className="text-muted-foreground leading-relaxed">{vrat.benefit}</p>
-                                        <p className="text-foreground/90 text-[11px] pt-1"><strong>Ritual:</strong> {vrat.ritual}</p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Common Astrological Analysis Section */}
-                              {(data.astrologicalAnalysis || data.description) && (
-                                <div className="p-5 sm:p-6 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-2">
-                                  <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
-                                    Astrological Insights & Analysis
-                                  </p>
-                                  <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line print:text-black">
-                                    {data.astrologicalAnalysis || data.description}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Common Procedure Section */}
-                              {data.procedure && (
-                                <div className="p-5 sm:p-6 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-2">
-                                  <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
-                                    Procedure & Remedial Methodology
-                                  </p>
-                                  <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line print:text-black">
-                                    {data.procedure}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Common Rules / Materials Section */}
-                              {data.materials && (
-                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-1">
-                                  <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
-                                    Materials / Sacred Offerings
-                                  </p>
-                                  <p className="text-xs sm:text-sm text-foreground leading-relaxed print:text-black">
-                                    {data.materials}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Prescribed Mantras Card */}
-                              {data.prescribedMantras && Array.isArray(data.prescribedMantras) && (
-                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
-                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
-                                    <Sparkles size={14} /> Prescribed Vedic Mantras &amp; Japa Protocol
-                                  </h4>
-                                  <div className="space-y-2">
-                                    {data.prescribedMantras.map((m: any, idx: number) => (
-                                      <div key={idx} className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs">
-                                        <div className="flex justify-between items-center font-bold">
-                                          <span className="text-foreground">{m.title || 'Mantra'}</span>
-                                          <span className="text-[#C9952B]">{m.japaCount}</span>
-                                        </div>
-                                        {m.sanskrit && <p className="text-sm font-serif text-[#C9952B]">{m.sanskrit}</p>}
-                                        {m.bestTime && <p className="text-muted-foreground text-[11px]">Best Time: {m.bestTime}</p>}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Primary Gemstone Card */}
-                              {data.primaryGemstone && typeof data.primaryGemstone === 'object' && (
-                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
-                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
-                                    💎 Prescribed Astrological Gemstone
-                                  </h4>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Gemstone</span>
-                                      <span className="font-bold text-foreground text-sm">{data.primaryGemstone.name}</span>
-                                    </div>
-                                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">Weight &amp; Metal</span>
-                                      <span className="font-semibold text-foreground">{data.primaryGemstone.caratWeight} in {data.primaryGemstone.metal}</span>
-                                    </div>
-                                    {data.primaryGemstone.wearingFinger && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Finger &amp; Day</span>
-                                        <span className="font-semibold text-foreground">{data.primaryGemstone.wearingFinger} ({data.primaryGemstone.auspiciousDay})</span>
-                                      </div>
-                                    )}
-                                    {data.primaryGemstone.consecrationMantra && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                        <span className="text-muted-foreground block text-[10px] uppercase font-bold">Energization Mantra</span>
-                                        <span className="font-serif text-[#C9952B]">{data.primaryGemstone.consecrationMantra}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Prescribed Mukhis Card */}
-                              {data.prescribedMukhis && Array.isArray(data.prescribedMukhis) && (
-                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
-                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
-                                    📿 Sacred Mukhi Rudraksha Combination
-                                  </h4>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {data.prescribedMukhis.map((rm: any, idx: number) => (
-                                      <div key={idx} className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs">
-                                        <div className="flex justify-between items-center font-bold">
-                                          <span className="text-foreground">{rm.mukhi}</span>
-                                          <span className="text-[#C9952B] text-[10px]">{rm.planet}</span>
-                                        </div>
-                                        <p className="text-muted-foreground text-[11px]">{rm.benefits}</p>
-                                        <p className="text-[10px] text-muted-foreground font-semibold">Deity: {rm.deity}</p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Recommended Pre-Marital / Remedial Rituals */}
-                              {data.recommendedRituals && Array.isArray(data.recommendedRituals) && (
-                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-2">
-                                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                                    Recommended Remedial Pujas &amp; Rituals
-                                  </h4>
-                                  <div className="space-y-1.5">
-                                    {data.recommendedRituals.map((r: string, idx: number) => (
-                                      <div key={idx} className="flex items-start gap-2 text-xs text-foreground/90 leading-relaxed">
-                                        <span className="text-emerald-400 font-bold">✓</span>
-                                        <span>{r}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Lucky Attributes Card */}
-                              {data.luckyAttributes && typeof data.luckyAttributes === 'object' && (
-                                <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
-                                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">
-                                    Cosmic Resonance &amp; Lucky Attributes
-                                  </h4>
-                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                                    {data.luckyAttributes.luckyColor && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">Lucky Color</span>
-                                        <span className="font-bold text-[#C9952B] mt-0.5 block">{data.luckyAttributes.luckyColor}</span>
-                                      </div>
-                                    )}
-                                    {data.luckyAttributes.luckyNumber && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">Lucky Number</span>
-                                        <span className="font-bold text-foreground mt-0.5 block">{data.luckyAttributes.luckyNumber}</span>
-                                      </div>
-                                    )}
-                                    {data.luckyAttributes.luckyDirection && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">Favorable Direction</span>
-                                        <span className="font-bold text-foreground mt-0.5 block">{data.luckyAttributes.luckyDirection}</span>
-                                      </div>
-                                    )}
-                                    {data.luckyAttributes.favorableDay && (
-                                      <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                                        <span className="text-[10px] text-muted-foreground uppercase font-bold block">Auspicious Day</span>
-                                        <span className="font-bold text-emerald-400 mt-0.5 block">{data.luckyAttributes.favorableDay}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Extra Admin-Defined Output Guidance */}
-                              {(data.additionalGuidance || data.customAdminInsights) && (
-                                <div className="p-5 sm:p-6 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 shadow-sm space-y-2">
-                                  <p className="text-xs text-[#C9952B] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                    <Sparkles size={14} /> Additional Vedic Guidance &amp; Lifestyle Alignment
-                                  </p>
-                                  <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line">
-                                    {data.additionalGuidance || data.customAdminInsights}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Daily Blessing Sanskrit Shloka */}
-                              {data.dailyBlessingShloka && (
-                                <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-center space-y-1">
-                                  <span className="text-[10px] uppercase font-bold text-amber-500">Daily Sacred Shloka</span>
-                                  <p className="text-xs sm:text-sm font-serif text-[#C9952B] italic">
-                                    &ldquo;{data.dailyBlessingShloka}&rdquo;
-                                  </p>
-                                </div>
-                              )}
+                          return (
+                            <div className="prose prose-invert max-w-none space-y-4">
+                              {selectedReport.reportContent
+                                ?.split('\n')
+                                .map((line: string, i: number) => {
+                                  if (line.trim() === '') return <br key={i} />;
+                                  return (
+                                    <p key={i} className="text-sm leading-relaxed">
+                                      {line}
+                                    </p>
+                                  );
+                                })}
                             </div>
                           );
-                        }
-                      } catch (e) {
-                        // Not JSON
-                      }
+                        })()
+                      )}
+                    </div>
+                  </div>
 
-                      return (
-                        <div className="prose prose-invert max-w-none space-y-4">
-                          {selectedReport.reportContent?.split('\n').map((line: string, i: number) => {
-                            if (line.trim() === '') return <br key={i} />;
-                            return (
-                              <p key={i} className="text-sm leading-relaxed">
-                                {line}
-                              </p>
-                            );
-                          })}
-                        </div>
-                      );
-                    })()
-                  )}
-                </div>
+                  <div className="p-6 border-t border-border bg-muted/30 flex items-center justify-between flex-wrap gap-3">
+                    <Link
+                      href="/talk-to-astrologer"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-500 transition-colors shadow-lg"
+                    >
+                      <PhoneCall size={15} /> Clarify Doubts? Talk to Astrologer 📞
+                    </Link>
+                    <button
+                      onClick={() => setSelectedReport(null)}
+                      className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </motion.div>
               </div>
-
-              <div className="p-6 border-t border-border bg-muted/30 flex items-center justify-between flex-wrap gap-3">
-                <Link
-                  href="/talk-to-astrologer"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-500 transition-colors shadow-lg"
-                >
-                  <PhoneCall size={15} /> Clarify Doubts? Talk to Astrologer 📞
-                </Link>
-                <button
-                  onClick={() => setSelectedReport(null)}
-                  className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>,
-      document.body
-    )}
     </>
   );
 }

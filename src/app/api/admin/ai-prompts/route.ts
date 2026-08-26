@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getAIPromptSettings, updateAIPromptSettings, AIPromptSettingsData } from '@/lib/aiPromptSettings';
+import {
+  getAIPromptSettings,
+  updateAIPromptSettings,
+  AIPromptSettingsData,
+} from '@/lib/aiPromptSettings';
 
 export async function GET() {
   try {
@@ -7,7 +11,10 @@ export async function GET() {
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('Error fetching AI prompt settings:', error);
-    return NextResponse.json({ error: error.message || 'Failed to fetch AI prompts' }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch AI prompts' },
+      { status: 500 }
+    );
   }
 }
 
@@ -19,9 +26,15 @@ export async function POST(req: Request) {
     }
 
     await updateAIPromptSettings(body);
-    return NextResponse.json({ success: true, message: 'AI Prompts and directives saved successfully' });
+    return NextResponse.json({
+      success: true,
+      message: 'AI Prompts and directives saved successfully',
+    });
   } catch (error: any) {
     console.error('Error updating AI prompt settings:', error);
-    return NextResponse.json({ error: error.message || 'Failed to save AI prompts' }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || 'Failed to save AI prompts' },
+      { status: 500 }
+    );
   }
 }

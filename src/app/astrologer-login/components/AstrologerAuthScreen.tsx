@@ -264,7 +264,10 @@ export default function AstrologerAuthScreen() {
         href="/"
         className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFFDFC]/95 backdrop-blur-md border border-[#E5D9C8] text-xs sm:text-sm font-bold text-[#713B32] hover:bg-[#EDE4D5] hover:text-[#552B24] transition-all shadow-md group"
       >
-        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-[#B88A44]" />
+        <ArrowLeft
+          size={16}
+          className="group-hover:-translate-x-1 transition-transform text-[#B88A44]"
+        />
         <span>Back to Home</span>
       </Link>
 
@@ -345,13 +348,18 @@ export default function AstrologerAuthScreen() {
               <div className="text-sm text-[#6B5E55] space-y-3 leading-relaxed">
                 <p>
                   Thank you for submitting your details with AstroParihar! Your token number is{' '}
-                  <strong className="text-[#713B32] font-bold text-base">#{signupSuccessToken}</strong>.
+                  <strong className="text-[#713B32] font-bold text-base">
+                    #{signupSuccessToken}
+                  </strong>
+                  .
                 </p>
                 <p className="text-xs">
-                  Please join the waitlist on the Astrologer Hiring App once you get shortlisted. You will be notified via WhatsApp and email.
+                  Please join the waitlist on the Astrologer Hiring App once you get shortlisted.
+                  You will be notified via WhatsApp and email.
                 </p>
                 <p className="text-xs">
-                  For further details, reach out at <span className="font-semibold text-[#292522]">onboarding@astroparihar.com</span>.
+                  For further details, reach out at{' '}
+                  <span className="font-semibold text-[#292522]">onboarding@astroparihar.com</span>.
                 </p>
               </div>
 
@@ -482,7 +490,10 @@ export default function AstrologerAuthScreen() {
                           />
                           <span>Remember me</span>
                         </label>
-                        <button type="button" className="text-sm font-semibold text-[#713B32] hover:underline">
+                        <button
+                          type="button"
+                          className="text-sm font-semibold text-[#713B32] hover:underline"
+                        >
                           Forgot password?
                         </button>
                       </div>
@@ -711,7 +722,10 @@ export default function AstrologerAuthScreen() {
                               Terms of Service
                             </Link>{' '}
                             and{' '}
-                            <Link href="/privacy" className="text-[#713B32] font-semibold underline">
+                            <Link
+                              href="/privacy"
+                              className="text-[#713B32] font-semibold underline"
+                            >
                               Privacy Policy
                             </Link>
                           </p>
@@ -883,9 +897,7 @@ export default function AstrologerAuthScreen() {
                   <div className="w-20 h-20 rounded-full bg-[#EDE4D5] flex items-center justify-center mb-6 text-[#713B32]">
                     <Sparkles size={40} className="animate-float" />
                   </div>
-                  <h3 className="text-3xl font-bold text-[#292522] mb-3">
-                    Sign In Success!
-                  </h3>
+                  <h3 className="text-3xl font-bold text-[#292522] mb-3">Sign In Success!</h3>
                   <p className="text-base text-[#6B5E55]">
                     Welcome back, Astrologer! Redirecting to your dashboard...
                   </p>

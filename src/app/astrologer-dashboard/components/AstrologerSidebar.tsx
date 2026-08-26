@@ -89,7 +89,9 @@ export default function AstrologerSidebar() {
                     <Icon
                       size={18}
                       className={
-                        isActive ? 'text-accent' : 'text-muted-foreground group-hover:text-foreground'
+                        isActive
+                          ? 'text-accent'
+                          : 'text-muted-foreground group-hover:text-foreground'
                       }
                     />
                     <span className="ml-3 flex-1">{item.label}</span>
@@ -146,7 +148,8 @@ export default function AstrologerSidebar() {
                       Confirm Sign Out
                     </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Are you sure you want to sign out of your Astrologer Dashboard? You will need to log in again to manage consultations.
+                      Are you sure you want to sign out of your Astrologer Dashboard? You will need
+                      to log in again to manage consultations.
                     </p>
                   </div>
 

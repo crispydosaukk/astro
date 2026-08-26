@@ -13,7 +13,12 @@ export interface RemedyWheelItem {
   icon: React.ReactNode;
 }
 
-function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
+function polarToCartesian(
+  centerX: number,
+  centerY: number,
+  radius: number,
+  angleInDegrees: number
+) {
   const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
   return {
     x: centerX + radius * Math.cos(angleInRadians),
@@ -37,10 +42,28 @@ function describeDonutSegment(
   const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
 
   return [
-    'M', outerStart.x, outerStart.y,
-    'A', rOuter, rOuter, 0, largeArcFlag, 1, outerEnd.x, outerEnd.y,
-    'L', innerEnd.x, innerEnd.y,
-    'A', rInner, rInner, 0, largeArcFlag, 0, innerStart.x, innerStart.y,
+    'M',
+    outerStart.x,
+    outerStart.y,
+    'A',
+    rOuter,
+    rOuter,
+    0,
+    largeArcFlag,
+    1,
+    outerEnd.x,
+    outerEnd.y,
+    'L',
+    innerEnd.x,
+    innerEnd.y,
+    'A',
+    rInner,
+    rInner,
+    0,
+    largeArcFlag,
+    0,
+    innerStart.x,
+    innerStart.y,
     'Z',
   ].join(' ');
 }
@@ -54,7 +77,15 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     icon: (
       // Sacred ॐ (Aum)
       <g transform="scale(1.25)">
-        <text x="0" y="6" fontSize="22" fontWeight="900" fontFamily="serif" textAnchor="middle" fill="#221C19">
+        <text
+          x="0"
+          y="6"
+          fontSize="22"
+          fontWeight="900"
+          fontFamily="serif"
+          textAnchor="middle"
+          fill="#221C19"
+        >
           ॐ
         </text>
       </g>
@@ -68,7 +99,15 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     icon: (
       // Sacred Yantra geometric emblem
       <g transform="scale(1.1)">
-        <rect x="-12" y="-12" width="24" height="24" fill="none" stroke="#221C19" strokeWidth="1.8" />
+        <rect
+          x="-12"
+          y="-12"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="#221C19"
+          strokeWidth="1.8"
+        />
         <circle cx="0" cy="0" r="9.5" fill="none" stroke="#221C19" strokeWidth="1.1" />
         <polygon points="0,-8 7,4.5 -7,4.5" fill="none" stroke="#221C19" strokeWidth="1.1" />
         <polygon points="0,8 7,-4.5 -7,-4.5" fill="none" stroke="#221C19" strokeWidth="1.1" />
@@ -86,8 +125,16 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
       <g transform="scale(1.15)">
         <path d="M-12,8 L12,8 L8,12 L-8,12 Z" fill="#221C19" />
         <path d="M-10,6 L10,6 L7,8 L-7,8 Z" fill="none" stroke="#221C19" strokeWidth="1.2" />
-        <path d="M0,-11 C-5,-4 -7,-1 -7,4 C-7,8 -4,9 0,9 C4,9 7,8 7,4 C7,-1 5,-4 0,-11 Z" fill="none" stroke="#221C19" strokeWidth="1.7" />
-        <path d="M0,-4 C-2,-1 -2.5,1 -2.5,3.5 C-2.5,5.5 -1.5,6.5 0,6.5 C1.5,6.5 2.5,5.5 2.5,3.5 C2.5,1 2,-1 0,-4 Z" fill="#221C19" />
+        <path
+          d="M0,-11 C-5,-4 -7,-1 -7,4 C-7,8 -4,9 0,9 C4,9 7,8 7,4 C7,-1 5,-4 0,-11 Z"
+          fill="none"
+          stroke="#221C19"
+          strokeWidth="1.7"
+        />
+        <path
+          d="M0,-4 C-2,-1 -2.5,1 -2.5,3.5 C-2.5,5.5 -1.5,6.5 0,6.5 C1.5,6.5 2.5,5.5 2.5,3.5 C2.5,1 2,-1 0,-4 Z"
+          fill="#221C19"
+        />
       </g>
     ),
   },
@@ -100,8 +147,20 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
       // Meditating Deity in Lotus Posture
       <g transform="scale(1.15)">
         <circle cx="0" cy="-6.5" r="4" fill="none" stroke="#221C19" strokeWidth="1.7" />
-        <path d="M-8,10 C-8,5.5 -4,3.5 0,3.5 C4,3.5 8,5.5 8,10" fill="none" stroke="#221C19" strokeWidth="1.7" strokeLinecap="round" />
-        <path d="M-11,10.5 C-6,12.5 6,12.5 11,10.5" fill="none" stroke="#221C19" strokeWidth="1.7" strokeLinecap="round" />
+        <path
+          d="M-8,10 C-8,5.5 -4,3.5 0,3.5 C4,3.5 8,5.5 8,10"
+          fill="none"
+          stroke="#221C19"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
+        <path
+          d="M-11,10.5 C-6,12.5 6,12.5 11,10.5"
+          fill="none"
+          stroke="#221C19"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
         <circle cx="0" cy="-12" r="1.3" fill="#221C19" />
       </g>
     ),
@@ -114,7 +173,13 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     icon: (
       // Clean Linear Diamond
       <g transform="scale(1.15)">
-        <polygon points="0,-12 11,-12 17,-4 0,14 -17,-4 -11,-12" fill="none" stroke="#221C19" strokeWidth="1.8" strokeLinejoin="round" />
+        <polygon
+          points="0,-12 11,-12 17,-4 0,14 -17,-4 -11,-12"
+          fill="none"
+          stroke="#221C19"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
         <line x1="-11" y1="-12" x2="0" y2="14" stroke="#221C19" strokeWidth="1.1" />
         <line x1="11" y1="-12" x2="0" y2="14" stroke="#221C19" strokeWidth="1.1" />
         <line x1="-17" y1="-4" x2="17" y2="-4" stroke="#221C19" strokeWidth="1.1" />
@@ -148,7 +213,13 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     icon: (
       // Sacred Vastu Home / Directional Temple
       <g transform="scale(1.15)">
-        <path d="M0,-11 L-12,-0.5 L-8.5,-0.5 L-8.5,10 L8.5,10 L8.5,-0.5 L12,-0.5 Z" fill="none" stroke="#221C19" strokeWidth="1.7" strokeLinejoin="round" />
+        <path
+          d="M0,-11 L-12,-0.5 L-8.5,-0.5 L-8.5,10 L8.5,10 L8.5,-0.5 L12,-0.5 Z"
+          fill="none"
+          stroke="#221C19"
+          strokeWidth="1.7"
+          strokeLinejoin="round"
+        />
         <rect x="-2.5" y="2" width="5" height="8" fill="none" stroke="#221C19" strokeWidth="1.3" />
         <circle cx="0" cy="-4.5" r="1.6" fill="#221C19" />
       </g>
@@ -162,8 +233,17 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
     icon: (
       // Giving Hands with Sacred Offering / Charity Heart
       <g transform="scale(1.15)">
-        <path d="M0,-2 C-2.8,-5.5 -8,-4.5 -8,0 C-8,4.5 0,9.5 0,9.5 C0,9.5 8,4.5 8,0 C8,-4.5 2.8,-5.5 0,-2 Z" fill="#221C19" />
-        <path d="M-11,11 C-7,8.5 -2.5,7.8 0,7.8 C2.5,7.8 7,8.5 11,11" fill="none" stroke="#221C19" strokeWidth="1.7" strokeLinecap="round" />
+        <path
+          d="M0,-2 C-2.8,-5.5 -8,-4.5 -8,0 C-8,4.5 0,9.5 0,9.5 C0,9.5 8,4.5 8,0 C8,-4.5 2.8,-5.5 0,-2 Z"
+          fill="#221C19"
+        />
+        <path
+          d="M-11,11 C-7,8.5 -2.5,7.8 0,7.8 C2.5,7.8 7,8.5 11,11"
+          fill="none"
+          stroke="#221C19"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
       </g>
     ),
   },
@@ -183,7 +263,9 @@ export default function RotatingRemediesWheel({ className = '' }: RotatingRemedi
   const rMid = 220;
 
   return (
-    <div className={`w-full max-w-[460px] sm:max-w-[490px] md:max-w-[520px] lg:max-w-[550px] xl:max-w-[580px] mx-auto flex flex-col items-center select-none group ${className}`}>
+    <div
+      className={`w-full max-w-[460px] sm:max-w-[490px] md:max-w-[520px] lg:max-w-[550px] xl:max-w-[580px] mx-auto flex flex-col items-center select-none group ${className}`}
+    >
       {/* Outer Container with Ambient Glow */}
       <div className="relative w-full aspect-square flex items-center justify-center p-1">
         {/* Ambient Warm Golden Aura Glow */}
@@ -221,18 +303,20 @@ export default function RotatingRemediesWheel({ className = '' }: RotatingRemedi
             </defs>
 
             {/* Base Full Circular Background for seamless cream base */}
-            <circle
-              cx={center}
-              cy={center}
-              r={rOuter}
-              fill="url(#sectorCreamGrad)"
-            />
+            <circle cx={center} cy={center} r={rOuter} fill="url(#sectorCreamGrad)" />
 
             {/* 8 Sector Wedges */}
             {REMEDIES_WHEEL_ITEMS.map((item) => {
               const startAngle = item.angle - 22.5;
               const endAngle = item.angle + 22.5;
-              const pathData = describeDonutSegment(center, center, rInner, rOuter, startAngle, endAngle);
+              const pathData = describeDonutSegment(
+                center,
+                center,
+                rInner,
+                rOuter,
+                startAngle,
+                endAngle
+              );
               const isHovered = hoveredItem === item.id;
 
               // Position for Icon and Text
@@ -272,9 +356,7 @@ export default function RotatingRemediesWheel({ className = '' }: RotatingRemedi
                     className="transition-transform duration-200"
                   >
                     {/* Icon */}
-                    <g transform="translate(0, -18)">
-                      {item.icon}
-                    </g>
+                    <g transform="translate(0, -18)">{item.icon}</g>
 
                     {/* Sector Text Label */}
                     <text
@@ -338,12 +420,7 @@ export default function RotatingRemediesWheel({ className = '' }: RotatingRemedi
                     stroke="#D4A03D"
                     strokeWidth="1.8"
                   />
-                  <circle
-                    cx={nodePos.x}
-                    cy={nodePos.y}
-                    r="2.5"
-                    fill="#E6CA65"
-                  />
+                  <circle cx={nodePos.x} cy={nodePos.y} r="2.5" fill="#E6CA65" />
                 </g>
               );
             })}

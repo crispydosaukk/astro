@@ -53,9 +53,9 @@ const iconDict: Record<string, any> = {
   'janam-kundli': Users,
   'kundli-matching': Users,
   'daily-horoscope': Sun,
-  'panchang': Sun,
-  'fasting': BookOpen,
-  'meditation': HeartHandshake,
+  panchang: Sun,
+  fasting: BookOpen,
+  meditation: HeartHandshake,
   'rahu-stabilisation': ShieldCheck,
   'rahu-survival': Flame,
   'sani-survival': Zap,
@@ -82,7 +82,9 @@ export function RemediesSection({ content }: RemediesSectionProps) {
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#292522]">
             {content?.title || 'Sacred Ashta-Digbandhan'}{' '}
-            <span className="text-gradient-gold">{content?.titleHighlight || 'Vedic Remedies'}</span>
+            <span className="text-gradient-gold">
+              {content?.titleHighlight || 'Vedic Remedies'}
+            </span>
           </h2>
           <p className="text-sm md:text-base text-[#6B5E55] max-w-2xl mx-auto font-medium">
             {content?.subtitle || '|| आठों दिशाओं की रक्षा – जीवन की पूर्ण स्थिरता और समृद्धि ||'}
@@ -122,7 +124,10 @@ export function RemediesSection({ content }: RemediesSectionProps) {
 
                   <div className="mt-6 pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs font-bold text-[#713B32]">
                     <span>Explore Remedy</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight
+                      size={14}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
                   </div>
                 </Link>
               </motion.div>
@@ -138,9 +143,12 @@ interface ComprehensiveServicesSectionProps {
   comprehensiveContent?: any;
 }
 
-export function ComprehensiveServicesSection({ comprehensiveContent }: ComprehensiveServicesSectionProps) {
+export function ComprehensiveServicesSection({
+  comprehensiveContent,
+}: ComprehensiveServicesSectionProps) {
   const comprehensiveSection = comprehensiveContent || defaultHomepageContent.comprehensiveServices;
-  const coreServicesList = comprehensiveSection?.items || defaultHomepageContent.comprehensiveServices.items;
+  const coreServicesList =
+    comprehensiveSection?.items || defaultHomepageContent.comprehensiveServices.items;
 
   return (
     <section id="services" className="pt-8 pb-16 bg-[#F8F3EA]">
@@ -156,10 +164,13 @@ export function ComprehensiveServicesSection({ comprehensiveContent }: Comprehen
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#292522]">
             {comprehensiveSection?.title || 'Our Comprehensive'}{' '}
-            <span className="text-gradient-gold">{comprehensiveSection?.titleHighlight || 'Vedic Services & Guides'}</span>
+            <span className="text-gradient-gold">
+              {comprehensiveSection?.titleHighlight || 'Vedic Services & Guides'}
+            </span>
           </h2>
           <p className="text-sm md:text-base text-[#6B5E55] max-w-2xl mx-auto">
-            {comprehensiveSection?.subtitle || 'Free daily Panchang, Horoscope forecasts, Kundli Matching, Meditation guides, Fasting Planners & Mahadasha Survival PDF Guides.'}
+            {comprehensiveSection?.subtitle ||
+              'Free daily Panchang, Horoscope forecasts, Kundli Matching, Meditation guides, Fasting Planners & Mahadasha Survival PDF Guides.'}
           </p>
         </motion.div>
 
@@ -196,7 +207,10 @@ export function ComprehensiveServicesSection({ comprehensiveContent }: Comprehen
 
                   <div className="mt-6 pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs font-bold text-[#713B32]">
                     <span>Access Service</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight
+                      size={14}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
                   </div>
                 </Link>
               </motion.div>

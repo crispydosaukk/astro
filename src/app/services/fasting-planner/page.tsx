@@ -3,7 +3,19 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Sparkles, User, MapPin, Clock, Moon, ArrowRight, FileText, PhoneCall, Sun, ShieldCheck } from 'lucide-react';
+import {
+  Calendar,
+  Sparkles,
+  User,
+  MapPin,
+  Clock,
+  Moon,
+  ArrowRight,
+  FileText,
+  PhoneCall,
+  Sun,
+  ShieldCheck,
+} from 'lucide-react';
 import CityLocationInput from '@/components/CityLocationInput';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
@@ -25,25 +37,87 @@ export default function FreeFastingPlannerPage() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const rashiList = [
-    { name: 'Aries (Mesha)', ruler: 'Mars', fastingDay: 'Tuesday (Mangalvar Vrat)', fastDeity: 'Lord Hanuman' },
-    { name: 'Taurus (Vrishabha)', ruler: 'Venus', fastingDay: 'Friday (Shukravar Vrat)', fastDeity: 'Goddess Lakshmi' },
-    { name: 'Gemini (Mithuna)', ruler: 'Mercury', fastingDay: 'Wednesday (Budhvar Vrat)', fastDeity: 'Lord Ganesha' },
-    { name: 'Cancer (Karka)', ruler: 'Moon', fastingDay: 'Monday (Somvar Vrat)', fastDeity: 'Lord Shiva' },
-    { name: 'Leo (Simha)', ruler: 'Sun', fastingDay: 'Sunday (Ravivar Vrat)', fastDeity: 'Lord Surya' },
-    { name: 'Virgo (Kanya)', ruler: 'Mercury', fastingDay: 'Wednesday (Budhvar Vrat)', fastDeity: 'Lord Vishnu' },
-    { name: 'Libra (Tula)', ruler: 'Venus', fastingDay: 'Friday (Shukravar Vrat)', fastDeity: 'Goddess Durga' },
-    { name: 'Scorpio (Vrishchika)', ruler: 'Mars', fastingDay: 'Tuesday (Mangalvar Vrat)', fastDeity: 'Lord Kartikeya' },
-    { name: 'Sagittarius (Dhanu)', ruler: 'Jupiter', fastingDay: 'Thursday (Guruvar Vrat)', fastDeity: 'Lord Vishnu / Dattatreya' },
-    { name: 'Capricorn (Makara)', ruler: 'Saturn', fastingDay: 'Saturday (Shanivar Vrat)', fastDeity: 'Lord Shani / Hanuman' },
-    { name: 'Aquarius (Kumbha)', ruler: 'Saturn', fastingDay: 'Saturday (Shanivar Vrat)', fastDeity: 'Lord Shani' },
-    { name: 'Pisces (Meena)', ruler: 'Jupiter', fastingDay: 'Thursday (Guruvar Vrat)', fastDeity: 'Lord Brihaspati' },
+    {
+      name: 'Aries (Mesha)',
+      ruler: 'Mars',
+      fastingDay: 'Tuesday (Mangalvar Vrat)',
+      fastDeity: 'Lord Hanuman',
+    },
+    {
+      name: 'Taurus (Vrishabha)',
+      ruler: 'Venus',
+      fastingDay: 'Friday (Shukravar Vrat)',
+      fastDeity: 'Goddess Lakshmi',
+    },
+    {
+      name: 'Gemini (Mithuna)',
+      ruler: 'Mercury',
+      fastingDay: 'Wednesday (Budhvar Vrat)',
+      fastDeity: 'Lord Ganesha',
+    },
+    {
+      name: 'Cancer (Karka)',
+      ruler: 'Moon',
+      fastingDay: 'Monday (Somvar Vrat)',
+      fastDeity: 'Lord Shiva',
+    },
+    {
+      name: 'Leo (Simha)',
+      ruler: 'Sun',
+      fastingDay: 'Sunday (Ravivar Vrat)',
+      fastDeity: 'Lord Surya',
+    },
+    {
+      name: 'Virgo (Kanya)',
+      ruler: 'Mercury',
+      fastingDay: 'Wednesday (Budhvar Vrat)',
+      fastDeity: 'Lord Vishnu',
+    },
+    {
+      name: 'Libra (Tula)',
+      ruler: 'Venus',
+      fastingDay: 'Friday (Shukravar Vrat)',
+      fastDeity: 'Goddess Durga',
+    },
+    {
+      name: 'Scorpio (Vrishchika)',
+      ruler: 'Mars',
+      fastingDay: 'Tuesday (Mangalvar Vrat)',
+      fastDeity: 'Lord Kartikeya',
+    },
+    {
+      name: 'Sagittarius (Dhanu)',
+      ruler: 'Jupiter',
+      fastingDay: 'Thursday (Guruvar Vrat)',
+      fastDeity: 'Lord Vishnu / Dattatreya',
+    },
+    {
+      name: 'Capricorn (Makara)',
+      ruler: 'Saturn',
+      fastingDay: 'Saturday (Shanivar Vrat)',
+      fastDeity: 'Lord Shani / Hanuman',
+    },
+    {
+      name: 'Aquarius (Kumbha)',
+      ruler: 'Saturn',
+      fastingDay: 'Saturday (Shanivar Vrat)',
+      fastDeity: 'Lord Shani',
+    },
+    {
+      name: 'Pisces (Meena)',
+      ruler: 'Jupiter',
+      fastingDay: 'Thursday (Guruvar Vrat)',
+      fastDeity: 'Lord Brihaspati',
+    },
   ];
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
 
-    const selectedRashiObj = rashiList.find((r) => r.name.toLowerCase().includes(formData.rashi.toLowerCase())) || rashiList[0];
+    const selectedRashiObj =
+      rashiList.find((r) => r.name.toLowerCase().includes(formData.rashi.toLowerCase())) ||
+      rashiList[0];
 
     const computedFasting = {
       recommendationTitle: 'Free Fasting Schedule Report',
@@ -61,13 +135,15 @@ export default function FreeFastingPlannerPage() {
           name: selectedRashiObj.fastingDay,
           frequency: 'Every Week',
           benefit: `Stabilizes ${selectedRashiObj.ruler} planetary influence, enhances peace and mental clarity.`,
-          ritual: 'Offer milk/water to deity, light ghee lamp, consume only fruits and milk after evening prayers.',
+          ritual:
+            'Offer milk/water to deity, light ghee lamp, consume only fruits and milk after evening prayers.',
         },
         {
           name: 'Ekadashi Vrat (11th Tithi)',
           frequency: 'Twice a Month (Shukla & Krishna Paksha)',
           benefit: 'Purifies karmic impressions, aids digestion and spiritual alignment.',
-          ritual: 'Abstain from food grains, rice, and beans. Consume fruits, nuts, and sago (Sabudana).',
+          ritual:
+            'Abstain from food grains, rice, and beans. Consume fruits, nuts, and sago (Sabudana).',
         },
         {
           name: 'Pradosh Vrat (13th Tithi)',
@@ -164,7 +240,8 @@ export default function FreeFastingPlannerPage() {
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
-                  Discover your personalized weekly planetary fasting days, sacred Ekadashi & Pradosh vrat schedule based on your Rashi and birth Nakshatra.
+                  Discover your personalized weekly planetary fasting days, sacred Ekadashi &
+                  Pradosh vrat schedule based on your Rashi and birth Nakshatra.
                 </p>
               </motion.div>
 
@@ -177,15 +254,21 @@ export default function FreeFastingPlannerPage() {
               >
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
                   <Calendar size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Weekly Planetary Vrat</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Weekly Planetary Vrat
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
                   <Moon size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Ekadashi & Pradosh Dates</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Ekadashi & Pradosh Dates
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
                   <Sun size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Vrat Rules & Rituals</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Vrat Rules & Rituals
+                  </span>
                 </div>
               </motion.div>
 
@@ -226,8 +309,12 @@ export default function FreeFastingPlannerPage() {
                 <span className="text-xs font-bold text-[#713B32] uppercase tracking-widest bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
                   Planetary Fasting Generator
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-bold text-[#292522] pt-1">Enter Your Birth Details</h2>
-                <p className="text-xs sm:text-sm text-[#6B5E55]">Calculate your sacred weekly fasting day according to Vedic astrology</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#292522] pt-1">
+                  Enter Your Birth Details
+                </h2>
+                <p className="text-xs sm:text-sm text-[#6B5E55]">
+                  Calculate your sacred weekly fasting day according to Vedic astrology
+                </p>
               </div>
 
               <form onSubmit={handleGenerate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -291,9 +378,26 @@ export default function FreeFastingPlannerPage() {
                     onChange={(e) => setFormData({ ...formData, rashi: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-sm outline-none focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 shadow-sm cursor-pointer"
                   >
-                    <option value="" className="bg-[#FFFDFC] text-[#292522]">-- Don&apos;t know / Detect from birth data --</option>
-                    {['Mesha (Aries)', 'Vrishabha (Taurus)', 'Mithuna (Gemini)', 'Karka (Cancer)', 'Simha (Leo)', 'Kanya (Virgo)', 'Tula (Libra)', 'Vrishchika (Scorpio)', 'Dhanu (Sagittarius)', 'Makara (Capricorn)', 'Kumbha (Aquarius)', 'Meena (Pisces)'].map((r) => (
-                      <option key={r} value={r} className="bg-[#FFFDFC] text-[#292522]">{r}</option>
+                    <option value="" className="bg-[#FFFDFC] text-[#292522]">
+                      -- Don&apos;t know / Detect from birth data --
+                    </option>
+                    {[
+                      'Mesha (Aries)',
+                      'Vrishabha (Taurus)',
+                      'Mithuna (Gemini)',
+                      'Karka (Cancer)',
+                      'Simha (Leo)',
+                      'Kanya (Virgo)',
+                      'Tula (Libra)',
+                      'Vrishchika (Scorpio)',
+                      'Dhanu (Sagittarius)',
+                      'Makara (Capricorn)',
+                      'Kumbha (Aquarius)',
+                      'Meena (Pisces)',
+                    ].map((r) => (
+                      <option key={r} value={r} className="bg-[#FFFDFC] text-[#292522]">
+                        {r}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -305,7 +409,11 @@ export default function FreeFastingPlannerPage() {
                     className="w-full py-3.5 rounded-full gold-gradient-bg text-[#292522] font-extrabold text-sm sm:text-base shadow-xl hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Sparkles size={18} />
-                    <span>{isGenerating ? 'Generating Fasting Report...' : 'Generate My Fasting Schedule'}</span>
+                    <span>
+                      {isGenerating
+                        ? 'Generating Fasting Report...'
+                        : 'Generate My Fasting Schedule'}
+                    </span>
                   </button>
                 </div>
               </form>
@@ -321,24 +429,36 @@ export default function FreeFastingPlannerPage() {
 
                 <ul className="space-y-3 text-xs sm:text-sm text-[#292522]">
                   <li className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                      ✓
+                    </span>
                     <div>
                       <strong className="text-[#713B32]">Planetary Lord Alignment</strong>
-                      <p className="text-[#6B5E55] text-xs mt-0.5">Fasting on your ruling day balances weak planetary aspects in your chart.</p>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">
+                        Fasting on your ruling day balances weak planetary aspects in your chart.
+                      </p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                      ✓
+                    </span>
                     <div>
                       <strong className="text-[#713B32]">Sattvic Diet Guidelines</strong>
-                      <p className="text-[#6B5E55] text-xs mt-0.5">Customized food intake rules (fruits, milk, water, samvat rice).</p>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">
+                        Customized food intake rules (fruits, milk, water, samvat rice).
+                      </p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                      ✓
+                    </span>
                     <div>
                       <strong className="text-[#713B32]">Deity & Mantra Infusions</strong>
-                      <p className="text-[#6B5E55] text-xs mt-0.5">Specific Stotrams & Japa counts recommended for your Vrat.</p>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">
+                        Specific Stotrams & Japa counts recommended for your Vrat.
+                      </p>
                     </div>
                   </li>
                 </ul>
@@ -354,11 +474,16 @@ export default function FreeFastingPlannerPage() {
               {/* Astrologer Consultation CTA */}
               <div className="p-5 rounded-2xl bg-gradient-to-br from-[#281123] to-[#170b16] text-white border border-[#B88A44]/30 space-y-2.5 shadow-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#F6D075] uppercase tracking-wider">Dosha Remedial Vrat</span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Recommended</span>
+                  <span className="text-xs font-bold text-[#F6D075] uppercase tracking-wider">
+                    Dosha Remedial Vrat
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                    Recommended
+                  </span>
                 </div>
                 <p className="text-xs text-[#F8F3EA]/90 leading-relaxed">
-                  Have severe planetary afflictions like Rahu Mahadasha or Sade Sati? Consult our Astrologers for intense Vrat sankalpas.
+                  Have severe planetary afflictions like Rahu Mahadasha or Sade Sati? Consult our
+                  Astrologers for intense Vrat sankalpas.
                 </p>
                 <Link
                   href="/talk-to-astrologer?category=Remedies%20%26%20Fasting"
@@ -375,7 +500,10 @@ export default function FreeFastingPlannerPage() {
       {/* Generated Result Section */}
       <AnimatePresence>
         {generatedResult && (
-          <section id="fasting-results" className="py-8 bg-background/50 border-t border-white/5 space-y-6">
+          <section
+            id="fasting-results"
+            className="py-8 bg-background/50 border-t border-white/5 space-y-6"
+          >
             <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-6">
               <div className="glass-card rounded-3xl p-6 border border-white/10 space-y-3">
                 <div className="flex items-center justify-between flex-wrap gap-4 border-b border-white/10 pb-3">
@@ -405,7 +533,9 @@ export default function FreeFastingPlannerPage() {
                 </div>
 
                 <p className="text-xs text-[#C9952B]">
-                  📌 <strong>Primary Fasting Day:</strong> <span className="font-bold">{generatedResult.weeklyFastingDay}</span> — Dedicated to {generatedResult.deity}.
+                  📌 <strong>Primary Fasting Day:</strong>{' '}
+                  <span className="font-bold">{generatedResult.weeklyFastingDay}</span> — Dedicated
+                  to {generatedResult.deity}.
                 </p>
               </div>
 
@@ -423,7 +553,10 @@ export default function FreeFastingPlannerPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {generatedResult.recommendedVrats.map((vrat: any) => (
-                  <div key={vrat.name} className="glass-card p-5 rounded-3xl border border-white/10 space-y-2">
+                  <div
+                    key={vrat.name}
+                    className="glass-card p-5 rounded-3xl border border-white/10 space-y-2"
+                  >
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-foreground text-sm">{vrat.name}</h4>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#C9952B]/20 text-[#C9952B]">

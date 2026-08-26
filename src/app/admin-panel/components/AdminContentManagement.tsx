@@ -84,11 +84,7 @@ export default function AdminContentManagement() {
     setContent({ ...content, services: { ...content.services, items: newItems } });
   };
 
-  const handleComprehensiveChange = (
-    index: number,
-    field: string,
-    val: any
-  ) => {
+  const handleComprehensiveChange = (index: number, field: string, val: any) => {
     const section = content.comprehensiveServices || defaultHomepageContent.comprehensiveServices;
     const newItems = [...section.items];
     newItems[index] = { ...newItems[index], [field]: val };
@@ -106,7 +102,10 @@ export default function AdminContentManagement() {
     });
   };
 
-  const handlePanchangChange = (field: keyof typeof defaultHomepageContent.panchang, val: string) => {
+  const handlePanchangChange = (
+    field: keyof typeof defaultHomepageContent.panchang,
+    val: string
+  ) => {
     const currentPanchang = content.panchang || defaultHomepageContent.panchang;
     setContent({
       ...content,
@@ -119,28 +118,28 @@ export default function AdminContentManagement() {
     if (!file) return;
 
     try {
-      setUploadingImage(prev => ({ ...prev, [idx]: true }));
-      
+      setUploadingImage((prev) => ({ ...prev, [idx]: true }));
+
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const res = await fetch('/api/upload-image', {
         method: 'POST',
         body: formData,
       });
-      
+
       const data = await res.json();
-      
+
       if (!data.success) {
         throw new Error(data.error || 'Upload failed');
       }
-      
+
       handleServiceChange(idx, 'image', data.url);
     } catch (error: any) {
-      console.error("Error uploading image:", error);
-      alert("Failed to upload image: " + error.message);
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image: ' + error.message);
     } finally {
-      setUploadingImage(prev => ({ ...prev, [idx]: false }));
+      setUploadingImage((prev) => ({ ...prev, [idx]: false }));
     }
   };
 
@@ -493,7 +492,9 @@ export default function AdminContentManagement() {
                           <input
                             type="number"
                             value={svc.price || 100}
-                            onChange={(e) => handleServiceChange(idx, 'price' as any, Number(e.target.value))}
+                            onChange={(e) =>
+                              handleServiceChange(idx, 'price' as any, Number(e.target.value))
+                            }
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
                           />
                         </div>
@@ -505,7 +506,9 @@ export default function AdminContentManagement() {
                             type="number"
                             step="0.01"
                             value={svc.priceUSD || ''}
-                            onChange={(e) => handleServiceChange(idx, 'priceUSD' as any, Number(e.target.value))}
+                            onChange={(e) =>
+                              handleServiceChange(idx, 'priceUSD' as any, Number(e.target.value))
+                            }
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
                             placeholder="e.g. 10.00"
                           />
@@ -547,12 +550,18 @@ export default function AdminContentManagement() {
                       <div className="space-y-2 mt-4">
                         <label className="text-xs font-medium text-muted-foreground flex justify-between items-center">
                           <span>Remedy Image</span>
-                          {uploadingImage[idx] && <Loader2 size={12} className="animate-spin text-accent" />}
+                          {uploadingImage[idx] && (
+                            <Loader2 size={12} className="animate-spin text-accent" />
+                          )}
                         </label>
                         <div className="flex gap-4 items-start">
                           <div className="relative w-32 h-20 rounded-lg overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center">
                             {svc.image ? (
-                              <img src={svc.image} alt="Preview" className="w-full h-full object-cover" />
+                              <img
+                                src={svc.image}
+                                alt="Preview"
+                                className="w-full h-full object-cover"
+                              />
                             ) : (
                               <ImagePlus className="text-muted-foreground opacity-50" size={24} />
                             )}
@@ -603,7 +612,10 @@ export default function AdminContentManagement() {
                     </label>
                     <input
                       type="text"
-                      value={content.comprehensiveServices?.tagline || defaultHomepageContent.comprehensiveServices.tagline}
+                      value={
+                        content.comprehensiveServices?.tagline ||
+                        defaultHomepageContent.comprehensiveServices.tagline
+                      }
                       onChange={(e) => handleComprehensiveSectionChange('tagline', e.target.value)}
                       className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent outline-none"
                     />
@@ -614,7 +626,10 @@ export default function AdminContentManagement() {
                     </label>
                     <input
                       type="text"
-                      value={content.comprehensiveServices?.title || defaultHomepageContent.comprehensiveServices.title}
+                      value={
+                        content.comprehensiveServices?.title ||
+                        defaultHomepageContent.comprehensiveServices.title
+                      }
                       onChange={(e) => handleComprehensiveSectionChange('title', e.target.value)}
                       className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent outline-none"
                     />
@@ -627,8 +642,13 @@ export default function AdminContentManagement() {
                   </label>
                   <input
                     type="text"
-                    value={content.comprehensiveServices?.titleHighlight || defaultHomepageContent.comprehensiveServices.titleHighlight}
-                    onChange={(e) => handleComprehensiveSectionChange('titleHighlight', e.target.value)}
+                    value={
+                      content.comprehensiveServices?.titleHighlight ||
+                      defaultHomepageContent.comprehensiveServices.titleHighlight
+                    }
+                    onChange={(e) =>
+                      handleComprehensiveSectionChange('titleHighlight', e.target.value)
+                    }
                     className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent outline-none"
                   />
                 </div>
@@ -639,7 +659,10 @@ export default function AdminContentManagement() {
                   </label>
                   <textarea
                     rows={2}
-                    value={content.comprehensiveServices?.subtitle || defaultHomepageContent.comprehensiveServices.subtitle}
+                    value={
+                      content.comprehensiveServices?.subtitle ||
+                      defaultHomepageContent.comprehensiveServices.subtitle
+                    }
                     onChange={(e) => handleComprehensiveSectionChange('subtitle', e.target.value)}
                     className="w-full px-4 py-2 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent outline-none resize-none"
                   />
@@ -652,7 +675,10 @@ export default function AdminContentManagement() {
                 </h3>
 
                 <div className="space-y-4">
-                  {(content.comprehensiveServices?.items || defaultHomepageContent.comprehensiveServices.items).map((item, idx) => (
+                  {(
+                    content.comprehensiveServices?.items ||
+                    defaultHomepageContent.comprehensiveServices.items
+                  ).map((item, idx) => (
                     <div
                       key={item.id || idx}
                       className="p-4 border border-border rounded-xl space-y-4 bg-muted/20"
@@ -663,23 +689,31 @@ export default function AdminContentManagement() {
                           <input
                             type="text"
                             value={item.title}
-                            onChange={(e) => handleComprehensiveChange(idx, 'title', e.target.value)}
+                            onChange={(e) =>
+                              handleComprehensiveChange(idx, 'title', e.target.value)
+                            }
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-xs font-medium text-muted-foreground">Badge (e.g. Free / ₹999)</label>
+                          <label className="text-xs font-medium text-muted-foreground">
+                            Badge (e.g. Free / ₹999)
+                          </label>
                           <input
                             type="text"
                             value={item.badge}
-                            onChange={(e) => handleComprehensiveChange(idx, 'badge', e.target.value)}
+                            onChange={(e) =>
+                              handleComprehensiveChange(idx, 'badge', e.target.value)
+                            }
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
                           />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-xs font-medium text-muted-foreground">Description</label>
+                        <label className="text-xs font-medium text-muted-foreground">
+                          Description
+                        </label>
                         <textarea
                           rows={2}
                           value={item.desc}
@@ -690,7 +724,9 @@ export default function AdminContentManagement() {
 
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="text-xs font-medium text-muted-foreground">Link (href)</label>
+                          <label className="text-xs font-medium text-muted-foreground">
+                            Link (href)
+                          </label>
                           <input
                             type="text"
                             value={item.href}
@@ -699,11 +735,15 @@ export default function AdminContentManagement() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-xs font-medium text-muted-foreground">Card Gradient / Color Class</label>
+                          <label className="text-xs font-medium text-muted-foreground">
+                            Card Gradient / Color Class
+                          </label>
                           <input
                             type="text"
                             value={item.color || ''}
-                            onChange={(e) => handleComprehensiveChange(idx, 'color', e.target.value)}
+                            onChange={(e) =>
+                              handleComprehensiveChange(idx, 'color', e.target.value)
+                            }
                             className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
                           />
                         </div>

@@ -50,4 +50,3 @@ const AppLogo = memo(function AppLogo({
 });
 
 export default AppLogo;
-

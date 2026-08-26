@@ -26,7 +26,7 @@ export default function IshtaDevataServicePage() {
     async function loadContent() {
       const [data, homeData] = await Promise.all([
         getServicePageContent('ishta-devata', defaultIshtaDevataContent),
-        getHomepageContent()
+        getHomepageContent(),
       ]);
       setHomepageContent(homeData);
       setContent(data);
@@ -71,9 +71,13 @@ export default function IshtaDevataServicePage() {
             <div className="max-w-3xl space-y-6">
               {/* Breadcrumb */}
               <div className="flex items-center gap-2 text-xs sm:text-sm text-white/70">
-                <Link href="/" className="hover:text-[#F6D075] transition-colors">Home</Link>
+                <Link href="/" className="hover:text-[#F6D075] transition-colors">
+                  Home
+                </Link>
                 <span>/</span>
-                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">Remedies</Link>
+                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">
+                  Remedies
+                </Link>
                 <span>/</span>
                 <span className="text-[#F6D075] font-semibold">Ishta Devata Upasana</span>
               </div>
@@ -165,7 +169,8 @@ export default function IshtaDevataServicePage() {
                 </div>
               </div>
               <p className="text-xs text-[#6B5E55] pt-4 border-t border-[#E5D9C8]">
-                Calculated through your Atmakaraka, 12th house from Karakamsa (Jaimini Sutras), and 5th/9th house lords.
+                Calculated through your Atmakaraka, 12th house from Karakamsa (Jaimini Sutras), and
+                5th/9th house lords.
               </p>
             </div>
 
@@ -174,22 +179,36 @@ export default function IshtaDevataServicePage() {
                 <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block mb-3">
                   Report Preview
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">Sample Devata Analysis</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">
+                  Sample Devata Analysis
+                </h3>
                 <div className="space-y-3.5">
                   <div className="p-5 rounded-2xl bg-gradient-to-br from-[#281123] to-[#150914] text-white border border-[#B88A44]/40 space-y-1 text-center shadow-md">
-                    <p className="text-xs text-[#F6D075] font-bold uppercase tracking-wider">Your Guiding Ishta Devata</p>
-                    <p className="text-2xl font-serif font-extrabold text-[#F6D075]">भगवान शिव (Lord Shiva)</p>
-                    <p className="text-xs text-white/80">Karakamsa 12th house Ketu / Moon alignment</p>
+                    <p className="text-xs text-[#F6D075] font-bold uppercase tracking-wider">
+                      Your Guiding Ishta Devata
+                    </p>
+                    <p className="text-2xl font-serif font-extrabold text-[#F6D075]">
+                      भगवान शिव (Lord Shiva)
+                    </p>
+                    <p className="text-xs text-white/80">
+                      Karakamsa 12th house Ketu / Moon alignment
+                    </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8]">
-                    <p className="text-xs font-bold text-[#713B32] uppercase mb-1">Prescribed Daily Sadhana</p>
-                    <p className="text-sm text-[#292522] font-medium">Monday Shiva Panchakshari Stotra and Jal Abhishekam.</p>
+                    <p className="text-xs font-bold text-[#713B32] uppercase mb-1">
+                      Prescribed Daily Sadhana
+                    </p>
+                    <p className="text-sm text-[#292522] font-medium">
+                      Monday Shiva Panchakshari Stotra and Jal Abhishekam.
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs text-[#713B32] font-bold">
-                <span className="flex items-center gap-1.5"><Lock size={14} /> Full individualized report generated below</span>
+                <span className="flex items-center gap-1.5">
+                  <Lock size={14} /> Full individualized report generated below
+                </span>
                 <span>Jaimini Calculation</span>
               </div>
             </div>
@@ -225,7 +244,9 @@ export default function IshtaDevataServicePage() {
                 <h3 className="font-bold text-[#292522] text-lg">{d?.name}</h3>
                 <p className="text-xs font-bold text-[#713B32]">📊 {d?.indicator}</p>
                 <p className="text-xs text-[#6B5E55] leading-relaxed pt-1">🙏 {d?.worship}</p>
-                <p className="text-xs font-mono text-[#292522] pt-2 border-t border-[#E5D9C8]">📖 {d?.stotra}</p>
+                <p className="text-xs font-mono text-[#292522] pt-2 border-t border-[#E5D9C8]">
+                  📖 {d?.stotra}
+                </p>
               </motion.div>
             ))}
           </div>

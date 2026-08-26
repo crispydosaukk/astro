@@ -43,7 +43,7 @@ export default function HeroSection({ content }: HeroSectionProps) {
       {/* Glowing orbs */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/30 blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#B88A44]/20 blur-3xl pointer-events-none" />
-      
+
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center pt-24 pb-8">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 xl:px-16 w-full">

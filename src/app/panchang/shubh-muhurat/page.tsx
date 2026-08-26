@@ -49,16 +49,42 @@ export default function ShubhMuhuratPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const auspiciousMuhurats = panchang.shubhMuhurats && panchang.shubhMuhurats.length > 0
-    ? panchang.shubhMuhurats
-    : [
-        { name: 'Abhijit Muhurat', desc: 'Most powerful muhurat for all tasks', timing: `${panchang.abhijitMuhurat.start} – ${panchang.abhijitMuhurat.end}`, isBest: true },
-        { name: 'Brahma Muhurat', desc: 'Spiritual practice & meditation', timing: '04:20 AM – 05:08 AM' },
-        { name: 'Amrit Kaal', desc: 'Favourable for new beginnings', timing: '06:15 AM – 07:45 AM' },
-        { name: 'Vijay Muhurat', desc: 'Success in lawsuits & competitions', timing: '02:15 PM – 03:05 PM' },
-        { name: 'Godhuli Muhurat', desc: 'Twilight evening prayer', timing: '06:45 PM – 07:10 PM' },
-        { name: 'Nishita Muhurat', desc: 'Midnight spiritual dhyana', timing: '11:45 PM – 12:35 AM' },
-      ];
+  const auspiciousMuhurats =
+    panchang.shubhMuhurats && panchang.shubhMuhurats.length > 0
+      ? panchang.shubhMuhurats
+      : [
+          {
+            name: 'Abhijit Muhurat',
+            desc: 'Most powerful muhurat for all tasks',
+            timing: `${panchang.abhijitMuhurat.start} – ${panchang.abhijitMuhurat.end}`,
+            isBest: true,
+          },
+          {
+            name: 'Brahma Muhurat',
+            desc: 'Spiritual practice & meditation',
+            timing: '04:20 AM – 05:08 AM',
+          },
+          {
+            name: 'Amrit Kaal',
+            desc: 'Favourable for new beginnings',
+            timing: '06:15 AM – 07:45 AM',
+          },
+          {
+            name: 'Vijay Muhurat',
+            desc: 'Success in lawsuits & competitions',
+            timing: '02:15 PM – 03:05 PM',
+          },
+          {
+            name: 'Godhuli Muhurat',
+            desc: 'Twilight evening prayer',
+            timing: '06:45 PM – 07:10 PM',
+          },
+          {
+            name: 'Nishita Muhurat',
+            desc: 'Midnight spiritual dhyana',
+            timing: '11:45 PM – 12:35 AM',
+          },
+        ];
 
   const relatedPages = [
     { title: 'Today Panchang', href: '/panchang/today-panchang' },
@@ -100,7 +126,8 @@ export default function ShubhMuhuratPage() {
             Shubh Muhurat Today — Auspicious Timings
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-            Discover Abhijit Muhurat, Brahma Muhurat, Vijay Muhurat, Amrit Kaal & Choghadiya auspicious windows for marriage, business, and travel.
+            Discover Abhijit Muhurat, Brahma Muhurat, Vijay Muhurat, Amrit Kaal & Choghadiya
+            auspicious windows for marriage, business, and travel.
           </p>
         </div>
 
@@ -118,7 +145,10 @@ export default function ShubhMuhuratPage() {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm focus:border-[#C9952B] outline-none transition-colors"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none"
+                />
               </div>
             </div>
 
@@ -138,16 +168,32 @@ export default function ShubhMuhuratPage() {
               disabled={isCalculating}
               className="w-full py-3.5 rounded-2xl gold-gradient-bg text-[#292522] font-bold text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
             >
-              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {isCalculating ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Sparkles size={18} />
+              )}
               <span>{isCalculating ? 'Calculating...' : 'Get Shubh Muhurat'}</span>
             </button>
           </div>
 
           <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs sm:text-sm font-semibold text-[#C9952B]">
-            <div className="flex items-center gap-2"><MapPin size={15} /><span>{location}</span></div>
-            <div className="flex items-center gap-2"><Calendar size={15} /><span>{panchang.formattedDate}</span></div>
-            <div className="flex items-center gap-2"><Sun size={15} /><span>Sunrise: {panchang.sunrise}</span></div>
-            <div className="flex items-center gap-2"><Moon size={15} /><span>Sunset: {panchang.sunset}</span></div>
+            <div className="flex items-center gap-2">
+              <MapPin size={15} />
+              <span>{location}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar size={15} />
+              <span>{panchang.formattedDate}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Sun size={15} />
+              <span>Sunrise: {panchang.sunrise}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Moon size={15} />
+              <span>Sunset: {panchang.sunset}</span>
+            </div>
           </div>
         </div>
 
@@ -162,13 +208,16 @@ export default function ShubhMuhuratPage() {
           {/* Top Highlight Abhijit Muhurat Card */}
           <div className="p-6 sm:p-8 lg:p-10 rounded-3xl border border-[#B88A44]/50 bg-gradient-to-br from-[#2D1B28] via-[#432332] to-[#1E111B] text-center space-y-4 shadow-2xl text-white">
             <span className="text-xs font-bold uppercase tracking-widest text-[#F6D075] bg-white/10 px-4 py-1.5 rounded-full border border-white/15 inline-flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-[#F6D075]" /> ✨ Today Abhijit Muhurat (Universally Auspicious)
+              <CheckCircle2 size={16} className="text-[#F6D075]" /> ✨ Today Abhijit Muhurat
+              (Universally Auspicious)
             </span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white font-mono tracking-tight">
               {panchang.abhijitMuhurat.start} – {panchang.abhijitMuhurat.end}
             </h2>
             <p className="text-xs sm:text-sm text-white/85 max-w-xl mx-auto leading-relaxed">
-              Calculated for <strong>{location}</strong> on <strong>{panchang.formattedDate}</strong>. Governed by Lord Vishnu, this is the prime time slot for business contracts, asset acquisitions, ceremonies, and travel.
+              Calculated for <strong>{location}</strong> on{' '}
+              <strong>{panchang.formattedDate}</strong>. Governed by Lord Vishnu, this is the prime
+              time slot for business contracts, asset acquisitions, ceremonies, and travel.
             </p>
           </div>
 
@@ -179,10 +228,12 @@ export default function ShubhMuhuratPage() {
                 Auspicious Calendar
               </span>
               <h2 className="text-2xl sm:text-3xl font-bold text-[#292522] flex items-center gap-2">
-                <CheckCircle2 size={24} className="text-emerald-700" /> Auspicious Periods for {panchang.formattedDate}
+                <CheckCircle2 size={24} className="text-emerald-700" /> Auspicious Periods for{' '}
+                {panchang.formattedDate}
               </h2>
               <p className="text-xs sm:text-sm text-[#6B5E55]">
-                Exact start and end times dynamically calculated based on local sunrise and solar position in {location}.
+                Exact start and end times dynamically calculated based on local sunrise and solar
+                position in {location}.
               </p>
             </div>
 
@@ -200,7 +251,9 @@ export default function ShubhMuhuratPage() {
                     <tr
                       key={row.name}
                       className={`hover:bg-[#F8F3EA]/70 transition-colors ${
-                        row.isBest ? 'bg-emerald-50/80 font-bold border-l-4 border-l-emerald-600' : ''
+                        row.isBest
+                          ? 'bg-emerald-50/80 font-bold border-l-4 border-l-emerald-600'
+                          : ''
                       }`}
                     >
                       <td className="px-4 py-4 font-bold text-[#292522] flex items-center gap-2">
@@ -229,7 +282,10 @@ export default function ShubhMuhuratPage() {
                 className="p-3 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md text-xs font-semibold text-[#292522] text-center flex items-center justify-center gap-1 transition-all group"
               >
                 <span>{page.title}</span>
-                <ChevronRight size={12} className="text-[#713B32] group-hover:translate-x-0.5 transition-transform" />
+                <ChevronRight
+                  size={12}
+                  className="text-[#713B32] group-hover:translate-x-0.5 transition-transform"
+                />
               </Link>
             ))}
           </div>

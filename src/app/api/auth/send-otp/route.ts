@@ -15,7 +15,10 @@ export async function POST(req: Request) {
     const templateId = process.env.MSG91_TEMPLATE_ID;
 
     if (!authKey || !templateId) {
-      return NextResponse.json({ error: 'Server configuration error (MSG91 keys missing)' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Server configuration error (MSG91 keys missing)' },
+        { status: 500 }
+      );
     }
 
     const msg91Url = `https://control.msg91.com/api/v5/otp?template_id=${templateId}&mobile=${cleanPhone}`;
@@ -23,7 +26,7 @@ export async function POST(req: Request) {
     const response = await fetch(msg91Url, {
       method: 'POST',
       headers: {
-        'authkey': authKey,
+        authkey: authKey,
         'Content-Type': 'application/json',
       },
     });

@@ -13,13 +13,29 @@ export async function POST(req: Request) {
 
     // Fetch dynamic Razorpay API credentials from Platform Settings or env variables
     const dbSettings = await getSettings();
-    const key_id = (process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || dbSettings?.razorpayKeyId || '').trim();
-    const key_secret = (process.env.RAZORPAY_KEY_SECRET || dbSettings?.razorpayKeySecret || '').trim();
+    const key_id = (
+      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+      dbSettings?.razorpayKeyId ||
+      ''
+    ).trim();
+    const key_secret = (
+      process.env.RAZORPAY_KEY_SECRET ||
+      dbSettings?.razorpayKeySecret ||
+      ''
+    ).trim();
 
-    if (!key_id || !key_secret || key_id === 'PLACEHOLDER_KEY' || key_secret === 'PLACEHOLDER_SECRET') {
+    if (
+      !key_id ||
+      !key_secret ||
+      key_id === 'PLACEHOLDER_KEY' ||
+      key_secret === 'PLACEHOLDER_SECRET'
+    ) {
       console.error('Razorpay API keys not configured in Admin Dashboard platform settings');
       return NextResponse.json(
-        { error: 'Razorpay API keys are not configured in platform settings. Please configure them in the Admin Dashboard.' },
+        {
+          error:
+            'Razorpay API keys are not configured in platform settings. Please configure them in the Admin Dashboard.',
+        },
         { status: 500 }
       );
     }

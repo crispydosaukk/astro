@@ -130,7 +130,8 @@ export default function AdminAstrologersTable() {
             {
               id: 'rev-1',
               name: 'Arjun Mehta',
-              avatar: 'https://img.rocket.new/generatedImages/rocket_gen_img_14ffa8b76-1772101717598.png',
+              avatar:
+                'https://img.rocket.new/generatedImages/rocket_gen_img_14ffa8b76-1772101717598.png',
               rating: 5,
               date: '2 days ago',
               comment:
@@ -139,7 +140,8 @@ export default function AdminAstrologersTable() {
             {
               id: 'rev-2',
               name: 'Priya Kapoor',
-              avatar: 'https://img.rocket.new/generatedImages/rocket_gen_img_14ceba124-1776062537292.png',
+              avatar:
+                'https://img.rocket.new/generatedImages/rocket_gen_img_14ceba124-1776062537292.png',
               rating: 5,
               date: '1 week ago',
               comment:
@@ -234,7 +236,10 @@ export default function AdminAstrologersTable() {
       <div className="p-5 border-b border-border flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-bold text-foreground">Approved Astrologers</h2>
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             type="text"
             placeholder="Search..."
@@ -314,7 +319,9 @@ export default function AdminAstrologersTable() {
                       <div className="flex items-center gap-1 text-foreground font-semibold">
                         <Star size={13} fill="currentColor" className="text-amber-400" />
                         <span>{ast.rating || 4.9}</span>
-                        <span className="text-xs text-muted-foreground">({ast.reviewsCount || 2847})</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({ast.reviewsCount || 2847})
+                        </span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-foreground tabular-nums font-mono">
@@ -374,15 +381,23 @@ export default function AdminAstrologersTable() {
 
                   {/* Header */}
                   <div className="flex items-center gap-4 pb-6 border-b border-border">
-                    {selectedAstrologer.avatar && selectedAstrologer.avatar !== 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop' ? (
-                      <img src={selectedAstrologer.avatar} alt={selectedAstrologer.name} className="w-16 h-16 rounded-full object-cover border-2 border-[#C9952B]" />
+                    {selectedAstrologer.avatar &&
+                    selectedAstrologer.avatar !==
+                      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop' ? (
+                      <img
+                        src={selectedAstrologer.avatar}
+                        alt={selectedAstrologer.name}
+                        className="w-16 h-16 rounded-full object-cover border-2 border-[#C9952B]"
+                      />
                     ) : (
                       <div className="w-16 h-16 rounded-full gold-gradient-bg flex items-center justify-center text-white text-2xl font-bold">
                         {selectedAstrologer.name?.charAt(0).toUpperCase()}
                       </div>
                     )}
                     <div>
-                      <h3 className="text-2xl font-bold text-foreground">{selectedAstrologer.name}</h3>
+                      <h3 className="text-2xl font-bold text-foreground">
+                        {selectedAstrologer.name}
+                      </h3>
                       <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                         <span className="font-mono bg-muted px-2 py-0.5 rounded-md">
                           Token: #{selectedAstrologer.tokenNumber}
@@ -406,14 +421,20 @@ export default function AdminAstrologersTable() {
                         disabled={isSavingStats}
                         className="px-6 py-2.5 rounded-xl gold-gradient-bg text-white font-bold text-xs flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg shadow-[#C9952B]/20 disabled:opacity-50"
                       >
-                        {isSavingStats ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                        {isSavingStats ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Save size={14} />
+                        )}
                         <span>Save Admin Stats</span>
                       </button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-2">
                       <div>
-                        <label className="text-xs font-semibold text-muted-foreground block mb-1">Rate (₹/min)</label>
+                        <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                          Rate (₹/min)
+                        </label>
                         <input
                           type="number"
                           value={editingAmount}
@@ -423,7 +444,9 @@ export default function AdminAstrologersTable() {
                       </div>
 
                       <div>
-                        <label className="text-xs font-semibold text-muted-foreground block mb-1">Rating (1.0 - 5.0)</label>
+                        <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                          Rating (1.0 - 5.0)
+                        </label>
                         <input
                           type="number"
                           step="0.1"
@@ -435,7 +458,9 @@ export default function AdminAstrologersTable() {
                       </div>
 
                       <div>
-                        <label className="text-xs font-semibold text-muted-foreground block mb-1">Total Reviews Count</label>
+                        <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                          Total Reviews Count
+                        </label>
                         <input
                           type="number"
                           value={editingReviewsCount}
@@ -445,7 +470,9 @@ export default function AdminAstrologersTable() {
                       </div>
 
                       <div>
-                        <label className="text-xs font-semibold text-muted-foreground block mb-1">Total Consultations</label>
+                        <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                          Total Consultations
+                        </label>
                         <input
                           type="number"
                           value={editingConsultations}
@@ -456,7 +483,9 @@ export default function AdminAstrologersTable() {
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-muted-foreground block mb-1">Special Badge</label>
+                      <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                        Special Badge
+                      </label>
                       <select
                         value={editingBadge}
                         onChange={(e) => setEditingBadge(e.target.value)}
@@ -475,12 +504,15 @@ export default function AdminAstrologersTable() {
                   {/* Admin Customer Reviews Manager */}
                   <div className="space-y-4 pt-2">
                     <h4 className="font-bold text-lg text-foreground flex items-center gap-2 border-b border-border pb-3">
-                      <MessageSquare size={18} className="text-accent" /> Customer Reviews Manager ({reviewsList.length})
+                      <MessageSquare size={18} className="text-accent" /> Customer Reviews Manager (
+                      {reviewsList.length})
                     </h4>
 
                     {/* Add New Review Input Card */}
                     <div className="p-4 rounded-2xl bg-muted/40 border border-border space-y-3">
-                      <span className="text-xs font-bold text-accent uppercase tracking-wider block">Add New Review</span>
+                      <span className="text-xs font-bold text-accent uppercase tracking-wider block">
+                        Add New Review
+                      </span>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <input
                           type="text"
@@ -527,14 +559,19 @@ export default function AdminAstrologersTable() {
                     {/* Existing Reviews List */}
                     <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                       {reviewsList.map((rev, idx) => (
-                        <div key={idx} className="p-3.5 rounded-2xl bg-muted/20 border border-border flex items-start justify-between gap-3 text-xs">
+                        <div
+                          key={idx}
+                          className="p-3.5 rounded-2xl bg-muted/20 border border-border flex items-start justify-between gap-3 text-xs"
+                        >
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-foreground">{rev.name}</span>
                               <span className="text-amber-400 font-bold flex items-center">
                                 ★ {rev.rating}
                               </span>
-                              <span className="text-muted-foreground text-[10px]">• {rev.date}</span>
+                              <span className="text-muted-foreground text-[10px]">
+                                • {rev.date}
+                              </span>
                             </div>
                             <p className="text-muted-foreground leading-relaxed">{rev.comment}</p>
                           </div>

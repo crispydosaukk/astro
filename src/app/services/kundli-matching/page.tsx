@@ -3,7 +3,19 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Sparkles, User, ArrowRight, ChevronDown, Globe, CheckCircle2, FileText, PhoneCall, Star, ShieldCheck } from 'lucide-react';
+import {
+  Heart,
+  Sparkles,
+  User,
+  ArrowRight,
+  ChevronDown,
+  Globe,
+  CheckCircle2,
+  FileText,
+  PhoneCall,
+  Star,
+  ShieldCheck,
+} from 'lucide-react';
 import CityLocationInput from '@/components/CityLocationInput';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
@@ -12,8 +24,22 @@ import { calculateAshtakootGunMilan } from '@/lib/vedicAstrologyEngine';
 
 export default function FreeKundliMatchingPage() {
   const { user } = useUserData();
-  const [groomData, setGroomData] = useState({ name: '', dob: '', tob: '', pob: '', lat: '', lon: '' });
-  const [brideData, setBrideData] = useState({ name: '', dob: '', tob: '', pob: '', lat: '', lon: '' });
+  const [groomData, setGroomData] = useState({
+    name: '',
+    dob: '',
+    tob: '',
+    pob: '',
+    lat: '',
+    lon: '',
+  });
+  const [brideData, setBrideData] = useState({
+    name: '',
+    dob: '',
+    tob: '',
+    pob: '',
+    lat: '',
+    lon: '',
+  });
   const [matchResult, setMatchResult] = useState<any | null>(null);
   const [apiReportData, setApiReportData] = useState<any | null>(null);
   const [isMatching, setIsMatching] = useState(false);
@@ -71,14 +97,38 @@ export default function FreeKundliMatchingPage() {
   };
 
   const ashtakootGuide = [
-    { title: 'Varna Koot (1 Point)', desc: 'Evaluates mental compatibility, spiritual ego, and mutual respect between bride and groom.' },
-    { title: 'Vashya Koot (2 Points)', desc: 'Measures magnetic attraction, mutual influence, and power balance in marriage.' },
-    { title: 'Tara Koot (3 Points)', desc: 'Calculates planetary birth star harmony for long-term health, destiny, and mutual well-being.' },
-    { title: 'Yoni Koot (4 Points)', desc: 'Determines physical compatibility, intimacy, and biological harmony between partners.' },
-    { title: 'Graha Maitri (5 Points)', desc: 'Assesses friendship, communication, intellectual connection, and emotional understanding.' },
-    { title: 'Gana Koot (6 Points)', desc: 'Evaluates behavioral temperament (Deva, Manushya, Rakshasa) and daily lifestyle harmony.' },
-    { title: 'Bhakoot Koot (7 Points)', desc: 'Governs financial prosperity, family growth, emotional depth, and marital longevity.' },
-    { title: 'Nadi Koot (8 Points)', desc: 'The most critical 8-point factor evaluating health of future progeny and genetic compatibility.' },
+    {
+      title: 'Varna Koot (1 Point)',
+      desc: 'Evaluates mental compatibility, spiritual ego, and mutual respect between bride and groom.',
+    },
+    {
+      title: 'Vashya Koot (2 Points)',
+      desc: 'Measures magnetic attraction, mutual influence, and power balance in marriage.',
+    },
+    {
+      title: 'Tara Koot (3 Points)',
+      desc: 'Calculates planetary birth star harmony for long-term health, destiny, and mutual well-being.',
+    },
+    {
+      title: 'Yoni Koot (4 Points)',
+      desc: 'Determines physical compatibility, intimacy, and biological harmony between partners.',
+    },
+    {
+      title: 'Graha Maitri (5 Points)',
+      desc: 'Assesses friendship, communication, intellectual connection, and emotional understanding.',
+    },
+    {
+      title: 'Gana Koot (6 Points)',
+      desc: 'Evaluates behavioral temperament (Deva, Manushya, Rakshasa) and daily lifestyle harmony.',
+    },
+    {
+      title: 'Bhakoot Koot (7 Points)',
+      desc: 'Governs financial prosperity, family growth, emotional depth, and marital longevity.',
+    },
+    {
+      title: 'Nadi Koot (8 Points)',
+      desc: 'The most critical 8-point factor evaluating health of future progeny and genetic compatibility.',
+    },
   ];
 
   return (
@@ -132,7 +182,8 @@ export default function FreeKundliMatchingPage() {
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
-                  Check marriage compatibility, Ashta Koota 36 Gun Milan score, Nadi Dosha, and Manglik alignment between you and your partner.
+                  Check marriage compatibility, Ashta Koota 36 Gun Milan score, Nadi Dosha, and
+                  Manglik alignment between you and your partner.
                 </p>
               </motion.div>
 
@@ -145,15 +196,21 @@ export default function FreeKundliMatchingPage() {
               >
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
                   <Star size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">36 Gun Milan Score</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    36 Gun Milan Score
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
                   <Heart size={16} className="text-rose-400" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Manglik Dosha Check</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Manglik Dosha Check
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
                   <ShieldCheck size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Ashta Koota Analysis</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Ashta Koota Analysis
+                  </span>
                 </div>
               </motion.div>
 
@@ -166,7 +223,9 @@ export default function FreeKundliMatchingPage() {
               >
                 <button
                   onClick={() => {
-                    document.getElementById('matching-form')?.scrollIntoView({ behavior: 'smooth' });
+                    document
+                      .getElementById('matching-form')
+                      ?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#C9952B]/40 text-sm sm:text-base"
                 >
@@ -191,8 +250,12 @@ export default function FreeKundliMatchingPage() {
             <span className="text-xs font-bold text-[#713B32] uppercase tracking-widest bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
               Kundli Milan Matrix
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#292522]">Enter Partner Details for 36 Gun Milan</h2>
-            <p className="text-xs sm:text-sm text-[#6B5E55]">Calculate Ashta Koota compatibility, Nadi Dosha, and Manglik cancellation</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#292522]">
+              Enter Partner Details for 36 Gun Milan
+            </h2>
+            <p className="text-xs sm:text-sm text-[#6B5E55]">
+              Calculate Ashta Koota compatibility, Nadi Dosha, and Manglik cancellation
+            </p>
           </div>
 
           <form onSubmit={handleMatch} className="space-y-6">
@@ -241,7 +304,14 @@ export default function FreeKundliMatchingPage() {
                   <CityLocationInput
                     label="Birth Place (City Search)*"
                     value={groomData.pob}
-                    onChange={(city, details) => setGroomData({ ...groomData, pob: city, lat: details?.lat || '', lon: details?.lon || '' })}
+                    onChange={(city, details) =>
+                      setGroomData({
+                        ...groomData,
+                        pob: city,
+                        lat: details?.lat || '',
+                        lon: details?.lon || '',
+                      })
+                    }
                     required
                   />
                 </div>
@@ -291,7 +361,14 @@ export default function FreeKundliMatchingPage() {
                   <CityLocationInput
                     label="Birth Place (City Search)*"
                     value={brideData.pob}
-                    onChange={(city, details) => setBrideData({ ...brideData, pob: city, lat: details?.lat || '', lon: details?.lon || '' })}
+                    onChange={(city, details) =>
+                      setBrideData({
+                        ...brideData,
+                        pob: city,
+                        lat: details?.lat || '',
+                        lon: details?.lon || '',
+                      })
+                    }
                     required
                   />
                 </div>
@@ -305,7 +382,11 @@ export default function FreeKundliMatchingPage() {
                 className="w-full sm:w-auto px-10 py-3.5 rounded-full gold-gradient-bg text-[#292522] font-extrabold text-sm sm:text-base shadow-xl hover:brightness-110 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Sparkles size={18} />
-                <span>{isMatching ? 'Calculating Gun Milan Score...' : 'Calculate Marriage Compatibility'}</span>
+                <span>
+                  {isMatching
+                    ? 'Calculating Gun Milan Score...'
+                    : 'Calculate Marriage Compatibility'}
+                </span>
               </button>
             </div>
           </form>
@@ -315,7 +396,10 @@ export default function FreeKundliMatchingPage() {
       {/* Result Section */}
       <AnimatePresence>
         {matchResult && (
-          <section id="match-report" className="py-8 bg-background/50 border-t border-white/5 space-y-6">
+          <section
+            id="match-report"
+            className="py-8 bg-background/50 border-t border-white/5 space-y-6"
+          >
             <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-6">
               <div className="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 text-center space-y-3">
                 <div className="flex justify-between items-center flex-wrap gap-2">
@@ -345,29 +429,42 @@ export default function FreeKundliMatchingPage() {
                 </div>
 
                 <div className="text-4xl sm:text-5xl font-black text-gradient-gold font-mono">
-                  {matchResult.totalScore} <span className="text-xl text-muted-foreground">/ 36</span>
+                  {matchResult.totalScore}{' '}
+                  <span className="text-xl text-muted-foreground">/ 36</span>
                 </div>
                 <p className="text-emerald-400 font-bold text-base">{matchResult.status}</p>
-                <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">{matchResult.verdict}</p>
+                <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">
+                  {matchResult.verdict}
+                </p>
 
                 {/* Planetary Signs & Manglik Analysis */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 text-left">
                   {matchResult.groomAstro && (
                     <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold">Your Planetary Alignment</div>
-                      <div className="text-xs font-bold text-[#C9952B]">{matchResult.groomAstro.rashiName}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                        Your Planetary Alignment
+                      </div>
+                      <div className="text-xs font-bold text-[#C9952B]">
+                        {matchResult.groomAstro.rashiName}
+                      </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {matchResult.groomAstro.nakshatraName} · {matchResult.groomAstro.gana} Gana · {matchResult.groomAstro.nadi} Nadi
+                        {matchResult.groomAstro.nakshatraName} · {matchResult.groomAstro.gana} Gana
+                        · {matchResult.groomAstro.nadi} Nadi
                       </div>
                     </div>
                   )}
 
                   {matchResult.brideAstro && (
                     <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold">Partner's Planetary Alignment</div>
-                      <div className="text-xs font-bold text-rose-400">{matchResult.brideAstro.rashiName}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase font-bold">
+                        Partner's Planetary Alignment
+                      </div>
+                      <div className="text-xs font-bold text-rose-400">
+                        {matchResult.brideAstro.rashiName}
+                      </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {matchResult.brideAstro.nakshatraName} · {matchResult.brideAstro.gana} Gana · {matchResult.brideAstro.nadi} Nadi
+                        {matchResult.brideAstro.nakshatraName} · {matchResult.brideAstro.gana} Gana
+                        · {matchResult.brideAstro.nadi} Nadi
                       </div>
                     </div>
                   )}
@@ -397,15 +494,19 @@ export default function FreeKundliMatchingPage() {
               <div className="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
                 <h3 className="text-lg font-bold text-foreground">Ashtakoot Score Breakdown</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {matchResult.ashtakoot && matchResult.ashtakoot.map((a: any) => (
-                    <div key={a.koot} className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-foreground text-xs">{a.koot}</span>
-                        <span className="text-xs font-bold text-[#C9952B]">{a.score}</span>
+                  {matchResult.ashtakoot &&
+                    matchResult.ashtakoot.map((a: any) => (
+                      <div
+                        key={a.koot}
+                        className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-foreground text-xs">{a.koot}</span>
+                          <span className="text-xs font-bold text-[#C9952B]">{a.score}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">{a.desc}</p>
                       </div>
-                      <p className="text-[11px] text-muted-foreground">{a.desc}</p>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
 
@@ -432,7 +533,10 @@ export default function FreeKundliMatchingPage() {
             <h2 className="text-2xl font-bold text-foreground">36 Ashtakoot Gun Milan System</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
               {ashtakootGuide.map((item) => (
-                <div key={item.title} className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                <div
+                  key={item.title}
+                  className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1"
+                >
                   <h4 className="font-bold text-[#C9952B] text-xs">{item.title}</h4>
                   <p className="text-[11px] text-muted-foreground leading-relaxed">{item.desc}</p>
                 </div>

@@ -25,7 +25,7 @@ export default function AstrologerDashboardPage() {
 
   useEffect(() => {
     let unsubscribeSnapshot: () => void;
-    
+
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const docRef = doc(db, 'astrologers', user.uid);
@@ -42,7 +42,7 @@ export default function AstrologerDashboardPage() {
           where('astrologerId', '==', user.uid),
           where('status', '==', 'active')
         );
-        
+
         unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
           const calls: any[] = [];
           snapshot.forEach((doc) => {
@@ -62,10 +62,10 @@ export default function AstrologerDashboardPage() {
   const toggleOnlineStatus = async () => {
     const user = auth.currentUser;
     if (!user) return;
-    
+
     const newStatus = !isOnline;
     setIsOnline(newStatus);
-    
+
     try {
       const docRef = doc(db, 'astrologers', user.uid);
       await updateDoc(docRef, { isOnline: newStatus });
@@ -86,16 +86,18 @@ export default function AstrologerDashboardPage() {
           <p className="text-muted-foreground mt-1">Here is your daily performance overview.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={toggleOnlineStatus}
             className={`px-4 py-2 rounded-xl border flex items-center gap-2 transition-all hover:opacity-80 ${
-              isOnline 
-                ? 'bg-green-500/10 border-green-500/20' 
-                : 'bg-red-500/10 border-red-500/20'
+              isOnline ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'
             }`}
           >
-            <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-            <span className={`text-sm font-semibold ${isOnline ? 'text-green-400' : 'text-red-400'}`}>
+            <div
+              className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}
+            />
+            <span
+              className={`text-sm font-semibold ${isOnline ? 'text-green-400' : 'text-red-400'}`}
+            >
               {isOnline ? 'You are Online' : 'You are Offline'}
             </span>
           </button>
@@ -114,14 +116,20 @@ export default function AstrologerDashboardPage() {
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-[#C9952B]/20 flex items-center justify-center animate-pulse">
-                  {call.type === 'video' ? <Phone className="text-[#C9952B]" /> : <MessageSquare className="text-[#C9952B]" />}
+                  {call.type === 'video' ? (
+                    <Phone className="text-[#C9952B]" />
+                  ) : (
+                    <MessageSquare className="text-[#C9952B]" />
+                  )}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-                    Incoming {call.type} Call <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    Incoming {call.type} Call{' '}
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-semibold text-white">{call.customerName}</span> is waiting for you to join the session.
+                    <span className="font-semibold text-white">{call.customerName}</span> is waiting
+                    for you to join the session.
                   </p>
                 </div>
               </div>

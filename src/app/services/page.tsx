@@ -3,7 +3,21 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Sparkles, Compass, Calendar, Sun, HeartHandshake, BookOpen, ShieldCheck, Flame, Zap, ArrowRight, Heart, Coins, Activity } from 'lucide-react';
+import {
+  Sparkles,
+  Compass,
+  Calendar,
+  Sun,
+  HeartHandshake,
+  BookOpen,
+  ShieldCheck,
+  Flame,
+  Zap,
+  ArrowRight,
+  Heart,
+  Coins,
+  Activity,
+} from 'lucide-react';
 import DynamicPageContent from '@/components/DynamicPageContent';
 import { useCurrency } from '@/lib/CurrencyContext';
 
@@ -161,7 +175,8 @@ export default function ServicesOverviewPage() {
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
-                  Free Vedic astrology calculation tools, Kundli matching, daily horoscope insights, meditation guides, and Mahadasha survival guides.
+                  Free Vedic astrology calculation tools, Kundli matching, daily horoscope insights,
+                  meditation guides, and Mahadasha survival guides.
                 </p>
               </motion.div>
 
@@ -174,7 +189,9 @@ export default function ServicesOverviewPage() {
               >
                 <button
                   onClick={() => {
-                    document.getElementById('services-grid')?.scrollIntoView({ behavior: 'smooth' });
+                    document
+                      .getElementById('services-grid')
+                      ?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#C9952B]/40 text-sm sm:text-base"
                 >
@@ -230,7 +247,11 @@ export default function ServicesOverviewPage() {
                         <p className="text-xs text-muted-foreground leading-relaxed">{svc.desc}</p>
                       </div>
                       <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/80 group-hover:text-white transition-colors pt-2">
-                        Access Free Service <ArrowRight size={14} className="text-[#C9952B] group-hover:translate-x-1 transition-transform" />
+                        Access Free Service{' '}
+                        <ArrowRight
+                          size={14}
+                          className="text-[#C9952B] group-hover:translate-x-1 transition-transform"
+                        />
                       </div>
                     </Link>
                   </motion.div>
@@ -271,7 +292,9 @@ export default function ServicesOverviewPage() {
                             {formatPrice(guide.priceINR, guide.priceUSD)}
                           </span>
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{guide.desc}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          {guide.desc}
+                        </p>
                       </div>
                     </Link>
                   </motion.div>

@@ -10,12 +10,18 @@ function initFirebaseAdmin() {
     if (process.env.FIREBASE_PRIVATE_KEY_BASE64) {
       privateKey = Buffer.from(process.env.FIREBASE_PRIVATE_KEY_BASE64, 'base64').toString('ascii');
     } else {
-      privateKey = process.env.FIREBASE_PRIVATE_KEY || '-----BEGIN PRIVATE KEY-----\ndemo\n-----END PRIVATE KEY-----\n';
+      privateKey =
+        process.env.FIREBASE_PRIVATE_KEY ||
+        '-----BEGIN PRIVATE KEY-----\ndemo\n-----END PRIVATE KEY-----\n';
       if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-        try { privateKey = JSON.parse(privateKey); } catch (e) {}
+        try {
+          privateKey = JSON.parse(privateKey);
+        } catch (_err) {
+          // Ignore JSON parse error and use raw key
+        }
       }
       privateKey = privateKey.replace(/\\n/g, '\n').replace(/^["']|["']$/g, '');
-      
+
       if (!privateKey.includes('BEGIN PRIVATE KEY') && privateKey.length > 100) {
         const rawKey = privateKey.replace(/\s+/g, '');
         const formattedKey = rawKey.match(/.{1,64}/g)?.join('\n') || rawKey;
@@ -44,12 +50,12 @@ export const adminAuth = new Proxy({} as any, {
   get: (target, prop) => {
     initFirebaseAdmin();
     return (getAuth() as any)[prop];
-  }
+  },
 });
 
 export const adminDb = new Proxy({} as any, {
   get: (target, prop) => {
     initFirebaseAdmin();
     return (getFirestore() as any)[prop];
-  }
+  },
 });

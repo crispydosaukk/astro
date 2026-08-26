@@ -16,7 +16,7 @@ import {
   Gem,
   Flame,
   Clock,
-  BookOpen
+  BookOpen,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CityLocationInput from '@/components/CityLocationInput';
@@ -53,9 +53,11 @@ const VAAR_PROFILES: Record<string, VaarDetail> = {
     direction: 'East (Purva)',
     mantra: 'ॐ ह्रां ह्रीं ह्रौं सः सूर्याय नमः ॥',
     element: 'Fire (Tejas)',
-    bestFor: 'Leadership decisions, government liaisons, taking medicines, inaugurations, public speeches, father blessings.',
+    bestFor:
+      'Leadership decisions, government liaisons, taking medicines, inaugurations, public speeches, father blessings.',
     avoidFor: 'Lending money, signing deceptive contracts, purchasing iron or dark blue items.',
-    significance: 'Governed by Surya Bhagavan, the Atmakaraka (soul significator) of Vedic astrology, infusing vitality, authority, and inner illumination.'
+    significance:
+      'Governed by Surya Bhagavan, the Atmakaraka (soul significator) of Vedic astrology, infusing vitality, authority, and inner illumination.',
   },
   Monday: {
     day: 'Monday (Somavar)',
@@ -69,9 +71,12 @@ const VAAR_PROFILES: Record<string, VaarDetail> = {
     direction: 'North-West (Vayavya)',
     mantra: 'ॐ श्रां श्रीं श्रौं सः चन्द्रमसे नमः ॥',
     element: 'Water (Jala)',
-    bestFor: 'Mental peace rituals, Shiva Puja, buying silver/milk/water products, planting flowers, romantic harmony, artistic pursuits.',
-    avoidFor: 'Harsh disciplinary arguments, heavy construction, surgical cuts or blood donations if Moon is debilitated.',
-    significance: 'Ruled by Chandra, presiding over the mind (Manas), intuition, maternal grace, and emotional equilibrium.'
+    bestFor:
+      'Mental peace rituals, Shiva Puja, buying silver/milk/water products, planting flowers, romantic harmony, artistic pursuits.',
+    avoidFor:
+      'Harsh disciplinary arguments, heavy construction, surgical cuts or blood donations if Moon is debilitated.',
+    significance:
+      'Ruled by Chandra, presiding over the mind (Manas), intuition, maternal grace, and emotional equilibrium.',
   },
   Tuesday: {
     day: 'Tuesday (Mangalvar)',
@@ -85,9 +90,12 @@ const VAAR_PROFILES: Record<string, VaarDetail> = {
     direction: 'South (Dakshina)',
     mantra: 'ॐ क्रां क्रीं क्रौं सः भौमाय नमः ॥',
     element: 'Fire (Agni)',
-    bestFor: 'Competitive exams, sports, legal litigation, Hanuman Chalisa recitation, land/property deeds, gym training, surgeries.',
-    avoidFor: 'Lending money (recovery becomes delayed), solemn peace treaties, delicate romantic discussions.',
-    significance: 'Governed by Mars, commander of the cosmic forces, bestowing immense physical stamina, bravery, and victory over adversaries.'
+    bestFor:
+      'Competitive exams, sports, legal litigation, Hanuman Chalisa recitation, land/property deeds, gym training, surgeries.',
+    avoidFor:
+      'Lending money (recovery becomes delayed), solemn peace treaties, delicate romantic discussions.',
+    significance:
+      'Governed by Mars, commander of the cosmic forces, bestowing immense physical stamina, bravery, and victory over adversaries.',
   },
   Wednesday: {
     day: 'Wednesday (Budhavar)',
@@ -101,9 +109,12 @@ const VAAR_PROFILES: Record<string, VaarDetail> = {
     direction: 'North (Uttara)',
     mantra: 'ॐ ब्रां ब्रीं ब्रौं सः बुधाय नमः ॥',
     element: 'Earth (Prithvi)',
-    bestFor: 'Business agreements, bookkeeping, marketing campaigns, communication, software coding, academic studies, signing contracts.',
-    avoidFor: 'Rash impulsive speculation, arguing with siblings or merchants, heavy emotional drama.',
-    significance: 'Governed by Budha, the planet of intelligence, speech (Vak), commerce, wit, and trade expansion.'
+    bestFor:
+      'Business agreements, bookkeeping, marketing campaigns, communication, software coding, academic studies, signing contracts.',
+    avoidFor:
+      'Rash impulsive speculation, arguing with siblings or merchants, heavy emotional drama.',
+    significance:
+      'Governed by Budha, the planet of intelligence, speech (Vak), commerce, wit, and trade expansion.',
   },
   Thursday: {
     day: 'Thursday (Guruvar)',
@@ -117,9 +128,12 @@ const VAAR_PROFILES: Record<string, VaarDetail> = {
     direction: 'North-East (Ishanya)',
     mantra: 'ॐ ग्रां ग्रीं ग्रौं सः गुरवे नमः ॥',
     element: 'Ether (Akasha)',
-    bestFor: 'Spiritual initiation, higher studies, temple visits, wealth investments, charity, legal advice, marriages, new learning.',
-    avoidFor: 'Washing hair/clothes with harsh chemicals (traditional lore), cruelty, gambling, excessive sarcasm.',
-    significance: 'Ruled by Devaguru Brihaspati, supreme benefactor of wisdom, righteousness (Dharma), wealth, progeny, and spiritual enlightenment.'
+    bestFor:
+      'Spiritual initiation, higher studies, temple visits, wealth investments, charity, legal advice, marriages, new learning.',
+    avoidFor:
+      'Washing hair/clothes with harsh chemicals (traditional lore), cruelty, gambling, excessive sarcasm.',
+    significance:
+      'Ruled by Devaguru Brihaspati, supreme benefactor of wisdom, righteousness (Dharma), wealth, progeny, and spiritual enlightenment.',
   },
   Friday: {
     day: 'Friday (Shukravar)',
@@ -133,9 +147,12 @@ const VAAR_PROFILES: Record<string, VaarDetail> = {
     direction: 'South-East (Agneya)',
     mantra: 'ॐ द्रां द्रीं द्रौं सः शुक्राय नमः ॥',
     element: 'Water (Jala)',
-    bestFor: 'Purchasing luxury goods, vehicle delivery, weddings, romance, music & dance, jewelry, spa treatments, Lakshmi Puja.',
-    avoidFor: 'Lending fine jewelry, contentious battles, harsh austerity or extreme ascetic practices.',
-    significance: 'Ruled by Shukracharya, bringing material prosperity, conjugal bliss, aesthetic refinement, and magnetic beauty.'
+    bestFor:
+      'Purchasing luxury goods, vehicle delivery, weddings, romance, music & dance, jewelry, spa treatments, Lakshmi Puja.',
+    avoidFor:
+      'Lending fine jewelry, contentious battles, harsh austerity or extreme ascetic practices.',
+    significance:
+      'Ruled by Shukracharya, bringing material prosperity, conjugal bliss, aesthetic refinement, and magnetic beauty.',
   },
   Saturday: {
     day: 'Saturday (Shanivar)',
@@ -149,21 +166,16 @@ const VAAR_PROFILES: Record<string, VaarDetail> = {
     direction: 'West (Pashchima)',
     mantra: 'ॐ प्रां प्रीं प्रौं सः शनैश्चराय नमः ॥',
     element: 'Air (Vayu)',
-    bestFor: 'Charity to underprivileged, feeding crows/dogs, Saturn temple oil lamps, long-term discipline, meditation, machinery maintenance.',
-    avoidFor: 'Starting joyful celebrations (vivaha), purchasing mustard oil for personal use, disrespecting laborers or elders.',
-    significance: 'Governed by Shani Bhagavan, Lord of Karma and Justice, instilling perseverance, detachment, endurance, and profound life lessons.'
-  }
+    bestFor:
+      'Charity to underprivileged, feeding crows/dogs, Saturn temple oil lamps, long-term discipline, meditation, machinery maintenance.',
+    avoidFor:
+      'Starting joyful celebrations (vivaha), purchasing mustard oil for personal use, disrespecting laborers or elders.',
+    significance:
+      'Governed by Shani Bhagavan, Lord of Karma and Justice, instilling perseverance, detachment, endurance, and profound life lessons.',
+  },
 };
 
-const ALL_VAARS = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday'
-];
+const ALL_VAARS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export default function VaarPage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -200,7 +212,7 @@ export default function VaarPage() {
       Wednesday: 'Mercury',
       Thursday: 'Jupiter',
       Friday: 'Venus',
-      Saturday: 'Saturn'
+      Saturday: 'Saturn',
     };
 
     const [h, m] = selectedTime.split(':').map(Number);
@@ -216,7 +228,7 @@ export default function VaarPage() {
     return {
       planet: currentPlanet,
       horaNumber: (horaIndex % 12) + 1,
-      isNightHora: horaIndex >= 12
+      isNightHora: horaIndex >= 12,
     };
   }, [selectedTime, activeDayKey]);
 
@@ -260,7 +272,8 @@ export default function VaarPage() {
             Today Vaar — Planetary Day Ruler
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto">
-            Discover the cosmic ruler, presiding deity, lucky gemstone, colors, and ideal actions for any chosen date and location.
+            Discover the cosmic ruler, presiding deity, lucky gemstone, colors, and ideal actions
+            for any chosen date and location.
           </p>
         </div>
 
@@ -278,7 +291,10 @@ export default function VaarPage() {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm focus:border-[#C9952B] outline-none transition-colors"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none"
+                />
               </div>
             </div>
 
@@ -293,13 +309,22 @@ export default function VaarPage() {
                   onChange={(e) => setSelectedTime(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm focus:border-[#C9952B] outline-none transition-colors"
                 />
-                <Clock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                <Clock
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none"
+                />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Location / City</label>
-              <CityLocationInput value={location} onChange={(city: string) => setLocation(city)} placeholder="Search city" />
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Location / City
+              </label>
+              <CityLocationInput
+                value={location}
+                onChange={(city: string) => setLocation(city)}
+                placeholder="Search city"
+              />
             </div>
 
             <button
@@ -307,17 +332,36 @@ export default function VaarPage() {
               disabled={isCalculating}
               className="w-full py-3.5 rounded-2xl gold-gradient-bg text-[#292522] font-bold text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
             >
-              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {isCalculating ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Sparkles size={18} />
+              )}
               <span>{isCalculating ? 'Calculating...' : 'Check Vaar'}</span>
             </button>
           </div>
 
           <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs sm:text-sm font-semibold text-[#C9952B]">
-            <div className="flex items-center gap-2"><MapPin size={15} /><span>{location}</span></div>
-            <div className="flex items-center gap-2"><Calendar size={15} /><span>{panchang.formattedDate}</span></div>
-            <div className="flex items-center gap-2"><Sun size={15} /><span>Sunrise: {panchang.sunrise}</span></div>
-            <div className="flex items-center gap-2"><Moon size={15} /><span>Sunset: {panchang.sunset}</span></div>
-            <div className="flex items-center gap-2"><Sparkles size={15} /><span>Tithi: {panchang.tithi}</span></div>
+            <div className="flex items-center gap-2">
+              <MapPin size={15} />
+              <span>{location}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar size={15} />
+              <span>{panchang.formattedDate}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Sun size={15} />
+              <span>Sunrise: {panchang.sunrise}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Moon size={15} />
+              <span>Sunset: {panchang.sunset}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Sparkles size={15} />
+              <span>Tithi: {panchang.tithi}</span>
+            </div>
           </div>
         </div>
 
@@ -329,9 +373,7 @@ export default function VaarPage() {
                 <Sparkles size={13} className="text-[#F6D075]" /> Active Weekday Lord (वार अधिपति)
               </span>
               <div className="flex items-center gap-3 flex-wrap">
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
-                  {activeVaar.day}
-                </h2>
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-white">{activeVaar.day}</h2>
                 <span className="text-xl font-serif text-[#F6D075]">({activeVaar.sanskrit})</span>
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#B88A44]/30 text-[#F6D075] border border-[#B88A44]/50">
                   {activeVaar.nature}
@@ -340,7 +382,9 @@ export default function VaarPage() {
             </div>
 
             <div className="text-left sm:text-right bg-white/10 sm:bg-transparent p-3 sm:p-0 rounded-2xl border border-white/10 sm:border-0 space-y-0.5">
-              <p className="text-xs text-white/75 uppercase tracking-wider">Hourly Hora Ruler ({selectedTime})</p>
+              <p className="text-xs text-white/75 uppercase tracking-wider">
+                Hourly Hora Ruler ({selectedTime})
+              </p>
               <p className="text-lg sm:text-xl font-extrabold text-[#F6D075]">
                 {activeHoraPlanet.planet} Hora (Slot #{activeHoraPlanet.horaNumber})
               </p>
@@ -396,19 +440,24 @@ export default function VaarPage() {
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 uppercase">
                 <CheckCircle2 size={15} /> Highly Favorable Activities
               </div>
-              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{activeVaar.bestFor}</p>
+              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
+                {activeVaar.bestFor}
+              </p>
             </div>
 
             <div className="p-4.5 rounded-2xl bg-rose-950/50 border border-rose-500/30 space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-rose-300 uppercase">
                 <XCircle size={15} /> Activities to Avoid
               </div>
-              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{activeVaar.avoidFor}</p>
+              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
+                {activeVaar.avoidFor}
+              </p>
             </div>
           </div>
 
           <p className="text-xs sm:text-sm text-white/85 leading-relaxed pt-1 border-t border-white/15">
-            <strong className="text-[#F6D075]">Vedic Significance:</strong> {activeVaar.significance}
+            <strong className="text-[#F6D075]">Vedic Significance:</strong>{' '}
+            {activeVaar.significance}
           </p>
         </div>
 
@@ -476,4 +525,3 @@ export default function VaarPage() {
     </div>
   );
 }
-

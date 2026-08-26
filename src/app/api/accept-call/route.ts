@@ -10,11 +10,11 @@ export async function POST(req: Request) {
     }
 
     const consultationRef = adminDb.collection('consultations').doc(consultationId);
-    
+
     // Update consultation status to active
     await consultationRef.update({
       status: 'active',
-      acceptedAt: new Date().toISOString()
+      acceptedAt: new Date().toISOString(),
     });
 
     return NextResponse.json({ success: true });

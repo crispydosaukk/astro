@@ -30,7 +30,13 @@ import {
 } from 'lucide-react';
 import ServiceReportForm from '@/components/ServiceReportForm';
 import VastuConsultationForm from '@/components/VastuConsultationForm';
-import { getServicePageContent, VastuServiceContent, defaultVastuContent, getHomepageContent, HomepageContent } from '@/lib/cms';
+import {
+  getServicePageContent,
+  VastuServiceContent,
+  defaultVastuContent,
+  getHomepageContent,
+  HomepageContent,
+} from '@/lib/cms';
 import DynamicPageContent from '@/components/DynamicPageContent';
 
 export default function VastuServicePage() {
@@ -64,10 +70,20 @@ export default function VastuServicePage() {
       border: 'border-[#E5D9C8]',
       icon: Sun,
       mainImage: '/assets/images/vastu/image3.jpeg',
-      gallery: ['/assets/images/vastu/image2.jpeg', '/assets/images/vastu/image3.jpeg', '/assets/images/vastu/image1.gif'],
+      gallery: [
+        '/assets/images/vastu/image2.jpeg',
+        '/assets/images/vastu/image3.jpeg',
+        '/assets/images/vastu/image1.gif',
+      ],
       governs: ['Growth', 'Reputation & Fame', 'New Opportunities', 'Vitality & Health'],
-      imbalance: ['Lack of recognition', 'Low confidence', 'Slow career progress', 'Stagnant opportunities'],
-      remedy: 'Keep uncluttered and open to morning sunlight. Place copper Sun symbol or crystal prisms.',
+      imbalance: [
+        'Lack of recognition',
+        'Low confidence',
+        'Slow career progress',
+        'Stagnant opportunities',
+      ],
+      remedy:
+        'Keep uncluttered and open to morning sunlight. Place copper Sun symbol or crystal prisms.',
     },
     {
       id: 'southeast',
@@ -79,10 +95,24 @@ export default function VastuServicePage() {
       border: 'border-[#E5D9C8]',
       icon: Flame,
       mainImage: '/assets/images/vastu/image5.png',
-      gallery: ['/assets/images/vastu/image4.jpeg', '/assets/images/vastu/image5.png', '/assets/images/vastu/image6.jpeg'],
-      governs: ['Energy & Vitality', 'Health & Digestion', 'Cash Flow & Liquidity', 'Power & Drive'],
-      imbalance: ['Health complications', 'Frequent anger & conflicts', 'Financial instability & cash crunch'],
-      remedy: 'Ideal for kitchen/electricals. Avoid blue colors or water tanks here. Keep warm and energized.',
+      gallery: [
+        '/assets/images/vastu/image4.jpeg',
+        '/assets/images/vastu/image5.png',
+        '/assets/images/vastu/image6.jpeg',
+      ],
+      governs: [
+        'Energy & Vitality',
+        'Health & Digestion',
+        'Cash Flow & Liquidity',
+        'Power & Drive',
+      ],
+      imbalance: [
+        'Health complications',
+        'Frequent anger & conflicts',
+        'Financial instability & cash crunch',
+      ],
+      remedy:
+        'Ideal for kitchen/electricals. Avoid blue colors or water tanks here. Keep warm and energized.',
     },
     {
       id: 'south',
@@ -94,10 +124,15 @@ export default function VastuServicePage() {
       border: 'border-[#E5D9C8]',
       icon: Shield,
       mainImage: '/assets/images/vastu/image7.jpeg',
-      gallery: ['/assets/images/vastu/image7.jpeg', '/assets/images/vastu/image8.jpeg', '/assets/images/vastu/image9.jpeg'],
+      gallery: [
+        '/assets/images/vastu/image7.jpeg',
+        '/assets/images/vastu/image8.jpeg',
+        '/assets/images/vastu/image9.jpeg',
+      ],
       governs: ['Discipline', 'Authoritative Control', 'Longevity & Health', 'Career Stability'],
       imbalance: ['Inner fears & anxiety', 'Career instability', 'Lack of command & authority'],
-      remedy: 'Keep heavier than North/East. Use closed solid walls, earthy tones, and avoid underground water.',
+      remedy:
+        'Keep heavier than North/East. Use closed solid walls, earthy tones, and avoid underground water.',
     },
     {
       id: 'southwest',
@@ -110,9 +145,19 @@ export default function VastuServicePage() {
       icon: Layers,
       mainImage: '/assets/images/vastu/image10.png',
       gallery: ['/assets/images/vastu/image10.png'],
-      governs: ['Master Stability', 'Marital Relationships', 'Long-term Success', 'Life Foundation'],
-      imbalance: ['Severe life instability', 'Relationship disputes & divorces', 'Financial insecurity'],
-      remedy: 'Master bedroom zone. Heaviest part of property. Use yellow/earth tones, zero borewells or cuts.',
+      governs: [
+        'Master Stability',
+        'Marital Relationships',
+        'Long-term Success',
+        'Life Foundation',
+      ],
+      imbalance: [
+        'Severe life instability',
+        'Relationship disputes & divorces',
+        'Financial insecurity',
+      ],
+      remedy:
+        'Master bedroom zone. Heaviest part of property. Use yellow/earth tones, zero borewells or cuts.',
     },
     {
       id: 'west',
@@ -125,9 +170,15 @@ export default function VastuServicePage() {
       icon: Droplets,
       mainImage: '/assets/images/vastu/image11.png',
       gallery: ['/assets/images/vastu/image11.png', '/assets/images/vastu/image12.jpeg'],
-      governs: ['Gains & Profitability', 'Fulfillment of Desires', 'Rewards of Hard Work', 'Emotional Balance'],
+      governs: [
+        'Gains & Profitability',
+        'Fulfillment of Desires',
+        'Rewards of Hard Work',
+        'Emotional Balance',
+      ],
       imbalance: ['Delayed results despite effort', 'Emotional stress', 'Chronic dissatisfaction'],
-      remedy: 'Ideal for dining room, study, or overhead water tanks. Use grey/white tones and metallic accents.',
+      remedy:
+        'Ideal for dining room, study, or overhead water tanks. Use grey/white tones and metallic accents.',
     },
     {
       id: 'northwest',
@@ -139,10 +190,24 @@ export default function VastuServicePage() {
       border: 'border-[#E5D9C8]',
       icon: Wind,
       mainImage: '/assets/images/vastu/image13.png',
-      gallery: ['/assets/images/vastu/image13.png', '/assets/images/vastu/image14.png', '/assets/images/vastu/image15.jpeg'],
-      governs: ['Movement & Travel', 'Social Networks & Support', 'Helpful Friends', 'Positive Change'],
-      imbalance: ['Unstable living situations', 'Disruptive frequent changes', 'Mental restlessness & anxiety'],
-      remedy: 'Guest bedroom or finished product storage. Use white/cream tones, ensure active fresh airflow.',
+      gallery: [
+        '/assets/images/vastu/image13.png',
+        '/assets/images/vastu/image14.png',
+        '/assets/images/vastu/image15.jpeg',
+      ],
+      governs: [
+        'Movement & Travel',
+        'Social Networks & Support',
+        'Helpful Friends',
+        'Positive Change',
+      ],
+      imbalance: [
+        'Unstable living situations',
+        'Disruptive frequent changes',
+        'Mental restlessness & anxiety',
+      ],
+      remedy:
+        'Guest bedroom or finished product storage. Use white/cream tones, ensure active fresh airflow.',
     },
     {
       id: 'north',
@@ -154,10 +219,20 @@ export default function VastuServicePage() {
       border: 'border-[#E5D9C8]',
       icon: Coins,
       mainImage: '/assets/images/vastu/image16.png',
-      gallery: ['/assets/images/vastu/image16.png', '/assets/images/vastu/image17.jpeg', '/assets/images/vastu/image18.jpeg'],
-      governs: ['Wealth & Prosperity', 'Continuous Income Flow', 'New Career Openings', 'Business Growth'],
+      gallery: [
+        '/assets/images/vastu/image16.png',
+        '/assets/images/vastu/image17.jpeg',
+        '/assets/images/vastu/image18.jpeg',
+      ],
+      governs: [
+        'Wealth & Prosperity',
+        'Continuous Income Flow',
+        'New Career Openings',
+        'Business Growth',
+      ],
       imbalance: ['Financial blockage', 'Missed business opportunities', 'Stagnant income growth'],
-      remedy: 'Keep light, open, and clean. Place cash locker facing North, water fountain, or green plants.',
+      remedy:
+        'Keep light, open, and clean. Place cash locker facing North, water fountain, or green plants.',
     },
     {
       id: 'northeast',
@@ -169,10 +244,24 @@ export default function VastuServicePage() {
       border: 'border-[#E5D9C8]',
       icon: Sparkles,
       mainImage: '/assets/images/vastu/image21.png',
-      gallery: ['/assets/images/vastu/image21.png', '/assets/images/vastu/image19.jpeg', '/assets/images/vastu/image20.jpeg'],
-      governs: ['Mental Clarity', 'Spiritual Awakening', 'Divine Intuition', 'Wisdom & Life Vision'],
-      imbalance: ['Chronic confusion', 'Disastrous decision-making', 'Lack of life direction & focus'],
-      remedy: 'Sacred Mandir / Meditation zone. Keep completely clutter-free, clean water pot, zero toilets/heavy loads.',
+      gallery: [
+        '/assets/images/vastu/image21.png',
+        '/assets/images/vastu/image19.jpeg',
+        '/assets/images/vastu/image20.jpeg',
+      ],
+      governs: [
+        'Mental Clarity',
+        'Spiritual Awakening',
+        'Divine Intuition',
+        'Wisdom & Life Vision',
+      ],
+      imbalance: [
+        'Chronic confusion',
+        'Disastrous decision-making',
+        'Lack of life direction & focus',
+      ],
+      remedy:
+        'Sacred Mandir / Meditation zone. Keep completely clutter-free, clean water pot, zero toilets/heavy loads.',
     },
   ];
 
@@ -181,21 +270,25 @@ export default function VastuServicePage() {
       id: 'wealth',
       title: 'Financial Blockages & Cash Crunch',
       icon: Coins,
-      problem: 'Money gets stuck, delayed payments, lack of new client opportunities, irregular cash flow.',
+      problem:
+        'Money gets stuck, delayed payments, lack of new client opportunities, irregular cash flow.',
       targetDirections: ['North (Kubera Zone)', 'Southeast (Agni Zone)'],
       insights:
         'The North governs wealth inflow and new opportunities, while Southeast governs daily cash liquidity and expenditure. Check for clutter or heavy storage in the North, and water elements/blue colors in the Southeast.',
-      actionPlan: 'Clear the North zone, place an energizing water fountain or Kubera Yantra. Ensure Southeast is illuminated with fire elements.',
+      actionPlan:
+        'Clear the North zone, place an energizing water fountain or Kubera Yantra. Ensure Southeast is illuminated with fire elements.',
     },
     {
       id: 'clarity',
       title: 'Confusion & Wrong Decision Making',
       icon: Eye,
-      problem: 'Mental fog, lack of clear life purpose, repeating identical mistakes, lack of peace.',
+      problem:
+        'Mental fog, lack of clear life purpose, repeating identical mistakes, lack of peace.',
       targetDirections: ['Northeast (Ishana Zone)'],
       insights:
         'Northeast is the sacred head of Vastu Purusha representing divine consciousness. Any toilet, heavy clutter, or kitchen in the Northeast blocks clarity and leads to poor judgments.',
-      actionPlan: 'Establish a pristine prayer/meditation space in the Northeast. Remove all dustbins and heavy items immediately.',
+      actionPlan:
+        'Establish a pristine prayer/meditation space in the Northeast. Remove all dustbins and heavy items immediately.',
     },
     {
       id: 'instability',
@@ -205,7 +298,8 @@ export default function VastuServicePage() {
       targetDirections: ['Southwest (Nairṛti Zone)'],
       insights:
         'Southwest is the anchor of stability and relationships. Underground tanks, missing corners, or main doors in the Southwest create severe vulnerability and relationship fractures.',
-      actionPlan: 'Position the master bedroom in the Southwest with heavy wooden furniture and warm earthy yellow tones.',
+      actionPlan:
+        'Position the master bedroom in the Southwest with heavy wooden furniture and warm earthy yellow tones.',
     },
     {
       id: 'health',
@@ -215,7 +309,8 @@ export default function VastuServicePage() {
       targetDirections: ['Southeast (Agni Zone)', 'East (Surya Zone)'],
       insights:
         'Southeast governs metabolic fire (Jatharagni) and drive. Water in Southeast extinguishes vitality, while a blocked East stops solar life energy (Prana).',
-      actionPlan: 'Ensure morning sunlight enters the East. Keep the kitchen fire in the Southeast quadrant facing East while cooking.',
+      actionPlan:
+        'Ensure morning sunlight enters the East. Keep the kitchen fire in the Southeast quadrant facing East while cooking.',
     },
   ];
 
@@ -247,9 +342,13 @@ export default function VastuServicePage() {
             <div className="max-w-3xl space-y-6">
               {/* Breadcrumb */}
               <div className="flex items-center gap-2 text-xs sm:text-sm text-white/70">
-                <Link href="/" className="hover:text-[#F6D075] transition-colors">Home</Link>
+                <Link href="/" className="hover:text-[#F6D075] transition-colors">
+                  Home
+                </Link>
                 <span>/</span>
-                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">Remedies</Link>
+                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">
+                  Remedies
+                </Link>
                 <span>/</span>
                 <span className="text-[#F6D075] font-semibold">Vastu Alignment</span>
               </div>
@@ -280,7 +379,9 @@ export default function VastuServicePage() {
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
-                  Vāstu is not merely about physical structure—it is about harmonizing natural directional energies with your internal karma to unlock clarity, health, stability, and enduring wealth.
+                  Vāstu is not merely about physical structure—it is about harmonizing natural
+                  directional energies with your internal karma to unlock clarity, health,
+                  stability, and enduring wealth.
                 </p>
               </motion.div>
 
@@ -294,7 +395,8 @@ export default function VastuServicePage() {
                   तस्मात् सुसंस्थिते देशे सुखं समृद्धिर्विवर्धते ॥
                 </p>
                 <p className="text-xs text-white/70 italic pt-1 border-t border-white/10">
-                  &quot;When space is properly aligned in all directions, harmony arises. In a well-balanced environment, happiness and prosperity naturally grow.&quot;
+                  &quot;When space is properly aligned in all directions, harmony arises. In a
+                  well-balanced environment, happiness and prosperity naturally grow.&quot;
                 </p>
               </div>
 
@@ -335,7 +437,8 @@ export default function VastuServicePage() {
               Why Vāstu is Important as a Remedy
             </h2>
             <p className="text-xs sm:text-sm text-[#6B5E55]">
-              Vāstu aligns your external physical environment to actively support and accelerate your internal karma.
+              Vāstu aligns your external physical environment to actively support and accelerate
+              your internal karma.
             </p>
           </div>
 
@@ -346,7 +449,8 @@ export default function VastuServicePage() {
               </div>
               <h3 className="text-base font-bold text-[#292522]">Space Influences Results</h3>
               <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-                Even with an auspicious horoscope, improper space creates friction and delays. Aligned space enables smoother outcomes and faster manifestation.
+                Even with an auspicious horoscope, improper space creates friction and delays.
+                Aligned space enables smoother outcomes and faster manifestation.
               </p>
             </div>
 
@@ -356,7 +460,8 @@ export default function VastuServicePage() {
               </div>
               <h3 className="text-base font-bold text-[#292522]">Directional Life Energies</h3>
               <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-                Each of the 8 directions governs a fundamental quadrant of human experience—from wealth (North) and clarity (Northeast) to stability (Southwest).
+                Each of the 8 directions governs a fundamental quadrant of human experience—from
+                wealth (North) and clarity (Northeast) to stability (Southwest).
               </p>
             </div>
 
@@ -366,7 +471,9 @@ export default function VastuServicePage() {
               </div>
               <h3 className="text-base font-bold text-[#292522]">Silent 24/7 Remedy</h3>
               <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-                Unlike rituals or mantras that require daily effort, aligned space works continuously around the clock, silently supporting and magnifying all other remedies.
+                Unlike rituals or mantras that require daily effort, aligned space works
+                continuously around the clock, silently supporting and magnifying all other
+                remedies.
               </p>
             </div>
 
@@ -376,7 +483,8 @@ export default function VastuServicePage() {
               </div>
               <h3 className="text-base font-bold text-[#292522]">Reduces Life Resistance</h3>
               <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-                When environmental resistance is removed, personal effort produces exponential results. Timing (Astrology) and Environment (Vāstu) work in unison.
+                When environmental resistance is removed, personal effort produces exponential
+                results. Timing (Astrology) and Environment (Vāstu) work in unison.
               </p>
             </div>
           </div>
@@ -394,7 +502,8 @@ export default function VastuServicePage() {
               The 8 Directions &amp; Life Areas
             </h2>
             <p className="text-xs sm:text-sm text-[#6B5E55]">
-              Explore the governing deities, elements, visual layout diagrams, and corrective remedies for each directional sector.
+              Explore the governing deities, elements, visual layout diagrams, and corrective
+              remedies for each directional sector.
             </p>
           </div>
 
@@ -445,7 +554,9 @@ export default function VastuServicePage() {
 
                     {/* Governs */}
                     <div className="space-y-1">
-                      <p className="text-[11px] font-bold text-[#713B32] uppercase tracking-wider">Governs:</p>
+                      <p className="text-[11px] font-bold text-[#713B32] uppercase tracking-wider">
+                        Governs:
+                      </p>
                       <ul className="text-xs text-[#292522] space-y-1">
                         {d.governs.map((g, idx) => (
                           <li key={idx} className="flex items-center gap-1.5 text-[11.5px]">
@@ -457,7 +568,9 @@ export default function VastuServicePage() {
 
                     {/* Imbalance */}
                     <div className="space-y-1 pt-2 border-t border-[#E5D9C8]">
-                      <p className="text-[11px] font-bold text-[#713B32] uppercase tracking-wider">If Imbalanced:</p>
+                      <p className="text-[11px] font-bold text-[#713B32] uppercase tracking-wider">
+                        If Imbalanced:
+                      </p>
                       <ul className="text-xs text-[#6B5E55] space-y-1">
                         {d.imbalance.map((imb, idx) => (
                           <li key={idx} className="flex items-center gap-1.5 text-[11px]">
@@ -523,7 +636,8 @@ export default function VastuServicePage() {
               Direction-Based Problem Diagnosis
             </h2>
             <p className="text-xs sm:text-sm text-[#6B5E55]">
-              Identify real-world challenges and discover which specific directional zones require immediate balancing.
+              Identify real-world challenges and discover which specific directional zones require
+              immediate balancing.
             </p>
           </div>
 
@@ -563,7 +677,9 @@ export default function VastuServicePage() {
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5D9C8] pb-5">
                     <div>
-                      <h3 className="text-xl sm:text-2xl font-extrabold text-[#292522]">{active.title}</h3>
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-[#292522]">
+                        {active.title}
+                      </h3>
                       <p className="text-xs sm:text-sm text-[#713B32] mt-1 flex items-center gap-1.5 font-medium">
                         <AlertTriangle size={14} /> Symptoms: {active.problem}
                       </p>
@@ -586,14 +702,18 @@ export default function VastuServicePage() {
                       <h4 className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-2">
                         <HelpCircle size={15} /> Vastu Root Cause Analysis
                       </h4>
-                      <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">{active.insights}</p>
+                      <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
+                        {active.insights}
+                      </p>
                     </div>
 
                     <div className="p-5 rounded-2xl bg-emerald-50/90 border border-emerald-200 space-y-2">
                       <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-2">
                         <CheckCircle2 size={15} /> Corrective Action Plan
                       </h4>
-                      <p className="text-xs sm:text-sm text-emerald-950 leading-relaxed font-medium">{active.actionPlan}</p>
+                      <p className="text-xs sm:text-sm text-emerald-950 leading-relaxed font-medium">
+                        {active.actionPlan}
+                      </p>
                     </div>
                   </div>
                 </motion.div>
@@ -614,7 +734,8 @@ export default function VastuServicePage() {
                 The 3 Golden Pillars of Life Harmony
               </h2>
               <p className="text-xs sm:text-sm text-white/80 max-w-2xl mx-auto">
-                If these three cardinal zones are balanced, personal stability, mental clarity, and wealth flow improve dramatically.
+                If these three cardinal zones are balanced, personal stability, mental clarity, and
+                wealth flow improve dramatically.
               </p>
             </div>
 
@@ -631,7 +752,8 @@ export default function VastuServicePage() {
                 <div className="text-2xl mb-1">🕉️</div>
                 <h3 className="text-base font-bold text-[#F6D075]">Northeast = Clarity</h3>
                 <p className="text-xs text-white/85 leading-relaxed">
-                  The head of consciousness providing vision, sound decision-making, and divine grace.
+                  The head of consciousness providing vision, sound decision-making, and divine
+                  grace.
                 </p>
               </div>
 
@@ -639,13 +761,15 @@ export default function VastuServicePage() {
                 <div className="text-2xl mb-1">💰</div>
                 <h3 className="text-base font-bold text-emerald-400">North = Wealth</h3>
                 <p className="text-xs text-white/85 leading-relaxed">
-                  The active flow of financial abundance, income streams, and expanding opportunities.
+                  The active flow of financial abundance, income streams, and expanding
+                  opportunities.
                 </p>
               </div>
             </div>
 
             <p className="text-xs sm:text-sm font-semibold text-[#F6D075] italic">
-              &quot;Each direction governs a specific aspect of life — when balanced, it supports complete harmony, stability, and growth.&quot;
+              &quot;Each direction governs a specific aspect of life — when balanced, it supports
+              complete harmony, stability, and growth.&quot;
             </p>
           </div>
         </div>
@@ -661,7 +785,11 @@ export default function VastuServicePage() {
       <section className="py-10 bg-[#EDE4D5]/60 border-t border-[#E5D9C8]">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-2">
           <p className="text-[11px] sm:text-xs text-[#713B32] leading-relaxed">
-            <strong>Advisory Note:</strong> The above guidance is based on classical Vedic astrological &amp; Vastu Shastra principles. Astrology (Graha) governs planetary timing &amp; karma, while Vāstu governs your immediate living environment. For personalized recommendations tailored to your birth chart and property layout, we strongly recommend consulting a certified AstroParihar astrologer.
+            <strong>Advisory Note:</strong> The above guidance is based on classical Vedic
+            astrological &amp; Vastu Shastra principles. Astrology (Graha) governs planetary timing
+            &amp; karma, while Vāstu governs your immediate living environment. For personalized
+            recommendations tailored to your birth chart and property layout, we strongly recommend
+            consulting a certified AstroParihar astrologer.
           </p>
         </div>
       </section>
@@ -673,7 +801,8 @@ export default function VastuServicePage() {
             Harmonize Your <span className="text-gradient-gold">Living &amp; Working Space</span>
           </h2>
           <p className="text-white/70 mb-8 max-w-xl mx-auto text-sm sm:text-base">
-            Get an interactive 8-directional Vastu analysis with room-by-room non-demolition remedies.
+            Get an interactive 8-directional Vastu analysis with room-by-room non-demolition
+            remedies.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link

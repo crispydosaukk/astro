@@ -13,7 +13,8 @@ export async function POST(req: Request) {
 
     // Fetch dynamic settings
     const settings = await getSettings();
-    const secretKey = settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
+    const secretKey =
+      settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
 
     const stripe = new Stripe(secretKey, {
       apiVersion: '2026-07-29.dahlia' as any,
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      customer_email: (userEmail && userEmail !== 'demo@example.com') ? userEmail : undefined,
+      customer_email: userEmail && userEmail !== 'demo@example.com' ? userEmail : undefined,
       line_items: [
         {
           price_data: {
@@ -50,16 +51,21 @@ export async function POST(req: Request) {
 
     // Import admin dynamically or at top. We will import at top.
     const { adminDb } = await import('@/lib/firebase/admin');
-    
+
     // Create pending transaction in Firestore
-    await adminDb.collection('users').doc(userId).collection('wallet_transactions').doc(session.id).set({
-      amount: amount,
-      type: 'credit',
-      status: 'failed', // Default to failed, verify API will mark it as completed
-      date: new Date().toISOString(),
-      description: 'Wallet Recharge',
-      stripeSessionId: session.id,
-    });
+    await adminDb
+      .collection('users')
+      .doc(userId)
+      .collection('wallet_transactions')
+      .doc(session.id)
+      .set({
+        amount: amount,
+        type: 'credit',
+        status: 'failed', // Default to failed, verify API will mark it as completed
+        date: new Date().toISOString(),
+        description: 'Wallet Recharge',
+        stripeSessionId: session.id,
+      });
 
     return NextResponse.json({ id: session.id, url: session.url });
   } catch (error: any) {

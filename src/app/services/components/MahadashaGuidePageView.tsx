@@ -74,7 +74,8 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
 
     if (!user) {
       toast.error('Please sign in to purchase this guide');
-      const returnUrl = typeof window !== 'undefined' ? window.location.pathname : `/services/${guideId}`;
+      const returnUrl =
+        typeof window !== 'undefined' ? window.location.pathname : `/services/${guideId}`;
       router.push(`/sign-up-login-screen?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
@@ -88,7 +89,7 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
         return;
       }
 
-      const rawPrice = currencyCode === 'USD' ? (guide.priceUSD || 19) : (guide.price || 499);
+      const rawPrice = currencyCode === 'USD' ? guide.priceUSD || 19 : guide.price || 499;
 
       const reportDetails = {
         userId: user.uid,
@@ -257,11 +258,15 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
               >
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
                   <ShieldCheck size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">100% Authentic Remedies</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    100% Authentic Remedies
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
                   <CheckCircle2 size={16} className="text-emerald-400" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Official PDF Publication</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Official PDF Publication
+                  </span>
                 </div>
               </motion.div>
 
@@ -287,7 +292,11 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
                       className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 shadow-2xl shadow-[#C9952B]/40 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm sm:text-base"
                     >
                       <Lock size={18} />
-                      <span>{isProcessingPayment ? 'Opening Razorpay...' : `Buy & Instant Access (${displayPrice})`}</span>
+                      <span>
+                        {isProcessingPayment
+                          ? 'Opening Razorpay...'
+                          : `Buy & Instant Access (${displayPrice})`}
+                      </span>
                     </button>
                     <Link
                       href="/my-reports"
@@ -307,14 +316,23 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
       <section className="py-12 lg:py-16 bg-background relative z-10 space-y-12">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-8">
           <div className="glass-card p-8 lg:p-10 rounded-3xl border border-white/10 space-y-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">What This Guide Covers</h2>
-            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">{guide.description}</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              What This Guide Covers
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              {guide.description}
+            </p>
 
             <div className="space-y-3 pt-2">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-[#C9952B]">Table of Contents & Key Modules</h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-[#C9952B]">
+                Table of Contents & Key Modules
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {guide.previewTopics.map((topic, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-3">
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-3"
+                  >
                     <span className="w-6 h-6 rounded-full gold-gradient-bg text-white font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                       {idx + 1}
                     </span>
@@ -334,7 +352,9 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
           <div className="glass-card p-8 rounded-3xl border border-[#C9952B]/30 bg-[#C9952B]/5 flex flex-wrap items-center justify-between gap-6">
             <div className="space-y-1">
               <h3 className="text-xl font-bold text-foreground">Ready to Access {guide.title}?</h3>
-              <p className="text-xs text-muted-foreground">Instant online access after payment • Available anytime under My Reports</p>
+              <p className="text-xs text-muted-foreground">
+                Instant online access after payment • Available anytime under My Reports
+              </p>
             </div>
 
             {hasPurchased ? (
@@ -353,7 +373,9 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
                 className="px-8 py-3.5 rounded-full gold-gradient-bg text-white font-bold text-sm shadow-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
                 <Lock size={16} />
-                <span>{isProcessingPayment ? 'Processing...' : `Get Guide Now (${displayPrice})`}</span>
+                <span>
+                  {isProcessingPayment ? 'Processing...' : `Get Guide Now (${displayPrice})`}
+                </span>
               </button>
             )}
           </div>
@@ -392,7 +414,9 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
               </div>
 
               <div className="p-5 border-t border-white/10 bg-muted/30 flex items-center justify-between flex-wrap gap-3">
-                <span className="text-xs text-muted-foreground font-mono">Status: Verified Purchase</span>
+                <span className="text-xs text-muted-foreground font-mono">
+                  Status: Verified Purchase
+                </span>
                 <button
                   onClick={() => setShowPdfModal(false)}
                   className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-foreground text-xs font-bold transition-colors"

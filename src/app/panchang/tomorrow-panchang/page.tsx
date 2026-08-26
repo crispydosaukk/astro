@@ -132,7 +132,8 @@ export default function TomorrowPanchangPage() {
             Tomorrow Panchang (Panchangam)
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-            Plan ahead with tomorrow&apos;s exact Vedic Tithi, Nakshatra, Shubh Muhurat, Abhijit Muhurat & Rahu Kaal timings.
+            Plan ahead with tomorrow&apos;s exact Vedic Tithi, Nakshatra, Shubh Muhurat, Abhijit
+            Muhurat & Rahu Kaal timings.
           </p>
         </div>
 
@@ -150,7 +151,10 @@ export default function TomorrowPanchangPage() {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm focus:border-[#C9952B] outline-none transition-colors"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none"
+                />
               </div>
             </div>
 
@@ -170,7 +174,11 @@ export default function TomorrowPanchangPage() {
               disabled={isGenerating}
               className="w-full py-3.5 rounded-2xl gold-gradient-bg text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-[#C9952B]/20"
             >
-              {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {isGenerating ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Sparkles size={18} />
+              )}
               <span>{isGenerating ? 'Calculating...' : 'Get Tomorrow Panchang'}</span>
             </button>
           </form>
@@ -227,8 +235,13 @@ export default function TomorrowPanchangPage() {
               { label: 'Shaka Samvat', val: panchang.shakaSamvat },
               { label: 'Vikram Samvat', val: panchang.vikramSamvat },
             ].map((item) => (
-              <div key={item.label} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase">{item.label}</span>
+              <div
+                key={item.label}
+                className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+              >
+                <span className="text-[11px] font-bold text-muted-foreground uppercase">
+                  {item.label}
+                </span>
                 <span className="text-sm font-bold text-foreground block">{item.val}</span>
               </div>
             ))}
@@ -250,9 +263,14 @@ export default function TomorrowPanchangPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {panchang.ashubhaMuhurats.map((row) => (
-                  <tr key={row.name} className={`hover:bg-white/5 transition-colors ${row.isRahu ? 'bg-red-500/10 font-bold' : ''}`}>
+                  <tr
+                    key={row.name}
+                    className={`hover:bg-white/5 transition-colors ${row.isRahu ? 'bg-red-500/10 font-bold' : ''}`}
+                  >
                     <td className="px-4 py-3 font-bold text-foreground">{row.name}</td>
-                    <td className="px-4 py-3 text-red-400 font-mono text-xs font-semibold">{row.time}</td>
+                    <td className="px-4 py-3 text-red-400 font-mono text-xs font-semibold">
+                      {row.time}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -268,7 +286,9 @@ export default function TomorrowPanchangPage() {
           <h2 className="text-2xl font-bold text-foreground font-mono">
             {panchang.abhijitMuhurat.start} – {panchang.abhijitMuhurat.end}
           </h2>
-          <p className="text-xs text-muted-foreground">Best window for tomorrow&apos;s key activities</p>
+          <p className="text-xs text-muted-foreground">
+            Best window for tomorrow&apos;s key activities
+          </p>
         </div>
 
         {/* Related Pages */}
@@ -282,7 +302,10 @@ export default function TomorrowPanchangPage() {
                 className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-foreground text-center flex items-center justify-center gap-1 transition-all group"
               >
                 <span>{page.title}</span>
-                <ChevronRight size={12} className="text-[#C9952B] group-hover:translate-x-0.5 transition-transform" />
+                <ChevronRight
+                  size={12}
+                  className="text-[#C9952B] group-hover:translate-x-0.5 transition-transform"
+                />
               </Link>
             ))}
           </div>

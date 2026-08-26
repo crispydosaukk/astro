@@ -87,7 +87,13 @@ export const NAKSHATRAS_DATA: Array<{
   { name: 'Pushya', ruler: 'Saturn', gana: 'Deva', yoni: 'Mesha (Sheep)', nadi: 'Madhya' },
   { name: 'Ashlesha', ruler: 'Mercury', gana: 'Rakshasa', yoni: 'Marjara (Cat)', nadi: 'Antya' },
   { name: 'Magha', ruler: 'Ketu', gana: 'Rakshasa', yoni: 'Mushaka (Rat)', nadi: 'Adi' },
-  { name: 'Purva Phalguni', ruler: 'Venus', gana: 'Manushya', yoni: 'Mushaka (Rat)', nadi: 'Madhya' },
+  {
+    name: 'Purva Phalguni',
+    ruler: 'Venus',
+    gana: 'Manushya',
+    yoni: 'Mushaka (Rat)',
+    nadi: 'Madhya',
+  },
   { name: 'Uttara Phalguni', ruler: 'Sun', gana: 'Manushya', yoni: 'Gau (Cow)', nadi: 'Antya' },
   { name: 'Hasta', ruler: 'Moon', gana: 'Deva', yoni: 'Mahisha (Buffalo)', nadi: 'Adi' },
   { name: 'Chitra', ruler: 'Mars', gana: 'Rakshasa', yoni: 'Vyaghra (Tiger)', nadi: 'Madhya' },
@@ -96,13 +102,37 @@ export const NAKSHATRAS_DATA: Array<{
   { name: 'Anuradha', ruler: 'Saturn', gana: 'Deva', yoni: 'Mriga (Deer)', nadi: 'Madhya' },
   { name: 'Jyeshtha', ruler: 'Mercury', gana: 'Rakshasa', yoni: 'Mriga (Deer)', nadi: 'Adi' },
   { name: 'Mula', ruler: 'Ketu', gana: 'Rakshasa', yoni: 'Shwan (Dog)', nadi: 'Adi' },
-  { name: 'Purva Ashadha', ruler: 'Venus', gana: 'Manushya', yoni: 'Vanara (Monkey)', nadi: 'Madhya' },
-  { name: 'Uttara Ashadha', ruler: 'Sun', gana: 'Manushya', yoni: 'Nakula (Mongoose)', nadi: 'Antya' },
+  {
+    name: 'Purva Ashadha',
+    ruler: 'Venus',
+    gana: 'Manushya',
+    yoni: 'Vanara (Monkey)',
+    nadi: 'Madhya',
+  },
+  {
+    name: 'Uttara Ashadha',
+    ruler: 'Sun',
+    gana: 'Manushya',
+    yoni: 'Nakula (Mongoose)',
+    nadi: 'Antya',
+  },
   { name: 'Shravana', ruler: 'Moon', gana: 'Deva', yoni: 'Vanara (Monkey)', nadi: 'Antya' },
   { name: 'Dhanishta', ruler: 'Mars', gana: 'Rakshasa', yoni: 'Simha (Lion)', nadi: 'Madhya' },
   { name: 'Shatabhisha', ruler: 'Rahu', gana: 'Rakshasa', yoni: 'Ashwa (Horse)', nadi: 'Adi' },
-  { name: 'Purva Bhadrapada', ruler: 'Jupiter', gana: 'Manushya', yoni: 'Simha (Lion)', nadi: 'Adi' },
-  { name: 'Uttara Bhadrapada', ruler: 'Saturn', gana: 'Manushya', yoni: 'Gau (Cow)', nadi: 'Madhya' },
+  {
+    name: 'Purva Bhadrapada',
+    ruler: 'Jupiter',
+    gana: 'Manushya',
+    yoni: 'Simha (Lion)',
+    nadi: 'Adi',
+  },
+  {
+    name: 'Uttara Bhadrapada',
+    ruler: 'Saturn',
+    gana: 'Manushya',
+    yoni: 'Gau (Cow)',
+    nadi: 'Madhya',
+  },
   { name: 'Revati', ruler: 'Mercury', gana: 'Deva', yoni: 'Gaja (Elephant)', nadi: 'Antya' },
 ];
 
@@ -119,7 +149,12 @@ const PLANET_FRIENDSHIPS: Record<string, Record<string, number>> = {
 };
 
 // Calculate Moon Longitude and planetary placement deterministically from birth date, time, and coordinates
-export function calculateAstroPlacement(dob: string, tob: string, lat?: string, lon?: string): PlanetaryMoonData {
+export function calculateAstroPlacement(
+  dob: string,
+  tob: string,
+  lat?: string,
+  lon?: string
+): PlanetaryMoonData {
   const d = new Date(dob || '1995-01-01');
   const [hours, mins] = (tob || '12:00').split(':').map((n) => parseInt(n, 10) || 0);
 
@@ -130,7 +165,8 @@ export function calculateAstroPlacement(dob: string, tob: string, lat?: string, 
   const lonOffset = lon ? Math.abs(parseFloat(lon) || 0) * 0.1 : 7.8;
 
   // Moon travels ~13.176 degrees per day (one nakshatra every ~1.01 days)
-  const moonDegRaw = (dayOffset * 13.176358 + timeOffset * 13.176 + latOffset + lonOffset + 35.5) % 360;
+  const moonDegRaw =
+    (dayOffset * 13.176358 + timeOffset * 13.176 + latOffset + lonOffset + 35.5) % 360;
   const moonDeg = (moonDegRaw + 360) % 360;
 
   // Nakshatra = 360 / 27 = 13.3333 degrees per nakshatra
@@ -237,8 +273,8 @@ export function calculateAshtakootGunMilan(
       taraScore === 3
         ? `Both birth stars (${groomAstro.nakshatraName} & ${brideAstro.nakshatraName}) are auspiciously aligned for longevity and luck.`
         : taraScore === 1.5
-        ? `Neutral Tara alignment ensuring stable well-being with minor planetary protective mantras.`
-        : `Tara indicates sensitivity to seasonal health; Mahamrityunjaya chanting recommended.`,
+          ? `Neutral Tara alignment ensuring stable well-being with minor planetary protective mantras.`
+          : `Tara indicates sensitivity to seasonal health; Mahamrityunjaya chanting recommended.`,
     status: taraScore === 3 ? 'Excellent' : taraScore >= 1.5 ? 'Good' : 'Low',
   });
 
@@ -268,7 +304,7 @@ export function calculateAshtakootGunMilan(
     if (swornEnemies[gYoni] === bYoni) {
       yoniScore = 0;
     } else {
-      yoniScore = ((groomAstro.nakshatraIndex + brideAstro.nakshatraIndex) % 2 === 0) ? 3 : 2;
+      yoniScore = (groomAstro.nakshatraIndex + brideAstro.nakshatraIndex) % 2 === 0 ? 3 : 2;
     }
   }
   ashtakoot.push({
@@ -280,8 +316,8 @@ export function calculateAshtakootGunMilan(
       yoniScore >= 3
         ? `Exceptional biological harmony, intimate chemistry, and natural emotional comfort.`
         : yoniScore === 2
-        ? `Moderate physical and lifestyle compatibility with steady affection.`
-        : `Yoni mismatch suggests need for open empathetic communication in marital life.`,
+          ? `Moderate physical and lifestyle compatibility with steady affection.`
+          : `Yoni mismatch suggests need for open empathetic communication in marital life.`,
     status: yoniScore === 4 ? 'Excellent' : yoniScore >= 2 ? 'Good' : 'Low',
   });
 
@@ -309,8 +345,8 @@ export function calculateAshtakootGunMilan(
       maitriScore >= 4
         ? `Moon sign lords (${gLord} & ${bLord}) are friendly, indicating deep intellectual companionship and trust.`
         : maitriScore === 3
-        ? `Neutral friendship fostering constructive mutual discussions and teamwork.`
-        : `Diverse worldviews; practicing patience and shared hobbies will bridge communication.`,
+          ? `Neutral friendship fostering constructive mutual discussions and teamwork.`
+          : `Diverse worldviews; practicing patience and shared hobbies will bridge communication.`,
     status: maitriScore >= 4 ? 'Excellent' : maitriScore >= 3 ? 'Good' : 'Average',
   });
 
@@ -351,7 +387,10 @@ export function calculateAshtakootGunMilan(
   // Inauspicious Bhakoot: 2/12 (Dvi-Dvadasha), 6/8 (Shad-Ashtaka), 9/5 (Nava-Panchama)
   if (distance === 2 || distance === 6 || distance === 5) {
     // Exceptions: same sign lord or mutual friends cancel Bhakoot Dosha
-    if (gLord === bLord || (PLANET_FRIENDSHIPS[gLord]?.[bLord] === 1 && PLANET_FRIENDSHIPS[bLord]?.[gLord] === 1)) {
+    if (
+      gLord === bLord ||
+      (PLANET_FRIENDSHIPS[gLord]?.[bLord] === 1 && PLANET_FRIENDSHIPS[bLord]?.[gLord] === 1)
+    ) {
       bhakootScore = 7;
       bhakootCancelled = true;
     } else {
@@ -377,7 +416,10 @@ export function calculateAshtakootGunMilan(
   let nadiCancelled = false;
   if (groomAstro.nadi === brideAstro.nadi) {
     // Same Nadi (Nadi Dosha) - Check cancellations (same rashi with diff nakshatras or diff rashi with same nakshatra)
-    if (groomAstro.rashiIndex === brideAstro.rashiIndex && groomAstro.nakshatraIndex !== brideAstro.nakshatraIndex) {
+    if (
+      groomAstro.rashiIndex === brideAstro.rashiIndex &&
+      groomAstro.nakshatraIndex !== brideAstro.nakshatraIndex
+    ) {
       nadiScore = 8;
       nadiCancelled = true;
     } else {
@@ -447,15 +489,15 @@ export function calculateAshtakootGunMilan(
       summary: isManglikCancelled
         ? 'Both partners are Manglik — Manglik Dosha is naturally neutralized.'
         : isGroomManglik || isBrideManglik
-        ? 'One partner is Manglik. Chanting Hanuman Chalisa and Tuesday fasting balances Mangal energy.'
-        : 'Neither partner is affected by Manglik Dosha.',
+          ? 'One partner is Manglik. Chanting Hanuman Chalisa and Tuesday fasting balances Mangal energy.'
+          : 'Neither partner is affected by Manglik Dosha.',
     },
     astrologicalAnalysis: `Extensive 36-Guna Vedic compatibility analysis for ${groomName} (${groomAstro.rashiName}, ${groomAstro.nakshatraName}) and ${brideName} (${brideAstro.rashiName}, ${brideAstro.nakshatraName}).\n\n• Calculated Gun Milan Score: ${totalScore} / 36 (${status}).\n• ${ashtakoot[4].desc}\n• ${ashtakoot[6].desc}\n• ${ashtakoot[7].desc}\n• Manglik Analysis: ${
       isManglikCancelled
         ? 'Mutual Manglik alignment neutralizes any adverse planetary influences.'
         : isGroomManglik || isBrideManglik
-        ? 'Mild Manglik influence can be balanced with Tuesday Hanuman Chalisa and Gauri Puja.'
-        : 'No Manglik afflictions detected.'
+          ? 'Mild Manglik influence can be balanced with Tuesday Hanuman Chalisa and Gauri Puja.'
+          : 'No Manglik afflictions detected.'
     }`,
     recommendationTitle: 'Free Kundli Matching Report',
     recommendationName: `${groomName} & ${brideName} — Gun Milan Compatibility`,

@@ -8,7 +8,11 @@ import Link from 'next/link';
 
 export default function MyReportsPage() {
   const { user, userData, loading } = useUserData();
-  const fullName = userData?.name || user?.displayName || user?.email?.split('@')[0] || (loading ? 'Loading...' : 'Guest');
+  const fullName =
+    userData?.name ||
+    user?.displayName ||
+    user?.email?.split('@')[0] ||
+    (loading ? 'Loading...' : 'Guest');
 
   // Get current date formatted
   const currentDate = new Date();

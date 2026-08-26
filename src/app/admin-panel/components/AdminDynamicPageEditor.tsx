@@ -42,7 +42,10 @@ export default function AdminDynamicPageEditor() {
   const [items, setItems] = useState<DynamicPageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   // Top Level View Mode: 'composer' (Create/Edit) | 'manager' (Saved Content & Live Previews)
   const [viewMode, setViewMode] = useState<'composer' | 'manager'>('composer');
@@ -50,7 +53,9 @@ export default function AdminDynamicPageEditor() {
   // Form state
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedPageId, setSelectedPageId] = useState<string>('horoscope-love');
-  const [selectedPlacement, setSelectedPlacement] = useState<'top' | 'below-form' | 'educational' | 'remedies' | 'bottom'>('educational');
+  const [selectedPlacement, setSelectedPlacement] = useState<
+    'top' | 'below-form' | 'educational' | 'remedies' | 'bottom'
+  >('educational');
   const [theme, setTheme] = useState<'gold' | 'rose' | 'emerald' | 'cyan' | 'slate'>('gold');
   const [badge, setBadge] = useState<string>('Vedic Wisdom & Guidance');
   const [title, setTitle] = useState<string>('');
@@ -170,7 +175,9 @@ export default function AdminDynamicPageEditor() {
 
       setStatusMessage({
         type: 'success',
-        text: editingId ? 'Content updated successfully.' : 'Content published successfully to the page.',
+        text: editingId
+          ? 'Content updated successfully.'
+          : 'Content published successfully to the page.',
       });
 
       setEditingId(savedId);
@@ -246,8 +253,7 @@ export default function AdminDynamicPageEditor() {
   // Filter items for manager
   const filteredItems = items.filter((it) => {
     const pageObj = TARGET_PAGES.find((p) => p.id === it.pageId);
-    const matchCategory =
-      managerCategoryFilter === 'all' || it.category === managerCategoryFilter;
+    const matchCategory = managerCategoryFilter === 'all' || it.category === managerCategoryFilter;
     const term = managerSearch.toLowerCase();
     const matchSearch =
       !term ||
@@ -263,11 +269,10 @@ export default function AdminDynamicPageEditor() {
       {/* Top Header & Mode Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            Page Content Management
-          </h2>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Page Content Management</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Publish and maintain custom articles, predictions, remedial guidelines, and educational content across Services, Panchang, and Remedy pages.
+            Publish and maintain custom articles, predictions, remedial guidelines, and educational
+            content across Services, Panchang, and Remedy pages.
           </p>
         </div>
 
@@ -309,7 +314,11 @@ export default function AdminDynamicPageEditor() {
               : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
           }`}
         >
-          {statusMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+          {statusMessage.type === 'success' ? (
+            <CheckCircle2 size={16} />
+          ) : (
+            <AlertCircle size={16} />
+          )}
           <span className="font-medium">{statusMessage.text}</span>
         </div>
       )}
@@ -343,7 +352,10 @@ export default function AdminDynamicPageEditor() {
                   onChange={(e) => {
                     const newCat = e.target.value;
                     setSelectedCategory(newCat);
-                    const validPages = newCat === 'all' ? TARGET_PAGES : TARGET_PAGES.filter((p) => p.category === newCat);
+                    const validPages =
+                      newCat === 'all'
+                        ? TARGET_PAGES
+                        : TARGET_PAGES.filter((p) => p.category === newCat);
                     if (validPages.length > 0 && !validPages.some((p) => p.id === selectedPageId)) {
                       setSelectedPageId(validPages[0].id);
                     }
@@ -354,16 +366,20 @@ export default function AdminDynamicPageEditor() {
                     ✨ All Categories (Services, Panchang, Remedies, General)
                   </option>
                   <option value="services" className="bg-slate-950 text-white py-1.5">
-                    🔮 Vedic Services ({TARGET_PAGES.filter((p) => p.category === 'services').length} Pages)
+                    🔮 Vedic Services (
+                    {TARGET_PAGES.filter((p) => p.category === 'services').length} Pages)
                   </option>
                   <option value="panchang" className="bg-slate-950 text-white py-1.5">
-                    🗓️ Panchang &amp; Muhurat ({TARGET_PAGES.filter((p) => p.category === 'panchang').length} Pages)
+                    🗓️ Panchang &amp; Muhurat (
+                    {TARGET_PAGES.filter((p) => p.category === 'panchang').length} Pages)
                   </option>
                   <option value="remedies" className="bg-slate-950 text-white py-1.5">
-                    🛡️ Vedic Remedies ({TARGET_PAGES.filter((p) => p.category === 'remedies').length} Pages)
+                    🛡️ Vedic Remedies (
+                    {TARGET_PAGES.filter((p) => p.category === 'remedies').length} Pages)
                   </option>
                   <option value="general" className="bg-slate-950 text-white py-1.5">
-                    🌐 General &amp; Consultation ({TARGET_PAGES.filter((p) => p.category === 'general').length} Pages)
+                    🌐 General &amp; Consultation (
+                    {TARGET_PAGES.filter((p) => p.category === 'general').length} Pages)
                   </option>
                 </select>
               </div>
@@ -381,30 +397,58 @@ export default function AdminDynamicPageEditor() {
                 >
                   {selectedCategory === 'all' ? (
                     <>
-                      <optgroup label="🔮 Vedic Services &amp; Horoscopes" className="bg-slate-950 text-amber-400 font-bold">
+                      <optgroup
+                        label="🔮 Vedic Services &amp; Horoscopes"
+                        className="bg-slate-950 text-amber-400 font-bold"
+                      >
                         {TARGET_PAGES.filter((p) => p.category === 'services').map((page) => (
-                          <option key={page.id} value={page.id} className="bg-slate-950 text-white font-normal py-1">
+                          <option
+                            key={page.id}
+                            value={page.id}
+                            className="bg-slate-950 text-white font-normal py-1"
+                          >
                             {page.title} ({page.route})
                           </option>
                         ))}
                       </optgroup>
-                      <optgroup label="🗓️ Panchang &amp; Muhurat" className="bg-slate-950 text-amber-400 font-bold">
+                      <optgroup
+                        label="🗓️ Panchang &amp; Muhurat"
+                        className="bg-slate-950 text-amber-400 font-bold"
+                      >
                         {TARGET_PAGES.filter((p) => p.category === 'panchang').map((page) => (
-                          <option key={page.id} value={page.id} className="bg-slate-950 text-white font-normal py-1">
+                          <option
+                            key={page.id}
+                            value={page.id}
+                            className="bg-slate-950 text-white font-normal py-1"
+                          >
                             {page.title} ({page.route})
                           </option>
                         ))}
                       </optgroup>
-                      <optgroup label="🛡️ Vedic Remedies" className="bg-slate-950 text-amber-400 font-bold">
+                      <optgroup
+                        label="🛡️ Vedic Remedies"
+                        className="bg-slate-950 text-amber-400 font-bold"
+                      >
                         {TARGET_PAGES.filter((p) => p.category === 'remedies').map((page) => (
-                          <option key={page.id} value={page.id} className="bg-slate-950 text-white font-normal py-1">
+                          <option
+                            key={page.id}
+                            value={page.id}
+                            className="bg-slate-950 text-white font-normal py-1"
+                          >
                             {page.title} ({page.route})
                           </option>
                         ))}
                       </optgroup>
-                      <optgroup label="🌐 General &amp; Consultations" className="bg-slate-950 text-amber-400 font-bold">
+                      <optgroup
+                        label="🌐 General &amp; Consultations"
+                        className="bg-slate-950 text-amber-400 font-bold"
+                      >
                         {TARGET_PAGES.filter((p) => p.category === 'general').map((page) => (
-                          <option key={page.id} value={page.id} className="bg-slate-950 text-white font-normal py-1">
+                          <option
+                            key={page.id}
+                            value={page.id}
+                            className="bg-slate-950 text-white font-normal py-1"
+                          >
                             {page.title} ({page.route})
                           </option>
                         ))}
@@ -412,7 +456,11 @@ export default function AdminDynamicPageEditor() {
                     </>
                   ) : (
                     filteredPages.map((page) => (
-                      <option key={page.id} value={page.id} className="bg-slate-950 text-white py-1">
+                      <option
+                        key={page.id}
+                        value={page.id}
+                        className="bg-slate-950 text-white py-1"
+                      >
                         {page.title} ({page.route})
                       </option>
                     ))
@@ -474,7 +522,9 @@ export default function AdminDynamicPageEditor() {
 
                 {/* Badge */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-200">Category Tag (Optional)</label>
+                  <label className="text-xs font-semibold text-slate-200">
+                    Category Tag (Optional)
+                  </label>
                   <input
                     type="text"
                     value={badge}
@@ -486,7 +536,9 @@ export default function AdminDynamicPageEditor() {
 
                 {/* Title */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-200">Section Heading (Optional)</label>
+                  <label className="text-xs font-semibold text-slate-200">
+                    Section Heading (Optional)
+                  </label>
                   <input
                     type="text"
                     value={title}
@@ -498,7 +550,9 @@ export default function AdminDynamicPageEditor() {
 
                 {/* Subtitle */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-200">Section Subtitle (Optional)</label>
+                  <label className="text-xs font-semibold text-slate-200">
+                    Section Subtitle (Optional)
+                  </label>
                   <input
                     type="text"
                     value={subtitle}
@@ -653,10 +707,18 @@ export default function AdminDynamicPageEditor() {
                       defaultValue="p"
                       className="px-2.5 py-1 rounded-md bg-slate-950 border border-slate-700 text-xs text-white outline-none cursor-pointer"
                     >
-                      <option value="p" className="bg-slate-950 text-white">Paragraph</option>
-                      <option value="h2" className="bg-slate-950 text-white">Heading 2</option>
-                      <option value="h3" className="bg-slate-950 text-white">Heading 3</option>
-                      <option value="h4" className="bg-slate-950 text-white">Heading 4</option>
+                      <option value="p" className="bg-slate-950 text-white">
+                        Paragraph
+                      </option>
+                      <option value="h2" className="bg-slate-950 text-white">
+                        Heading 2
+                      </option>
+                      <option value="h3" className="bg-slate-950 text-white">
+                        Heading 3
+                      </option>
+                      <option value="h4" className="bg-slate-950 text-white">
+                        Heading 4
+                      </option>
                     </select>
                   </div>
 
@@ -815,7 +877,10 @@ export default function AdminDynamicPageEditor() {
 
               {/* Search */}
               <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search
+                  size={14}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                />
                 <input
                   type="text"
                   value={managerSearch}
@@ -831,11 +896,21 @@ export default function AdminDynamicPageEditor() {
                 onChange={(e) => setManagerCategoryFilter(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs font-medium text-white outline-none focus:border-amber-400"
               >
-                <option value="all" className="bg-slate-950 text-white">✨ All Categories ({items.length})</option>
-                <option value="services" className="bg-slate-950 text-white">🔮 Vedic Services</option>
-                <option value="panchang" className="bg-slate-950 text-white">🗓️ Panchang &amp; Muhurat</option>
-                <option value="remedies" className="bg-slate-950 text-white">🛡️ Vedic Remedies</option>
-                <option value="general" className="bg-slate-950 text-white">🌐 General Pages</option>
+                <option value="all" className="bg-slate-950 text-white">
+                  ✨ All Categories ({items.length})
+                </option>
+                <option value="services" className="bg-slate-950 text-white">
+                  🔮 Vedic Services
+                </option>
+                <option value="panchang" className="bg-slate-950 text-white">
+                  🗓️ Panchang &amp; Muhurat
+                </option>
+                <option value="remedies" className="bg-slate-950 text-white">
+                  🛡️ Vedic Remedies
+                </option>
+                <option value="general" className="bg-slate-950 text-white">
+                  🌐 General Pages
+                </option>
               </select>
             </div>
 
@@ -935,7 +1010,9 @@ export default function AdminDynamicPageEditor() {
                       <Edit3 size={12} /> Edit in Composer
                     </button>
                     {(() => {
-                      const pageRoute = TARGET_PAGES.find((p) => p.id === previewingItem.pageId)?.route || '/services';
+                      const pageRoute =
+                        TARGET_PAGES.find((p) => p.id === previewingItem.pageId)?.route ||
+                        '/services';
                       return (
                         <a
                           href={pageRoute}
@@ -958,7 +1035,8 @@ export default function AdminDynamicPageEditor() {
                   <div className="text-xs text-slate-400 flex items-center gap-2">
                     <span>Target Route:</span>
                     <span className="font-mono text-white bg-slate-950 border border-slate-800 px-2 py-0.5 rounded">
-                      {TARGET_PAGES.find((p) => p.id === previewingItem.pageId)?.route || '/services'}
+                      {TARGET_PAGES.find((p) => p.id === previewingItem.pageId)?.route ||
+                        '/services'}
                     </span>
                   </div>
 

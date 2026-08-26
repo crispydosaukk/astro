@@ -17,7 +17,13 @@ import Navbar from '@/components/Navbar';
 import ServiceReportForm from '@/components/ServiceReportForm';
 import PremiumSection from '@/components/PremiumSection';
 import DynamicPageContent from '@/components/DynamicPageContent';
-import { getServicePageContent, MantraServiceContent, defaultMantraContent, getHomepageContent, HomepageContent } from '@/lib/cms';
+import {
+  getServicePageContent,
+  MantraServiceContent,
+  defaultMantraContent,
+  getHomepageContent,
+  HomepageContent,
+} from '@/lib/cms';
 
 export default function MantraServicePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -29,7 +35,7 @@ export default function MantraServicePage() {
     async function loadContent() {
       const [data, homeData] = await Promise.all([
         getServicePageContent('mantra', defaultMantraContent),
-        getHomepageContent()
+        getHomepageContent(),
       ]);
       setHomepageContent(homeData);
       setContent(data);
@@ -74,9 +80,13 @@ export default function MantraServicePage() {
             <div className="max-w-3xl space-y-6">
               {/* Breadcrumb */}
               <div className="flex items-center gap-2 text-xs sm:text-sm text-white/70">
-                <Link href="/" className="hover:text-[#F6D075] transition-colors">Home</Link>
+                <Link href="/" className="hover:text-[#F6D075] transition-colors">
+                  Home
+                </Link>
                 <span>/</span>
-                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">Remedies</Link>
+                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">
+                  Remedies
+                </Link>
                 <span>/</span>
                 <span className="text-[#F6D075] font-semibold">Mantra Guidance</span>
               </div>
@@ -168,7 +178,8 @@ export default function MantraServicePage() {
                 </div>
               </div>
               <p className="text-xs text-[#6B5E55] pt-4 border-t border-[#E5D9C8]">
-                Mantra resonance pacifies afflicted planetary vibrations and activates higher mental clarity.
+                Mantra resonance pacifies afflicted planetary vibrations and activates higher mental
+                clarity.
               </p>
             </div>
 
@@ -177,26 +188,44 @@ export default function MantraServicePage() {
                 <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block mb-3">
                   Report Preview
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">Sample Mantra Analysis</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">
+                  Sample Mantra Analysis
+                </h3>
                 <div className="space-y-3.5">
                   <div className="p-5 rounded-2xl bg-gradient-to-br from-[#281123] to-[#150914] text-white border border-[#B88A44]/40 space-y-1 text-center shadow-md">
-                    <p className="text-xs text-[#F6D075] font-bold uppercase tracking-wider">Primary Prescribed Mantra</p>
-                    <p className="text-2xl font-serif font-extrabold text-[#F6D075]">ॐ नमः शिवाय ॥</p>
-                    <p className="text-xs text-white/80 font-mono">108 daily repetitions · Brahma Muhurtha (4:30 – 6:00 AM)</p>
+                    <p className="text-xs text-[#F6D075] font-bold uppercase tracking-wider">
+                      Primary Prescribed Mantra
+                    </p>
+                    <p className="text-2xl font-serif font-extrabold text-[#F6D075]">
+                      ॐ नमः शिवाय ॥
+                    </p>
+                    <p className="text-xs text-white/80 font-mono">
+                      108 daily repetitions · Brahma Muhurtha (4:30 – 6:00 AM)
+                    </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8]">
-                    <p className="text-xs font-bold text-[#713B32] uppercase mb-1">Cosmic Purpose</p>
-                    <p className="text-sm text-[#292522] font-medium">Pacifies Saturn & Rahu, stabilizes nervous anxiety, enhances concentration.</p>
+                    <p className="text-xs font-bold text-[#713B32] uppercase mb-1">
+                      Cosmic Purpose
+                    </p>
+                    <p className="text-sm text-[#292522] font-medium">
+                      Pacifies Saturn & Rahu, stabilizes nervous anxiety, enhances concentration.
+                    </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-1">
-                    <p className="text-xs font-bold text-[#713B32] uppercase">Planetary Bija Mantras Included</p>
-                    <p className="text-xs text-[#6B5E55]">Gayatri Mantra, Mahamrityunjaya, & personalized 5th House Ishta Mantra.</p>
+                    <p className="text-xs font-bold text-[#713B32] uppercase">
+                      Planetary Bija Mantras Included
+                    </p>
+                    <p className="text-xs text-[#6B5E55]">
+                      Gayatri Mantra, Mahamrityunjaya, & personalized 5th House Ishta Mantra.
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs text-[#713B32] font-bold">
-                <span className="flex items-center gap-1.5"><Lock size={14} /> Full individualized report generated below</span>
+                <span className="flex items-center gap-1.5">
+                  <Lock size={14} /> Full individualized report generated below
+                </span>
                 <span>Vedic Calculation</span>
               </div>
             </div>
@@ -230,7 +259,9 @@ export default function MantraServicePage() {
                 {content.mantras?.map((m, i) => (
                   <tr key={i} className="hover:bg-[#F8F3EA] transition-colors">
                     <td className="px-5 py-4 font-bold text-[#713B32]">{m?.planet}</td>
-                    <td className="px-5 py-4 text-xs sm:text-sm font-mono font-bold text-[#292522]">{m?.mantra}</td>
+                    <td className="px-5 py-4 text-xs sm:text-sm font-mono font-bold text-[#292522]">
+                      {m?.mantra}
+                    </td>
                     <td className="px-5 py-4 text-xs font-semibold text-[#6B5E55]">{m?.count}x</td>
                     <td className="px-5 py-4 text-xs text-[#6B5E55]">{m?.time}</td>
                   </tr>
@@ -271,7 +302,10 @@ export default function MantraServicePage() {
 
           <div className="space-y-3">
             {content.faqs?.map((faq, i) => (
-              <div key={i} className="rounded-2xl border border-[#E5D9C8] bg-[#FFFDFC] overflow-hidden shadow-sm">
+              <div
+                key={i}
+                className="rounded-2xl border border-[#E5D9C8] bg-[#FFFDFC] overflow-hidden shadow-sm"
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F3EA] transition-colors cursor-pointer"

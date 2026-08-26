@@ -18,9 +18,7 @@ export default function PremiumSection({ data }: { data?: PremiumDetails }) {
             {data.titleLine1} <span className="text-gradient-gold">{data.titleLine2Gold}</span>
           </h2>
           {data.quote && (
-            <p className="text-[#713B32] font-semibold italic mt-4 mb-6 text-xl">
-              {data.quote}
-            </p>
+            <p className="text-[#713B32] font-semibold italic mt-4 mb-6 text-xl">{data.quote}</p>
           )}
           {data.description && (
             <p className="text-[#6B5E55] max-w-3xl mx-auto whitespace-pre-line">
@@ -45,9 +43,7 @@ export default function PremiumSection({ data }: { data?: PremiumDetails }) {
             </div>
             <div className="mt-6 pt-6 border-t border-[#E5D9C8]">
               <p className="text-sm text-[#713B32] font-bold mb-2">📖 Meaning</p>
-              <p className="text-[#292522] whitespace-pre-line">
-                {data.sloka.meaning}
-              </p>
+              <p className="text-[#292522] whitespace-pre-line">{data.sloka.meaning}</p>
             </div>
           </div>
         )}
@@ -55,7 +51,10 @@ export default function PremiumSection({ data }: { data?: PremiumDetails }) {
         {data.infoCards && data.infoCards.length > 0 && (
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {data.infoCards.map((card, idx) => (
-              <div key={idx} className={`bg-[#FFFDFC] border border-[#E5D9C8] p-7 rounded-3xl shadow-sm hover:shadow-xl hover:border-[#B88A44] transition-all card-hover ${idx === data.infoCards!.length - 1 && data.infoCards!.length % 2 !== 0 ? 'md:col-span-2 max-w-3xl mx-auto w-full' : ''}`}>
+              <div
+                key={idx}
+                className={`bg-[#FFFDFC] border border-[#E5D9C8] p-7 rounded-3xl shadow-sm hover:shadow-xl hover:border-[#B88A44] transition-all card-hover ${idx === data.infoCards!.length - 1 && data.infoCards!.length % 2 !== 0 ? 'md:col-span-2 max-w-3xl mx-auto w-full' : ''}`}
+              >
                 <h3 className="text-xl font-bold text-[#292522] mb-3 flex items-center gap-2">
                   <span className="text-2xl">{card.icon || '✨'}</span> {card.title}
                 </h3>
@@ -65,13 +64,15 @@ export default function PremiumSection({ data }: { data?: PremiumDetails }) {
                   </p>
                 )}
                 {card.description && (
-                  <p className="text-sm text-[#6B5E55] mb-4 whitespace-pre-line">{card.description}</p>
+                  <p className="text-sm text-[#6B5E55] mb-4 whitespace-pre-line">
+                    {card.description}
+                  </p>
                 )}
                 {card.points && card.points.length > 0 && (
                   <ul className="space-y-2 text-sm text-[#292522] font-medium pl-2 mb-4">
                     {card.points.map((pt, pIdx) => (
                       <li key={pIdx} className="flex items-start gap-2">
-                        <span className="text-[#713B32] mt-0.5 font-bold">✔</span> 
+                        <span className="text-[#713B32] mt-0.5 font-bold">✔</span>
                         <span>{pt}</span>
                       </li>
                     ))}
@@ -81,9 +82,13 @@ export default function PremiumSection({ data }: { data?: PremiumDetails }) {
                   <div className="space-y-5 mt-4">
                     {card.subSections.map((sub, sIdx) => (
                       <div key={sIdx}>
-                        <h4 className="font-bold text-[#292522] text-sm border-b border-[#E5D9C8] pb-2 mb-3">{sub.title}</h4>
+                        <h4 className="font-bold text-[#292522] text-sm border-b border-[#E5D9C8] pb-2 mb-3">
+                          {sub.title}
+                        </h4>
                         {sub.description && (
-                          <p className="text-sm text-[#6B5E55] mb-2 whitespace-pre-line">{sub.description}</p>
+                          <p className="text-sm text-[#6B5E55] mb-2 whitespace-pre-line">
+                            {sub.description}
+                          </p>
                         )}
                         {sub.points && sub.points.length > 0 && (
                           <ul className="text-sm text-[#6B5E55] space-y-1 list-disc pl-5">

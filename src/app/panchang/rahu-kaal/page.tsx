@@ -118,7 +118,8 @@ export default function RahuKaalPage() {
             Rahu Kaal Today
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-            Find the precise Rahu Kaal timing for your location to avoid delays and obstacles in new beginnings.
+            Find the precise Rahu Kaal timing for your location to avoid delays and obstacles in new
+            beginnings.
           </p>
         </div>
 
@@ -136,7 +137,10 @@ export default function RahuKaalPage() {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm focus:border-[#C9952B] outline-none transition-colors"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none"
+                />
               </div>
             </div>
 
@@ -156,7 +160,11 @@ export default function RahuKaalPage() {
               disabled={isCalculating}
               className="w-full py-3.5 rounded-2xl gold-gradient-bg text-white font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#C9952B]/20 active:scale-95"
             >
-              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {isCalculating ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Sparkles size={18} />
+              )}
               <span>{isCalculating ? 'Calculating...' : 'Get Rahu Kaal'}</span>
             </button>
           </div>
@@ -198,7 +206,9 @@ export default function RahuKaalPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
               <span className="text-xs text-muted-foreground font-semibold block">☀️ Sunrise</span>
-              <span className="text-lg font-bold text-foreground font-mono">{panchang.sunrise}</span>
+              <span className="text-lg font-bold text-foreground font-mono">
+                {panchang.sunrise}
+              </span>
             </div>
             <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
               <span className="text-xs text-muted-foreground font-semibold block">🌅 Sunset</span>
@@ -206,11 +216,15 @@ export default function RahuKaalPage() {
             </div>
             <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
               <span className="text-xs text-muted-foreground font-semibold block">🌕 Moonrise</span>
-              <span className="text-lg font-bold text-foreground font-mono">{panchang.moonrise}</span>
+              <span className="text-lg font-bold text-foreground font-mono">
+                {panchang.moonrise}
+              </span>
             </div>
             <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
               <span className="text-xs text-muted-foreground font-semibold block">🌑 Moonset</span>
-              <span className="text-lg font-bold text-foreground font-mono">{panchang.moonset}</span>
+              <span className="text-lg font-bold text-foreground font-mono">
+                {panchang.moonset}
+              </span>
             </div>
           </div>
 
@@ -243,7 +257,9 @@ export default function RahuKaalPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-red-400 font-semibold">{row.time}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-red-400 font-semibold">
+                        {row.time}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -273,7 +289,10 @@ export default function RahuKaalPage() {
                   className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-foreground text-center flex items-center justify-center gap-1 transition-all group"
                 >
                   <span>{page.title}</span>
-                  <ChevronRight size={12} className="text-[#C9952B] group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight
+                    size={12}
+                    className="text-[#C9952B] group-hover:translate-x-0.5 transition-transform"
+                  />
                 </Link>
               ))}
             </div>

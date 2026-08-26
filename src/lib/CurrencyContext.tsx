@@ -26,7 +26,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     setMounted(true);
 
     // 1. Check if user previously chose a specific currency preference in localStorage
-    const savedCurrency = typeof window !== 'undefined' ? localStorage.getItem('astroparihar_currency') : null;
+    const savedCurrency =
+      typeof window !== 'undefined' ? localStorage.getItem('astroparihar_currency') : null;
     if (savedCurrency === 'INR' || savedCurrency === 'USD') {
       setCurrencyCodeState(savedCurrency);
       setIsIndia(savedCurrency === 'INR');
@@ -41,7 +42,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         timeZone === 'Asia/Kolkata' ||
         timeZone.toLowerCase().includes('calcutta') ||
         timeZone.toLowerCase().includes('kolkata');
-      
+
       const isISTOffset = new Date().getTimezoneOffset() === -330;
 
       if (isIndianTimeZone || isISTOffset) {
@@ -87,17 +88,26 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const convertPrice = (amountInINR: number | string, amountInUSD?: number | string): number => {
     if (currencyCode === 'USD') {
       if (amountInUSD !== undefined && amountInUSD !== null && amountInUSD !== '') {
-        const usdVal = typeof amountInUSD === 'string' ? parseFloat(amountInUSD.replace(/[^0-9.]/g, '')) : amountInUSD;
+        const usdVal =
+          typeof amountInUSD === 'string'
+            ? parseFloat(amountInUSD.replace(/[^0-9.]/g, ''))
+            : amountInUSD;
         if (!isNaN(usdVal) && usdVal > 0) return Number(usdVal.toFixed(2));
       }
 
-      const inrVal = typeof amountInINR === 'string' ? parseFloat(amountInINR.replace(/[^0-9.]/g, '')) : amountInINR;
+      const inrVal =
+        typeof amountInINR === 'string'
+          ? parseFloat(amountInINR.replace(/[^0-9.]/g, ''))
+          : amountInINR;
       if (isNaN(inrVal) || inrVal === 0) return 0;
       return Number((inrVal * EXCHANGE_RATE_INR_TO_USD).toFixed(2));
     }
 
     // Default INR
-    const inrVal = typeof amountInINR === 'string' ? parseFloat(amountInINR.replace(/[^0-9.]/g, '')) : amountInINR;
+    const inrVal =
+      typeof amountInINR === 'string'
+        ? parseFloat(amountInINR.replace(/[^0-9.]/g, ''))
+        : amountInINR;
     if (isNaN(inrVal)) return 0;
     return Math.round(inrVal);
   };
@@ -139,11 +149,17 @@ export function useCurrency() {
       isIndia: true,
       setCurrencyCode: () => {},
       formatPrice: (amountInINR: number | string, amountInUSD?: number | string) => {
-        const val = typeof amountInINR === 'string' ? parseFloat(amountInINR.replace(/[^0-9.]/g, '')) : amountInINR;
+        const val =
+          typeof amountInINR === 'string'
+            ? parseFloat(amountInINR.replace(/[^0-9.]/g, ''))
+            : amountInINR;
         return `₹${Number(val || 0).toLocaleString('en-IN')}`;
       },
       convertPrice: (amountInINR: number | string) => {
-        const val = typeof amountInINR === 'string' ? parseFloat(amountInINR.replace(/[^0-9.]/g, '')) : amountInINR;
+        const val =
+          typeof amountInINR === 'string'
+            ? parseFloat(amountInINR.replace(/[^0-9.]/g, ''))
+            : amountInINR;
         return Number(val || 0);
       },
     };

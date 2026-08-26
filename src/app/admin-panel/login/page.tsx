@@ -21,7 +21,10 @@ export default function AdminLogin() {
         href="/"
         className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFFDFC]/95 backdrop-blur-md border border-[#E5D9C8] text-xs sm:text-sm font-bold text-[#713B32] hover:bg-[#EDE4D5] hover:text-[#552B24] transition-all shadow-md group"
       >
-        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-[#B88A44]" />
+        <ArrowLeft
+          size={16}
+          className="group-hover:-translate-x-1 transition-transform text-[#B88A44]"
+        />
         <span>Back to Home</span>
       </Link>
 
@@ -37,7 +40,9 @@ export default function AdminLogin() {
               <ShieldCheck size={13} className="text-[#B88A44]" /> Administrative Portal
             </span>
             <h2 className="text-2xl font-bold text-[#292522]">Admin Sign In</h2>
-            <p className="text-[#6B5E55] text-xs sm:text-sm mt-1">Sign in to manage AstroParihar operations</p>
+            <p className="text-[#6B5E55] text-xs sm:text-sm mt-1">
+              Sign in to manage AstroParihar operations
+            </p>
           </div>
 
           <form action={formAction} className="space-y-5">

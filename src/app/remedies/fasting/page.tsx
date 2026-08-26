@@ -64,13 +64,14 @@ const benefits = [
 export default function FastingServicePage() {
   const content = {
     hero: {
-      tag: "Vedic Wisdom",
-      titleLine1: "Align With",
-      titleLine2: "The Cosmos",
-      description: "Discover the power of Vedic fasting tailored to your astrological chart. Enhance your spiritual journey, remove planetary afflictions, and bring harmony to your life.",
-      primaryBtnText: "Get Fasting Plan",
-      secondaryBtnText: "Consult Astrologer"
-    }
+      tag: 'Vedic Wisdom',
+      titleLine1: 'Align With',
+      titleLine2: 'The Cosmos',
+      description:
+        'Discover the power of Vedic fasting tailored to your astrological chart. Enhance your spiritual journey, remove planetary afflictions, and bring harmony to your life.',
+      primaryBtnText: 'Get Fasting Plan',
+      secondaryBtnText: 'Consult Astrologer',
+    },
   };
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -117,9 +118,13 @@ export default function FastingServicePage() {
             <div className="max-w-3xl space-y-6">
               {/* Breadcrumb */}
               <div className="flex items-center gap-2 text-xs sm:text-sm text-white/70">
-                <Link href="/" className="hover:text-[#F6D075] transition-colors">Home</Link>
+                <Link href="/" className="hover:text-[#F6D075] transition-colors">
+                  Home
+                </Link>
                 <span>/</span>
-                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">Remedies</Link>
+                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">
+                  Remedies
+                </Link>
                 <span>/</span>
                 <span className="text-[#F6D075] font-semibold">Vrata & Fasting Guide</span>
               </div>
@@ -211,7 +216,8 @@ export default function FastingServicePage() {
                 </div>
               </div>
               <p className="text-xs text-[#6B5E55] pt-4 border-t border-[#E5D9C8]">
-                Fasting clears physical toxins (Ama) and balances planetary subtle energies across your bio-rhythm.
+                Fasting clears physical toxins (Ama) and balances planetary subtle energies across
+                your bio-rhythm.
               </p>
             </div>
 
@@ -220,12 +226,29 @@ export default function FastingServicePage() {
                 <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block mb-3">
                   Calendar Preview
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">Sample Monthly Fasting Schedule</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">
+                  Sample Monthly Fasting Schedule
+                </h3>
                 <div className="space-y-3">
                   {[
-                    { date: 'Jul 8', fast: 'Ekadashi Vrata', deity: 'Lord Vishnu', status: 'Optimal' },
-                    { date: 'Jul 14', fast: 'Somvar Vrata', deity: 'Lord Shiva', status: 'Optimal' },
-                    { date: 'Jul 21', fast: 'Pradosh Vrata', deity: 'Lord Shiva', status: 'Optimal' },
+                    {
+                      date: 'Jul 8',
+                      fast: 'Ekadashi Vrata',
+                      deity: 'Lord Vishnu',
+                      status: 'Optimal',
+                    },
+                    {
+                      date: 'Jul 14',
+                      fast: 'Somvar Vrata',
+                      deity: 'Lord Shiva',
+                      status: 'Optimal',
+                    },
+                    {
+                      date: 'Jul 21',
+                      fast: 'Pradosh Vrata',
+                      deity: 'Lord Shiva',
+                      status: 'Optimal',
+                    },
                   ]?.map((item, i) => (
                     <div
                       key={i}
@@ -250,7 +273,9 @@ export default function FastingServicePage() {
               </div>
 
               <div className="pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs text-[#713B32] font-bold">
-                <span className="flex items-center gap-1.5"><Lock size={14} /> Full individualized report generated below</span>
+                <span className="flex items-center gap-1.5">
+                  <Lock size={14} /> Full individualized report generated below
+                </span>
                 <span>Tithi Precision</span>
               </div>
             </div>
@@ -287,7 +312,9 @@ export default function FastingServicePage() {
                 <p className="text-xs font-bold text-[#713B32]">{f?.deity}</p>
                 <p className="text-xs text-[#6B5E55]">📅 {f?.day}</p>
                 <p className="text-xs text-[#6B5E55]">✨ {f?.benefit}</p>
-                <p className="text-xs font-medium text-[#292522] pt-2 border-t border-[#E5D9C8]">🍎 {f?.food}</p>
+                <p className="text-xs font-medium text-[#292522] pt-2 border-t border-[#E5D9C8]">
+                  🍎 {f?.food}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -321,7 +348,10 @@ export default function FastingServicePage() {
           </div>
           <div className="space-y-4">
             {faqs?.map((faq, i) => (
-              <div key={i} className="rounded-2xl border border-[#E5D9C8] bg-[#FFFDFC] shadow-sm overflow-hidden">
+              <div
+                key={i}
+                className="rounded-2xl border border-[#E5D9C8] bg-[#FFFDFC] shadow-sm overflow-hidden"
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F3EA] transition-colors"

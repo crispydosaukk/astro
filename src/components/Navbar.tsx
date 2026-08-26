@@ -131,6 +131,7 @@ const panchangItems = [
 const standardNavLinks = [
   { label: 'Home', href: '/' },
   { label: 'Talk to Astrologer', href: '/talk-to-astrologer' },
+  { label: '✦ AI Astrologers', href: '/talk-to-ai-astrologer', isAiBadge: true },
   { label: 'Remedies', href: '/remedies' },
   { label: 'Astrologer Login', href: '/astrologer-login' },
 ];
@@ -152,7 +153,7 @@ export default function Navbar() {
     let unsubscribeSnapshot: () => void;
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      
+
       if (currentUser) {
         // Check for active consultations as a customer
         const q = query(
@@ -160,7 +161,7 @@ export default function Navbar() {
           where('customerId', '==', currentUser.uid),
           where('status', '==', 'active')
         );
-        
+
         unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
           if (!snapshot.empty) {
             setActiveCall({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() });
@@ -173,7 +174,7 @@ export default function Navbar() {
         if (unsubscribeSnapshot) unsubscribeSnapshot();
       }
     });
-    
+
     return () => {
       unsubscribeAuth();
       if (unsubscribeSnapshot) unsubscribeSnapshot();
@@ -312,7 +313,9 @@ export default function Navbar() {
                 <button
                   onClick={() => setIsPanchangOpen(!isPanchangOpen)}
                   className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:text-[#713B32] hover:bg-[#EDE4D5]/60 ${
-                    isPanchangOpen || pathname.includes('/panchang') ? 'text-[#713B32] bg-[#EDE4D5]/80' : 'text-[#292522]'
+                    isPanchangOpen || pathname.includes('/panchang')
+                      ? 'text-[#713B32] bg-[#EDE4D5]/80'
+                      : 'text-[#292522]'
                   }`}
                 >
                   <span>Panchang</span>
@@ -386,7 +389,7 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-        
+
         {/* Active Call Banner */}
         {activeCall && !pathname.includes('/call/') && (
           <div className="bg-[#713B32] text-white px-6 py-2.5 flex items-center justify-between text-sm shadow-md animate-pulse border-t border-[#B88A44]/30">
@@ -394,7 +397,7 @@ export default function Navbar() {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               You have an active ongoing {activeCall.type || 'video'} call!
             </div>
-            <Link 
+            <Link
               href={`/call/${activeCall.roomID}`}
               className="px-4 py-1.5 bg-[#FFFDFC] text-[#713B32] rounded-lg font-bold text-xs hover:bg-[#F8F3EA] transition-colors shadow-sm"
             >

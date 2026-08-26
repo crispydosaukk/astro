@@ -66,8 +66,10 @@ export default function FreeDailyHoroscopePage() {
 
   const predictions: Record<string, any> = {
     Aries: {
-      overall: 'High cosmic energy propels your career endeavors today. Focus on long-term goal setting and remain open to fresh collaborations.',
-      career: 'Promising growth in leadership roles. A new project proposal gets positive feedback.',
+      overall:
+        'High cosmic energy propels your career endeavors today. Focus on long-term goal setting and remain open to fresh collaborations.',
+      career:
+        'Promising growth in leadership roles. A new project proposal gets positive feedback.',
       love: 'Warm communication brings harmony to your relationship. Singles may meet someone special.',
       health: 'Vitality is high, but ensure proper hydration and afternoon rest.',
       finance: 'Favorable time for prudent investments and financial planning.',
@@ -75,7 +77,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Crimson Red',
     },
     Taurus: {
-      overall: 'Patience and steady perseverance yield excellent outcomes. Financial stability brings peace of mind.',
+      overall:
+        'Patience and steady perseverance yield excellent outcomes. Financial stability brings peace of mind.',
       career: 'Methodical work impresses senior management. Stay focused on quality.',
       love: 'Deep mutual understanding strengthens your bond.',
       health: 'Incorporate gentle stretches or yoga into your daily routine.',
@@ -84,7 +87,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Emerald Green',
     },
     Gemini: {
-      overall: 'Mercurial curiosity inspires creative breakthroughs today. Effective networking opens unexpected doors.',
+      overall:
+        'Mercurial curiosity inspires creative breakthroughs today. Effective networking opens unexpected doors.',
       career: 'Great day for presentations, brainstorming, and signing client agreements.',
       love: 'Lively banter and shared laughter deepen your relationship bond.',
       health: 'Keep your nervous system calm with mindful breathing.',
@@ -93,7 +97,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Canary Yellow',
     },
     Cancer: {
-      overall: 'Moon transits favorable houses, bringing intuitive clarity and domestic harmony to your daily schedule.',
+      overall:
+        'Moon transits favorable houses, bringing intuitive clarity and domestic harmony to your daily schedule.',
       career: 'Team members look to you for guidance and emotional support.',
       love: 'Heart-to-heart conversations heal past misunderstandings effortlessly.',
       health: 'Nourish yourself with warm herbal teas and light sattvic meals.',
@@ -102,7 +107,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Pearl White',
     },
     Leo: {
-      overall: 'Surya Dev shines brightly on your 10th house axis, bestowing executive authority and vibrant charisma.',
+      overall:
+        'Surya Dev shines brightly on your 10th house axis, bestowing executive authority and vibrant charisma.',
       career: 'Your proposals receive applause from superiors and clients alike.',
       love: 'Generous gestures and romantic dinner plans spark delight.',
       health: 'Energy is robust; engage in cardiovascular exercise or brisk walking.',
@@ -111,7 +117,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Royal Gold',
     },
     Virgo: {
-      overall: 'Analytical precision and attention to detail enable you to solve complex hurdles with ease today.',
+      overall:
+        'Analytical precision and attention to detail enable you to solve complex hurdles with ease today.',
       career: 'Organizing workflows and auditing reports yields stellar recognition.',
       love: 'Acts of thoughtful service communicate your love louder than words.',
       health: 'Focus on gut wellness and avoid overly spicy or street food.',
@@ -120,7 +127,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Sage Green',
     },
     Libra: {
-      overall: 'Venusian grace fosters diplomatic negotiations and artistic inspiration across personal and work spheres.',
+      overall:
+        'Venusian grace fosters diplomatic negotiations and artistic inspiration across personal and work spheres.',
       career: 'Partnership negotiations and creative design tasks flourish effortlessly.',
       love: 'Romantic vibes are peaked; an ideal evening for date night or celebrations.',
       health: 'Balance work hours with relaxation to avoid mental fatigue.',
@@ -129,7 +137,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Rose Pink',
     },
     Scorpio: {
-      overall: 'Mars and Ketu empower your investigative focus, allowing you to master intricate tasks ahead of deadlines.',
+      overall:
+        'Mars and Ketu empower your investigative focus, allowing you to master intricate tasks ahead of deadlines.',
       career: 'Strategic planning and confidential negotiations swing in your favor.',
       love: 'Intense emotional connection brings profound closeness with your partner.',
       health: 'Hydrate well and practice evening meditation to ground your energy.',
@@ -138,7 +147,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Deep Maroon',
     },
     Sagittarius: {
-      overall: 'Jupiterian optimism fuels your desire for learning, philosophical discussions, and ambitious travel plans.',
+      overall:
+        'Jupiterian optimism fuels your desire for learning, philosophical discussions, and ambitious travel plans.',
       career: 'Mentorship and advisory roles bring deep satisfaction and prestige.',
       love: 'Sharing philosophical insights and adventures sparks romantic warmth.',
       health: 'High stamina; enjoy outdoor activities or fitness workouts.',
@@ -147,7 +157,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Saffron Yellow',
     },
     Capricorn: {
-      overall: 'Shani Dev rewards your disciplined dedication with steady progress on milestone career projects.',
+      overall:
+        'Shani Dev rewards your disciplined dedication with steady progress on milestone career projects.',
       career: 'Structured execution impresses corporate decision-makers.',
       love: 'Loyalty and commitment form the bedrock of lasting marital happiness.',
       health: 'Pay attention to posture, joint mobility, and restful sleep.',
@@ -156,7 +167,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Charcoal Grey',
     },
     Aquarius: {
-      overall: 'Innovative thinking and humanitarian ideas set you apart as a visionary collaborator today.',
+      overall:
+        'Innovative thinking and humanitarian ideas set you apart as a visionary collaborator today.',
       career: 'Technological innovations and group projects gain strong momentum.',
       love: 'Intellectual synergy and open conversations spark romantic intrigue.',
       health: 'Keep your circulation active with regular movement breaks.',
@@ -165,7 +177,8 @@ export default function FreeDailyHoroscopePage() {
       luckyColor: 'Electric Blue',
     },
     Pisces: {
-      overall: 'Spiritual intuition and creative empathy guide you toward peace, inspiration, and fruitful decisions.',
+      overall:
+        'Spiritual intuition and creative empathy guide you toward peace, inspiration, and fruitful decisions.',
       career: 'Creative arts, healing, writing, and counseling ventures achieve peak flow.',
       love: 'Soulful empathy and compassionate understanding enchant your partner.',
       health: 'Rejuvenate near water or indulge in soothing music and rest.',
@@ -321,7 +334,8 @@ export default function FreeDailyHoroscopePage() {
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
-                  Select your zodiac sign below for today&apos;s predictions on career, love, health, finance, lucky color, and lucky numbers.
+                  Select your zodiac sign below for today&apos;s predictions on career, love,
+                  health, finance, lucky color, and lucky numbers.
                 </p>
               </motion.div>
 
@@ -334,7 +348,9 @@ export default function FreeDailyHoroscopePage() {
               >
                 <button
                   onClick={() => {
-                    document.getElementById('zodiac-selector')?.scrollIntoView({ behavior: 'smooth' });
+                    document
+                      .getElementById('zodiac-selector')
+                      ?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#C9952B]/40 text-sm sm:text-base cursor-pointer"
                 >
@@ -342,7 +358,9 @@ export default function FreeDailyHoroscopePage() {
                 </button>
                 <button
                   onClick={() => {
-                    document.getElementById('personalized-form-section')?.scrollIntoView({ behavior: 'smooth' });
+                    document
+                      .getElementById('personalized-form-section')
+                      ?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="px-7 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md cursor-pointer flex items-center gap-2"
                 >
@@ -355,12 +373,21 @@ export default function FreeDailyHoroscopePage() {
       </section>
 
       {/* 12 Zodiac Quick Selector Section */}
-      <section id="zodiac-selector" className="py-12 lg:py-16 bg-background relative z-10 space-y-6">
+      <section
+        id="zodiac-selector"
+        className="py-12 lg:py-16 bg-background relative z-10 space-y-6"
+      >
         <div className="max-w-6xl mx-auto px-6 lg:px-10 space-y-6">
           <div className="text-center space-y-2 mb-4">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">12 Rashi Transits</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Explore Today&apos;s Sun & Moon Sign Horoscopes</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Select any zodiac sign for instantaneous transit overview</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              12 Rashi Transits
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Explore Today&apos;s Sun & Moon Sign Horoscopes
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Select any zodiac sign for instantaneous transit overview
+            </p>
           </div>
 
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
@@ -380,7 +407,12 @@ export default function FreeDailyHoroscopePage() {
             ))}
           </div>
 
-          <motion.div key={selectedZodiac} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+          <motion.div
+            key={selectedZodiac}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+          >
             <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-3">
               <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-wrap gap-2">
                 <h2 className="text-xl font-bold text-[#C9952B]">
@@ -395,7 +427,9 @@ export default function FreeDailyHoroscopePage() {
                   </span>
                 </div>
               </div>
-              <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{currentPred.overall}</p>
+              <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                {currentPred.overall}
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -403,28 +437,36 @@ export default function FreeDailyHoroscopePage() {
                 <div className="flex items-center gap-1.5 text-[#C9952B] font-bold text-xs">
                   <Briefcase size={16} /> Career
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">{currentPred.career}</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {currentPred.career}
+                </p>
               </div>
 
               <div className="glass-card p-4 rounded-xl border border-white/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-rose-400 font-bold text-xs">
                   <Heart size={16} /> Love & Relationships
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">{currentPred.love}</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {currentPred.love}
+                </p>
               </div>
 
               <div className="glass-card p-4 rounded-xl border border-white/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs">
                   <Activity size={16} /> Health
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">{currentPred.health}</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {currentPred.health}
+                </p>
               </div>
 
               <div className="glass-card p-4 rounded-xl border border-white/10 space-y-1">
                 <div className="flex items-center gap-1.5 text-blue-400 font-bold text-xs">
                   <DollarSign size={16} /> Finance
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">{currentPred.finance}</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {currentPred.finance}
+                </p>
               </div>
             </div>
 
@@ -444,7 +486,10 @@ export default function FreeDailyHoroscopePage() {
       </section>
 
       {/* PERSONALIZED BIRTH DETAILS FORM SECTION (EXACTLY BELOW ASTROLOGER BANNER) */}
-      <section id="personalized-form-section" className="py-12 lg:py-16 bg-background/60 border-t border-white/5 relative z-10">
+      <section
+        id="personalized-form-section"
+        className="py-12 lg:py-16 bg-background/60 border-t border-white/5 relative z-10"
+      >
         <div className="max-w-6xl mx-auto px-6 lg:px-10">
           <div className="text-center space-y-2 mb-8">
             <span className="text-xs font-bold text-[#713B32] uppercase tracking-widest bg-[#EDE4D5] px-3.5 py-1 rounded-full border border-[#E5D9C8] inline-block">
@@ -454,7 +499,8 @@ export default function FreeDailyHoroscopePage() {
               Generate Your Personalized Daily Horoscope
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl mx-auto">
-              Enter your exact birth date, time, and birthplace for an AI-synthesized Vedic forecast calculated specifically for your Lagna and Nakshatra.
+              Enter your exact birth date, time, and birthplace for an AI-synthesized Vedic forecast
+              calculated specifically for your Lagna and Nakshatra.
             </p>
           </div>
 
@@ -462,8 +508,12 @@ export default function FreeDailyHoroscopePage() {
             {/* Left Form Card */}
             <div className="lg:col-span-7 glass-card border border-[#B88A44]/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
               <div className="space-y-1 border-b border-[#E5D9C8] pb-3">
-                <h3 className="text-lg sm:text-xl font-bold text-[#292522]">Enter Your Birth Details</h3>
-                <p className="text-xs text-[#6B5E55]">All calculations are generated live and 100% private</p>
+                <h3 className="text-lg sm:text-xl font-bold text-[#292522]">
+                  Enter Your Birth Details
+                </h3>
+                <p className="text-xs text-[#6B5E55]">
+                  All calculations are generated live and 100% private
+                </p>
               </div>
 
               <form onSubmit={handleCalculate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -482,15 +532,23 @@ export default function FreeDailyHoroscopePage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Gender*</label>
+                  <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">
+                    Gender*
+                  </label>
                   <select
                     value={formData.gender}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm cursor-pointer"
                   >
-                    <option value="Male" className="bg-[#FFFDFC] text-[#292522]">Male</option>
-                    <option value="Female" className="bg-[#FFFDFC] text-[#292522]">Female</option>
-                    <option value="Other" className="bg-[#FFFDFC] text-[#292522]">Other</option>
+                    <option value="Male" className="bg-[#FFFDFC] text-[#292522]">
+                      Male
+                    </option>
+                    <option value="Female" className="bg-[#FFFDFC] text-[#292522]">
+                      Female
+                    </option>
+                    <option value="Other" className="bg-[#FFFDFC] text-[#292522]">
+                      Other
+                    </option>
                   </select>
                 </div>
 
@@ -539,11 +597,13 @@ export default function FreeDailyHoroscopePage() {
                   >
                     {isCalculating ? (
                       <span className="flex items-center gap-2">
-                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Generating Daily AI Horoscope...
+                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Generating
+                        Daily AI Horoscope...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
-                        <Sparkles size={18} className="text-[#292522]" /> Generate My Daily Horoscope
+                        <Sparkles size={18} className="text-[#292522]" /> Generate My Daily
+                        Horoscope
                       </span>
                     )}
                   </button>
@@ -561,24 +621,36 @@ export default function FreeDailyHoroscopePage() {
 
                 <ul className="space-y-3 text-xs sm:text-sm text-[#292522]">
                   <li className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                      ✓
+                    </span>
                     <div>
                       <strong className="text-[#713B32]">Exact Lagna & Moon Sign Analysis</strong>
-                      <p className="text-[#6B5E55] text-xs mt-0.5">Calculates how current celestial transits impact your personal houses.</p>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">
+                        Calculates how current celestial transits impact your personal houses.
+                      </p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                      ✓
+                    </span>
                     <div>
                       <strong className="text-[#713B32]">Personalized 4-Pillar Daily Advice</strong>
-                      <p className="text-[#6B5E55] text-xs mt-0.5">Tailored recommendations for career, romance, health, and finance.</p>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">
+                        Tailored recommendations for career, romance, health, and finance.
+                      </p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">✓</span>
+                    <span className="w-5 h-5 rounded-full bg-[#B88A44]/20 text-[#713B32] font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                      ✓
+                    </span>
                     <div>
                       <strong className="text-[#713B32]">Today&apos;s Lucky Elements</strong>
-                      <p className="text-[#6B5E55] text-xs mt-0.5">Auspicious hours, lucky color, lucky number, and daily mantra remedy.</p>
+                      <p className="text-[#6B5E55] text-xs mt-0.5">
+                        Auspicious hours, lucky color, lucky number, and daily mantra remedy.
+                      </p>
                     </div>
                   </li>
                 </ul>
@@ -594,11 +666,16 @@ export default function FreeDailyHoroscopePage() {
               {/* Astrologer Call CTA */}
               <div className="p-5 rounded-2xl bg-gradient-to-br from-[#281123] to-[#170b16] text-white border border-[#B88A44]/30 space-y-2 shadow-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#F6D075] uppercase tracking-wider">Need Deep Personalized Guidance?</span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Live</span>
+                  <span className="text-xs font-bold text-[#F6D075] uppercase tracking-wider">
+                    Need Deep Personalized Guidance?
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                    Live
+                  </span>
                 </div>
                 <p className="text-xs text-[#F8F3EA]/90 leading-relaxed">
-                  Have a verified Vedic astrologer analyze your chart live over phone for precise life guidance.
+                  Have a verified Vedic astrologer analyze your chart live over phone for precise
+                  life guidance.
                 </p>
                 <Link
                   href="/talk-to-astrologer"
@@ -615,7 +692,10 @@ export default function FreeDailyHoroscopePage() {
       {/* Generated AI Daily Horoscope Report Section */}
       <AnimatePresence>
         {dailyReport && (
-          <section id="daily-report-section" className="py-12 bg-background/50 border-t border-white/5 space-y-8">
+          <section
+            id="daily-report-section"
+            className="py-12 bg-background/50 border-t border-white/5 space-y-8"
+          >
             <div className="max-w-6xl mx-auto px-6 lg:px-10 space-y-6">
               {/* Header Summary Banner */}
               <div className="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 flex flex-wrap items-center justify-between gap-6 shadow-2xl">
@@ -632,7 +712,8 @@ export default function FreeDailyHoroscopePage() {
                     {dailyReport.recommendationName}
                   </h2>
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    Native: <strong className="text-foreground">{dailyReport.name}</strong> ({dailyReport.gender}) • Birth: {dailyReport.dob} at {dailyReport.pob}
+                    Native: <strong className="text-foreground">{dailyReport.name}</strong> (
+                    {dailyReport.gender}) • Birth: {dailyReport.dob} at {dailyReport.pob}
                   </p>
                 </div>
 
@@ -662,8 +743,12 @@ export default function FreeDailyHoroscopePage() {
                 </p>
                 {dailyReport.procedure && (
                   <div className="pt-3 border-t border-white/10 space-y-1">
-                    <span className="text-xs font-bold text-[#C9952B] uppercase tracking-wider">Today&apos;s Recommended Ritual & Vedic Remedy</span>
-                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">{dailyReport.procedure}</p>
+                    <span className="text-xs font-bold text-[#C9952B] uppercase tracking-wider">
+                      Today&apos;s Recommended Ritual & Vedic Remedy
+                    </span>
+                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {dailyReport.procedure}
+                    </p>
                   </div>
                 )}
               </div>
@@ -715,9 +800,15 @@ export default function FreeDailyHoroscopePage() {
       <section className="py-16 bg-background/50 border-t border-white/5">
         <div className="max-w-6xl mx-auto px-6 lg:px-10 space-y-8">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">Personalized Vedic Astrology</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Explore Specialized Horoscopes</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Generate tailored birth chart predictions with your exact date and time of birth</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              Personalized Vedic Astrology
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Explore Specialized Horoscopes
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Generate tailored birth chart predictions with your exact date and time of birth
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -734,11 +825,13 @@ export default function FreeDailyHoroscopePage() {
                   Love & Relationship Horoscope
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Discover 7th House (Kalatra Bhava), Venusian strength, Manglik alignment, relationship synergy, and marriage timing.
+                  Discover 7th House (Kalatra Bhava), Venusian strength, Manglik alignment,
+                  relationship synergy, and marriage timing.
                 </p>
               </div>
               <div className="text-xs font-bold text-rose-400 flex items-center gap-1 pt-2">
-                Open Love Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Open Love Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -755,11 +848,13 @@ export default function FreeDailyHoroscopePage() {
                   Finance & Wealth Horoscope
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Analyze Dhana Bhava (2nd House), Labha Bhava (11th House), Jupiter&apos;s wealth yogas, and favorable investment timing.
+                  Analyze Dhana Bhava (2nd House), Labha Bhava (11th House), Jupiter&apos;s wealth
+                  yogas, and favorable investment timing.
                 </p>
               </div>
               <div className="text-xs font-bold text-emerald-400 flex items-center gap-1 pt-2">
-                Open Finance Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Open Finance Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -776,11 +871,13 @@ export default function FreeDailyHoroscopePage() {
                   Health & Vitality Horoscope
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance (Vata/Pitta/Kapha), and longevity remedies.
+                  Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance
+                  (Vata/Pitta/Kapha), and longevity remedies.
                 </p>
               </div>
               <div className="text-xs font-bold text-cyan-400 flex items-center gap-1 pt-2">
-                Open Health Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Open Health Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           </div>

@@ -146,19 +146,13 @@ export default function AstrologerFilterModal({
 
   // Derive final lists combining dynamic data with fallbacks
   const effectiveSkills: DynamicFilterOption[] =
-    dynamicSkills.length > 0
-      ? dynamicSkills
-      : fallbackSkills.map((s) => ({ name: s }));
+    dynamicSkills.length > 0 ? dynamicSkills : fallbackSkills.map((s) => ({ name: s }));
 
   const effectiveLanguages: DynamicFilterOption[] =
-    dynamicLanguages.length > 0
-      ? dynamicLanguages
-      : fallbackLanguages.map((l) => ({ name: l }));
+    dynamicLanguages.length > 0 ? dynamicLanguages : fallbackLanguages.map((l) => ({ name: l }));
 
   const effectiveCountries: DynamicFilterOption[] =
-    dynamicCountries.length > 0
-      ? dynamicCountries
-      : fallbackCountries.map((c) => ({ name: c }));
+    dynamicCountries.length > 0 ? dynamicCountries : fallbackCountries.map((c) => ({ name: c }));
 
   const effectiveGenders =
     dynamicGenders.length > 0
@@ -205,7 +199,9 @@ export default function AstrologerFilterModal({
       const exists = prev.countries.includes(country);
       return {
         ...prev,
-        countries: exists ? prev.countries.filter((c) => c !== country) : [...prev.countries, country],
+        countries: exists
+          ? prev.countries.filter((c) => c !== country)
+          : [...prev.countries, country],
       };
     });
   };
@@ -327,9 +323,7 @@ export default function AstrologerFilterModal({
                       <button
                         key={opt.id}
                         type="button"
-                        onClick={() =>
-                          setDraftFilters((prev) => ({ ...prev, sortBy: opt.id }))
-                        }
+                        onClick={() => setDraftFilters((prev) => ({ ...prev, sortBy: opt.id }))}
                         className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-left ${
                           isSelected
                             ? 'bg-[#FACC15]/15 text-foreground font-bold border border-[#FACC15]/30'
@@ -451,9 +445,7 @@ export default function AstrologerFilterModal({
                       <button
                         key={gen.id}
                         type="button"
-                        onClick={() =>
-                          setDraftFilters((prev) => ({ ...prev, gender: gen.id }))
-                        }
+                        onClick={() => setDraftFilters((prev) => ({ ...prev, gender: gen.id }))}
                         className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all text-left ${
                           isSelected
                             ? 'bg-[#FACC15]/15 text-foreground font-bold border border-[#FACC15]/30'

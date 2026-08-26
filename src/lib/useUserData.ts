@@ -36,7 +36,12 @@ export function useUserData() {
           } else {
             const email = currentUser.email || '';
             const phone = currentUser.phoneNumber || '';
-            setUserData({ name: defaultName, firstName: defaultFirstName, email, phone } as UserData);
+            setUserData({
+              name: defaultName,
+              firstName: defaultFirstName,
+              email,
+              phone,
+            } as UserData);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);

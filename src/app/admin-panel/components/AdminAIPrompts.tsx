@@ -1,14 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  Sparkles,
-  Save,
-  RotateCcw,
-  Check,
-  AlertCircle,
-  Loader2,
-} from 'lucide-react';
+import { Sparkles, Save, RotateCcw, Check, AlertCircle, Loader2 } from 'lucide-react';
 import {
   AIPromptItem,
   AIPromptSettingsData,
@@ -136,7 +129,10 @@ export default function AdminAIPrompts() {
   };
 
   const currentOption = PROMPT_OPTIONS.find((o) => o.id === selectedServiceId) || PROMPT_OPTIONS[0];
-  const currentPrompt = prompts[selectedServiceId] || DEFAULT_AI_PROMPTS[selectedServiceId] || DEFAULT_AI_PROMPTS['kundli-general'];
+  const currentPrompt =
+    prompts[selectedServiceId] ||
+    DEFAULT_AI_PROMPTS[selectedServiceId] ||
+    DEFAULT_AI_PROMPTS['kundli-general'];
 
   const promptText = currentPrompt.extraDirectives || currentPrompt.systemPrompt || '';
 
@@ -217,7 +213,8 @@ export default function AdminAIPrompts() {
           Services, Remedies &amp; Panchang Prompts
         </h1>
         <p className="text-sm text-[#6B5E55] leading-relaxed">
-          Select any service, remedy, or panchang module below and simply enter the prompt instructions you want OpenAI to follow when generating customer reports and predictions.
+          Select any service, remedy, or panchang module below and simply enter the prompt
+          instructions you want OpenAI to follow when generating customer reports and predictions.
         </p>
       </div>
 
@@ -273,7 +270,9 @@ export default function AdminAIPrompts() {
             </optgroup>
           </select>
           <p className="text-xs text-[#6B5E55]">
-            Currently editing prompt for: <strong className="text-[#292522]">{currentOption.name}</strong> ({currentOption.description})
+            Currently editing prompt for:{' '}
+            <strong className="text-[#292522]">{currentOption.name}</strong> (
+            {currentOption.description})
           </p>
         </div>
 
@@ -301,7 +300,9 @@ export default function AdminAIPrompts() {
           />
 
           <p className="text-xs text-[#6B5E55] leading-relaxed">
-            💡 <em>Tip:</em> You can type in plain English. When customers generate reports for <strong>{currentOption.name}</strong>, OpenAI will follow these exact prompt instructions.
+            💡 <em>Tip:</em> You can type in plain English. When customers generate reports for{' '}
+            <strong>{currentOption.name}</strong>, OpenAI will follow these exact prompt
+            instructions.
           </p>
         </div>
 

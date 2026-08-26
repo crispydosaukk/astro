@@ -64,8 +64,10 @@ export async function POST(req: Request) {
       brideNakshatra: sampleDetails.brideNakshatra || 'Hasta',
       totalScore: sampleDetails.totalScore || '29.5',
       status: sampleDetails.status || 'Highly Auspicious Match',
-      manglikSummary: sampleDetails.manglikSummary || 'Both partners are Non-Manglik (Clean Alignment)',
-      ashtakootBreakdown: 'Varna: 1/1, Vashya: 2/2, Tara: 3/3, Yoni: 4/4, Graha Maitri: 5/5, Gana: 6/6, Bhakoot: 7/7, Nadi: 1.5/8',
+      manglikSummary:
+        sampleDetails.manglikSummary || 'Both partners are Non-Manglik (Clean Alignment)',
+      ashtakootBreakdown:
+        'Varna: 1/1, Vashya: 2/2, Tara: 3/3, Yoni: 4/4, Graha Maitri: 5/5, Gana: 6/6, Bhakoot: 7/7, Nadi: 1.5/8',
       date: sampleDetails.date || new Date().toISOString().split('T')[0],
       location: sampleDetails.location || 'New Delhi, India',
       tithi: sampleDetails.tithi || 'Shukla Paksha Dashami',

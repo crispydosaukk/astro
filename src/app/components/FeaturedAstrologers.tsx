@@ -19,7 +19,8 @@ const fallbackFeaturedAstrologers = [
     price: 25,
     languages: ['Hindi', 'English'],
     status: 'online',
-    image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=600&h=600&fit=crop&crop=face',
+    image:
+      'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=600&h=600&fit=crop&crop=face',
     badge: 'VERIFIED',
   },
   {
@@ -32,7 +33,8 @@ const fallbackFeaturedAstrologers = [
     price: 20,
     languages: ['English', 'Tamil', 'Hindi'],
     status: 'online',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=600&fit=crop&crop=face',
+    image:
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=600&fit=crop&crop=face',
     badge: 'VERIFIED',
   },
   {
@@ -45,7 +47,8 @@ const fallbackFeaturedAstrologers = [
     price: 30,
     languages: ['Hindi', 'Sanskrit', 'English'],
     status: 'online',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face',
+    image:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face',
     badge: 'VERIFIED',
   },
   {
@@ -58,7 +61,8 @@ const fallbackFeaturedAstrologers = [
     price: 22,
     languages: ['Malayalam', 'English', 'Hindi'],
     status: 'online',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&h=600&fit=crop&crop=face',
+    image:
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&h=600&fit=crop&crop=face',
     badge: 'VERIFIED',
   },
   {
@@ -71,7 +75,8 @@ const fallbackFeaturedAstrologers = [
     price: 18,
     languages: ['Hindi', 'English'],
     status: 'online',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face',
+    image:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face',
     badge: 'VERIFIED',
   },
 ];
@@ -100,8 +105,11 @@ export default function FeaturedAstrologers() {
               rating: Number(data.rating) || 4.9,
               reviews: Number(data.reviewsCount || data.reviews) || 2847,
               price: Number(data.amount) || 20,
-              languages: data.languages ? data.languages.split(',').map((l: string) => l.trim()) : ['English', 'Hindi'],
-              status: data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
+              languages: data.languages
+                ? data.languages.split(',').map((l: string) => l.trim())
+                : ['English', 'Hindi'],
+              status:
+                data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
               image:
                 data.profileImageUrl ||
                 data.avatar ||
@@ -179,7 +187,8 @@ export default function FeaturedAstrologers() {
                     alt={ast.name}
                     className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`;
+                      (e.currentTarget as HTMLImageElement).src =
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`;
                     }}
                   />
                   {/* Verified Badge */}
@@ -218,12 +227,14 @@ export default function FeaturedAstrologers() {
                     <p className="text-xs text-[#6B5E55] font-medium truncate capitalize">
                       {Array.isArray(ast.specialties || ast.specialty)
                         ? (ast.specialties || ast.specialty).join(', ')
-                        : (ast.specialties || ast.specialty)}
+                        : ast.specialties || ast.specialty}
                     </p>
 
                     {/* Experience */}
                     <p className="text-[11px] text-[#6B5E55]/90 font-medium">
-                      {ast.experience?.toString().includes('Exp') ? ast.experience : `${ast.experience}+ Years Exp.`}
+                      {ast.experience?.toString().includes('Exp')
+                        ? ast.experience
+                        : `${ast.experience}+ Years Exp.`}
                     </p>
 
                     {/* Rating */}
@@ -243,7 +254,9 @@ export default function FeaturedAstrologers() {
                       {ast.languages && ast.languages.length > 0 && (
                         <>
                           <span className="text-[#E5D9C8]">•</span>
-                          <span className="truncate max-w-[100px] text-[#6B5E55] font-medium">{ast.languages.slice(0, 2).join(', ')}</span>
+                          <span className="truncate max-w-[100px] text-[#6B5E55] font-medium">
+                            {ast.languages.slice(0, 2).join(', ')}
+                          </span>
                         </>
                       )}
                     </div>

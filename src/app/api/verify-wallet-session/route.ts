@@ -13,7 +13,8 @@ export async function POST(req: Request) {
 
     // Fetch settings and initialize Stripe
     const settings = await getSettings();
-    const secretKey = settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
+    const secretKey =
+      settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
 
     const stripe = new Stripe(secretKey, {
       apiVersion: '2026-07-29.dahlia' as any,
@@ -34,7 +35,11 @@ export async function POST(req: Request) {
     }
 
     // Check if this transaction has already been processed to avoid double crediting
-    const transactionRef = adminDb.collection('users').doc(userId).collection('wallet_transactions').doc(sessionId);
+    const transactionRef = adminDb
+      .collection('users')
+      .doc(userId)
+      .collection('wallet_transactions')
+      .doc(sessionId);
     const transactionDoc = await transactionRef.get();
 
     if (transactionDoc.exists && transactionDoc.data()?.status === 'completed') {
@@ -69,7 +74,11 @@ export async function POST(req: Request) {
 
     await batch.commit();
 
-    return NextResponse.json({ message: 'Wallet updated successfully', balanceUpdated: true, newBalance: currentBalance + parsedAmount });
+    return NextResponse.json({
+      message: 'Wallet updated successfully',
+      balanceUpdated: true,
+      newBalance: currentBalance + parsedAmount,
+    });
   } catch (error: any) {
     console.error('Verify wallet session error:', error);
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });

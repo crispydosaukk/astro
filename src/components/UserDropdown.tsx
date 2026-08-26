@@ -47,8 +47,13 @@ export default function UserDropdown() {
     };
   }, []);
 
-  const fullName = userData?.name || user?.displayName || user?.email?.split('@')[0] || (loading ? 'Loading...' : 'User');
-  const phoneNumber = user?.phoneNumber || userData?.phone || userData?.phoneNumber || (loading ? '...' : '');
+  const fullName =
+    userData?.name ||
+    user?.displayName ||
+    user?.email?.split('@')[0] ||
+    (loading ? 'Loading...' : 'User');
+  const phoneNumber =
+    user?.phoneNumber || userData?.phone || userData?.phoneNumber || (loading ? '...' : '');
   const walletBalance = userData?.walletBalance || 0;
 
   return (
@@ -105,8 +110,12 @@ export default function UserDropdown() {
               >
                 <span>Wallet Transactions</span>
                 <div className="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 flex flex-col items-end">
-                  <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-wider">Balance</span>
-                  <span className="font-bold text-xs text-[#292522]">{formatPrice(walletBalance)}</span>
+                  <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-wider">
+                    Balance
+                  </span>
+                  <span className="font-bold text-xs text-[#292522]">
+                    {formatPrice(walletBalance)}
+                  </span>
                 </div>
               </Link>
               <Link
@@ -197,7 +206,9 @@ export default function UserDropdown() {
                       <UserIcon size={28} />
                     </div>
                     <h3 className="text-xl font-bold text-[#292522] mb-1">Sign Out</h3>
-                    <p className="text-[#6B5E55] text-sm">Are you sure you want to sign out of your account?</p>
+                    <p className="text-[#6B5E55] text-sm">
+                      Are you sure you want to sign out of your account?
+                    </p>
                   </div>
                   <div className="flex border-t border-[#E5D9C8] bg-[#F8F3EA]">
                     <button

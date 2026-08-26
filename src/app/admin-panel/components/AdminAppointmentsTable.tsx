@@ -28,7 +28,7 @@ export default function AdminAppointmentsTable() {
       try {
         const q = query(collection(db, 'consultations'), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setAppointments(data);
       } catch (error) {
         console.error('Error fetching appointments:', error);
@@ -119,9 +119,11 @@ export default function AdminAppointmentsTable() {
               filtered.map((appt, i) => {
                 let dateStr = appt.date || 'Unknown';
                 let timeStr = appt.time || '';
-                
+
                 if (appt.createdAt) {
-                  const d = appt.createdAt.toDate ? appt.createdAt.toDate() : new Date(appt.createdAt);
+                  const d = appt.createdAt.toDate
+                    ? appt.createdAt.toDate()
+                    : new Date(appt.createdAt);
                   dateStr = d.toLocaleDateString();
                   timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 }
@@ -134,11 +136,19 @@ export default function AdminAppointmentsTable() {
                     transition={{ delay: i * 0.04 }}
                     className="border-b border-border/50 hover:bg-muted/30 transition-colors group"
                   >
-                    <td className="px-5 py-4 font-medium text-foreground">{appt.customerName || 'Unknown'}</td>
-                    <td className="px-5 py-4 text-muted-foreground">{appt.astrologerName || 'Unknown'}</td>
+                    <td className="px-5 py-4 font-medium text-foreground">
+                      {appt.customerName || 'Unknown'}
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground">
+                      {appt.astrologerName || 'Unknown'}
+                    </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
-                        {appt.type === 'video' || appt.type === 'Video' ? <Video size={12} /> : <Phone size={12} />}
+                        {appt.type === 'video' || appt.type === 'Video' ? (
+                          <Video size={12} />
+                        ) : (
+                          <Phone size={12} />
+                        )}
                         <span className="capitalize">{appt.type || 'Unknown'}</span>
                       </div>
                     </td>
@@ -153,7 +163,10 @@ export default function AdminAppointmentsTable() {
                       <span
                         className={`px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[appt.status] || 'bg-muted text-muted-foreground'}`}
                       >
-                        {appt.status ? appt.status.charAt(0).toUpperCase() + appt.status.slice(1).replace('-', ' ') : 'Unknown'}
+                        {appt.status
+                          ? appt.status.charAt(0).toUpperCase() +
+                            appt.status.slice(1).replace('-', ' ')
+                          : 'Unknown'}
                       </span>
                     </td>
                     <td className="px-5 py-4">

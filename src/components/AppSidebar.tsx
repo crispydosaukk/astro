@@ -36,6 +36,12 @@ const sidebarGroups = [
     items: [
       { icon: Home, label: 'Home', href: '/' },
       {
+        icon: Bot,
+        label: 'Talk to AI Astrologer',
+        href: '/talk-to-ai-astrologer',
+        badge: 'AI',
+      },
+      {
         icon: Calendar,
         label: 'Book Consultation',
         href: '/consultation-booking-screen',
@@ -47,6 +53,7 @@ const sidebarGroups = [
     label: 'My Space',
     items: [
       { icon: FileText, label: 'My Reports', href: '/my-reports', badge: '3' },
+      { icon: Bot, label: 'AI Consultations', href: '/ai-consultations', badge: null },
       { icon: Star, label: 'Saved Kundlis', href: '/', badge: null },
       { icon: Crown, label: 'Membership', href: '/', badge: null },
       { icon: Bell, label: 'Notifications', href: '/notifications', badge: '5' },
@@ -56,6 +63,7 @@ const sidebarGroups = [
     label: 'Admin',
     items: [
       { icon: Shield, label: 'Overview', href: '/admin-panel', badge: null },
+      { icon: Bot, label: 'AI Astrologers', href: '/admin-panel/ai-astrologers', badge: 'AI' },
       { icon: LayoutTemplate, label: 'Content', href: '/admin-panel/content', badge: null },
       { icon: FileText, label: 'Page Content', href: '/admin-panel/page-content', badge: null },
       { icon: Users, label: 'Users', href: '/admin-panel/users', badge: null },
@@ -183,72 +191,108 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
         ))}
       </nav>
 
-      {/* Bottom */}
-      <div className="border-t border-border p-3 space-y-2">
-        {!collapsed && isAdminRoute && (
+      {/* Bottom Profile & Sign Out Controls */}
+      <div className="flex-shrink-0 border-t border-border p-3 space-y-2 bg-card">
+        {isAdminRoute && (
           <>
-            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <Shield size={14} className="text-accent" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate">System Admin</p>
-                <p className="text-xs text-muted-foreground truncate">AstroParihar</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-all font-medium text-sm mt-2"
-            >
-              <LogOut size={18} className="flex-shrink-0" />
-              <span className="flex-1 text-left">Sign Out</span>
-            </button>
+            {!collapsed ? (
+              <>
+                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted border border-border/60">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                      <Shield size={15} className="text-accent" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground truncate">System Admin</p>
+                      <p className="text-[10px] text-muted-foreground truncate">AstroParihar</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowLogoutModal(true)}
+                    className="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 hover:text-red-600 transition-colors"
+                    title="Sign Out"
+                  >
+                    <LogOut size={16} />
+                  </button>
+                </div>
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all font-bold text-xs shadow-sm"
+                >
+                  <LogOut size={15} className="flex-shrink-0" />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className="w-10 h-10 mx-auto rounded-xl bg-red-500/10 text-red-600 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all"
+                title="Sign Out"
+              >
+                <LogOut size={18} />
+              </button>
+            )}
           </>
         )}
 
-        {!collapsed && !isAdminRoute && isUserLoggedIn && (
+        {!isAdminRoute && isUserLoggedIn && (
           <>
-            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted">
-              <div className="w-8 h-8 rounded-full indigo-gradient-bg flex items-center justify-center">
-                <User size={14} className="text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate">{fullName}</p>
-                <p className="text-xs text-muted-foreground truncate">Premium Member</p>
-              </div>
-              <Crown size={14} className="text-accent flex-shrink-0" />
-            </div>
-            <button
-              onClick={async () => {
-                await signOut(auth);
-                window.location.href = '/';
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-all font-medium text-sm"
-            >
-              <LogOut size={18} className="flex-shrink-0" />
-              <span className="flex-1 text-left">Sign Out</span>
-            </button>
+            {!collapsed ? (
+              <>
+                <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-muted border border-border/60">
+                  <div className="w-8 h-8 rounded-full indigo-gradient-bg flex items-center justify-center shrink-0">
+                    <User size={14} className="text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate">{fullName}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">Customer Account</p>
+                  </div>
+                  <Crown size={14} className="text-accent flex-shrink-0" />
+                </div>
+                <button
+                  onClick={async () => {
+                    await signOut(auth);
+                    window.location.href = '/';
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all font-bold text-xs shadow-sm"
+                >
+                  <LogOut size={15} className="flex-shrink-0" />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={async () => {
+                  await signOut(auth);
+                  window.location.href = '/';
+                }}
+                className="w-10 h-10 mx-auto rounded-xl bg-red-500/10 text-red-600 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all"
+                title="Sign Out"
+              >
+                <LogOut size={18} />
+              </button>
+            )}
           </>
         )}
 
-        {!collapsed && !isAdminRoute && !isUserLoggedIn && (
+        {!isAdminRoute && !isUserLoggedIn && (
           <button
             onClick={() => (window.location.href = '/sign-up-login-screen')}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent text-accent-foreground font-medium text-sm hover:bg-accent/90 transition-all"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-accent text-accent-foreground font-bold text-xs hover:bg-accent/90 transition-all shadow-sm"
           >
-            <User size={16} /> Sign In
+            <User size={15} /> {!collapsed && 'Sign In'}
           </button>
         )}
         <button
           onClick={onToggle}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
         >
           {collapsed ? (
             <ChevronRight size={16} />
           ) : (
             <>
               <ChevronLeft size={16} />
-              <span>Collapse</span>
+              <span>Collapse Sidebar</span>
             </>
           )}
         </button>

@@ -18,15 +18,25 @@ export async function POST(req: Request) {
     } = body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return NextResponse.json({ error: 'Missing payment verification parameters' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing payment verification parameters' },
+        { status: 400 }
+      );
     }
 
     // Fetch Razorpay Secret Key dynamically from Platform Settings
     const dbSettings = await getSettings();
-    const key_secret = (process.env.RAZORPAY_KEY_SECRET || dbSettings?.razorpayKeySecret || '').trim();
+    const key_secret = (
+      process.env.RAZORPAY_KEY_SECRET ||
+      dbSettings?.razorpayKeySecret ||
+      ''
+    ).trim();
 
     if (!key_secret) {
-      return NextResponse.json({ error: 'Razorpay Secret Key missing in settings' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Razorpay Secret Key missing in settings' },
+        { status: 500 }
+      );
     }
 
     // Verify HMAC SHA256 Signature
@@ -84,7 +94,8 @@ export async function POST(req: Request) {
         duration: 'Lifetime Guidance',
         materials: 'Personalized Kundli & Planetary Transits',
         astrologicalAnalysis: `Comprehensive astrological analysis for ${reportTitle}. ${detailsStr}. Your planetary chart has been analyzed according to Vedic astrological principles.`,
-        procedure: 'Perform daily morning meditation, chant relevant mantras for weak planets, and consult with our expert astrologers for deeper custom solutions.',
+        procedure:
+          'Perform daily morning meditation, chant relevant mantras for weak planets, and consult with our expert astrologers for deeper custom solutions.',
       });
 
       await addDoc(collection(db, 'service_requests'), {

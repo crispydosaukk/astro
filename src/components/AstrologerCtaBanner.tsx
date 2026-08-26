@@ -36,13 +36,9 @@ export default function AstrologerCtaBanner({
             </span>
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-bold text-[#292522] tracking-tight">
-            {title}
-          </h3>
+          <h3 className="text-2xl sm:text-3xl font-bold text-[#292522] tracking-tight">{title}</h3>
 
-          <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">
-            {subtitle}
-          </p>
+          <p className="text-xs sm:text-sm text-[#6B5E55] leading-relaxed">{subtitle}</p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">

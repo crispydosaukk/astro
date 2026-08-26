@@ -3,13 +3,31 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Gem, Music, Triangle, Flame, Heart, Compass, CircleDot, ShieldCheck, Sparkles, ChevronRight, ChevronDown } from 'lucide-react';
+import {
+  ArrowRight,
+  Gem,
+  Music,
+  Triangle,
+  Flame,
+  Heart,
+  Compass,
+  CircleDot,
+  ShieldCheck,
+  Sparkles,
+  ChevronRight,
+  ChevronDown,
+} from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import LandingFooter from '@/app/components/LandingFooter';
 
 import AshtaDigbandhanaWheel, { SpokeItem } from '@/components/AshtaDigbandhanaWheel';
 import DynamicPageContent from '@/components/DynamicPageContent';
-import { getHomepageContent, HomepageContent, defaultHomepageContent, subscribeHomepageContent } from '@/lib/cms';
+import {
+  getHomepageContent,
+  HomepageContent,
+  defaultHomepageContent,
+  subscribeHomepageContent,
+} from '@/lib/cms';
 
 const iconMap: Record<string, any> = {
   Music,
@@ -29,7 +47,8 @@ const DEFAULT_SPOKE: SpokeItem = {
   direction: 'N',
   directionFull: 'उत्तर (North)',
   mantra: 'ॐ ह्रीं श्रीं क्लीं चामुण्डायै विच्चे ॥',
-  explanation: 'जप से मन, वाणी और कर्म की शुद्धि, ग्रहों की अनुकूलता और आत्मिक शक्ति प्राप्त होती है।',
+  explanation:
+    'जप से मन, वाणी और कर्म की शुद्धि, ग्रहों की अनुकूलता और आत्मिक शक्ति प्राप्त होती है।',
   href: '/remedies/mantra',
   angle: -90,
   bgGradientId: 'grad-n-mantra',
@@ -44,7 +63,8 @@ const EIGHT_SACRED_REMEDIES = [
     id: 'svc-mantra',
     icon: 'Music',
     title: '1. Mantra Shakti (मन्त्र शक्ति)',
-    description: 'Sacred Vedic mantras to purify mind, speech, & actions, balance planetary afflictions, and energize consciousness.',
+    description:
+      'Sacred Vedic mantras to purify mind, speech, & actions, balance planetary afflictions, and energize consciousness.',
     href: '/remedies/mantra',
     badge: 'North (N)',
     image: '/assets/images/remedies/remedies_mantra_1785738410624.png',
@@ -54,7 +74,8 @@ const EIGHT_SACRED_REMEDIES = [
     id: 'svc-yantra',
     icon: 'Triangle',
     title: '2. Yantra (यन्त्र)',
-    description: 'Sacred geometric energy conductors for spatial stability, obstacle removal, divine protection, and business prosperity.',
+    description:
+      'Sacred geometric energy conductors for spatial stability, obstacle removal, divine protection, and business prosperity.',
     href: '/remedies/yantra',
     badge: 'North-East (NE)',
     image: '/assets/images/remedies/remedies_yantra_1785738431966.png',
@@ -64,7 +85,8 @@ const EIGHT_SACRED_REMEDIES = [
     id: 'svc-homam',
     icon: 'Flame',
     title: '3. Homa (होम / हवन)',
-    description: 'Sacred Vedic fire rituals through Agni Deva to destroy negative energies, pacify planetary afflictions, and bring auspiciousness.',
+    description:
+      'Sacred Vedic fire rituals through Agni Deva to destroy negative energies, pacify planetary afflictions, and bring auspiciousness.',
     href: '/remedies/homa',
     badge: 'East (E)',
     image: '/assets/images/remedies/remedies_homam_1785738443734.png',
@@ -74,7 +96,8 @@ const EIGHT_SACRED_REMEDIES = [
     id: 'svc-ishta',
     icon: 'Heart',
     title: '4. Devata Upasana (देवता उपासना)',
-    description: 'Surrender and worship of your personal Ishta Devata (5th/9th house ruler) for spiritual breakthrough and divine grace.',
+    description:
+      'Surrender and worship of your personal Ishta Devata (5th/9th house ruler) for spiritual breakthrough and divine grace.',
     href: '/remedies/ishta-devata',
     badge: 'South-East (SE)',
     image: '/assets/images/remedies/remedies_ishta_1785738453810.png',
@@ -84,7 +107,8 @@ const EIGHT_SACRED_REMEDIES = [
     id: 'svc-gemstone',
     icon: 'Gem',
     title: '5. Ratna / Gemstones (रत्न)',
-    description: 'Empower weak benefactor planets, restore life balance, and attract positive cosmic vibrations through certified gemstones.',
+    description:
+      'Empower weak benefactor planets, restore life balance, and attract positive cosmic vibrations through certified gemstones.',
     href: '/remedies/gemstone',
     badge: 'South (S)',
     image: '/assets/images/remedies/remedies_gemstone_1785738400359.png',
@@ -94,7 +118,8 @@ const EIGHT_SACRED_REMEDIES = [
     id: 'svc-rudraksha',
     icon: 'CircleDot',
     title: '6. Rudraksha (रुद्राक्ष)',
-    description: 'Pure authentic Mukhi Rudraksha beads to pacify malefic planetary dashas, stabilize nervous energy, and boost inner focus.',
+    description:
+      'Pure authentic Mukhi Rudraksha beads to pacify malefic planetary dashas, stabilize nervous energy, and boost inner focus.',
     href: '/remedies/rudraksha',
     badge: 'South-West (SW)',
     image: '/assets/images/remedies/remedies_homam_1785738443734.png',
@@ -104,7 +129,8 @@ const EIGHT_SACRED_REMEDIES = [
     id: 'svc-vastu',
     icon: 'Compass',
     title: '7. Vastu (वास्तु)',
-    description: 'Directional 16-zone Vastu corrections to eliminate geo-stress and cultivate harmonious wealth and health at home & workplace.',
+    description:
+      'Directional 16-zone Vastu corrections to eliminate geo-stress and cultivate harmonious wealth and health at home & workplace.',
     href: '/remedies/vastu',
     badge: 'West (W)',
     image: '/assets/images/remedies/remedies_vastu_1785738485180.png',
@@ -114,7 +140,8 @@ const EIGHT_SACRED_REMEDIES = [
     id: 'svc-charity',
     icon: 'Heart',
     title: '8. Dāna & Seva (दान एवं सेवा)',
-    description: 'Selfless charity and service to purify karma, invoke ancestral blessings, pacify malefic nodes, and bring lifelong protection.',
+    description:
+      'Selfless charity and service to purify karma, invoke ancestral blessings, pacify malefic nodes, and bring lifelong protection.',
     href: '/remedies/charity',
     badge: 'North-West (NW)',
     image: '/assets/images/remedies/remedies_charity_1785738494717.png',
@@ -167,12 +194,11 @@ export default function RemediesPage() {
         {/* Glowing orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#713B32]/30 blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#B88A44]/20 blur-3xl pointer-events-none" />
-        
+
         {/* Main content */}
         <div className="flex-1 flex items-center justify-center pt-24 pb-8">
           <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 xl:px-16 w-full">
             <div className="grid lg:grid-cols-12 items-center gap-8 lg:gap-12">
-              
               {/* Left Content - Headline, Description, Buttons, and Active Remedy Card */}
               <motion.div
                 initial={{ opacity: 0, x: -40 }}
@@ -185,16 +211,15 @@ export default function RemediesPage() {
                     <Sparkles size={14} className="text-[#F6D075]" />
                     Complete Vedic Healing & Planetary Shield
                   </span>
-                  
+
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight hero-text-glow max-w-xl mb-3.5">
                     Transform Your Life With <br />
-                    <span className="block text-gradient-gold">
-                      Sacred Vedic Remedies
-                    </span>
+                    <span className="block text-gradient-gold">Sacred Vedic Remedies</span>
                   </h1>
-                  
+
                   <p className="text-sm sm:text-base lg:text-lg text-white/80 leading-relaxed max-w-lg mb-5">
-                    Explore our 8 powerful Vedic remedy modules designed to balance planetary energies, remove obstacles, and propel your spiritual and material growth.
+                    Explore our 8 powerful Vedic remedy modules designed to balance planetary
+                    energies, remove obstacles, and propel your spiritual and material growth.
                   </p>
 
                   {/* Action Buttons */}
@@ -204,11 +229,16 @@ export default function RemediesPage() {
                       className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all duration-200 gold-shadow animate-pulse-gold cursor-pointer"
                     >
                       ✦ Consult Astrologer
-                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight
+                        size={16}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
                     </Link>
                     <button
                       onClick={() => {
-                        document.getElementById('remedies-grid')?.scrollIntoView({ behavior: 'smooth' });
+                        document
+                          .getElementById('remedies-grid')
+                          ?.scrollIntoView({ behavior: 'smooth' });
                       }}
                       className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold bg-[#FFFDFC]/10 backdrop-blur-md border border-[#D8B66A]/30 text-white hover:border-[#D8B66A] hover:text-[#D8B66A] transition-all duration-200 cursor-pointer"
                     >
@@ -252,7 +282,9 @@ export default function RemediesPage() {
                         <span>Explore {selectedSpoke.name.split(' ')[0]} Module</span>
                         <ChevronRight size={13} />
                       </Link>
-                      <span className="text-[10px] text-white/50 italic">Hover/click any sector on the wheel</span>
+                      <span className="text-[10px] text-white/50 italic">
+                        Hover/click any sector on the wheel
+                      </span>
                     </div>
                   </motion.div>
                 </div>
@@ -273,7 +305,6 @@ export default function RemediesPage() {
                   }}
                 />
               </motion.div>
-
             </div>
           </div>
         </div>
@@ -312,7 +343,7 @@ export default function RemediesPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {EIGHT_SACRED_REMEDIES.map((remedy, index) => {
               const Icon = iconMap[remedy.icon] || CircleDot;
-              
+
               return (
                 <motion.div
                   key={remedy.id}
@@ -334,7 +365,7 @@ export default function RemediesPage() {
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                      
+
                       {/* Direction Badge */}
                       {remedy.badge && (
                         <span className="absolute top-3 right-3 px-3 py-1 rounded-full text-[11px] font-bold bg-black/85 text-[#F6D075] border border-[#B88A44]/40 backdrop-blur-md shadow-md">
@@ -342,25 +373,30 @@ export default function RemediesPage() {
                         </span>
                       )}
                     </div>
-                    
+
                     {/* Card Body with High Contrast & Clear Typography */}
                     <div className="flex flex-col flex-grow p-5 sm:p-6 space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl bg-[#F8F3EA] border border-[#E5D9C8] flex items-center justify-center shadow-sm shrink-0 ${remedy.iconColor}`}>
+                        <div
+                          className={`w-10 h-10 rounded-xl bg-[#F8F3EA] border border-[#E5D9C8] flex items-center justify-center shadow-sm shrink-0 ${remedy.iconColor}`}
+                        >
                           <Icon size={20} />
                         </div>
                         <h3 className="text-base sm:text-lg font-bold text-[#292522] group-hover:text-[#713B32] transition-colors leading-snug">
                           {remedy.title}
                         </h3>
                       </div>
-                      
+
                       <p className="text-xs sm:text-sm text-[#6B5E55] flex-grow leading-relaxed line-clamp-3">
                         {remedy.description}
                       </p>
-                      
+
                       <div className="inline-flex items-center justify-between text-xs font-bold text-[#713B32] group-hover:text-[#292522] transition-colors mt-auto pt-3 border-t border-[#E5D9C8]">
                         <span>Explore Remedy</span>
-                        <ArrowRight size={15} className="text-[#B88A44] group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight
+                          size={15}
+                          className="text-[#B88A44] group-hover:translate-x-1 transition-transform"
+                        />
                       </div>
                     </div>
                   </Link>

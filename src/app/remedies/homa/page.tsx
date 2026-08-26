@@ -6,7 +6,13 @@ import { motion } from 'framer-motion';
 import { Flame, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ServiceReportForm from '@/components/ServiceReportForm';
-import { getServicePageContent, HomaServiceContent, defaultHomaContent, getHomepageContent, HomepageContent } from '@/lib/cms';
+import {
+  getServicePageContent,
+  HomaServiceContent,
+  defaultHomaContent,
+  getHomepageContent,
+  HomepageContent,
+} from '@/lib/cms';
 import PremiumSection from '@/components/PremiumSection';
 import DynamicPageContent from '@/components/DynamicPageContent';
 
@@ -19,7 +25,7 @@ export default function HomaServicePage() {
     async function load() {
       const [data, homeData] = await Promise.all([
         getServicePageContent('homa', defaultHomaContent),
-        getHomepageContent()
+        getHomepageContent(),
       ]);
       setHomepageContent(homeData);
       setContent(data);
@@ -64,9 +70,13 @@ export default function HomaServicePage() {
             <div className="max-w-3xl space-y-6">
               {/* Breadcrumb */}
               <div className="flex items-center gap-2 text-xs sm:text-sm text-white/70">
-                <Link href="/" className="hover:text-[#F6D075] transition-colors">Home</Link>
+                <Link href="/" className="hover:text-[#F6D075] transition-colors">
+                  Home
+                </Link>
                 <span>/</span>
-                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">Remedies</Link>
+                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">
+                  Remedies
+                </Link>
                 <span>/</span>
                 <span className="text-[#F6D075] font-semibold">Homam & Puja</span>
               </div>
@@ -158,7 +168,8 @@ export default function HomaServicePage() {
                 </div>
               </div>
               <p className="text-xs text-[#6B5E55] pt-4 border-t border-[#E5D9C8]">
-                Agni Deva acts as the divine messenger carrying consecrated ahuti offerings to all 9 planetary deities.
+                Agni Deva acts as the divine messenger carrying consecrated ahuti offerings to all 9
+                planetary deities.
               </p>
             </div>
 
@@ -167,22 +178,34 @@ export default function HomaServicePage() {
                 <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block mb-3">
                   Report Preview
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">Sample Ritual Schedule</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">
+                  Sample Ritual Schedule
+                </h3>
                 <div className="space-y-3.5">
                   <div className="p-5 rounded-2xl bg-gradient-to-br from-[#281123] to-[#150914] text-white border border-[#B88A44]/40 space-y-1 text-center shadow-md">
-                    <p className="text-xs text-[#F6D075] font-bold uppercase tracking-wider">Recommended Homam</p>
-                    <p className="text-2xl font-serif font-extrabold text-[#F6D075]">नवग्रह शान्ति हवन (Navagraha Shanti)</p>
+                    <p className="text-xs text-[#F6D075] font-bold uppercase tracking-wider">
+                      Recommended Homam
+                    </p>
+                    <p className="text-2xl font-serif font-extrabold text-[#F6D075]">
+                      नवग्रह शान्ति हवन (Navagraha Shanti)
+                    </p>
                     <p className="text-xs text-white/80">Saturday · 6:00 – 9:00 AM · 3–4 hours</p>
                   </div>
                   <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8]">
-                    <p className="text-xs font-bold text-[#713B32] uppercase mb-1">Prescribed Samidha (Sacred Wood)</p>
-                    <p className="text-sm text-[#292522] font-medium">Shami, Palasa, Peepal, Khadira, and pure Cow Desi Ghee.</p>
+                    <p className="text-xs font-bold text-[#713B32] uppercase mb-1">
+                      Prescribed Samidha (Sacred Wood)
+                    </p>
+                    <p className="text-sm text-[#292522] font-medium">
+                      Shami, Palasa, Peepal, Khadira, and pure Cow Desi Ghee.
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-3 border-t border-[#E5D9C8] flex items-center justify-between text-xs text-[#713B32] font-bold">
-                <span className="flex items-center gap-1.5"><Lock size={14} /> Full individualized report generated below</span>
+                <span className="flex items-center gap-1.5">
+                  <Lock size={14} /> Full individualized report generated below
+                </span>
                 <span>Vedic Agni Vidhi</span>
               </div>
             </div>

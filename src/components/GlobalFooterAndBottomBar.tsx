@@ -21,15 +21,10 @@ export default function GlobalFooterAndBottomBar() {
 
   // Check which pages already have LandingFooter built into their component
   // to avoid rendering double footers
-  const pagesWithDirectFooter = [
-    '/',
-    '/privacy',
-    '/terms',
-    '/refund-policy',
-    '/cookies',
-  ];
+  const pagesWithDirectFooter = ['/', '/privacy', '/terms', '/refund-policy', '/cookies'];
   const isServicesRoute = pathname?.startsWith('/services');
-  const hasDirectFooter = pagesWithDirectFooter.includes(pathname || '') || isServicesRoute || pathname === '/remedies';
+  const hasDirectFooter =
+    pagesWithDirectFooter.includes(pathname || '') || isServicesRoute || pathname === '/remedies';
 
   const navItems = [
     {
@@ -90,9 +85,7 @@ export default function GlobalFooterAndBottomBar() {
                 key={item.label}
                 href={item.href}
                 className={`relative flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all duration-200 group ${
-                  item.isActive
-                    ? 'text-[#713B32] font-bold'
-                    : 'text-[#6B5E55] hover:text-[#292522]'
+                  item.isActive ? 'text-[#713B32] font-bold' : 'text-[#6B5E55] hover:text-[#292522]'
                 }`}
               >
                 {/* Active Indicator Pip */}

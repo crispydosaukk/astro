@@ -101,7 +101,10 @@ export default function ProfilePage() {
         bio,
         about: bio,
         education,
-        certifications: certifications.split(',').map((s) => s.trim()).filter(Boolean),
+        certifications: certifications
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
         learningSource,
         dailyHours,
         workingElsewhere,
@@ -221,7 +224,12 @@ export default function ProfilePage() {
 
               <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                 <Camera className="w-8 h-8 text-white" />
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
               </label>
             </div>
 
@@ -246,7 +254,8 @@ export default function ProfilePage() {
               <div className="p-3 rounded-2xl bg-muted/40 border border-border text-center">
                 <span className="text-muted-foreground block text-[10px]">Rating</span>
                 <span className="font-bold text-[#C9952B] flex items-center justify-center gap-1 mt-0.5">
-                  <Star size={12} fill="currentColor" /> {profile.rating || 4.9} ({profile.reviewsCount || profile.reviews || 2847})
+                  <Star size={12} fill="currentColor" /> {profile.rating || 4.9} (
+                  {profile.reviewsCount || profile.reviews || 2847})
                 </span>
               </div>
               <div className="p-3 rounded-2xl bg-muted/40 border border-border text-center">
@@ -270,7 +279,9 @@ export default function ProfilePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Email</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">
+                  Email
+                </label>
                 <input
                   type="text"
                   value={profile.email || ''}
@@ -281,7 +292,9 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">City / Location</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">
+                  City / Location
+                </label>
                 <input
                   type="text"
                   value={city}
@@ -292,7 +305,9 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Phone Device</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">
+                  Phone Device
+                </label>
                 <select
                   value={phoneType}
                   onChange={(e) => setPhoneType(e.target.value)}
@@ -319,7 +334,8 @@ export default function ProfilePage() {
               <FileText size={20} className="text-accent" /> About Me & Biography
             </h3>
             <p className="text-xs text-muted-foreground">
-              Provide a comprehensive bio highlighting your astrological background, lineage, strengths, and advice methodology.
+              Provide a comprehensive bio highlighting your astrological background, lineage,
+              strengths, and advice methodology.
             </p>
             <textarea
               rows={5}

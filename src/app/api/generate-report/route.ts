@@ -28,7 +28,9 @@ export async function POST(request: Request) {
     if (!reportJsonObj && clientReportContent) {
       try {
         reportJsonObj =
-          typeof clientReportContent === 'string' ? JSON.parse(clientReportContent) : clientReportContent;
+          typeof clientReportContent === 'string'
+            ? JSON.parse(clientReportContent)
+            : clientReportContent;
       } catch (e) {
         reportJsonObj = { rawContent: clientReportContent };
       }
@@ -69,7 +71,8 @@ export async function POST(request: Request) {
     }
 
     const typeLower = type.toLowerCase();
-    const isVastu = typeLower.includes('vastu') || typeLower.includes('vāstu') || typeLower.includes('spatial');
+    const isVastu =
+      typeLower.includes('vastu') || typeLower.includes('vāstu') || typeLower.includes('spatial');
 
     // 3. Call OpenAI with Admin Configured Prompts & Extra Directives if API key exists
     if (openaiApiKey) {
@@ -80,14 +83,24 @@ export async function POST(request: Request) {
         // Select the matching prompt module
         let promptKey = 'kundli-general';
         if (isVastu) promptKey = 'remedy-vastu';
-        else if (type.includes('Matching') || reportJsonObj?.ashtakoot) promptKey = 'kundli-matching';
-        else if (typeLower.includes('love') || typeLower.includes('relationship')) promptKey = 'horoscope-love';
-        else if (typeLower.includes('finance') || typeLower.includes('wealth')) promptKey = 'horoscope-finance';
-        else if (typeLower.includes('health') || typeLower.includes('vitality')) promptKey = 'horoscope-health';
+        else if (type.includes('Matching') || reportJsonObj?.ashtakoot)
+          promptKey = 'kundli-matching';
+        else if (typeLower.includes('love') || typeLower.includes('relationship'))
+          promptKey = 'horoscope-love';
+        else if (typeLower.includes('finance') || typeLower.includes('wealth'))
+          promptKey = 'horoscope-finance';
+        else if (typeLower.includes('health') || typeLower.includes('vitality'))
+          promptKey = 'horoscope-health';
         else if (typeLower.includes('mantra')) promptKey = 'remedy-mantra';
-        else if (typeLower.includes('gemstone') || typeLower.includes('ratna')) promptKey = 'remedy-gemstone';
+        else if (typeLower.includes('gemstone') || typeLower.includes('ratna'))
+          promptKey = 'remedy-gemstone';
         else if (typeLower.includes('rudraksha')) promptKey = 'remedy-rudraksha';
-        else if (typeLower.includes('homa') || typeLower.includes('hawan') || typeLower.includes('puja')) promptKey = 'remedy-homa';
+        else if (
+          typeLower.includes('homa') ||
+          typeLower.includes('hawan') ||
+          typeLower.includes('puja')
+        )
+          promptKey = 'remedy-homa';
         else if (typeLower.includes('panchang')) promptKey = 'panchang-daily';
 
         const promptConfig: AIPromptItem = prompts[promptKey] || prompts['kundli-general'];
@@ -108,7 +121,11 @@ export async function POST(request: Request) {
         const userDob = details.dob || 'N/A';
         const userTime = details.time || details.tob || '12:00 PM';
         const userPlace = details.place || details.pob || 'India';
-        const userQuery = details.primaryConcern || details.userQuery || details.focus || 'General Life Path Guidance';
+        const userQuery =
+          details.primaryConcern ||
+          details.userQuery ||
+          details.focus ||
+          'General Life Path Guidance';
 
         const replacements: Record<string, string> = {
           name: userName,
@@ -203,14 +220,54 @@ export async function POST(request: Request) {
           },
           astrologicalAnalysis: `Vedic Vāstu Purusha Mandala audit conducted for ${userName} (${details.propertyType || 'Residential Property'}) located at ${birthPlace}.\n\nYour primary entrance facing ${details.entranceFacing || 'North-East'} allows the beneficial Jaivik (solar) and Pranic magnetic energy lines to enter unobstructed. The ${details.kitchenLocation || 'South-East'} quadrant governs the Agni element and liquidity; balancing this zone maintains consistent cash flow and household vitality.\n\nThe ${details.masterBedroomLocation || 'South-West'} Nairruti sector anchors physical stability, health of the main breadwinner, and relationship harmony. With our non-demolition remedial placement of consecrated Yantras and metal pyramid strips, any subtle elemental conflicts are neutralized naturally.`,
           directionalAnalysis: [
-            { direction: 'North (Kuber Zone)', status: 'Positive', observation: 'Governs liquid cash and new growth opportunities.', remedy: 'Place Kubera Yantra or green indoor plants.' },
-            { direction: 'North-East (Ishanya Zone)', status: 'Divine Energy', observation: 'Head of Vastu Purusha, governs mental peace and wisdom.', remedy: 'Keep pristine and clutter-free. Establish pure water/Gangajal bowl.' },
-            { direction: 'East (Surya Zone)', status: 'Vital Energy', observation: 'Governs reputation, life force, and social connections.', remedy: 'Ensure morning sunlight enters unobstructed.' },
-            { direction: 'South-East (Agni Zone)', status: 'Active Fire', observation: 'Governs metabolic fire, kitchen balance, and vitality.', remedy: 'Maintain warm golden lighting; avoid blue tones or water storage.' },
-            { direction: 'South (Yama Zone)', status: 'Stable', observation: 'Governs career authority, discipline, and endurance.', remedy: 'Keep heavier than North/East zones.' },
-            { direction: 'South-West (Nairruti Zone)', status: 'Master Foundation', observation: 'Governs relationship bonding and overall property grounding.', remedy: 'Use earthy yellow tones and heavy brass elements. Zero underground water.' },
-            { direction: 'West (Varuna Zone)', status: 'Gains & Profits', observation: 'Governs consistent returns on effort and emotional balance.', remedy: 'Ideal for study or metallic accents.' },
-            { direction: 'North-West (Vayavya Zone)', status: 'Air Movement', observation: 'Governs social support, bank relationships, and mobility.', remedy: 'Keep well-ventilated with white or silver accents.' },
+            {
+              direction: 'North (Kuber Zone)',
+              status: 'Positive',
+              observation: 'Governs liquid cash and new growth opportunities.',
+              remedy: 'Place Kubera Yantra or green indoor plants.',
+            },
+            {
+              direction: 'North-East (Ishanya Zone)',
+              status: 'Divine Energy',
+              observation: 'Head of Vastu Purusha, governs mental peace and wisdom.',
+              remedy: 'Keep pristine and clutter-free. Establish pure water/Gangajal bowl.',
+            },
+            {
+              direction: 'East (Surya Zone)',
+              status: 'Vital Energy',
+              observation: 'Governs reputation, life force, and social connections.',
+              remedy: 'Ensure morning sunlight enters unobstructed.',
+            },
+            {
+              direction: 'South-East (Agni Zone)',
+              status: 'Active Fire',
+              observation: 'Governs metabolic fire, kitchen balance, and vitality.',
+              remedy: 'Maintain warm golden lighting; avoid blue tones or water storage.',
+            },
+            {
+              direction: 'South (Yama Zone)',
+              status: 'Stable',
+              observation: 'Governs career authority, discipline, and endurance.',
+              remedy: 'Keep heavier than North/East zones.',
+            },
+            {
+              direction: 'South-West (Nairruti Zone)',
+              status: 'Master Foundation',
+              observation: 'Governs relationship bonding and overall property grounding.',
+              remedy: 'Use earthy yellow tones and heavy brass elements. Zero underground water.',
+            },
+            {
+              direction: 'West (Varuna Zone)',
+              status: 'Gains & Profits',
+              observation: 'Governs consistent returns on effort and emotional balance.',
+              remedy: 'Ideal for study or metallic accents.',
+            },
+            {
+              direction: 'North-West (Vayavya Zone)',
+              status: 'Air Movement',
+              observation: 'Governs social support, bank relationships, and mobility.',
+              remedy: 'Keep well-ventilated with white or silver accents.',
+            },
           ],
           doshaCorrections: [
             '1. Non-Demolition Fire/Water Rectification: Install a green stone slab under the cooking stove if near water fixtures.',
@@ -228,7 +285,8 @@ export async function POST(request: Request) {
           recommendationName: `${userName}'s Personalized Vedic Chart Analysis`,
           timing: `${currentDate}`,
           duration: 'Lifetime Guidance',
-          materials: 'Red Coral/Ruby, Pure Cow Ghee, Navagraha Incense, Copper Arghya Vessel, Yellow Flowers',
+          materials:
+            'Red Coral/Ruby, Pure Cow Ghee, Navagraha Incense, Copper Arghya Vessel, Yellow Flowers',
           astrologicalAnalysis: `Extensive birth chart analysis for ${userName} born on ${birthDob} at ${birthPlace}.\n\nBased on your Lagna (Scorpio) and Moon placement in Aries (Bharani Nakshatra), Mars serves as your Lagna lord, granting immense courage, physical stamina, and natural leadership capabilities. The strong 10th house Sun alignment bestows executive authority, high social status, and professional success in management or governance.\n\nYour active Vimshottari Dasha period favors career expansion and wealth accumulation. Jupiter's aspect on the 7th house ensures harmony in relationships and auspicious business partnerships.`,
           procedure:
             '1. Perform morning Surya Arghya offering water to the rising Sun in a copper vessel.\n2. Recite the Gayatri Mantra or Hanuman Chalisa 108 times daily.\n3. Keep a fast or consume Sattvic Falahar food on Tuesdays/Thursdays.',

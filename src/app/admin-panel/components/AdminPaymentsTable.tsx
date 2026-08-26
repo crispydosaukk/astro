@@ -80,7 +80,10 @@ export default function AdminPaymentsTable() {
 
       // 1. Fetch all users to create a lookup map for dynamic names & emails
       const usersSnap = await getDocs(collection(db, 'users'));
-      const usersMap = new Map<string, { name: string; email: string; phone?: string; avatar?: string }>();
+      const usersMap = new Map<
+        string,
+        { name: string; email: string; phone?: string; avatar?: string }
+      >();
 
       usersSnap.forEach((userDoc) => {
         const uData = userDoc.data();
@@ -121,7 +124,11 @@ export default function AdminPaymentsTable() {
         let gateway: 'Razorpay' | 'Stripe' | 'Wallet' = 'Wallet';
         if (data.paymentId || data.orderId || data.razorpayPaymentId || data.razorpay_payment_id) {
           gateway = 'Razorpay';
-        } else if (data.stripeSessionId || String(docSnap.id).startsWith('cs_test_') || String(docSnap.id).startsWith('cs_live_')) {
+        } else if (
+          data.stripeSessionId ||
+          String(docSnap.id).startsWith('cs_test_') ||
+          String(docSnap.id).startsWith('cs_live_')
+        ) {
           gateway = 'Stripe';
         } else if (data.type === 'debit') {
           gateway = 'Wallet';
@@ -154,13 +161,16 @@ export default function AdminPaymentsTable() {
           userAvatar,
           amount: Number(data.amount) || 0,
           type: data.type === 'credit' ? 'credit' : 'debit',
-          description: data.description || (data.type === 'credit' ? 'Wallet Recharge' : 'Astrology Consultation'),
+          description:
+            data.description ||
+            (data.type === 'credit' ? 'Wallet Recharge' : 'Astrology Consultation'),
           date: dateStr,
           status,
           gateway,
           orderId: data.orderId || data.razorpayOrderId || data.razorpay_order_id,
           paymentId: data.paymentId || data.razorpayPaymentId || data.razorpay_payment_id,
-          stripeSessionId: data.stripeSessionId || (String(docSnap.id).startsWith('cs_') ? docSnap.id : undefined),
+          stripeSessionId:
+            data.stripeSessionId || (String(docSnap.id).startsWith('cs_') ? docSnap.id : undefined),
           astrologerName: data.astrologerName,
           durationMinutes: data.durationMinutes,
           rawDoc: data,
@@ -271,7 +281,10 @@ export default function AdminPaymentsTable() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `astroparihar_transactions_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute(
+      'download',
+      `astroparihar_transactions_${new Date().toISOString().split('T')[0]}.csv`
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -305,7 +318,9 @@ export default function AdminPaymentsTable() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Top-Ups (Revenue)</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Total Top-Ups (Revenue)
+            </p>
             <p className="text-xl sm:text-2xl font-extrabold text-emerald-400 mt-1">
               +{formatPrice(metrics.totalTopups)}
             </p>
@@ -318,7 +333,9 @@ export default function AdminPaymentsTable() {
 
         <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Consultation Spend</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Consultation Spend
+            </p>
             <p className="text-xl sm:text-2xl font-extrabold text-amber-400 mt-1">
               -{formatPrice(metrics.totalSpent)}
             </p>
@@ -331,14 +348,22 @@ export default function AdminPaymentsTable() {
 
         <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Successful TXNs</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Successful TXNs
+            </p>
             <p className="text-xl sm:text-2xl font-extrabold text-white mt-1">
               {metrics.successCount}{' '}
               <span className="text-xs font-normal text-slate-400">
-                ({metrics.totalCount > 0 ? Math.round((metrics.successCount / metrics.totalCount) * 100) : 0}%)
+                (
+                {metrics.totalCount > 0
+                  ? Math.round((metrics.successCount / metrics.totalCount) * 100)
+                  : 0}
+                %)
               </span>
             </p>
-            <p className="text-[11px] text-slate-500 mt-0.5">{metrics.totalCount} total logged records</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              {metrics.totalCount} total logged records
+            </p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
             <CheckCircle2 size={20} className="text-blue-400" />
@@ -347,7 +372,9 @@ export default function AdminPaymentsTable() {
 
         <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Failed / Refunded</p>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Failed / Refunded
+            </p>
             <p className="text-xl sm:text-2xl font-extrabold text-rose-400 mt-1">
               {metrics.failedCount + metrics.refundedCount}
             </p>
@@ -384,7 +411,10 @@ export default function AdminPaymentsTable() {
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Search Input */}
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
               <input
                 type="text"
                 placeholder="Search user, TXN, ID..."
@@ -446,14 +476,30 @@ export default function AdminPaymentsTable() {
           <table className="w-full text-sm text-left">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60">
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Transaction ID</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Customer / User</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Type & Purpose</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Amount</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Gateway</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Date & Time</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Transaction ID
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Customer / User
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Type & Purpose
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Amount
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Gateway
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Date & Time
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -488,7 +534,8 @@ export default function AdminPaymentsTable() {
                     formattedDate = txn.date;
                   }
 
-                  const displayTxnId = txn.stripeSessionId || txn.paymentId || txn.orderId || txn.id;
+                  const displayTxnId =
+                    txn.stripeSessionId || txn.paymentId || txn.orderId || txn.id;
 
                   return (
                     <motion.tr
@@ -502,7 +549,9 @@ export default function AdminPaymentsTable() {
                       {/* TXN ID */}
                       <td className="px-5 py-3.5 font-mono text-xs text-slate-400 whitespace-nowrap">
                         <span className="bg-slate-950 px-2 py-1 rounded border border-slate-800">
-                          {displayTxnId.length > 14 ? `${displayTxnId.slice(0, 10)}...${displayTxnId.slice(-4)}` : displayTxnId}
+                          {displayTxnId.length > 14
+                            ? `${displayTxnId.slice(0, 10)}...${displayTxnId.slice(-4)}`
+                            : displayTxnId}
                         </span>
                       </td>
 
@@ -516,8 +565,12 @@ export default function AdminPaymentsTable() {
                             className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 object-cover shrink-0"
                           />
                           <div className="min-w-0">
-                            <p className="text-xs font-bold text-white truncate max-w-[150px]">{txn.userName}</p>
-                            <p className="text-[11px] text-slate-400 truncate max-w-[150px]">{txn.userEmail}</p>
+                            <p className="text-xs font-bold text-white truncate max-w-[150px]">
+                              {txn.userName}
+                            </p>
+                            <p className="text-[11px] text-slate-400 truncate max-w-[150px]">
+                              {txn.userEmail}
+                            </p>
                           </div>
                         </div>
                       </td>
@@ -590,7 +643,9 @@ export default function AdminPaymentsTable() {
         <div className="px-5 py-4 border-t border-slate-800 bg-slate-950/40 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-3">
           <div>
             Showing <span className="text-white font-bold">{filtered.length}</span> transactions ·{' '}
-            <span className="text-emerald-400 font-semibold">{metrics.successCount} Successful</span>
+            <span className="text-emerald-400 font-semibold">
+              {metrics.successCount} Successful
+            </span>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-emerald-400 font-medium">● Success: {metrics.successCount}</span>
@@ -655,7 +710,9 @@ export default function AdminPaymentsTable() {
 
                     {/* Customer Details */}
                     <div className="space-y-2">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Customer Profile</p>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Customer Profile
+                      </p>
                       <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 flex items-center gap-3">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -664,10 +721,14 @@ export default function AdminPaymentsTable() {
                           className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 object-cover"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-white truncate">{selectedTxn.userName}</p>
+                          <p className="text-sm font-bold text-white truncate">
+                            {selectedTxn.userName}
+                          </p>
                           <p className="text-xs text-slate-400 truncate">{selectedTxn.userEmail}</p>
                           {selectedTxn.userPhone && (
-                            <p className="text-xs text-slate-400 font-mono mt-0.5">{selectedTxn.userPhone}</p>
+                            <p className="text-xs text-slate-400 font-mono mt-0.5">
+                              {selectedTxn.userPhone}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -675,7 +736,9 @@ export default function AdminPaymentsTable() {
 
                     {/* Metadata Grid */}
                     <div className="space-y-2">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Technical Reference</p>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Technical Reference
+                      </p>
                       <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <div>
                           <span className="text-slate-400">Payment Gateway:</span>
@@ -683,15 +746,21 @@ export default function AdminPaymentsTable() {
                         </div>
                         <div>
                           <span className="text-slate-400">Transaction Type:</span>
-                          <p className="font-semibold text-white mt-0.5 capitalize">{selectedTxn.type}</p>
+                          <p className="font-semibold text-white mt-0.5 capitalize">
+                            {selectedTxn.type}
+                          </p>
                         </div>
                         <div>
                           <span className="text-slate-400">Date & Timestamp:</span>
-                          <p className="font-semibold text-white mt-0.5">{new Date(selectedTxn.date).toLocaleString()}</p>
+                          <p className="font-semibold text-white mt-0.5">
+                            {new Date(selectedTxn.date).toLocaleString()}
+                          </p>
                         </div>
                         <div>
                           <span className="text-slate-400">Description:</span>
-                          <p className="font-semibold text-white mt-0.5">{selectedTxn.description}</p>
+                          <p className="font-semibold text-white mt-0.5">
+                            {selectedTxn.description}
+                          </p>
                         </div>
                         {selectedTxn.orderId && (
                           <div className="sm:col-span-2">

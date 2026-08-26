@@ -83,7 +83,8 @@ export default function AdminServicePagesEditor() {
         await updateServicePageContent('muhurtham', muhurtham);
       else if (selectedService === 'vastu') await updateServicePageContent('vastu', vastu);
       else if (selectedService === 'charity') await updateServicePageContent('charity', charity);
-      else if (selectedService === 'rudraksha') await updateServicePageContent('rudraksha', rudraksha);
+      else if (selectedService === 'rudraksha')
+        await updateServicePageContent('rudraksha', rudraksha);
 
       setMessage({ type: 'success', text: `Page content updated successfully!` });
       setTimeout(() => setMessage(null), 3000);
@@ -221,37 +222,79 @@ export default function AdminServicePagesEditor() {
     if (!premium) return null;
     return (
       <>
-        <h3 className="text-lg font-bold text-foreground border-b border-border pb-4 mt-8">Premium Layout Details</h3>
+        <h3 className="text-lg font-bold text-foreground border-b border-border pb-4 mt-8">
+          Premium Layout Details
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-border p-4 rounded-xl bg-muted/10">
           <div className="space-y-2">
             <label className="text-xs font-medium text-muted-foreground">Enabled</label>
             <div className="flex items-center gap-2">
-              <input type="checkbox" checked={premium.enabled} onChange={(e) => updatePremium({ ...premium, enabled: e.target.checked })} />
+              <input
+                type="checkbox"
+                checked={premium.enabled}
+                onChange={(e) => updatePremium({ ...premium, enabled: e.target.checked })}
+              />
               <span className="text-sm">Show Premium Section</span>
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-medium text-muted-foreground">Tagline</label>
-            <input type="text" value={premium.tagline || ''} onChange={(e) => updatePremium({ ...premium, tagline: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm" />
+            <input
+              type="text"
+              value={premium.tagline || ''}
+              onChange={(e) => updatePremium({ ...premium, tagline: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+            />
           </div>
           <div className="space-y-2">
             <label className="text-xs font-medium text-muted-foreground">Title Line 1</label>
-            <input type="text" value={premium.titleLine1 || ''} onChange={(e) => updatePremium({ ...premium, titleLine1: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm" />
+            <input
+              type="text"
+              value={premium.titleLine1 || ''}
+              onChange={(e) => updatePremium({ ...premium, titleLine1: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+            />
           </div>
           <div className="space-y-2">
             <label className="text-xs font-medium text-muted-foreground">Title Line 2 (Gold)</label>
-            <input type="text" value={premium.titleLine2Gold || ''} onChange={(e) => updatePremium({ ...premium, titleLine2Gold: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm" />
+            <input
+              type="text"
+              value={premium.titleLine2Gold || ''}
+              onChange={(e) => updatePremium({ ...premium, titleLine2Gold: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm"
+            />
           </div>
           <div className="space-y-2 md:col-span-2">
             <label className="text-xs font-medium text-muted-foreground">Description</label>
-            <textarea rows={3} value={premium.description || ''} onChange={(e) => updatePremium({ ...premium, description: e.target.value })} className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm resize-none" />
+            <textarea
+              rows={3}
+              value={premium.description || ''}
+              onChange={(e) => updatePremium({ ...premium, description: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm resize-none"
+            />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <label className="text-xs font-medium text-muted-foreground">Advanced JSON Data (infoCards, sloka, summary, etc.)</label>
-            <p className="text-xs text-muted-foreground/70 mb-2">Warning: Edit this JSON carefully. Invalid JSON will cause errors.</p>
-            <textarea 
-              rows={12} 
-              defaultValue={JSON.stringify({ sloka: premium.sloka, infoCards: premium.infoCards, summaryTitle: premium.summaryTitle, summaryTitleGold: premium.summaryTitleGold, summaryPoints: premium.summaryPoints, summaryFooter: premium.summaryFooter, quote: premium.quote }, null, 2)} 
+            <label className="text-xs font-medium text-muted-foreground">
+              Advanced JSON Data (infoCards, sloka, summary, etc.)
+            </label>
+            <p className="text-xs text-muted-foreground/70 mb-2">
+              Warning: Edit this JSON carefully. Invalid JSON will cause errors.
+            </p>
+            <textarea
+              rows={12}
+              defaultValue={JSON.stringify(
+                {
+                  sloka: premium.sloka,
+                  infoCards: premium.infoCards,
+                  summaryTitle: premium.summaryTitle,
+                  summaryTitleGold: premium.summaryTitleGold,
+                  summaryPoints: premium.summaryPoints,
+                  summaryFooter: premium.summaryFooter,
+                  quote: premium.quote,
+                },
+                null,
+                2
+              )}
               onBlur={(e) => {
                 try {
                   const parsed = JSON.parse(e.target.value);
@@ -260,7 +303,7 @@ export default function AdminServicePagesEditor() {
                   alert('Invalid JSON format in Premium Details');
                 }
               }}
-              className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm font-mono" 
+              className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm font-mono"
             />
           </div>
         </div>
@@ -361,7 +404,9 @@ export default function AdminServicePagesEditor() {
                 </div>
               </div>
             ))}
-            {renderPremiumDetailsEditor(homa.premiumDetails, (v) => setHoma({ ...homa, premiumDetails: v }))}
+            {renderPremiumDetailsEditor(homa.premiumDetails, (v) =>
+              setHoma({ ...homa, premiumDetails: v })
+            )}
           </>
         )}
 
@@ -405,7 +450,9 @@ export default function AdminServicePagesEditor() {
               </div>
             ))}
             {renderFaqEditor(gemstone.faqs, (v) => setGemstone({ ...gemstone, faqs: v }))}
-            {renderPremiumDetailsEditor(gemstone.premiumDetails, (v) => setGemstone({ ...gemstone, premiumDetails: v }))}
+            {renderPremiumDetailsEditor(gemstone.premiumDetails, (v) =>
+              setGemstone({ ...gemstone, premiumDetails: v })
+            )}
           </>
         )}
 
@@ -449,7 +496,9 @@ export default function AdminServicePagesEditor() {
               </div>
             ))}
             {renderFaqEditor(mantra.faqs, (v) => setMantra({ ...mantra, faqs: v }))}
-            {renderPremiumDetailsEditor(mantra.premiumDetails, (v) => setMantra({ ...mantra, premiumDetails: v }))}
+            {renderPremiumDetailsEditor(mantra.premiumDetails, (v) =>
+              setMantra({ ...mantra, premiumDetails: v })
+            )}
           </>
         )}
 
@@ -492,7 +541,9 @@ export default function AdminServicePagesEditor() {
                 ))}
               </div>
             ))}
-            {renderPremiumDetailsEditor(yantra.premiumDetails, (v) => setYantra({ ...yantra, premiumDetails: v }))}
+            {renderPremiumDetailsEditor(yantra.premiumDetails, (v) =>
+              setYantra({ ...yantra, premiumDetails: v })
+            )}
           </>
         )}
 
@@ -535,7 +586,9 @@ export default function AdminServicePagesEditor() {
                 ))}
               </div>
             ))}
-            {renderPremiumDetailsEditor(ishta.premiumDetails, (v) => setIshta({ ...ishta, premiumDetails: v }))}
+            {renderPremiumDetailsEditor(ishta.premiumDetails, (v) =>
+              setIshta({ ...ishta, premiumDetails: v })
+            )}
           </>
         )}
 
@@ -578,7 +631,9 @@ export default function AdminServicePagesEditor() {
                 ))}
               </div>
             ))}
-            {renderPremiumDetailsEditor(muhurtham.premiumDetails, (v) => setMuhurtham({ ...muhurtham, premiumDetails: v }))}
+            {renderPremiumDetailsEditor(muhurtham.premiumDetails, (v) =>
+              setMuhurtham({ ...muhurtham, premiumDetails: v })
+            )}
           </>
         )}
 
@@ -621,7 +676,9 @@ export default function AdminServicePagesEditor() {
                 ))}
               </div>
             ))}
-            {renderPremiumDetailsEditor(vastu.premiumDetails, (v) => setVastu({ ...vastu, premiumDetails: v }))}
+            {renderPremiumDetailsEditor(vastu.premiumDetails, (v) =>
+              setVastu({ ...vastu, premiumDetails: v })
+            )}
           </>
         )}
 
@@ -664,7 +721,9 @@ export default function AdminServicePagesEditor() {
                 ))}
               </div>
             ))}
-            {renderPremiumDetailsEditor(charity.premiumDetails, (v) => setCharity({ ...charity, premiumDetails: v }))}
+            {renderPremiumDetailsEditor(charity.premiumDetails, (v) =>
+              setCharity({ ...charity, premiumDetails: v })
+            )}
           </>
         )}
 

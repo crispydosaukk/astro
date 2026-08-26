@@ -43,11 +43,12 @@ export default function LandingFooter() {
               India&apos;s most advanced premium Vedic astrology platform. Ancient wisdom, modern
               technology, personalized for you.
             </p>
-            
+
             <div className="space-y-1.5 text-xs text-[#6B5E55] pt-1">
               <div className="font-bold text-[#292522]">VAYORIX PRIVATE LIMITED</div>
               <div className="flex items-center gap-2">
-                <MapPin size={14} className="text-[#713B32] shrink-0" /> B Ff1/1, KK road, V Puram, Chennai-53
+                <MapPin size={14} className="text-[#713B32] shrink-0" /> B Ff1/1, KK road, V Puram,
+                Chennai-53
               </div>
               <div className="flex items-center gap-2">
                 <Mail size={14} className="text-[#713B32] shrink-0" /> astroparihar06@gmail.com
@@ -80,10 +81,18 @@ export default function LandingFooter() {
             <p>© 2026 AstroParihar. Operated by VAYORIX PRIVATE LIMITED. All rights reserved.</p>
           </div>
           <div className="flex flex-wrap items-center gap-4">
-            <Link href="/privacy" className="hover:text-[#713B32] transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-[#713B32] transition-colors">Terms of Service</Link>
-            <Link href="/refund-policy" className="hover:text-[#713B32] transition-colors">Refund Policy</Link>
-            <Link href="/cookies" className="hover:text-[#713B32] transition-colors">Cookie Policy</Link>
+            <Link href="/privacy" className="hover:text-[#713B32] transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-[#713B32] transition-colors">
+              Terms of Service
+            </Link>
+            <Link href="/refund-policy" className="hover:text-[#713B32] transition-colors">
+              Refund Policy
+            </Link>
+            <Link href="/cookies" className="hover:text-[#713B32] transition-colors">
+              Cookie Policy
+            </Link>
           </div>
         </div>
       </div>

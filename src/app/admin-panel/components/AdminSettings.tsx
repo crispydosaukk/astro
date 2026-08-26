@@ -61,8 +61,12 @@ export default function AdminSettings() {
               <Key size={20} className="text-accent" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground">Razorpay Payment Integration Keys</h3>
-              <p className="text-xs text-muted-foreground">Dynamic Razorpay credentials for wallet recharges & service purchases.</p>
+              <h3 className="text-lg font-bold text-foreground">
+                Razorpay Payment Integration Keys
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Dynamic Razorpay credentials for wallet recharges & service purchases.
+              </p>
             </div>
           </div>
 
@@ -72,16 +76,16 @@ export default function AdminSettings() {
               <input
                 type="text"
                 value={settings.razorpayKeyId || ''}
-                onChange={(e) =>
-                  setSettings({ ...settings, razorpayKeyId: e.target.value })
-                }
+                onChange={(e) => setSettings({ ...settings, razorpayKeyId: e.target.value })}
                 placeholder="e.g. rzp_test_... or rzp_live_..."
                 autoComplete="off"
                 spellCheck="false"
                 data-lpignore="true"
                 className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-mono text-sm"
               />
-              <p className="text-xs text-muted-foreground">Public Key ID obtained from your Razorpay Dashboard API Keys section.</p>
+              <p className="text-xs text-muted-foreground">
+                Public Key ID obtained from your Razorpay Dashboard API Keys section.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -90,9 +94,7 @@ export default function AdminSettings() {
                 <input
                   type={showSecret ? 'text' : 'password'}
                   value={settings.razorpayKeySecret || ''}
-                  onChange={(e) =>
-                    setSettings({ ...settings, razorpayKeySecret: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, razorpayKeySecret: e.target.value })}
                   placeholder="e.g. Secret Key"
                   autoComplete="new-password"
                   spellCheck="false"
@@ -107,7 +109,9 @@ export default function AdminSettings() {
                   {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">Keep this secure. Used by backend to verify Razorpay HMAC signatures.</p>
+              <p className="text-xs text-muted-foreground">
+                Keep this secure. Used by backend to verify Razorpay HMAC signatures.
+              </p>
             </div>
           </div>
         </div>
@@ -120,7 +124,9 @@ export default function AdminSettings() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">ZegoCloud Call Keys</h3>
-              <p className="text-xs text-muted-foreground">Required for 1-on-1 audio and video calls between customers & astrologers.</p>
+              <p className="text-xs text-muted-foreground">
+                Required for 1-on-1 audio and video calls between customers & astrologers.
+              </p>
             </div>
           </div>
 
@@ -130,14 +136,14 @@ export default function AdminSettings() {
               <input
                 type="text"
                 value={settings.zegoAppId || ''}
-                onChange={(e) =>
-                  setSettings({ ...settings, zegoAppId: e.target.value })
-                }
+                onChange={(e) => setSettings({ ...settings, zegoAppId: e.target.value })}
                 placeholder="e.g. 123456789"
                 autoComplete="off"
                 className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-mono text-sm"
               />
-              <p className="text-xs text-muted-foreground">Obtained from your ZegoCloud Admin Console project dashboard.</p>
+              <p className="text-xs text-muted-foreground">
+                Obtained from your ZegoCloud Admin Console project dashboard.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -145,14 +151,14 @@ export default function AdminSettings() {
               <input
                 type={showSecret ? 'text' : 'password'}
                 value={settings.zegoServerSecret || ''}
-                onChange={(e) =>
-                  setSettings({ ...settings, zegoServerSecret: e.target.value })
-                }
+                onChange={(e) => setSettings({ ...settings, zegoServerSecret: e.target.value })}
                 placeholder="e.g. 4a5b6c7d..."
                 autoComplete="off"
                 className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-mono text-sm"
               />
-              <p className="text-xs text-muted-foreground">Secret key used to generate room tokens.</p>
+              <p className="text-xs text-muted-foreground">
+                Secret key used to generate room tokens.
+              </p>
             </div>
           </div>
         </div>
@@ -165,7 +171,10 @@ export default function AdminSettings() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">OpenAI AI Astrology Engine Keys</h3>
-              <p className="text-xs text-muted-foreground">Generates Astrotalk-grade dynamic Vedic chart analyses, compatibility reports, and remedial guidance.</p>
+              <p className="text-xs text-muted-foreground">
+                Generates Astrotalk-grade dynamic Vedic chart analyses, compatibility reports, and
+                remedial guidance.
+              </p>
             </div>
           </div>
 
@@ -176,9 +185,7 @@ export default function AdminSettings() {
                 <input
                   type={showSecret ? 'text' : 'password'}
                   value={settings.openaiApiKey || ''}
-                  onChange={(e) =>
-                    setSettings({ ...settings, openaiApiKey: e.target.value })
-                  }
+                  onChange={(e) => setSettings({ ...settings, openaiApiKey: e.target.value })}
                   placeholder="sk-proj-..."
                   autoComplete="off"
                   spellCheck="false"
@@ -193,7 +200,10 @@ export default function AdminSettings() {
                   {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">If left empty, AstroParihar uses its internal high-precision mathematical Vedic calculation engine.</p>
+              <p className="text-xs text-muted-foreground">
+                If left empty, AstroParihar uses its internal high-precision mathematical Vedic
+                calculation engine.
+              </p>
             </div>
           </div>
         </div>

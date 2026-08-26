@@ -41,7 +41,9 @@ export default function FreeHoroscopePage() {
     lon: '',
   });
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'd1' | 'd9' | 'planets' | 'dasha' | 'yogas' | 'predictions' | 'remedies'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'd1' | 'd9' | 'planets' | 'dasha' | 'yogas' | 'predictions' | 'remedies'
+  >('overview');
   const [horoscopeReport, setHoroscopeReport] = useState<any | null>(null);
   const [apiReportData, setApiReportData] = useState<any | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -84,40 +86,132 @@ export default function FreeHoroscopePage() {
       yoni: 'Gaja (Elephant)',
       nadi: 'Madhya',
       planetaryDegrees: [
-        { planet: 'Sun (Surya)', rashi: 'Leo (Simha)', degree: "14° 22'", house: '10th House', status: 'Own Sign (Strong)' },
-        { planet: 'Moon (Chandra)', rashi: 'Aries (Mesha)', degree: "08° 10'", house: '6th House', status: 'Exalted Nakshatra' },
-        { planet: 'Mars (Mangal)', rashi: 'Scorpio (Vrishchika)', degree: "21° 05'", house: '1st House (Lagna)', status: 'Own Sign (Lagna Lord)' },
-        { planet: 'Mercury (Budh)', rashi: 'Virgo (Kanya)', degree: "03° 40'", house: '11th House', status: 'Exalted' },
-        { planet: 'Jupiter (Guru)', rashi: 'Cancer (Karka)', degree: "18° 12'", house: '9th House', status: 'Exalted (Highly Auspicious)' },
-        { planet: 'Venus (Shukra)', rashi: 'Taurus (Vrishabha)', degree: "11° 50'", house: '7th House', status: 'Own Sign' },
-        { planet: 'Saturn (Shani)', rashi: 'Aquarius (Kumbha)', degree: "26° 15'", house: '4th House', status: 'Moolatrikona' },
-        { planet: 'Rahu', rashi: 'Pisces (Meena)', degree: "09° 04'", house: '5th House', status: 'Benefic Transit' },
-        { planet: 'Ketu', rashi: 'Virgo (Kanya)', degree: "09° 04'", house: '11th House', status: 'Spiritual Alignment' },
+        {
+          planet: 'Sun (Surya)',
+          rashi: 'Leo (Simha)',
+          degree: "14° 22'",
+          house: '10th House',
+          status: 'Own Sign (Strong)',
+        },
+        {
+          planet: 'Moon (Chandra)',
+          rashi: 'Aries (Mesha)',
+          degree: "08° 10'",
+          house: '6th House',
+          status: 'Exalted Nakshatra',
+        },
+        {
+          planet: 'Mars (Mangal)',
+          rashi: 'Scorpio (Vrishchika)',
+          degree: "21° 05'",
+          house: '1st House (Lagna)',
+          status: 'Own Sign (Lagna Lord)',
+        },
+        {
+          planet: 'Mercury (Budh)',
+          rashi: 'Virgo (Kanya)',
+          degree: "03° 40'",
+          house: '11th House',
+          status: 'Exalted',
+        },
+        {
+          planet: 'Jupiter (Guru)',
+          rashi: 'Cancer (Karka)',
+          degree: "18° 12'",
+          house: '9th House',
+          status: 'Exalted (Highly Auspicious)',
+        },
+        {
+          planet: 'Venus (Shukra)',
+          rashi: 'Taurus (Vrishabha)',
+          degree: "11° 50'",
+          house: '7th House',
+          status: 'Own Sign',
+        },
+        {
+          planet: 'Saturn (Shani)',
+          rashi: 'Aquarius (Kumbha)',
+          degree: "26° 15'",
+          house: '4th House',
+          status: 'Moolatrikona',
+        },
+        {
+          planet: 'Rahu',
+          rashi: 'Pisces (Meena)',
+          degree: "09° 04'",
+          house: '5th House',
+          status: 'Benefic Transit',
+        },
+        {
+          planet: 'Ketu',
+          rashi: 'Virgo (Kanya)',
+          degree: "09° 04'",
+          house: '11th House',
+          status: 'Spiritual Alignment',
+        },
       ],
       dasha: {
         currentMahadasha: 'Jupiter (Guru)',
         currentAntardasha: 'Saturn (Shani)',
         endDate: '14 Nov 2028',
         timeline: [
-          { dasha: 'Jupiter - Saturn', period: '2025 - 2028', effect: 'Career restructuring & steady financial growth' },
-          { dasha: 'Jupiter - Mercury', period: '2028 - 2030', effect: 'Academic success, foreign travels & wealth' },
-          { dasha: 'Jupiter - Ketu', period: '2030 - 2031', effect: 'Spiritual awakening & deep meditation' },
-          { dasha: 'Jupiter - Venus', period: '2031 - 2034', effect: 'Marriage, luxury & social prestige' },
+          {
+            dasha: 'Jupiter - Saturn',
+            period: '2025 - 2028',
+            effect: 'Career restructuring & steady financial growth',
+          },
+          {
+            dasha: 'Jupiter - Mercury',
+            period: '2028 - 2030',
+            effect: 'Academic success, foreign travels & wealth',
+          },
+          {
+            dasha: 'Jupiter - Ketu',
+            period: '2030 - 2031',
+            effect: 'Spiritual awakening & deep meditation',
+          },
+          {
+            dasha: 'Jupiter - Venus',
+            period: '2031 - 2034',
+            effect: 'Marriage, luxury & social prestige',
+          },
         ],
       },
       yogas: [
-        { name: 'Raja Yoga', desc: '1st Lord Mars & 10th Lord Sun in mutual connection granting leadership & governance authority.' },
-        { name: 'Dhana Yoga', desc: '5th Lord Venus & 11th Lord Mercury in wealth houses generating financial prosperity.' },
-        { name: 'Gaj Kesari Yoga', desc: 'Moon in Kendra to Jupiter granting wisdom, respect, and enduring reputation.' },
+        {
+          name: 'Raja Yoga',
+          desc: '1st Lord Mars & 10th Lord Sun in mutual connection granting leadership & governance authority.',
+        },
+        {
+          name: 'Dhana Yoga',
+          desc: '5th Lord Venus & 11th Lord Mercury in wealth houses generating financial prosperity.',
+        },
+        {
+          name: 'Gaj Kesari Yoga',
+          desc: 'Moon in Kendra to Jupiter granting wisdom, respect, and enduring reputation.',
+        },
       ],
       doshas: [
-        { name: 'Mangal Dosha', status: 'Mild (1st House Mars)', cancelled: true, remedy: 'Chant Hanuman Chalisa on Tuesdays.' },
-        { name: 'Kaal Sarp Dosha', status: 'Absent', cancelled: false, remedy: 'Planets are evenly distributed across Kendra houses.' },
+        {
+          name: 'Mangal Dosha',
+          status: 'Mild (1st House Mars)',
+          cancelled: true,
+          remedy: 'Chant Hanuman Chalisa on Tuesdays.',
+        },
+        {
+          name: 'Kaal Sarp Dosha',
+          status: 'Absent',
+          cancelled: false,
+          remedy: 'Planets are evenly distributed across Kendra houses.',
+        },
       ],
       predictions: {
-        career: 'Exalted 10th house Sun and Jupiter aspect indicate strong potential for government authority, corporate leadership, law, or high-tech management.',
-        finance: 'Dhana Yoga ensures steady asset accumulation through property, investments, and professional income.',
-        marriage: 'Venus in 7th house in own sign promises a charming, supportive, and intellectually compatible spouse.',
+        career:
+          'Exalted 10th house Sun and Jupiter aspect indicate strong potential for government authority, corporate leadership, law, or high-tech management.',
+        finance:
+          'Dhana Yoga ensures steady asset accumulation through property, investments, and professional income.',
+        marriage:
+          'Venus in 7th house in own sign promises a charming, supportive, and intellectually compatible spouse.',
         health: 'Lagna Lord Mars ensures high stamina and vital power.',
       },
       remedies: [
@@ -172,18 +266,66 @@ export default function FreeHoroscopePage() {
   };
 
   const houseGuide = [
-    { num: '1st House', title: 'Lagna (Ascendant)', desc: 'Personality, physical constitution, self-expression, and general life orientation.' },
-    { num: '2nd House', title: 'Dhan Bhava', desc: 'Wealth, family lineage, speech, liquid assets, and early childhood values.' },
-    { num: '3rd House', title: 'Sahaj Bhava', desc: 'Courage, communication, siblings, short-distance travels, and mental initiative.' },
-    { num: '4th House', title: 'Sukha Bhava', desc: 'Home, domestic tranquility, mother, land, vehicles, and inner emotional peace.' },
-    { num: '5th House', title: 'Putra & Trikona', desc: 'Creativity, education, romance, intelligence, children, and past-life karma (Purva Punya).' },
-    { num: '6th House', title: 'Shatru Bhava', desc: 'Health challenges, debts, daily work routine, competition, and overcoming obstacles.' },
-    { num: '7th House', title: 'Yuvati Bhava', desc: 'Marriage, life partner, legal partnerships, contracts, and public relations.' },
-    { num: '8th House', title: 'Aayu Bhava', desc: 'Transformation, longevity, sudden gains, occult knowledge, and hidden mysteries.' },
-    { num: '9th House', title: 'Bhagya Bhava', desc: 'Luck, higher wisdom, spiritual dharma, mentors/father, and long-distance travel.' },
-    { num: '10th House', title: 'Karma Bhava', desc: 'Career, status, authority, public recognition, karma, and executive strength.' },
-    { num: '11th House', title: 'Labha Bhava', desc: 'Income, financial gains, social networks, fulfillment of desires, and elder siblings.' },
-    { num: '12th House', title: 'Vyaya Bhava', desc: 'Moksha (liberation), spiritual retreat, foreign connections, subconscious mind, and expenditure.' },
+    {
+      num: '1st House',
+      title: 'Lagna (Ascendant)',
+      desc: 'Personality, physical constitution, self-expression, and general life orientation.',
+    },
+    {
+      num: '2nd House',
+      title: 'Dhan Bhava',
+      desc: 'Wealth, family lineage, speech, liquid assets, and early childhood values.',
+    },
+    {
+      num: '3rd House',
+      title: 'Sahaj Bhava',
+      desc: 'Courage, communication, siblings, short-distance travels, and mental initiative.',
+    },
+    {
+      num: '4th House',
+      title: 'Sukha Bhava',
+      desc: 'Home, domestic tranquility, mother, land, vehicles, and inner emotional peace.',
+    },
+    {
+      num: '5th House',
+      title: 'Putra & Trikona',
+      desc: 'Creativity, education, romance, intelligence, children, and past-life karma (Purva Punya).',
+    },
+    {
+      num: '6th House',
+      title: 'Shatru Bhava',
+      desc: 'Health challenges, debts, daily work routine, competition, and overcoming obstacles.',
+    },
+    {
+      num: '7th House',
+      title: 'Yuvati Bhava',
+      desc: 'Marriage, life partner, legal partnerships, contracts, and public relations.',
+    },
+    {
+      num: '8th House',
+      title: 'Aayu Bhava',
+      desc: 'Transformation, longevity, sudden gains, occult knowledge, and hidden mysteries.',
+    },
+    {
+      num: '9th House',
+      title: 'Bhagya Bhava',
+      desc: 'Luck, higher wisdom, spiritual dharma, mentors/father, and long-distance travel.',
+    },
+    {
+      num: '10th House',
+      title: 'Karma Bhava',
+      desc: 'Career, status, authority, public recognition, karma, and executive strength.',
+    },
+    {
+      num: '11th House',
+      title: 'Labha Bhava',
+      desc: 'Income, financial gains, social networks, fulfillment of desires, and elder siblings.',
+    },
+    {
+      num: '12th House',
+      title: 'Vyaya Bhava',
+      desc: 'Moksha (liberation), spiritual retreat, foreign connections, subconscious mind, and expenditure.',
+    },
   ];
 
   const faqs = [
@@ -230,19 +372,26 @@ export default function FreeHoroscopePage() {
             >
               <div>
                 <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 mb-4 backdrop-blur-md shadow-xl shadow-black/20">
-                  <Sparkles size={15} className="text-[#F6D075] animate-pulse" /> Free Vedic Horoscope & Janam Kundli
+                  <Sparkles size={15} className="text-[#F6D075] animate-pulse" /> Free Vedic
+                  Horoscope & Janam Kundli
                 </span>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight max-w-xl drop-shadow-lg">
                   Free Vedic <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">Horoscope & Kundli</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">
+                    Horoscope & Kundli
+                  </span>
                 </h1>
                 <p className="text-base sm:text-lg text-[#F8F3EA]/90 font-medium leading-relaxed max-w-lg drop-shadow">
-                  Enter your birth details to generate your complete Vedic birth chart with AI-powered planetary predictions, Dasha timeline, and authentic remedies.
+                  Enter your birth details to generate your complete Vedic birth chart with
+                  AI-powered planetary predictions, Dasha timeline, and authentic remedies.
                 </p>
               </div>
 
               {/* Form Card */}
-              <div id="form-section" className="glass-card p-6 sm:p-8 rounded-3xl border border-[#B88A44]/30 shadow-2xl backdrop-blur-xl bg-card/90 space-y-4">
+              <div
+                id="form-section"
+                className="glass-card p-6 sm:p-8 rounded-3xl border border-[#B88A44]/30 shadow-2xl backdrop-blur-xl bg-card/90 space-y-4"
+              >
                 <form onSubmit={handleCalculate} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
@@ -260,15 +409,23 @@ export default function FreeHoroscopePage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Gender*</label>
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">
+                        Gender*
+                      </label>
                       <select
                         value={formData.gender}
                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                         className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm cursor-pointer"
                       >
-                        <option value="Male" className="bg-[#FFFDFC] text-[#292522]">Male</option>
-                        <option value="Female" className="bg-[#FFFDFC] text-[#292522]">Female</option>
-                        <option value="Other" className="bg-[#FFFDFC] text-[#292522]">Other</option>
+                        <option value="Male" className="bg-[#FFFDFC] text-[#292522]">
+                          Male
+                        </option>
+                        <option value="Female" className="bg-[#FFFDFC] text-[#292522]">
+                          Female
+                        </option>
+                        <option value="Other" className="bg-[#FFFDFC] text-[#292522]">
+                          Other
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -319,7 +476,8 @@ export default function FreeHoroscopePage() {
                   >
                     {isCalculating ? (
                       <span className="flex items-center gap-2">
-                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Generating AI Horoscope...
+                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Generating AI
+                        Horoscope...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
@@ -352,11 +510,18 @@ export default function FreeHoroscopePage() {
                         <Heart size={18} />
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-[#292522] group-hover:text-rose-700">Love & Marriage Horoscope</div>
-                        <div className="text-xs text-[#6B5E55]">7th house, Venus & soulmate timing</div>
+                        <div className="text-sm font-bold text-[#292522] group-hover:text-rose-700">
+                          Love & Marriage Horoscope
+                        </div>
+                        <div className="text-xs text-[#6B5E55]">
+                          7th house, Venus & soulmate timing
+                        </div>
                       </div>
                     </div>
-                    <ArrowRight size={16} className="text-rose-500 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight
+                      size={16}
+                      className="text-rose-500 group-hover:translate-x-1 transition-transform"
+                    />
                   </Link>
 
                   <Link
@@ -368,11 +533,18 @@ export default function FreeHoroscopePage() {
                         <Coins size={18} />
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-[#292522] group-hover:text-emerald-700">Finance & Wealth Horoscope</div>
-                        <div className="text-xs text-[#6B5E55]">2nd/11th house, Dhana yogas & investments</div>
+                        <div className="text-sm font-bold text-[#292522] group-hover:text-emerald-700">
+                          Finance & Wealth Horoscope
+                        </div>
+                        <div className="text-xs text-[#6B5E55]">
+                          2nd/11th house, Dhana yogas & investments
+                        </div>
                       </div>
                     </div>
-                    <ArrowRight size={16} className="text-emerald-600 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight
+                      size={16}
+                      className="text-emerald-600 group-hover:translate-x-1 transition-transform"
+                    />
                   </Link>
 
                   <Link
@@ -384,11 +556,18 @@ export default function FreeHoroscopePage() {
                         <Activity size={18} />
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-[#292522] group-hover:text-cyan-700">Health & Vitality Horoscope</div>
-                        <div className="text-xs text-[#6B5E55]">Lagna vitality, Tridoshas & Ayurveda</div>
+                        <div className="text-sm font-bold text-[#292522] group-hover:text-cyan-700">
+                          Health & Vitality Horoscope
+                        </div>
+                        <div className="text-xs text-[#6B5E55]">
+                          Lagna vitality, Tridoshas & Ayurveda
+                        </div>
                       </div>
                     </div>
-                    <ArrowRight size={16} className="text-cyan-600 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight
+                      size={16}
+                      className="text-cyan-600 group-hover:translate-x-1 transition-transform"
+                    />
                   </Link>
                 </div>
               </div>
@@ -396,11 +575,16 @@ export default function FreeHoroscopePage() {
               {/* Trust Box */}
               <div className="p-5 rounded-2xl bg-gradient-to-br from-[#281123] to-[#170b16] text-white border border-[#B88A44]/30 space-y-2 shadow-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#F6D075] uppercase tracking-wider">Need Personal Consultation?</span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Online</span>
+                  <span className="text-xs font-bold text-[#F6D075] uppercase tracking-wider">
+                    Need Personal Consultation?
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                    Online
+                  </span>
                 </div>
                 <p className="text-xs text-[#F8F3EA]/90 leading-relaxed">
-                  Have a verified Vedic astrologer analyze your chart live over phone for precise life guidance.
+                  Have a verified Vedic astrologer analyze your chart live over phone for precise
+                  life guidance.
                 </p>
                 <Link
                   href="/talk-to-astrologer"
@@ -417,7 +601,10 @@ export default function FreeHoroscopePage() {
       {/* Comprehensive Kundli Report Output */}
       <AnimatePresence>
         {horoscopeReport && (
-          <section id="report-section" className="py-10 bg-background/50 border-t border-white/5 space-y-8">
+          <section
+            id="report-section"
+            className="py-10 bg-background/50 border-t border-white/5 space-y-8"
+          >
             <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-6">
               {/* Header Summary Banner */}
               <div className="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 flex flex-wrap items-center justify-between gap-6 shadow-2xl">
@@ -471,8 +658,12 @@ export default function FreeHoroscopePage() {
                   </p>
                   {apiReportData.procedure && (
                     <div className="pt-2 border-t border-white/10 space-y-1">
-                      <span className="text-xs font-bold text-[#C9952B] uppercase tracking-wider">Recommended Ritual / Procedure</span>
-                      <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">{apiReportData.procedure}</p>
+                      <span className="text-xs font-bold text-[#C9952B] uppercase tracking-wider">
+                        Recommended Ritual / Procedure
+                      </span>
+                      <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                        {apiReportData.procedure}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -509,29 +700,49 @@ export default function FreeHoroscopePage() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-1">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">ASCENDANT (LAGNA)</span>
-                      <p className="text-base font-bold text-[#C9952B]">{horoscopeReport.ascendant}</p>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">
+                        ASCENDANT (LAGNA)
+                      </span>
+                      <p className="text-base font-bold text-[#C9952B]">
+                        {horoscopeReport.ascendant}
+                      </p>
                     </div>
                     <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-1">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">SUN SIGN</span>
-                      <p className="text-base font-bold text-[#C9952B]">{horoscopeReport.sunSign}</p>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">
+                        SUN SIGN
+                      </span>
+                      <p className="text-base font-bold text-[#C9952B]">
+                        {horoscopeReport.sunSign}
+                      </p>
                     </div>
                     <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-1">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">MOON SIGN (RASHI)</span>
-                      <p className="text-base font-bold text-[#C9952B]">{horoscopeReport.moonSign}</p>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">
+                        MOON SIGN (RASHI)
+                      </span>
+                      <p className="text-base font-bold text-[#C9952B]">
+                        {horoscopeReport.moonSign}
+                      </p>
                     </div>
                     <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-1">
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase">NAKSHATRA</span>
-                      <p className="text-base font-bold text-[#C9952B]">{horoscopeReport.nakshatra}</p>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">
+                        NAKSHATRA
+                      </span>
+                      <p className="text-base font-bold text-[#C9952B]">
+                        {horoscopeReport.nakshatra}
+                      </p>
                     </div>
                   </div>
 
                   <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-4">
-                    <h3 className="text-lg font-bold text-foreground">Avakhada Chakra & Panchang Details</h3>
+                    <h3 className="text-lg font-bold text-foreground">
+                      Avakhada Chakra & Panchang Details
+                    </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                       <div className="p-3 rounded-xl bg-white/5">
                         <span className="text-muted-foreground block">Nakshatra Lord</span>
-                        <span className="font-bold text-foreground">{horoscopeReport.nakshatraLord}</span>
+                        <span className="font-bold text-foreground">
+                          {horoscopeReport.nakshatraLord}
+                        </span>
                       </div>
                       <div className="p-3 rounded-xl bg-white/5">
                         <span className="text-muted-foreground block">Tithi</span>
@@ -554,7 +765,9 @@ export default function FreeHoroscopePage() {
               {activeTab === 'd1' && (
                 <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-6">
                   <div className="flex justify-between items-center flex-wrap gap-2">
-                    <h3 className="text-xl font-bold text-foreground">Lagna Chart (D1 Main Birth Chart)</h3>
+                    <h3 className="text-xl font-bold text-foreground">
+                      Lagna Chart (D1 Main Birth Chart)
+                    </h3>
                     <span className="text-xs font-bold text-[#C9952B] bg-[#C9952B]/10 px-3 py-1 rounded-full border border-[#C9952B]/20">
                       Ascendant: Scorpio (8)
                     </span>
@@ -575,13 +788,20 @@ export default function FreeHoroscopePage() {
                       { house: 'H11 (Labha)', sign: 'Virgo', planets: 'Mercury, Ketu' },
                       { house: 'H12 (Vyaya)', sign: 'Libra', planets: 'Empty' },
                     ].map((item) => (
-                      <div key={item.house} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                      <div
+                        key={item.house}
+                        className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+                      >
                         <div className="flex justify-between text-xs font-bold">
                           <span className="text-[#C9952B]">{item.house}</span>
                           <span className="text-muted-foreground">{item.sign}</span>
                         </div>
                         <p className="text-xs font-semibold text-foreground pt-1">
-                          {item.planets === 'Empty' ? <span className="text-muted-foreground/60">No Planets</span> : item.planets}
+                          {item.planets === 'Empty' ? (
+                            <span className="text-muted-foreground/60">No Planets</span>
+                          ) : (
+                            item.planets
+                          )}
                         </p>
                       </div>
                     ))}
@@ -593,7 +813,9 @@ export default function FreeHoroscopePage() {
               {activeTab === 'd9' && (
                 <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-6">
                   <div className="flex justify-between items-center flex-wrap gap-2">
-                    <h3 className="text-xl font-bold text-foreground">Navamsha Chart (D9 Marriage & Spiritual Strength)</h3>
+                    <h3 className="text-xl font-bold text-foreground">
+                      Navamsha Chart (D9 Marriage & Spiritual Strength)
+                    </h3>
                     <span className="text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
                       Spousal & Karmic Strength
                     </span>
@@ -610,7 +832,10 @@ export default function FreeHoroscopePage() {
                       { house: 'D9 H11', sign: 'Pisces', planets: 'Rahu' },
                       { house: 'D9 H12', sign: 'Aries', planets: 'Ketu' },
                     ].map((item) => (
-                      <div key={item.house} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                      <div
+                        key={item.house}
+                        className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+                      >
                         <div className="flex justify-between text-xs font-bold">
                           <span className="text-[#C9952B]">{item.house}</span>
                           <span className="text-muted-foreground">{item.sign}</span>
@@ -625,7 +850,9 @@ export default function FreeHoroscopePage() {
               {/* Tab 4: Planetary Degrees */}
               {activeTab === 'planets' && (
                 <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-4">
-                  <h3 className="text-xl font-bold text-foreground">Planetary Degrees & Status Table</h3>
+                  <h3 className="text-xl font-bold text-foreground">
+                    Planetary Degrees & Status Table
+                  </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
                       <thead>
@@ -659,13 +886,17 @@ export default function FreeHoroscopePage() {
                   <div className="flex justify-between items-center flex-wrap gap-2">
                     <h3 className="text-xl font-bold text-foreground">Active Vimshottari Dasha</h3>
                     <span className="text-xs font-bold text-[#C9952B] bg-[#C9952B]/20 px-3 py-1 rounded-full">
-                      Current: {horoscopeReport.dasha.currentMahadasha} - {horoscopeReport.dasha.currentAntardasha}
+                      Current: {horoscopeReport.dasha.currentMahadasha} -{' '}
+                      {horoscopeReport.dasha.currentAntardasha}
                     </span>
                   </div>
 
                   <div className="space-y-3">
                     {horoscopeReport.dasha.timeline.map((t: any) => (
-                      <div key={t.dasha} className="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-wrap justify-between items-center gap-2">
+                      <div
+                        key={t.dasha}
+                        className="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-wrap justify-between items-center gap-2"
+                      >
                         <div>
                           <h4 className="font-bold text-foreground text-sm">{t.dasha}</h4>
                           <p className="text-xs text-muted-foreground">{t.effect}</p>
@@ -688,7 +919,10 @@ export default function FreeHoroscopePage() {
                     </h3>
                     <div className="space-y-3">
                       {horoscopeReport.yogas.map((y: any) => (
-                        <div key={y.name} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                        <div
+                          key={y.name}
+                          className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+                        >
                           <h4 className="font-bold text-foreground text-sm">{y.name}</h4>
                           <p className="text-xs text-muted-foreground leading-relaxed">{y.desc}</p>
                         </div>
@@ -702,18 +936,25 @@ export default function FreeHoroscopePage() {
                     </h3>
                     <div className="space-y-3">
                       {horoscopeReport.doshas.map((d: any) => (
-                        <div key={d.name} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                        <div
+                          key={d.name}
+                          className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+                        >
                           <div className="flex justify-between items-center">
                             <h4 className="font-bold text-foreground text-sm">{d.name}</h4>
                             <span
                               className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                                d.cancelled ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                                d.cancelled
+                                  ? 'bg-emerald-500/20 text-emerald-400'
+                                  : 'bg-rose-500/20 text-rose-400'
                               }`}
                             >
                               {d.status}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{d.remedy}</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {d.remedy}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -727,40 +968,57 @@ export default function FreeHoroscopePage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-2">
                       <h4 className="font-bold text-[#C9952B] text-base">💼 Career & Profession</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{horoscopeReport.predictions.career}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {horoscopeReport.predictions.career}
+                      </p>
                     </div>
                     <div className="glass-card p-6 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 space-y-3">
                       <div className="flex justify-between items-center">
                         <h4 className="font-bold text-emerald-400 text-base flex items-center gap-1.5">
                           <Coins size={16} /> Finance & Wealth
                         </h4>
-                        <Link href="/services/horoscope/finance" className="text-[11px] font-bold text-emerald-400 hover:underline flex items-center gap-1">
+                        <Link
+                          href="/services/horoscope/finance"
+                          className="text-[11px] font-bold text-emerald-400 hover:underline flex items-center gap-1"
+                        >
                           Deep Dive →
                         </Link>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{horoscopeReport.predictions.finance}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {horoscopeReport.predictions.finance}
+                      </p>
                     </div>
                     <div className="glass-card p-6 rounded-3xl border border-rose-500/20 bg-rose-500/5 space-y-3">
                       <div className="flex justify-between items-center">
                         <h4 className="font-bold text-rose-400 text-base flex items-center gap-1.5">
                           <Heart size={16} /> Marriage & Relationships
                         </h4>
-                        <Link href="/services/horoscope/love" className="text-[11px] font-bold text-rose-400 hover:underline flex items-center gap-1">
+                        <Link
+                          href="/services/horoscope/love"
+                          className="text-[11px] font-bold text-rose-400 hover:underline flex items-center gap-1"
+                        >
                           Deep Dive →
                         </Link>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{horoscopeReport.predictions.marriage}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {horoscopeReport.predictions.marriage}
+                      </p>
                     </div>
                     <div className="glass-card p-6 rounded-3xl border border-cyan-500/20 bg-cyan-500/5 space-y-3">
                       <div className="flex justify-between items-center">
                         <h4 className="font-bold text-cyan-400 text-base flex items-center gap-1.5">
                           <Activity size={16} /> Health & Vitality
                         </h4>
-                        <Link href="/services/horoscope/health" className="text-[11px] font-bold text-cyan-400 hover:underline flex items-center gap-1">
+                        <Link
+                          href="/services/horoscope/health"
+                          className="text-[11px] font-bold text-cyan-400 hover:underline flex items-center gap-1"
+                        >
                           Deep Dive →
                         </Link>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{horoscopeReport.predictions.health}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {horoscopeReport.predictions.health}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -772,7 +1030,10 @@ export default function FreeHoroscopePage() {
                   <h3 className="text-xl font-bold text-foreground">Personalized Vedic Remedies</h3>
                   <div className="space-y-3">
                     {horoscopeReport.remedies.map((rem: string, idx: number) => (
-                      <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-3">
+                      <div
+                        key={idx}
+                        className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-3"
+                      >
                         <CheckCircle2 size={18} className="text-[#C9952B] shrink-0 mt-0.5" />
                         <p className="text-xs text-muted-foreground leading-relaxed">{rem}</p>
                       </div>
@@ -800,9 +1061,15 @@ export default function FreeHoroscopePage() {
       <section className="py-16 bg-background/50 border-t border-white/5">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-8">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">Targeted Vedic Forecasts</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Explore Specialized Horoscopes</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Select a category below for in-depth astrological analysis and remedies</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              Targeted Vedic Forecasts
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Explore Specialized Horoscopes
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Select a category below for in-depth astrological analysis and remedies
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -819,11 +1086,13 @@ export default function FreeHoroscopePage() {
                   Love & Relationship Horoscope
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Discover 7th House (Kalatra Bhava), Venusian strength, Manglik alignment, relationship synergy, and marriage timing.
+                  Discover 7th House (Kalatra Bhava), Venusian strength, Manglik alignment,
+                  relationship synergy, and marriage timing.
                 </p>
               </div>
               <div className="text-xs font-bold text-rose-400 flex items-center gap-1 pt-2">
-                Open Love Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Open Love Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -840,11 +1109,13 @@ export default function FreeHoroscopePage() {
                   Finance & Wealth Horoscope
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Analyze Dhana Bhava (2nd House), Labha Bhava (11th House), Jupiter&apos;s wealth yogas, and favorable investment timing.
+                  Analyze Dhana Bhava (2nd House), Labha Bhava (11th House), Jupiter&apos;s wealth
+                  yogas, and favorable investment timing.
                 </p>
               </div>
               <div className="text-xs font-bold text-emerald-400 flex items-center gap-1 pt-2">
-                Open Finance Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Open Finance Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -861,11 +1132,13 @@ export default function FreeHoroscopePage() {
                   Health & Vitality Horoscope
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance (Vata/Pitta/Kapha), and longevity remedies.
+                  Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance
+                  (Vata/Pitta/Kapha), and longevity remedies.
                 </p>
               </div>
               <div className="text-xs font-bold text-cyan-400 flex items-center gap-1 pt-2">
-                Open Health Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Open Health Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           </div>
@@ -879,7 +1152,10 @@ export default function FreeHoroscopePage() {
             <h2 className="text-2xl font-bold text-foreground">The 12 Houses Explained</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {houseGuide.map((h) => (
-                <div key={h.num} className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                <div
+                  key={h.num}
+                  className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#C9952B]">{h.num}</span>
                     <span className="text-xs font-semibold text-foreground">{h.title}</span>

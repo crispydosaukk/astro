@@ -2,7 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Sparkles, ShieldAlert, CheckCircle2, XCircle, Info, ChevronRight, HelpCircle, Sun, Moon, Clock, Loader2, Check } from 'lucide-react';
+import {
+  Calendar,
+  MapPin,
+  Sparkles,
+  ShieldAlert,
+  CheckCircle2,
+  XCircle,
+  Info,
+  ChevronRight,
+  HelpCircle,
+  Sun,
+  Moon,
+  Clock,
+  Loader2,
+  Check,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CityLocationInput from '@/components/CityLocationInput';
 import Navbar from '@/components/Navbar';
@@ -29,9 +44,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Lord Indra / Vishnu',
     symbol: 'Lion (Simha)',
     nature: 'Auspicious',
-    bestFor: 'Commencing new business, health treatments, government affairs, leadership tasks, charity, religious ceremonies.',
+    bestFor:
+      'Commencing new business, health treatments, government affairs, leadership tasks, charity, religious ceremonies.',
     avoidFor: 'Destructive or aggressive conflicts.',
-    description: 'Bava represents courage, vitality, and expansion. Governed by Indra, it gives stability and success to ventures started in this half-tithi.',
+    description:
+      'Bava represents courage, vitality, and expansion. Governed by Indra, it gives stability and success to ventures started in this half-tithi.',
   },
   {
     name: 'Balava (Balav)',
@@ -40,9 +57,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Lord Brahma',
     symbol: 'Leopard / Tiger (Vyaghra)',
     nature: 'Auspicious',
-    bestFor: 'Education, academic enrollment, yajnas, performing pujas, studying spiritual texts, learning fine arts.',
+    bestFor:
+      'Education, academic enrollment, yajnas, performing pujas, studying spiritual texts, learning fine arts.',
     avoidFor: 'Unethical shortcuts or deceiving others.',
-    description: 'Balava is ruled by the Creator Brahma, making it supreme for intellectual pursuits, scholastic endeavors, and creative arts.',
+    description:
+      'Balava is ruled by the Creator Brahma, making it supreme for intellectual pursuits, scholastic endeavors, and creative arts.',
   },
   {
     name: 'Kaulava (Kaulav)',
@@ -51,9 +70,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Mitra (Solar Deity of Friendship)',
     symbol: 'Boar / Pig (Varaha)',
     nature: 'Auspicious',
-    bestFor: 'Friendship, treaties, partnerships, signing alliances, romantic agreements, marriage talks, social gatherings.',
+    bestFor:
+      'Friendship, treaties, partnerships, signing alliances, romantic agreements, marriage talks, social gatherings.',
     avoidFor: 'Breaking promises or instigating disputes.',
-    description: 'Kaulava promotes harmony, mutual affection, and auspicious social connections. Excellent for building lasting alliances.',
+    description:
+      'Kaulava promotes harmony, mutual affection, and auspicious social connections. Excellent for building lasting alliances.',
   },
   {
     name: 'Taitila (Taitil)',
@@ -62,9 +83,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Aryaman (God of Chivalry & Wealth)',
     symbol: 'Donkey / Rhinoceros',
     nature: 'Auspicious',
-    bestFor: 'Commercial trade, buying clothes, ornaments, real estate construction, public welfare works, hospitality.',
+    bestFor:
+      'Commercial trade, buying clothes, ornaments, real estate construction, public welfare works, hospitality.',
     avoidFor: 'Extreme physical sports or risky gambling.',
-    description: 'Taitila is associated with worldly comfort, craftsmanship, social respect, and material security.',
+    description:
+      'Taitila is associated with worldly comfort, craftsmanship, social respect, and material security.',
   },
   {
     name: 'Gara (Gar)',
@@ -73,9 +96,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Bhumi Devi (Mother Earth)',
     symbol: 'Elephant (Gaja)',
     nature: 'Auspicious',
-    bestFor: 'Agriculture, planting trees, plowing, laying building foundations, buying cattle, digging wells.',
+    bestFor:
+      'Agriculture, planting trees, plowing, laying building foundations, buying cattle, digging wells.',
     avoidFor: 'Fast-paced speculative intraday trading.',
-    description: 'Gara brings earthy strength, fertile beginnings, and grounded growth. Highly praised for agricultural and domestic construction work.',
+    description:
+      'Gara brings earthy strength, fertile beginnings, and grounded growth. Highly praised for agricultural and domestic construction work.',
   },
   {
     name: 'Vanija (Vanij)',
@@ -84,9 +109,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Goddess Lakshmi & Manibhadra',
     symbol: 'Bull (Vrishabha)',
     nature: 'Auspicious',
-    bestFor: 'Business deals, opening bank accounts, investments, large sales transactions, purchasing luxury items.',
+    bestFor:
+      'Business deals, opening bank accounts, investments, large sales transactions, purchasing luxury items.',
     avoidFor: 'Lending money without documentation.',
-    description: 'Vanija is the hallmark Karana for traders and entrepreneurs. Blessed by Lakshmi, it multiplies transactional prosperity.',
+    description:
+      'Vanija is the hallmark Karana for traders and entrepreneurs. Blessed by Lakshmi, it multiplies transactional prosperity.',
   },
   {
     name: 'Vishti (Bhadra)',
@@ -95,9 +122,12 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Lord Yama (God of Justice & Death)',
     symbol: 'Dog / Black Hornet',
     nature: 'Inauspicious / Fierce',
-    bestFor: 'Defeating enemies, legal battles, research into occult/poisons, surgical operations, defensive military action, detox.',
-    avoidFor: 'Strictly avoid Vivaha (Marriage), Griha Pravesh, buying new vehicles, or starting celebratory business.',
-    description: 'Vishti is famously known as Bhadra. It is a fierce energy suitable only for overcoming obstacles and aggressive competition.',
+    bestFor:
+      'Defeating enemies, legal battles, research into occult/poisons, surgical operations, defensive military action, detox.',
+    avoidFor:
+      'Strictly avoid Vivaha (Marriage), Griha Pravesh, buying new vehicles, or starting celebratory business.',
+    description:
+      'Vishti is famously known as Bhadra. It is a fierce energy suitable only for overcoming obstacles and aggressive competition.',
   },
   {
     name: 'Shakuni',
@@ -106,9 +136,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Garuda / Vayu',
     symbol: 'Bird / Vulture (Pakshi)',
     nature: 'Moderate',
-    bestFor: 'Administering herbal medicines, taking diagnosis, settling old disputes, tantric sadhana, bird feeding.',
+    bestFor:
+      'Administering herbal medicines, taking diagnosis, settling old disputes, tantric sadhana, bird feeding.',
     avoidFor: 'New romantic proposals or joyful beginnings.',
-    description: 'A fixed Karana occurring in Krishna Chaturdashi 2nd half. Great for medical treatments and diagnosing chronic ailments.',
+    description:
+      'A fixed Karana occurring in Krishna Chaturdashi 2nd half. Great for medical treatments and diagnosing chronic ailments.',
   },
   {
     name: 'Chatushpada',
@@ -117,9 +149,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Pashupati / Lord Shiva',
     symbol: 'Four-legged Cattle',
     nature: 'Moderate',
-    bestFor: 'Shraddha rituals, Pitru Tarpana, animal husbandry, donations, veterinary care, charitable trusts.',
+    bestFor:
+      'Shraddha rituals, Pitru Tarpana, animal husbandry, donations, veterinary care, charitable trusts.',
     avoidFor: 'Weddings and festive material celebrations.',
-    description: 'Occurs during the first half of Amavasya. Specially consecrated for ancestral debt clearance and caring for animals.',
+    description:
+      'Occurs during the first half of Amavasya. Specially consecrated for ancestral debt clearance and caring for animals.',
   },
   {
     name: 'Naga',
@@ -128,9 +162,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Naga Devatas (Serpent Gods)',
     symbol: 'Serpent (Sarpa)',
     nature: 'Inauspicious / Fierce',
-    bestFor: 'Mining, mineral excavation, subduing adversaries, snake worship (Nag Puja), mystical studies.',
+    bestFor:
+      'Mining, mineral excavation, subduing adversaries, snake worship (Nag Puja), mystical studies.',
     avoidFor: 'Auspicious social events, Griha Pravesh, long journeys.',
-    description: 'Occurs in the 2nd half of Amavasya. Ruled by underworld Serpent deities; demands caution and spiritual protection.',
+    description:
+      'Occurs in the 2nd half of Amavasya. Ruled by underworld Serpent deities; demands caution and spiritual protection.',
   },
   {
     name: 'Kimstughna',
@@ -139,9 +175,11 @@ const ALL_11_KARANAS: KaranaDetail[] = [
     ruler: 'Vayu / Kubera',
     symbol: 'Worm / Swan',
     nature: 'Auspicious',
-    bestFor: 'Performing peace yajnas, taking spiritual vows, starting educational curriculums, charitable feeds.',
+    bestFor:
+      'Performing peace yajnas, taking spiritual vows, starting educational curriculums, charitable feeds.',
     avoidFor: 'Aggressive confrontations.',
-    description: 'Occurs in the first half of Shukla Pratipada. Symbolizes auspicious freshness, divine blessings, and harmonious beginnings.',
+    description:
+      'Occurs in the first half of Shukla Pratipada. Symbolizes auspicious freshness, divine blessings, and harmonious beginnings.',
   },
 ];
 
@@ -171,8 +209,9 @@ export default function KaranaPage() {
   // Find active Karana details
   const activeKaranaName = panchang.karana || 'Balav';
   const activeKaranaInfo =
-    ALL_11_KARANAS.find((k) => activeKaranaName.toLowerCase().includes(k.name.toLowerCase().split(' ')[0])) ||
-    ALL_11_KARANAS[1];
+    ALL_11_KARANAS.find((k) =>
+      activeKaranaName.toLowerCase().includes(k.name.toLowerCase().split(' ')[0])
+    ) || ALL_11_KARANAS[1];
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -225,7 +264,8 @@ export default function KaranaPage() {
             Today Karana Timings
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto">
-            Discover the active Karana (Half-Tithi), ruling deities, cosmic nature, and ideal timing for business, ceremonies, and rituals.
+            Discover the active Karana (Half-Tithi), ruling deities, cosmic nature, and ideal timing
+            for business, ceremonies, and rituals.
           </p>
         </div>
 
@@ -243,27 +283,51 @@ export default function KaranaPage() {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm focus:border-[#C9952B] outline-none transition-colors"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none"
+                />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Location / City</label>
-              <CityLocationInput value={location} onChange={(city: string) => setLocation(city)} placeholder="Search city" />
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Location / City
+              </label>
+              <CityLocationInput
+                value={location}
+                onChange={(city: string) => setLocation(city)}
+                placeholder="Search city"
+              />
             </div>
             <button
               onClick={handleCalculate}
               disabled={isCalculating}
               className="w-full py-3.5 rounded-2xl gold-gradient-bg text-[#292522] font-bold text-sm shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
             >
-              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {isCalculating ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Sparkles size={18} />
+              )}
               <span>{isCalculating ? 'Calculating...' : 'Get Karana Timings'}</span>
             </button>
           </div>
 
           <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs sm:text-sm font-semibold text-[#C9952B]">
-            <div className="flex items-center gap-2"><MapPin size={15} /><span>{location}</span></div>
-            <div className="flex items-center gap-2"><Calendar size={15} /><span>{panchang.formattedDate}</span></div>
-            <div className="flex items-center gap-2"><Moon size={15} /><span>{panchang.tithi} ({panchang.paksha} Paksha)</span></div>
+            <div className="flex items-center gap-2">
+              <MapPin size={15} />
+              <span>{location}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar size={15} />
+              <span>{panchang.formattedDate}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Moon size={15} />
+              <span>
+                {panchang.tithi} ({panchang.paksha} Paksha)
+              </span>
+            </div>
           </div>
         </div>
 
@@ -276,15 +340,20 @@ export default function KaranaPage() {
               </span>
               <div className="flex items-center gap-3 flex-wrap">
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
-                  {activeKaranaInfo.name} <span className="text-xl font-serif text-[#F6D075]">({activeKaranaInfo.sanskrit})</span>
+                  {activeKaranaInfo.name}{' '}
+                  <span className="text-xl font-serif text-[#F6D075]">
+                    ({activeKaranaInfo.sanskrit})
+                  </span>
                 </h2>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                  activeKaranaInfo.nature === 'Auspicious'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                    : activeKaranaInfo.nature === 'Moderate'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                }`}>
+                <span
+                  className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    activeKaranaInfo.nature === 'Auspicious'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : activeKaranaInfo.nature === 'Moderate'
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                  }`}
+                >
                   {activeKaranaInfo.nature}
                 </span>
               </div>
@@ -292,7 +361,9 @@ export default function KaranaPage() {
 
             <div className="text-left sm:text-right bg-white/10 sm:bg-transparent p-3 sm:p-0 rounded-2xl border border-white/10 sm:border-0">
               <p className="text-xs text-white/75 uppercase tracking-wider">Classification</p>
-              <p className="text-sm sm:text-base font-bold text-[#F6D075]">{activeKaranaInfo.type}</p>
+              <p className="text-sm sm:text-base font-bold text-[#F6D075]">
+                {activeKaranaInfo.type}
+              </p>
             </div>
           </div>
 
@@ -311,7 +382,9 @@ export default function KaranaPage() {
             </div>
             <div className="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1">
               <span className="text-xs text-white/75">Sunrise – Sunset</span>
-              <p className="text-sm font-bold text-[#F6D075] font-mono">{panchang.sunrise} – {panchang.sunset}</p>
+              <p className="text-sm font-bold text-[#F6D075] font-mono">
+                {panchang.sunrise} – {panchang.sunset}
+              </p>
             </div>
           </div>
 
@@ -320,19 +393,24 @@ export default function KaranaPage() {
               <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 uppercase">
                 <CheckCircle2 size={15} /> Recommended Activities
               </div>
-              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{activeKaranaInfo.bestFor}</p>
+              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
+                {activeKaranaInfo.bestFor}
+              </p>
             </div>
 
             <div className="p-4.5 rounded-2xl bg-rose-950/50 border border-rose-500/30 space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-rose-300 uppercase">
                 <XCircle size={15} /> Activities to Avoid
               </div>
-              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">{activeKaranaInfo.avoidFor}</p>
+              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
+                {activeKaranaInfo.avoidFor}
+              </p>
             </div>
           </div>
 
           <p className="text-xs sm:text-sm text-white/85 leading-relaxed pt-1 border-t border-white/15">
-            <strong className="text-[#F6D075]">Vedic Insights:</strong> {activeKaranaInfo.description}
+            <strong className="text-[#F6D075]">Vedic Insights:</strong>{' '}
+            {activeKaranaInfo.description}
           </p>
         </div>
 
@@ -345,21 +423,30 @@ export default function KaranaPage() {
                 <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
                   Daily Half-Tithi Breakdown
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#292522]">Today&apos;s Karana Sequence</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-[#292522]">
+                  Today&apos;s Karana Sequence
+                </h3>
               </div>
 
               <p className="text-xs sm:text-sm text-[#6B5E55]">
-                Each lunar Tithi is split into two halves (Karanas). Here is the location-synchronized sequence of Karanas for {location}:
+                Each lunar Tithi is split into two halves (Karanas). Here is the
+                location-synchronized sequence of Karanas for {location}:
               </p>
 
               <div className="space-y-3 pt-1">
                 {/* 1st Half */}
                 <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#713B32] uppercase">{panchang.firstHalfKarana?.type || '1st Half Karana (Prathama)'}</span>
-                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                      panchang.firstHalfKarana?.nature?.includes('Inauspicious') ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
-                    }`}>
+                    <span className="text-xs font-bold text-[#713B32] uppercase">
+                      {panchang.firstHalfKarana?.type || '1st Half Karana (Prathama)'}
+                    </span>
+                    <span
+                      className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                        panchang.firstHalfKarana?.nature?.includes('Inauspicious')
+                          ? 'bg-rose-100 text-rose-800'
+                          : 'bg-emerald-100 text-emerald-800'
+                      }`}
+                    >
                       {panchang.firstHalfKarana?.nature || 'Auspicious'}
                     </span>
                   </div>
@@ -369,16 +456,25 @@ export default function KaranaPage() {
                       {panchang.firstHalfKarana?.start} – {panchang.firstHalfKarana?.end}
                     </span>
                   </div>
-                  <p className="text-xs text-[#6B5E55]">Favorable for general transactions, writing, commercial trade, and constructive actions.</p>
+                  <p className="text-xs text-[#6B5E55]">
+                    Favorable for general transactions, writing, commercial trade, and constructive
+                    actions.
+                  </p>
                 </div>
 
                 {/* 2nd Half */}
                 <div className="p-4 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#713B32] uppercase">{panchang.secondHalfKarana?.type || '2nd Half Karana (Dwitiya)'}</span>
-                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                      panchang.secondHalfKarana?.nature?.includes('Inauspicious') ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
-                    }`}>
+                    <span className="text-xs font-bold text-[#713B32] uppercase">
+                      {panchang.secondHalfKarana?.type || '2nd Half Karana (Dwitiya)'}
+                    </span>
+                    <span
+                      className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                        panchang.secondHalfKarana?.nature?.includes('Inauspicious')
+                          ? 'bg-rose-100 text-rose-800'
+                          : 'bg-emerald-100 text-emerald-800'
+                      }`}
+                    >
                       {panchang.secondHalfKarana?.nature || 'Auspicious'}
                     </span>
                   </div>
@@ -388,7 +484,9 @@ export default function KaranaPage() {
                       {panchang.secondHalfKarana?.start} – {panchang.secondHalfKarana?.end}
                     </span>
                   </div>
-                  <p className="text-xs text-[#6B5E55]">Follows continuous cyclical movement through the 7 Chara Karanas.</p>
+                  <p className="text-xs text-[#6B5E55]">
+                    Follows continuous cyclical movement through the 7 Chara Karanas.
+                  </p>
                 </div>
               </div>
             </div>
@@ -413,7 +511,9 @@ export default function KaranaPage() {
               </div>
 
               <p className="text-xs sm:text-sm text-[#292522] leading-relaxed">
-                <strong>Vishti Karana</strong> is personified as <em>Bhadra</em>, the fierce daughter of Surya and Chhaya. In Vedic Muhurat astrology, Bhadra is strictly avoided for auspicious rites.
+                <strong>Vishti Karana</strong> is personified as <em>Bhadra</em>, the fierce
+                daughter of Surya and Chhaya. In Vedic Muhurat astrology, Bhadra is strictly avoided
+                for auspicious rites.
               </p>
 
               <div className="space-y-2 pt-1">
@@ -421,20 +521,27 @@ export default function KaranaPage() {
                   <p className="font-bold text-rose-800 flex items-center gap-1.5">
                     <XCircle size={14} /> Strict Prohibitions during Bhadra:
                   </p>
-                  <p>Marriage (Vivaha), Griha Pravesh, buying new property, signing major partnerships, travel starts.</p>
+                  <p>
+                    Marriage (Vivaha), Griha Pravesh, buying new property, signing major
+                    partnerships, travel starts.
+                  </p>
                 </div>
 
                 <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-1">
                   <p className="font-bold text-emerald-800 flex items-center gap-1.5">
                     <CheckCircle2 size={14} /> Allowed / Favorable Actions:
                   </p>
-                  <p>Litigation, warfare, taking medicine, poison removal, competitive exams, Hanuman Chalisa recitation.</p>
+                  <p>
+                    Litigation, warfare, taking medicine, poison removal, competitive exams, Hanuman
+                    Chalisa recitation.
+                  </p>
                 </div>
               </div>
             </div>
 
             <p className="text-xs text-[#6B5E55] pt-3 border-t border-[#E5D9C8] italic">
-              When Bhadra resides in Swarga (Heaven) or Patala (Underworld), its negative impact on Earth (Mrityu Loka) is nullified.
+              When Bhadra resides in Swarga (Heaven) or Patala (Underworld), its negative impact on
+              Earth (Mrityu Loka) is nullified.
             </p>
           </div>
         </div>
@@ -449,7 +556,8 @@ export default function KaranaPage() {
               Complete Guide to the 11 Karanas
             </h2>
             <p className="text-xs sm:text-sm text-[#6B5E55]">
-              Detailed Vedic classification, ruling deities, symbols, and recommended activities for all 11 Karanas.
+              Detailed Vedic classification, ruling deities, symbols, and recommended activities for
+              all 11 Karanas.
             </p>
           </div>
 
@@ -462,22 +570,28 @@ export default function KaranaPage() {
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#713B32]">{k.type}</span>
-                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                      k.nature === 'Auspicious'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : k.nature === 'Moderate'
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-rose-100 text-rose-800'
-                    }`}>
+                    <span
+                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                        k.nature === 'Auspicious'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : k.nature === 'Moderate'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-rose-100 text-rose-800'
+                      }`}
+                    >
                       {k.nature}
                     </span>
                   </div>
 
                   <div>
                     <h4 className="text-base sm:text-lg font-bold text-[#292522]">
-                      {k.name} <span className="text-sm font-serif text-[#713B32]">({k.sanskrit})</span>
+                      {k.name}{' '}
+                      <span className="text-sm font-serif text-[#713B32]">({k.sanskrit})</span>
                     </h4>
-                    <p className="text-xs text-[#6B5E55]">Ruler: <strong className="text-[#292522]">{k.ruler}</strong> • Symbol: <strong className="text-[#292522]">{k.symbol}</strong></p>
+                    <p className="text-xs text-[#6B5E55]">
+                      Ruler: <strong className="text-[#292522]">{k.ruler}</strong> • Symbol:{' '}
+                      <strong className="text-[#292522]">{k.symbol}</strong>
+                    </p>
                   </div>
 
                   <div className="space-y-1 text-xs">
@@ -523,7 +637,9 @@ export default function KaranaPage() {
                     <HelpCircle size={18} className="text-[#B88A44] shrink-0" />
                     {faq.q}
                   </span>
-                  <span className="text-lg text-[#713B32] font-mono">{openFaq === idx ? '−' : '+'}</span>
+                  <span className="text-lg text-[#713B32] font-mono">
+                    {openFaq === idx ? '−' : '+'}
+                  </span>
                 </button>
                 {openFaq === idx && (
                   <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-[#6B5E55] leading-relaxed border-t border-[#E5D9C8]/60">
@@ -541,42 +657,60 @@ export default function KaranaPage() {
             href="/panchang/tithi"
             className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Moon size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <Moon
+              size={20}
+              className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform"
+            />
             <p className="text-xs font-bold text-[#292522]">Today Tithi</p>
           </Link>
           <Link
             href="/panchang/hora"
             className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Clock size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <Clock
+              size={20}
+              className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform"
+            />
             <p className="text-xs font-bold text-[#292522]">Hora Timings</p>
           </Link>
           <Link
             href="/panchang/choghadiya"
             className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Sun size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <Sun
+              size={20}
+              className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform"
+            />
             <p className="text-xs font-bold text-[#292522]">Choghadiya</p>
           </Link>
           <Link
             href="/panchang/rahu-kaal"
             className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <ShieldAlert size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <ShieldAlert
+              size={20}
+              className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform"
+            />
             <p className="text-xs font-bold text-[#292522]">Rahu Kaal</p>
           </Link>
           <Link
             href="/panchang/shubh-muhurat"
             className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Sparkles size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <Sparkles
+              size={20}
+              className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform"
+            />
             <p className="text-xs font-bold text-[#292522]">Shubh Muhurat</p>
           </Link>
           <Link
             href="/panchang/today-panchang"
             className="p-4 rounded-2xl bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#713B32] hover:shadow-md transition-all text-center space-y-1 group"
           >
-            <Calendar size={20} className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform" />
+            <Calendar
+              size={20}
+              className="mx-auto text-[#B88A44] group-hover:scale-110 transition-transform"
+            />
             <p className="text-xs font-bold text-[#292522]">Full Panchang</p>
           </Link>
         </div>

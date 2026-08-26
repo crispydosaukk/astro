@@ -6,7 +6,8 @@ import { calculatePanchang } from '@/lib/panchangEngine';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { date = new Date().toISOString().split('T')[0], location = 'New Delhi, Delhi, India' } = body;
+    const { date = new Date().toISOString().split('T')[0], location = 'New Delhi, Delhi, India' } =
+      body;
 
     // 1. Calculate Astronomical Panchang data
     const panchang = calculatePanchang(date, location);
@@ -30,7 +31,8 @@ export async function POST(req: Request) {
             `Avoid commencing critical long journeys or taking heavy financial debt during Rahu Kaal (${panchang.rahuKaal.start} – ${panchang.rahuKaal.end})`,
           ],
           dailyMantra: 'ॐ नमो नारायणाय ॥ / ॐ नमः शिवाय ॥',
-          dailyBlessingShloka: 'शुभं करोति कल्याणमारोग्यं धनसंपदाम् । शत्रुबुद्धिविनाशाय दीपज्योतिर्नमोऽस्तुते ॥',
+          dailyBlessingShloka:
+            'शुभं करोति कल्याणमारोग्यं धनसंपदाम् । शत्रुबुद्धिविनाशाय दीपज्योतिर्नमोऽस्तुते ॥',
         },
       });
     }

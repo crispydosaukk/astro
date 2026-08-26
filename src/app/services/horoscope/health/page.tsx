@@ -84,12 +84,29 @@ export default function HealthHoroscopePage() {
       ayurvedicDosha: 'Pitta-Vata Balanced Constitution',
       vitalityIndexScore: '89 / 100',
       healthPillars: [
-        { pillar: 'Natural Immunity & Ojas (1st House)', rating: '92%', desc: 'Robust physical stamina and strong recovery resilience against acute seasonal changes.' },
-        { pillar: 'Metabolic Fire & Digestion (Agni / 6th House)', rating: '87%', desc: 'Balanced digestive agni; maintaining regular meal times prevents acidity spikes.' },
-        { pillar: 'Mental Equilibrium & Nervous System (Chandra / 4th House)', rating: '85%', desc: 'Benefic lunar alignment promotes emotional clarity; morning pranayama supports stress relief.' },
-        { pillar: 'Cellular Rejuvenation & Longevity (8th House)', rating: '91%', desc: 'Favorable Jupiterian protection supports cellular detoxification and long-term vitality.' },
+        {
+          pillar: 'Natural Immunity & Ojas (1st House)',
+          rating: '92%',
+          desc: 'Robust physical stamina and strong recovery resilience against acute seasonal changes.',
+        },
+        {
+          pillar: 'Metabolic Fire & Digestion (Agni / 6th House)',
+          rating: '87%',
+          desc: 'Balanced digestive agni; maintaining regular meal times prevents acidity spikes.',
+        },
+        {
+          pillar: 'Mental Equilibrium & Nervous System (Chandra / 4th House)',
+          rating: '85%',
+          desc: 'Benefic lunar alignment promotes emotional clarity; morning pranayama supports stress relief.',
+        },
+        {
+          pillar: 'Cellular Rejuvenation & Longevity (8th House)',
+          rating: '91%',
+          desc: 'Favorable Jupiterian protection supports cellular detoxification and long-term vitality.',
+        },
       ],
-      vitalityForecast: 'Strong restorative planetary period ahead. Incorporating sunrise solar therapy and regular hydration optimizes stamina and mental tranquility over the next 18 months.',
+      vitalityForecast:
+        'Strong restorative planetary period ahead. Incorporating sunrise solar therapy and regular hydration optimizes stamina and mental tranquility over the next 18 months.',
       remedies: [
         'Chant the sacred Maha Mrityunjaya Mantra ("Om Tryambakam Yajamahe...") 108 times at sunrise.',
         'Offer fresh water (Surya Arghya) to the Sun in a pure copper vessel each morning.',
@@ -136,9 +153,18 @@ export default function HealthHoroscopePage() {
   };
 
   const healthFaqs = [
-    { q: 'How does Vedic Astrology analyze health and well-being?', a: 'In Ayur-Jyotish (Medical Astrology), the 1st house (Lagna) represents overall vitality and physical constitution, the 6th house (Roga Bhava) identifies potential ailments and recovery capacity, the 8th house governs longevity, and the Sun and Moon govern physical energy and mental peace.' },
-    { q: 'What are the Ayurvedic Tridoshas in a Horoscope?', a: 'The three constitutional doshas—Vata (Air/Ether), Pitta (Fire/Water), and Kapha (Water/Earth)—are determined by the zodiac signs and ruling planets prominent in your birth chart, guiding optimal diet, yoga, and lifestyle choices.' },
-    { q: 'Can Vedic remedies help improve physical vitality?', a: 'Yes. Practices such as morning Surya Arghya, Maha Mrityunjaya Japa, wearing suitable energized Rudraksha beads, and timing medical treatments according to planetary muhuratas restore energetic balance and accelerate natural healing.' },
+    {
+      q: 'How does Vedic Astrology analyze health and well-being?',
+      a: 'In Ayur-Jyotish (Medical Astrology), the 1st house (Lagna) represents overall vitality and physical constitution, the 6th house (Roga Bhava) identifies potential ailments and recovery capacity, the 8th house governs longevity, and the Sun and Moon govern physical energy and mental peace.',
+    },
+    {
+      q: 'What are the Ayurvedic Tridoshas in a Horoscope?',
+      a: 'The three constitutional doshas—Vata (Air/Ether), Pitta (Fire/Water), and Kapha (Water/Earth)—are determined by the zodiac signs and ruling planets prominent in your birth chart, guiding optimal diet, yoga, and lifestyle choices.',
+    },
+    {
+      q: 'Can Vedic remedies help improve physical vitality?',
+      a: 'Yes. Practices such as morning Surya Arghya, Maha Mrityunjaya Japa, wearing suitable energized Rudraksha beads, and timing medical treatments according to planetary muhuratas restore energetic balance and accelerate natural healing.',
+    },
   ];
 
   return (
@@ -177,10 +203,13 @@ export default function HealthHoroscopePage() {
                 </span>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight max-w-xl drop-shadow-lg">
                   Nurture Your <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">Vedic Health & Vitality</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">
+                    Vedic Health & Vitality
+                  </span>
                 </h1>
                 <p className="text-base sm:text-lg text-[#F8F3EA]/90 font-medium leading-relaxed max-w-lg drop-shadow">
-                  Analyze your Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha constitution, and restorative planetary remedies with authentic Vedic astrology.
+                  Analyze your Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha
+                  constitution, and restorative planetary remedies with authentic Vedic astrology.
                 </p>
               </div>
 
@@ -203,7 +232,9 @@ export default function HealthHoroscopePage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Gender</label>
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">
+                        Gender
+                      </label>
                       <select
                         value={formData.gender}
                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
@@ -280,7 +311,8 @@ export default function HealthHoroscopePage() {
                   >
                     {isCalculating ? (
                       <span className="flex items-center gap-2">
-                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Calculating Health Vitality...
+                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Calculating
+                        Health Vitality...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
@@ -303,14 +335,19 @@ export default function HealthHoroscopePage() {
                 <div className="w-20 h-20 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-2xl animate-pulse">
                   <Activity size={40} />
                 </div>
-                <h3 className="text-2xl font-bold text-gradient-gold">Ayur-Jyotish Vitality Analysis</h3>
+                <h3 className="text-2xl font-bold text-gradient-gold">
+                  Ayur-Jyotish Vitality Analysis
+                </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                  Understand how the 1st House (Lagna), Sun, Moon, and 6th House determine your physical stamina, mental calm, and Ayurvedic Tridosha balance.
+                  Understand how the 1st House (Lagna), Sun, Moon, and 6th House determine your
+                  physical stamina, mental calm, and Ayurvedic Tridosha balance.
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 w-full pt-2">
                   <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-left">
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase">1st House</span>
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase">
+                      1st House
+                    </span>
                     <p className="text-xs font-bold text-foreground">Lagna Bhava</p>
                     <p className="text-[10px] text-muted-foreground">Vitality & Ojas</p>
                   </div>
@@ -333,7 +370,10 @@ export default function HealthHoroscopePage() {
       {/* Health Horoscope Generated Results Section */}
       <AnimatePresence>
         {reportResult && (
-          <section id="health-report-section" className="py-16 bg-background relative z-10 space-y-10 border-b border-white/5">
+          <section
+            id="health-report-section"
+            className="py-16 bg-background relative z-10 space-y-10 border-b border-white/5"
+          >
             <div className="max-w-5xl mx-auto px-6 space-y-8">
               {/* Header Bar */}
               <div className="glass-card p-6 sm:p-8 rounded-3xl border border-cyan-500/30 bg-cyan-500/5 space-y-4">
@@ -343,10 +383,12 @@ export default function HealthHoroscopePage() {
                       Ayur-Jyotish & Vitality Analysis
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                      Health Horoscope for <span className="text-gradient-gold">{reportResult.name}</span>
+                      Health Horoscope for{' '}
+                      <span className="text-gradient-gold">{reportResult.name}</span>
                     </h2>
                     <p className="text-xs text-muted-foreground pt-1">
-                      📅 {reportResult.dob} · ⏰ {reportResult.tob} · 📍 {reportResult.pob} · Focus: {reportResult.healthFocus}
+                      📅 {reportResult.dob} · ⏰ {reportResult.tob} · 📍 {reportResult.pob} · Focus:{' '}
+                      {reportResult.healthFocus}
                     </p>
                   </div>
 
@@ -370,26 +412,40 @@ export default function HealthHoroscopePage() {
               {/* Core Astrological Placements */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Moon Sign</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Moon Sign
+                  </span>
                   <div className="text-base font-bold text-[#C9952B]">{reportResult.rashiName}</div>
-                  <p className="text-[11px] text-muted-foreground">Lord: {reportResult.rashiLord}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Lord: {reportResult.rashiLord}
+                  </p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Ayurvedic Dosha</span>
-                  <div className="text-base font-bold text-cyan-400">{reportResult.ayurvedicDosha}</div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Ayurvedic Dosha
+                  </span>
+                  <div className="text-base font-bold text-cyan-400">
+                    {reportResult.ayurvedicDosha}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Body Constitution</p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Lagna Vitality</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Lagna Vitality
+                  </span>
                   <div className="text-base font-bold text-emerald-400">High Stamina</div>
                   <p className="text-[11px] text-muted-foreground">1st House Strength</p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Vitality Index</span>
-                  <div className="text-base font-bold text-gradient-gold font-mono">{reportResult.vitalityIndexScore}</div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Vitality Index
+                  </span>
+                  <div className="text-base font-bold text-gradient-gold font-mono">
+                    {reportResult.vitalityIndexScore}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Ojas & Immunity</p>
                 </div>
               </div>
@@ -411,7 +467,10 @@ export default function HealthHoroscopePage() {
                 <h3 className="text-lg font-bold text-foreground">4 Vitality & Health Pillars</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {reportResult.healthPillars.map((item: any, idx: number) => (
-                    <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2"
+                    >
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-foreground">{item.pillar}</span>
                         <span className="text-xs font-bold text-cyan-400">{item.rating}</span>
@@ -425,14 +484,24 @@ export default function HealthHoroscopePage() {
               {/* Planetary Health Status & Forecast */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Lagna & Roga Bhava Alignments</span>
-                  <p className="text-sm text-foreground"><strong>1st House (Vitality):</strong> {reportResult.lagnaLord}</p>
-                  <p className="text-sm text-foreground"><strong>6th House (Immunity):</strong> {reportResult.sixthHouseLord}</p>
+                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
+                    Lagna & Roga Bhava Alignments
+                  </span>
+                  <p className="text-sm text-foreground">
+                    <strong>1st House (Vitality):</strong> {reportResult.lagnaLord}
+                  </p>
+                  <p className="text-sm text-foreground">
+                    <strong>6th House (Immunity):</strong> {reportResult.sixthHouseLord}
+                  </p>
                 </div>
 
                 <div className="glass-card p-6 rounded-3xl border border-[#C9952B]/30 bg-[#C9952B]/5 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">Vitality & Healing Timeline</span>
-                  <p className="text-sm text-foreground leading-relaxed">{reportResult.vitalityForecast}</p>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">
+                    Vitality & Healing Timeline
+                  </span>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    {reportResult.vitalityForecast}
+                  </p>
                 </div>
               </div>
 
@@ -443,7 +512,10 @@ export default function HealthHoroscopePage() {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {reportResult.remedies.map((rem: string, idx: number) => (
-                    <div key={idx} className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs text-foreground/90">
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs text-foreground/90"
+                    >
                       <span className="w-5 h-5 rounded-full gold-gradient-bg text-white font-bold flex items-center justify-center shrink-0 mt-0.5 text-[10px]">
                         {idx + 1}
                       </span>
@@ -475,9 +547,15 @@ export default function HealthHoroscopePage() {
       <section className="py-16 bg-background/50 border-b border-white/5">
         <div className="max-w-5xl mx-auto px-6 space-y-12">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">Ayur-Jyotish Principles</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">The Vedic Foundations of Health & Longevity</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">How planetary alignments govern your immune vitality and constitutional balance</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              Ayur-Jyotish Principles
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              The Vedic Foundations of Health & Longevity
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              How planetary alignments govern your immune vitality and constitutional balance
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -487,10 +565,14 @@ export default function HealthHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                   <Activity size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">1. The 1st House (Lagna Bhava)</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  1. The 1st House (Lagna Bhava)
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Governs overall physical constitution, immune reserve (Ojas), head and brain vitality, and natural resilience. A strong Lagna lord acts as an unbreakable cosmic armor against chronic diseases.
+                Governs overall physical constitution, immune reserve (Ojas), head and brain
+                vitality, and natural resilience. A strong Lagna lord acts as an unbreakable cosmic
+                armor against chronic diseases.
               </p>
             </div>
 
@@ -500,10 +582,14 @@ export default function HealthHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
                   <ShieldCheck size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">2. The 6th House (Roga & Immunity)</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  2. The 6th House (Roga & Immunity)
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Identifies acute bodily ailments, digestive fires (Agni), bacterial/viral defenses, and recovery speeds. Benefic planetary placements here help eliminate toxins and quickly conquer health challenges.
+                Identifies acute bodily ailments, digestive fires (Agni), bacterial/viral defenses,
+                and recovery speeds. Benefic planetary placements here help eliminate toxins and
+                quickly conquer health challenges.
               </p>
             </div>
 
@@ -513,10 +599,14 @@ export default function HealthHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/20 flex items-center justify-center text-[#C9952B]">
                   <Sun size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">3. Sun (Surya) & Moon (Chandra)</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  3. Sun (Surya) & Moon (Chandra)
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Sun governs the soul, eyesight, bone density, and heart vitality, while Moon rules fluids, sleep cycles, and mental tranquility. Balancing both through solar water therapy and pranayama ensures holistic harmony.
+                Sun governs the soul, eyesight, bone density, and heart vitality, while Moon rules
+                fluids, sleep cycles, and mental tranquility. Balancing both through solar water
+                therapy and pranayama ensures holistic harmony.
               </p>
             </div>
 
@@ -526,10 +616,14 @@ export default function HealthHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                   <Flame size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">4. Ayurvedic Tridosha Alignment</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  4. Ayurvedic Tridosha Alignment
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Your birth rashi and ascendant reveal your dominant element: Vata (Air/Nervous system), Pitta (Fire/Metabolism), or Kapha (Earth/Fluid stability), guiding optimal dietary timing and herbal therapies.
+                Your birth rashi and ascendant reveal your dominant element: Vata (Air/Nervous
+                system), Pitta (Fire/Metabolism), or Kapha (Earth/Fluid stability), guiding optimal
+                dietary timing and herbal therapies.
               </p>
             </div>
           </div>
@@ -540,13 +634,20 @@ export default function HealthHoroscopePage() {
       <section className="py-16 bg-background/50 border-b border-white/5">
         <div className="max-w-4xl mx-auto px-6 space-y-8">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Frequently Asked Questions</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Understanding Ayur-Jyotish & Medical Astrology</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Understanding Ayur-Jyotish & Medical Astrology
+            </p>
           </div>
 
           <div className="space-y-3">
             {healthFaqs.map((faq, idx) => (
-              <div key={idx} className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+              <div
+                key={idx}
+                className="glass-card rounded-2xl border border-white/10 overflow-hidden"
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                   className="w-full p-5 text-left font-semibold text-foreground flex justify-between items-center text-sm"
@@ -588,9 +689,15 @@ export default function HealthHoroscopePage() {
       <section className="py-16 bg-background relative z-10">
         <div className="max-w-5xl mx-auto px-6 space-y-8">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">Explore Specialized Horoscopes</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Gain Complete Life Clarity</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Navigate directly to our other dedicated Vedic horoscope reports</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              Explore Specialized Horoscopes
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Gain Complete Life Clarity
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Navigate directly to our other dedicated Vedic horoscope reports
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -607,11 +714,13 @@ export default function HealthHoroscopePage() {
                   Love & Marriage Horoscope
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Discover 7th House (Kalatra Bhava), Venusian strength, relationship harmony, and soulmate timing.
+                  Discover 7th House (Kalatra Bhava), Venusian strength, relationship harmony, and
+                  soulmate timing.
                 </p>
               </div>
               <div className="text-xs font-bold text-rose-400 flex items-center gap-1 pt-2">
-                Check Love Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Check Love Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -628,11 +737,13 @@ export default function HealthHoroscopePage() {
                   Finance & Wealth Horoscope
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Analyze Dhana Bhava (2nd House), Jupiter&apos;s wealth yogas, investment timings, and career growth prospects.
+                  Analyze Dhana Bhava (2nd House), Jupiter&apos;s wealth yogas, investment timings,
+                  and career growth prospects.
                 </p>
               </div>
               <div className="text-xs font-bold text-emerald-400 flex items-center gap-1 pt-2">
-                Check Finance Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Check Finance Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -649,11 +760,13 @@ export default function HealthHoroscopePage() {
                   Full Vedic Janam Kundli
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Complete 12-house chart, D9 Navamsha, Vimshottari Dasha, planetary degrees, and comprehensive lifetime roadmap.
+                  Complete 12-house chart, D9 Navamsha, Vimshottari Dasha, planetary degrees, and
+                  comprehensive lifetime roadmap.
                 </p>
               </div>
               <div className="text-xs font-bold text-[#C9952B] flex items-center gap-1 pt-2">
-                View Complete Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                View Complete Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           </div>

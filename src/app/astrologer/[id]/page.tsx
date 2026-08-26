@@ -26,7 +26,15 @@ import { useCurrency } from '@/lib/CurrencyContext';
 import { useUserData } from '@/lib/useUserData';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, addDoc, collection, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  addDoc,
+  collection,
+  serverTimestamp,
+  updateDoc,
+  increment,
+} from 'firebase/firestore';
 
 const astrologersData: Record<
   string,
@@ -264,7 +272,7 @@ const astrologersData: Record<
 
 export default function AstrologerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
-  
+
   const [dbAstrologer, setDbAstrologer] = useState<any>(null);
   const { user, userData } = useUserData();
   const router = useRouter();
@@ -294,8 +302,8 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
     const certs = Array.isArray(dbAstrologer.certifications)
       ? dbAstrologer.certifications
       : dbAstrologer.certifications
-      ? dbAstrologer.certifications.split(',').map((c: string) => c.trim())
-      : fallbackData.certifications;
+        ? dbAstrologer.certifications.split(',').map((c: string) => c.trim())
+        : fallbackData.certifications;
 
     const skillsList = dbAstrologer.skills
       ? dbAstrologer.skills.split(',').map((s: string) => s.trim())
@@ -311,7 +319,8 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
       ...fallbackData,
       name: dbAstrologer.name || fallbackData.name,
       location: dbAstrologer.city || dbAstrologer.location || fallbackData.location,
-      experience: Number(dbAstrologer.experienceYears || dbAstrologer.experience) || fallbackData.experience,
+      experience:
+        Number(dbAstrologer.experienceYears || dbAstrologer.experience) || fallbackData.experience,
       rating: Number(dbAstrologer.rating) || fallbackData.rating,
       reviews: Number(dbAstrologer.reviewsCount || dbAstrologer.reviews) || fallbackData.reviews,
       pricePerMin: Number(dbAstrologer.amount) || fallbackData.pricePerMin,
@@ -326,9 +335,10 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
         ? dbAstrologer.languages.split(',').map((s: string) => s.trim())
         : fallbackData.languages,
       expertise: dynamicExpertise.length > 0 ? dynamicExpertise : fallbackData.expertise,
-      reviewsList: Array.isArray(dbAstrologer.reviewsList) && dbAstrologer.reviewsList.length > 0
-        ? dbAstrologer.reviewsList
-        : fallbackData.reviewsList,
+      reviewsList:
+        Array.isArray(dbAstrologer.reviewsList) && dbAstrologer.reviewsList.length > 0
+          ? dbAstrologer.reviewsList
+          : fallbackData.reviewsList,
     };
   }, [dbAstrologer, fallbackData]);
 
@@ -364,12 +374,12 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
     }
 
     setIsBooking(true);
-    
+
     try {
       const roomID = `room_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      
+
       await updateDoc(doc(db, 'users', user.uid), {
-        walletBalance: increment(-totalCost)
+        walletBalance: increment(-totalCost),
       });
 
       await addDoc(collection(db, 'consultations'), {
@@ -388,8 +398,10 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
         totalAmount: totalCost,
         createdAt: serverTimestamp(),
       });
-      
-      toast.success(`Starting Live ${consultationType === 'video' ? 'Video' : 'Voice'} Call with ${astrologer.name}!`);
+
+      toast.success(
+        `Starting Live ${consultationType === 'video' ? 'Video' : 'Voice'} Call with ${astrologer.name}!`
+      );
       router.push(`/call/${roomID}`);
     } catch (error) {
       console.error('Error starting live call:', error);
@@ -752,10 +764,15 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     <span className="text-3xl sm:text-4xl font-black text-[#713B32] dark:text-[#F6D075] tabular-nums tracking-tight">
                       {formatPrice(astrologer.pricePerMin)}
                     </span>
-                    <span className="text-sm font-bold text-[#8C5D53] dark:text-[#D1A056]">/min</span>
+                    <span className="text-sm font-bold text-[#8C5D53] dark:text-[#D1A056]">
+                      /min
+                    </span>
                   </div>
                   <span className="inline-flex items-center gap-1 text-xs font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/70 px-3 py-1.5 rounded-full border border-emerald-300 dark:border-emerald-700 shadow-xs">
-                    <Zap size={12} className="fill-emerald-600 dark:fill-emerald-400 text-emerald-600 dark:text-emerald-400" />
+                    <Zap
+                      size={12}
+                      className="fill-emerald-600 dark:fill-emerald-400 text-emerald-600 dark:text-emerald-400"
+                    />
                     0 Min Wait Time
                   </span>
                 </div>
@@ -784,11 +801,17 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                         : 'border-[#E5D9C8] dark:border-[#3D2C24] bg-white dark:bg-[#221815] text-[#5A483E] dark:text-[#C5B3A3] hover:border-[#C9952B]/60 hover:bg-[#FAF6EE]'
                     }`}
                   >
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 ${consultationType === 'video' ? 'bg-[#713B32] text-[#F6D075] shadow-sm' : 'bg-[#EDE4D5] dark:bg-[#3D2C24] text-[#713B32] dark:text-[#E6CA65]'}`}>
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 ${consultationType === 'video' ? 'bg-[#713B32] text-[#F6D075] shadow-sm' : 'bg-[#EDE4D5] dark:bg-[#3D2C24] text-[#713B32] dark:text-[#E6CA65]'}`}
+                    >
                       <Video size={18} />
                     </div>
-                    <span className="font-extrabold text-sm text-[#292522] dark:text-white">Live Video Call</span>
-                    <span className="text-[11px] font-bold text-[#8C5D53] dark:text-[#D1A056] mt-0.5">Face-to-Face HD</span>
+                    <span className="font-extrabold text-sm text-[#292522] dark:text-white">
+                      Live Video Call
+                    </span>
+                    <span className="text-[11px] font-bold text-[#8C5D53] dark:text-[#D1A056] mt-0.5">
+                      Face-to-Face HD
+                    </span>
                   </button>
 
                   <button
@@ -800,11 +823,17 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                         : 'border-[#E5D9C8] dark:border-[#3D2C24] bg-white dark:bg-[#221815] text-[#5A483E] dark:text-[#C5B3A3] hover:border-[#C9952B]/60 hover:bg-[#FAF6EE]'
                     }`}
                   >
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 ${consultationType === 'call' ? 'bg-[#713B32] text-[#F6D075] shadow-sm' : 'bg-[#EDE4D5] dark:bg-[#3D2C24] text-[#713B32] dark:text-[#E6CA65]'}`}>
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center mb-1.5 ${consultationType === 'call' ? 'bg-[#713B32] text-[#F6D075] shadow-sm' : 'bg-[#EDE4D5] dark:bg-[#3D2C24] text-[#713B32] dark:text-[#E6CA65]'}`}
+                    >
                       <Phone size={18} />
                     </div>
-                    <span className="font-extrabold text-sm text-[#292522] dark:text-white">Live Voice Call</span>
-                    <span className="text-[11px] font-bold text-[#8C5D53] dark:text-[#D1A056] mt-0.5">Direct Voice Line</span>
+                    <span className="font-extrabold text-sm text-[#292522] dark:text-white">
+                      Live Voice Call
+                    </span>
+                    <span className="text-[11px] font-bold text-[#8C5D53] dark:text-[#D1A056] mt-0.5">
+                      Direct Voice Line
+                    </span>
                   </button>
                 </div>
               </div>
@@ -857,7 +886,9 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                       <p className="text-[10px] text-[#8C5D53] dark:text-[#D1A056] font-black uppercase tracking-wider">
                         Your Wallet Balance
                       </p>
-                      <p className={`text-sm font-black tabular-nums ${(userData?.walletBalance || 0) >= totalCost ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      <p
+                        className={`text-sm font-black tabular-nums ${(userData?.walletBalance || 0) >= totalCost ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}
+                      >
                         {formatPrice(userData?.walletBalance || 0)}
                       </p>
                     </div>
@@ -865,7 +896,11 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                   {(userData?.walletBalance || 0) < totalCost ? (
                     <button
                       type="button"
-                      onClick={() => router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`)}
+                      onClick={() =>
+                        router.push(
+                          `/wallet?redirect=${encodeURIComponent(window.location.pathname)}`
+                        )
+                      }
                       className="px-3.5 py-1.5 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-black border border-rose-200 dark:border-rose-800 hover:bg-rose-200 transition-colors cursor-pointer"
                     >
                       + Recharge
@@ -883,10 +918,15 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                 <div className="space-y-2">
                   <button
                     type="button"
-                    onClick={() => router.push(`/wallet?redirect=${encodeURIComponent(window.location.pathname)}`)}
+                    onClick={() =>
+                      router.push(
+                        `/wallet?redirect=${encodeURIComponent(window.location.pathname)}`
+                      )
+                    }
                     className="w-full py-4 rounded-2xl font-black text-sm gold-gradient-bg text-[#292522] hover:brightness-110 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-xl shadow-[#C9952B]/30 flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <Zap size={16} /> Recharge Wallet ({formatPrice(totalCost - (userData?.walletBalance || 0))} Needed)
+                    <Zap size={16} /> Recharge Wallet (
+                    {formatPrice(totalCost - (userData?.walletBalance || 0))} Needed)
                   </button>
                   <p className="text-[11px] text-center font-bold text-[#7C6A5E] dark:text-[#BAA797]">
                     Instant recharge via UPI / GooglePay / Cards / NetBanking
@@ -961,7 +1001,9 @@ export default function AstrologerDetailPage({ params }: { params: Promise<{ id:
                     <div className="w-7 h-7 rounded-lg bg-[#F8F4EC] dark:bg-[#2A1F1B] border border-[#E5D9C8] dark:border-[#3D2C24] flex items-center justify-center flex-shrink-0 text-[#713B32] dark:text-[#F6D075]">
                       <Icon size={13} />
                     </div>
-                    <p className="text-xs font-medium text-[#5A483E] dark:text-[#D8C7B8] leading-relaxed">{text}</p>
+                    <p className="text-xs font-medium text-[#5A483E] dark:text-[#D8C7B8] leading-relaxed">
+                      {text}
+                    </p>
                   </div>
                 ))}
               </div>

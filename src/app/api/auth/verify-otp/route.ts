@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const response = await fetch(msg91Url, {
       method: 'GET',
       headers: {
-        'authkey': authKey,
+        authkey: authKey,
       },
     });
 
@@ -37,10 +37,10 @@ export async function POST(req: Request) {
     // Successfully verified. Mint a custom Firebase token.
     // Create a deterministic UID based on the phone number
     const uid = `phone_${cleanPhone}`;
-    
+
     // Create the custom token
     const customToken = await adminAuth.createCustomToken(uid, {
-      phoneNumber: formattedPhone
+      phoneNumber: formattedPhone,
     });
 
     return NextResponse.json({ success: true, token: customToken });

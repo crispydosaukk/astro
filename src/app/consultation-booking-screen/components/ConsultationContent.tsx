@@ -95,14 +95,21 @@ export default function ConsultationContent() {
           fetched.push({
             id: doc.id,
             name: data.name || 'Unknown Astrologer',
-            specialty: data.skills ? data.skills.split(',').map((s: string) => s.trim()) : ['Vedic'],
+            specialty: data.skills
+              ? data.skills.split(',').map((s: string) => s.trim())
+              : ['Vedic'],
             experience: data.experience || 10,
             rating: data.rating || 4.5,
             reviews: data.consultations || 120,
             pricePerMin: Number(data.amount) || 20,
-            languages: data.languages ? data.languages.split(',').map((s: string) => s.trim()) : ['Hindi', 'English'],
+            languages: data.languages
+              ? data.languages.split(',').map((s: string) => s.trim())
+              : ['Hindi', 'English'],
             status: 'online', // Mock online status for display
-            image: data.profileImageUrl || data.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop',
+            image:
+              data.profileImageUrl ||
+              data.avatar ||
+              'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop',
             consultations: data.consultations || 0,
             badge: data.rating >= 4.8 ? 'Top Rated' : null,
             about: data.bio || 'Experienced Vedic astrologer providing personalized guidance.',
@@ -158,7 +165,7 @@ export default function ConsultationContent() {
     await new Promise((r) => setTimeout(r, 1000));
     setIsWaiting(true);
     toast.success('Request sent! Waiting for astrologer to accept...');
-    
+
     // Simulate wait time
     await new Promise((r) => setTimeout(r, 3000));
     setIsWaiting(false);
@@ -280,127 +287,131 @@ export default function ConsultationContent() {
           <>
             {/* Astrologer grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-8">
-          {filtered.map((ast, i) => (
-            <motion.div
-              key={ast.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="bg-[#FFFDFC] rounded-2xl border border-[#E5D9C8] hover:border-[#B88A44] transition-all duration-300 shadow-sm hover:shadow-xl card-hover flex flex-col overflow-hidden group w-full"
-            >
-              {/* Profile Image (Complete Image Visible) */}
-              <div className="relative w-full aspect-[4/3] bg-[#F8F3EA] p-2 overflow-hidden flex items-center justify-center">
-                <img
-                  src={
-                    ast.image && typeof ast.image === 'string' && ast.image.trim() !== ''
-                      ? ast.image
-                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`
-                  }
-                  alt={`${ast.name} - verified astrologer`}
-                  className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`;
-                  }}
-                />
-                {/* Verified Badge */}
-                <div className="absolute top-3 left-3 z-10 bg-[#15803d] text-white text-[9px] font-bold px-2 py-0.5 rounded tracking-wider uppercase shadow-md flex items-center gap-1">
-                  VERIFIED
-                </div>
-
-                {/* Online Status Pill */}
-                <div className="absolute top-3 right-3 z-10">
-                  <span
-                    className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold backdrop-blur-md ${
-                      ast.status === 'online'
-                        ? 'bg-black/60 text-green-400 border border-green-500/30'
-                        : 'bg-black/60 text-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full mr-1 ${
-                        ast.status === 'online' ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
-                      }`}
+              {filtered.map((ast, i) => (
+                <motion.div
+                  key={ast.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="bg-[#FFFDFC] rounded-2xl border border-[#E5D9C8] hover:border-[#B88A44] transition-all duration-300 shadow-sm hover:shadow-xl card-hover flex flex-col overflow-hidden group w-full"
+                >
+                  {/* Profile Image (Complete Image Visible) */}
+                  <div className="relative w-full aspect-[4/3] bg-[#F8F3EA] p-2 overflow-hidden flex items-center justify-center">
+                    <img
+                      src={
+                        ast.image && typeof ast.image === 'string' && ast.image.trim() !== ''
+                          ? ast.image
+                          : `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`
+                      }
+                      alt={`${ast.name} - verified astrologer`}
+                      className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src =
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`;
+                      }}
                     />
-                    {ast.status === 'online' ? 'Online' : 'Offline'}
-                  </span>
-                </div>
-              </div>
+                    {/* Verified Badge */}
+                    <div className="absolute top-3 left-3 z-10 bg-[#15803d] text-white text-[9px] font-bold px-2 py-0.5 rounded tracking-wider uppercase shadow-md flex items-center gap-1">
+                      VERIFIED
+                    </div>
 
-              {/* Content Section (Centered, Clean & Balanced) */}
-              <div className="p-3.5 text-center flex-1 flex flex-col justify-between space-y-1.5 bg-[#FFFDFC]">
-                <div className="space-y-1">
-                  {/* Name */}
-                  <h3 className="font-bold text-[#292522] text-sm sm:text-base leading-tight truncate capitalize">
-                    {ast.name}
-                  </h3>
-
-                  {/* Specialty */}
-                  <p className="text-xs text-[#6B5E55] font-medium truncate capitalize">
-                    {Array.isArray(ast.specialty) ? ast.specialty.join(', ') : ast.specialty}
-                  </p>
-
-                  {/* Experience */}
-                  <p className="text-[11px] text-[#6B5E55]/90 font-medium">
-                    {ast.experience}+ Years Exp.
-                  </p>
-
-                  {/* Rating */}
-                  <div className="flex items-center justify-center gap-1 text-xs font-bold text-[#292522] pt-0.5">
-                    <Star size={13} fill="#D8B66A" className="text-[#B88A44] flex-shrink-0" />
-                    <span className="font-bold text-[#292522]">{ast.rating}</span>
-                    <span className="text-[#6B5E55] font-normal text-[11px]">
-                      ({ast.reviews.toLocaleString()})
-                    </span>
+                    {/* Online Status Pill */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <span
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold backdrop-blur-md ${
+                          ast.status === 'online'
+                            ? 'bg-black/60 text-green-400 border border-green-500/30'
+                            : 'bg-black/60 text-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full mr-1 ${
+                            ast.status === 'online' ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
+                          }`}
+                        />
+                        {ast.status === 'online' ? 'Online' : 'Offline'}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Price & Languages */}
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-[#6B5E55] pt-1.5 border-t border-[#E5D9C8] mt-1">
-                    <span className="font-extrabold text-[#713B32] text-sm tabular-nums">
-                      {selectedCurrency.symbol}{convertPrice(ast.pricePerMin)}/min
-                    </span>
-                    {ast.languages && ast.languages.length > 0 && (
-                      <>
-                        <span className="text-[#E5D9C8]">•</span>
-                        <span className="truncate max-w-[100px] text-[#6B5E55] font-medium">{ast.languages.slice(0, 2).join(', ')}</span>
-                      </>
-                    )}
+                  {/* Content Section (Centered, Clean & Balanced) */}
+                  <div className="p-3.5 text-center flex-1 flex flex-col justify-between space-y-1.5 bg-[#FFFDFC]">
+                    <div className="space-y-1">
+                      {/* Name */}
+                      <h3 className="font-bold text-[#292522] text-sm sm:text-base leading-tight truncate capitalize">
+                        {ast.name}
+                      </h3>
+
+                      {/* Specialty */}
+                      <p className="text-xs text-[#6B5E55] font-medium truncate capitalize">
+                        {Array.isArray(ast.specialty) ? ast.specialty.join(', ') : ast.specialty}
+                      </p>
+
+                      {/* Experience */}
+                      <p className="text-[11px] text-[#6B5E55]/90 font-medium">
+                        {ast.experience}+ Years Exp.
+                      </p>
+
+                      {/* Rating */}
+                      <div className="flex items-center justify-center gap-1 text-xs font-bold text-[#292522] pt-0.5">
+                        <Star size={13} fill="#D8B66A" className="text-[#B88A44] flex-shrink-0" />
+                        <span className="font-bold text-[#292522]">{ast.rating}</span>
+                        <span className="text-[#6B5E55] font-normal text-[11px]">
+                          ({ast.reviews.toLocaleString()})
+                        </span>
+                      </div>
+
+                      {/* Price & Languages */}
+                      <div className="flex items-center justify-center gap-1.5 text-xs text-[#6B5E55] pt-1.5 border-t border-[#E5D9C8] mt-1">
+                        <span className="font-extrabold text-[#713B32] text-sm tabular-nums">
+                          {selectedCurrency.symbol}
+                          {convertPrice(ast.pricePerMin)}/min
+                        </span>
+                        {ast.languages && ast.languages.length > 0 && (
+                          <>
+                            <span className="text-[#E5D9C8]">•</span>
+                            <span className="truncate max-w-[100px] text-[#6B5E55] font-medium">
+                              {ast.languages.slice(0, 2).join(', ')}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Consult Now Button & Profile Link */}
+                    <div className="pt-1.5 space-y-1">
+                      <button
+                        onClick={() => {
+                          setSelectedAstrologer(ast);
+                          setConsultationType('call');
+                          setBookingStep(1);
+                        }}
+                        disabled={ast.status === 'offline'}
+                        className="w-full inline-flex items-center justify-center py-2 px-3 rounded-full font-bold text-xs text-white uppercase tracking-wider bg-[#713B32] hover:bg-[#552B24] shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        CONSULT NOW
+                      </button>
+                      <Link
+                        href={`/astrologer/${ast.id}`}
+                        className="block text-center text-[11px] font-semibold text-[#713B32] hover:text-[#B88A44] transition-colors pt-0.5"
+                      >
+                        View Full Profile →
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
+              ))}
+            </div>
 
-                {/* Consult Now Button & Profile Link */}
-                <div className="pt-1.5 space-y-1">
-                  <button
-                    onClick={() => {
-                      setSelectedAstrologer(ast);
-                      setConsultationType('call');
-                      setBookingStep(1);
-                    }}
-                    disabled={ast.status === 'offline'}
-                    className="w-full inline-flex items-center justify-center py-2 px-3 rounded-full font-bold text-xs text-white uppercase tracking-wider bg-[#713B32] hover:bg-[#552B24] shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    CONSULT NOW
-                  </button>
-                  <Link
-                    href={`/astrologer/${ast.id}`}
-                    className="block text-center text-[11px] font-semibold text-[#713B32] hover:text-[#B88A44] transition-colors pt-0.5"
-                  >
-                    View Full Profile →
-                  </Link>
-                </div>
+            {filtered.length === 0 && (
+              <div className="text-center py-20">
+                <Search size={40} className="text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">No astrologers found</h3>
+                <p className="text-sm text-muted-foreground">
+                  Try adjusting your filters or search term
+                </p>
               </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-20">
-            <Search size={40} className="text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No astrologers found</h3>
-            <p className="text-sm text-muted-foreground">
-              Try adjusting your filters or search term
-            </p>
-          </div>
-        )}
+            )}
           </>
         )}
       </div>
@@ -579,87 +590,90 @@ export default function ConsultationContent() {
                               value: `${selectedCurrency.symbol}${convertPrice(selectedAstrologer.pricePerMin)}/min`,
                             },
                           ].map((item) => (
-                            <div key={`summary-${item.label}`} className="flex justify-between text-sm">
+                            <div
+                              key={`summary-${item.label}`}
+                              className="flex justify-between text-sm"
+                            >
                               <span className="text-muted-foreground">{item.label}</span>
                               <span className="font-medium text-foreground">{item.value}</span>
                             </div>
                           ))}
-                      <div className="border-t border-border pt-3 flex justify-between">
-                        <span className="font-semibold text-foreground">Total</span>
-                        <span className="text-xl font-bold text-accent tabular-nums">
-                          {selectedCurrency.symbol}
-                          {totalCostConverted}
-                        </span>
-                      </div>
-                    </div>
+                          <div className="border-t border-border pt-3 flex justify-between">
+                            <span className="font-semibold text-foreground">Total</span>
+                            <span className="text-xl font-bold text-accent tabular-nums">
+                              {selectedCurrency.symbol}
+                              {totalCostConverted}
+                            </span>
+                          </div>
+                        </div>
 
-                    {/* Currency note */}
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-accent/10 border border-accent/20">
-                      <Globe size={14} className="text-accent" />
-                      <p className="text-xs text-muted-foreground">
-                        Paying in{' '}
-                        <span className="font-semibold text-accent">
-                          {selectedCurrency.label} ({selectedCurrency.code})
-                        </span>{' '}
-                        · Exchange rates are approximate
-                      </p>
-                    </div>
+                        {/* Currency note */}
+                        <div className="flex items-center gap-2 p-3 rounded-xl bg-accent/10 border border-accent/20">
+                          <Globe size={14} className="text-accent" />
+                          <p className="text-xs text-muted-foreground">
+                            Paying in{' '}
+                            <span className="font-semibold text-accent">
+                              {selectedCurrency.label} ({selectedCurrency.code})
+                            </span>{' '}
+                            · Exchange rates are approximate
+                          </p>
+                        </div>
 
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-3">Payment Method</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { id: 'pay-upi', label: 'UPI', icon: '📱' },
-                          { id: 'pay-card', label: 'Card', icon: '💳' },
-                          { id: 'pay-nb', label: 'Net Banking', icon: '🏦' },
-                          { id: 'pay-wallet', label: 'Wallet', icon: '👛' },
-                        ].map((method) => (
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-3">Payment Method</h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { id: 'pay-upi', label: 'UPI', icon: '📱' },
+                              { id: 'pay-card', label: 'Card', icon: '💳' },
+                              { id: 'pay-nb', label: 'Net Banking', icon: '🏦' },
+                              { id: 'pay-wallet', label: 'Wallet', icon: '👛' },
+                            ].map((method) => (
+                              <button
+                                key={method.id}
+                                className="flex items-center gap-2 p-3 rounded-xl border border-border hover:border-accent/50 text-sm font-medium hover:text-accent transition-all"
+                              >
+                                <span>{method.icon}</span> {method.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
                           <button
-                            key={method.id}
-                            className="flex items-center gap-2 p-3 rounded-xl border border-border hover:border-accent/50 text-sm font-medium hover:text-accent transition-all"
+                            onClick={() => setBookingStep(1)}
+                            className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold hover:border-accent/50 transition-all"
                           >
-                            <span>{method.icon}</span> {method.label}
+                            Back
                           </button>
-                        ))}
+                          <button
+                            onClick={handleBook}
+                            disabled={isBooking || isWaiting}
+                            className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                          >
+                            {isWaiting ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Connecting...
+                              </>
+                            ) : isBooking ? (
+                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                              <>
+                                <CreditCard size={16} /> Pay {selectedCurrency.symbol}
+                                {totalCostConverted}
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setBookingStep(1)}
-                        className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold hover:border-accent/50 transition-all"
-                      >
-                        Back
-                      </button>
-                      <button
-                        onClick={handleBook}
-                        disabled={isBooking || isWaiting}
-                        className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                      >
-                        {isWaiting ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Connecting...
-                          </>
-                        ) : isBooking ? (
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <CreditCard size={16} /> Pay {selectedCurrency.symbol}
-                            {totalCostConverted}
-                          </>
-                        )}
-                      </button>
-                    </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>,
-      document.body
-    )}
     </div>
   );
 }

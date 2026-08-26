@@ -25,7 +25,8 @@ export const DEFAULT_MAHADASHA_GUIDES: Record<string, MahadashaGuide> = {
     priceUSD: 9.99,
     pdfUrl: '/assets/pdfs/rahu_mahadasha_stabilisation_guide.pdf',
     badge: 'Stabilisation Module',
-    subtitle: 'Harmonize intense Rahu transit with exact Vedic mantras, protective talismans & dietary discipline.',
+    subtitle:
+      'Harmonize intense Rahu transit with exact Vedic mantras, protective talismans & dietary discipline.',
     description:
       'The Rahu Mahadasha Stabilisation Guide provides a practical, non-fearful roadmap to grounding hyperactive Rahu energy, preventing mental anxiety, financial volatility, and sudden life disruptions.',
     previewTopics: [
@@ -45,7 +46,8 @@ export const DEFAULT_MAHADASHA_GUIDES: Record<string, MahadashaGuide> = {
     priceUSD: 19.99,
     pdfUrl: '/assets/pdfs/rahu_mahadasha_survival_guide.pdf',
     badge: 'Complete Survival Protocol',
-    subtitle: 'Tactical survival strategies, spiritual shield, karmic remedies & navigating intense 18-year Rahu Dasha.',
+    subtitle:
+      'Tactical survival strategies, spiritual shield, karmic remedies & navigating intense 18-year Rahu Dasha.',
     description:
       'An exhaustive 18-year survival blueprint for navigating Rahu Mahadasha and Rahu Antardashas. Master modern career pivots, foreign migrations, and emotional resilience without fear.',
     previewTopics: [
@@ -65,7 +67,8 @@ export const DEFAULT_MAHADASHA_GUIDES: Record<string, MahadashaGuide> = {
     priceUSD: 9.99,
     pdfUrl: '/assets/pdfs/sani_mahadasha_stabilisation_guide.pdf',
     badge: 'Saturn Pacification',
-    subtitle: 'Saturn discipline, endurance, Sade Sati pacification & balancing karmic lessons with grace.',
+    subtitle:
+      'Saturn discipline, endurance, Sade Sati pacification & balancing karmic lessons with grace.',
     description:
       'The Sani Mahadasha Stabilisation Guide equips you with classical Saturn remedies, Hanuman Chalisa daily practices, and lifestyle modifications to transform Saturnian delay into rock-solid mastery.',
     previewTopics: [
@@ -85,7 +88,8 @@ export const DEFAULT_MAHADASHA_GUIDES: Record<string, MahadashaGuide> = {
     priceUSD: 19.99,
     pdfUrl: '/assets/pdfs/sani_mahadasha_survival_guide.pdf',
     badge: '19-Year Master Guide',
-    subtitle: 'Mastering Saturn 19-year Dasha trials, major Sade Sati shifts & long-term legacy building.',
+    subtitle:
+      'Mastering Saturn 19-year Dasha trials, major Sade Sati shifts & long-term legacy building.',
     description:
       'The definitive guide to triumphing through the 19-year Saturn Mahadasha. Learn how Saturn rewards honest hard work, integrity, and spiritual devotion with enduring wealth and authority.',
     previewTopics: [
@@ -131,7 +135,10 @@ export async function getAllMahadashaGuides(): Promise<MahadashaGuide[]> {
   }
 }
 
-export async function updateMahadashaGuide(id: string, data: Partial<MahadashaGuide>): Promise<void> {
+export async function updateMahadashaGuide(
+  id: string,
+  data: Partial<MahadashaGuide>
+): Promise<void> {
   try {
     const docRef = doc(db, 'mahadasha_guides', id);
     await setDoc(docRef, data, { merge: true });

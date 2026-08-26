@@ -33,12 +33,12 @@ export default function EarningsPage() {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       let total = 0;
-      const docs = snapshot.docs.map(doc => {
+      const docs = snapshot.docs.map((doc) => {
         const data = doc.data();
-        total += (data.price || 0);
+        total += data.price || 0;
         return { id: doc.id, ...data };
       });
-      
+
       // Sort by createdAt descending
       docs.sort((a: any, b: any) => {
         const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
@@ -98,9 +98,7 @@ export default function EarningsPage() {
           <p className="text-sm font-medium text-muted-foreground mb-1">
             Total Earnings (All Time)
           </p>
-          <h2 className="text-4xl font-bold text-foreground">
-            {formatPrice(totalEarnings)}
-          </h2>
+          <h2 className="text-4xl font-bold text-foreground">{formatPrice(totalEarnings)}</h2>
           <div className="mt-4 flex items-center gap-2 text-green-400 text-sm font-semibold">
             <TrendingUp size={16} /> Based on completed consultations
           </div>
@@ -128,10 +126,10 @@ export default function EarningsPage() {
         <div className="p-6 border-b border-border flex justify-between items-center">
           <h3 className="text-lg font-bold text-foreground">Recent Transactions</h3>
         </div>
-        
+
         {loading ? (
           <div className="p-12 flex justify-center items-center">
-             <div className="w-8 h-8 border-4 border-muted border-t-accent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-muted border-t-accent rounded-full animate-spin"></div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -165,15 +163,17 @@ export default function EarningsPage() {
                       key={txn.id || i}
                       className="border-b border-border/50 hover:bg-muted/20 transition-colors"
                     >
-                      <td className="px-6 py-4 font-mono text-muted-foreground">{txn.id.substring(0, 9).toUpperCase()}</td>
+                      <td className="px-6 py-4 font-mono text-muted-foreground">
+                        {txn.id.substring(0, 9).toUpperCase()}
+                      </td>
                       <td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
                         <ArrowDownRight size={16} className="text-green-400" />
                         Consultation ({txn.type || 'Call'})
                       </td>
-                      <td className="px-6 py-4 text-muted-foreground">{formatDate(txn.createdAt)}</td>
-                      <td
-                        className={`px-6 py-4 text-right font-bold tabular-nums text-green-400`}
-                      >
+                      <td className="px-6 py-4 text-muted-foreground">
+                        {formatDate(txn.createdAt)}
+                      </td>
+                      <td className={`px-6 py-4 text-right font-bold tabular-nums text-green-400`}>
                         +{formatPrice(txn.price)}
                       </td>
                     </tr>

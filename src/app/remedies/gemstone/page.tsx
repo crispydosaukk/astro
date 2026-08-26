@@ -8,7 +8,13 @@ import Navbar from '@/components/Navbar';
 import ServiceReportForm from '@/components/ServiceReportForm';
 import PremiumSection from '@/components/PremiumSection';
 import DynamicPageContent from '@/components/DynamicPageContent';
-import { getServicePageContent, GemstoneServiceContent, defaultGemstoneContent, getHomepageContent, HomepageContent } from '@/lib/cms';
+import {
+  getServicePageContent,
+  GemstoneServiceContent,
+  defaultGemstoneContent,
+  getHomepageContent,
+  HomepageContent,
+} from '@/lib/cms';
 
 export default function GemstoneServicePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -21,7 +27,7 @@ export default function GemstoneServicePage() {
     async function load() {
       const [data, homeData] = await Promise.all([
         getServicePageContent('gemstone', defaultGemstoneContent),
-        getHomepageContent()
+        getHomepageContent(),
       ]);
       setHomepageContent(homeData);
       setContent(data);
@@ -66,9 +72,13 @@ export default function GemstoneServicePage() {
             <div className="max-w-3xl space-y-6">
               {/* Breadcrumb */}
               <div className="flex items-center gap-2 text-xs sm:text-sm text-white/70">
-                <Link href="/" className="hover:text-[#F6D075] transition-colors">Home</Link>
+                <Link href="/" className="hover:text-[#F6D075] transition-colors">
+                  Home
+                </Link>
                 <span>/</span>
-                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">Remedies</Link>
+                <Link href="/remedies" className="hover:text-[#F6D075] transition-colors">
+                  Remedies
+                </Link>
                 <span>/</span>
                 <span className="text-[#F6D075] font-semibold">Gemstone Advice</span>
               </div>
@@ -160,7 +170,8 @@ export default function GemstoneServicePage() {
                 </div>
               </div>
               <p className="text-xs text-[#6B5E55] pt-4 border-t border-[#E5D9C8]">
-                Only natural, unheated, certified gemstones produce measurable cosmic radiation benefits.
+                Only natural, unheated, certified gemstones produce measurable cosmic radiation
+                benefits.
               </p>
             </div>
 
@@ -169,7 +180,9 @@ export default function GemstoneServicePage() {
                 <span className="text-xs font-bold uppercase tracking-widest text-[#713B32] bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block mb-3">
                   Navaratna Quick Grid
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">9 Sacred Planetary Jewels</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-[#292522] mb-4">
+                  9 Sacred Planetary Jewels
+                </h3>
                 <div className="grid grid-cols-3 gap-3">
                   {content.gemstones.slice(0, 6).map((g, i) => (
                     <div
@@ -178,15 +191,21 @@ export default function GemstoneServicePage() {
                     >
                       <div className="text-2xl mb-1">💎</div>
                       <p className="text-xs font-bold text-[#292522]">{g?.planet}</p>
-                      <p className="text-[11px] font-semibold text-[#713B32]">{g?.gem?.split(' ')?.[0]}</p>
+                      <p className="text-[11px] font-semibold text-[#713B32]">
+                        {g?.gem?.split(' ')?.[0]}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="p-4 rounded-2xl bg-gradient-to-br from-[#281123] to-[#150914] text-white border border-[#B88A44]/40 space-y-1 text-center shadow-md">
-                <p className="text-xs text-[#F6D075] font-bold uppercase tracking-wider">Exact Carat Weight & Activation Day</p>
-                <p className="text-xs text-white/80">Calculated specifically for your Lagna and 9th House lord in your full report.</p>
+                <p className="text-xs text-[#F6D075] font-bold uppercase tracking-wider">
+                  Exact Carat Weight & Activation Day
+                </p>
+                <p className="text-xs text-white/80">
+                  Calculated specifically for your Lagna and 9th House lord in your full report.
+                </p>
               </div>
             </div>
           </div>
@@ -220,7 +239,9 @@ export default function GemstoneServicePage() {
                 {content.gemstones.map((g, i) => (
                   <tr key={i} className="hover:bg-[#F8F3EA] transition-colors">
                     <td className="px-5 py-4 font-bold text-[#713B32]">{g?.planet}</td>
-                    <td className="px-5 py-4 text-xs sm:text-sm font-bold text-[#292522]">{g?.gem}</td>
+                    <td className="px-5 py-4 text-xs sm:text-sm font-bold text-[#292522]">
+                      {g?.gem}
+                    </td>
                     <td className="px-5 py-4 text-xs font-semibold text-[#6B5E55]">{g?.metal}</td>
                     <td className="px-5 py-4 text-xs text-[#6B5E55]">{g?.finger}</td>
                     <td className="px-5 py-4 text-xs text-[#6B5E55]">{g?.day}</td>
@@ -263,7 +284,10 @@ export default function GemstoneServicePage() {
 
           <div className="space-y-3">
             {content.faqs.map((faq, i) => (
-              <div key={i} className="rounded-2xl border border-[#E5D9C8] bg-[#FFFDFC] overflow-hidden shadow-sm">
+              <div
+                key={i}
+                className="rounded-2xl border border-[#E5D9C8] bg-[#FFFDFC] overflow-hidden shadow-sm"
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-[#F8F3EA] transition-colors cursor-pointer"

@@ -86,12 +86,29 @@ export default function FinanceHoroscopePage() {
       wealthYoga: 'Lakshmi Yoga & Gajakesari Yoga Present',
       wealthIndexScore: '91 / 100',
       financialPillars: [
-        { pillar: 'Income Expansion & Cashflow (11th House)', rating: '94%', desc: 'Strong planetary inflow from multiple avenues and professional expertise.' },
-        { pillar: 'Savings & Accumulated Assets (2nd House)', rating: '88%', desc: 'Benefic Jupiterian influence protects liquid assets and property growth.' },
-        { pillar: 'Investment & Speculative Growth (5th/9th Houses)', rating: '86%', desc: 'Favorable periods for long-term equity, gold, and real estate investments.' },
-        { pillar: 'Debt Mitigation & Risk Resistance (6th/8th Houses)', rating: '90%', desc: 'Protective planetary shields minimize unexpected financial volatility.' },
+        {
+          pillar: 'Income Expansion & Cashflow (11th House)',
+          rating: '94%',
+          desc: 'Strong planetary inflow from multiple avenues and professional expertise.',
+        },
+        {
+          pillar: 'Savings & Accumulated Assets (2nd House)',
+          rating: '88%',
+          desc: 'Benefic Jupiterian influence protects liquid assets and property growth.',
+        },
+        {
+          pillar: 'Investment & Speculative Growth (5th/9th Houses)',
+          rating: '86%',
+          desc: 'Favorable periods for long-term equity, gold, and real estate investments.',
+        },
+        {
+          pillar: 'Debt Mitigation & Risk Resistance (6th/8th Houses)',
+          rating: '90%',
+          desc: 'Protective planetary shields minimize unexpected financial volatility.',
+        },
       ],
-      wealthForecast: 'Auspicious Jupiter-Mercury transit phase indicates strong financial breakthroughs and profitable asset acquisitions over the next 12 to 24 months.',
+      wealthForecast:
+        'Auspicious Jupiter-Mercury transit phase indicates strong financial breakthroughs and profitable asset acquisitions over the next 12 to 24 months.',
       remedies: [
         'Recite the sacred Sri Kanakadhara Stotram or Sri Suktam on Friday and Wednesday mornings.',
         'Install and worship an energized brass/copper Sri Yantra or Kubera Yantra in the North quadrant.',
@@ -138,9 +155,18 @@ export default function FinanceHoroscopePage() {
   };
 
   const financeFaqs = [
-    { q: 'Which astrological houses govern wealth and financial prosperity?', a: 'In Vedic Astrology, the 2nd house (Dhana Bhava) governs accumulated wealth and savings, the 11th house (Labha Bhava) governs incoming profits and gains, the 9th house (Bhagya Bhava) represents destiny and luck, and the 5th house governs intelligence in investments.' },
-    { q: 'What is a Dhana Yoga in a birth chart?', a: 'A Dhana Yoga occurs when the lords of wealth houses (1st, 2nd, 5th, 9th, and 11th) form mutual relationships, conjunctions, or aspects. Powerful yogas like Lakshmi Yoga or Gajakesari Yoga generate immense prosperity.' },
-    { q: 'How can I remedy planetary afflictions affecting my finances?', a: 'Vedic remedies such as chanting the Kanakadhara Stotram, establishing an energized Kubera Yantra in the north, performing Thursday/Friday charitable donations, and balancing planetary dasha periods help clear financial blockages.' },
+    {
+      q: 'Which astrological houses govern wealth and financial prosperity?',
+      a: 'In Vedic Astrology, the 2nd house (Dhana Bhava) governs accumulated wealth and savings, the 11th house (Labha Bhava) governs incoming profits and gains, the 9th house (Bhagya Bhava) represents destiny and luck, and the 5th house governs intelligence in investments.',
+    },
+    {
+      q: 'What is a Dhana Yoga in a birth chart?',
+      a: 'A Dhana Yoga occurs when the lords of wealth houses (1st, 2nd, 5th, 9th, and 11th) form mutual relationships, conjunctions, or aspects. Powerful yogas like Lakshmi Yoga or Gajakesari Yoga generate immense prosperity.',
+    },
+    {
+      q: 'How can I remedy planetary afflictions affecting my finances?',
+      a: 'Vedic remedies such as chanting the Kanakadhara Stotram, establishing an energized Kubera Yantra in the north, performing Thursday/Friday charitable donations, and balancing planetary dasha periods help clear financial blockages.',
+    },
   ];
 
   return (
@@ -179,10 +205,13 @@ export default function FinanceHoroscopePage() {
                 </span>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight max-w-xl drop-shadow-lg">
                   Unlock Your <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">Vedic Wealth Potential</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">
+                    Vedic Wealth Potential
+                  </span>
                 </h1>
                 <p className="text-base sm:text-lg text-[#F8F3EA]/90 font-medium leading-relaxed max-w-lg drop-shadow">
-                  Discover your 2nd House (Dhana Bhava), 11th House (Profits), Dhana Yogas, and favorable wealth-building transit cycles with authentic Vedic astrology.
+                  Discover your 2nd House (Dhana Bhava), 11th House (Profits), Dhana Yogas, and
+                  favorable wealth-building transit cycles with authentic Vedic astrology.
                 </p>
               </div>
 
@@ -205,7 +234,9 @@ export default function FinanceHoroscopePage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Gender</label>
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">
+                        Gender
+                      </label>
                       <select
                         value={formData.gender}
                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
@@ -264,13 +295,23 @@ export default function FinanceHoroscopePage() {
                       </label>
                       <select
                         value={formData.financialGoal}
-                        onChange={(e) => setFormData({ ...formData, financialGoal: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, financialGoal: e.target.value })
+                        }
                         className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       >
-                        <option value="Wealth Accumulation & Investments" className="bg-background">Wealth Accumulation & Investments</option>
-                        <option value="Business Expansion & Profit" className="bg-background">Business Expansion & Profits</option>
-                        <option value="Career Promotion & Salary Growth" className="bg-background">Career Salary & Promotions</option>
-                        <option value="Debt Clearance & Stability" className="bg-background">Debt Clearance & Stability</option>
+                        <option value="Wealth Accumulation & Investments" className="bg-background">
+                          Wealth Accumulation & Investments
+                        </option>
+                        <option value="Business Expansion & Profit" className="bg-background">
+                          Business Expansion & Profits
+                        </option>
+                        <option value="Career Promotion & Salary Growth" className="bg-background">
+                          Career Salary & Promotions
+                        </option>
+                        <option value="Debt Clearance & Stability" className="bg-background">
+                          Debt Clearance & Stability
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -282,7 +323,8 @@ export default function FinanceHoroscopePage() {
                   >
                     {isCalculating ? (
                       <span className="flex items-center gap-2">
-                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Calculating Dhana Yogas...
+                        <Sparkles size={18} className="animate-spin text-[#292522]" /> Calculating
+                        Dhana Yogas...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
@@ -305,19 +347,26 @@ export default function FinanceHoroscopePage() {
                 <div className="w-20 h-20 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-2xl animate-pulse">
                   <Coins size={40} />
                 </div>
-                <h3 className="text-2xl font-bold text-gradient-gold">Dhana & Labha Bhava Alignments</h3>
+                <h3 className="text-2xl font-bold text-gradient-gold">
+                  Dhana & Labha Bhava Alignments
+                </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                  Discover how Jupiter, Mercury, and the 2nd and 11th houses govern your business success, income velocity, and lifelong wealth accumulation.
+                  Discover how Jupiter, Mercury, and the 2nd and 11th houses govern your business
+                  success, income velocity, and lifelong wealth accumulation.
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 w-full pt-2">
                   <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-left">
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase">2nd House</span>
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase">
+                      2nd House
+                    </span>
                     <p className="text-xs font-bold text-foreground">Dhana Bhava</p>
                     <p className="text-[10px] text-muted-foreground">Savings & Treasury</p>
                   </div>
                   <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-left">
-                    <span className="text-[10px] font-bold text-[#C9952B] uppercase">11th House</span>
+                    <span className="text-[10px] font-bold text-[#C9952B] uppercase">
+                      11th House
+                    </span>
                     <p className="text-xs font-bold text-foreground">Labha Bhava</p>
                     <p className="text-[10px] text-muted-foreground">Profits & Gains</p>
                   </div>
@@ -335,7 +384,10 @@ export default function FinanceHoroscopePage() {
       {/* Finance Horoscope Generated Results Section */}
       <AnimatePresence>
         {reportResult && (
-          <section id="finance-report-section" className="py-16 bg-background relative z-10 space-y-10 border-b border-white/5">
+          <section
+            id="finance-report-section"
+            className="py-16 bg-background relative z-10 space-y-10 border-b border-white/5"
+          >
             <div className="max-w-5xl mx-auto px-6 space-y-8">
               {/* Header Bar */}
               <div className="glass-card p-6 sm:p-8 rounded-3xl border border-emerald-500/30 bg-emerald-500/5 space-y-4">
@@ -345,10 +397,12 @@ export default function FinanceHoroscopePage() {
                       Wealth & Prosperity Analysis
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                      Finance Horoscope for <span className="text-gradient-gold">{reportResult.name}</span>
+                      Finance Horoscope for{' '}
+                      <span className="text-gradient-gold">{reportResult.name}</span>
                     </h2>
                     <p className="text-xs text-muted-foreground pt-1">
-                      📅 {reportResult.dob} · ⏰ {reportResult.tob} · 📍 {reportResult.pob} · Focus: {reportResult.financialGoal}
+                      📅 {reportResult.dob} · ⏰ {reportResult.tob} · 📍 {reportResult.pob} · Focus:{' '}
+                      {reportResult.financialGoal}
                     </p>
                   </div>
 
@@ -372,26 +426,42 @@ export default function FinanceHoroscopePage() {
               {/* Core Astrological Placements */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Moon Sign</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Moon Sign
+                  </span>
                   <div className="text-base font-bold text-[#C9952B]">{reportResult.rashiName}</div>
-                  <p className="text-[11px] text-muted-foreground">Lord: {reportResult.rashiLord}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Lord: {reportResult.rashiLord}
+                  </p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">2nd House (Dhana)</span>
-                  <div className="text-base font-bold text-emerald-400">{reportResult.dhanaHouseLord}</div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    2nd House (Dhana)
+                  </span>
+                  <div className="text-base font-bold text-emerald-400">
+                    {reportResult.dhanaHouseLord}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Savings & Assets</p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">11th House (Labha)</span>
-                  <div className="text-base font-bold text-cyan-400">{reportResult.labhaHouseLord}</div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    11th House (Labha)
+                  </span>
+                  <div className="text-base font-bold text-cyan-400">
+                    {reportResult.labhaHouseLord}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Profit & Expansion</p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Wealth Index</span>
-                  <div className="text-base font-bold text-gradient-gold font-mono">{reportResult.wealthIndexScore}</div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Wealth Index
+                  </span>
+                  <div className="text-base font-bold text-gradient-gold font-mono">
+                    {reportResult.wealthIndexScore}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Jupiterian Potency</p>
                 </div>
               </div>
@@ -413,7 +483,10 @@ export default function FinanceHoroscopePage() {
                 <h3 className="text-lg font-bold text-foreground">4 Wealth Building Pillars</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {reportResult.financialPillars.map((item: any, idx: number) => (
-                    <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2"
+                    >
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-foreground">{item.pillar}</span>
                         <span className="text-xs font-bold text-emerald-400">{item.rating}</span>
@@ -427,14 +500,23 @@ export default function FinanceHoroscopePage() {
               {/* Planetary Yogas & Timing Window */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Auspicious Wealth Yogas</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                    Auspicious Wealth Yogas
+                  </span>
                   <p className="text-sm text-foreground font-semibold">{reportResult.wealthYoga}</p>
-                  <p className="text-xs text-muted-foreground">Combination of 9th & 11th house lords creates continuous opportunities for financial multiplication.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Combination of 9th & 11th house lords creates continuous opportunities for
+                    financial multiplication.
+                  </p>
                 </div>
 
                 <div className="glass-card p-6 rounded-3xl border border-[#C9952B]/30 bg-[#C9952B]/5 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">Financial Growth Timeline</span>
-                  <p className="text-sm text-foreground leading-relaxed">{reportResult.wealthForecast}</p>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">
+                    Financial Growth Timeline
+                  </span>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    {reportResult.wealthForecast}
+                  </p>
                 </div>
               </div>
 
@@ -445,7 +527,10 @@ export default function FinanceHoroscopePage() {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {reportResult.remedies.map((rem: string, idx: number) => (
-                    <div key={idx} className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs text-foreground/90">
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs text-foreground/90"
+                    >
                       <span className="w-5 h-5 rounded-full gold-gradient-bg text-white font-bold flex items-center justify-center shrink-0 mt-0.5 text-[10px]">
                         {idx + 1}
                       </span>
@@ -477,9 +562,15 @@ export default function FinanceHoroscopePage() {
       <section className="py-16 bg-background/50 border-b border-white/5">
         <div className="max-w-5xl mx-auto px-6 space-y-12">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">Vedic Wealth Sciences</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">The 4 Pillars of Financial Astrology</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">How classical planetary yogas and wealth houses govern lifelong prosperity</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              Vedic Wealth Sciences
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              The 4 Pillars of Financial Astrology
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              How classical planetary yogas and wealth houses govern lifelong prosperity
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -489,10 +580,14 @@ export default function FinanceHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                   <Coins size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">1. The 2nd House (Dhana Bhava)</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  1. The 2nd House (Dhana Bhava)
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Represents accumulated wealth, bank balances, gold, family inheritance, and financial security. Benefic aspects from Jupiter or Venus on the 2nd house ensure stable asset retention and wealth accumulation without sudden leaks.
+                Represents accumulated wealth, bank balances, gold, family inheritance, and
+                financial security. Benefic aspects from Jupiter or Venus on the 2nd house ensure
+                stable asset retention and wealth accumulation without sudden leaks.
               </p>
             </div>
 
@@ -502,10 +597,14 @@ export default function FinanceHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/20 flex items-center justify-center text-[#C9952B]">
                   <TrendingUp size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">2. The 11th House (Labha Bhava)</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  2. The 11th House (Labha Bhava)
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                The ultimate house of profit, revenue velocity, cash flow, and fulfillment of high ambitions. Strong planets in the 11th house create multiple streams of passive and active business income.
+                The ultimate house of profit, revenue velocity, cash flow, and fulfillment of high
+                ambitions. Strong planets in the 11th house create multiple streams of passive and
+                active business income.
               </p>
             </div>
 
@@ -515,10 +614,14 @@ export default function FinanceHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
                   <Star size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">3. The 9th House (Bhagya Bhava)</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  3. The 9th House (Bhagya Bhava)
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                The highest auspicious trine (Trikona) governing fortune, divine luck, mentorship, and windfall prosperity. When the 9th lord connects with the 2nd or 11th lords, extraordinary Lakshmi Yogas manifest.
+                The highest auspicious trine (Trikona) governing fortune, divine luck, mentorship,
+                and windfall prosperity. When the 9th lord connects with the 2nd or 11th lords,
+                extraordinary Lakshmi Yogas manifest.
               </p>
             </div>
 
@@ -528,10 +631,14 @@ export default function FinanceHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                   <DollarSign size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">4. Jupiter & Mercury: Wealth Karakas</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  4. Jupiter & Mercury: Wealth Karakas
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Jupiter (Guru) acts as Dhanakaraka expanding resources through wisdom, while Mercury (Budh) governs commercial intellect, sharp negotiation, trading, and digital business acumen.
+                Jupiter (Guru) acts as Dhanakaraka expanding resources through wisdom, while Mercury
+                (Budh) governs commercial intellect, sharp negotiation, trading, and digital
+                business acumen.
               </p>
             </div>
           </div>
@@ -542,13 +649,20 @@ export default function FinanceHoroscopePage() {
       <section className="py-16 bg-background/50 border-b border-white/5">
         <div className="max-w-4xl mx-auto px-6 space-y-8">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Frequently Asked Questions</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Understanding Vedic Wealth & Prosperity Astrology</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Understanding Vedic Wealth & Prosperity Astrology
+            </p>
           </div>
 
           <div className="space-y-3">
             {financeFaqs.map((faq, idx) => (
-              <div key={idx} className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+              <div
+                key={idx}
+                className="glass-card rounded-2xl border border-white/10 overflow-hidden"
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                   className="w-full p-5 text-left font-semibold text-foreground flex justify-between items-center text-sm"
@@ -590,9 +704,15 @@ export default function FinanceHoroscopePage() {
       <section className="py-16 bg-background relative z-10">
         <div className="max-w-5xl mx-auto px-6 space-y-8">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">Explore Specialized Horoscopes</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Gain Complete Life Clarity</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Navigate directly to our other dedicated Vedic horoscope reports</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              Explore Specialized Horoscopes
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Gain Complete Life Clarity
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Navigate directly to our other dedicated Vedic horoscope reports
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -609,11 +729,13 @@ export default function FinanceHoroscopePage() {
                   Love & Marriage Horoscope
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Discover 7th House (Kalatra Bhava), Venusian strength, relationship harmony, and soulmate timing.
+                  Discover 7th House (Kalatra Bhava), Venusian strength, relationship harmony, and
+                  soulmate timing.
                 </p>
               </div>
               <div className="text-xs font-bold text-rose-400 flex items-center gap-1 pt-2">
-                Check Love Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Check Love Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -630,11 +752,13 @@ export default function FinanceHoroscopePage() {
                   Health & Vitality Horoscope
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance, and restorative remedies.
+                  Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance, and
+                  restorative remedies.
                 </p>
               </div>
               <div className="text-xs font-bold text-cyan-400 flex items-center gap-1 pt-2">
-                Check Health Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Check Health Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -651,11 +775,13 @@ export default function FinanceHoroscopePage() {
                   Full Vedic Janam Kundli
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Complete 12-house chart, D9 Navamsha, Vimshottari Dasha, planetary degrees, and comprehensive lifetime roadmap.
+                  Complete 12-house chart, D9 Navamsha, Vimshottari Dasha, planetary degrees, and
+                  comprehensive lifetime roadmap.
                 </p>
               </div>
               <div className="text-xs font-bold text-[#C9952B] flex items-center gap-1 pt-2">
-                View Complete Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                View Complete Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           </div>

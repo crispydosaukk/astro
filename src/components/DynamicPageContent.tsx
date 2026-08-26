@@ -95,7 +95,9 @@ export default function DynamicPageContent({
                   </span>
                 )}
                 {item.title && (
-                  <h3 className={`text-xl sm:text-2xl lg:text-3xl font-bold ${theme.title} tracking-tight`}>
+                  <h3
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold ${theme.title} tracking-tight`}
+                  >
                     {item.title}
                   </h3>
                 )}

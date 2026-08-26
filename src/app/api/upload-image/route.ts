@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Save the file to public/assets/images/remedies/
     const uploadDir = path.join(process.cwd(), 'public', 'assets', 'images', 'remedies');
     const filePath = path.join(uploadDir, filename);
-    
+
     await writeFile(filePath, buffer);
 
     const fileUrl = `/assets/images/remedies/${filename}`;

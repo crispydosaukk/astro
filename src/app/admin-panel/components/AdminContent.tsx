@@ -10,6 +10,7 @@ import AdminPaymentsTable from './AdminPaymentsTable';
 import AdminContentManagement from './AdminContentManagement';
 import AdminDynamicPageEditor from './AdminDynamicPageEditor';
 import AdminAIPrompts from './AdminAIPrompts';
+import AdminAIAstrologersTable from './AdminAIAstrologersTable';
 import { Shield, Bell, Download, LogOut } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
 
@@ -35,9 +36,10 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
             </button>
             <button
               onClick={() => setShowLogoutModal(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border text-white hover:border-red-500/50 text-sm hover:text-red-400 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white font-bold text-xs transition-all shadow-sm"
+              title="Sign Out of Admin Panel"
             >
-              <LogOut size={14} /> Sign Out
+              <LogOut size={15} /> Sign Out
             </button>
             <button className="relative p-2 rounded-xl hover:bg-muted transition-all">
               <Bell size={18} className="text-muted-foreground" />
@@ -56,6 +58,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
         {activeTab === 'tab-content' && <AdminContentManagement />}
         {activeTab === 'tab-page-content' && <AdminDynamicPageEditor />}
         {activeTab === 'tab-prompts' && <AdminAIPrompts />}
+        {activeTab === 'tab-ai-astrologers' && <AdminAIAstrologersTable />}
         {activeTab === 'tab-users' && <AdminUsersTable />}
         {activeTab === 'tab-astrologers' && <AdminAstrologersTable />}
         {activeTab === 'tab-applications' && <AdminAstrologerApplicationsTable />}

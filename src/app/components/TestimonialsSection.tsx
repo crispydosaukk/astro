@@ -88,7 +88,9 @@ export default function TestimonialsSection() {
             >
               <div>
                 <Quote size={28} className="text-[#713B32]/30 mb-4" />
-                <p className="text-sm text-[#292522]/90 leading-relaxed mb-6 font-normal">{t?.text}</p>
+                <p className="text-sm text-[#292522]/90 leading-relaxed mb-6 font-normal">
+                  {t?.text}
+                </p>
               </div>
 
               <div>

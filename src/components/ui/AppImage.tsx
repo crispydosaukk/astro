@@ -70,7 +70,12 @@ const AppImage = memo(function AppImage({
 
   const imageClassName = useMemo(() => {
     const classes = [className];
-    if (isLoading && !priority && !className.includes('bg-transparent') && !className.includes('bg-')) {
+    if (
+      isLoading &&
+      !priority &&
+      !className.includes('bg-transparent') &&
+      !className.includes('bg-')
+    ) {
       classes.push('bg-gray-200/50');
     }
     if (onClick) classes.push('cursor-pointer hover:opacity-90 transition-opacity duration-200');

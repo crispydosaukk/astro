@@ -46,7 +46,8 @@ export default function ChoghadiyaPage() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  const currentChoghadiyaSlot = panchang.dayChoghadiya.find((c) => c.isCurrent) || panchang.dayChoghadiya[4];
+  const currentChoghadiyaSlot =
+    panchang.dayChoghadiya.find((c) => c.isCurrent) || panchang.dayChoghadiya[4];
 
   const getTypeBadgeClass = (type: string) => {
     switch (type) {
@@ -127,7 +128,8 @@ export default function ChoghadiyaPage() {
             Today Choghadiya — Find Auspicious Time Today
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-            Accurate Day & Night Choghadiya timings to select the best muhurat for business, travel, and spiritual work.
+            Accurate Day & Night Choghadiya timings to select the best muhurat for business, travel,
+            and spiritual work.
           </p>
         </div>
 
@@ -145,7 +147,10 @@ export default function ChoghadiyaPage() {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm focus:border-[#C9952B] outline-none transition-colors"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none"
+                />
               </div>
             </div>
 
@@ -165,7 +170,11 @@ export default function ChoghadiyaPage() {
               disabled={isCalculating}
               className="w-full py-3.5 rounded-2xl gold-gradient-bg text-white font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#C9952B]/20 active:scale-95"
             >
-              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {isCalculating ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Sparkles size={18} />
+              )}
               <span>{isCalculating ? 'Calculating...' : 'Get Choghadiya'}</span>
             </button>
           </div>
@@ -198,7 +207,8 @@ export default function ChoghadiyaPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
               {currentChoghadiyaSlot.name}{' '}
               <span className="text-orange-400 text-lg font-normal">
-                ({currentChoghadiyaSlot.start} – {currentChoghadiyaSlot.end} · {currentChoghadiyaSlot.type})
+                ({currentChoghadiyaSlot.start} – {currentChoghadiyaSlot.end} ·{' '}
+                {currentChoghadiyaSlot.type})
               </span>
             </h2>
           </div>
@@ -240,12 +250,18 @@ export default function ChoghadiyaPage() {
                           )}
                         </td>
                         <td className="px-3 py-3">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${getTypeBadgeClass(row.type)}`}>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${getTypeBadgeClass(row.type)}`}
+                          >
                             {row.type}
                           </span>
                         </td>
-                        <td className="px-3 py-3 font-mono text-xs text-muted-foreground">{row.start}</td>
-                        <td className="px-3 py-3 font-mono text-xs text-muted-foreground">{row.end}</td>
+                        <td className="px-3 py-3 font-mono text-xs text-muted-foreground">
+                          {row.start}
+                        </td>
+                        <td className="px-3 py-3 font-mono text-xs text-muted-foreground">
+                          {row.end}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -272,16 +288,25 @@ export default function ChoghadiyaPage() {
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {panchang.nightChoghadiya.map((row) => (
-                      <tr key={`night-${row.num}-${row.name}`} className="hover:bg-white/5 transition-colors">
+                      <tr
+                        key={`night-${row.num}-${row.name}`}
+                        className="hover:bg-white/5 transition-colors"
+                      >
                         <td className="px-3 py-3 font-bold text-muted-foreground">{row.num}</td>
                         <td className="px-3 py-3 font-bold text-foreground">{row.name}</td>
                         <td className="px-3 py-3">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${getTypeBadgeClass(row.type)}`}>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${getTypeBadgeClass(row.type)}`}
+                          >
                             {row.type}
                           </span>
                         </td>
-                        <td className="px-3 py-3 font-mono text-xs text-muted-foreground">{row.start}</td>
-                        <td className="px-3 py-3 font-mono text-xs text-muted-foreground">{row.end}</td>
+                        <td className="px-3 py-3 font-mono text-xs text-muted-foreground">
+                          {row.start}
+                        </td>
+                        <td className="px-3 py-3 font-mono text-xs text-muted-foreground">
+                          {row.end}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -301,7 +326,10 @@ export default function ChoghadiyaPage() {
                   className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-foreground text-center flex items-center justify-center gap-1 transition-all group"
                 >
                   <span>{page.title}</span>
-                  <ChevronRight size={12} className="text-[#C9952B] group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight
+                    size={12}
+                    className="text-[#C9952B] group-hover:translate-x-0.5 transition-transform"
+                  />
                 </Link>
               ))}
             </div>

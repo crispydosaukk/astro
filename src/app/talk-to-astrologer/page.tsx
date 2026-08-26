@@ -30,7 +30,18 @@ import AstrologerFilterModal, {
   defaultFilterState,
 } from '@/components/AstrologerFilterModal';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, updateDoc, doc, increment, onSnapshot } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  updateDoc,
+  doc,
+  increment,
+  onSnapshot,
+} from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useUserData } from '@/lib/useUserData';
 import { useCurrency } from '@/lib/CurrencyContext';
@@ -70,7 +81,8 @@ export default function TalkToAstrologerPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [filterModalState, setFilterModalState] = useState<AstrologerFilterState>(defaultFilterState);
+  const [filterModalState, setFilterModalState] =
+    useState<AstrologerFilterState>(defaultFilterState);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const [selectedAstrologer, setSelectedAstrologer] = useState<any>(null);
@@ -91,19 +103,35 @@ export default function TalkToAstrologerPage() {
             return {
               id: doc.id,
               name: data.name || 'Astrologer',
-              specialty: data.skills ? data.skills.split(',').map((s: string) => s.trim()) : ['Vedic Astrology'],
+              specialty: data.skills
+                ? data.skills.split(',').map((s: string) => s.trim())
+                : ['Vedic Astrology'],
               experience: Number(data.experienceYears || data.experience) || 10,
               rating: Number(data.rating) || 4.9,
               reviews: Number(data.reviewsCount || data.reviews) || 2847,
               pricePerMin: Number(data.amount) || 20,
-              languages: data.languages ? data.languages.split(',').map((l: string) => l.trim()) : ['English', 'Hindi'],
-              gender: data.gender || (data.name?.toLowerCase().includes('dr. kavya') || data.name?.toLowerCase().includes('meera') || data.name?.toLowerCase().includes('priya') || data.name?.toLowerCase().includes('ananya') ? 'Female' : 'Male'),
+              languages: data.languages
+                ? data.languages.split(',').map((l: string) => l.trim())
+                : ['English', 'Hindi'],
+              gender:
+                data.gender ||
+                (data.name?.toLowerCase().includes('dr. kavya') ||
+                data.name?.toLowerCase().includes('meera') ||
+                data.name?.toLowerCase().includes('priya') ||
+                data.name?.toLowerCase().includes('ananya')
+                  ? 'Female'
+                  : 'Male'),
               country: data.country || 'India',
-              status: data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
-              image: data.profileImageUrl || data.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
+              status:
+                data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
+              image:
+                data.profileImageUrl ||
+                data.avatar ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
               consultations: Number(data.consultations || data.orders) || 12480,
               badge: data.badge !== undefined ? data.badge : 'VERIFIED',
-              about: data.bio || data.about || 'Experienced astrologer offering insightful guidance.',
+              about:
+                data.bio || data.about || 'Experienced astrologer offering insightful guidance.',
             };
           });
           setAstrologers(fetchedData);
@@ -121,10 +149,12 @@ export default function TalkToAstrologerPage() {
               gender: 'Male',
               country: 'India',
               status: 'online',
-              image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=600&h=600&fit=crop&crop=face',
+              image:
+                'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=600&h=600&fit=crop&crop=face',
               consultations: 15400,
               badge: 'Celebrity Astrologer',
-              about: 'Specialist in Vedic Kundli, career breakthroughs, and love marriage compatibility.',
+              about:
+                'Specialist in Vedic Kundli, career breakthroughs, and love marriage compatibility.',
             },
             {
               id: 'prof-meera-iyer',
@@ -138,7 +168,8 @@ export default function TalkToAstrologerPage() {
               gender: 'Female',
               country: 'India',
               status: 'online',
-              image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=600&fit=crop&crop=face',
+              image:
+                'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=600&fit=crop&crop=face',
               consultations: 14120,
               badge: 'VERIFIED',
               about: 'Master of KP astrology, timing of events, Prashna, and academic prosperity.',
@@ -155,10 +186,12 @@ export default function TalkToAstrologerPage() {
               gender: 'Male',
               country: 'India',
               status: 'online',
-              image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face',
+              image:
+                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&crop=face',
               consultations: 16300,
               badge: 'Senior Master',
-              about: 'Expert in Vastu Shastra remedies, corporate wealth alignment, and planetary balancing.',
+              about:
+                'Expert in Vastu Shastra remedies, corporate wealth alignment, and planetary balancing.',
             },
             {
               id: 'dr-kavya-nair',
@@ -172,15 +205,22 @@ export default function TalkToAstrologerPage() {
               gender: 'Female',
               country: 'India',
               status: 'online',
-              image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&h=600&fit=crop&crop=face',
+              image:
+                'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&h=600&fit=crop&crop=face',
               consultations: 13890,
               badge: 'VERIFIED',
-              about: 'Vedic health chart diagnosis, Tridosha balance, and Ayurvedic mantra prescription.',
+              about:
+                'Vedic health chart diagnosis, Tridosha balance, and Ayurvedic mantra prescription.',
             },
             {
               id: 'astro-rohit-verma',
               name: 'Astro Rohit Verma',
-              specialty: ['Tarot Reading', 'Numerology', 'Career & Business', 'Love & Relationship'],
+              specialty: [
+                'Tarot Reading',
+                'Numerology',
+                'Career & Business',
+                'Love & Relationship',
+              ],
               experience: 12,
               rating: 4.7,
               reviews: 654,
@@ -189,10 +229,12 @@ export default function TalkToAstrologerPage() {
               gender: 'Male',
               country: 'India',
               status: 'online',
-              image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face',
+              image:
+                'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=600&fit=crop&crop=face',
               consultations: 9980,
               badge: 'Rising Star',
-              about: 'Modern Vedic & Tarot consultations for youth career, startups, and relationship clarity.',
+              about:
+                'Modern Vedic & Tarot consultations for youth career, startups, and relationship clarity.',
             },
             {
               id: 'ananya-mukherjee',
@@ -206,10 +248,12 @@ export default function TalkToAstrologerPage() {
               gender: 'Female',
               country: 'India',
               status: 'online',
-              image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face',
+              image:
+                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=600&fit=crop&crop=face',
               consultations: 11200,
               badge: 'VERIFIED',
-              about: 'Intuitive Tarot reader, psychic aura counseling, and soulmate connection guidance.',
+              about:
+                'Intuitive Tarot reader, psychic aura counseling, and soulmate connection guidance.',
             },
             {
               id: 'vashikant-shastri',
@@ -223,7 +267,8 @@ export default function TalkToAstrologerPage() {
               gender: 'Male',
               country: 'India',
               status: 'online',
-              image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face',
+              image:
+                'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=600&fit=crop&crop=face',
               consultations: 18500,
               badge: 'Top Rated',
               about: 'Specialist in Lal Kitab remedies, Manglik Dosha parihar, and marital peace.',
@@ -240,10 +285,12 @@ export default function TalkToAstrologerPage() {
               gender: 'Male',
               country: 'India',
               status: 'offline',
-              image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face',
+              image:
+                'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=600&fit=crop&crop=face',
               consultations: 14750,
               badge: 'Senior Master',
-              about: 'Nadi palm-leaf astrology, business name numerology, and financial wealth attraction.',
+              about:
+                'Nadi palm-leaf astrology, business name numerology, and financial wealth attraction.',
             },
           ]);
         }
@@ -263,8 +310,8 @@ export default function TalkToAstrologerPage() {
       const list = Array.isArray(ast.specialty)
         ? ast.specialty
         : typeof ast.specialty === 'string'
-        ? ast.specialty.split(',')
-        : [];
+          ? ast.specialty.split(',')
+          : [];
       list.forEach((s: string) => {
         const cleaned = s.trim();
         if (cleaned) {
@@ -284,8 +331,8 @@ export default function TalkToAstrologerPage() {
       const list = Array.isArray(ast.languages)
         ? ast.languages
         : typeof ast.languages === 'string'
-        ? ast.languages.split(',')
-        : [];
+          ? ast.languages.split(',')
+          : [];
       list.forEach((l: string) => {
         const cleaned = l.trim();
         if (cleaned) {
@@ -371,9 +418,10 @@ export default function TalkToAstrologerPage() {
       // 3. Skills Filter from Modal
       let matchSkills = true;
       if (filterModalState.skills.length > 0) {
-        matchSkills = filterModalState.skills.some((sk) =>
-          a.specialty.some((s: string) => s.toLowerCase().includes(sk.toLowerCase())) ||
-          a.about?.toLowerCase().includes(sk.toLowerCase())
+        matchSkills = filterModalState.skills.some(
+          (sk) =>
+            a.specialty.some((s: string) => s.toLowerCase().includes(sk.toLowerCase())) ||
+            a.about?.toLowerCase().includes(sk.toLowerCase())
         );
       }
 
@@ -455,11 +503,11 @@ export default function TalkToAstrologerPage() {
       router.push(`/wallet?redirect=${encodeURIComponent('/talk-to-astrologer')}`);
       return;
     }
-    
+
     const maxDuration = Math.floor(currentBalance / pricePerMin);
-    
+
     setIsBooking(true);
-    
+
     try {
       const roomID = `room_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
@@ -478,7 +526,7 @@ export default function TalkToAstrologerPage() {
         status: 'pending',
         createdAt: serverTimestamp(),
       });
-      
+
       setIsWaiting(true);
       toast.success('Request sent! Waiting for astrologer to accept...');
 
@@ -503,14 +551,13 @@ export default function TalkToAstrologerPage() {
           setIsWaiting(false);
           router.push(`/call/${roomID}`);
         } else if (data && data.status === 'cancelled' && isWaiting) {
-           clearTimeout(timeoutId);
-           unsubscribe();
-           setIsWaiting(false);
-           setIsBooking(false);
-           toast.error('Astrologer is currently unavailable.');
+          clearTimeout(timeoutId);
+          unsubscribe();
+          setIsWaiting(false);
+          setIsBooking(false);
+          toast.error('Astrologer is currently unavailable.');
         }
       });
-      
     } catch (error) {
       console.error('Error booking consultation:', error);
       toast.error('Failed to book consultation. Please try again.');
@@ -518,7 +565,6 @@ export default function TalkToAstrologerPage() {
       setIsWaiting(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -545,6 +591,20 @@ export default function TalkToAstrologerPage() {
               Connect instantly with India&apos;s most trusted Vedic astrologers. Get personalized
               guidance on career, marriage, health, and life&apos;s important decisions.
             </p>
+
+            {/* Quick Switcher: Human vs AI */}
+            <div className="inline-flex items-center p-1.5 rounded-2xl glass-card border border-white/20 shadow-2xl mb-6">
+              <div className="px-5 py-2 rounded-xl text-xs font-bold bg-[#C9952B] text-white shadow-md flex items-center gap-1.5">
+                <Users size={14} /> Human Astrologers
+              </div>
+              <Link
+                href="/talk-to-ai-astrologer"
+                className="px-5 py-2 rounded-xl text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-1.5"
+              >
+                <Sparkles size={14} className="text-[#C9952B]" /> ✦ AI Astrologers (Instant Voice)
+              </Link>
+            </div>
+
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/60">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -572,7 +632,10 @@ export default function TalkToAstrologerPage() {
                   : 'bg-muted/90 hover:bg-muted text-foreground border-border'
               }`}
             >
-              <SlidersHorizontal size={14} className={activeFiltersCount > 0 ? 'text-black' : 'text-[#C9952B]'} />
+              <SlidersHorizontal
+                size={14}
+                className={activeFiltersCount > 0 ? 'text-black' : 'text-[#C9952B]'}
+              />
               <span>Filters {activeFiltersCount > 0 ? `· ${activeFiltersCount}` : ''}</span>
               <ChevronDown size={14} className="ml-0.5" />
             </button>
@@ -646,7 +709,11 @@ export default function TalkToAstrologerPage() {
               {activeCategory !== 'All' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-400/10 text-yellow-500 border border-yellow-400/30 font-semibold">
                   Category: {activeCategory}
-                  <button type="button" onClick={() => setActiveCategory('All')} className="hover:text-foreground">
+                  <button
+                    type="button"
+                    onClick={() => setActiveCategory('All')}
+                    className="hover:text-foreground"
+                  >
                     <X size={11} />
                   </button>
                 </span>
@@ -657,7 +724,9 @@ export default function TalkToAstrologerPage() {
                   Sort: {filterModalState.sortBy}
                   <button
                     type="button"
-                    onClick={() => setFilterModalState({ ...filterModalState, sortBy: 'popularity' })}
+                    onClick={() =>
+                      setFilterModalState({ ...filterModalState, sortBy: 'popularity' })
+                    }
                     className="hover:text-foreground"
                   >
                     <X size={11} />
@@ -666,7 +735,10 @@ export default function TalkToAstrologerPage() {
               )}
 
               {filterModalState.skills.map((sk) => (
-                <span key={sk} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium">
+                <span
+                  key={sk}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium"
+                >
                   {sk}
                   <button
                     type="button"
@@ -684,7 +756,10 @@ export default function TalkToAstrologerPage() {
               ))}
 
               {filterModalState.languages.map((lang) => (
-                <span key={lang} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium">
+                <span
+                  key={lang}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium"
+                >
                   🗣️ {lang}
                   <button
                     type="button"
@@ -715,7 +790,10 @@ export default function TalkToAstrologerPage() {
               )}
 
               {filterModalState.countries.map((c) => (
-                <span key={c} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium">
+                <span
+                  key={c}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-foreground border border-border font-medium"
+                >
                   📍 {c}
                   <button
                     type="button"
@@ -737,7 +815,9 @@ export default function TalkToAstrologerPage() {
                   ⭐ {filterModalState.topAstrologer}
                   <button
                     type="button"
-                    onClick={() => setFilterModalState({ ...filterModalState, topAstrologer: 'all' })}
+                    onClick={() =>
+                      setFilterModalState({ ...filterModalState, topAstrologer: 'all' })
+                    }
                     className="hover:text-rose-400"
                   >
                     <X size={11} />
@@ -783,7 +863,8 @@ export default function TalkToAstrologerPage() {
                   alt={`${ast.name} - verified astrologer`}
                   className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`;
+                    (e.currentTarget as HTMLImageElement).src =
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(ast.name || 'Astrologer')}&background=713B32&color=fff&size=512`;
                   }}
                 />
                 {/* Verified Badge */}
@@ -845,7 +926,9 @@ export default function TalkToAstrologerPage() {
                     {ast.languages && ast.languages.length > 0 && (
                       <>
                         <span className="text-[#E5D9C8]">•</span>
-                        <span className="truncate max-w-[100px] text-[#6B5E55] font-medium">{ast.languages.slice(0, 2).join(', ')}</span>
+                        <span className="truncate max-w-[100px] text-[#6B5E55] font-medium">
+                          {ast.languages.slice(0, 2).join(', ')}
+                        </span>
                       </>
                     )}
                   </div>
@@ -924,7 +1007,8 @@ export default function TalkToAstrologerPage() {
                       <div>
                         <h2 className="font-bold text-foreground">{selectedAstrologer.name}</h2>
                         <p className="text-xs text-muted-foreground">
-                          {selectedAstrologer.specialty[0]} · {formatPrice(selectedAstrologer.pricePerMin)}/min
+                          {selectedAstrologer.specialty[0]} ·{' '}
+                          {formatPrice(selectedAstrologer.pricePerMin)}/min
                         </p>
                       </div>
                     </div>
@@ -963,182 +1047,200 @@ export default function TalkToAstrologerPage() {
 
                   <div className="p-5">
                     {bookingStep === 1 && (
-                  <div className="space-y-5">
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-4">
-                        Choose Consultation Type
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {(['video', 'call'] as const).map((type) => (
-                          <button
-                            key={type}
-                            onClick={() => setConsultationType(type)}
-                            className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${consultationType === type ? 'border-[#C9952B] bg-[#C9952B]/10' : 'border-border hover:border-[#C9952B]/50'}`}
-                          >
-                            {type === 'video' ? (
-                              <Video
-                                size={24}
-                                className={
-                                  consultationType === type
-                                    ? 'text-[#C9952B]'
-                                    : 'text-muted-foreground'
+                      <div className="space-y-5">
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-4">
+                            Choose Consultation Type
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {(['video', 'call'] as const).map((type) => (
+                              <button
+                                key={type}
+                                onClick={() => setConsultationType(type)}
+                                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${consultationType === type ? 'border-[#C9952B] bg-[#C9952B]/10' : 'border-border hover:border-[#C9952B]/50'}`}
+                              >
+                                {type === 'video' ? (
+                                  <Video
+                                    size={24}
+                                    className={
+                                      consultationType === type
+                                        ? 'text-[#C9952B]'
+                                        : 'text-muted-foreground'
+                                    }
+                                  />
+                                ) : (
+                                  <Phone
+                                    size={24}
+                                    className={
+                                      consultationType === type
+                                        ? 'text-[#C9952B]'
+                                        : 'text-muted-foreground'
+                                    }
+                                  />
+                                )}
+                                <span className="font-semibold text-sm text-foreground capitalize">
+                                  {type} Consultation
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {type === 'video' ? 'Face-to-face video call' : 'Audio only'}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            About {selectedAstrologer.name}
+                          </p>
+                          <p className="text-sm text-foreground">{selectedAstrologer.about}</p>
+                        </div>
+                        <button
+                          onClick={() => setBookingStep(2)}
+                          className="w-full py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                        >
+                          Continue to Payment <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Step 2 (Payment) */}
+                    {bookingStep === 2 && (
+                      <div className="space-y-5">
+                        <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
+                          <h3 className="font-semibold text-foreground">Booking Summary</h3>
+                          {[
+                            { label: 'Astrologer', value: selectedAstrologer.name },
+                            {
+                              label: 'Type',
+                              value:
+                                consultationType === 'video'
+                                  ? 'Video Consultation'
+                                  : 'Phone Consultation',
+                            },
+                            {
+                              label: 'Max Duration',
+                              value: `${Math.floor((userData?.walletBalance || 0) / (selectedAstrologer?.pricePerMin || 1))} mins (based on balance)`,
+                            },
+                            {
+                              label: 'Rate',
+                              value: `${formatPrice(selectedAstrologer.pricePerMin)}/min`,
+                            },
+                          ].map((item) => (
+                            <div key={item.label} className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">{item.label}</span>
+                              <span className="font-medium text-foreground text-right">
+                                {item.value}
+                              </span>
+                            </div>
+                          ))}
+                          <div className="border-t border-border pt-3 flex justify-between">
+                            <span className="font-semibold text-foreground">
+                              Min Balance Required
+                            </span>
+                            <span className="text-xl font-bold text-[#C9952B] tabular-nums">
+                              {formatPrice(selectedAstrologer.pricePerMin * 5)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Currency note */}
+                        <div className="flex items-center gap-2 p-3 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20">
+                          <Globe size={14} className="text-[#C9952B]" />
+                          <p className="text-xs text-muted-foreground">
+                            Paying in{' '}
+                            <span className="font-semibold text-[#C9952B]">
+                              {currencyCode === 'INR' ? 'Indian Rupee' : 'US Dollar'} (
+                              {currencyCode})
+                            </span>{' '}
+                            · Automatically detected for your region
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="font-semibold text-foreground mb-3">Payment Method</h3>
+                          <div className="p-4 rounded-xl border border-border flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-[#C9952B]/20 flex items-center justify-center">
+                                <span className="text-xl">👛</span>
+                              </div>
+                              <div>
+                                <p className="font-medium text-foreground">My Wallet</p>
+                                <p
+                                  className={`text-sm ${(userData?.walletBalance || 0) >= selectedAstrologer.pricePerMin * 5 ? 'text-green-500' : 'text-red-500'}`}
+                                >
+                                  Available: {formatPrice(userData?.walletBalance || 0)}
+                                </p>
+                              </div>
+                            </div>
+                            {(userData?.walletBalance || 0) <
+                              selectedAstrologer.pricePerMin * 5 && (
+                              <button
+                                onClick={() =>
+                                  router.push(
+                                    `/wallet?redirect=${encodeURIComponent('/talk-to-astrologer')}`
+                                  )
                                 }
-                              />
-                            ) : (
-                              <Phone
-                                size={24}
-                                className={
-                                  consultationType === type
-                                    ? 'text-[#C9952B]'
-                                    : 'text-muted-foreground'
-                                }
-                              />
+                                className="px-4 py-2 rounded-lg bg-red-500/10 text-red-500 text-sm font-semibold hover:bg-red-500/20 transition-colors"
+                              >
+                                Recharge
+                              </button>
                             )}
-                            <span className="font-semibold text-sm text-foreground capitalize">
-                              {type} Consultation
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {type === 'video' ? 'Face-to-face video call' : 'Audio only'}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-muted/50 border border-border">
-                      <p className="text-xs text-muted-foreground mb-1">
-                        About {selectedAstrologer.name}
-                      </p>
-                      <p className="text-sm text-foreground">{selectedAstrologer.about}</p>
-                    </div>
-                    <button
-                      onClick={() => setBookingStep(2)}
-                      className="w-full py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all flex items-center justify-center gap-2"
-                    >
-                      Continue to Payment <ChevronRight size={16} />
-                    </button>
-                  </div>
-                )}
-
-                {/* Step 2 (Payment) */}
-                {bookingStep === 2 && (
-                  <div className="space-y-5">
-                    <div className="p-4 rounded-xl bg-muted/50 border border-border space-y-3">
-                      <h3 className="font-semibold text-foreground">Booking Summary</h3>
-                      {[
-                        { label: 'Astrologer', value: selectedAstrologer.name },
-                        {
-                          label: 'Type',
-                          value:
-                            consultationType === 'video'
-                              ? 'Video Consultation'
-                              : 'Phone Consultation',
-                        },
-                        {
-                          label: 'Max Duration',
-                          value: `${Math.floor((userData?.walletBalance || 0) / (selectedAstrologer?.pricePerMin || 1))} mins (based on balance)`,
-                        },
-                        {
-                          label: 'Rate',
-                          value: `${formatPrice(selectedAstrologer.pricePerMin)}/min`,
-                        },
-                      ].map((item) => (
-                        <div key={item.label} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">{item.label}</span>
-                          <span className="font-medium text-foreground text-right">{item.value}</span>
-                        </div>
-                      ))}
-                      <div className="border-t border-border pt-3 flex justify-between">
-                        <span className="font-semibold text-foreground">Min Balance Required</span>
-                        <span className="text-xl font-bold text-[#C9952B] tabular-nums">
-                          {formatPrice(selectedAstrologer.pricePerMin * 5)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Currency note */}
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/20">
-                      <Globe size={14} className="text-[#C9952B]" />
-                      <p className="text-xs text-muted-foreground">
-                        Paying in{' '}
-                        <span className="font-semibold text-[#C9952B]">
-                          {currencyCode === 'INR' ? 'Indian Rupee' : 'US Dollar'} ({currencyCode})
-                        </span>{' '}
-                        · Automatically detected for your region
-                      </p>
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-3">Payment Method</h3>
-                      <div className="p-4 rounded-xl border border-border flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#C9952B]/20 flex items-center justify-center">
-                            <span className="text-xl">👛</span>
                           </div>
-                          <div>
-                            <p className="font-medium text-foreground">My Wallet</p>
-                            <p className={`text-sm ${(userData?.walletBalance || 0) >= selectedAstrologer.pricePerMin * 5 ? 'text-green-500' : 'text-red-500'}`}>
-                              Available: {formatPrice(userData?.walletBalance || 0)}
+                          {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 && (
+                            <p className="text-xs text-red-500 mt-2 text-center">
+                              Minimum 5 mins required. Please recharge your wallet to continue.
                             </p>
-                          </div>
-                        </div>
-                        {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 && (
-                          <button 
-                            onClick={() => router.push(`/wallet?redirect=${encodeURIComponent('/talk-to-astrologer')}`)}
-                            className="px-4 py-2 rounded-lg bg-red-500/10 text-red-500 text-sm font-semibold hover:bg-red-500/20 transition-colors"
-                          >
-                            Recharge
-                          </button>
-                        )}
-                      </div>
-                      {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 && (
-                         <p className="text-xs text-red-500 mt-2 text-center">Minimum 5 mins required. Please recharge your wallet to continue.</p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setBookingStep(1)}
-                        className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold hover:border-[#C9952B]/50 transition-all"
-                      >
-                        Back
-                      </button>
-                      {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 ? (
-                        <button
-                          onClick={() => router.push(`/wallet?redirect=${encodeURIComponent('/talk-to-astrologer')}`)}
-                          className="flex-1 py-3 rounded-xl font-semibold bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
-                        >
-                          Recharge Wallet
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleBook}
-                          disabled={isBooking || isWaiting}
-                          className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                        >
-                          {isWaiting ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              Connecting...
-                            </>
-                          ) : isBooking ? (
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <Phone size={16} /> Connect Now
-                            </>
                           )}
-                        </button>
-                      )}
-                    </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => setBookingStep(1)}
+                            className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold hover:border-[#C9952B]/50 transition-all"
+                          >
+                            Back
+                          </button>
+                          {(userData?.walletBalance || 0) < selectedAstrologer.pricePerMin * 5 ? (
+                            <button
+                              onClick={() =>
+                                router.push(
+                                  `/wallet?redirect=${encodeURIComponent('/talk-to-astrologer')}`
+                                )
+                              }
+                              className="flex-1 py-3 rounded-xl font-semibold bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
+                            >
+                              Recharge Wallet
+                            </button>
+                          ) : (
+                            <button
+                              onClick={handleBook}
+                              disabled={isBooking || isWaiting}
+                              className="flex-1 py-3 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                            >
+                              {isWaiting ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                  Connecting...
+                                </>
+                              ) : isBooking ? (
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              ) : (
+                                <>
+                                  <Phone size={16} /> Connect Now
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>,
-      document.body
-    )}
 
       {/* Comprehensive Astrologer Filters Modal (Matching Design & Dynamic Data) */}
       <AstrologerFilterModal

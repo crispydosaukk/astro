@@ -46,7 +46,11 @@ export default function TithiPage() {
     { name: 'Dwadashi', deity: 'Vishnu', nature: 'Fulfillment & Charity' },
     { name: 'Trayodashi', deity: 'Shiva / Kamadeva', nature: 'Pradosham & Devotion' },
     { name: 'Chaturdashi', deity: 'Shiva', nature: 'Shivaratri & Meditation' },
-    { name: 'Purnima / Amavasya', deity: 'Moon / Ancestors', nature: 'Full Illumination / Ancestral Worship' },
+    {
+      name: 'Purnima / Amavasya',
+      deity: 'Moon / Ancestors',
+      nature: 'Full Illumination / Ancestral Worship',
+    },
   ];
 
   return (
@@ -96,25 +100,44 @@ export default function TithiPage() {
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="w-full px-4 py-3 pl-10 rounded-xl bg-white/5 border border-white/10 text-foreground text-sm focus:border-[#C9952B] outline-none transition-colors"
                 />
-                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none"
+                />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Location / City</label>
-              <CityLocationInput value={location} onChange={(city: string) => setLocation(city)} placeholder="Search city" />
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Location / City
+              </label>
+              <CityLocationInput
+                value={location}
+                onChange={(city: string) => setLocation(city)}
+                placeholder="Search city"
+              />
             </div>
             <button
               onClick={handleCalculate}
               disabled={isCalculating}
               className="w-full py-3.5 rounded-2xl gold-gradient-bg text-white font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#C9952B]/20 active:scale-95 cursor-pointer disabled:opacity-75"
             >
-              {isCalculating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+              {isCalculating ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Sparkles size={18} />
+              )}
               <span>{isCalculating ? 'Calculating...' : 'Check Tithi'}</span>
             </button>
           </div>
           <div className="pt-4 border-t border-white/10 flex items-center justify-between flex-wrap gap-2 text-sm font-bold text-[#C9952B]">
-            <div className="flex items-center gap-2"><MapPin size={16} /><span>{location}</span></div>
-            <div className="flex items-center gap-2"><Calendar size={16} /><span>{panchang.formattedDate}</span></div>
+            <div className="flex items-center gap-2">
+              <MapPin size={16} />
+              <span>{location}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar size={16} />
+              <span>{panchang.formattedDate}</span>
+            </div>
           </div>
         </div>
 
@@ -123,13 +146,17 @@ export default function TithiPage() {
           <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest flex items-center justify-center gap-1.5">
             <Moon size={16} /> Active Tithi & Paksha
           </span>
-          <h2 className="text-3xl font-bold text-foreground">{panchang.tithi} ({panchang.paksha} Paksha)</h2>
+          <h2 className="text-3xl font-bold text-foreground">
+            {panchang.tithi} ({panchang.paksha} Paksha)
+          </h2>
           <p className="text-xs text-muted-foreground">Governed by Vedic lunar cycle energy</p>
         </div>
 
         {/* 15 Tithis Table */}
         <div className="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 space-y-6">
-          <h2 className="text-xl font-bold text-foreground">The 15 Tithis of Vedic Lunar Calendar</h2>
+          <h2 className="text-xl font-bold text-foreground">
+            The 15 Tithis of Vedic Lunar Calendar
+          </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

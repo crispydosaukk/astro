@@ -72,7 +72,9 @@ export default function FreePanchangPage() {
     fetchAiSynthesis(selectedDate, location);
     setIsGenerating(false);
 
-    setToastMessage(`Panchang calculated successfully for ${calculated.formattedDate} (${location})`);
+    setToastMessage(
+      `Panchang calculated successfully for ${calculated.formattedDate} (${location})`
+    );
     setTimeout(() => setToastMessage(null), 4000);
 
     if (user) {
@@ -192,7 +194,8 @@ export default function FreePanchangPage() {
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-[#F8F3EA]/90 font-medium leading-relaxed max-w-2xl drop-shadow">
-                  Accurate Vedic Tithi, Nakshatra, Yoga, Karana, Abhijit Muhurat, Rahu Kaal, Sunrise, Sunset, and auspicious timings calculated for your exact location.
+                  Accurate Vedic Tithi, Nakshatra, Yoga, Karana, Abhijit Muhurat, Rahu Kaal,
+                  Sunrise, Sunset, and auspicious timings calculated for your exact location.
                 </p>
               </motion.div>
 
@@ -205,15 +208,21 @@ export default function FreePanchangPage() {
               >
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/15 backdrop-blur-md shadow-lg">
                   <Sun size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Abhijit Muhurat</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Abhijit Muhurat
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
                   <Moon size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Tithi & Nakshatra</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Tithi & Nakshatra
+                  </span>
                 </div>
                 <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-black/45 border border-white/10 backdrop-blur-md shadow-lg">
                   <Clock size={16} className="text-[#F6D075]" />
-                  <span className="text-xs sm:text-sm font-semibold text-white/95">Rahu Kaal Timings</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white/95">
+                    Rahu Kaal Timings
+                  </span>
                 </div>
               </motion.div>
 
@@ -226,7 +235,9 @@ export default function FreePanchangPage() {
               >
                 <button
                   onClick={() => {
-                    document.getElementById('panchang-selector')?.scrollIntoView({ behavior: 'smooth' });
+                    document
+                      .getElementById('panchang-selector')
+                      ?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[#C9952B]/40 text-sm sm:text-base"
                 >
@@ -244,7 +255,10 @@ export default function FreePanchangPage() {
         </div>
       </section>
 
-      <div id="panchang-selector" className="pt-8 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12">
+      <div
+        id="panchang-selector"
+        className="pt-8 pb-16 px-6 lg:px-10 max-w-screen-2xl mx-auto space-y-12"
+      >
         {/* Date & Location Form Selector - Compact & Clean */}
         <div className="max-w-4xl mx-auto">
           <div className="glass-card p-6 sm:p-7 rounded-3xl border border-[#B88A44]/30 space-y-5 shadow-2xl relative z-30">
@@ -252,10 +266,15 @@ export default function FreePanchangPage() {
               <span className="text-xs font-bold text-[#713B32] uppercase tracking-widest bg-[#EDE4D5] px-3 py-1 rounded-full border border-[#E5D9C8] inline-block">
                 Panchang Calculator
               </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#292522]">Calculate Today&apos;s Vedic Almanac</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#292522]">
+                Calculate Today&apos;s Vedic Almanac
+              </h2>
             </div>
 
-            <form onSubmit={handleGeneratePanchang} className="grid sm:grid-cols-12 gap-4 items-end">
+            <form
+              onSubmit={handleGeneratePanchang}
+              className="grid sm:grid-cols-12 gap-4 items-end"
+            >
               <div className="sm:col-span-4 space-y-1.5">
                 <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider flex items-center gap-1.5">
                   <Calendar size={13} className="text-[#B88A44]" /> Select Date
@@ -267,7 +286,10 @@ export default function FreePanchangPage() {
                     onChange={(e) => setSelectedDate(e.target.value)}
                     className="w-full px-4 py-3 pl-10 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:border-[#B88A44] focus:ring-2 focus:ring-[#B88A44]/20 outline-none transition-all shadow-sm"
                   />
-                  <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#B88A44] pointer-events-none" />
+                  <Calendar
+                    size={16}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#B88A44] pointer-events-none"
+                  />
                 </div>
               </div>
 
@@ -288,7 +310,11 @@ export default function FreePanchangPage() {
                   disabled={isGenerating}
                   className="w-full py-3.5 rounded-xl gold-gradient-bg text-[#292522] font-extrabold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#C9952B]/30 cursor-pointer"
                 >
-                  {isGenerating ? <Sparkles size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                  {isGenerating ? (
+                    <Sparkles size={16} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={16} />
+                  )}
                   <span>{isGenerating ? 'Calculating...' : 'Get Panchang'}</span>
                 </button>
               </div>
@@ -359,27 +385,30 @@ export default function FreePanchangPage() {
                   </div>
                 )}
 
-                {aiSummary.inauspiciousPrecautions && Array.isArray(aiSummary.inauspiciousPrecautions) && (
-                  <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-2">
-                    <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block">
-                      ⚠ Inauspicious Periods &amp; Precautions
-                    </span>
-                    <ul className="space-y-1 text-xs text-gray-200">
-                      {aiSummary.inauspiciousPrecautions.map((prec: string, idx: number) => (
-                        <li key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                          <span className="text-rose-400 font-bold">•</span>
-                          <span>{prec}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {aiSummary.inauspiciousPrecautions &&
+                  Array.isArray(aiSummary.inauspiciousPrecautions) && (
+                    <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-2">
+                      <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block">
+                        ⚠ Inauspicious Periods &amp; Precautions
+                      </span>
+                      <ul className="space-y-1 text-xs text-gray-200">
+                        {aiSummary.inauspiciousPrecautions.map((prec: string, idx: number) => (
+                          <li key={idx} className="flex items-start gap-1.5 leading-relaxed">
+                            <span className="text-rose-400 font-bold">•</span>
+                            <span>{prec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
               </div>
 
               {/* Sacred Daily Shloka */}
               {aiSummary.dailyBlessingShloka && (
                 <div className="p-4 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/20 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-[#F3E5AB]">Daily Sacred Vedic Shloka</span>
+                  <span className="text-[10px] uppercase font-bold text-[#F3E5AB]">
+                    Daily Sacred Vedic Shloka
+                  </span>
                   <p className="text-xs sm:text-sm font-serif text-[#F3E5AB] italic">
                     &ldquo;{aiSummary.dailyBlessingShloka}&rdquo;
                   </p>
@@ -403,7 +432,9 @@ export default function FreePanchangPage() {
                 <Sun size={20} />
               </div>
               <span className="text-xs text-muted-foreground font-semibold block">☀️ Sunrise</span>
-              <span className="text-lg font-bold text-foreground font-mono">{panchang.sunrise}</span>
+              <span className="text-lg font-bold text-foreground font-mono">
+                {panchang.sunrise}
+              </span>
             </div>
 
             <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
@@ -419,7 +450,9 @@ export default function FreePanchangPage() {
                 <Moon size={20} />
               </div>
               <span className="text-xs text-muted-foreground font-semibold block">🌕 Moonrise</span>
-              <span className="text-lg font-bold text-foreground font-mono">{panchang.moonrise}</span>
+              <span className="text-lg font-bold text-foreground font-mono">
+                {panchang.moonrise}
+              </span>
             </div>
 
             <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
@@ -427,7 +460,9 @@ export default function FreePanchangPage() {
                 <Moon size={20} />
               </div>
               <span className="text-xs text-muted-foreground font-semibold block">🌑 Moonset</span>
-              <span className="text-lg font-bold text-foreground font-mono">{panchang.moonset}</span>
+              <span className="text-lg font-bold text-foreground font-mono">
+                {panchang.moonset}
+              </span>
             </div>
           </div>
 
@@ -448,8 +483,13 @@ export default function FreePanchangPage() {
                 { label: 'Shaka Samvat', val: panchang.shakaSamvat },
                 { label: 'Vikram Samvat', val: panchang.vikramSamvat },
               ].map((item) => (
-                <div key={item.label} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
-                  <span className="text-[11px] font-bold text-muted-foreground uppercase">{item.label}</span>
+                <div
+                  key={item.label}
+                  className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+                >
+                  <span className="text-[11px] font-bold text-muted-foreground uppercase">
+                    {item.label}
+                  </span>
                   <span className="text-sm font-bold text-foreground block">{item.val}</span>
                 </div>
               ))}
@@ -462,7 +502,9 @@ export default function FreePanchangPage() {
               <h2 className="text-xl font-bold text-red-400 flex items-center gap-2">
                 <ShieldAlert size={20} /> Inauspicious Timings (Ashubha Muhurat)
               </h2>
-              <span className="text-xs text-muted-foreground">Avoid starting major tasks in Rahu Kaal</span>
+              <span className="text-xs text-muted-foreground">
+                Avoid starting major tasks in Rahu Kaal
+              </span>
             </div>
 
             <div className="overflow-x-auto">
@@ -475,9 +517,14 @@ export default function FreePanchangPage() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {panchang.ashubhaMuhurats.map((row) => (
-                    <tr key={row.name} className={`hover:bg-white/5 transition-colors ${row.isRahu ? 'bg-red-500/10 font-bold' : ''}`}>
+                    <tr
+                      key={row.name}
+                      className={`hover:bg-white/5 transition-colors ${row.isRahu ? 'bg-red-500/10 font-bold' : ''}`}
+                    >
                       <td className="px-4 py-3 font-bold text-foreground">{row.name}</td>
-                      <td className="px-4 py-3 text-red-400 font-mono text-xs font-semibold">{row.time}</td>
+                      <td className="px-4 py-3 text-red-400 font-mono text-xs font-semibold">
+                        {row.time}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -503,8 +550,10 @@ export default function FreePanchangPage() {
               </h3>
               <p className="text-xs text-muted-foreground">Shubh, Amrit, Labh & Chara Muhurats</p>
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center font-mono font-bold text-amber-400 text-xs leading-relaxed">
-                Amrit: {panchang.dayChoghadiya[0]?.start || '05:51 AM'} - {panchang.dayChoghadiya[0]?.end || '07:29 AM'} <br />
-                Shubh: {panchang.dayChoghadiya[2]?.start || '09:08 AM'} - {panchang.dayChoghadiya[2]?.end || '10:46 AM'}
+                Amrit: {panchang.dayChoghadiya[0]?.start || '05:51 AM'} -{' '}
+                {panchang.dayChoghadiya[0]?.end || '07:29 AM'} <br />
+                Shubh: {panchang.dayChoghadiya[2]?.start || '09:08 AM'} -{' '}
+                {panchang.dayChoghadiya[2]?.end || '10:46 AM'}
               </div>
             </div>
 
@@ -542,7 +591,9 @@ export default function FreePanchangPage() {
                     <tr key={row.planet} className="hover:bg-white/5 transition-colors">
                       <td className="px-4 py-3 font-bold text-foreground">{row.planet}</td>
                       <td className="px-4 py-3 text-muted-foreground">{row.rashi}</td>
-                      <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{row.lon}</td>
+                      <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
+                        {row.lon}
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">{row.nakshatra}</td>
                       <td className="px-4 py-3 font-bold text-[#C9952B]">{row.pada}</td>
                     </tr>
@@ -575,7 +626,10 @@ export default function FreePanchangPage() {
                   className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-foreground text-center flex items-center justify-center gap-1 transition-all group"
                 >
                   <span>{page.title}</span>
-                  <ChevronRight size={12} className="text-[#C9952B] group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight
+                    size={12}
+                    className="text-[#C9952B] group-hover:translate-x-0.5 transition-transform"
+                  />
                 </Link>
               ))}
             </div>

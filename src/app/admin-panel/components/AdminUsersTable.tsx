@@ -244,14 +244,30 @@ export default function AdminUsersTable() {
           <table className="w-full text-sm text-left">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-950/60">
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">User / Contact Info</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Plan</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Wallet Balance</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Joined Date</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Reports</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Consultations</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  User / Contact Info
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Plan
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Wallet Balance
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Joined Date
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Reports
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Consultations
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-5 py-3.5 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -306,7 +322,9 @@ export default function AdminUsersTable() {
                               </span>
                             )}
                             {!user.phone && !user.email && (
-                              <span className="text-[11px] text-slate-500 italic">No contact info</span>
+                              <span className="text-[11px] text-slate-500 italic">
+                                No contact info
+                              </span>
                             )}
                           </div>
                         </div>
@@ -320,8 +338,8 @@ export default function AdminUsersTable() {
                           user.plan === 'Annual'
                             ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30'
                             : user.plan === 'Premium'
-                            ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                            : 'bg-slate-800 text-slate-300 border border-slate-700'
+                              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                              : 'bg-slate-800 text-slate-300 border border-slate-700'
                         }`}
                       >
                         {user.plan}
@@ -399,8 +417,11 @@ export default function AdminUsersTable() {
         {/* Pagination */}
         <div className="px-5 py-4 border-t border-slate-800 bg-slate-950/40 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-3">
           <div>
-            Showing <span className="text-white font-bold">{Math.min(filtered.length, paginated.length)}</span> of{' '}
-            <span className="text-white font-bold">{filtered.length}</span> registered users
+            Showing{' '}
+            <span className="text-white font-bold">
+              {Math.min(filtered.length, paginated.length)}
+            </span>{' '}
+            of <span className="text-white font-bold">{filtered.length}</span> registered users
           </div>
           <div className="flex items-center gap-1.5">
             <button
@@ -461,7 +482,9 @@ export default function AdminUsersTable() {
                         className="w-14 h-14 rounded-full object-cover bg-slate-800 border border-slate-700"
                       />
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-base font-bold text-white truncate">{selectedUser.name}</h4>
+                        <h4 className="text-base font-bold text-white truncate">
+                          {selectedUser.name}
+                        </h4>
                         <span
                           className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                             selectedUser.status === 'active'

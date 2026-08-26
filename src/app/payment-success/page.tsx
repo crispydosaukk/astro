@@ -48,12 +48,11 @@ function PaymentSuccessContent() {
         localStorage.removeItem('pending_report');
         setStatus('done');
         toast.success('Report generated successfully!');
-        
+
         // Wait a moment so user sees success
         setTimeout(() => {
           router.push('/my-reports');
         }, 1500);
-
       } catch (error: any) {
         console.error(error);
         setStatus('error');

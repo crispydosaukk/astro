@@ -88,12 +88,29 @@ export default function LoveHoroscopePage() {
       marsStatus: 'Mild Manglik (Naturally balanced after age 28)',
       loveScore: '88%',
       compatibilityHighlights: [
-        { area: 'Emotional & Mental Connection', score: '92%', desc: 'Deep intuitive bonding and mutual unspoken understanding.' },
-        { area: 'Physical & Romantic Chemistry', score: '85%', desc: 'Venusian grace fosters enduring passion and mutual attraction.' },
-        { area: 'Marital Harmony & Longevity', score: '89%', desc: 'Favorable 7th house lord transit provides stability and shared values.' },
-        { area: 'Communication & Problem Solving', score: '86%', desc: 'Balanced Mercury-Jupiter alignment ensures respectful communication.' },
+        {
+          area: 'Emotional & Mental Connection',
+          score: '92%',
+          desc: 'Deep intuitive bonding and mutual unspoken understanding.',
+        },
+        {
+          area: 'Physical & Romantic Chemistry',
+          score: '85%',
+          desc: 'Venusian grace fosters enduring passion and mutual attraction.',
+        },
+        {
+          area: 'Marital Harmony & Longevity',
+          score: '89%',
+          desc: 'Favorable 7th house lord transit provides stability and shared values.',
+        },
+        {
+          area: 'Communication & Problem Solving',
+          score: '86%',
+          desc: 'Balanced Mercury-Jupiter alignment ensures respectful communication.',
+        },
       ],
-      timingForecast: 'Favorable marriage and relationship progression window active over the next 14 to 18 months.',
+      timingForecast:
+        'Favorable marriage and relationship progression window active over the next 14 to 18 months.',
       remedies: [
         'Chant the Shukra Gayatri Mantra ("Om Shukraya Vidmahe...") on Friday mornings.',
         'Wear a natural White Zircon or Rose Quartz energized on a Friday during Shukla Paksha.',
@@ -141,9 +158,18 @@ export default function LoveHoroscopePage() {
   };
 
   const loveFaqs = [
-    { q: 'What determines love and marriage in Vedic Astrology?', a: 'In Vedic Astrology, the 7th house (Kalatra Bhava) governs marriage and lifelong partnerships, while the 5th house governs romance and emotional attraction. Venus (Shukra) is the prime karaka (significator) of love, and Jupiter (Guru) represents marital wisdom and auspiciousness.' },
-    { q: 'How does Manglik Dosha affect relationships?', a: 'Mangal (Mars) represents fiery drive and passion. When placed in the 1st, 4th, 7th, 8th, or 12th houses, it can introduce strong independent temperament. However, with proper planetary cancellations, maturity after age 28, or matching charts, Manglik Dosha creates dynamic and successful marriages.' },
-    { q: 'When is the best time for marriage according to my horoscope?', a: 'Marriage timing is indicated by the dasha periods of the 7th house lord, planets posited in the 7th house, or transits of Jupiter (Guru Gochar) aspecting the natal 7th house or Venus.' },
+    {
+      q: 'What determines love and marriage in Vedic Astrology?',
+      a: 'In Vedic Astrology, the 7th house (Kalatra Bhava) governs marriage and lifelong partnerships, while the 5th house governs romance and emotional attraction. Venus (Shukra) is the prime karaka (significator) of love, and Jupiter (Guru) represents marital wisdom and auspiciousness.',
+    },
+    {
+      q: 'How does Manglik Dosha affect relationships?',
+      a: 'Mangal (Mars) represents fiery drive and passion. When placed in the 1st, 4th, 7th, 8th, or 12th houses, it can introduce strong independent temperament. However, with proper planetary cancellations, maturity after age 28, or matching charts, Manglik Dosha creates dynamic and successful marriages.',
+    },
+    {
+      q: 'When is the best time for marriage according to my horoscope?',
+      a: 'Marriage timing is indicated by the dasha periods of the 7th house lord, planets posited in the 7th house, or transits of Jupiter (Guru Gochar) aspecting the natal 7th house or Venus.',
+    },
   ];
 
   return (
@@ -182,10 +208,13 @@ export default function LoveHoroscopePage() {
                 </span>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight max-w-xl drop-shadow-lg">
                   Discover Your <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">Love & Marriage Destiny</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F6D075] via-[#FFE29F] to-[#D4A03D] drop-shadow-sm">
+                    Love & Marriage Destiny
+                  </span>
                 </h1>
                 <p className="text-base sm:text-lg text-[#F8F3EA]/90 font-medium leading-relaxed max-w-lg drop-shadow">
-                  Analyze your 7th House (Kalatra Bhava), Venusian strength, Manglik alignment, and soulmate timing with authentic Vedic astrology.
+                  Analyze your 7th House (Kalatra Bhava), Venusian strength, Manglik alignment, and
+                  soulmate timing with authentic Vedic astrology.
                 </p>
               </div>
 
@@ -208,7 +237,9 @@ export default function LoveHoroscopePage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">Gender</label>
+                      <label className="text-xs font-bold text-[#713B32] uppercase tracking-wider">
+                        Gender
+                      </label>
                       <select
                         value={formData.gender}
                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
@@ -267,7 +298,9 @@ export default function LoveHoroscopePage() {
                       </label>
                       <select
                         value={formData.relationshipStatus}
-                        onChange={(e) => setFormData({ ...formData, relationshipStatus: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, relationshipStatus: e.target.value })
+                        }
                         className="w-full px-4 py-3 rounded-xl bg-white border border-[#E5D9C8] text-[#292522] text-sm focus:outline-none focus:border-[#C9952B] focus:ring-2 focus:ring-[#C9952B]/20 transition-all shadow-sm"
                       >
                         <option value="Single">Single (Seeking Love)</option>
@@ -312,12 +345,15 @@ export default function LoveHoroscopePage() {
                 </div>
                 <h3 className="text-2xl font-bold text-gradient-gold">Vedic Relationship Yogas</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                  Discover how planetary positions of Venus, Jupiter, and the 7th house shape your emotional bonds, romantic synergy, and marital happiness.
+                  Discover how planetary positions of Venus, Jupiter, and the 7th house shape your
+                  emotional bonds, romantic synergy, and marital happiness.
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 w-full pt-2">
                   <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-left">
-                    <span className="text-[10px] font-bold text-[#C9952B] uppercase">7th House</span>
+                    <span className="text-[10px] font-bold text-[#C9952B] uppercase">
+                      7th House
+                    </span>
                     <p className="text-xs font-bold text-foreground">Kalatra Bhava</p>
                     <p className="text-[10px] text-muted-foreground">Spouse & Marriage</p>
                   </div>
@@ -340,7 +376,10 @@ export default function LoveHoroscopePage() {
       {/* Love Horoscope Generated Results Section */}
       <AnimatePresence>
         {reportResult && (
-          <section id="love-report-section" className="py-16 bg-background relative z-10 space-y-10 border-b border-white/5">
+          <section
+            id="love-report-section"
+            className="py-16 bg-background relative z-10 space-y-10 border-b border-white/5"
+          >
             <div className="max-w-5xl mx-auto px-6 space-y-8">
               {/* Header Bar */}
               <div className="glass-card p-6 sm:p-8 rounded-3xl border border-rose-500/30 bg-rose-500/5 space-y-4">
@@ -350,10 +389,12 @@ export default function LoveHoroscopePage() {
                       Love & Relationship Analysis
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                      Love Horoscope for <span className="text-gradient-gold">{reportResult.name}</span>
+                      Love Horoscope for{' '}
+                      <span className="text-gradient-gold">{reportResult.name}</span>
                     </h2>
                     <p className="text-xs text-muted-foreground pt-1">
-                      📅 {reportResult.dob} · ⏰ {reportResult.tob} · 📍 {reportResult.pob} · Status: {reportResult.relationshipStatus}
+                      📅 {reportResult.dob} · ⏰ {reportResult.tob} · 📍 {reportResult.pob} ·
+                      Status: {reportResult.relationshipStatus}
                     </p>
                   </div>
 
@@ -377,26 +418,42 @@ export default function LoveHoroscopePage() {
               {/* Core Astrological Placements */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Moon Rashi</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Moon Rashi
+                  </span>
                   <div className="text-base font-bold text-[#C9952B]">{reportResult.rashiName}</div>
-                  <p className="text-[11px] text-muted-foreground">Lord: {reportResult.rashiLord}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Lord: {reportResult.rashiLord}
+                  </p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Nakshatra</span>
-                  <div className="text-base font-bold text-rose-400">{reportResult.nakshatraName}</div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Nakshatra
+                  </span>
+                  <div className="text-base font-bold text-rose-400">
+                    {reportResult.nakshatraName}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Gana: {reportResult.gana}</p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">7th House (Kalatra)</span>
-                  <div className="text-base font-bold text-emerald-400">{reportResult.seventhHouseLord}</div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    7th House (Kalatra)
+                  </span>
+                  <div className="text-base font-bold text-emerald-400">
+                    {reportResult.seventhHouseLord}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Spouse Significator</p>
                 </div>
 
                 <div className="glass-card p-4 rounded-2xl border border-white/10 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Love Synergy</span>
-                  <div className="text-base font-bold text-gradient-gold font-mono">{reportResult.loveScore}</div>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                    Love Synergy
+                  </span>
+                  <div className="text-base font-bold text-gradient-gold font-mono">
+                    {reportResult.loveScore}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Venusian Alignment</p>
                 </div>
               </div>
@@ -415,10 +472,15 @@ export default function LoveHoroscopePage() {
 
               {/* Detailed Relationship Highlights */}
               <div className="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 space-y-6">
-                <h3 className="text-lg font-bold text-foreground">Compatibility & Harmony Pillars</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  Compatibility & Harmony Pillars
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {reportResult.compatibilityHighlights.map((item: any, idx: number) => (
-                    <div key={idx} className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2"
+                    >
                       <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-foreground">{item.area}</span>
                         <span className="text-xs font-bold text-rose-400">{item.score}</span>
@@ -432,14 +494,24 @@ export default function LoveHoroscopePage() {
               {/* Planetary Status & Timing Window */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-rose-400">Venus & Mars Alignment</span>
-                  <p className="text-sm text-foreground"><strong>Venus (Shukra):</strong> {reportResult.venusPlacement}</p>
-                  <p className="text-sm text-foreground"><strong>Mars (Mangal):</strong> {reportResult.marsStatus}</p>
+                  <span className="text-xs font-bold uppercase tracking-wider text-rose-400">
+                    Venus & Mars Alignment
+                  </span>
+                  <p className="text-sm text-foreground">
+                    <strong>Venus (Shukra):</strong> {reportResult.venusPlacement}
+                  </p>
+                  <p className="text-sm text-foreground">
+                    <strong>Mars (Mangal):</strong> {reportResult.marsStatus}
+                  </p>
                 </div>
 
                 <div className="glass-card p-6 rounded-3xl border border-[#C9952B]/30 bg-[#C9952B]/5 space-y-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">Marriage & Romance Timing</span>
-                  <p className="text-sm text-foreground leading-relaxed">{reportResult.timingForecast}</p>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#C9952B]">
+                    Marriage & Romance Timing
+                  </span>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    {reportResult.timingForecast}
+                  </p>
                 </div>
               </div>
 
@@ -450,7 +522,10 @@ export default function LoveHoroscopePage() {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {reportResult.remedies.map((rem: string, idx: number) => (
-                    <div key={idx} className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs text-foreground/90">
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs text-foreground/90"
+                    >
                       <span className="w-5 h-5 rounded-full gold-gradient-bg text-white font-bold flex items-center justify-center shrink-0 mt-0.5 text-[10px]">
                         {idx + 1}
                       </span>
@@ -482,9 +557,15 @@ export default function LoveHoroscopePage() {
       <section className="py-16 bg-background/50 border-b border-white/5">
         <div className="max-w-5xl mx-auto px-6 space-y-12">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">Vedic Relationship Science</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Understanding Love, Marriage & Soulmates</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">The classical astronomical foundations of romantic compatibility in Vedic astrology</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              Vedic Relationship Science
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Understanding Love, Marriage & Soulmates
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              The classical astronomical foundations of romantic compatibility in Vedic astrology
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -494,10 +575,14 @@ export default function LoveHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
                   <Heart size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">1. The 7th House (Kalatra Bhava)</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  1. The 7th House (Kalatra Bhava)
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                The 7th house in your birth chart represents your life partner, legal union, marital happiness, and the qualities your soul seeks in another. The planetary lord of your 7th house reveals your spouse&apos;s character, appearance, and career background.
+                The 7th house in your birth chart represents your life partner, legal union, marital
+                happiness, and the qualities your soul seeks in another. The planetary lord of your
+                7th house reveals your spouse&apos;s character, appearance, and career background.
               </p>
             </div>
 
@@ -507,10 +592,14 @@ export default function LoveHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/20 flex items-center justify-center text-[#C9952B]">
                   <Sparkles size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">2. Venus (Shukra) — Cosmic Love Principle</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  2. Venus (Shukra) — Cosmic Love Principle
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Venus governs beauty, romance, affection, aesthetic tastes, and physical chemistry. A strong Venus in Taurus, Libra, or Pisces creates radiant personal charm, deep fidelity, and harmonious relationships.
+                Venus governs beauty, romance, affection, aesthetic tastes, and physical chemistry.
+                A strong Venus in Taurus, Libra, or Pisces creates radiant personal charm, deep
+                fidelity, and harmonious relationships.
               </p>
             </div>
 
@@ -520,10 +609,14 @@ export default function LoveHoroscopePage() {
                 <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
                   <Flame size={20} />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">3. Manglik Dosha & Passion Balance</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  3. Manglik Dosha & Passion Balance
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Mangal (Mars) brings courage, passion, and vitality. When placed in relationship houses, it requires mindful emotional regulation. After age 28, Mars energy naturally matures, turning into enduring loyalty and mutual support.
+                Mangal (Mars) brings courage, passion, and vitality. When placed in relationship
+                houses, it requires mindful emotional regulation. After age 28, Mars energy
+                naturally matures, turning into enduring loyalty and mutual support.
               </p>
             </div>
 
@@ -536,7 +629,9 @@ export default function LoveHoroscopePage() {
                 <h3 className="text-lg font-bold text-foreground">4. Rahu & Ketu Karmic Bonds</h3>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                The lunar nodes reveal past-life connections (Rinānubandha). Intense magnetic attractions often stem from unfinished karmic cycles that transform into profound spiritual evolution when approached with mutual respect.
+                The lunar nodes reveal past-life connections (Rinānubandha). Intense magnetic
+                attractions often stem from unfinished karmic cycles that transform into profound
+                spiritual evolution when approached with mutual respect.
               </p>
             </div>
           </div>
@@ -547,13 +642,20 @@ export default function LoveHoroscopePage() {
       <section className="py-16 bg-background/50 border-b border-white/5">
         <div className="max-w-4xl mx-auto px-6 space-y-8">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Frequently Asked Questions</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Understanding Love, Marriage & Relationship Astrology</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Understanding Love, Marriage & Relationship Astrology
+            </p>
           </div>
 
           <div className="space-y-3">
             {loveFaqs.map((faq, idx) => (
-              <div key={idx} className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+              <div
+                key={idx}
+                className="glass-card rounded-2xl border border-white/10 overflow-hidden"
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                   className="w-full p-5 text-left font-semibold text-foreground flex justify-between items-center text-sm"
@@ -595,9 +697,15 @@ export default function LoveHoroscopePage() {
       <section className="py-16 bg-background relative z-10">
         <div className="max-w-5xl mx-auto px-6 space-y-8">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">Explore Specialized Horoscopes</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Gain Complete Life Clarity</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">Navigate directly to our other dedicated Vedic horoscope reports</p>
+            <span className="text-xs font-bold text-[#C9952B] uppercase tracking-widest">
+              Explore Specialized Horoscopes
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Gain Complete Life Clarity
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Navigate directly to our other dedicated Vedic horoscope reports
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -614,11 +722,13 @@ export default function LoveHoroscopePage() {
                   Finance & Wealth Horoscope
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Analyze Dhana Bhava (2nd House), Jupiter&apos;s wealth yogas, investment timings, and career growth prospects.
+                  Analyze Dhana Bhava (2nd House), Jupiter&apos;s wealth yogas, investment timings,
+                  and career growth prospects.
                 </p>
               </div>
               <div className="text-xs font-bold text-emerald-400 flex items-center gap-1 pt-2">
-                Check Finance Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Check Finance Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -635,11 +745,13 @@ export default function LoveHoroscopePage() {
                   Health & Vitality Horoscope
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance, and restorative remedies.
+                  Evaluate Lagna vitality, 6th House (Roga Bhava), Ayurvedic Tridosha balance, and
+                  restorative remedies.
                 </p>
               </div>
               <div className="text-xs font-bold text-cyan-400 flex items-center gap-1 pt-2">
-                Check Health Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                Check Health Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
 
@@ -656,11 +768,13 @@ export default function LoveHoroscopePage() {
                   Full Vedic Janam Kundli
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Complete 12-house chart, D9 Navamsha, Vimshottari Dasha, planetary degrees, and comprehensive lifetime roadmap.
+                  Complete 12-house chart, D9 Navamsha, Vimshottari Dasha, planetary degrees, and
+                  comprehensive lifetime roadmap.
                 </p>
               </div>
               <div className="text-xs font-bold text-[#C9952B] flex items-center gap-1 pt-2">
-                View Complete Horoscope <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                View Complete Horoscope{' '}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           </div>

@@ -22,7 +22,12 @@ export interface SpokeItem {
   icon: React.ReactNode;
 }
 
-function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
+function polarToCartesian(
+  centerX: number,
+  centerY: number,
+  radius: number,
+  angleInDegrees: number
+) {
   const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
   return {
     x: centerX + radius * Math.cos(angleInRadians),
@@ -46,10 +51,28 @@ function describeDonutSegment(
   const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
 
   return [
-    'M', outerStart.x, outerStart.y,
-    'A', rOuter, rOuter, 0, largeArcFlag, 1, outerEnd.x, outerEnd.y,
-    'L', innerEnd.x, innerEnd.y,
-    'A', rInner, rInner, 0, largeArcFlag, 0, innerStart.x, innerStart.y,
+    'M',
+    outerStart.x,
+    outerStart.y,
+    'A',
+    rOuter,
+    rOuter,
+    0,
+    largeArcFlag,
+    1,
+    outerEnd.x,
+    outerEnd.y,
+    'L',
+    innerEnd.x,
+    innerEnd.y,
+    'A',
+    rInner,
+    rInner,
+    0,
+    largeArcFlag,
+    0,
+    innerStart.x,
+    innerStart.y,
     'Z',
   ].join(' ');
 }
@@ -72,9 +95,8 @@ export default function AshtaDigbandhanaWheel({
   const router = useRouter();
   const [internalHoveredSpoke, setInternalHoveredSpoke] = useState<string | null>(null);
 
-  const hoveredSpoke = activeSpokeId !== undefined && activeSpokeId !== null
-    ? activeSpokeId
-    : internalHoveredSpoke;
+  const hoveredSpoke =
+    activeSpokeId !== undefined && activeSpokeId !== null ? activeSpokeId : internalHoveredSpoke;
 
   const center = 360;
   const rOuter = 330;
@@ -91,7 +113,8 @@ export default function AshtaDigbandhanaWheel({
       direction: 'N',
       directionFull: 'उत्तर (North)',
       mantra: 'ॐ ह्रीं श्रीं क्लीं चामुण्डायै विच्चे ॥',
-      explanation: 'जप से मन, वाणी और कर्म की शुद्धि, ग्रहों की अनुकूलता और आत्मिक शक्ति प्राप्त होती है।',
+      explanation:
+        'जप से मन, वाणी और कर्म की शुद्धि, ग्रहों की अनुकूलता और आत्मिक शक्ति प्राप्त होती है।',
       href: '/remedies/mantra',
       angle: -90, // North (Top) - 1
       bgGradientId: 'grad-n-mantra',
@@ -101,10 +124,27 @@ export default function AshtaDigbandhanaWheel({
       icon: (
         // Japa Mala & Sacred ॐ - Large Crisp Vector
         <g transform="scale(1.35)">
-          <ellipse cx="0" cy="1" rx="13" ry="9" fill="none" stroke="#F6AD55" strokeWidth="1.8" strokeDasharray="3.2 3.2" />
+          <ellipse
+            cx="0"
+            cy="1"
+            rx="13"
+            ry="9"
+            fill="none"
+            stroke="#F6AD55"
+            strokeWidth="1.8"
+            strokeDasharray="3.2 3.2"
+          />
           <circle cx="0" cy="10" r="2" fill="#ECC94B" stroke="#742A2A" strokeWidth="0.8" />
           <path d="M0,12 L-2,18 L2,18 Z" fill="#E53E3E" />
-          <text x="0" y="4.5" fontSize="11" fontWeight="900" textAnchor="middle" fill="#FFFFFF" fontFamily="serif">
+          <text
+            x="0"
+            y="4.5"
+            fontSize="11"
+            fontWeight="900"
+            textAnchor="middle"
+            fill="#FFFFFF"
+            fontFamily="serif"
+          >
             ॐ
           </text>
         </g>
@@ -118,7 +158,8 @@ export default function AshtaDigbandhanaWheel({
       direction: 'NE',
       directionFull: 'ईशान (North-East)',
       mantra: 'ॐ श्रीं ह्रीं क्लीं नमः ॥',
-      explanation: 'पवित्र ज्यामिति व यंत्र स्थापना से ऊर्जा का संरक्षण, दिशाओं की स्थिरता और दिव्य संतुलन मिलता है।',
+      explanation:
+        'पवित्र ज्यामिति व यंत्र स्थापना से ऊर्जा का संरक्षण, दिशाओं की स्थिरता और दिव्य संतुलन मिलता है।',
       href: '/remedies/yantra',
       angle: -45, // North-East (Top-Right) - 2
       bgGradientId: 'grad-ne-yantra',
@@ -128,7 +169,16 @@ export default function AshtaDigbandhanaWheel({
       icon: (
         // Sri Yantra Sacred Geometry - Large Crisp Vector
         <g transform="scale(1.35)">
-          <rect x="-12" y="-12" width="24" height="24" rx="2" fill="none" stroke="#F6E05E" strokeWidth="1.4" />
+          <rect
+            x="-12"
+            y="-12"
+            width="24"
+            height="24"
+            rx="2"
+            fill="none"
+            stroke="#F6E05E"
+            strokeWidth="1.4"
+          />
           <circle cx="0" cy="0" r="10" fill="none" stroke="#F6E05E" strokeWidth="1" />
           <polygon points="0,-9 8,5 -8,5" fill="none" stroke="#ECC94B" strokeWidth="1.2" />
           <polygon points="0,9 8,-5 -8,-5" fill="none" stroke="#ECC94B" strokeWidth="1.2" />
@@ -144,7 +194,8 @@ export default function AshtaDigbandhanaWheel({
       direction: 'E',
       directionFull: 'पूर्व (East)',
       mantra: 'ॐ अग्नये स्वाहा ॥',
-      explanation: 'पवित्र अग्नि अनुष्ठान नकारात्मकता को भस्म कर ग्रहों को शांत व जीवन में सकारात्मक ऊर्जा लाते हैं।',
+      explanation:
+        'पवित्र अग्नि अनुष्ठान नकारात्मकता को भस्म कर ग्रहों को शांत व जीवन में सकारात्मक ऊर्जा लाते हैं।',
       href: '/remedies/homa',
       angle: 0, // East (Right) - 3
       bgGradientId: 'grad-e-homa',
@@ -154,7 +205,12 @@ export default function AshtaDigbandhanaWheel({
       icon: (
         // Sacred Homa Kund with Agni Flames - Large Crisp Vector
         <g transform="scale(1.35)">
-          <polygon points="-12,6 12,6 9,11 -9,11" fill="#C05621" stroke="#D69E2E" strokeWidth="0.8" />
+          <polygon
+            points="-12,6 12,6 9,11 -9,11"
+            fill="#C05621"
+            stroke="#D69E2E"
+            strokeWidth="0.8"
+          />
           <polygon points="-9,2 9,2 12,6 -12,6" fill="#DD6B20" stroke="#ECC94B" strokeWidth="0.8" />
           <polygon points="-6,-1 6,-1 9,2 -9,2" fill="#ED8936" />
           <path d="M-3,-1 C-5,-6 -1,-11 0,-14 C1,-11 5,-6 3,-1 Z" fill="#ECC94B" />
@@ -170,7 +226,8 @@ export default function AshtaDigbandhanaWheel({
       direction: 'SE',
       directionFull: 'आग्नेय (South-East)',
       mantra: 'ॐ नमः शिवाय ॥',
-      explanation: 'इष्ट देव की उपासना से आध्यात्मिक संरक्षण, दिव्य कृपा, शक्ति और आशीर्वाद प्राप्त होता है।',
+      explanation:
+        'इष्ट देव की उपासना से आध्यात्मिक संरक्षण, दिव्य कृपा, शक्ति और आशीर्वाद प्राप्त होता है।',
       href: '/remedies/ishta-devata',
       angle: 45, // South-East (Bottom-Right) - 4
       bgGradientId: 'grad-se-devata',
@@ -180,8 +237,22 @@ export default function AshtaDigbandhanaWheel({
       icon: (
         // Lord Shiva Trishula & Damru - Large Crisp Vector
         <g transform="scale(1.35)">
-          <line x1="0" y1="-14" x2="0" y2="12" stroke="#ECC94B" strokeWidth="1.6" strokeLinecap="round" />
-          <path d="M-7,-7 C-7,-1 0,1 0,1 C0,1 7,-1 7,-7" fill="none" stroke="#ECC94B" strokeWidth="1.5" strokeLinecap="round" />
+          <line
+            x1="0"
+            y1="-14"
+            x2="0"
+            y2="12"
+            stroke="#ECC94B"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M-7,-7 C-7,-1 0,1 0,1 C0,1 7,-1 7,-7"
+            fill="none"
+            stroke="#ECC94B"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
           <line x1="-7" y1="-12" x2="-7" y2="-7" stroke="#ECC94B" strokeWidth="1.5" />
           <line x1="7" y1="-12" x2="7" y2="-7" stroke="#ECC94B" strokeWidth="1.5" />
           <polygon points="-4,-2 4,-2 0,2" fill="#ED8936" />
@@ -197,7 +268,8 @@ export default function AshtaDigbandhanaWheel({
       direction: 'S',
       directionFull: 'दक्षिण (South)',
       mantra: 'ॐ ग्रहाय नमः ॥',
-      explanation: 'उचित रत्न धारण से शुभ ग्रह बलवान होते हैं और जीवन में संतुलन व सकारात्मकता आती है।',
+      explanation:
+        'उचित रत्न धारण से शुभ ग्रह बलवान होते हैं और जीवन में संतुलन व सकारात्मकता आती है।',
       href: '/remedies/gemstone',
       angle: 90, // South (Bottom) - 5
       bgGradientId: 'grad-s-gemstone',
@@ -207,7 +279,12 @@ export default function AshtaDigbandhanaWheel({
       icon: (
         // Navaratna Gems Cluster - Large Crisp Vector
         <g transform="scale(1.35)">
-          <polygon points="0,-11 4.5,-7 4.5,-3 -4.5,-3 -4.5,-7" fill="#E53E3E" stroke="#FFF" strokeWidth="0.6" />
+          <polygon
+            points="0,-11 4.5,-7 4.5,-3 -4.5,-3 -4.5,-7"
+            fill="#E53E3E"
+            stroke="#FFF"
+            strokeWidth="0.6"
+          />
           <circle cx="9" cy="-5" r="3.6" fill="#3182CE" stroke="#FFF" strokeWidth="0.6" />
           <circle cx="-9" cy="-5" r="3.6" fill="#ECC94B" stroke="#FFF" strokeWidth="0.6" />
           <circle cx="-8" cy="4" r="3.6" fill="#38A169" stroke="#FFF" strokeWidth="0.6" />
@@ -224,7 +301,8 @@ export default function AshtaDigbandhanaWheel({
       direction: 'SW',
       directionFull: 'नैऋत्य (South-West)',
       mantra: 'ॐ नमः शिवाय ॥',
-      explanation: 'भगवान शिव के पावन रुद्राक्ष मन को स्थिर, कष्टों का निवारण और आत्मिक ऊर्जा में वृद्धि करते हैं।',
+      explanation:
+        'भगवान शिव के पावन रुद्राक्ष मन को स्थिर, कष्टों का निवारण और आत्मिक ऊर्जा में वृद्धि करते हैं।',
       href: '/remedies/rudraksha',
       angle: 135, // South-West (Bottom-Left) - 6
       bgGradientId: 'grad-sw-rudraksha',
@@ -251,7 +329,8 @@ export default function AshtaDigbandhanaWheel({
       direction: 'W',
       directionFull: 'पश्चिम (West)',
       mantra: 'ॐ वास्तुपुरुषाय नमः ॥',
-      explanation: 'वास्तु संतुलन से घर और कार्यस्थल में ऊर्जा का सकारात्मक प्रवाह, सुख, शांति और समृद्धि आती है।',
+      explanation:
+        'वास्तु संतुलन से घर और कार्यस्थल में ऊर्जा का सकारात्मक प्रवाह, सुख, शांति और समृद्धि आती है।',
       href: '/remedies/vastu',
       angle: 180, // West (Left) - 7
       bgGradientId: 'grad-w-vastu',
@@ -261,7 +340,16 @@ export default function AshtaDigbandhanaWheel({
       icon: (
         // Vastu Purusha Mandala Compass Grid - Large Crisp Vector
         <g transform="scale(1.35)">
-          <rect x="-11" y="-11" width="22" height="22" rx="1.5" fill="none" stroke="#81E6D9" strokeWidth="1.4" />
+          <rect
+            x="-11"
+            y="-11"
+            width="22"
+            height="22"
+            rx="1.5"
+            fill="none"
+            stroke="#81E6D9"
+            strokeWidth="1.4"
+          />
           <line x1="-11" y1="0" x2="11" y2="0" stroke="#81E6D9" strokeWidth="1" />
           <line x1="0" y1="-11" x2="0" y2="11" stroke="#81E6D9" strokeWidth="1" />
           <circle cx="0" cy="0" r="7" fill="none" stroke="#ECC94B" strokeWidth="1" />
@@ -277,7 +365,8 @@ export default function AshtaDigbandhanaWheel({
       direction: 'NW',
       directionFull: 'वायव्य (North-West)',
       mantra: 'ॐ परोपकाराय नमः ॥',
-      explanation: 'निःस्वार्थ दान और सेवा से कर्मों की शुद्धि होती है, ग्रहों की शांति और जीवन में सुरक्षा मिलती है।',
+      explanation:
+        'निःस्वार्थ दान और सेवा से कर्मों की शुद्धि होती है, ग्रहों की शांति और जीवन में सुरक्षा मिलती है।',
       href: '/remedies/charity',
       angle: 225, // North-West (Top-Left) - 8
       bgGradientId: 'grad-nw-dana',
@@ -287,25 +376,48 @@ export default function AshtaDigbandhanaWheel({
       icon: (
         // Cupped Giving Hands with Sacred Offering / Grain Bowl - Large Crisp Vector
         <g transform="scale(1.35)">
-          <ellipse cx="0" cy="-3" rx="8" ry="4.5" fill="#ECC94B" stroke="#D69E2E" strokeWidth="0.8" />
+          <ellipse
+            cx="0"
+            cy="-3"
+            rx="8"
+            ry="4.5"
+            fill="#ECC94B"
+            stroke="#D69E2E"
+            strokeWidth="0.8"
+          />
           <ellipse cx="0" cy="-4.5" rx="5.5" ry="2.5" fill="#FAF089" />
           <circle cx="-3" cy="-4.5" r="0.8" fill="#D69E2E" />
           <circle cx="0" cy="-5" r="0.9" fill="#B7791F" />
           <circle cx="3" cy="-4.5" r="0.8" fill="#D69E2E" />
-          <path d="M-13,5 C-11,2 -7,-1 -1,-1 L-1,1 C-6,1 -9,4 -11,7 Z" fill="#E2E8F0" stroke="#CBD5E0" strokeWidth="0.5" />
-          <path d="M13,5 C11,2 7,-1 1,-1 L1,1 C6,1 9,4 11,7 Z" fill="#E2E8F0" stroke="#CBD5E0" strokeWidth="0.5" />
-          <path d="M0,4 C-1.8,2 -5,3.2 -5,5.5 C-5,8 0,11 0,11 C0,11 5,8 5,5.5 C5,3.2 1.8,2 0,4 Z" fill="#F56565" stroke="#E53E3E" strokeWidth="0.5" />
+          <path
+            d="M-13,5 C-11,2 -7,-1 -1,-1 L-1,1 C-6,1 -9,4 -11,7 Z"
+            fill="#E2E8F0"
+            stroke="#CBD5E0"
+            strokeWidth="0.5"
+          />
+          <path
+            d="M13,5 C11,2 7,-1 1,-1 L1,1 C6,1 9,4 11,7 Z"
+            fill="#E2E8F0"
+            stroke="#CBD5E0"
+            strokeWidth="0.5"
+          />
+          <path
+            d="M0,4 C-1.8,2 -5,3.2 -5,5.5 C-5,8 0,11 0,11 C0,11 5,8 5,5.5 C5,3.2 1.8,2 0,4 Z"
+            fill="#F56565"
+            stroke="#E53E3E"
+            strokeWidth="0.5"
+          />
         </g>
       ),
     },
   ];
 
-  const activeSpoke = hoveredSpoke
-    ? spokes.find((s) => s.id === hoveredSpoke)
-    : spokes[0];
+  const activeSpoke = hoveredSpoke ? spokes.find((s) => s.id === hoveredSpoke) : spokes[0];
 
   return (
-    <div className={`w-full max-w-[475px] sm:max-w-[500px] md:max-w-[530px] lg:max-w-[560px] xl:max-w-[590px] mx-auto flex flex-col items-center select-none space-y-2 ${className}`}>
+    <div
+      className={`w-full max-w-[475px] sm:max-w-[500px] md:max-w-[530px] lg:max-w-[560px] xl:max-w-[590px] mx-auto flex flex-col items-center select-none space-y-2 ${className}`}
+    >
       {/* Main Wheel Container */}
       <div className="relative w-full aspect-square flex items-center justify-center p-0.5 sm:p-1">
         {/* Ambient Radial Background Glow */}
@@ -373,7 +485,14 @@ export default function AshtaDigbandhanaWheel({
           {spokes.map((spoke) => {
             const startAngle = spoke.angle - 22.5;
             const endAngle = spoke.angle + 22.5;
-            const pathData = describeDonutSegment(center, center, rInner, rOuter, startAngle, endAngle);
+            const pathData = describeDonutSegment(
+              center,
+              center,
+              rInner,
+              rOuter,
+              startAngle,
+              endAngle
+            );
             const isHovered = hoveredSpoke === spoke.id;
 
             // Anchor center of each sector
@@ -408,11 +527,7 @@ export default function AshtaDigbandhanaWheel({
 
                 {/* Hover overlay brightness */}
                 {isHovered && (
-                  <path
-                    d={pathData}
-                    fill="url(#hoverHighlighter)"
-                    pointerEvents="none"
-                  />
+                  <path d={pathData} fill="url(#hoverHighlighter)" pointerEvents="none" />
                 )}
 
                 {/* Radial Dividing Boundary Line */}
@@ -434,11 +549,7 @@ export default function AshtaDigbandhanaWheel({
                     y="-48"
                     textAnchor="middle"
                     fontSize={
-                      spoke.name.length > 13
-                        ? '11.5'
-                        : spoke.name.length > 10
-                        ? '12'
-                        : '13'
+                      spoke.name.length > 13 ? '11.5' : spoke.name.length > 10 ? '12' : '13'
                     }
                     fontWeight="900"
                     letterSpacing="0.4"
@@ -468,9 +579,7 @@ export default function AshtaDigbandhanaWheel({
                   </text>
 
                   {/* 3. CENTER VECTOR ICON (With comfortable top and bottom padding) */}
-                  <g transform="translate(0, 2)">
-                    {spoke.icon}
-                  </g>
+                  <g transform="translate(0, 2)">{spoke.icon}</g>
 
                   {/* 4. SACRED SHLOKA / MANTRA (Bottom with generous spacing) */}
                   <text

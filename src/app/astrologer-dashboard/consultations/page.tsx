@@ -27,28 +27,34 @@ export default function ConsultationsPage() {
       // Note: We avoid orderBy here if no index exists, we can sort in memory.
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Sort by createdAt descending in memory
-      docs.sort((a: any, b: any) => {
-        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-        return timeB - timeA;
-      });
-      setConsultations(docs);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching consultations:", error);
-      toast.error('Failed to load consultations.');
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        // Sort by createdAt descending in memory
+        docs.sort((a: any, b: any) => {
+          const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return timeB - timeA;
+        });
+        setConsultations(docs);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching consultations:', error);
+        toast.error('Failed to load consultations.');
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [user]);
 
-  const requests = consultations.filter(c => c.status === 'pending');
-  const activeSessions = consultations.filter(c => c.status === 'active');
-  const history = consultations.filter(c => c.status === 'completed' || c.status === 'declined' || c.status === 'missed');
+  const requests = consultations.filter((c) => c.status === 'pending');
+  const activeSessions = consultations.filter((c) => c.status === 'active');
+  const history = consultations.filter(
+    (c) => c.status === 'completed' || c.status === 'declined' || c.status === 'missed'
+  );
 
   const handleAccept = async (req: any) => {
     try {
@@ -57,9 +63,9 @@ export default function ConsultationsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ consultationId: req.id }),
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to accept');
       }
@@ -157,7 +163,9 @@ export default function ConsultationsPage() {
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <h3 className="font-bold text-lg text-foreground">{req.customerName}</h3>
-                          <p className="text-xs text-muted-foreground mt-1">Requested {formatTimeAgo(req.createdAt)}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Requested {formatTimeAgo(req.createdAt)}
+                          </p>
                         </div>
                         <div
                           className={`p-2 rounded-xl ${req.type === 'video' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}
@@ -177,7 +185,9 @@ export default function ConsultationsPage() {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Earnings:</span>
-                          <span className="font-semibold text-green-400">{formatPrice(req.price)}</span>
+                          <span className="font-semibold text-green-400">
+                            {formatPrice(req.price)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -218,7 +228,9 @@ export default function ConsultationsPage() {
                     <div>
                       <div className="flex items-start justify-between mb-4">
                         <div>
-                          <h3 className="font-bold text-lg text-foreground">{session.customerName}</h3>
+                          <h3 className="font-bold text-lg text-foreground">
+                            {session.customerName}
+                          </h3>
                           <div className="flex items-center gap-1 mt-1 text-xs text-accent">
                             <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
                             In Progress
@@ -272,46 +284,50 @@ export default function ConsultationsPage() {
           )}
 
           {activeTab === 'history' && (
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {history.length === 0 ? (
-               <div className="col-span-full py-12 flex flex-col items-center justify-center text-muted-foreground bg-muted/20 rounded-3xl border border-dashed border-border">
-                 <Clock className="w-12 h-12 mb-4 opacity-50" />
-                 <p>Your history will appear here.</p>
-               </div>
-             ) : (
-               history.map((hist) => (
-                 <div
-                   key={hist.id}
-                   className="glass-card-light dark:glass-card p-6 rounded-2xl border border-border flex flex-col justify-between opacity-80"
-                 >
-                   <div>
-                     <div className="flex items-start justify-between mb-4">
-                       <div>
-                         <h3 className="font-bold text-lg text-foreground">{hist.customerName}</h3>
-                         <p className="text-xs text-muted-foreground mt-1">{formatTimeAgo(hist.createdAt)}</p>
-                       </div>
-                       <div
-                         className={`text-xs font-semibold px-2 py-1 rounded-full ${hist.status === 'completed' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}
-                       >
-                         {hist.status}
-                       </div>
-                     </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {history.length === 0 ? (
+                <div className="col-span-full py-12 flex flex-col items-center justify-center text-muted-foreground bg-muted/20 rounded-3xl border border-dashed border-border">
+                  <Clock className="w-12 h-12 mb-4 opacity-50" />
+                  <p>Your history will appear here.</p>
+                </div>
+              ) : (
+                history.map((hist) => (
+                  <div
+                    key={hist.id}
+                    className="glass-card-light dark:glass-card p-6 rounded-2xl border border-border flex flex-col justify-between opacity-80"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="font-bold text-lg text-foreground">{hist.customerName}</h3>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatTimeAgo(hist.createdAt)}
+                          </p>
+                        </div>
+                        <div
+                          className={`text-xs font-semibold px-2 py-1 rounded-full ${hist.status === 'completed' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}
+                        >
+                          {hist.status}
+                        </div>
+                      </div>
 
-                     <div className="space-y-2">
-                       <div className="flex justify-between text-sm">
-                         <span className="text-muted-foreground">Session Type:</span>
-                         <span className="font-semibold capitalize">{hist.type}</span>
-                       </div>
-                       <div className="flex justify-between text-sm">
-                         <span className="text-muted-foreground">Earnings:</span>
-                         <span className="font-semibold text-foreground">{hist.status === 'completed' ? formatPrice(hist.price) : '0'}</span>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               ))
-             )}
-           </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Session Type:</span>
+                          <span className="font-semibold capitalize">{hist.type}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Earnings:</span>
+                          <span className="font-semibold text-foreground">
+                            {hist.status === 'completed' ? formatPrice(hist.price) : '0'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </>
       )}

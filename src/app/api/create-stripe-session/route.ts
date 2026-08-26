@@ -10,7 +10,8 @@ export async function POST(req: Request) {
 
     // Fetch dynamic settings
     const settings = await getSettings();
-    const secretKey = settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
+    const secretKey =
+      settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
 
     const stripe = new Stripe(secretKey, {
       apiVersion: '2026-07-29.dahlia' as any,
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
     const cmsContent = await getHomepageContent();
     let price = currency === 'usd' ? 10 : 100; // Default fallback (needs to be high enough for Stripe limits)
     if (serviceId && cmsContent?.services?.items) {
-      const item = cmsContent.services.items.find(i => i.id === serviceId);
+      const item = cmsContent.services.items.find((i) => i.id === serviceId);
       if (item) {
         if (currency === 'usd' && item.priceUSD !== undefined) {
           price = item.priceUSD;
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      customer_email: (userEmail && userEmail !== 'demo@example.com') ? userEmail : undefined,
+      customer_email: userEmail && userEmail !== 'demo@example.com' ? userEmail : undefined,
       line_items: [
         {
           price_data: {

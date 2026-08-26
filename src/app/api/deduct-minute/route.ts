@@ -10,13 +10,13 @@ export async function POST(req: Request) {
     }
 
     const consultationRef = adminDb.collection('consultations').doc(consultationId);
-    
+
     // We run a transaction to securely deduct balance
     let remainingBalance = 0;
-    
+
     await adminDb.runTransaction(async (transaction: any) => {
       const consultationDoc = await transaction.get(consultationRef);
-      
+
       if (!consultationDoc.exists) {
         throw new Error('Consultation not found');
       }
@@ -47,21 +47,25 @@ export async function POST(req: Request) {
       // Deduct balance
       remainingBalance = currentBalance - pricePerMin;
       transaction.update(userRef, {
-        walletBalance: remainingBalance
+        walletBalance: remainingBalance,
       });
 
       // Update existing wallet transaction record
-      const walletTxRef = adminDb.collection('users').doc(customerId).collection('wallet_transactions').doc(transactionId);
+      const walletTxRef = adminDb
+        .collection('users')
+        .doc(customerId)
+        .collection('wallet_transactions')
+        .doc(transactionId);
       const newTotalAmount = (consultationData.totalBilledAmount || pricePerMin) + pricePerMin;
-      
+
       transaction.update(walletTxRef, {
-        amount: newTotalAmount
+        amount: newTotalAmount,
       });
 
       // Update consultation stats
       transaction.update(consultationRef, {
         billedMinutes: (consultationData.billedMinutes || 1) + 1,
-        totalBilledAmount: newTotalAmount
+        totalBilledAmount: newTotalAmount,
       });
     });
 
@@ -70,7 +74,7 @@ export async function POST(req: Request) {
     console.error('Deduct minute error:', error);
     // Return a 402 Payment Required status to signal the client to disconnect
     if (error.message === 'Insufficient balance') {
-        return NextResponse.json({ error: 'Insufficient balance' }, { status: 402 });
+      return NextResponse.json({ error: 'Insufficient balance' }, { status: 402 });
     }
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }

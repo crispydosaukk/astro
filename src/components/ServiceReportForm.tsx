@@ -83,21 +83,23 @@ export default function ServiceReportForm({
   useEffect(() => {
     if (!serviceId) return;
     let isMounted = true;
-    getHomepageContent().then((content) => {
-      if (!isMounted) return;
-      let p = 99;
-      let pUsd = 1.99;
-      if (content?.services?.items) {
-        const item = content.services.items.find((i) => i.id === serviceId);
-        if (item) {
-          if (item.price !== undefined) p = item.price;
-          if (item.priceUSD !== undefined) pUsd = item.priceUSD;
+    getHomepageContent()
+      .then((content) => {
+        if (!isMounted) return;
+        let p = 99;
+        let pUsd = 1.99;
+        if (content?.services?.items) {
+          const item = content.services.items.find((i) => i.id === serviceId);
+          if (item) {
+            if (item.price !== undefined) p = item.price;
+            if (item.priceUSD !== undefined) pUsd = item.priceUSD;
+          }
         }
-      }
-      setPrice(p);
-      setPriceUSD(pUsd);
-    }).catch(console.error);
-    
+        setPrice(p);
+        setPriceUSD(pUsd);
+      })
+      .catch(console.error);
+
     return () => {
       isMounted = false;
     };
@@ -260,9 +262,7 @@ export default function ServiceReportForm({
         <div className="relative rounded-3xl border border-[#E5D9C8] bg-[#FFFDFC] p-8 sm:p-10 shadow-xl overflow-hidden text-[#292522]">
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-[#292522] mb-2">
-                Date of Birth
-              </label>
+              <label className="block text-sm font-bold text-[#292522] mb-2">Date of Birth</label>
               <input
                 type="date"
                 value={dob}
@@ -275,9 +275,7 @@ export default function ServiceReportForm({
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-[#292522] mb-2">
-                Time of Birth
-              </label>
+              <label className="block text-sm font-bold text-[#292522] mb-2">Time of Birth</label>
               <input
                 type="time"
                 value={time}
@@ -290,9 +288,7 @@ export default function ServiceReportForm({
               />
             </div>
             <div className="relative">
-              <label className="block text-sm font-bold text-[#292522] mb-2">
-                Place of Birth
-              </label>
+              <label className="block text-sm font-bold text-[#292522] mb-2">Place of Birth</label>
               <input
                 type="text"
                 placeholder="e.g. Delhi, India"
@@ -324,14 +320,14 @@ export default function ServiceReportForm({
                           className="px-4 py-3 hover:bg-[#F8F3EA] cursor-pointer flex items-start gap-3 transition-colors border-b border-[#E5D9C8]/50 last:border-0"
                         >
                           <MapPin size={16} className="text-[#713B32] flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-[#292522] font-medium">{s.display_name}</span>
+                          <span className="text-sm text-[#292522] font-medium">
+                            {s.display_name}
+                          </span>
                         </li>
                       ))}
                     </ul>
                   ) : place.length >= 3 ? (
-                    <div className="p-4 text-center text-sm text-[#6B5E55]">
-                      No locations found
-                    </div>
+                    <div className="p-4 text-center text-sm text-[#6B5E55]">No locations found</div>
                   ) : null}
                 </div>
               )}
@@ -351,7 +347,10 @@ export default function ServiceReportForm({
               <button
                 onClick={() => {
                   saveDraft(dob, time, place);
-                  const returnUrl = typeof window !== 'undefined' ? `${window.location.pathname}#get-report` : '/remedies';
+                  const returnUrl =
+                    typeof window !== 'undefined'
+                      ? `${window.location.pathname}#get-report`
+                      : '/remedies';
                   router.push(`/sign-up-login-screen?redirect=${encodeURIComponent(returnUrl)}`);
                 }}
                 className="w-full flex items-center justify-center gap-2 py-3.5 mt-4 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all shadow-md"
@@ -366,11 +365,15 @@ export default function ServiceReportForm({
               >
                 {isSubmitting || loading ? (
                   <span className="flex items-center gap-2">
-                    <Loader2 className="animate-spin" size={16} /> {loading ? 'Loading...' : 'Submitting...'}
+                    <Loader2 className="animate-spin" size={16} />{' '}
+                    {loading ? 'Loading...' : 'Submitting...'}
                   </span>
                 ) : (
                   <>
-                    <Icon size={16} /> {buttonText} {price !== null ? `— ${formatPrice(price, priceUSD !== null ? priceUSD : undefined)}` : ''}
+                    <Icon size={16} /> {buttonText}{' '}
+                    {price !== null
+                      ? `— ${formatPrice(price, priceUSD !== null ? priceUSD : undefined)}`
+                      : ''}
                     <ArrowRight size={16} />
                   </>
                 )}
@@ -381,7 +384,9 @@ export default function ServiceReportForm({
             <div className="pt-4 mt-4 border-t border-[#E5D9C8] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
               <div>
                 <p className="text-xs font-bold text-[#292522]">Prefer Live Personal Guidance?</p>
-                <p className="text-[11px] text-[#6B5E55]">Discuss your birth chart & remedies live with verified Human Astrologers.</p>
+                <p className="text-[11px] text-[#6B5E55]">
+                  Discuss your birth chart & remedies live with verified Human Astrologers.
+                </p>
               </div>
               <Link
                 href="/talk-to-astrologer"
