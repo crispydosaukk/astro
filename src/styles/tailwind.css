@@ -155,6 +155,18 @@
 
   .cosmic-bg {
     background: linear-gradient(135deg, #352433 0%, #4a2832 30%, #713b32 65%, #352433 100%);
+    color: #fffdfc;
+  }
+
+  .cosmic-bg h1,
+  .cosmic-bg h2,
+  .cosmic-bg h3,
+  .cosmic-bg h4 {
+    color: #fffdfc;
+  }
+
+  .cosmic-bg p {
+    color: #f3ebdd;
   }
 
   .cosmic-bg-light {

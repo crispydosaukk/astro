@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useUserData } from '@/lib/useUserData';
 import { useCurrency } from '@/lib/CurrencyContext';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import AppImage from '@/components/ui/AppImage';
 import {
   Mic,
@@ -14,7 +14,6 @@ import {
   VolumeX,
   PhoneOff,
   Sparkles,
-  ShieldCheck,
   Clock,
   Wallet,
   AlertTriangle,
@@ -23,12 +22,9 @@ import {
   Loader2,
   CheckCircle2,
   Download,
-  Flame,
-  Star,
-  ChevronDown,
-  ChevronUp,
   X,
-  Plus,
+  Globe,
+  MessageSquare,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -48,6 +44,7 @@ export default function AICallRoomPage() {
   const [durationSeconds, setDurationSeconds] = useState(0);
   const [billedMinutes, setBilledMinutes] = useState(1);
   const [currentBalance, setCurrentBalance] = useState(0);
+  const [activeLanguage, setActiveLanguage] = useState<string>('English');
 
   // Audio & Mic Controls
   const [isMicMuted, setIsMicMuted] = useState(false);
@@ -63,6 +60,7 @@ export default function AICallRoomPage() {
   // UI Drawers & Modals
   const [showChartDrawer, setShowChartDrawer] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [summaryViewTab, setSummaryViewTab] = useState<'remedies' | 'transcript'>('remedies');
   const [finalSummary, setFinalSummary] = useState<AIConsultationSummary | null>(null);
   const [lowBalanceAlert, setLowBalanceAlert] = useState(false);
   const [isEndingCall, setIsEndingCall] = useState(false);
@@ -70,6 +68,19 @@ export default function AICallRoomPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<any>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Get Speech Recognition Language Code
+  const getLangCode = (lang: string) => {
+    const l = lang.toLowerCase();
+    if (l.includes('telugu') || l.includes('te')) return 'te-IN';
+    if (l.includes('hindi') || l.includes('hi')) return 'hi-IN';
+    if (l.includes('tamil') || l.includes('ta')) return 'ta-IN';
+    if (l.includes('kannada') || l.includes('kn')) return 'kn-IN';
+    if (l.includes('marathi') || l.includes('mr')) return 'mr-IN';
+    if (l.includes('gujarati') || l.includes('gu')) return 'gu-IN';
+    if (l.includes('bengali') || l.includes('bn')) return 'bn-IN';
+    return 'en-IN';
+  };
 
   // 1. Fetch Consultation Session on Mount
   useEffect(() => {
@@ -82,6 +93,10 @@ export default function AICallRoomPage() {
           setSession(data);
           setBilledMinutes(data.billedMinutes || 1);
           setCallActive(data.status === 'active');
+          if (data.language) setActiveLanguage(data.language);
+          if (data.conversationTranscript?.length) {
+            setMessages(data.conversationTranscript);
+          }
           if (data.status === 'completed' && data.summary) {
             setFinalSummary(data.summary);
             setShowSummaryModal(true);
@@ -175,7 +190,7 @@ export default function AICallRoomPage() {
     };
   }, [callActive, sessionId, session, isEndingCall, formatPrice]);
 
-  // 4. Setup Speech Recognition for hands-free voice talking
+  // 4. Setup Speech Recognition for hands-free voice talking with dynamic language support
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
@@ -186,7 +201,7 @@ export default function AICallRoomPage() {
       const rec = new SpeechRecognition();
       rec.continuous = false;
       rec.interimResults = false;
-      rec.lang = 'en-IN';
+      rec.lang = getLangCode(activeLanguage);
 
       rec.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
@@ -206,7 +221,7 @@ export default function AICallRoomPage() {
 
       recognitionRef.current = rec;
     }
-  }, []);
+  }, [activeLanguage]);
 
   const toggleMicListening = () => {
     if (isMicMuted) {
@@ -218,25 +233,38 @@ export default function AICallRoomPage() {
       setIsListening(false);
     } else {
       try {
-        recognitionRef.current?.start();
-        setIsListening(true);
+        if (recognitionRef.current) {
+          recognitionRef.current.lang = getLangCode(activeLanguage);
+          recognitionRef.current.start();
+          setIsListening(true);
+        } else {
+          toast.info('Voice input is not supported in this browser. Please type your message.');
+        }
       } catch (e) {
         console.warn('Could not start recognition:', e);
       }
     }
   };
 
-  // 5. AI Voice / Speech Exchange Handler
-  const triggerAiVoiceExchange = async (userText: string | null, isInitial = false) => {
+  // 5. AI Voice / Speech Exchange Handler with full history & language context
+  const triggerAiVoiceExchange = async (
+    userText: string | null,
+    isInitial = false,
+    historyOverride?: any[]
+  ) => {
     setIsGeneratingReply(true);
     try {
+      const historyToSend = historyOverride || messages;
       const res = await fetch('/api/ai-consultation/voice-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
           userMessage: userText,
-          action: 'chat_voice',
+          conversationHistory: historyToSend,
+          language: activeLanguage,
+          isInitial: isInitial,
+          action: isInitial ? 'initial_greeting' : 'chat_voice',
         }),
       });
 
@@ -254,12 +282,22 @@ export default function AICallRoomPage() {
         if (data.audioBase64 && !isSpeakerMuted) {
           playAudioFromBase64(data.audioBase64);
         } else if ('speechSynthesis' in window && !isSpeakerMuted) {
-          // Browser native TTS fallback
+          // Browser native TTS fallback with correct language code
+          window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(data.replyText);
+          const langCode = getLangCode(activeLanguage);
+          utterance.lang = langCode;
           utterance.rate = 0.95;
           utterance.pitch = 1.0;
+
+          // Attempt to find a native voice for the language
+          const voices = window.speechSynthesis.getVoices();
+          const matchingVoice = voices.find((v) => v.lang.startsWith(langCode.substring(0, 2)));
+          if (matchingVoice) utterance.voice = matchingVoice;
+
           utterance.onstart = () => setIsAiSpeaking(true);
           utterance.onend = () => setIsAiSpeaking(false);
+          utterance.onerror = () => setIsAiSpeaking(false);
           window.speechSynthesis.speak(utterance);
         }
       }
@@ -275,9 +313,22 @@ export default function AICallRoomPage() {
       const audioUrl = `data:audio/mp3;base64,${base64String}`;
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
-        audioRef.current.play();
-        setIsAiSpeaking(true);
+        audioRef.current.load();
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsAiSpeaking(true);
+            })
+            .catch((err) => {
+              console.warn('Audio play error:', err);
+              setIsAiSpeaking(false);
+            });
+        }
         audioRef.current.onended = () => {
+          setIsAiSpeaking(false);
+        };
+        audioRef.current.onerror = () => {
           setIsAiSpeaking(false);
         };
       }
@@ -297,11 +348,12 @@ export default function AICallRoomPage() {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedHistory = [...messages, userMsg];
+    setMessages(updatedHistory);
     setInputText('');
 
-    // Trigger AI response
-    triggerAiVoiceExchange(text);
+    // Trigger dynamic AI response with updated conversation history!
+    triggerAiVoiceExchange(text, false, updatedHistory);
   };
 
   // 6. End Call & Generate Summary
@@ -317,7 +369,7 @@ export default function AICallRoomPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
-          durationSeconds,
+          durationSeconds: Math.max(durationSeconds, 60),
           conversationTranscript: messages,
         }),
       });
@@ -326,6 +378,33 @@ export default function AICallRoomPage() {
       if (data.summary) {
         setFinalSummary(data.summary);
         setShowSummaryModal(true);
+
+        // Cache completed session locally for instant redundancy
+        try {
+          const cached = JSON.parse(localStorage.getItem('astroparihar_ai_history') || '[]');
+          const updatedSession = {
+            id: sessionId,
+            astrologerName: session?.astrologerName,
+            astrologerAvatar: session?.astrologerAvatar,
+            primaryDiscipline: session?.primaryDiscipline,
+            language: activeLanguage,
+            billedMinutes: data.billedMinutes || billedMinutes,
+            totalBilledAmount: data.totalBilledAmount || session?.pricePerMin * billedMinutes,
+            status: 'completed',
+            createdAt: new Date().toISOString(),
+            conversationTranscript: messages,
+            summary: data.summary,
+            birthDetails: session?.birthDetails,
+          };
+          localStorage.setItem(
+            'astroparihar_ai_history',
+            JSON.stringify([updatedSession, ...cached.filter((c: any) => c.id !== sessionId)])
+          );
+        } catch (storageErr) {
+          console.warn('LocalStorage save error:', storageErr);
+        }
+
+        toast.success('Consultation completed! Report is now saved in your Order History.');
       }
     } catch (err) {
       console.error('Error ending call:', err);
@@ -343,23 +422,23 @@ export default function AICallRoomPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#0C0A09] flex flex-col items-center justify-center text-[#FBF7EE]">
         <Loader2 className="animate-spin text-[#C9952B] mb-4" size={48} />
-        <p className="text-muted-foreground font-serif">Connecting to Celestial AI Astrologer...</p>
+        <p className="text-[#E5D5BA] font-serif tracking-wide text-sm">Connecting to Celestial AI Astrologer...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0E0C0A] text-foreground flex flex-col justify-between relative overflow-hidden select-none">
+    <div className="min-h-screen bg-[#0C0A09] text-[#FBF7EE] flex flex-col justify-between relative overflow-hidden select-none">
       {/* Hidden Audio Element */}
       <audio ref={audioRef} />
 
       {/* Top Session Navigation & Ticker HUD */}
-      <header className="px-6 py-4 bg-card/60 backdrop-blur-md border-b border-border/40 z-30 flex items-center justify-between">
+      <header className="px-6 py-4 bg-[#14110E]/90 backdrop-blur-md border-b border-[#3D352A] z-30 flex items-center justify-between shadow-lg">
         {/* Left: Astrologer Badge */}
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-[#C9952B] relative">
+          <div className="w-11 h-11 rounded-2xl overflow-hidden border-2 border-[#C9952B] relative shadow-md shadow-[#C9952B]/20">
             <AppImage
               src={
                 session?.astrologerAvatar ||
@@ -372,41 +451,61 @@ export default function AICallRoomPage() {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h2 className="font-bold text-sm text-foreground">{session?.astrologerName}</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#C9952B]/20 text-[#C9952B]">
+              <h2 className="font-bold text-sm text-[#FFFDFC]">{session?.astrologerName}</h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#C9952B]/20 text-[#E5B54F] border border-[#C9952B]/40">
                 {session?.primaryDiscipline}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Live Consultation ({session?.language || 'English'})
-            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-xs text-[#E5D5BA] flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Live Call
+              </p>
+              <span className="text-[#3D352A]">·</span>
+              {/* Language Selector in Top HUD */}
+              <div className="flex items-center gap-1 text-[11px] text-[#E5B54F] font-semibold bg-[#221B14] px-2 py-0.5 rounded-md border border-[#C9952B]/40">
+                <Globe size={11} className="text-[#C9952B]" />
+                <select
+                  value={activeLanguage}
+                  onChange={(e) => {
+                    setActiveLanguage(e.target.value);
+                    toast.success(`Language switched to ${e.target.value}`);
+                  }}
+                  className="bg-transparent text-[#FFFDFC] text-[11px] font-bold outline-none cursor-pointer"
+                >
+                  <option value="Telugu" className="bg-[#1C1814] text-white">✦ Telugu (తెలుగు)</option>
+                  <option value="Hindi" className="bg-[#1C1814] text-white">✦ Hindi (हिन्दी)</option>
+                  <option value="English" className="bg-[#1C1814] text-white">✦ English</option>
+                  <option value="Tamil" className="bg-[#1C1814] text-white">✦ Tamil (தமிழ்)</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Center: Live Timer & Billed Minutes */}
-        <div className="hidden md:flex items-center gap-4 bg-background/60 px-5 py-2 rounded-2xl border border-border/80 shadow-inner">
+        <div className="hidden md:flex items-center gap-4 bg-[#181410] px-5 py-2 rounded-2xl border border-[#3D352A] shadow-inner">
           <div className="flex items-center gap-2 text-sm font-mono font-bold text-emerald-400">
             <Clock size={16} className="animate-spin text-[#C9952B]" />
             {formatTimer(durationSeconds)}
           </div>
-          <span className="text-muted-foreground/40">|</span>
-          <div className="text-xs text-muted-foreground">
-            Billed: <span className="font-bold text-foreground">{billedMinutes} min</span> (
+          <span className="text-[#3D352A]">|</span>
+          <div className="text-xs text-[#D4C3A3]">
+            Billed: <span className="font-bold text-[#FFFDFC]">{billedMinutes} min</span> (
             {formatPrice(session?.pricePerMin * billedMinutes)})
           </div>
         </div>
 
         {/* Right: Wallet Balance & Kundli HUD Button */}
         <div className="flex items-center gap-3">
-          <div className="bg-muted/40 px-3.5 py-1.5 rounded-xl border border-border/60 flex items-center gap-2 text-xs">
+          <div className="bg-[#1C1814] px-3.5 py-1.5 rounded-xl border border-[#3D352A] flex items-center gap-2 text-xs">
             <Wallet size={14} className="text-[#C9952B]" />
-            <span className="font-bold text-foreground">{formatPrice(currentBalance)}</span>
+            <span className="font-bold text-[#FFFDFC]">{formatPrice(currentBalance)}</span>
           </div>
 
           <button
             onClick={() => setShowChartDrawer(!showChartDrawer)}
-            className="px-3 py-1.5 rounded-xl bg-card border border-border/80 hover:border-[#C9952B] text-xs font-semibold text-foreground flex items-center gap-1.5 transition-all"
+            className="px-3 py-1.5 rounded-xl bg-[#221B14] border border-[#C9952B]/40 hover:border-[#C9952B] text-xs font-semibold text-[#FFFDFC] flex items-center gap-1.5 transition-all shadow-sm"
           >
             <Sparkles size={13} className="text-[#C9952B]" />
             <span className="hidden sm:inline">Birth Chart</span>
@@ -416,7 +515,7 @@ export default function AICallRoomPage() {
 
       {/* Low Balance Warning Banner */}
       {lowBalanceAlert && (
-        <div className="bg-amber-500/20 border-b border-amber-500/40 px-4 py-2 text-center text-xs text-amber-400 flex items-center justify-center gap-2 animate-pulse">
+        <div className="bg-amber-500/20 border-b border-amber-500/40 px-4 py-2 text-center text-xs text-amber-300 flex items-center justify-center gap-2 animate-pulse font-medium">
           <AlertTriangle size={15} />
           <span>
             Low Balance Warning: Under 2 minutes remaining. Top up to avoid disconnection.
@@ -424,7 +523,7 @@ export default function AICallRoomPage() {
           <Link
             href={`/wallet?redirect=${encodeURIComponent(`/ai-call/${sessionId}`)}`}
             target="_blank"
-            className="px-2 py-0.5 rounded bg-amber-500 text-black font-bold text-[10px] ml-2 hover:bg-amber-400"
+            className="px-2.5 py-0.5 rounded bg-amber-500 text-black font-bold text-[10px] ml-2 hover:bg-amber-400"
           >
             Quick Top-Up
           </Link>
@@ -440,8 +539,8 @@ export default function AICallRoomPage() {
             {/* Outer Pulsing Wave Rings when AI speaks */}
             {isAiSpeaking && (
               <>
-                <div className="absolute w-72 h-72 rounded-full border border-[#C9952B]/30 animate-ping opacity-30" />
-                <div className="absolute w-80 h-80 rounded-full border border-[#713B32]/30 animate-pulse opacity-40" />
+                <div className="absolute w-72 h-72 rounded-full border border-[#C9952B]/40 animate-ping opacity-40" />
+                <div className="absolute w-80 h-80 rounded-full border border-[#713B32]/50 animate-pulse opacity-50" />
               </>
             )}
 
@@ -449,8 +548,8 @@ export default function AICallRoomPage() {
             <div
               className={`w-44 h-44 rounded-full p-1.5 transition-all duration-500 ${
                 isAiSpeaking
-                  ? 'bg-gradient-to-tr from-[#C9952B] via-[#E5B54F] to-[#713B32] shadow-2xl shadow-[#C9952B]/40 scale-105'
-                  : 'bg-card border-2 border-border/80'
+                  ? 'bg-gradient-to-tr from-[#C9952B] via-[#E5B54F] to-[#713B32] shadow-2xl shadow-[#C9952B]/50 scale-105'
+                  : 'bg-[#1C1814] border-2 border-[#C9952B]/50 shadow-xl'
               }`}
             >
               <div className="w-full h-full rounded-full overflow-hidden relative">
@@ -469,17 +568,17 @@ export default function AICallRoomPage() {
 
           {/* Astrologer Status Caption */}
           <div className="mb-4">
-            <h3 className="text-xl font-bold text-foreground font-serif">
+            <h3 className="text-2xl font-bold text-[#FFFDFC] font-serif tracking-wide">
               {session?.astrologerName}
             </h3>
-            <p className="text-xs text-[#C9952B] font-medium tracking-wide mt-0.5">
+            <p className="text-xs text-[#E5B54F] font-semibold tracking-wide mt-1">
               {isAiSpeaking
                 ? '✦ Speaking guidance...'
                 : isGeneratingReply
                   ? '✦ Consulting birth chart...'
                   : isListening
                     ? '✦ Listening to you...'
-                    : '✦ Listening · Tap mic or speak'}
+                    : '✦ Listening · Tap mic or send message'}
             </p>
           </div>
 
@@ -499,53 +598,60 @@ export default function AICallRoomPage() {
                 }}
                 className={`w-1.5 rounded-full ${
                   isAiSpeaking
-                    ? 'bg-gradient-to-t from-[#713B32] to-[#C9952B]'
+                    ? 'bg-gradient-to-t from-[#713B32] to-[#E5B54F]'
                     : isListening
                       ? 'bg-emerald-400'
-                      : 'bg-muted/40'
+                      : 'bg-[#3D352A]'
                 }`}
               />
             ))}
           </div>
         </div>
 
-        {/* Right: Live Transcript & Chat Log */}
-        <div className="w-full lg:w-96 h-80 lg:h-[420px] bg-card/40 backdrop-blur-md border border-border/70 rounded-3xl p-4 flex flex-col justify-between shadow-2xl">
-          <div className="border-b border-border/40 pb-2 mb-2 flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <FileText size={13} className="text-[#C9952B]" /> Live Transcript
+        {/* Right: Live Transcript & Chat Log (High Contrast Overhaul) */}
+        <div className="w-full lg:w-[420px] h-96 lg:h-[460px] bg-[#14110E] border border-[#3D352A] rounded-3xl p-4 flex flex-col justify-between shadow-2xl">
+          <div className="border-b border-[#3D352A] pb-2 mb-2 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] flex items-center gap-1.5">
+              <FileText size={14} className="text-[#C9952B]" /> Live Transcript ({activeLanguage})
             </span>
-            <span className="text-[10px] text-muted-foreground">{messages.length} exchanges</span>
+            <span className="text-[11px] text-[#D4C3A3] font-medium">{messages.length} exchanges</span>
           </div>
 
           {/* Chat Messages Log */}
           <div ref={chatScrollRef} className="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
             {messages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground p-4">
-                <Sparkles size={24} className="text-[#C9952B] mb-2 opacity-60" />
-                <p>Welcome! Speak directly or send a message to ask your question.</p>
+              <div className="h-full flex flex-col items-center justify-center text-center text-[#D4C3A3] p-4">
+                <Sparkles size={26} className="text-[#C9952B] mb-2 opacity-80 animate-pulse" />
+                <p className="text-xs font-medium text-[#FFFDFC]">Connecting with {session?.astrologerName}...</p>
+                <p className="text-[11px] text-[#D4C3A3] mt-1">Speak directly or type your question below.</p>
               </div>
             ) : (
               messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`p-3 rounded-2xl max-w-[88%] ${
+                  className={`p-3.5 rounded-2xl max-w-[90%] shadow-lg ${
                     msg.role === 'user'
-                      ? 'ml-auto bg-[#C9952B]/20 border border-[#C9952B]/40 text-foreground'
-                      : 'mr-auto bg-muted/60 border border-border text-foreground/90'
+                      ? 'ml-auto bg-gradient-to-r from-[#C9952B] to-[#9E6D14] text-white border border-[#E5B54F]/40'
+                      : 'mr-auto bg-[#1C1814] text-[#F5EFE6] border border-[#C9952B]/40'
                   }`}
                 >
-                  <div className="text-[10px] text-muted-foreground mb-1 font-semibold">
+                  <div
+                    className={`text-[11px] mb-1 font-bold ${
+                      msg.role === 'user' ? 'text-amber-100' : 'text-[#E5B54F]'
+                    }`}
+                  >
                     {msg.role === 'user' ? 'You' : session?.astrologerName} · {msg.time}
                   </div>
-                  <p className="leading-relaxed">{msg.content}</p>
+                  <p className="leading-relaxed text-xs whitespace-pre-wrap font-normal">
+                    {msg.content}
+                  </p>
                 </div>
               ))
             )}
             {isGeneratingReply && (
-              <div className="mr-auto bg-muted/60 border border-border p-3 rounded-2xl text-[11px] text-muted-foreground flex items-center gap-2">
-                <Loader2 size={12} className="animate-spin text-[#C9952B]" />
-                Analyzing planetary alignments...
+              <div className="mr-auto bg-[#1C1814] border border-[#C9952B]/40 p-3 rounded-2xl text-xs text-[#E5B54F] flex items-center gap-2 shadow-md">
+                <Loader2 size={13} className="animate-spin text-[#C9952B]" />
+                <span>Consulting birth chart & planetary transits...</span>
               </div>
             )}
           </div>
@@ -556,21 +662,21 @@ export default function AICallRoomPage() {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="pt-2 border-t border-border/50 flex items-center gap-2"
+            className="pt-2.5 border-t border-[#3D352A] flex items-center gap-2"
           >
             <input
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Type your question..."
-              className="flex-1 px-3.5 py-2 rounded-xl bg-background/80 border border-border text-xs focus:border-[#C9952B] outline-none"
+              placeholder={`Ask in ${activeLanguage}... (e.g. Can you speak in Telugu?)`}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-[#1C1814] border border-[#3D352A] text-xs text-[#FFFDFC] placeholder-[#8F8171] focus:border-[#C9952B] outline-none shadow-inner"
             />
             <button
               type="submit"
               disabled={!inputText.trim() || isGeneratingReply}
-              className="p-2 rounded-xl bg-[#C9952B] text-white disabled:opacity-40 hover:bg-[#b08022] transition-colors"
+              className="p-2.5 rounded-xl bg-[#C9952B] text-white disabled:opacity-40 hover:bg-[#b08022] transition-colors shadow-md"
             >
-              <Send size={14} />
+              <Send size={15} />
             </button>
           </form>
         </div>
@@ -583,45 +689,45 @@ export default function AICallRoomPage() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl bg-card border border-border/80 rounded-3xl p-5 shadow-2xl z-40 backdrop-blur-xl"
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl bg-[#1A1612] border border-[#C9952B]/50 rounded-3xl p-5 shadow-2xl z-40 backdrop-blur-xl text-[#FBF7EE]"
           >
-            <div className="flex items-center justify-between mb-3 border-b border-border/50 pb-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
-                <Sparkles size={14} /> Synthesized Birth Chart Profile
+            <div className="flex items-center justify-between mb-3 border-b border-[#3D352A] pb-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] flex items-center gap-1.5">
+                <Sparkles size={14} className="text-[#C9952B]" /> Synthesized Birth Chart Profile
               </h4>
               <button
                 onClick={() => setShowChartDrawer(false)}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-[#D4C3A3] hover:text-[#FFFDFC]"
               >
                 <X size={16} />
               </button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 bg-muted/40 rounded-xl border border-border">
-                <span className="text-[10px] text-muted-foreground uppercase block">
+              <div className="p-3 bg-[#221B14] rounded-xl border border-[#3D352A]">
+                <span className="text-[10px] text-[#D4C3A3] uppercase block font-semibold">
                   Lagna (Ascendant)
                 </span>
-                <span className="font-bold text-foreground">
+                <span className="font-bold text-[#FFFDFC]">
                   {session?.astroContext?.lagna || 'Scorpio'}
                 </span>
               </div>
-              <div className="p-3 bg-muted/40 rounded-xl border border-border">
-                <span className="text-[10px] text-muted-foreground uppercase block">
+              <div className="p-3 bg-[#221B14] rounded-xl border border-[#3D352A]">
+                <span className="text-[10px] text-[#D4C3A3] uppercase block font-semibold">
                   Moon Sign (Rashi)
                 </span>
-                <span className="font-bold text-foreground">
+                <span className="font-bold text-[#FFFDFC]">
                   {session?.astroContext?.moonRashi || 'Aries'}
                 </span>
               </div>
-              <div className="p-3 bg-muted/40 rounded-xl border border-border">
-                <span className="text-[10px] text-muted-foreground uppercase block">Nakshatra</span>
-                <span className="font-bold text-foreground">
+              <div className="p-3 bg-[#221B14] rounded-xl border border-[#3D352A]">
+                <span className="text-[10px] text-[#D4C3A3] uppercase block font-semibold">Nakshatra</span>
+                <span className="font-bold text-[#FFFDFC]">
                   {session?.astroContext?.nakshatra || 'Bharani'}
                 </span>
               </div>
-              <div className="p-3 bg-muted/40 rounded-xl border border-border">
-                <span className="text-[10px] text-muted-foreground uppercase block">
+              <div className="p-3 bg-[#221B14] rounded-xl border border-[#3D352A]">
+                <span className="text-[10px] text-[#D4C3A3] uppercase block font-semibold">
                   Active Dasha
                 </span>
                 <span className="font-bold text-emerald-400">
@@ -630,7 +736,7 @@ export default function AICallRoomPage() {
               </div>
             </div>
 
-            <p className="text-[11px] text-muted-foreground mt-3 italic">
+            <p className="text-[11px] text-[#D4C3A3] mt-3 italic">
               Devotee: {session?.birthDetails?.name} · Born {session?.birthDetails?.dob} at{' '}
               {session?.birthDetails?.place} · Topic: {session?.birthDetails?.primaryConcern}
             </p>
@@ -639,14 +745,14 @@ export default function AICallRoomPage() {
       </AnimatePresence>
 
       {/* Bottom Floating Call Control Bar */}
-      <footer className="p-6 bg-card/60 backdrop-blur-md border-t border-border/40 z-30 flex items-center justify-center gap-4">
+      <footer className="p-6 bg-[#14110E]/90 backdrop-blur-md border-t border-[#3D352A] z-30 flex items-center justify-center gap-4">
         {/* Mic Listen Toggle */}
         <button
           onClick={toggleMicListening}
           className={`p-4 rounded-2xl border transition-all ${
             isListening
               ? 'bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/30 scale-110'
-              : 'bg-card border-border hover:border-[#C9952B] text-foreground'
+              : 'bg-[#1C1814] border-[#3D352A] hover:border-[#C9952B] text-[#FFFDFC]'
           }`}
           title={isListening ? 'Listening active' : 'Click to Speak'}
         >
@@ -662,7 +768,7 @@ export default function AICallRoomPage() {
           className={`p-4 rounded-2xl border transition-all ${
             isSpeakerMuted
               ? 'bg-red-500/20 border-red-500 text-red-400'
-              : 'bg-card border-border hover:border-[#C9952B] text-foreground'
+              : 'bg-[#1C1814] border-[#3D352A] hover:border-[#C9952B] text-[#FFFDFC]'
           }`}
           title={isSpeakerMuted ? 'Unmute Speaker' : 'Mute Speaker'}
         >
@@ -678,7 +784,7 @@ export default function AICallRoomPage() {
           {isEndingCall ? (
             <>
               <Loader2 size={18} className="animate-spin" />
-              Generating Summary...
+              Generating Vedic Report...
             </>
           ) : (
             <>
@@ -689,144 +795,201 @@ export default function AICallRoomPage() {
         </button>
       </footer>
 
-      {/* Post-Consultation AI Summary & Vedic Remedies Modal */}
+      {/* Post-Consultation AI Summary & Vedic Remedies Modal (High Contrast Overhaul) */}
       <AnimatePresence>
         {showSummaryModal && finalSummary && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-card border border-border max-w-2xl w-full rounded-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col"
+              className="bg-[#17130F] border border-[#C9952B]/40 max-w-2xl w-full rounded-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col text-[#FBF7EE]"
             >
-              {/* Header */}
-              <div className="p-6 cosmic-bg border-b border-border text-center relative">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#C9952B]/20 text-[#C9952B] border border-[#C9952B]/40 mb-2">
+              {/* Header with high-contrast celestial styling */}
+              <div className="p-6 bg-gradient-to-r from-[#2F1712] via-[#221715] to-[#1A1310] border-b border-[#C9952B]/40 text-center relative">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#C9952B]/20 text-[#E5B54F] border border-[#C9952B]/50 mb-2">
                   <Sparkles size={12} /> Consultation Completed
                 </div>
-                <h2 className="text-xl font-bold text-foreground font-serif">
+                <h2 className="text-2xl font-bold text-[#FFFDFC] font-serif">
                   Vedic Astrological Summary & Remedies
                 </h2>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Consultation with {session?.astrologerName} ({session?.primaryDiscipline})
+                <p className="text-xs text-[#E5D5BA] mt-1 font-medium">
+                  Consultation with {session?.astrologerName} ({session?.primaryDiscipline}) · {activeLanguage}
                 </p>
+
+                {/* Tab Switcher: Remedies vs Transcript */}
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <button
+                    onClick={() => setSummaryViewTab('remedies')}
+                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      summaryViewTab === 'remedies'
+                        ? 'bg-[#C9952B] text-white shadow-md'
+                        : 'bg-[#221B14] text-[#D4C3A3] border border-[#3D352A] hover:text-white'
+                    }`}
+                  >
+                    <Sparkles size={13} /> Vedic Summary & Remedies
+                  </button>
+                  <button
+                    onClick={() => setSummaryViewTab('transcript')}
+                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      summaryViewTab === 'transcript'
+                        ? 'bg-[#C9952B] text-white shadow-md'
+                        : 'bg-[#221B14] text-[#D4C3A3] border border-[#3D352A] hover:text-white'
+                    }`}
+                  >
+                    <MessageSquare size={13} /> Conversation Transcript ({messages.length})
+                  </button>
+                </div>
               </div>
 
               {/* Summary Content Body */}
               <div className="p-6 overflow-y-auto space-y-6 text-sm">
                 {/* Billing Recap */}
-                <div className="grid grid-cols-3 gap-3 p-3 bg-muted/40 rounded-2xl border border-border text-center">
+                <div className="grid grid-cols-3 gap-3 p-3.5 bg-[#221B14] rounded-2xl border border-[#3D352A] text-center">
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase block">
+                    <span className="text-[10px] text-[#D4C3A3] uppercase font-semibold block">
                       Duration
                     </span>
-                    <span className="font-bold text-foreground">{billedMinutes} Minutes</span>
+                    <span className="font-bold text-[#FFFDFC] text-sm">{billedMinutes} Minutes</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase block">
+                    <span className="text-[10px] text-[#D4C3A3] uppercase font-semibold block">
                       Amount Paid
                     </span>
-                    <span className="font-bold text-[#C9952B]">
+                    <span className="font-bold text-[#E5B54F] text-sm">
                       {formatPrice(session?.pricePerMin * billedMinutes)}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase block">
+                    <span className="text-[10px] text-[#D4C3A3] uppercase font-semibold block">
                       Remaining Balance
                     </span>
-                    <span className="font-bold text-emerald-400">
+                    <span className="font-bold text-emerald-400 text-sm">
                       {formatPrice(currentBalance)}
                     </span>
                   </div>
                 </div>
 
-                {/* Overview */}
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] mb-1.5">
-                    Consultation Overview
-                  </h4>
-                  <p className="text-xs text-foreground/90 leading-relaxed bg-card p-3 rounded-xl border border-border">
-                    {finalSummary.overview}
-                  </p>
-                </div>
+                {summaryViewTab === 'remedies' ? (
+                  <>
+                    {/* Overview */}
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2">
+                        Consultation Overview
+                      </h4>
+                      <p className="text-xs text-[#F5EFE6] leading-relaxed bg-[#221B14] p-3.5 rounded-xl border border-[#3D352A]">
+                        {finalSummary.overview}
+                      </p>
+                    </div>
 
-                {/* Astrological Highlights */}
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] mb-2">
-                    Key Planetary Observations
-                  </h4>
-                  <ul className="space-y-1.5 text-xs text-muted-foreground">
-                    {finalSummary.astrologicalHighlights?.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                    {/* Astrological Highlights */}
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2">
+                        Key Planetary Observations
+                      </h4>
+                      <ul className="space-y-2 text-xs text-[#E8DFC8]">
+                        {finalSummary.astrologicalHighlights?.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2 bg-[#221B14] p-2.5 rounded-xl border border-[#3D352A]">
+                            <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                            <span className="leading-relaxed">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                {/* Timeline Predictions */}
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] mb-2">
-                    Timeline Predictions
-                  </h4>
-                  <div className="space-y-2">
-                    {finalSummary.timelinePredictions?.map((pred, i) => (
-                      <div
-                        key={i}
-                        className="p-2.5 rounded-xl bg-card border border-border/80 text-xs text-foreground/90"
-                      >
-                        {pred}
+                    {/* Timeline Predictions */}
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2">
+                        Timeline Predictions
+                      </h4>
+                      <div className="space-y-2">
+                        {finalSummary.timelinePredictions?.map((pred, i) => (
+                          <div
+                            key={i}
+                            className="p-3 rounded-xl bg-[#221B14] border border-[#3D352A] text-xs text-[#F5EFE6] leading-relaxed"
+                          >
+                            {pred}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
 
-                {/* Recommended Remedies */}
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] mb-2">
-                    Recommended Vedic Remedies & Mantras
-                  </h4>
-                  <div className="space-y-2.5">
-                    {finalSummary.recommendedRemedies?.map((rem, i) => (
-                      <div
-                        key={i}
-                        className="p-3 rounded-xl bg-[#C9952B]/10 border border-[#C9952B]/30"
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-xs text-[#C9952B] uppercase">
-                            {rem.title}
-                          </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded bg-[#C9952B]/20 text-[#C9952B] uppercase font-semibold">
-                            {rem.type}
-                          </span>
+                    {/* Recommended Remedies */}
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2">
+                        Recommended Vedic Remedies & Mantras
+                      </h4>
+                      <div className="space-y-2.5">
+                        {finalSummary.recommendedRemedies?.map((rem, i) => (
+                          <div
+                            key={i}
+                            className="p-3.5 rounded-xl bg-[#282015] border border-[#C9952B]/40 shadow-sm"
+                          >
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="font-bold text-xs text-[#E5B54F] uppercase tracking-wide">
+                                {rem.title}
+                              </span>
+                              <span className="text-[10px] px-2.5 py-0.5 rounded bg-[#C9952B]/20 text-[#E5B54F] border border-[#C9952B]/40 uppercase font-bold">
+                                {rem.type}
+                              </span>
+                            </div>
+                            <p className="text-xs text-[#F5EFE6] leading-relaxed">{rem.instructions}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Closing Blessing */}
+                    <div className="p-4 bg-gradient-to-r from-[#3B221B] to-[#2B1B13] rounded-2xl border border-[#C9952B]/50 text-center shadow-lg">
+                      <p className="text-xs font-medium text-[#FFE7B8] italic leading-relaxed">
+                        "{finalSummary.panditJiFinalBlessing}"
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  /* Full Transcript Tab */
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2 flex items-center gap-2">
+                      <MessageSquare size={14} className="text-[#C9952B]" /> Full Consultation Conversation Transcript
+                    </h4>
+                    {messages.length === 0 ? (
+                      <p className="text-xs text-[#D4C3A3] italic">No messages recorded in this consultation.</p>
+                    ) : (
+                      messages.map((msg, i) => (
+                        <div
+                          key={i}
+                          className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
+                            msg.role === 'user'
+                              ? 'bg-[#C9952B]/25 border border-[#C9952B]/50 text-[#FFFDFC] ml-6'
+                              : 'bg-[#221B14] border border-[#3D352A] text-[#F5EFE6] mr-6'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-[#E5B54F] text-[11px]">
+                              {msg.role === 'user' ? 'Devotee (You)' : session?.astrologerName}
+                            </span>
+                            <span className="text-[10px] text-[#D4C3A3]">{msg.time}</span>
+                          </div>
+                          <p className="whitespace-pre-wrap font-normal">{msg.content}</p>
                         </div>
-                        <p className="text-xs text-muted-foreground">{rem.instructions}</p>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
-                </div>
-
-                {/* Closing Blessing */}
-                <div className="p-3.5 bg-gradient-to-r from-[#713B32]/30 to-[#C9952B]/20 rounded-2xl border border-[#C9952B]/40 text-center">
-                  <p className="text-xs font-medium text-foreground italic">
-                    "{finalSummary.panditJiFinalBlessing}"
-                  </p>
-                </div>
+                )}
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-border bg-card flex items-center justify-between gap-3">
+              <div className="p-4 border-t border-[#3D352A] bg-[#14110E] flex items-center justify-between gap-3">
                 <button
                   onClick={() => window.print()}
-                  className="px-4 py-2 rounded-xl border border-border hover:border-[#C9952B] text-xs font-semibold text-foreground flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl border border-[#3D352A] hover:border-[#C9952B] text-xs font-semibold text-[#FFFDFC] flex items-center gap-1.5 transition-colors"
                 >
                   <Download size={14} /> Print / Save Summary
                 </button>
                 <button
-                  onClick={() => router.push('/ai-consultations')}
-                  className="px-6 py-2 rounded-xl bg-[#C9952B] text-white text-xs font-bold hover:bg-[#b08022] transition-colors"
+                  onClick={() => router.push(`/order-history?tab=ai&session=${sessionId}`)}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#B08022] hover:from-[#B08022] hover:to-[#966B1A] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2"
                 >
-                  View All Consultations
+                  <Sparkles size={14} /> View in Order History & Reports
                 </button>
               </div>
             </motion.div>

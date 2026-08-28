@@ -22,6 +22,7 @@ export async function POST(req: Request) {
     const birthDetails = sessionData?.birthDetails || {};
     const primaryConcern = birthDetails?.primaryConcern || 'Life Guidance';
     const discipline = sessionData?.primaryDiscipline || 'Vedic Jyotish';
+    const language = sessionData?.language || 'English';
 
     // 1. Fetch dynamic OpenAI API Key
     let openaiApiKey = process.env.OPENAI_API_KEY;
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
 
     // Default High-Quality Astrology Summary fallback
     let summary: AIConsultationSummary = {
-      overview: `Divine consultation completed with ${astrologerName} (${discipline}) for ${birthDetails.name || 'Devotee'}. Explored key planetary influences around ${primaryConcern}, analyzing active Dasha and transits.`,
+      overview: `Divine consultation completed with ${astrologerName} (${discipline}) for ${birthDetails.name || 'Devotee'}. Explored key planetary influences around ${primaryConcern}, analyzing active Dasha and transits in ${language}.`,
       astrologicalHighlights: [
         `Strong planetary alignment observed in your chart indicating high intellectual resilience and leadership capacity.`,
         `Current Mahadasha-Antardasha period is initiating a significant transition phase favoring long-term stability.`,
@@ -91,7 +92,7 @@ export async function POST(req: Request) {
 
         const systemPrompt = `You are an elite Vedic astrology report generator for AstroParihar.
 Synthesize a professional, inspiring, and authentic post-consultation astrology summary based on the consultation conducted by ${astrologerName} (${discipline}).
-Devotee Details: Name: ${birthDetails.name || 'Devotee'}, DOB: ${birthDetails.dob || 'N/A'}, Time: ${birthDetails.time || 'N/A'}, Place: ${birthDetails.place || 'N/A'}, Concern: ${primaryConcern}.
+Devotee Details: Name: ${birthDetails.name || 'Devotee'}, DOB: ${birthDetails.dob || 'N/A'}, Time: ${birthDetails.time || 'N/A'}, Place: ${birthDetails.place || 'N/A'}, Concern: ${primaryConcern}, Language: ${language}.
 
 Respond ONLY with a valid JSON object matching this schema:
 {
@@ -145,7 +146,7 @@ Respond ONLY with a valid JSON object matching this schema:
       }
     }
 
-    // 3. Save Summary and Complete the Session in Firestore
+    // 3. Save Summary, Full Transcript, and Complete the Session in Firestore
     const finalDuration = Math.max(durationSeconds, 60);
     const finalBilledMinutes = Math.ceil(finalDuration / 60);
     const finalTotalAmount = finalBilledMinutes * (sessionData?.pricePerMin || 20);
@@ -157,6 +158,7 @@ Respond ONLY with a valid JSON object matching this schema:
       durationSeconds: finalDuration,
       billedMinutes: finalBilledMinutes,
       totalBilledAmount: finalTotalAmount,
+      conversationTranscript: Array.isArray(conversationTranscript) ? conversationTranscript : [],
       summary,
     });
 
@@ -166,6 +168,7 @@ Respond ONLY with a valid JSON object matching this schema:
       durationSeconds: finalDuration,
       billedMinutes: finalBilledMinutes,
       totalBilledAmount: finalTotalAmount,
+      conversationTranscript,
     });
   } catch (error: any) {
     console.error('Error ending AI consultation:', error);

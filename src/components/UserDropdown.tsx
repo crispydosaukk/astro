@@ -121,9 +121,19 @@ export default function UserDropdown() {
               <Link
                 href="/order-history"
                 onClick={() => setIsOpen(false)}
-                className="px-5 py-2.5 text-sm font-semibold text-[#292522] hover:bg-[#F8F3EA] hover:text-[#713B32] transition-colors text-left"
+                className="px-5 py-2.5 text-sm font-semibold text-[#292522] hover:bg-[#F8F3EA] hover:text-[#713B32] transition-colors text-left flex items-center justify-between"
               >
-                Order History
+                <span>Order History</span>
+              </Link>
+              <Link
+                href="/ai-consultations"
+                onClick={() => setIsOpen(false)}
+                className="px-5 py-2.5 text-sm font-semibold text-[#292522] hover:bg-[#F8F3EA] hover:text-[#713B32] transition-colors text-left flex items-center justify-between"
+              >
+                <span>AI Consultations</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#C9952B]/20 text-[#C9952B]">
+                  Voice & Reports
+                </span>
               </Link>
               <Link
                 href="/my-reports"

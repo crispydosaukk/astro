@@ -87,6 +87,7 @@ export default function TalkToAIAstrologerPage() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [callLanguage, setCallLanguage] = useState<string>('English');
 
   // Birth Details Intake Form
   const [birthForm, setBirthForm] = useState({
@@ -175,6 +176,13 @@ export default function TalkToAIAstrologerPage() {
   // Open consultation booking
   const handleInitiateConsultation = (astro: AIAstrologer) => {
     setSelectedAstrologer(astro);
+    if (selectedLanguage !== 'all') {
+      setCallLanguage(selectedLanguage);
+    } else if (astro.languages?.length) {
+      setCallLanguage(astro.languages[0]);
+    } else {
+      setCallLanguage('English');
+    }
     setShowBookingModal(true);
   };
 
@@ -210,10 +218,7 @@ export default function TalkToAIAstrologerPage() {
           customerName: birthForm.name || user.displayName || 'Devotee',
           customerEmail: user.email || '',
           astrologerId: selectedAstrologer.id,
-          language:
-            selectedLanguage !== 'all'
-              ? selectedLanguage
-              : selectedAstrologer.languages[0] || 'English',
+          language: callLanguage,
           birthDetails: birthForm,
         }),
       });
@@ -262,23 +267,23 @@ export default function TalkToAIAstrologerPage() {
               Connect · Zero Waiting Queue · 12+ Disciplines
             </div>
 
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 font-serif">
-              Talk to <span className="text-[#C9952B]">AI Expert Astrologers</span>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 font-serif text-[#FFFDFC]">
+              Talk to <span className="text-[#E5B54F]">AI Expert Astrologers</span>
             </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg mb-8">
+            <p className="text-[#F3EBDD] max-w-2xl mx-auto text-base md:text-lg mb-8 font-normal leading-relaxed">
               Experience authentic, instant, two-way voice consultations with elite Vedic, Tarot,
               KP, and Nadi AI Expert personalities — powered by deep birth-chart synthesis.
             </p>
 
             {/* Quick Navigation Pill Switcher */}
-            <div className="inline-flex items-center p-1.5 rounded-2xl glass-card border border-border/60 shadow-xl mb-6">
+            <div className="inline-flex items-center p-1.5 rounded-2xl bg-[#221B14]/80 backdrop-blur-md border border-[#C9952B]/40 shadow-xl mb-6">
               <Link
                 href="/talk-to-astrologer"
-                className="px-5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground transition-all flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[#D4C3A3] hover:text-[#FFFDFC] transition-all flex items-center gap-2"
               >
                 <User size={16} /> Human Astrologers
               </Link>
-              <div className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#C9952B] text-white shadow-md flex items-center gap-2">
+              <div className="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#C9952B] text-white shadow-md flex items-center gap-2">
                 <Bot size={16} /> ✦ AI Expert Astrologers (Instant Voice)
               </div>
             </div>
@@ -562,16 +567,16 @@ export default function TalkToAIAstrologerPage() {
               className="bg-card border border-border max-w-xl w-full rounded-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col"
             >
               {/* Modal Header */}
-              <div className="relative p-6 cosmic-bg border-b border-border">
+              <div className="relative p-6 cosmic-bg border-b border-[#C9952B]/40 text-[#FFFDFC]">
                 <button
                   onClick={() => setShowProfileModal(false)}
-                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/20 text-muted-foreground hover:text-foreground transition-all"
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/15 text-[#E5D5BA] hover:text-[#FFFDFC] transition-all"
                 >
                   <X size={18} />
                 </button>
 
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-[#C9952B] relative">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-[#C9952B] relative shadow-lg">
                     <AppImage
                       src={selectedAstrologer.avatar}
                       alt={selectedAstrologer.name}
@@ -580,19 +585,19 @@ export default function TalkToAIAstrologerPage() {
                     />
                   </div>
                   <div>
-                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[#C9952B]/20 text-[#C9952B] uppercase">
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[#C9952B]/30 text-[#FFFDFC] border border-[#C9952B]/50 uppercase">
                       {selectedAstrologer.primaryDiscipline}
                     </span>
-                    <h2 className="text-xl font-bold text-foreground mt-1">
+                    <h2 className="text-xl font-bold text-[#FFFDFC] mt-1 font-serif">
                       {selectedAstrologer.name}
                     </h2>
-                    <p className="text-xs text-muted-foreground">{selectedAstrologer.tagline}</p>
+                    <p className="text-xs text-[#E5D5BA] mt-0.5 font-medium">{selectedAstrologer.tagline}</p>
                     <div className="flex items-center gap-3 mt-2 text-xs">
-                      <span className="flex items-center gap-1 text-amber-500 font-bold">
-                        <Star size={13} className="fill-amber-500" /> {selectedAstrologer.rating}
+                      <span className="flex items-center gap-1 text-amber-400 font-bold">
+                        <Star size={13} className="fill-amber-400" /> {selectedAstrologer.rating}
                       </span>
-                      <span>·</span>
-                      <span className="text-muted-foreground">
+                      <span className="text-[#D4C3A3]">·</span>
+                      <span className="text-[#E5D5BA] font-medium">
                         {selectedAstrologer.experienceYears} Years Vedic Experience
                       </span>
                     </div>
@@ -696,9 +701,9 @@ export default function TalkToAIAstrologerPage() {
               className="bg-card border border-border max-w-lg w-full rounded-3xl overflow-hidden shadow-2xl relative flex flex-col"
             >
               {/* Header */}
-              <div className="p-5 cosmic-bg border-b border-border flex items-center justify-between">
+              <div className="p-5 cosmic-bg border-b border-[#C9952B]/40 flex items-center justify-between text-[#FFFDFC]">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl overflow-hidden border border-[#C9952B] relative">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-[#C9952B] relative shadow-md">
                     <AppImage
                       src={selectedAstrologer.avatar}
                       alt={selectedAstrologer.name}
@@ -707,17 +712,17 @@ export default function TalkToAIAstrologerPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-bold text-foreground text-base">
+                    <h3 className="font-bold text-[#FFFDFC] text-base font-serif">
                       Connect with {selectedAstrologer.name}
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Rate: {formatPrice(selectedAstrologer.pricePerMin)}/min · Live Voice Call
+                    <p className="text-xs text-[#E5D5BA] font-medium">
+                      Rate: <span className="text-[#E5B54F] font-bold">{formatPrice(selectedAstrologer.pricePerMin)}/min</span> · Live Voice Call
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowBookingModal(false)}
-                  className="p-2 rounded-full hover:bg-black/20 text-muted-foreground hover:text-foreground"
+                  className="p-2 rounded-full hover:bg-white/15 text-[#E5D5BA] hover:text-[#FFFDFC] transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -851,6 +856,23 @@ export default function TalkToAIAstrologerPage() {
                       placeholder="e.g. New Delhi, India"
                       className="w-full px-3 py-2 rounded-xl bg-background border border-border text-xs focus:border-[#C9952B] outline-none"
                     />
+                  </div>
+
+                  {/* Language Selection */}
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1 font-semibold text-[#292522] dark:text-[#E5B54F]">
+                      Consultation Language · సంభాషణ భాష / மொழி
+                    </label>
+                    <select
+                      value={callLanguage}
+                      onChange={(e) => setCallLanguage(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-background border-2 border-[#C9952B] text-xs font-bold focus:border-[#C9952B] outline-none shadow-sm"
+                    >
+                      <option value="Telugu">✦ Telugu (తెలుగు) — శ్రీ వేద జ్యోతిషం</option>
+                      <option value="Hindi">✦ Hindi (हिन्दी) — प्रामाणिक वैदिक ज्योतिष</option>
+                      <option value="English">✦ English — Celestial Vedic Astrology</option>
+                      <option value="Tamil">✦ Tamil (தமிழ்) — பாரம்பரிய வேத ஜோதிடம்</option>
+                    </select>
                   </div>
 
                   {/* Primary Topic / Concern */}
