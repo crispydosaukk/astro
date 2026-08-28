@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PhoneCall, Sparkles, Calendar, FileText } from 'lucide-react';
+import { Home, PhoneCall, Sparkles, Calendar, FileText, Bot } from 'lucide-react';
 import LandingFooter from '@/app/components/LandingFooter';
 
 export default function GlobalFooterAndBottomBar() {
@@ -34,23 +34,23 @@ export default function GlobalFooterAndBottomBar() {
       isActive: pathname === '/',
     },
     {
+      label: 'AI Expert',
+      href: '/talk-to-ai-astrologer',
+      icon: Bot,
+      isActive: pathname?.startsWith('/talk-to-ai-astrologer'),
+      showLiveDot: true,
+    },
+    {
       label: 'Talk to Astro',
       href: '/talk-to-astrologer',
       icon: PhoneCall,
       isActive: pathname?.startsWith('/talk-to-astrologer') || pathname?.startsWith('/astrologer/'),
-      showLiveDot: true,
     },
     {
       label: 'Remedies',
       href: '/remedies',
       icon: Sparkles,
       isActive: pathname?.startsWith('/remedies'),
-    },
-    {
-      label: 'Panchang',
-      href: '/services/panchang',
-      icon: Calendar,
-      isActive: pathname?.startsWith('/services/panchang') || pathname?.startsWith('/panchang'),
     },
     {
       label: 'My Reports',

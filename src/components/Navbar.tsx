@@ -131,7 +131,7 @@ const panchangItems = [
 const standardNavLinks = [
   { label: 'Home', href: '/' },
   { label: 'Talk to Astrologer', href: '/talk-to-astrologer' },
-  { label: '✦ AI Astrologers', href: '/talk-to-ai-astrologer', isAiBadge: true },
+  { label: '✦ AI Expert Astrologer', href: '/talk-to-ai-astrologer', isAiBadge: true },
   { label: 'Remedies', href: '/remedies' },
   { label: 'Astrologer Login', href: '/astrologer-login' },
 ];

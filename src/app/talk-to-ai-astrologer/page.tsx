@@ -263,11 +263,11 @@ export default function TalkToAIAstrologerPage() {
             </div>
 
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 font-serif">
-              Talk to <span className="text-[#C9952B]">AI Astrologers</span>
+              Talk to <span className="text-[#C9952B]">AI Expert Astrologers</span>
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg mb-8">
               Experience authentic, instant, two-way voice consultations with elite Vedic, Tarot,
-              KP, and Nadi AI personalities — powered by deep birth-chart synthesis.
+              KP, and Nadi AI Expert personalities — powered by deep birth-chart synthesis.
             </p>
 
             {/* Quick Navigation Pill Switcher */}
@@ -279,7 +279,7 @@ export default function TalkToAIAstrologerPage() {
                 <User size={16} /> Human Astrologers
               </Link>
               <div className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#C9952B] text-white shadow-md flex items-center gap-2">
-                <Bot size={16} /> ✦ AI Astrologers (Instant Voice)
+                <Bot size={16} /> ✦ AI Expert Astrologers (Instant Voice)
               </div>
             </div>
           </motion.div>

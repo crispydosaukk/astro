@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import { useUserData } from '@/lib/useUserData';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { Loader2, Video, Phone, Calendar, Clock, CreditCard } from 'lucide-react';
+import { Loader2, Video, Phone, Calendar, Clock, CreditCard, Bot } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCurrency } from '@/lib/CurrencyContext';
 
@@ -121,12 +121,20 @@ export default function OrderHistoryPage() {
             <p className="text-muted-foreground mb-6">
               You haven't completed any consultations with our astrologers yet.
             </p>
-            <button
-              onClick={() => (window.location.href = '/talk-to-astrologer')}
-              className="px-6 py-2.5 rounded-xl font-semibold gold-gradient-bg text-white hover:opacity-90 transition-all"
-            >
-              Book a Session Now
-            </button>
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              <button
+                onClick={() => (window.location.href = '/talk-to-ai-astrologer')}
+                className="px-6 py-2.5 rounded-xl font-semibold bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white transition-all shadow-md flex items-center gap-1.5"
+              >
+                <Bot size={15} className="animate-pulse" /> AI Expert Astrologer
+              </button>
+              <button
+                onClick={() => (window.location.href = '/talk-to-astrologer')}
+                className="px-6 py-2.5 rounded-xl font-semibold bg-muted hover:bg-muted/80 text-foreground border border-border transition-all"
+              >
+                Book Astrologer Session
+              </button>
+            </div>
           </div>
         )}
       </div>

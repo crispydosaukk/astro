@@ -251,9 +251,13 @@ export const REMEDIES_WHEEL_ITEMS: RemedyWheelItem[] = [
 
 interface RotatingRemediesWheelProps {
   className?: string;
+  onHoverItem?: (itemId: string | null) => void;
 }
 
-export default function RotatingRemediesWheel({ className = '' }: RotatingRemediesWheelProps) {
+export default function RotatingRemediesWheel({
+  className = '',
+  onHoverItem,
+}: RotatingRemediesWheelProps) {
   const router = useRouter();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
@@ -326,8 +330,14 @@ export default function RotatingRemediesWheel({ className = '' }: RotatingRemedi
                 <g
                   key={item.id}
                   onClick={() => router.push(item.href)}
-                  onMouseEnter={() => setHoveredItem(item.id)}
-                  onMouseLeave={() => setHoveredItem(null)}
+                  onMouseEnter={() => {
+                    setHoveredItem(item.id);
+                    onHoverItem?.(item.id);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredItem(null);
+                    onHoverItem?.(null);
+                  }}
                   className="cursor-pointer transition-all duration-200"
                 >
                   {/* Wedge Shape with Hover Glow */}

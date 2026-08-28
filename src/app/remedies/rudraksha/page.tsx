@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { CircleDot, Check, ArrowRight, Lock, Loader2 } from 'lucide-react';
+import { CircleDot, Check, ArrowRight, Lock, Loader2, Bot } from 'lucide-react';
 import ServiceReportForm from '@/components/ServiceReportForm';
 import {
   getServicePageContent,
@@ -125,6 +125,12 @@ export default function RudrakshaServicePage() {
                   <CircleDot size={18} />
                   <span>{content.hero.primaryBtnText || 'Get My Rudraksha Report'}</span>
                 </a>
+                <Link
+                  href="/talk-to-ai-astrologer"
+                  className="px-7 py-4 rounded-full bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white font-bold hover:scale-[1.02] transition-all text-sm sm:text-base shadow-lg shadow-[#C9952B]/30 flex items-center gap-2 cursor-pointer"
+                >
+                  <Bot size={18} className="animate-pulse" /> AI Expert Astrologer
+                </Link>
                 <Link
                   href="/talk-to-astrologer"
                   className="px-7 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md cursor-pointer"

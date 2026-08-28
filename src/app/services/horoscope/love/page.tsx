@@ -24,6 +24,7 @@ import {
   Sun,
   Moon,
   PhoneCall,
+  Bot,
 } from 'lucide-react';
 import CityLocationInput from '@/components/CityLocationInput';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
@@ -399,6 +400,12 @@ export default function LoveHoroscopePage() {
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap">
+                    <Link
+                      href="/talk-to-ai-astrologer"
+                      className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white text-xs font-bold flex items-center gap-1.5 shadow transition-all"
+                    >
+                      <Bot size={14} className="animate-pulse" /> AI Expert Astrologer
+                    </Link>
                     <Link
                       href="/talk-to-astrologer?category=Love"
                       className="px-5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow transition-colors"

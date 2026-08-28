@@ -21,6 +21,7 @@ import {
   Coins,
   Activity,
   PhoneCall,
+  Bot,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useUserData } from '@/lib/useUserData';
@@ -1160,12 +1161,20 @@ export default function RecentReports() {
                   </div>
 
                   <div className="p-6 border-t border-border bg-muted/30 flex items-center justify-between flex-wrap gap-3">
-                    <Link
-                      href="/talk-to-astrologer"
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-500 transition-colors shadow-lg"
-                    >
-                      <PhoneCall size={15} /> Clarify Doubts? Talk to Astrologer 📞
-                    </Link>
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <Link
+                        href="/talk-to-ai-astrologer"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] transition-all shadow-md transform hover:-translate-y-0.5"
+                      >
+                        <Bot size={15} className="animate-pulse" /> AI Expert Astrologer
+                      </Link>
+                      <Link
+                        href="/talk-to-astrologer"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-500 transition-colors shadow-md"
+                      >
+                        <PhoneCall size={15} /> Talk to Astrologer 📞
+                      </Link>
+                    </div>
                     <button
                       onClick={() => setSelectedReport(null)}
                       className="px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"

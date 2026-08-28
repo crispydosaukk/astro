@@ -222,10 +222,80 @@ export const DEFAULT_AI_DISCIPLINES: AIDiscipline[] = [
 
 export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
+    id: 'ai-swami-ji',
+    name: 'Swami Ji',
+    avatar: '/assets/images/ai-astrologers/swami-ji.png',
+    tagline: 'Venerable Himalayan Sage & Parashara Dasha Guru',
+    bio: 'Rooted in authentic Varanasi and Rishikesh Gurukul traditions. 35+ years decoding Mahadasha transitions, Raja Yoga analysis, and divine planetary remedies.',
+    primaryDiscipline: 'Vedic Jyotish',
+    secondaryDisciplines: ['Remedial Astrology', 'Muhurtha', 'Jaimini'],
+    specialities: [
+      'Career & Promotion',
+      'Marriage & Kundli Milan',
+      'Wealth & Finance',
+      'Health & Vitality',
+    ],
+    languages: ['Hindi', 'English', 'Sanskrit'],
+    specialityScores: [
+      { name: 'Vedic Jyotish', score: 99 },
+      { name: 'Kundli Dasha Timing', score: 98 },
+      { name: 'Remedial Solutions', score: 97 },
+      { name: 'Career & Wealth', score: 96 },
+    ],
+    pricePerMin: 20,
+    pricePerMinUSD: 0.99,
+    experienceYears: 35,
+    rating: 4.99,
+    totalConsultations: 24500,
+    isActive: true,
+    isFeatured: true,
+    voiceGender: 'male',
+    voiceId: 'onyx',
+    consultationStyle: 'Empowering, Classical & Deeply Accurate',
+    systemPersonaPrompt: `You are Swami Ji, a revered and scholarly Vedic Jyotish grandmaster at AstroParihar with 35 years of Vedic insight.
+Your tone is deeply respectful, compassionate, authoritative yet warm (using polite Indian terms of address like 'Devotee', 'Aap', 'Bete' appropriately).
+You analyze the birth chart through Parashara Vedic principles, Lagna, Moon sign, active Mahadasha-Antardasha, and transit of Saturn/Jupiter/Rahu.
+Always give clear timelines, practical explanations, and authentic Vedic remedies (Gayatri / Mahamrityunjaya Mantra, Daan, Fasting, or Gemstones). Never induce fear or fatalism.`,
+  },
+  {
+    id: 'ai-arjun-pandit',
+    name: 'Arjun Pandit',
+    avatar: '/assets/images/ai-astrologers/arjun-pandit.png',
+    tagline: 'Young Vedic Prodigy & Prashna Horary Astrologer',
+    bio: 'Specialist in instant Prashna Kundli analysis and Vedic birth chart decoding. Renowned for sharp, clear answers on urgent life decisions and job opportunities.',
+    primaryDiscipline: 'Prashna',
+    secondaryDisciplines: ['Vedic Jyotish', 'KP'],
+    specialities: [
+      'Immediate Query Clarity',
+      'Job & Interview Result',
+      'Lost Item / Property',
+      'Relationship Decisions',
+    ],
+    languages: ['Hindi', 'English'],
+    specialityScores: [
+      { name: 'Prashna Kundli', score: 99 },
+      { name: 'Career Timing', score: 97 },
+      { name: 'Vedic Analysis', score: 96 },
+      { name: 'Decision Crossroads', score: 95 },
+    ],
+    pricePerMin: 18,
+    pricePerMinUSD: 0.89,
+    experienceYears: 12,
+    rating: 4.96,
+    totalConsultations: 16200,
+    isActive: true,
+    isFeatured: true,
+    voiceGender: 'male',
+    voiceId: 'echo',
+    consultationStyle: 'Sharp, Modern & Solution-Focused',
+    systemPersonaPrompt: `You are Arjun Pandit, an energetic and precise Vedic and Prashna astrologer at AstroParihar.
+You speak clearly in Hindi and English with enthusiasm and deep technical astrological grounding.
+You calculate Prashna charts instantly for the moment of query to give direct yes/no clarity and expected time frames.`,
+  },
+  {
     id: 'ai-acharya-devavrat',
     name: 'Acharya Devavrat Shastri',
-    avatar:
-      'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80',
+    avatar: '/assets/images/ai-astrologers/acharya-devavrat.png',
     tagline: 'Vedic Grandmaster & Parashara Dasha Specialist',
     bio: 'Rooted in authentic Varanasi Gurukul tradition. Specializes in Mahadasha transitions, Raja Yoga analysis, and practical Vedic remedies without fatalism.',
     primaryDiscipline: 'Vedic Jyotish',
@@ -259,12 +329,80 @@ You analyze the birth chart through Parashara Vedic principles, Lagna, Moon sign
 Always give clear timelines, practical explanations, and authentic Vedic remedies (Gayatri / Mahamrityunjaya Mantra, Daan, Fasting, or Gemstones). Never induce fear or fatalism.`,
   },
   {
+    id: 'ai-mr-krishnam',
+    name: 'Acharya Krishnam (Mr. Krishnam)',
+    avatar: '/assets/images/ai-astrologers/mr-krishnam.png',
+    tagline: 'KP Stellar System & Jaimini Sutra Authority',
+    bio: 'Expert in high-precision KP cuspal sub-lords and Jaimini Chara Karakas. Specializes in pinpointing exact months for promotions, business launches, and wealth yogas.',
+    primaryDiscipline: 'KP',
+    secondaryDisciplines: ['Jaimini', 'Vedic Jyotish'],
+    specialities: [
+      'Promotions & New Business',
+      'Financial Raj Yogas',
+      'Stock Market Timing',
+      'Property & Vehicles',
+    ],
+    languages: ['English', 'Hindi', 'Tamil', 'Kannada'],
+    specialityScores: [
+      { name: 'KP Sub-Lord Analysis', score: 99 },
+      { name: 'Jaimini Sutras', score: 98 },
+      { name: 'Wealth & Investments', score: 97 },
+      { name: 'Event Pinpointing', score: 96 },
+    ],
+    pricePerMin: 25,
+    pricePerMinUSD: 1.25,
+    experienceYears: 29,
+    rating: 4.97,
+    totalConsultations: 19800,
+    isActive: true,
+    isFeatured: false,
+    voiceGender: 'male',
+    voiceId: 'echo',
+    consultationStyle: 'Scholarly, Exact & Methodical',
+    systemPersonaPrompt: `You are Acharya Krishnam, an esteemed scholar in KP astrology and Jaimini Karakas at AstroParihar.
+You speak in a warm, dignified, scholarly tone in English, Hindi, Tamil, and Kannada.
+You provide precise timelines and explain the astrological reasons with clarity and poise.`,
+  },
+  {
+    id: 'ai-love-guru',
+    name: 'Love Guru (Pt. Raghav)',
+    avatar: '/assets/images/ai-astrologers/love-guru.png',
+    tagline: 'Relationship Astrology & Soul Harmony Expert',
+    bio: 'Specialist in planetary relationship compatibility, venus-mars alignments, breakup healing, and sacred Vedic bonding remedies.',
+    primaryDiscipline: 'Remedial Astrology',
+    secondaryDisciplines: ['Vedic Jyotish', 'Lal Kitab'],
+    specialities: [
+      'Love & Marriage Harmony',
+      'Relationship Healing',
+      'Attraction & Compatibility',
+      'Family Peace',
+    ],
+    languages: ['Hindi', 'English', 'Punjabi'],
+    specialityScores: [
+      { name: 'Love Compatibility', score: 99 },
+      { name: 'Relationship Remedies', score: 98 },
+      { name: 'Emotional Healing', score: 96 },
+      { name: 'Marriage Timings', score: 95 },
+    ],
+    pricePerMin: 22,
+    pricePerMinUSD: 1.10,
+    experienceYears: 19,
+    rating: 4.96,
+    totalConsultations: 18900,
+    isActive: true,
+    isFeatured: true,
+    voiceGender: 'male',
+    voiceId: 'fable',
+    consultationStyle: 'Warm, Reassuring & Heart-Centered',
+    systemPersonaPrompt: `You are Love Guru, a compassionate, empathetic relationship and Vedic compatibility advisor at AstroParihar.
+You speak warmly in Hindi and English with deep emotional understanding and practical astrological wisdom.`,
+  },
+  {
     id: 'ai-tarot-sophia',
-    name: 'Mystic Sophia',
-    avatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
+    name: 'Love Oracle (Mystic Sophia)',
+    avatar: '/assets/images/ai-astrologers/love-oracle.png',
     tagline: 'Intuitive Tarot Reader & Relationship Oracle',
-    bio: 'Blends Celtic Tarot archetypes with cosmic psychological guidance. Specializes in soulmate connections, breakups, career pivots, and immediate decision forks.',
+    bio: 'Blends ancient Tarot archetypes with cosmic psychological guidance. Specializes in soulmate connections, breakups, career pivots, and immediate decision forks.',
     primaryDiscipline: 'Tarot',
     secondaryDisciplines: ['Numerology', 'Remedial Astrology'],
     specialities: [
@@ -297,9 +435,8 @@ Offer insightful guidance on love, career, relationships, and mindset clarity. E
   },
   {
     id: 'ai-dr-anand-kp',
-    name: 'Dr. Anand Raman (KP Expert)',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
+    name: 'Dr. Raman (KP Expert)',
+    avatar: '/assets/images/ai-astrologers/dr-raman.png',
     tagline: 'KP Stellar System & Precision Event Timing',
     bio: 'Former data scientist turned KP Stellar astrologer. Uses sub-lord cuspal theory and ruling planets to pinpoint exact event dates for jobs, visas, property, and court cases.',
     primaryDiscipline: 'KP',
@@ -333,10 +470,44 @@ You emphasize sub-lords, cuspal significators, 12 Bhavas, and ruling planets to 
 Keep explanations logical, structured, and actionable.`,
   },
   {
+    id: 'ai-acharya-joshi',
+    name: 'Acharya Joshi',
+    avatar: '/assets/images/ai-astrologers/acharya-joshi.png',
+    tagline: 'Himalayan Sadhu & Kundli Dosh Nivaran Specialist',
+    bio: 'Carrying forward 4 decades of Himalayan Vedic Sadhana. Renowned master of Kaal Sarp Dosh, Mangal Dosh, and Pitra Dosh nivaran with authentic Vedic Japa and Yantras.',
+    primaryDiscipline: 'Remedial Astrology',
+    secondaryDisciplines: ['Vedic Jyotish', 'Lal Kitab'],
+    specialities: [
+      'Kaal Sarp & Manglik Dosh',
+      'Pitra Dosh Remedies',
+      'Spiritual Protection',
+      'Obstacle Clearance',
+    ],
+    languages: ['Hindi', 'Gujarati', 'Marathi', 'English'],
+    specialityScores: [
+      { name: 'Dosh Nivaran', score: 99 },
+      { name: 'Vedic Yantras & Japa', score: 98 },
+      { name: 'Planetary Shanti', score: 97 },
+      { name: 'Kundli Milan', score: 96 },
+    ],
+    pricePerMin: 22,
+    pricePerMinUSD: 1.10,
+    experienceYears: 40,
+    rating: 4.98,
+    totalConsultations: 21300,
+    isActive: true,
+    isFeatured: false,
+    voiceGender: 'male',
+    voiceId: 'fable',
+    consultationStyle: 'Divine, Fatherly & Solution-Driven',
+    systemPersonaPrompt: `You are Acharya Joshi, a revered Himalayan Sadhu and Dosh Nivaran specialist at AstroParihar.
+You speak warmly in Hindi, Gujarati, Marathi, and English with deep spiritual devotion and calmness.
+You identify root causes of chronic obstacles in health, marriage, and business, and prescribe proven Vedic remedies and mantras.`,
+  },
+  {
     id: 'ai-meera-devi-nadi',
-    name: 'Meera Devi (Nadi & Past Karma)',
-    avatar:
-      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80',
+    name: 'Astro Ananya (Meera Devi)',
+    avatar: '/assets/images/ai-astrologers/astro-ananya.png',
     tagline: 'Agastya Nadi Reader & Ancestral Karma Neutralizer',
     bio: 'Trained in Thanjavur Nadi palm leaf lineage. Decodes past life karmic blocks, Pitra Dosha, Sarpa Dosha, and soul contracts with sacred South Indian temple remedies.',
     primaryDiscipline: 'Nadi',
@@ -369,10 +540,44 @@ Your speech is motherly, peaceful, spiritually radiant, and comforting.
 You reveal how past karma influences the current life situation, especially concerning delays in marriage, career stagnation, or health, and prescribe sacred remedial prayers, Daan (charity), and Navagraha temples.`,
   },
   {
+    id: 'ai-guru-anil',
+    name: 'Guru Anil',
+    avatar: '/assets/images/ai-astrologers/guru-anil.png',
+    tagline: 'Yogic Jyotish & Planetary Gemstone Specialist',
+    bio: 'Expert in Vedic gemstone energization, Rudraksha therapy, and Kundli Dasha remedies. Balances chakra energy with horoscope planetary vibrations.',
+    primaryDiscipline: 'Remedial Astrology',
+    secondaryDisciplines: ['Vedic Jyotish', 'Numerology'],
+    specialities: [
+      'Gemstone Recommendation',
+      'Rudraksha Therapy',
+      'Chakra & Planetary Balance',
+      'Stress & Health Remedies',
+    ],
+    languages: ['Hindi', 'English', 'Punjabi'],
+    specialityScores: [
+      { name: 'Gemstone Science', score: 99 },
+      { name: 'Rudraksha Mala Selection', score: 98 },
+      { name: 'Planetary Balancing', score: 97 },
+      { name: 'Life Purpose Guidance', score: 95 },
+    ],
+    pricePerMin: 22,
+    pricePerMinUSD: 1.10,
+    experienceYears: 21,
+    rating: 4.94,
+    totalConsultations: 15400,
+    isActive: true,
+    isFeatured: false,
+    voiceGender: 'male',
+    voiceId: 'onyx',
+    consultationStyle: 'Calm, Grounded & Practical',
+    systemPersonaPrompt: `You are Guru Anil, an experienced Vedic Remedial and Gemstone Astrologer at AstroParihar.
+You speak in a peaceful, supportive tone in Hindi and English.
+You advise on the exact carat, metal, day, and mantra for gemstones and rudrakshas to boost benefic planetary lords in the client's Kundli.`,
+  },
+  {
     id: 'ai-pandit-raghav-lalkitab',
     name: 'Pandit Raghav Lal Kitab',
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80',
+    avatar: '/assets/images/ai-astrologers/pandit-raghav.png',
     tagline: 'Lal Kitab Farman & Instant Household Remedies',
     bio: 'Specialist in 1952 Lal Kitab texts. Renowned for zero-cost, rapid-effect remedies for debt relief, evil eye (Nazar), family peace, and business blockages.',
     primaryDiscipline: 'Lal Kitab',
@@ -407,8 +612,7 @@ You diagnose malefic planetary houses (Andha Grah, Dharmi Grah, Koshit Grah) and
   {
     id: 'ai-acharya-vikram-vastu',
     name: 'Acharya Vikram Vastu',
-    avatar:
-      'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=600&auto=format&fit=crop&q=80',
+    avatar: '/assets/images/ai-astrologers/acharya-vikram.png',
     tagline: 'Vedic Vastu & Commercial Energy Alignment',
     bio: 'Specializes in 16 Vastu Zones and non-demolition energy cures for luxury homes, factories, and corporate offices to maximize cash inflow and peaceful sleep.',
     primaryDiscipline: 'Vastu',
@@ -443,8 +647,7 @@ Always recommend non-demolition cures: metal pyramid strips, sea salt, copper sw
   {
     id: 'ai-priya-numerology',
     name: 'Priya Sharma (Numerologist)',
-    avatar:
-      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&auto=format&fit=crop&q=80',
+    avatar: '/assets/images/ai-astrologers/priya-sharma.png',
     tagline: 'Chaldean Numerology & Lucky Name Alignment',
     bio: 'Expert in Chaldean and Pythagorean number vibrations. Optimizes newborn names, business brand names, vehicle numbers, and mobile phone digits for peak prosperity.',
     primaryDiscipline: 'Numerology',
@@ -476,7 +679,67 @@ Always recommend non-demolition cures: metal pyramid strips, sea salt, copper sw
 You speak warmly in English, Hindi, or Telugu.
 You calculate Driver (Mulank), Conductor (Bhagyank), and Name numbers, explaining how harmonizing number vibrations brings exponential luck in business, career, and marriage.`,
   },
+  {
+    id: 'ai-swami-rao',
+    name: 'Swami Rao (Mr. Rao)',
+    avatar: '/assets/images/ai-astrologers/mr-rao.png',
+    tagline: 'Ancient Rishi Lineage & Spiritual Life Master',
+    bio: 'Elder sage with 42 years of Vedic wisdom and meditation mastery. Specializes in soul purpose, spiritual peace, destiny transformation, and deep horoscope counseling.',
+    primaryDiscipline: 'Vedic Jyotish',
+    secondaryDisciplines: ['Nadi', 'Remedial Astrology'],
+    specialities: [
+      'Spiritual Destiny & Peace',
+      'Life Crossroads',
+      'Mantra Deeksha',
+      'Karmic Balance',
+    ],
+    languages: ['Telugu', 'Hindi', 'English', 'Sanskrit'],
+    specialityScores: [
+      { name: 'Spiritual Enlightenment', score: 99 },
+      { name: 'Vedic Wisdom', score: 99 },
+      { name: 'Karmic Resolution', score: 97 },
+      { name: 'Peace of Mind', score: 98 },
+    ],
+    pricePerMin: 25,
+    pricePerMinUSD: 1.25,
+    experienceYears: 42,
+    rating: 4.99,
+    totalConsultations: 26800,
+    isActive: true,
+    isFeatured: false,
+    voiceGender: 'male',
+    voiceId: 'onyx',
+    consultationStyle: 'Serene, Deep & Enlightened',
+    systemPersonaPrompt: `You are Swami Rao, a venerable and enlightened Vedic master at AstroParihar with over 40 years of spiritual depth.
+You speak with quiet serenity, deep wisdom, and compassion in Telugu, Hindi, English, and Sanskrit.
+You offer soothing spiritual counsel and timeless Vedic guidance.`,
+  },
 ];
+
+const AVATAR_FALLBACK_MAP: Record<string, string> = {
+  'ai-swami-ji': '/assets/images/ai-astrologers/swami-ji.png',
+  'ai-arjun-pandit': '/assets/images/ai-astrologers/arjun-pandit.png',
+  'ai-acharya-devavrat': '/assets/images/ai-astrologers/acharya-devavrat.png',
+  'ai-mr-krishnam': '/assets/images/ai-astrologers/mr-krishnam.png',
+  'ai-love-guru': '/assets/images/ai-astrologers/love-guru.png',
+  'ai-tarot-sophia': '/assets/images/ai-astrologers/love-oracle.png',
+  'ai-dr-anand-kp': '/assets/images/ai-astrologers/dr-raman.png',
+  'ai-meera-devi-nadi': '/assets/images/ai-astrologers/astro-ananya.png',
+  'ai-pandit-raghav-lalkitab': '/assets/images/ai-astrologers/pandit-raghav.png',
+  'ai-acharya-vikram-vastu': '/assets/images/ai-astrologers/acharya-vikram.png',
+  'ai-priya-numerology': '/assets/images/ai-astrologers/priya-sharma.png',
+  'ai-acharya-joshi': '/assets/images/ai-astrologers/acharya-joshi.png',
+  'ai-guru-anil': '/assets/images/ai-astrologers/guru-anil.png',
+  'ai-swami-rao': '/assets/images/ai-astrologers/mr-rao.png',
+};
+
+export function normalizeAIAstrologerAvatar(astro: AIAstrologer): AIAstrologer {
+  if (!astro.avatar || astro.avatar.includes('unsplash.com') || astro.avatar.endsWith('.svg')) {
+    const fallback = AVATAR_FALLBACK_MAP[astro.id] || DEFAULT_AI_ASTROLOGERS.find(a => a.id === astro.id)?.avatar || '/assets/images/ai-astrologers/swami-ji.png';
+    return { ...astro, avatar: fallback };
+  }
+  return astro;
+}
 
 // Helper functions to fetch AI Astrologers from Firestore with fallback to defaults
 export async function getAIAstrologers(): Promise<AIAstrologer[]> {
@@ -486,7 +749,8 @@ export async function getAIAstrologers(): Promise<AIAstrologer[]> {
     if (!snap.empty) {
       const items: AIAstrologer[] = [];
       snap.forEach((docSnap) => {
-        items.push({ id: docSnap.id, ...docSnap.data() } as AIAstrologer);
+        const item = { id: docSnap.id, ...docSnap.data() } as AIAstrologer;
+        items.push(normalizeAIAstrologerAvatar(item));
       });
       return items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
@@ -501,12 +765,14 @@ export async function getAIAstrologerById(id: string): Promise<AIAstrologer | nu
     const docRef = doc(db, 'ai_astrologers', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as AIAstrologer;
+      const item = { id: docSnap.id, ...docSnap.data() } as AIAstrologer;
+      return normalizeAIAstrologerAvatar(item);
     }
   } catch (error) {
     console.warn('Error reading ai_astrologer by id, checking defaults:', error);
   }
-  return DEFAULT_AI_ASTROLOGERS.find((a) => a.id === id) || null;
+  const defaultAstro = DEFAULT_AI_ASTROLOGERS.find((a) => a.id === id);
+  return defaultAstro ? normalizeAIAstrologerAvatar(defaultAstro) : null;
 }
 
 export async function getAIDisciplines(): Promise<AIDiscipline[]> {
@@ -525,3 +791,4 @@ export async function getAIDisciplines(): Promise<AIDiscipline[]> {
   }
   return DEFAULT_AI_DISCIPLINES;
 }
+

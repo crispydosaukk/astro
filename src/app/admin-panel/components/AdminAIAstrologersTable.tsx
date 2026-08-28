@@ -24,6 +24,7 @@ import {
   Save,
   RotateCcw,
   LogOut,
+  Power,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import LogoutModal from '@/components/LogoutModal';
@@ -34,12 +35,31 @@ import {
   DEFAULT_AI_DISCIPLINES,
 } from '@/lib/aiAstrologerData';
 
+export const SADHU_AVATAR_PRESETS = [
+  { name: 'Swami Ji', title: 'Himalayan Sage', url: '/assets/images/ai-astrologers/swami-ji.png' },
+  { name: 'Arjun Pandit', title: 'Young Prodigy', url: '/assets/images/ai-astrologers/arjun-pandit.png' },
+  { name: 'Acharya Devavrat', title: 'Parashara Guru', url: '/assets/images/ai-astrologers/acharya-devavrat.png' },
+  { name: 'Acharya Krishnam', title: 'KP Stellar Master', url: '/assets/images/ai-astrologers/mr-krishnam.png' },
+  { name: 'Love Guru', title: 'Relationship Guru', url: '/assets/images/ai-astrologers/love-guru.png' },
+  { name: 'Astro Ananya', title: 'Divine Nadi Seer', url: '/assets/images/ai-astrologers/astro-ananya.png' },
+  { name: 'Dr. Raman', title: 'Event Timing', url: '/assets/images/ai-astrologers/dr-raman.png' },
+  { name: 'Acharya Joshi', title: 'Dosh Nivaran', url: '/assets/images/ai-astrologers/acharya-joshi.png' },
+  { name: 'Love Oracle', title: 'Mystic Tarot', url: '/assets/images/ai-astrologers/love-oracle.png' },
+  { name: 'Guru Anil', title: 'Rudraksha & Gems', url: '/assets/images/ai-astrologers/guru-anil.png' },
+  { name: 'Pandit Raghav', title: 'Lal Kitab', url: '/assets/images/ai-astrologers/pandit-raghav.png' },
+  { name: 'Acharya Vikram', title: 'Vastu Master', url: '/assets/images/ai-astrologers/acharya-vikram.png' },
+  { name: 'Priya Sharma', title: 'Numerologist', url: '/assets/images/ai-astrologers/priya-sharma.png' },
+  { name: 'Swami Rao', title: 'Elder Rishi', url: '/assets/images/ai-astrologers/mr-rao.png' },
+];
+
 export default function AdminAIAstrologersTable() {
   const [astrologers, setAstrologers] = useState<AIAstrologer[]>([]);
   const [disciplines, setDisciplines] = useState<AIDiscipline[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
 
   const [activeSubTab, setActiveSubTab] = useState<'astrologers' | 'disciplines'>('astrologers');
   const [search, setSearch] = useState('');
@@ -55,6 +75,29 @@ export default function AdminAIAstrologersTable() {
   useEffect(() => {
     fetchAdminData();
   }, []);
+
+  const handleResetAstrologers = async () => {
+    if (!confirm('Sync and restore all 13 authentic AI Sadhu Astrologers with Rudraksha avatars?')) return;
+    setIsResetting(true);
+    try {
+      const res = await fetch('/api/admin/ai-astrologers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset_astrologers' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Successfully synced ${data.count} AI Sadhu Astrologers!`);
+        fetchAdminData();
+      } else {
+        toast.error('Failed to sync');
+      }
+    } catch (e) {
+      toast.error('Sync failed');
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const fetchAdminData = async () => {
     try {
@@ -152,6 +195,87 @@ export default function AdminAIAstrologersTable() {
     }
   };
 
+  // Toggle AI Astrologer Active/Inactive Status
+  const handleToggleAstrologerStatus = async (astro: AIAstrologer) => {
+    const newStatus = !astro.isActive;
+    setUpdatingStatusId(astro.id);
+
+    // Optimistic UI update
+    setAstrologers((prev) =>
+      prev.map((a) => (a.id === astro.id ? { ...a, isActive: newStatus } : a))
+    );
+
+    try {
+      const res = await fetch('/api/admin/ai-astrologers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_astrologer',
+          astrologer: {
+            ...astro,
+            isActive: newStatus,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(
+          `AI Astrologer "${astro.name}" is now ${newStatus ? 'Active' : 'Inactive'}`
+        );
+      } else {
+        throw new Error(data.error || 'Failed to update status');
+      }
+    } catch (err: any) {
+      // Revert optimistic update
+      setAstrologers((prev) =>
+        prev.map((a) => (a.id === astro.id ? { ...a, isActive: astro.isActive } : a))
+      );
+      toast.error('Failed to update status');
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
+  // Toggle Discipline Active/Inactive Status
+  const handleToggleDisciplineStatus = async (disc: AIDiscipline) => {
+    const newStatus = !disc.isActive;
+    setUpdatingStatusId(disc.id);
+
+    // Optimistic UI update
+    setDisciplines((prev) =>
+      prev.map((d) => (d.id === disc.id ? { ...d, isActive: newStatus } : d))
+    );
+
+    try {
+      const res = await fetch('/api/admin/ai-astrologers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_discipline',
+          discipline: {
+            ...disc,
+            isActive: newStatus,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(
+          `Discipline "${disc.name}" is now ${newStatus ? 'Active' : 'Inactive'}`
+        );
+      } else {
+        throw new Error(data.error || 'Failed to update status');
+      }
+    } catch (err: any) {
+      setDisciplines((prev) =>
+        prev.map((d) => (d.id === disc.id ? { ...d, isActive: disc.isActive } : d))
+      );
+      toast.error('Failed to update discipline status');
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
   const filteredAstrologers = astrologers.filter(
     (a) =>
       a.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -193,37 +317,49 @@ export default function AdminAIAstrologersTable() {
           </button>
 
           {activeSubTab === 'astrologers' ? (
-            <button
-              onClick={() => {
-                setEditingAstro({
-                  id: '',
-                  name: '',
-                  avatar: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600',
-                  tagline: '',
-                  bio: '',
-                  primaryDiscipline: disciplines[0]?.name || 'Vedic Jyotish',
-                  secondaryDisciplines: ['Remedial Astrology'],
-                  specialities: ['Career & Promotion', 'Marriage & Relationships'],
-                  languages: ['English', 'Hindi'],
-                  specialityScores: [{ name: 'Vedic Analysis', score: 98 }],
-                  pricePerMin: 25,
-                  pricePerMinUSD: 1.25,
-                  experienceYears: 20,
-                  rating: 4.95,
-                  totalConsultations: 0,
-                  isActive: true,
-                  isFeatured: false,
-                  voiceGender: 'male',
-                  voiceId: 'onyx',
-                  consultationStyle: 'Empowering, Classical & Deeply Accurate',
-                  systemPersonaPrompt: 'You are an authentic Vedic Astrologer at AstroParihar.',
-                });
-                setShowAstroModal(true);
-              }}
-              className="px-4 py-2 rounded-xl bg-[#C9952B] text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-[#C9952B]/20 hover:bg-[#b08022] transition-colors"
-            >
-              <Plus size={15} /> Add AI Astrologer
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleResetAstrologers}
+                disabled={isResetting}
+                className="px-3 py-2 rounded-xl border border-border text-xs font-semibold flex items-center gap-1.5 hover:bg-muted/40 transition-colors text-muted-foreground hover:text-foreground"
+                title="Restore all 13 authentic AI Sadhus with Rudraksha avatars"
+              >
+                {isResetting ? <Loader2 size={14} className="animate-spin text-[#C9952B]" /> : <RotateCcw size={14} />}
+                Sync 13 AI Sadhus
+              </button>
+              <button
+                onClick={() => {
+                  setEditingAstro({
+                    id: '',
+                    name: '',
+                    avatar: '/assets/images/ai-astrologers/swami-ji.png',
+                    tagline: '',
+                    bio: '',
+                    primaryDiscipline: disciplines[0]?.name || 'Vedic Jyotish',
+                    secondaryDisciplines: ['Remedial Astrology'],
+                    specialities: ['Career & Promotion', 'Marriage & Relationships'],
+                    languages: ['English', 'Hindi'],
+                    specialityScores: [{ name: 'Vedic Analysis', score: 98 }],
+                    pricePerMin: 25,
+                    pricePerMinUSD: 1.25,
+                    experienceYears: 20,
+                    rating: 4.95,
+                    totalConsultations: 0,
+                    isActive: true,
+                    isFeatured: false,
+                    voiceGender: 'male',
+                    voiceId: 'onyx',
+                    consultationStyle: 'Empowering, Classical & Deeply Accurate',
+                    systemPersonaPrompt: 'You are an authentic Vedic Astrologer at AstroParihar.',
+                  });
+                  setShowAstroModal(true);
+                }}
+                className="px-4 py-2 rounded-xl bg-[#C9952B] text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-[#C9952B]/20 hover:bg-[#b08022] transition-colors"
+              >
+                <Plus size={15} /> Add AI Astrologer
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => {
@@ -408,20 +544,54 @@ export default function AdminAIAstrologersTable() {
                         {astro.totalConsultations.toLocaleString()} calls
                       </span>
                     </td>
+                    {/* Status Toggle Button */}
                     <td className="p-4">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      <button
+                        type="button"
+                        onClick={() => handleToggleAstrologerStatus(astro)}
+                        disabled={updatingStatusId === astro.id}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 disabled:opacity-50 ${
                           astro.isActive
-                            ? 'bg-emerald-500/20 text-emerald-400'
-                            : 'bg-red-500/20 text-red-400'
+                            ? 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
+                            : 'bg-rose-500/15 text-rose-500 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/25'
                         }`}
+                        title={`Click to set ${astro.isActive ? 'Inactive' : 'Active'}`}
                       >
-                        {astro.isActive ? 'Active' : 'Inactive'}
-                      </span>
+                        {updatingStatusId === astro.id ? (
+                          <Loader2 size={10} className="animate-spin text-current" />
+                        ) : (
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              astro.isActive
+                                ? 'bg-emerald-500 dark:bg-emerald-400 animate-pulse'
+                                : 'bg-rose-500 dark:bg-rose-400'
+                            }`}
+                          />
+                        )}
+                        <span>{astro.isActive ? 'Active' : 'Inactive'}</span>
+                      </button>
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          type="button"
+                          onClick={() => handleToggleAstrologerStatus(astro)}
+                          disabled={updatingStatusId === astro.id}
+                          className={`p-1.5 rounded-lg border transition-all ${
+                            astro.isActive
+                              ? 'border-border text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/40'
+                              : 'border-border text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/40'
+                          }`}
+                          title={
+                            astro.isActive
+                              ? 'Deactivate AI Astrologer'
+                              : 'Activate AI Astrologer'
+                          }
+                        >
+                          <Power size={13} />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => {
                             setEditingAstro({ ...astro });
                             setShowAstroModal(true);
@@ -432,6 +602,7 @@ export default function AdminAIAstrologersTable() {
                           <Edit2 size={13} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDeleteAstrologer(astro)}
                           className="p-1.5 rounded-lg border border-border hover:border-red-500 text-muted-foreground hover:text-red-400 transition-all"
                           title="Delete AI Astrologer"
@@ -470,26 +641,60 @@ export default function AdminAIAstrologersTable() {
                   </td>
                   <td className="p-4 font-mono text-[10px] text-[#C9952B]">{disc.iconName}</td>
                   <td className="p-4">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                    <button
+                      type="button"
+                      onClick={() => handleToggleDisciplineStatus(disc)}
+                      disabled={updatingStatusId === disc.id}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 disabled:opacity-50 ${
                         disc.isActive
-                          ? 'bg-emerald-500/20 text-emerald-400'
-                          : 'bg-red-500/20 text-red-400'
+                          ? 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
+                          : 'bg-rose-500/15 text-rose-500 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/25'
                       }`}
+                      title={`Click to set ${disc.isActive ? 'Inactive' : 'Active'}`}
                     >
-                      {disc.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                      {updatingStatusId === disc.id ? (
+                        <Loader2 size={10} className="animate-spin text-current" />
+                      ) : (
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            disc.isActive
+                              ? 'bg-emerald-500 dark:bg-emerald-400 animate-pulse'
+                              : 'bg-rose-500 dark:bg-rose-400'
+                          }`}
+                        />
+                      )}
+                      <span>{disc.isActive ? 'Active' : 'Inactive'}</span>
+                    </button>
                   </td>
                   <td className="p-4 text-right">
-                    <button
-                      onClick={() => {
-                        setEditingDisc({ ...disc });
-                        setShowDiscModal(true);
-                      }}
-                      className="p-1.5 rounded-lg border border-border hover:border-[#C9952B] text-muted-foreground hover:text-foreground"
-                    >
-                      <Edit2 size={13} />
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleDisciplineStatus(disc)}
+                        disabled={updatingStatusId === disc.id}
+                        className={`p-1.5 rounded-lg border transition-all ${
+                          disc.isActive
+                            ? 'border-border text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/40'
+                            : 'border-border text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/40'
+                        }`}
+                        title={
+                          disc.isActive ? 'Deactivate Discipline' : 'Activate Discipline'
+                        }
+                      >
+                        <Power size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingDisc({ ...disc });
+                          setShowDiscModal(true);
+                        }}
+                        className="p-1.5 rounded-lg border border-border hover:border-[#C9952B] text-muted-foreground hover:text-foreground"
+                        title="Edit Discipline"
+                      >
+                        <Edit2 size={13} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -516,6 +721,38 @@ export default function AdminAIAstrologersTable() {
             </div>
 
             <form onSubmit={handleSaveAstrologer} className="p-6 overflow-y-auto space-y-4 text-xs">
+              {/* Visual Sadhu Avatar Selector */}
+              <div>
+                <label className="block text-muted-foreground mb-1.5 font-semibold">
+                  Select AI Sadhu / Rishi Avatar (with Sacred Rudraksha Mala & Tilak)
+                </label>
+                <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 p-2.5 bg-muted/20 border border-border rounded-2xl max-h-44 overflow-y-auto">
+                  {SADHU_AVATAR_PRESETS.map((preset) => {
+                    const isSelected = editingAstro.avatar === preset.url;
+                    return (
+                      <button
+                        key={preset.url}
+                        type="button"
+                        onClick={() => setEditingAstro({ ...editingAstro, avatar: preset.url })}
+                        className={`flex flex-col items-center gap-1 p-1.5 rounded-xl border transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-[#C9952B] bg-[#C9952B]/15 scale-105 shadow-md shadow-[#C9952B]/20'
+                            : 'border-border hover:border-[#C9952B]/50 hover:bg-muted/40'
+                        }`}
+                        title={`${preset.name} - ${preset.title}`}
+                      >
+                        <div className="w-10 h-10 rounded-full overflow-hidden border border-[#C9952B]/40 relative shrink-0">
+                          <AppImage src={preset.url} alt={preset.name} fill className="object-cover" />
+                        </div>
+                        <span className="text-[9px] font-bold truncate max-w-full text-foreground">
+                          {preset.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-muted-foreground mb-1">Name</label>
@@ -530,7 +767,7 @@ export default function AdminAIAstrologersTable() {
                 <div>
                   <label className="block text-muted-foreground mb-1">Avatar Image URL</label>
                   <input
-                    type="url"
+                    type="text"
                     required
                     value={editingAstro.avatar}
                     onChange={(e) => setEditingAstro({ ...editingAstro, avatar: e.target.value })}

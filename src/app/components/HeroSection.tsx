@@ -2,8 +2,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, ChevronDown } from 'lucide-react';
-import RotatingRemediesWheel from '@/components/RotatingRemediesWheel';
+import { ArrowRight, Play, ChevronDown, Bot, Sparkles } from 'lucide-react';
+import AshtaDigbandhanaWheel from '@/components/AshtaDigbandhanaWheel';
 import { HomepageContent } from '@/lib/cms';
 import { useUserData } from '@/lib/useUserData';
 
@@ -22,7 +22,7 @@ export default function HeroSection({ content }: HeroSectionProps) {
   const { user } = useUserData();
 
   return (
-    <section className="relative min-h-screen cosmic-bg overflow-hidden flex flex-col">
+    <section className="relative min-h-screen cosmic-bg overflow-hidden flex flex-col justify-between">
       {/* Star field background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(60)]?.map((_, i) => (
@@ -58,7 +58,7 @@ export default function HeroSection({ content }: HeroSectionProps) {
               {/* Headline */}
               <div className="space-y-4">
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight hero-text-glow max-w-xl">
-                  {content?.headline1 || 'Discover Your'}
+                  {content?.headline1 || 'Discover Your'}{' '}
                   <span className="block text-gradient-gold">
                     {content?.headline2 || 'Cosmic Destiny'}
                   </span>
@@ -70,23 +70,31 @@ export default function HeroSection({ content }: HeroSectionProps) {
               </div>
 
               {/* CTAs */}
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 <Link
-                  href="/#services"
-                  className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all duration-200 gold-shadow animate-pulse-gold"
+                  href="/talk-to-ai-astrologer"
+                  className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all duration-200 gold-shadow animate-pulse-gold transform hover:-translate-y-0.5"
                 >
-                  ✦ Explore Remedies
-                  <ArrowRight
-                    size={16}
-                    className="group-hover:translate-x-1 transition-transform"
-                  />
+                  <Bot size={18} className="animate-pulse" />
+                  AI Expert Astrologer
+                  <Sparkles size={14} className="text-amber-200" />
                 </Link>
                 <Link
                   href="/talk-to-astrologer"
-                  className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold bg-[#FFFDFC]/10 backdrop-blur-md border border-[#D8B66A]/30 text-white hover:border-[#D8B66A] hover:text-[#D8B66A] transition-all duration-200"
+                  className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold bg-[#FFFDFC]/10 backdrop-blur-md border border-[#D8B66A]/40 text-white hover:border-[#D8B66A] hover:text-[#D8B66A] transition-all duration-200"
                 >
                   <Play size={16} />
                   {content?.secondaryBtnText || 'Talk to Astrologer'}
+                </Link>
+                <Link
+                  href="/#services"
+                  className="group flex items-center gap-2 px-5 py-3.5 rounded-xl font-semibold border border-white/20 text-white/90 hover:bg-white/10 transition-all duration-200"
+                >
+                  ✦ Explore Remedies
+                  <ArrowRight
+                    size={15}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
                 </Link>
               </div>
 
@@ -103,18 +111,19 @@ export default function HeroSection({ content }: HeroSectionProps) {
               </div>
             </motion.div>
 
-            {/* Right visual - Rotating Sacred Vedic Remedies Wheel */}
+            {/* Right visual - Ashta Digbandhana Wheel */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
               className="relative flex items-center justify-center"
             >
-              <RotatingRemediesWheel />
+              <AshtaDigbandhanaWheel hideInfoCard={true} hideFooter={true} />
             </motion.div>
           </div>
         </div>
       </div>
+
       {/* Scroll indicator */}
       <div className="flex justify-center pb-8">
         <motion.div

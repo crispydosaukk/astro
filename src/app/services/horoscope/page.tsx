@@ -23,6 +23,7 @@ import {
   Coins,
   Activity,
   PhoneCall,
+  Bot,
 } from 'lucide-react';
 import CityLocationInput from '@/components/CityLocationInput';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
@@ -586,12 +587,20 @@ export default function FreeHoroscopePage() {
                   Have a verified Vedic astrologer analyze your chart live over phone for precise
                   life guidance.
                 </p>
-                <Link
-                  href="/talk-to-astrologer"
-                  className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl gold-gradient-bg text-[#292522] font-extrabold text-xs hover:brightness-110 transition-all shadow-md"
-                >
-                  <PhoneCall size={13} /> Consult Astrologer Live
-                </Link>
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href="/talk-to-ai-astrologer"
+                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white font-extrabold text-xs transition-all shadow-md"
+                  >
+                    <Bot size={13} className="animate-pulse" /> AI Expert Astrologer
+                  </Link>
+                  <Link
+                    href="/talk-to-astrologer"
+                    className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl gold-gradient-bg text-[#292522] font-extrabold text-xs hover:brightness-110 transition-all shadow-md"
+                  >
+                    <PhoneCall size={13} /> Consult Astrologer Live
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -631,7 +640,13 @@ export default function FreeHoroscopePage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <Link
+                    href="/talk-to-ai-astrologer"
+                    className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white font-bold transition-all flex items-center gap-1.5 text-xs shadow-lg"
+                  >
+                    <Bot size={14} className="animate-pulse" /> AI Expert Astrologer
+                  </Link>
                   <Link
                     href="/talk-to-astrologer"
                     className="px-5 py-2.5 rounded-full bg-[#713B32] hover:bg-[#552B24] text-white font-bold transition-colors flex items-center gap-1.5 text-xs shadow-lg"

@@ -16,11 +16,12 @@ import {
   Sparkles,
   ChevronRight,
   ChevronDown,
+  Bot,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import LandingFooter from '@/app/components/LandingFooter';
 
-import AshtaDigbandhanaWheel, { SpokeItem } from '@/components/AshtaDigbandhanaWheel';
+import RotatingRemediesWheel from '@/components/RotatingRemediesWheel';
 import DynamicPageContent from '@/components/DynamicPageContent';
 import {
   getHomepageContent,
@@ -28,6 +29,24 @@ import {
   defaultHomepageContent,
   subscribeHomepageContent,
 } from '@/lib/cms';
+
+export interface SpokeItem {
+  id: string;
+  number: string;
+  name: string;
+  sanskrit: string;
+  direction: string;
+  directionFull: string;
+  mantra: string;
+  explanation: string;
+  href: string;
+  angle: number;
+  bgGradientId: string;
+  startColor: string;
+  endColor: string;
+  accentColor: string;
+  icon?: React.ReactNode;
+}
 
 const iconMap: Record<string, any> = {
   Music,
@@ -39,24 +58,146 @@ const iconMap: Record<string, any> = {
   CircleDot,
 };
 
-const DEFAULT_SPOKE: SpokeItem = {
-  id: 'mantra',
-  number: '1',
-  name: 'MANTRA',
-  sanskrit: 'मन्त्र',
-  direction: 'N',
-  directionFull: 'उत्तर (North)',
-  mantra: 'ॐ ह्रीं श्रीं क्लीं चामुण्डायै विच्चे ॥',
-  explanation:
-    'जप से मन, वाणी और कर्म की शुद्धि, ग्रहों की अनुकूलता और आत्मिक शक्ति प्राप्त होती है।',
-  href: '/remedies/mantra',
-  angle: -90,
-  bgGradientId: 'grad-n-mantra',
-  startColor: '#5C111A',
-  endColor: '#36060C',
-  accentColor: '#FBD38D',
-  icon: null,
+const SPOKES_MAP: Record<string, SpokeItem> = {
+  mantra: {
+    id: 'mantra',
+    number: '1',
+    name: 'MANTRA',
+    sanskrit: 'मन्त्र',
+    direction: 'N',
+    directionFull: 'उत्तर (North)',
+    mantra: 'ॐ ह्रीं श्रीं क्लीं चामुण्डायै विच्चे ॥',
+    explanation:
+      'जप से मन, वाणी और कर्म की शुद्धि, ग्रहों की अनुकूलता और आत्मिक शक्ति प्राप्त होती है।',
+    href: '/remedies/mantra',
+    angle: -90,
+    bgGradientId: 'grad-n-mantra',
+    startColor: '#5C111A',
+    endColor: '#36060C',
+    accentColor: '#FBD38D',
+  },
+  yantra: {
+    id: 'yantra',
+    number: '2',
+    name: 'YANTRA',
+    sanskrit: 'यन्त्र',
+    direction: 'NE',
+    directionFull: 'ईशान (North-East)',
+    mantra: 'ॐ श्रीं ह्रीं क्लीं नमः ॥',
+    explanation:
+      'यन्त्र ऊर्जा को केंद्रित कर वास्तुदोष, ग्रहपीड़ा और नकारात्मकता को दूर करते हैं।',
+    href: '/remedies/yantra',
+    angle: -45,
+    bgGradientId: 'grad-ne-yantra',
+    startColor: '#4A2A08',
+    endColor: '#281403',
+    accentColor: '#F6AD55',
+  },
+  homa: {
+    id: 'homa',
+    number: '3',
+    name: 'HOMA',
+    sanskrit: 'होम',
+    direction: 'E',
+    directionFull: 'पूर्व (East)',
+    mantra: 'ॐ अग्नये स्वाहा ॥',
+    explanation:
+      'हवन अग्नि द्वारा वातावरण और सूक्ष्म शरीर का शोधन होता है, नवग्रह प्रसन्न होते हैं।',
+    href: '/remedies/homa',
+    angle: 0,
+    bgGradientId: 'grad-e-homa',
+    startColor: '#4C240A',
+    endColor: '#2B1102',
+    accentColor: '#F6AD55',
+  },
+  ishta: {
+    id: 'ishta',
+    number: '4',
+    name: 'DEVATA UPASANA',
+    sanskrit: 'देवता उपासना',
+    direction: 'SE',
+    directionFull: 'आग्नेय (South-East)',
+    mantra: 'ॐ नमः शिवाय ॥',
+    explanation:
+      'इष्ट या कुलदेवता की उपासना से आध्यात्मिक बल और जीवन में ईश्वरीय कृपा प्राप्त होती है।',
+    href: '/remedies/ishta-devata',
+    angle: 45,
+    bgGradientId: 'grad-se-upasana',
+    startColor: '#0E2E1A',
+    endColor: '#05180C',
+    accentColor: '#68D391',
+  },
+  gemstone: {
+    id: 'gemstone',
+    number: '5',
+    name: 'RATNA',
+    sanskrit: 'रत्न',
+    direction: 'S',
+    directionFull: 'दक्षिण (South)',
+    mantra: 'ॐ ग्रहाय नमः ॥',
+    explanation:
+      'उचित रत्न धारण करने से कमजोर लेकिन शुभ ग्रहों को बल मिलता है और अनुकूलता बढ़ती है।',
+    href: '/remedies/gemstone',
+    angle: 90,
+    bgGradientId: 'grad-s-ratna',
+    startColor: '#453508',
+    endColor: '#241B02',
+    accentColor: '#FAF089',
+  },
+  rudraksha: {
+    id: 'rudraksha',
+    number: '6',
+    name: 'RUDRĀKṢA',
+    sanskrit: 'रुद्राक्ष',
+    direction: 'SW',
+    directionFull: 'नैऋत्य (South-West)',
+    mantra: 'ॐ नमः शिवाय ॥',
+    explanation:
+      'रुद्राक्ष शरीर और मन की ऊर्जा को स्थिर करता है और नकारात्मक प्रभावों से रक्षा करता है।',
+    href: '/remedies/rudraksha',
+    angle: 135,
+    bgGradientId: 'grad-sw-rudraksha',
+    startColor: '#173646',
+    endColor: '#0A1C25',
+    accentColor: '#63B3ED',
+  },
+  vastu: {
+    id: 'vastu',
+    number: '7',
+    name: 'VĀSTU',
+    sanskrit: 'वास्तु',
+    direction: 'W',
+    directionFull: 'पश्चिम (West)',
+    mantra: 'ॐ वास्तुपुरुषाय नमः ॥',
+    explanation:
+      'दिशाओं का संतुलन बनाकर घर और कार्यक्षेत्र में सकारात्मक ऊर्जा का संचार किया जाता है।',
+    href: '/remedies/vastu',
+    angle: 180,
+    bgGradientId: 'grad-w-vastu',
+    startColor: '#083B38',
+    endColor: '#021F1D',
+    accentColor: '#4FD1C5',
+  },
+  charity: {
+    id: 'charity',
+    number: '8',
+    name: 'DĀNA & SEVA',
+    sanskrit: 'दान एवं सेवा',
+    direction: 'NW',
+    directionFull: 'वायव्य (North-West)',
+    mantra: 'ॐ परोपकाराय नमः ॥',
+    explanation:
+      'निःस्वार्थ दान और सेवा से प्रारब्ध कर्मों के दोष कम होते हैं और आंतरिक शांति मिलती है।',
+    href: '/remedies/charity',
+    angle: 225,
+    bgGradientId: 'grad-nw-dana',
+    startColor: '#28133E',
+    endColor: '#140620',
+    accentColor: '#B794F4',
+  },
 };
+
+const DEFAULT_SPOKE: SpokeItem = SPOKES_MAP['mantra'];
 
 const EIGHT_SACRED_REMEDIES = [
   {
@@ -223,10 +364,17 @@ export default function RemediesPage() {
                   </p>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-wrap items-center gap-4 mb-5">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-5">
+                    <Link
+                      href="/talk-to-ai-astrologer"
+                      className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all duration-200 gold-shadow animate-pulse-gold cursor-pointer"
+                    >
+                      <Bot size={18} className="animate-pulse" />
+                      AI Expert Astrologer
+                    </Link>
                     <Link
                       href="/talk-to-astrologer"
-                      className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all duration-200 gold-shadow animate-pulse-gold cursor-pointer"
+                      className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold bg-[#FFFDFC]/10 backdrop-blur-md border border-[#D8B66A]/40 text-white hover:border-[#D8B66A] hover:text-[#D8B66A] transition-all duration-200 cursor-pointer"
                     >
                       ✦ Consult Astrologer
                       <ArrowRight
@@ -297,11 +445,11 @@ export default function RemediesPage() {
                 transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
                 className="lg:col-span-6 relative w-full order-1 lg:order-2 flex items-center justify-center"
               >
-                <AshtaDigbandhanaWheel
-                  hideInfoCard={true}
-                  hideFooter={true}
-                  onHoverSpoke={(spoke) => {
-                    if (spoke) setSelectedSpoke(spoke);
+                <RotatingRemediesWheel
+                  onHoverItem={(id) => {
+                    if (id && SPOKES_MAP[id]) {
+                      setSelectedSpoke(SPOKES_MAP[id]);
+                    }
                   }}
                 />
               </motion.div>

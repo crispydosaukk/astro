@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Loader2,
   Check,
+  Bot,
 } from 'lucide-react';
 import CityLocationInput from '@/components/CityLocationInput';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
@@ -243,6 +244,12 @@ export default function FreePanchangPage() {
                 >
                   View Today&apos;s Panchang <ChevronRight size={18} />
                 </button>
+                <Link
+                  href="/talk-to-ai-astrologer"
+                  className="px-7 py-4 rounded-full bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white font-bold hover:scale-[1.02] transition-all text-sm sm:text-base shadow-lg shadow-[#C9952B]/30 flex items-center gap-2"
+                >
+                  <Bot size={18} className="animate-pulse" /> AI Expert Astrologer
+                </Link>
                 <Link
                   href="/talk-to-astrologer"
                   className="px-7 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md"

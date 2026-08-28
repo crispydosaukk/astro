@@ -15,6 +15,7 @@ import {
   PhoneCall,
   Star,
   ShieldCheck,
+  Bot,
 } from 'lucide-react';
 import CityLocationInput from '@/components/CityLocationInput';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
@@ -232,6 +233,12 @@ export default function FreeKundliMatchingPage() {
                   Match Kundli Now <ArrowRight size={18} />
                 </button>
                 <Link
+                  href="/talk-to-ai-astrologer"
+                  className="px-7 py-4 rounded-full bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white font-bold hover:scale-[1.02] transition-all text-sm sm:text-base shadow-lg shadow-[#C9952B]/30 flex items-center gap-2"
+                >
+                  <Bot size={18} className="animate-pulse" /> AI Expert Astrologer
+                </Link>
+                <Link
                   href="/talk-to-astrologer"
                   className="px-7 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md"
                 >
@@ -413,6 +420,12 @@ export default function FreeKundliMatchingPage() {
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap">
+                    <Link
+                      href="/talk-to-ai-astrologer"
+                      className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white text-xs font-bold flex items-center gap-1 shadow transition-all"
+                    >
+                      <Bot size={12} className="animate-pulse" /> AI Expert Astrologer
+                    </Link>
                     <Link
                       href="/talk-to-astrologer?category=Kundli%20Matching"
                       className="px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1 shadow transition-colors"

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Lock, Loader2, MapPin } from 'lucide-react';
+import { ArrowRight, Lock, Loader2, MapPin, Bot } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -380,20 +380,28 @@ export default function ServiceReportForm({
               </button>
             )}
 
-            {/* Option to Contact Human Astrologer */}
-            <div className="pt-4 mt-4 border-t border-[#E5D9C8] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            {/* Option to Contact Astrologer */}
+            <div className="pt-4 mt-4 border-t border-[#E5D9C8] flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
               <div>
-                <p className="text-xs font-bold text-[#292522]">Prefer Live Personal Guidance?</p>
+                <p className="text-xs font-bold text-[#292522]">Prefer Instant Live Guidance?</p>
                 <p className="text-[11px] text-[#6B5E55]">
-                  Discuss your birth chart & remedies live with verified Human Astrologers.
+                  Consult 24x7 AI Expert Astrologers or connect with verified Human Astrologers.
                 </p>
               </div>
-              <Link
-                href="/talk-to-astrologer"
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#EDE4D5] border border-[#E5D9C8] text-[#713B32] hover:bg-[#EDE4D5]/80 transition-colors whitespace-nowrap"
-              >
-                Consult Astrologer →
-              </Link>
+              <div className="flex items-center gap-2 flex-wrap justify-center">
+                <Link
+                  href="/talk-to-ai-astrologer"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white shadow-sm hover:shadow transition-all flex items-center gap-1.5 whitespace-nowrap"
+                >
+                  <Bot size={13} className="animate-pulse" /> AI Expert Astrologer →
+                </Link>
+                <Link
+                  href="/talk-to-astrologer"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#EDE4D5] border border-[#E5D9C8] text-[#713B32] hover:bg-[#EDE4D5]/80 transition-colors whitespace-nowrap"
+                >
+                  Consult Astrologer →
+                </Link>
+              </div>
             </div>
           </div>
         </div>

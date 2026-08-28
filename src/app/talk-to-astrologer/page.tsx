@@ -601,7 +601,7 @@ export default function TalkToAstrologerPage() {
                 href="/talk-to-ai-astrologer"
                 className="px-5 py-2 rounded-xl text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-1.5"
               >
-                <Sparkles size={14} className="text-[#C9952B]" /> ✦ AI Astrologers (Instant Voice)
+                <Sparkles size={14} className="text-[#C9952B]" /> ✦ AI Expert Astrologers (Instant Voice)
               </Link>
             </div>
 

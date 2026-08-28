@@ -27,6 +27,7 @@ import {
   ImageIcon,
   Maximize2,
   X,
+  Bot,
 } from 'lucide-react';
 import ServiceReportForm from '@/components/ServiceReportForm';
 import VastuConsultationForm from '@/components/VastuConsultationForm';
@@ -415,8 +416,14 @@ export default function VastuServicePage() {
                   <span>Get Vastu Analysis</span>
                 </a>
                 <Link
+                  href="/talk-to-ai-astrologer"
+                  className="px-7 py-4 rounded-full bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white font-bold hover:scale-[1.02] transition-all text-sm sm:text-base shadow-lg shadow-[#C9952B]/30 flex items-center gap-2 cursor-pointer"
+                >
+                  <Bot size={18} className="animate-pulse" /> AI Expert Astrologer
+                </Link>
+                <Link
                   href="/talk-to-astrologer"
-                  className="px-7 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md cursor-pointer"
+                  className="px-7 py-4 rounded-full bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-sm text-sm sm:text-base shadow-md cursor-pointer flex items-center gap-2"
                 >
                   <PhoneCall size={16} /> Talk to Vastu Expert
                 </Link>
@@ -804,12 +811,18 @@ export default function VastuServicePage() {
             Get an interactive 8-directional Vastu analysis with room-by-room non-demolition
             remedies.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex flex-wrap gap-3 sm:gap-4 justify-center items-center">
             <Link
               href="#get-report"
               className="flex items-center gap-2 px-8 py-4 rounded-xl font-extrabold gold-gradient-bg text-[#292522] hover:brightness-110 active:scale-[0.98] transition-all gold-shadow text-sm"
             >
               <Compass size={18} /> Get Vastu Analysis
+            </Link>
+            <Link
+              href="/talk-to-ai-astrologer"
+              className="flex items-center gap-2 px-8 py-4 rounded-xl font-extrabold bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white transition-all text-sm shadow-md"
+            >
+              <Bot size={18} className="animate-pulse" /> AI Expert Astrologer
             </Link>
             <Link
               href="/talk-to-astrologer"

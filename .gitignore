@@ -35,6 +35,13 @@ jest-test-results.json
 # Optional: if using TurboRepo or monorepo
 turbo/
 
+# Deployment artifacts & Archives
+cpanel_deploy/
+*.zip
+scratch/
+debug-info.json
+server.js.backup
+
 # Environment variables
 .env
 .env*.local

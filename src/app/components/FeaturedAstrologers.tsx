@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Star, ArrowRight } from 'lucide-react';
+import { Star, ArrowRight, Bot } from 'lucide-react';
 import AppImage from '@/components/ui/AppImage';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
@@ -151,12 +151,20 @@ export default function FeaturedAstrologers() {
               Connect instantly for career, marriage, health, and life guidance.
             </p>
           </div>
-          <Link
-            href="/talk-to-astrologer"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#E5D9C8] hover:border-[#713B32] text-sm font-bold text-[#292522] hover:text-[#713B32] transition-all bg-[#FFFDFC] shadow-sm"
-          >
-            View All Astrologers <ArrowRight size={14} />
-          </Link>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Link
+              href="/talk-to-ai-astrologer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-sm font-bold text-white transition-all shadow-md transform hover:-translate-y-0.5"
+            >
+              <Bot size={15} className="animate-pulse" /> AI Expert Astrologers
+            </Link>
+            <Link
+              href="/talk-to-astrologer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#E5D9C8] hover:border-[#713B32] text-sm font-bold text-[#292522] hover:text-[#713B32] transition-all bg-[#FFFDFC] shadow-sm"
+            >
+              View All Astrologers <ArrowRight size={14} />
+            </Link>
+          </div>
         </motion.div>
 
         {loading ? (

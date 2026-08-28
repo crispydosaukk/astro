@@ -5,6 +5,7 @@ import {
   DEFAULT_AI_DISCIPLINES,
   AIAstrologer,
   AIDiscipline,
+  normalizeAIAstrologerAvatar,
 } from '@/lib/aiAstrologerData';
 
 export async function GET(req: Request) {
@@ -18,7 +19,8 @@ export async function GET(req: Request) {
       const astSnap = await adminDb.collection('ai_astrologers').get();
       if (!astSnap.empty) {
         astSnap.forEach((doc: any) => {
-          astrologers.push({ id: doc.id, ...doc.data() } as AIAstrologer);
+          const item = { id: doc.id, ...doc.data() } as AIAstrologer;
+          astrologers.push(normalizeAIAstrologerAvatar(item));
         });
       } else {
         astrologers = [...DEFAULT_AI_ASTROLOGERS];
@@ -143,6 +145,16 @@ export async function POST(req: Request) {
     if (action === 'delete_discipline' && discipline?.id) {
       await adminDb.collection('ai_disciplines').doc(discipline.id).delete();
       return NextResponse.json({ success: true, deletedId: discipline.id });
+    }
+
+    if (action === 'reset_astrologers') {
+      const batch = adminDb.batch();
+      for (const a of DEFAULT_AI_ASTROLOGERS) {
+        const docRef = adminDb.collection('ai_astrologers').doc(a.id);
+        batch.set(docRef, { ...a, updatedAt: new Date().toISOString() });
+      }
+      await batch.commit();
+      return NextResponse.json({ success: true, count: DEFAULT_AI_ASTROLOGERS.length });
     }
 
     return NextResponse.json({ error: 'Invalid action or payload' }, { status: 400 });
