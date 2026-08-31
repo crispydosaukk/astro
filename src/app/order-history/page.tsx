@@ -121,7 +121,7 @@ export default function OrderHistoryPage() {
   return (
     <div className="min-h-screen bg-[#F8F3EA] text-[#292522]">
       <Navbar />
-      <div className="container mx-auto p-6 lg:p-8 max-w-5xl pt-32 pb-20">
+      <div className="container mx-auto p-6 lg:p-8 max-w-5xl pt-36 lg:pt-40 pb-20">
         {/* Page Title & Subtitle */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
@@ -129,7 +129,7 @@ export default function OrderHistoryPage() {
               <Clock className="text-[#713B32]" size={32} />
               Consultation & Order History
             </h1>
-            <p className="text-sm text-[#6B5E55] mt-1">
+            <p className="text-sm text-[#6B5E55] mt-1.5">
               Review your complete AI voice consultations, conversation transcripts, and astrologer bookings.
             </p>
           </div>

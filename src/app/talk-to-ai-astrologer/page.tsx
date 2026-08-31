@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import Script from 'next/script';
 import Navbar from '@/components/Navbar';
 import AppImage from '@/components/ui/AppImage';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -74,6 +75,8 @@ export default function TalkToAIAstrologerPage() {
   const [astrologers, setAstrologers] = useState<AIAstrologer[]>(DEFAULT_AI_ASTROLOGERS);
   const [disciplines, setDisciplines] = useState<AIDiscipline[]>(DEFAULT_AI_DISCIPLINES);
   const [loading, setLoading] = useState(true);
+  const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
+  const placeInputRef = useRef<HTMLInputElement | null>(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -100,6 +103,39 @@ export default function TalkToAIAstrologerPage() {
     place: 'New Delhi, India',
     primaryConcern: 'Career Growth & Promotion',
   });
+
+  // Google Places Autocomplete for Birth City / Place
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
+      setIsGoogleLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showBookingModal && isGoogleLoaded && placeInputRef.current) {
+      if (!(placeInputRef.current as any)._autocompleteAttached && (window as any).google?.maps?.places) {
+        try {
+          const autocomplete = new (window as any).google.maps.places.Autocomplete(
+            placeInputRef.current,
+            {
+              types: ['(cities)'],
+            }
+          );
+          autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (place && place.formatted_address) {
+              setBirthForm((prev) => ({ ...prev, place: place.formatted_address }));
+            } else if (place && place.name) {
+              setBirthForm((prev) => ({ ...prev, place: place.name }));
+            }
+          });
+          (placeInputRef.current as any)._autocompleteAttached = true;
+        } catch (e) {
+          console.warn('Google Places autocomplete init warning:', e);
+        }
+      }
+    }
+  }, [showBookingModal, isGoogleLoaded]);
 
   useEffect(() => {
     async function loadData() {
@@ -930,14 +966,18 @@ export default function TalkToAIAstrologerPage() {
                   {/* Birth Place */}
                   <div>
                     <label className="text-muted-foreground block mb-1">Birth City / Place</label>
-                    <input
-                      type="text"
-                      required
-                      value={birthForm.place}
-                      onChange={(e) => setBirthForm({ ...birthForm, place: e.target.value })}
-                      placeholder="e.g. New Delhi, India"
-                      className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-xs focus:border-[#C9952B] outline-none"
-                    />
+                    <div className="relative">
+                      <input
+                        ref={placeInputRef}
+                        type="text"
+                        required
+                        value={birthForm.place}
+                        onChange={(e) => setBirthForm({ ...birthForm, place: e.target.value })}
+                        placeholder="Type city or location (e.g. Chennai, India)"
+                        className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-background border border-border text-xs focus:border-[#C9952B] outline-none"
+                      />
+                      <MapPin size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#C9952B] pointer-events-none" />
+                    </div>
                   </div>
 
                   {/* Language Selection */}
@@ -983,7 +1023,7 @@ export default function TalkToAIAstrologerPage() {
                   <button
                     type="submit"
                     disabled={isConnecting}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#713B32] text-white font-bold text-xs shadow-lg shadow-[#C9952B]/20 hover:opacity-95 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#713B32] text-white font-bold text-xs shadow-lg shadow-[#C9952B]/20 hover:opacity-95 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {isConnecting ? (
                       <>
@@ -1003,6 +1043,36 @@ export default function TalkToAIAstrologerPage() {
           </div>
         )}
       </AnimatePresence>
+
+      <Script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-CXsyKpvFtpidpOkhOiIQGfXFO3O5lKA&libraries=places"
+        strategy="lazyOnload"
+        onReady={() => setIsGoogleLoaded(true)}
+      />
+
+      <style jsx global>{`
+        .pac-container {
+          z-index: 999999 !important;
+          border-radius: 12px;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+          border: 1px solid #C9952B;
+          font-family: inherit;
+          margin-top: 4px;
+          background-color: #FFFDFC;
+        }
+        .pac-item {
+          padding: 8px 12px;
+          cursor: pointer;
+          font-size: 13px;
+        }
+        .pac-item:hover {
+          background-color: #EDE4D5;
+        }
+        .pac-item-query {
+          font-size: 13px;
+          color: #713B32;
+        }
+      `}</style>
     </div>
   );
 }

@@ -218,7 +218,7 @@ function WalletContent() {
   return (
     <div className="min-h-screen bg-[#F8F3EA] text-[#292522]">
       <Navbar />
-      <div className="container mx-auto p-6 max-w-6xl pt-32">
+      <div className="container mx-auto p-6 max-w-6xl pt-36 lg:pt-40">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column: Balance and Add Funds */}
           <div className="lg:col-span-1 space-y-6">
