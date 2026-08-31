@@ -93,6 +93,10 @@ export default function OrderHistoryPage() {
         // Auto-open session if session ID is in URL query or if recently completed
         if (typeof window !== 'undefined') {
           const params = new URLSearchParams(window.location.search);
+          const tabParam = params.get('tab');
+          if (tabParam === 'ai' || tabParam === 'human') {
+            setActiveTab(tabParam);
+          }
           const sessionParam = params.get('session');
           if (sessionParam) {
             const found = aiData.find((s: any) => s.id === sessionParam);
@@ -101,13 +105,6 @@ export default function OrderHistoryPage() {
               setActiveTab('ai');
             }
           }
-        }
-
-        // Default tab selection based on available history
-        if (aiData.length > 0) {
-          setActiveTab('ai');
-        } else if (humanData.length > 0) {
-          setActiveTab('human');
         }
       } catch (error) {
         console.error('Error fetching order history:', error);

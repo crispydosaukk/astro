@@ -59,15 +59,34 @@ export default function AICallRoomPage() {
 
   // UI Drawers & Modals
   const [showChartDrawer, setShowChartDrawer] = useState(false);
-  const [showSummaryModal, setShowSummaryModal] = useState(false);
-  const [summaryViewTab, setSummaryViewTab] = useState<'remedies' | 'transcript'>('remedies');
-  const [finalSummary, setFinalSummary] = useState<AIConsultationSummary | null>(null);
   const [lowBalanceAlert, setLowBalanceAlert] = useState(false);
   const [isEndingCall, setIsEndingCall] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<any>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
+  const isCallEndedRef = useRef(false);
+
+  // Global unmount audio cleanup
+  useEffect(() => {
+    return () => {
+      isCallEndedRef.current = true;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = '';
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
+    };
+  }, []);
 
   // Get Speech Recognition Language Code
   const getLangCode = (lang: string) => {
@@ -97,9 +116,9 @@ export default function AICallRoomPage() {
           if (data.conversationTranscript?.length) {
             setMessages(data.conversationTranscript);
           }
-          if (data.status === 'completed' && data.summary) {
-            setFinalSummary(data.summary);
-            setShowSummaryModal(true);
+          if (data.status === 'completed') {
+            router.push(`/order-history?tab=ai&session=${sessionId}`);
+            return;
           }
         } else {
           toast.error('Session not found');
@@ -252,6 +271,7 @@ export default function AICallRoomPage() {
     isInitial = false,
     historyOverride?: any[]
   ) => {
+    if (isCallEndedRef.current) return;
     setIsGeneratingReply(true);
     try {
       const historyToSend = historyOverride || messages;
@@ -268,7 +288,10 @@ export default function AICallRoomPage() {
         }),
       });
 
+      if (isCallEndedRef.current) return;
+
       const data = await res.json();
+      if (isCallEndedRef.current) return;
 
       if (data.replyText) {
         const aiMsg = {
@@ -278,10 +301,10 @@ export default function AICallRoomPage() {
         };
         setMessages((prev) => [...prev, aiMsg]);
 
-        // Play Synthesized Voice Audio if available
-        if (data.audioBase64 && !isSpeakerMuted) {
+        // Play Synthesized Voice Audio if available and call is still active
+        if (data.audioBase64 && !isSpeakerMuted && !isCallEndedRef.current) {
           playAudioFromBase64(data.audioBase64);
-        } else if ('speechSynthesis' in window && !isSpeakerMuted) {
+        } else if ('speechSynthesis' in window && !isSpeakerMuted && !isCallEndedRef.current) {
           // Browser native TTS fallback with correct language code
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(data.replyText);
@@ -295,10 +318,19 @@ export default function AICallRoomPage() {
           const matchingVoice = voices.find((v) => v.lang.startsWith(langCode.substring(0, 2)));
           if (matchingVoice) utterance.voice = matchingVoice;
 
-          utterance.onstart = () => setIsAiSpeaking(true);
+          utterance.onstart = () => {
+            if (isCallEndedRef.current) {
+              window.speechSynthesis.cancel();
+              setIsAiSpeaking(false);
+              return;
+            }
+            setIsAiSpeaking(true);
+          };
           utterance.onend = () => setIsAiSpeaking(false);
           utterance.onerror = () => setIsAiSpeaking(false);
-          window.speechSynthesis.speak(utterance);
+          if (!isCallEndedRef.current) {
+            window.speechSynthesis.speak(utterance);
+          }
         }
       }
     } catch (err) {
@@ -309,6 +341,7 @@ export default function AICallRoomPage() {
   };
 
   const playAudioFromBase64 = (base64String: string) => {
+    if (isCallEndedRef.current) return;
     try {
       const audioUrl = `data:audio/mp3;base64,${base64String}`;
       if (audioRef.current) {
@@ -318,6 +351,11 @@ export default function AICallRoomPage() {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
+              if (isCallEndedRef.current) {
+                audioRef.current?.pause();
+                setIsAiSpeaking(false);
+                return;
+              }
               setIsAiSpeaking(true);
             })
             .catch((err) => {
@@ -339,6 +377,7 @@ export default function AICallRoomPage() {
   };
 
   const handleSendMessage = (textToSend?: string) => {
+    if (isCallEndedRef.current || isEndingCall || !callActive) return;
     const text = textToSend || inputText;
     if (!text.trim() || isGeneratingReply) return;
 
@@ -356,12 +395,38 @@ export default function AICallRoomPage() {
     triggerAiVoiceExchange(text, false, updatedHistory);
   };
 
-  // 6. End Call & Generate Summary
+  // 6. End Call, Stop All Audio & Redirect to AI Reports
   const handleEndCall = async (dueToLowBalance = false) => {
+    if (isEndingCall) return;
+    isCallEndedRef.current = true;
     setIsEndingCall(true);
     setCallActive(false);
-    if (audioRef.current) audioRef.current.pause();
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setIsAiSpeaking(false);
+    setIsListening(false);
+
+    // 1. Immediately abort & stop speech recognition
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+        recognitionRef.current.stop();
+      } catch (e) {}
+    }
+
+    // 2. Immediately stop HTML audio element and clear source
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = '';
+      } catch (e) {}
+    }
+
+    // 3. Immediately cancel browser speech synthesis
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
+    }
 
     try {
       const res = await fetch('/api/ai-consultation/end', {
@@ -376,9 +441,6 @@ export default function AICallRoomPage() {
 
       const data = await res.json();
       if (data.summary) {
-        setFinalSummary(data.summary);
-        setShowSummaryModal(true);
-
         // Cache completed session locally for instant redundancy
         try {
           const cached = JSON.parse(localStorage.getItem('astroparihar_ai_history') || '[]');
@@ -403,13 +465,12 @@ export default function AICallRoomPage() {
         } catch (storageErr) {
           console.warn('LocalStorage save error:', storageErr);
         }
-
-        toast.success('Consultation completed! Report is now saved in your Order History.');
       }
     } catch (err) {
       console.error('Error ending call:', err);
     } finally {
-      setIsEndingCall(false);
+      toast.success('Consultation completed! Redirecting to your AI Report...');
+      router.push(`/order-history?tab=ai&session=${sessionId}`);
     }
   };
 
@@ -795,207 +856,23 @@ export default function AICallRoomPage() {
         </button>
       </footer>
 
-      {/* Post-Consultation AI Summary & Vedic Remedies Modal (High Contrast Overhaul) */}
-      <AnimatePresence>
-        {showSummaryModal && finalSummary && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-[#17130F] border border-[#C9952B]/40 max-w-2xl w-full rounded-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col text-[#FBF7EE]"
-            >
-              {/* Header with high-contrast celestial styling */}
-              <div className="p-6 bg-gradient-to-r from-[#2F1712] via-[#221715] to-[#1A1310] border-b border-[#C9952B]/40 text-center relative">
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#C9952B]/20 text-[#E5B54F] border border-[#C9952B]/50 mb-2">
-                  <Sparkles size={12} /> Consultation Completed
-                </div>
-                <h2 className="text-2xl font-bold text-[#FFFDFC] font-serif">
-                  Vedic Astrological Summary & Remedies
-                </h2>
-                <p className="text-xs text-[#E5D5BA] mt-1 font-medium">
-                  Consultation with {session?.astrologerName} ({session?.primaryDiscipline}) · {activeLanguage}
-                </p>
-
-                {/* Tab Switcher: Remedies vs Transcript */}
-                <div className="flex items-center justify-center gap-2 mt-4">
-                  <button
-                    onClick={() => setSummaryViewTab('remedies')}
-                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                      summaryViewTab === 'remedies'
-                        ? 'bg-[#C9952B] text-white shadow-md'
-                        : 'bg-[#221B14] text-[#D4C3A3] border border-[#3D352A] hover:text-white'
-                    }`}
-                  >
-                    <Sparkles size={13} /> Vedic Summary & Remedies
-                  </button>
-                  <button
-                    onClick={() => setSummaryViewTab('transcript')}
-                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                      summaryViewTab === 'transcript'
-                        ? 'bg-[#C9952B] text-white shadow-md'
-                        : 'bg-[#221B14] text-[#D4C3A3] border border-[#3D352A] hover:text-white'
-                    }`}
-                  >
-                    <MessageSquare size={13} /> Conversation Transcript ({messages.length})
-                  </button>
-                </div>
-              </div>
-
-              {/* Summary Content Body */}
-              <div className="p-6 overflow-y-auto space-y-6 text-sm">
-                {/* Billing Recap */}
-                <div className="grid grid-cols-3 gap-3 p-3.5 bg-[#221B14] rounded-2xl border border-[#3D352A] text-center">
-                  <div>
-                    <span className="text-[10px] text-[#D4C3A3] uppercase font-semibold block">
-                      Duration
-                    </span>
-                    <span className="font-bold text-[#FFFDFC] text-sm">{billedMinutes} Minutes</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-[#D4C3A3] uppercase font-semibold block">
-                      Amount Paid
-                    </span>
-                    <span className="font-bold text-[#E5B54F] text-sm">
-                      {formatPrice(session?.pricePerMin * billedMinutes)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-[#D4C3A3] uppercase font-semibold block">
-                      Remaining Balance
-                    </span>
-                    <span className="font-bold text-emerald-400 text-sm">
-                      {formatPrice(currentBalance)}
-                    </span>
-                  </div>
-                </div>
-
-                {summaryViewTab === 'remedies' ? (
-                  <>
-                    {/* Overview */}
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2">
-                        Consultation Overview
-                      </h4>
-                      <p className="text-xs text-[#F5EFE6] leading-relaxed bg-[#221B14] p-3.5 rounded-xl border border-[#3D352A]">
-                        {finalSummary.overview}
-                      </p>
-                    </div>
-
-                    {/* Astrological Highlights */}
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2">
-                        Key Planetary Observations
-                      </h4>
-                      <ul className="space-y-2 text-xs text-[#E8DFC8]">
-                        {finalSummary.astrologicalHighlights?.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 bg-[#221B14] p-2.5 rounded-xl border border-[#3D352A]">
-                            <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
-                            <span className="leading-relaxed">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Timeline Predictions */}
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2">
-                        Timeline Predictions
-                      </h4>
-                      <div className="space-y-2">
-                        {finalSummary.timelinePredictions?.map((pred, i) => (
-                          <div
-                            key={i}
-                            className="p-3 rounded-xl bg-[#221B14] border border-[#3D352A] text-xs text-[#F5EFE6] leading-relaxed"
-                          >
-                            {pred}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Recommended Remedies */}
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2">
-                        Recommended Vedic Remedies & Mantras
-                      </h4>
-                      <div className="space-y-2.5">
-                        {finalSummary.recommendedRemedies?.map((rem, i) => (
-                          <div
-                            key={i}
-                            className="p-3.5 rounded-xl bg-[#282015] border border-[#C9952B]/40 shadow-sm"
-                          >
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="font-bold text-xs text-[#E5B54F] uppercase tracking-wide">
-                                {rem.title}
-                              </span>
-                              <span className="text-[10px] px-2.5 py-0.5 rounded bg-[#C9952B]/20 text-[#E5B54F] border border-[#C9952B]/40 uppercase font-bold">
-                                {rem.type}
-                              </span>
-                            </div>
-                            <p className="text-xs text-[#F5EFE6] leading-relaxed">{rem.instructions}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Closing Blessing */}
-                    <div className="p-4 bg-gradient-to-r from-[#3B221B] to-[#2B1B13] rounded-2xl border border-[#C9952B]/50 text-center shadow-lg">
-                      <p className="text-xs font-medium text-[#FFE7B8] italic leading-relaxed">
-                        "{finalSummary.panditJiFinalBlessing}"
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  /* Full Transcript Tab */
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#E5B54F] mb-2 flex items-center gap-2">
-                      <MessageSquare size={14} className="text-[#C9952B]" /> Full Consultation Conversation Transcript
-                    </h4>
-                    {messages.length === 0 ? (
-                      <p className="text-xs text-[#D4C3A3] italic">No messages recorded in this consultation.</p>
-                    ) : (
-                      messages.map((msg, i) => (
-                        <div
-                          key={i}
-                          className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
-                            msg.role === 'user'
-                              ? 'bg-[#C9952B]/25 border border-[#C9952B]/50 text-[#FFFDFC] ml-6'
-                              : 'bg-[#221B14] border border-[#3D352A] text-[#F5EFE6] mr-6'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-[#E5B54F] text-[11px]">
-                              {msg.role === 'user' ? 'Devotee (You)' : session?.astrologerName}
-                            </span>
-                            <span className="text-[10px] text-[#D4C3A3]">{msg.time}</span>
-                          </div>
-                          <p className="whitespace-pre-wrap font-normal">{msg.content}</p>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-4 border-t border-[#3D352A] bg-[#14110E] flex items-center justify-between gap-3">
-                <button
-                  onClick={() => window.print()}
-                  className="px-4 py-2 rounded-xl border border-[#3D352A] hover:border-[#C9952B] text-xs font-semibold text-[#FFFDFC] flex items-center gap-1.5 transition-colors"
-                >
-                  <Download size={14} /> Print / Save Summary
-                </button>
-                <button
-                  onClick={() => router.push(`/order-history?tab=ai&session=${sessionId}`)}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#B08022] hover:from-[#B08022] hover:to-[#966B1A] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2"
-                >
-                  <Sparkles size={14} /> View in Order History & Reports
-                </button>
-              </div>
-            </motion.div>
+      {/* Ending Call Full-Screen Transition Overlay */}
+      {isEndingCall && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-black/90 backdrop-blur-md text-center">
+          <div className="w-16 h-16 rounded-full border-2 border-[#C9952B] flex items-center justify-center mb-4 relative shadow-lg shadow-[#C9952B]/30 animate-pulse">
+            <Loader2 className="animate-spin text-[#C9952B]" size={36} />
           </div>
-        )}
-      </AnimatePresence>
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-[#C9952B]/20 text-[#E5B54F] border border-[#C9952B]/50 mb-3">
+            <Sparkles size={13} /> Consultation Completed
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#FFFDFC] font-serif mb-2">
+            Finalizing Vedic Report & Remedies
+          </h2>
+          <p className="text-xs text-[#E5D5BA] max-w-sm leading-relaxed">
+            Generating your personalized chart observations, timeline predictions, and transcript. Redirecting you to your AI Reports...
+          </p>
+        </div>
+      )}
     </div>
   );
 }

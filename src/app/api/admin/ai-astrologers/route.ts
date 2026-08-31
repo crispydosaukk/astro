@@ -11,7 +11,6 @@ import {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const type = searchParams.get('type') || 'all';
 
     // 1. Fetch AI Astrologers
     let astrologers: AIAstrologer[] = [];
@@ -104,8 +103,48 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { action, astrologer, discipline } = body;
+    const { action, astrologer, discipline, astrologerId, isActive, isFeatured, availability } = body;
 
+    // Toggle Active / Inactive Status
+    if (action === 'toggle_status' && astrologerId !== undefined) {
+      const docRef = adminDb.collection('ai_astrologers').doc(astrologerId);
+      await docRef.set(
+        {
+          isActive: !!isActive,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      return NextResponse.json({ success: true, astrologerId, isActive: !!isActive });
+    }
+
+    // Set Availability (online / offline / busy)
+    if (action === 'set_availability' && astrologerId && availability) {
+      const docRef = adminDb.collection('ai_astrologers').doc(astrologerId);
+      await docRef.set(
+        {
+          availability,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      return NextResponse.json({ success: true, astrologerId, availability });
+    }
+
+    // Toggle Featured
+    if (action === 'toggle_featured' && astrologerId !== undefined) {
+      const docRef = adminDb.collection('ai_astrologers').doc(astrologerId);
+      await docRef.set(
+        {
+          isFeatured: !!isFeatured,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      return NextResponse.json({ success: true, astrologerId, isFeatured: !!isFeatured });
+    }
+
+    // Save or Update Full Astrologer Profile
     if (action === 'save_astrologer' && astrologer) {
       const id =
         astrologer.id ||
@@ -115,6 +154,7 @@ export async function POST(req: Request) {
       const payload: AIAstrologer = {
         ...astrologer,
         id,
+        availability: astrologer.availability || 'online',
         updatedAt: new Date().toISOString(),
         createdAt: astrologer.createdAt || new Date().toISOString(),
       };
@@ -123,6 +163,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, astrologer: payload });
     }
 
+    // Save or Update Discipline
     if (action === 'save_discipline' && discipline) {
       const id = discipline.id || discipline.slug || `disc-${Date.now()}`;
       const docRef = adminDb.collection('ai_disciplines').doc(id);
@@ -137,24 +178,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, discipline: payload });
     }
 
-    if (action === 'delete_astrologer' && astrologer?.id) {
-      await adminDb.collection('ai_astrologers').doc(astrologer.id).delete();
-      return NextResponse.json({ success: true, deletedId: astrologer.id });
+    // Delete Astrologer
+    if (action === 'delete_astrologer' && (astrologer?.id || astrologerId)) {
+      const targetId = astrologer?.id || astrologerId;
+      await adminDb.collection('ai_astrologers').doc(targetId).delete();
+      return NextResponse.json({ success: true, deletedId: targetId });
     }
 
+    // Delete Discipline
     if (action === 'delete_discipline' && discipline?.id) {
       await adminDb.collection('ai_disciplines').doc(discipline.id).delete();
       return NextResponse.json({ success: true, deletedId: discipline.id });
     }
 
-    if (action === 'reset_astrologers') {
+    // One-Click Bulk Sync all 50 AI Astrologers & Disciplines to Firestore
+    if (action === 'reset_astrologers' || action === 'sync_all_50') {
       const batch = adminDb.batch();
       for (const a of DEFAULT_AI_ASTROLOGERS) {
         const docRef = adminDb.collection('ai_astrologers').doc(a.id);
-        batch.set(docRef, { ...a, updatedAt: new Date().toISOString() });
+        batch.set(docRef, { ...a, updatedAt: new Date().toISOString() }, { merge: true });
+      }
+      for (const d of DEFAULT_AI_DISCIPLINES) {
+        const discRef = adminDb.collection('ai_disciplines').doc(d.id);
+        batch.set(discRef, d, { merge: true });
       }
       await batch.commit();
-      return NextResponse.json({ success: true, count: DEFAULT_AI_ASTROLOGERS.length });
+      return NextResponse.json({
+        success: true,
+        count: DEFAULT_AI_ASTROLOGERS.length,
+        disciplinesCount: DEFAULT_AI_DISCIPLINES.length,
+      });
     }
 
     return NextResponse.json({ error: 'Invalid action or payload' }, { status: 400 });

@@ -345,7 +345,7 @@ export default function RemediesPage() {
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="lg:col-span-6 space-y-6 order-2 lg:order-1"
+                className="lg:col-span-6 space-y-6 order-1"
               >
                 <div>
                   <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#B88A44]/20 text-[#F6D075] border border-[#B88A44]/40 mb-3.5 backdrop-blur-md shadow-sm">
@@ -443,7 +443,7 @@ export default function RemediesPage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-                className="lg:col-span-6 relative w-full order-1 lg:order-2 flex items-center justify-center"
+                className="lg:col-span-6 relative w-full order-2 flex items-center justify-center"
               >
                 <RotatingRemediesWheel
                   onHoverItem={(id) => {
