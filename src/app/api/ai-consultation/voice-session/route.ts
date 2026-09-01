@@ -18,7 +18,7 @@ function getNativeRashi(sign: string, lang: 'telugu' | 'tamil' | 'hindi' | 'engl
     if (s.includes('capricorn') || s.includes('makara')) return 'మకర రాశి';
     if (s.includes('aquarius') || s.includes('kumbha')) return 'కుంభ రాశి';
     if (s.includes('pisces') || s.includes('meena')) return 'మీన రాశి';
-    return 'రాశి';
+    return 'శుభ రాశి';
   }
   if (lang === 'tamil') {
     if (s.includes('aries') || s.includes('mesha')) return 'மேஷ ராசி';
@@ -53,56 +53,58 @@ function getNativeRashi(sign: string, lang: 'telugu' | 'tamil' | 'hindi' | 'engl
   return sign || 'Aries';
 }
 
-function getNativeLagna(sign: string, lang: 'telugu' | 'tamil' | 'hindi' | 'english'): string {
-  const s = (sign || '').toLowerCase();
+// Lagna Native Translators
+function getNativeLagna(lagna: string, lang: 'telugu' | 'tamil' | 'hindi' | 'english'): string {
+  const l = (lagna || '').toLowerCase();
   if (lang === 'telugu') {
-    if (s.includes('aries') || s.includes('mesha')) return 'మేష లగ్నం';
-    if (s.includes('taurus') || s.includes('vrishabha')) return 'వృషభ లగ్నం';
-    if (s.includes('gemini') || s.includes('mithuna')) return 'మిథున లగ్నం';
-    if (s.includes('cancer') || s.includes('karka')) return 'కర్కాటక లగ్నం';
-    if (s.includes('leo') || s.includes('simha')) return 'సింహ లగ్నం';
-    if (s.includes('virgo') || s.includes('kanya')) return 'కన్యా లగ్నం';
-    if (s.includes('libra') || s.includes('tula')) return 'తులా లగ్నం';
-    if (s.includes('scorpio') || s.includes('vrishchika')) return 'వృశ్చిక లగ్నం';
-    if (s.includes('sagittarius') || s.includes('dhanu')) return 'ధనుస్సు లగ్నం';
-    if (s.includes('capricorn') || s.includes('makara')) return 'మకర లగ్నం';
-    if (s.includes('aquarius') || s.includes('kumbha')) return 'కుంభ లగ్నం';
-    if (s.includes('pisces') || s.includes('meena')) return 'మీన లగ్నం';
+    if (l.includes('aries') || l.includes('mesha')) return 'మేష లగ్నం';
+    if (l.includes('taurus') || l.includes('vrishabha')) return 'వృషభ లగ్నం';
+    if (l.includes('gemini') || l.includes('mithuna')) return 'మిథున లగ్నం';
+    if (l.includes('cancer') || l.includes('karka')) return 'కర్కాటక లగ్నం';
+    if (l.includes('leo') || l.includes('simha')) return 'సింహ లగ్నం';
+    if (l.includes('virgo') || l.includes('kanya')) return 'కన్యా లగ్నం';
+    if (l.includes('libra') || l.includes('tula')) return 'తులా లగ్నం';
+    if (l.includes('scorpio') || l.includes('vrishchika')) return 'వృశ్చిక లగ్నం';
+    if (l.includes('sagittarius') || l.includes('dhanu')) return 'ధనుస్సు లగ్నం';
+    if (l.includes('capricorn') || l.includes('makara')) return 'మకర లగ్నం';
+    if (l.includes('aquarius') || l.includes('kumbha')) return 'కుంభ లగ్నం';
+    if (l.includes('pisces') || l.includes('meena')) return 'మీన లగ్నం';
     return 'లగ్నం';
   }
   if (lang === 'tamil') {
-    if (s.includes('aries') || s.includes('mesha')) return 'மேஷ லக்னம்';
-    if (s.includes('taurus') || s.includes('vrishabha')) return 'ரிஷப லக்னம்';
-    if (s.includes('gemini') || s.includes('mithuna')) return 'மிதுன லக்னம்';
-    if (s.includes('cancer') || s.includes('karka')) return 'கடக லக்னம்';
-    if (s.includes('leo') || s.includes('simha')) return 'சிம்ம லக்னம்';
-    if (s.includes('virgo') || s.includes('kanya')) return 'கன்னி லக்னம்';
-    if (s.includes('libra') || s.includes('tula')) return 'துலாம் லக்னம்';
-    if (s.includes('scorpio') || s.includes('vrishchika')) return 'விருச்சிக லக்னம்';
-    if (s.includes('sagittarius') || s.includes('dhanu')) return 'தனுசு லக்னம்';
-    if (s.includes('capricorn') || s.includes('makara')) return 'மகர லக்னம்';
-    if (s.includes('aquarius') || s.includes('kumbha')) return 'கும்ப லக்னம்';
-    if (s.includes('pisces') || s.includes('meena')) return 'மீன லக்னம்';
+    if (l.includes('aries') || l.includes('mesha')) return 'மேஷ லக்னம்';
+    if (l.includes('taurus') || l.includes('vrishabha')) return 'ரிஷப லக்னம்';
+    if (l.includes('gemini') || l.includes('mithuna')) return 'மிதுன லக்னம்';
+    if (l.includes('cancer') || l.includes('karka')) return 'கடக லக்னம்';
+    if (l.includes('leo') || l.includes('simha')) return 'சிம்ம லக்னம்';
+    if (l.includes('virgo') || l.includes('kanya')) return 'கன்னி லக்னம்';
+    if (l.includes('libra') || l.includes('tula')) return 'துலாம் லக்னம்';
+    if (l.includes('scorpio') || l.includes('vrishchika')) return 'விருச்சிக லக்னம்';
+    if (l.includes('sagittarius') || l.includes('dhanu')) return 'தனுசு லக்னம்';
+    if (l.includes('capricorn') || l.includes('makara')) return 'மகர லக்னம்';
+    if (l.includes('aquarius') || l.includes('kumbha')) return 'கும்ப லக்னம்';
+    if (l.includes('pisces') || l.includes('meena')) return 'மீன லக்னம்';
     return 'லக்னம்';
   }
   if (lang === 'hindi') {
-    if (s.includes('aries') || s.includes('mesha')) return 'मेष लग्न';
-    if (s.includes('taurus') || s.includes('vrishabha')) return 'वृषभ लग्न';
-    if (s.includes('gemini') || s.includes('mithuna')) return 'मिथुन लग्न';
-    if (s.includes('cancer') || s.includes('karka')) return 'कर्क लग्न';
-    if (s.includes('leo') || s.includes('simha')) return 'सिंह लग्न';
-    if (s.includes('virgo') || s.includes('kanya')) return 'कन्या लग्न';
-    if (s.includes('libra') || s.includes('tula')) return 'तुला लग्न';
-    if (s.includes('scorpio') || s.includes('vrishchika')) return 'वृश्चिक लग्न';
-    if (s.includes('sagittarius') || s.includes('dhanu')) return 'धनु लग्न';
-    if (s.includes('capricorn') || s.includes('makara')) return 'मकर लग्न';
-    if (s.includes('aquarius') || s.includes('kumbha')) return 'कुंभ लग्न';
-    if (s.includes('pisces') || s.includes('meena')) return 'मीन लग्न';
+    if (l.includes('aries') || l.includes('mesha')) return 'मेष लग्न';
+    if (l.includes('taurus') || l.includes('vrishabha')) return 'वृषभ लग्न';
+    if (l.includes('gemini') || l.includes('mithuna')) return 'मिथुन लग्न';
+    if (l.includes('cancer') || l.includes('karka')) return 'कर्क लग्न';
+    if (l.includes('leo') || l.includes('simha')) return 'सिंह लग्न';
+    if (l.includes('virgo') || l.includes('kanya')) return 'कन्या लग्न';
+    if (l.includes('libra') || l.includes('tula')) return 'तुला लग्न';
+    if (l.includes('scorpio') || l.includes('vrishchika')) return 'वृश्चिक लग्न';
+    if (l.includes('sagittarius') || l.includes('dhanu')) return 'धनु लग्न';
+    if (l.includes('capricorn') || l.includes('makara')) return 'मकर लग्न';
+    if (l.includes('aquarius') || l.includes('kumbha')) return 'कुंभ लग्न';
+    if (l.includes('pisces') || l.includes('meena')) return 'मीन लग्न';
     return 'लग्न';
   }
-  return sign || 'Lagna';
+  return lagna || 'Scorpio Ascendant';
 }
 
+// Dasha Native Translators
 function getNativeDasha(dasha: string, lang: 'telugu' | 'tamil' | 'hindi' | 'english'): string {
   const d = (dasha || '').toLowerCase();
   if (lang === 'telugu') {
@@ -123,7 +125,7 @@ function getNativeDasha(dasha: string, lang: 'telugu' | 'tamil' | 'hindi' | 'eng
     if (d.includes('venus') || d.includes('shukra')) return 'சுக்கிர மகாதிசை';
     if (d.includes('sun') || d.includes('surya')) return 'சூரிய மகாதிசை';
     if (d.includes('moon') || d.includes('chandra')) return 'சந்திர மகாதிசை';
-    if (d.includes('mars') || d.includes('kuja')) return 'செவ்வாய் மகாதிசை';
+    if (d.includes('mars') || d.includes('kuja') || d.includes('mangal')) return 'செவ்வாய் மகாதிசை';
     if (d.includes('rahu')) return 'ராகு மகாதிசை';
     if (d.includes('ketu')) return 'கேது மகாதிசை';
     if (d.includes('mercury') || d.includes('budha')) return 'புதன் மகாதிசை';
@@ -159,7 +161,18 @@ function generateDynamicVedicReply(
   const isHindi = langLower.includes('hindi') || langLower.includes('hi') || /[\u0900-\u097F]/.test(userText || '');
 
   const langKey = isTelugu ? 'telugu' : isTamil ? 'tamil' : isHindi ? 'hindi' : 'english';
-  const name = birthDetails.name || (isTelugu ? 'భక్తుడు' : isTamil ? 'அன்பரே' : isHindi ? 'भक्त' : 'Devotee');
+  let name = birthDetails.name || (isTelugu ? 'భక్తుడు' : isTamil ? 'அன்பரே' : isHindi ? 'भक्त' : 'Devotee');
+  
+  if (isTelugu && /^[a-zA-Z\s]+$/.test(name)) {
+    const firstName = name.split(' ')[0];
+    if (firstName.toLowerCase() === 'rahul') name = 'రాహుల్';
+    else if (firstName.toLowerCase() === 'raj') name = 'రాజ్';
+    else if (firstName.toLowerCase() === 'ravi') name = 'రవి';
+    else if (firstName.toLowerCase() === 'suresh') name = 'సురేష్';
+    else if (firstName.toLowerCase() === 'ramesh') name = 'రమేష్';
+    else name = firstName;
+  }
+
   const lagna = getNativeLagna(astroContext.lagna, langKey);
   const moonRashi = getNativeRashi(astroContext.moonRashi, langKey);
   const dasha = getNativeDasha(astroContext.currentDasha, langKey);
@@ -183,9 +196,9 @@ function generateDynamicVedicReply(
 
   // 2. Simple greetings by customer
   if (
-    text.includes('నమస్కారం') ||
+    text.includes('నమస్కార') ||
     text.includes('స్వామీజీ') ||
-    text.includes('గురువుగారు') ||
+    text.includes('గురువు') ||
     text.includes('హాయ్') ||
     text.includes('నమస్తే') ||
     text === 'hello' ||
@@ -211,10 +224,15 @@ function generateDynamicVedicReply(
     text.includes('wedding') ||
     text.includes('relationship') ||
     text.includes('love') ||
+    text.includes('పెళ్ళ') ||
     text.includes('పెళ్లి') ||
-    text.includes('వివాహం') ||
-    text.includes('సంబంధం') ||
-    text.includes('దాంపత్యం') ||
+    text.includes('వివాహ') ||
+    text.includes('సంబంధ') ||
+    text.includes('దాంపత్య') ||
+    text.includes('శ్రీమతి') ||
+    text.includes('భార్య') ||
+    text.includes('భర్త') ||
+    text.includes('తిరుమణం') ||
     text.includes('திருமணம்') ||
     text.includes('शादी') ||
     text.includes('विवाह')
@@ -238,11 +256,14 @@ function generateDynamicVedicReply(
     text.includes('promotion') ||
     text.includes('business') ||
     text.includes('work') ||
-    text.includes('ఉద్యోగం') ||
+    text.includes('salary') ||
+    text.includes('ఉద్యోగ') ||
     text.includes('కెరీర్') ||
     text.includes('నౌకరి') ||
     text.includes('ప్రమోషన్') ||
-    text.includes('వ్యాపారం') ||
+    text.includes('వ్యాపార') ||
+    text.includes('వేతన') ||
+    text.includes('జీతం') ||
     text.includes('வேலை') ||
     text.includes('தொழில்') ||
     text.includes('नौकरी') ||
@@ -260,76 +281,83 @@ function generateDynamicVedicReply(
     return `${name}, in your chart, the 10th house of Profession is strongly positioned. Jupiter's aspect indicates high chances of career growth. Chanting the Aditya Hridaya Stotram will remove workplace obstacles.`;
   }
 
-  // 5. Wealth & Finances
+  // 5. Wealth, Finances & Debt
   if (
+    text.includes('finance') ||
     text.includes('money') ||
     text.includes('wealth') ||
-    text.includes('finance') ||
-    text.includes('loan') ||
     text.includes('debt') ||
-    text.includes('ధనం') ||
+    text.includes('loan') ||
+    text.includes('rich') ||
+    text.includes('ధన') ||
     text.includes('ఆర్థిక') ||
-    text.includes('పైసలు') ||
-    text.includes('రుణం') ||
+    text.includes('డబ్బు') ||
+    text.includes('సంపాదన') ||
+    text.includes('అప్పు') ||
+    text.includes('లాభం') ||
     text.includes('பணம்') ||
     text.includes('செல்வம்') ||
     text.includes('धन') ||
-    text.includes('पैसे')
+    text.includes('पैसा') ||
+    text.includes('कर्ज')
   ) {
     if (isTelugu) {
-      return `${name} గారూ, మీ ధన స్థానం మరియు లాభ స్థానం అనుకూలమైన మార్గంలో ఉన్నాయి. ఆర్థిక వృద్ధి నిలకడగా ఉండటానికి ప్రతిరోజూ శ్రీ సూక్తం పఠించడం మరియు బుధవారం ఆవుకు ఆకుకూరలు తినిపించడం వల్ల లక్ష్మీ కటాక్షం సిద్ధిస్తుంది. అప్పుల నివారణ లేదా పెట్టుబడుల గురించి ఇంకా ఏమైనా సందేహం ఉందా?`;
+      return `${name} గారూ, మీ కుండలిలో 2వ స్థానం (ధన భావం) మరియు 11వ స్థానం (లాభ భావం) ప్రకారం రాబోయే కాలంలో ఆదాయ మార్గాలు మెరుగుపడతాయి. అప్పుల నివారణ మరియు స్థిర సంపద కొరకు శ్రీ సూక్తం పఠించడం మరియు పక్షులకు లేదా ఆవుకు ఆహారం ఇవ్వడం మంచి ఫలితాలను ఇస్తుంది.`;
     }
     if (isTamil) {
-      return `${name}, உங்கள் தன ஸ்தானமும் லாப ஸ்தானமும் நல்ல நிலையில் உள்ளன. வெள்ளிக்கிழமைகளில் ஸ்ரீ சூக்தம் பாராயணம் செய்வதும், புதன்கிழமைகளில் பசுவிற்கு அகத்திக்கீரை அளிப்பதும் நிலையான தன லாபத்தைத் தரும்.`;
+      return `${name}, உங்கள் 2ஆம் (தனம்) மற்றும் 11ஆம் (லாபம்) வீடுகளில் பணவரவுக்கான அனுகூலம் காணப்படுகிறது. கடன் சுமை குறைய கனகதாரா ஸ்தோத்திரம் சொல்வதும் பசுவுக்கு அகத்திக்கீரை வழங்குவதும் சிறந்த பரிகாரமாகும்.`;
     }
     if (isHindi) {
-      return `${name} जी, आपकी कुंडली में धन और लाभ भाव की स्थिति उत्तम है। आर्थिक समृद्धि के लिए श्री सूक्त का पाठ करें और बुधवार को गाय को हरा चारा खिलाएं।`;
+      return `${name} जी, आपकी कुंडली में द्वितीय (धन) और एकादश (लाभ) भाव में धन आगमन के अच्छे संकेत हैं। कनकधारा स्तोत्र का पाठ करने से आर्थिक स्थिति सुदृढ़ होगी।`;
     }
-    return `${name}, your 2nd house of Wealth and 11th house of Financial Gains show favorable momentum. Reciting Sri Suktam on Fridays will attract steady prosperity.`;
+    return `${name}, evaluating your 2nd house of Wealth and 11th house of Financial Gains, steady growth is indicated. Reciting the Kanakadhara Stotram will balance financial cash flow.`;
   }
 
-  // 6. Remedies & Pooja
+  // 6. Remedies & Poojas
   if (
     text.includes('remedy') ||
     text.includes('remedies') ||
+    text.includes('pooja') ||
+    text.includes('puja') ||
     text.includes('mantra') ||
     text.includes('gemstone') ||
-    text.includes('pooja') ||
-    text.includes('పరిహారం') ||
-    text.includes('పరిహారాలు') ||
-    text.includes('మంత్రం') ||
+    text.includes('dosha') ||
+    text.includes('పరిహార') ||
     text.includes('పూజ') ||
-    text.includes('பரிகாரம்') ||
-    text.includes('மந்திரம்') ||
+    text.includes('మంత్ర') ||
+    text.includes('దోష') ||
+    text.includes('రత్న') ||
+    text.includes('పరికారం') ||
+    text.includes('தோஷம்') ||
     text.includes('उपाय') ||
-    text.includes('मंत्र')
+    text.includes('दोष')
   ) {
     if (isTelugu) {
-      return `${name} గారూ, మీ గ్రహ శాంతి కొరకు మూడు శ్రేష్టమైన పరిహారాలు: 1) రోజూ గాయత్రీ మంత్రం 108 సార్లు జపించండి. 2) గురువారం ఆలయంలో పసుపు రంగు వస్తువులు లేదా శనగలు దానం చేయండి. 3) శివునికి జలాభిషేకం చేయడం వల్ల సకల దోషాలు తొలగిపోతాయి. దీనిపై మీకు ఇంకా ఏమైనా సందేహం ఉందా?`;
+      return `${name} గారూ, మీ కుండలిలోని గ్రహ దోష నివారణకు ప్రతిరోజూ గాయత్రీ మంత్రం లేదా మహామృత్యుంజయ మంత్రం జపించడం అత్యంత శ్రేయస్కరం. అలాగే సోమవారం శివారాధన మరియు శనివారం ఆంజనేయ స్వామి దర్శనం మీకు సర్వదా రక్షణ కల్పిస్తాయి.`;
     }
     if (isTamil) {
-      return `${name}, உங்கள் கிரக தோஷ நிவர்த்திக்கான பரிகாரங்கள்: 1) தினமும் காயத்ரி மந்திரம் 108 முறை ஜபிக்கவும். 2) வியாழக்கிழமைகளில் குரு பகவானை வழிபடவும். 3) சிவபெருமானுக்கு அபிஷேகம் செய்வது நலம் பயக்கும்.`;
+      return `${name}, உங்கள் ஜாதக தோஷங்கள் நீங்க தினமும் காயத்ரி மந்திரம் அல்லது மகா மிருத்யுஞ்சய மந்திரம் ஜெபிப்பது சிறந்தது. திங்கட்கிழமை சிவபெருமானையும், சனிக்கிழமை ஆஞ்சநேயரையும் வழிபடுவது பூரண பலன் தரும்.`;
     }
     if (isHindi) {
-      return `${name} जी, ग्रहों के संतुलन के लिए प्रतिदिन गायत्री मंत्र का 108 बार जाप करें, गुरुवार को चने की दाल का दान करें और भगवान शिव की आराधना करें।`;
+      return `${name} जी, समस्त ग्रह शांति के लिए प्रतिदिन महामृत्युंजय मंत्र अथवा गायत्री मंत्र का 108 बार जाप करें। सोमवार को शिवलिंग पर जल-अभिषेक करना अत्यंत कल्याणकारी रहेगा।`;
     }
-    return `${name}, here are the core Vedic remedies: 1) Chant the Gayatri Mantra 108 times daily. 2) Donate yellow grains on Thursdays. 3) Perform Shiva Pooja for universal protection.`;
+    return `${name}, chanting the Maha Mrityunjaya Mantra or Gayatri Mantra daily creates strong spiritual protection. Offering milk to Lord Shiva on Mondays will neutralize planetary afflicted energies.`;
   }
 
-  // 7. General Astrological Response
+  // Default Vedic Wisdom
   if (isTelugu) {
-    return `${name} గారూ, మీరు అడిగిన విషయమై మీ జన్మ కుండలిలోని గ్రహాలు అనుకూలంగానే స్పందిస్తున్నాయి. మీ ${lagna} మరియు ${moonRashi} ప్రకారం, మీరు దృఢ సంకల్పంతో చేసే ప్రతి పనిలో విజయం సాధిస్తారు. దీనిపై మీకు ఇంకా ఏవైనా ప్రత్యేక పరిహారాలు లేదా సమయపాలన వివరాలు కావాలా?`;
+    return `${name} గారూ, మీ కుండలిలోని ${lagna} మరియు ${moonRashi} ప్రకారం, ప్రస్తుత ${dasha} కాలం మీకు ఎన్నో అవకాశాలను అందిస్తుంది. మీ మనోబలంతో ముందుకు సాగండి, దైవానుగ్రహం మీకు తోడుగా ఉంటుంది. దీనిపై మీకు ఇంకా ఏ ప్రశ్నకైనా సమాధానం కావాలా?`;
   }
   if (isTamil) {
-    return `${name}, உங்கள் ${lagna} மற்றும் ${moonRashi}ப்படி தற்போதைய கிரக சஞ்சாரங்கள் நல்வழியை நோக்கி உள்ளன. தொடர்ந்து நற்செயல்களைச் செய்து வர வெற்றிகள் உண்டாகும். வேறு ஏதேனும் சந்தேகம் உள்ளதா?`;
+    return `${name}, உங்கள் ${lagna} மற்றும் ${moonRashi}க்கு நடப்பு ${dasha} காலம் நல்ல மாற்றங்களை கொண்டுவரும். நம்பிக்கையுடன் செயல்படுங்கள், தெய்வ அருள் துணை நிற்கும். வேறு ஏதேனும் சந்தேகம் உள்ளதா?`;
   }
   if (isHindi) {
-    return `${name} जी, आपके द्वारा पूछे गए प्रश्न के अनुसार ग्रह गोचर आपके पक्ष में है। ${lagna} और ${moonRashi} के आधार पर आपका आत्मबल उत्तम रहेगा। क्या आप किसी अन्य ग्रह दोष या समय के बारे में जानना चाहते हैं?`;
+    return `${name} जी, आपकी कुंडली में ${lagna} और ${moonRashi} के अनुसार वर्तमान ${dasha} अनुकूल रहने वाली है। ईश्वर पर आस्था रखें, सर्व कार्य सिद्ध होंगे। क्या आप कुछ और पूछना चाहते हैं?`;
   }
-  return `${name}, based on your ${lagna} and ${moonRashi}, the current cosmic transit aligns favorably with your aspirations. Consistency and righteous action will bring victory. Would you like further clarity on timing or specific planetary remedies?`;
+  return `${name}, your Vedic chart reveals immense latent strength under your ${lagna} and ${moonRashi}. Stay focused and purposeful during this ${dasha} period. Is there anything else you wish to consult about?`;
 }
 
-// Universal Multilingual Speech Synthesizer (OpenAI TTS with extended 12s timeout + Google TTS fallback)
+// Universal Multilingual Speech Synthesizer
 async function generateMultilingualAudioBase64(
   text: string,
   language: string,
@@ -339,9 +367,8 @@ async function generateMultilingualAudioBase64(
   const cleanInput = text.replace(/[\n\r]+/g, ' ').slice(0, 350).trim();
   if (!cleanInput) return null;
 
-  // 1. Universal OpenAI TTS Engine (Extended 12s timeout for high-quality audio)
-  const activeKey = openaiApiKey || DEFAULT_OPENAI_KEY;
-  if (activeKey) {
+  // 1. OpenAI TTS Engine
+  if (openaiApiKey) {
     try {
       const ttsVoice = astrologer.voiceId || (astrologer.voiceGender === 'female' ? 'nova' : 'onyx');
       const controller = new AbortController();
@@ -351,7 +378,7 @@ async function generateMultilingualAudioBase64(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${activeKey}`,
+          Authorization: `Bearer ${openaiApiKey}`,
         },
         body: JSON.stringify({
           model: 'tts-1',
@@ -361,52 +388,43 @@ async function generateMultilingualAudioBase64(
         }),
         signal: controller.signal,
       });
+
       clearTimeout(timeoutId);
 
       if (ttsRes.ok) {
         const audioBuffer = await ttsRes.arrayBuffer();
         return Buffer.from(audioBuffer).toString('base64');
       }
-    } catch (ttsErr) {
-      console.warn('OpenAI TTS timeout/error, attempting secondary synthesis:', ttsErr);
+    } catch (e) {
+      console.warn('OpenAI TTS error:', e);
     }
   }
 
-  // 2. Google Translate TTS Audio Fallback
+  // 2. Google Translate TTS Fallback
   try {
+    const lLower = (language || '').toLowerCase();
     let langCode = 'te';
-    const langLower = (language || '').toLowerCase();
-    if (langLower.includes('tamil') || langLower.includes('ta') || /[\u0B80-\u0BFF]/.test(cleanInput)) {
-      langCode = 'ta';
-    } else if (langLower.includes('hindi') || langLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) {
-      langCode = 'hi';
-    } else if (langLower.includes('english') || langLower.includes('en')) {
-      langCode = 'en';
-    } else if (langLower.includes('telugu') || langLower.includes('te') || /[\u0C00-\u0C7F]/.test(cleanInput)) {
-      langCode = 'te';
-    }
+    if (lLower.includes('telugu') || lLower.includes('te') || /[\u0C00-\u0C7F]/.test(cleanInput)) langCode = 'te';
+    else if (lLower.includes('tamil') || lLower.includes('ta') || /[\u0B80-\u0BFF]/.test(cleanInput)) langCode = 'ta';
+    else if (lLower.includes('hindi') || lLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) langCode = 'hi';
+    else langCode = 'en';
 
-    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanInput)}&tl=${langCode}&client=tw-ob`;
+    const encodedText = encodeURIComponent(cleanInput.slice(0, 200));
+    const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-    const res = await fetch(ttsUrl, {
+    const gRes = await fetch(googleTtsUrl, {
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        Referer: 'https://translate.google.com/',
       },
-      signal: controller.signal,
     });
-    clearTimeout(timeoutId);
 
-    if (res.ok) {
-      const buffer = await res.arrayBuffer();
-      return Buffer.from(buffer).toString('base64');
+    if (gRes.ok) {
+      const arrayBuffer = await gRes.arrayBuffer();
+      return Buffer.from(arrayBuffer).toString('base64');
     }
-  } catch (ttsErr) {
-    console.warn('Secondary audio synthesizer error:', ttsErr);
+  } catch (e) {
+    console.warn('Google TTS fallback warning:', e);
   }
 
   return null;
@@ -414,38 +432,34 @@ async function generateMultilingualAudioBase64(
 
 export async function POST(req: Request) {
   try {
-    let sessionId = '';
-    let userMessage = '';
-    let conversationHistory: any[] = [];
-    let reqLanguage = '';
-    let isInitial = false;
-    let audioFile: File | Blob | null = null;
-
     const contentType = req.headers.get('content-type') || '';
+    let sessionId: string | null = null;
+    let userMessage: string | null = null;
+    let conversationHistory: any[] = [];
+    let reqLanguage: string | null = null;
+    let isInitial = false;
+    let audioFile: Blob | null = null;
 
-    // Handle Multipart Form Data (Audio voice file from client mic)
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
-      sessionId = (formData.get('sessionId') as string) || '';
-      userMessage = (formData.get('userMessage') as string) || '';
-      reqLanguage = (formData.get('language') as string) || '';
+      sessionId = formData.get('sessionId') as string;
+      userMessage = formData.get('userMessage') as string;
+      reqLanguage = formData.get('language') as string;
       isInitial = formData.get('isInitial') === 'true';
-      audioFile = formData.get('audio') as File | Blob | null;
-
-      const histStr = formData.get('conversationHistory') as string;
-      if (histStr) {
+      const historyStr = formData.get('conversationHistory') as string;
+      if (historyStr) {
         try {
-          conversationHistory = JSON.parse(histStr);
+          conversationHistory = JSON.parse(historyStr);
         } catch (e) {}
       }
+      audioFile = formData.get('audio') as Blob;
     } else {
-      // Handle Standard JSON Body
       const body = await req.json();
-      sessionId = body.sessionId || '';
-      userMessage = body.userMessage || '';
+      sessionId = body.sessionId;
+      userMessage = body.userMessage;
       conversationHistory = body.conversationHistory || [];
-      reqLanguage = body.language || '';
-      isInitial = !!body.isInitial;
+      reqLanguage = body.language;
+      isInitial = body.isInitial === true;
     }
 
     if (!sessionId) {
@@ -465,12 +479,9 @@ export async function POST(req: Request) {
         console.warn('Settings key fetch error:', sErr);
       }
     }
-    if (!openaiApiKey) {
-      openaiApiKey = DEFAULT_OPENAI_KEY;
-    }
 
-    // 2. If an audio file was uploaded, Transcribe via OpenAI Whisper STT
-    if (audioFile && !userMessage) {
+    // 2. Whisper STT transcription if audio file was uploaded
+    if (audioFile && !userMessage && openaiApiKey) {
       try {
         const whisperFormData = new FormData();
         whisperFormData.append('file', audioFile, 'voice_input.webm');
@@ -480,7 +491,7 @@ export async function POST(req: Request) {
           if (lLower.includes('telugu') || lLower.includes('te')) whisperFormData.append('language', 'te');
           else if (lLower.includes('tamil') || lLower.includes('ta')) whisperFormData.append('language', 'ta');
           else if (lLower.includes('hindi') || lLower.includes('hi')) whisperFormData.append('language', 'hi');
-          else if (lLower.includes('english') || lLower.includes('en')) whisperFormData.append('language', 'en');
+          else whisperFormData.append('language', 'en');
         }
 
         const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
@@ -493,124 +504,97 @@ export async function POST(req: Request) {
 
         if (whisperRes.ok) {
           const whisperData = await whisperRes.json();
-          if (whisperData?.text?.trim()) {
-            userMessage = whisperData.text.trim();
-          }
-        } else {
-          console.warn('Whisper API non-ok response:', await whisperRes.text());
+          userMessage = whisperData.text || '';
         }
-      } catch (whisperErr) {
-        console.warn('Whisper transcription error:', whisperErr);
+      } catch (sttErr) {
+        console.warn('Whisper STT transcription warning:', sttErr);
       }
     }
 
-    // 3. Fetch Session & Astrologer Details
-    let sessionData: any = null;
-    let sessionDocRef: any = null;
+    // 3. Fetch Consultation Session Context from Firestore
+    let astrologer: AIAstrologer = DEFAULT_AI_ASTROLOGERS[0];
+    let birthDetails: any = {
+      name: 'Devotee',
+      gender: 'Male',
+      dob: '1995-05-15',
+      time: '14:30',
+      place: 'New Delhi, India',
+      primaryConcern: 'Career & Life Guidance',
+    };
+    let astroContext: any = {
+      lagna: 'Leo (Simha)',
+      moonRashi: 'Capricorn (Makara)',
+      nakshatra: 'Uttara Ashadha',
+      currentDasha: 'Jupiter Mahadasha',
+    };
+    let sessionLanguage = reqLanguage || 'Telugu';
+
     try {
       const sessionDoc = await adminDb.collection('ai_consultations').doc(sessionId).get();
       if (sessionDoc.exists) {
-        sessionData = sessionDoc.data();
-        sessionDocRef = sessionDoc.ref;
+        const sData = sessionDoc.data();
+        if (sData?.birthDetails) birthDetails = { ...birthDetails, ...sData.birthDetails };
+        if (sData?.astroContext) astroContext = { ...astroContext, ...sData.astroContext };
+        if (sData?.language) sessionLanguage = sData.language;
+
+        if (sData?.astrologerId) {
+          const found = DEFAULT_AI_ASTROLOGERS.find((a) => a.id === sData.astrologerId);
+          if (found) astrologer = found;
+        }
       }
     } catch (e) {
-      console.warn('Session fetch error:', e);
+      console.warn('Session Firestore lookup warning:', e);
     }
 
-    if (!sessionData) {
-      sessionData = {
-        astrologerId: 'ai-astrologer-1',
-        astrologerName: 'Swami Ji',
-        language: reqLanguage || 'Telugu',
-        birthDetails: {
-          name: 'Devotee',
-          gender: 'Male',
-          primaryConcern: 'General Life Guidance',
-        },
-        astroContext: {
-          lagna: 'Scorpio (Vrishchika)',
-          moonRashi: 'Aries (Mesha)',
-          nakshatra: 'Bharani',
-          currentDasha: 'Jupiter - Mars',
-        },
-      };
-    }
+    // 4. Live AI Generation via OpenAI GPT-4o-mini
+    let replyText = '';
 
-    const astrologerId = sessionData?.astrologerId;
-    const birthDetails = sessionData?.birthDetails || {};
-    const astroContext = sessionData?.astroContext || {};
-    const language = reqLanguage || sessionData?.language || 'Telugu';
-
-    let astrologer: AIAstrologer | null = null;
-    try {
-      const astDoc = await adminDb.collection('ai_astrologers').doc(astrologerId).get();
-      if (astDoc.exists) {
-        astrologer = { id: astDoc.id, ...astDoc.data() } as AIAstrologer;
-      }
-    } catch (e) {
-      console.warn('Error fetching astrologer:', e);
-    }
-    if (!astrologer) {
-      astrologer =
-        DEFAULT_AI_ASTROLOGERS.find((a) => a.id === astrologerId) || DEFAULT_AI_ASTROLOGERS[0];
-    }
-
-    const langLower = (language || '').toLowerCase();
-    const isTelugu = langLower.includes('telugu') || langLower.includes('te');
-    const isTamil = langLower.includes('tamil') || langLower.includes('ta');
-    const isHindi = langLower.includes('hindi') || langLower.includes('hi');
-    const langKey = isTelugu ? 'telugu' : isTamil ? 'tamil' : isHindi ? 'hindi' : 'english';
-
-    const nativeLagna = getNativeLagna(astroContext.lagna, langKey);
-    const nativeMoonRashi = getNativeRashi(astroContext.moonRashi, langKey);
-    const nativeDasha = getNativeDasha(astroContext.currentDasha, langKey);
-
-    const systemPersona = `${astrologer.systemPersonaPrompt || 'You are an authentic, revered Vedic Astrologer at AstroParihar.'}
-
-CUSTOMER BIRTH CHART CONTEXT:
-- Devotee Name: ${birthDetails.name || 'Devotee'}
-- Gender: ${birthDetails.gender || 'N/A'}
-- Date of Birth: ${birthDetails.dob || 'N/A'}, Time: ${birthDetails.time || 'N/A'}, Place: ${birthDetails.place || 'N/A'}
-- Primary Category of Consultation: ${birthDetails.primaryConcern || 'General Life Guidance'}
-- Lagna: ${nativeLagna} (${astroContext.lagna || 'Scorpio'})
-- Moon Sign (Rashi): ${nativeMoonRashi} (${astroContext.moonRashi || 'Aries'})
-- Nakshatra: ${astroContext.nakshatra || 'Bharani'}
-- Active Mahadasha: ${nativeDasha}
-- Preferred Consultation Language: ${language}
-
-CRITICAL CONVERSATIONAL VOICE INSTRUCTIONS:
-1. STRICT LANGUAGE SCRIPT:
-   - If language is "Telugu" (or user speaks in Telugu), reply 100% in pure Telugu script (తెలుగు లిపి). NEVER include English words in brackets (e.g. write "సింహ లగ్నం" or "మకర రాశి").
-   - If language is "Tamil", reply 100% in pure Tamil script (தமிழ்).
-   - If language is "Hindi", reply 100% in pure Hindi script (हिन्दी).
-   - If language is "English", reply in fluent, respectful English.
-2. DYNAMIC REAL-TIME CONVERSATION:
-   - You are in an active LIVE 2-way phone call as ${astrologer.name}.
-   - Understand whatever the customer asks (marriage timing, job promotion, money, love, remedies) and answer DIRECTLY with clear astrological insight.
-   - Keep each answer to 2 to 4 spoken sentences (concise and natural for listening).
-   - DO NOT repeat initial greetings once the conversation has started.
-   - Conclude each response with a warm, gentle follow-up question to keep the conversation flowing.`;
-
-    // 4. Live AI Chat Execution via OpenAI GPT-4o-mini
     if (openaiApiKey) {
       try {
-        const messages: any[] = [{ role: 'system', content: systemPersona }];
+        const systemPrompt = `You are ${astrologer.name}, a revered, authentic Vedic Astrologer (${astrologer.primaryDiscipline}) with 25+ years of Vedic wisdom on AstroParihar.
+Devotee Profile:
+- Name: ${birthDetails.name || 'Devotee'}
+- Lagna: ${astroContext.lagna}
+- Moon Rashi: ${astroContext.moonRashi}
+- Nakshatra: ${astroContext.nakshatra}
+- Current Dasha: ${astroContext.currentDasha}
+- Primary Concern: ${birthDetails.primaryConcern}
 
-        if (Array.isArray(conversationHistory) && conversationHistory.length > 0) {
-          for (const msg of conversationHistory) {
-            messages.push({
-              role: msg.role === 'user' ? 'user' : 'assistant',
-              content: msg.content || msg.text || '',
-            });
-          }
+Language Instruction:
+You MUST speak ONLY in ${sessionLanguage}.
+- If Telugu: Speak in pure, warm, respectful spoken Telugu script (తెలుగు లిపి). Use respectful words like 'నమస్కారం', 'గారూ', 'మీ జాతకం ప్రకారం'.
+- If Tamil: Speak in pure Tamil script (தமிழ்). Use 'வணக்கம்', 'உங்கள் ஜாதகப்படி'.
+- If Hindi: Speak in pure Hindi script (हिन्दी). Use 'नमस्ते', 'जी', 'आपकी जन्म कुंडली के अनुसार'.
+- If English: Warm, serene, traditional Indian Vedic astrology tone.
+
+Spoken Call Style:
+- Keep your answers concise, direct, and conversational (2 to 4 spoken sentences).
+- Give immediate Vedic astrological insights, auspicious time windows (e.g. 2024–2026), and 1 actionable remedy (mantra, donation, or pooja).
+- Do not use markdown bullet points, stars (*), or hashes (#). Keep it pure natural speech suitable for voice conversation.`;
+
+        const messagesPayload: any[] = [{ role: 'system', content: systemPrompt }];
+
+        if (conversationHistory && conversationHistory.length > 0) {
+          const recentHistory = conversationHistory.slice(-6);
+          recentHistory.forEach((msg: any) => {
+            if (msg.content && (msg.role === 'user' || msg.role === 'assistant')) {
+              messagesPayload.push({
+                role: msg.role,
+                content: msg.content,
+              });
+            }
+          });
         }
 
-        if (userMessage && userMessage.trim()) {
-          messages.push({ role: 'user', content: userMessage.trim() });
-        } else if (messages.length === 1) {
-          messages.push({
+        if (isInitial && (!userMessage || userMessage.trim() === '')) {
+          messagesPayload.push({
             role: 'user',
-            content: `I have joined the live voice call. Please greet me in ${language} and review my birth chart regarding my concern: ${birthDetails.primaryConcern || 'General Life Guidance'}.`,
+            content: `Initiate the call with a warm welcome greeting to ${birthDetails.name || 'Devotee'} in ${sessionLanguage}, stating your readiness to guide their ${birthDetails.primaryConcern || 'life guidance'}.`,
+          });
+        } else if (userMessage) {
+          messagesPayload.push({
+            role: 'user',
+            content: userMessage,
           });
         }
 
@@ -622,84 +606,54 @@ CRITICAL CONVERSATIONAL VOICE INSTRUCTIONS:
           },
           body: JSON.stringify({
             model: 'gpt-4o-mini',
-            messages,
+            messages: messagesPayload,
             temperature: 0.7,
             max_tokens: 300,
           }),
         });
 
         if (chatRes.ok) {
-          const chatJson = await chatRes.json();
-          let replyText = chatJson.choices[0]?.message?.content?.trim();
-          if (replyText) {
-            // Generate full speech audio in the selected language
-            const audioBase64 = await generateMultilingualAudioBase64(
-              replyText,
-              language,
-              astrologer,
-              openaiApiKey
-            );
-
-            // Persist message to session transcript in Firestore
-            try {
-              if (sessionDocRef) {
-                const updatedHistory = [
-                  ...conversationHistory,
-                  ...(userMessage ? [{ role: 'user', content: userMessage, time: new Date().toISOString() }] : []),
-                  { role: 'assistant', content: replyText, time: new Date().toISOString() },
-                ];
-                await sessionDocRef.set(
-                  { conversationTranscript: updatedHistory, updatedAt: new Date().toISOString() },
-                  { merge: true }
-                );
-              }
-            } catch (pErr) {
-              console.warn('Transcript save warning:', pErr);
-            }
-
-            return NextResponse.json({
-              success: true,
-              transcribedText: userMessage || '',
-              replyText,
-              audioBase64,
-              astrologer,
-              language,
-            });
-          }
+          const chatData = await chatRes.json();
+          replyText = chatData.choices?.[0]?.message?.content?.trim() || '';
         }
       } catch (aiErr) {
-        console.warn('OpenAI chat error, activating dynamic native Vedic engine:', aiErr);
+        console.warn('OpenAI GPT-4o-mini generation warning:', aiErr);
       }
     }
 
-    // 5. Dynamic Native Vedic Engine (Pure Script Fallback)
-    const isExplicitGreeting = isInitial || !userMessage || userMessage.trim() === '';
-    const dynamicReply = generateDynamicVedicReply(
-      userMessage,
-      isExplicitGreeting,
-      birthDetails,
-      astroContext,
-      astrologer,
-      language
-    );
+    // 5. Dynamic Native Vedic Engine (Static Fallback)
+    if (!replyText) {
+      replyText = generateDynamicVedicReply(
+        userMessage,
+        isInitial,
+        birthDetails,
+        astroContext,
+        astrologer,
+        sessionLanguage
+      );
+    }
 
+    // 6. Generate Voice Speech Audio
     const audioBase64 = await generateMultilingualAudioBase64(
-      dynamicReply,
-      language,
+      replyText,
+      sessionLanguage,
       astrologer,
       openaiApiKey
     );
 
     return NextResponse.json({
       success: true,
-      transcribedText: userMessage || '',
-      replyText: dynamicReply,
+      userMessage,
+      replyText,
       audioBase64,
-      astrologer,
-      language,
+      astrologerName: astrologer.name,
+      language: sessionLanguage,
     });
   } catch (error: any) {
-    console.error('Error in voice session:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    console.error('AI voice-session error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal voice exchange error' },
+      { status: 500 }
+    );
   }
 }

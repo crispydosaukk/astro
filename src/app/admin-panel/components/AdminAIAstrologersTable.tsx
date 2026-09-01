@@ -116,6 +116,16 @@ export default function AdminAIAstrologersTable() {
   const handleSaveAstrologer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingAstro) return;
+
+    // Verify Name Uniqueness
+    const duplicate = astrologers.find(
+      (a) => a.name.trim().toLowerCase() === editingAstro.name.trim().toLowerCase() && a.id !== editingAstro.id
+    );
+    if (duplicate) {
+      toast.error(`Astrologer name "${editingAstro.name}" is already used by another astrologer! Please use a unique name.`);
+      return;
+    }
+
     setIsSaving(true);
     try {
       const res = await fetch('/api/admin/ai-astrologers', {

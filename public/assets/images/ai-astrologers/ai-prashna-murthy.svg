@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3730A3" />
+      <stop offset="70%" stop-color="#1E1B4B" />
+      <stop offset="100%" stop-color="#0A0512" />
+    </radialGradient>
+    <radialGradient id="aura-grad" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#C084FC" stop-opacity="0.6" />
+      <stop offset="70%" stop-color="#C084FC" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#C084FC" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#bg-grad)" rx="30"/>
+  <circle cx="200" cy="180" r="140" fill="url(#aura-grad)" />
+  <circle cx="200" cy="180" r="110" fill="none" stroke="#C084FC" stroke-width="1.5" stroke-dasharray="4,6" opacity="0.6"/>
+  
+  <g transform="translate(100, 70)">
+    <path d="M 100 20 L 100 0 M 100 260 L 100 280 M 20 140 L 0 140 M 180 140 L 200 140 M 43 43 L 29 29 M 157 157 L 171 171" stroke="#C084FC" stroke-width="2" opacity="0.4" />
+    <path d="M 30 250 Q 100 190 170 250 Z" fill="#1E1B4B" opacity="0.9"/>
+    <circle cx="100" cy="110" r="52" fill="#E5C39E"/>
+    <circle cx="100" cy="62" r="28" fill="#3730A3"/>
+    <path d="M 96 90 L 104 90 L 100 120 Z" fill="#C084FC"/>
+    <circle cx="100" cy="100" r="3" fill="#D62828"/>
+    <path d="M 45 220 C 70 160 130 160 155 220 L 175 260 L 25 260 Z" fill="#C084FC" opacity="0.85"/>
+    <path d="M 60 170 Q 100 230 140 170" fill="none" stroke="#5C2B11" stroke-width="6" stroke-dasharray="8,4"/>
+  </g>
+  
+  <rect x="12" y="12" width="376" height="376" rx="22" fill="none" stroke="#C084FC" stroke-width="2" opacity="0.4"/>
+  <text x="200" y="360" font-family="'Cinzel', 'Georgia', serif" font-size="14" font-weight="bold" fill="#C084FC" text-anchor="middle" letter-spacing="1">ACHARYA PRASHNA MURTHY</text>
+</svg>

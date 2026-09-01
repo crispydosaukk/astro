@@ -201,11 +201,19 @@ export default function TalkToAIAstrologerPage() {
           a.specialities?.some((s) => s.toLowerCase().includes(term)) ||
           a.languages?.some((l) => l.toLowerCase().includes(term));
 
+        // Helper for flexible discipline matching
+        const isDisciplineMatch = (astroDisc: string, target: string) => {
+          if (!astroDisc || !target) return false;
+          const a = astroDisc.toLowerCase().trim();
+          const t = target.toLowerCase().trim();
+          return a === t || a.includes(t) || t.includes(a);
+        };
+
         // Discipline Filter
         const matchDisc =
           selectedDiscipline === 'all' ||
-          a.primaryDiscipline.toLowerCase() === selectedDiscipline.toLowerCase() ||
-          a.secondaryDisciplines?.some((d) => d.toLowerCase() === selectedDiscipline.toLowerCase());
+          isDisciplineMatch(a.primaryDiscipline, selectedDiscipline) ||
+          a.secondaryDisciplines?.some((d) => isDisciplineMatch(d, selectedDiscipline));
 
         // Language Filter
         const matchLang =
@@ -375,9 +383,12 @@ export default function TalkToAIAstrologerPage() {
             {disciplines.map((d) => {
               const IconComponent = disciplineIconMap[d.iconName] || Sparkles;
               const isSelected = selectedDiscipline.toLowerCase() === d.name.toLowerCase();
-              const discCount = astrologers.filter(
-                (a) => a.isActive !== false && a.primaryDiscipline.toLowerCase() === d.name.toLowerCase()
-              ).length;
+              const discCount = astrologers.filter((a) => {
+                if (a.isActive === false) return false;
+                const p = a.primaryDiscipline.toLowerCase().trim();
+                const target = d.name.toLowerCase().trim();
+                return p === target || p.includes(target) || target.includes(p);
+              }).length;
               return (
                 <button
                   key={d.id}

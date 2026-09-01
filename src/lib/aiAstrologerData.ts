@@ -185,7 +185,7 @@ export const DEFAULT_AI_DISCIPLINES: AIDiscipline[] = [
   },
   {
     id: 'numerology',
-    name: 'Numerology (Anka Vidya)',
+    name: 'Numerology',
     slug: 'numerology',
     description: 'Name number analysis, life path vibration, lucky numbers, and annual forecast.',
     iconName: 'Hash',
@@ -213,22 +213,26 @@ export const DEFAULT_AI_DISCIPLINES: AIDiscipline[] = [
 ];
 
 export const SADHU_AVATAR_PRESETS = [
-  { name: 'Swami Ji', title: 'Himalayan Sage', url: '/assets/images/ai-astrologers/swami-ji.png' },
+  { name: 'Swami Shankarananda', title: 'Himalayan Sage', url: '/assets/images/ai-astrologers/swami-ji.png' },
+  { name: 'Acharya Devavrat', title: 'Vedic Grandmaster', url: '/assets/images/ai-astrologers/acharya-devavrat.png' },
+  { name: 'Astro Ananya', title: 'Nadi Seer', url: '/assets/images/ai-astrologers/astro-ananya.png' },
   { name: 'Arjun Pandit', title: 'Young Prodigy', url: '/assets/images/ai-astrologers/arjun-pandit.png' },
-  { name: 'Acharya Devavrat', title: 'Parashara Guru', url: '/assets/images/ai-astrologers/acharya-devavrat.png' },
-  { name: 'Acharya Krishnam', title: 'KP Stellar Master', url: '/assets/images/ai-astrologers/mr-krishnam.png' },
-  { name: 'Love Guru', title: 'Relationship Guru', url: '/assets/images/ai-astrologers/love-guru.png' },
-  { name: 'Astro Ananya', title: 'Divine Nadi Seer', url: '/assets/images/ai-astrologers/astro-ananya.png' },
-  { name: 'Dr. Raman', title: 'Event Timing', url: '/assets/images/ai-astrologers/dr-raman.png' },
+  { name: 'Acharya Krishnamurti', title: 'KP Master', url: '/assets/images/ai-astrologers/mr-krishnam.png' },
+  { name: 'Dr. K. N. Raman', title: 'Corporate Timing', url: '/assets/images/ai-astrologers/dr-raman.png' },
+  { name: 'Acharya Raghvendra', title: 'Love & Vivaha', url: '/assets/images/ai-astrologers/love-guru.png' },
   { name: 'Acharya Joshi', title: 'Dosh Nivaran', url: '/assets/images/ai-astrologers/acharya-joshi.png' },
-  { name: 'Love Oracle', title: 'Mystic Tarot', url: '/assets/images/ai-astrologers/love-oracle.png' },
-  { name: 'Guru Anil', title: 'Rudraksha & Gems', url: '/assets/images/ai-astrologers/guru-anil.png' },
-  { name: 'Pandit Raghav', title: 'Lal Kitab', url: '/assets/images/ai-astrologers/pandit-raghav.png' },
-  { name: 'Acharya Vikram', title: 'Vastu Master', url: '/assets/images/ai-astrologers/acharya-vikram.png' },
+  { name: 'Guru Anil Shastri', title: 'Wealth & Gems', url: '/assets/images/ai-astrologers/guru-anil.png' },
+  { name: 'Pandit Raghavendra', title: 'Lal Kitab Master', url: '/assets/images/ai-astrologers/pandit-raghav.png' },
+  { name: 'Acharya Vikramaditya', title: 'Vastu Master', url: '/assets/images/ai-astrologers/acharya-vikram.png' },
   { name: 'Priya Sharma', title: 'Numerologist', url: '/assets/images/ai-astrologers/priya-sharma.png' },
-  { name: 'Swami Rao', title: 'Elder Rishi', url: '/assets/images/ai-astrologers/mr-rao.png' },
-  { name: 'Meera Devi', title: 'Devi Shodashi', url: '/assets/images/ai-astrologers/meera-devi.png' },
-  { name: 'Mystic Sophia', title: 'Tarot Oracle', url: '/assets/images/ai-astrologers/mystic-sophia.png' },
+  { name: 'Swami Sadasiva Rao', title: 'Elder Rishi', url: '/assets/images/ai-astrologers/mr-rao.png' },
+  { name: 'Yogini Meera Devi', title: 'Divine Shakti', url: '/assets/images/ai-astrologers/meera-devi.png' },
+  { name: 'Mystic Sophia', title: 'Tarot Oracle', url: '/assets/images/ai-astrologers/love-oracle.png' },
+  { name: 'Pt. Radhey Shyam', title: 'Mathura Kundli', url: '/assets/images/ai-astrologers/ai-pt-radhey-shastri.svg' },
+  { name: 'Shastri Vidyadhar', title: 'Kashi Scholar', url: '/assets/images/ai-astrologers/ai-shastri-vidyadhar.svg' },
+  { name: 'Guru Smita Patel', title: 'Marriage Counselor', url: '/assets/images/ai-astrologers/ai-guru-smita-patel.svg' },
+  { name: 'Gurukkal Senthil', title: 'Agastya Nadi', url: '/assets/images/ai-astrologers/ai-agastya-seer-senthil.svg' },
+  { name: 'Rishi Anka Shastri', title: 'Chaldean Anka Vidya', url: '/assets/images/ai-astrologers/ai-anka-vidya-rishi.svg' },
 ];
 
 export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
@@ -237,7 +241,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   // ==========================================
   {
     id: 'ai-swami-ji',
-    name: 'Swami Ji',
+    name: 'Swami Shankarananda Giri',
     avatar: '/assets/images/ai-astrologers/swami-ji.png',
     tagline: 'Venerable Himalayan Sage & Parashara Dasha Guru',
     bio: 'Rooted in authentic Varanasi and Rishikesh Gurukul traditions. 35+ years decoding Mahadasha transitions, Raja Yoga analysis, and divine planetary remedies.',
@@ -295,8 +299,8 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-pt-radhey-shastri',
-    name: 'Pandit Radhey Shyam',
-    avatar: '/assets/images/ai-astrologers/acharya-joshi.png',
+    name: 'Pandit Radhey Shyam Chaturvedi',
+    avatar: '/assets/images/ai-astrologers/ai-pt-radhey-shastri.svg',
     tagline: 'Traditional Mathura Jyotishi & Kundli Dosha Expert',
     bio: 'Over 28 years of practice in Mathura and Vrindavan. Specializes in Manglik Dosha, Kaal Sarp Yog, Sade Sati mitigation, and Navagraha Shanti.',
     primaryDiscipline: 'Vedic Jyotish',
@@ -325,7 +329,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-shastri-vidyadhar',
     name: 'Shastri Vidyadhar Bhatt',
-    avatar: '/assets/images/ai-astrologers/mr-krishnam.png',
+    avatar: '/assets/images/ai-astrologers/ai-shastri-vidyadhar.svg',
     tagline: 'Kashi Sanskrit University Scholar & Panchang Master',
     bio: 'Gold medalist from Sampurnanand Sanskrit Vishwavidyalaya. Master in astrological mathematical astronomy (Siddhanta) and Parashara predictive principles.',
     primaryDiscipline: 'Vedic Jyotish',
@@ -353,8 +357,8 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-swami-anand',
-    name: 'Swami Anandamurti',
-    avatar: '/assets/images/ai-astrologers/swami-ji.png',
+    name: 'Swami Anandamurti Saraswati',
+    avatar: '/assets/images/ai-astrologers/ai-swami-anand.svg',
     tagline: 'Spiritual Vedic Sage & Karmic Chart Analyzer',
     bio: 'Guided over 20,000 seekers in understanding past life karma (Prarabdha), spiritual awakenings, and finding peace amidst planetary turbulence.',
     primaryDiscipline: 'Vedic Jyotish',
@@ -382,7 +386,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-swami-rao',
-    name: 'Swami Rao (Elder Rishi)',
+    name: 'Swami Sadasiva Rao',
     avatar: '/assets/images/ai-astrologers/mr-rao.png',
     tagline: 'Venerable South Indian Vedic Astrologer & Dasha Authority',
     bio: 'Over 42 years of astrological practice. Authority in Andhra and Karnataka Jyotish traditions, Vimshottari Dasha, and Navagraha Stotram remedies.',
@@ -415,7 +419,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   // ==========================================
   {
     id: 'ai-love-guru',
-    name: 'Love Guru (Pt. Raghav)',
+    name: 'Acharya Raghvendra Shastri',
     avatar: '/assets/images/ai-astrologers/love-guru.png',
     tagline: 'Relationship Astrology & Soul Harmony Expert',
     bio: 'Specialist in planetary relationship compatibility, Venus-Mars alignments, breakup healing, and sacred Vedic bonding remedies.',
@@ -445,7 +449,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-acharya-shreya',
     name: 'Acharya Shreya Devi',
-    avatar: '/assets/images/ai-astrologers/astro-ananya.png',
+    avatar: '/assets/images/ai-astrologers/ai-acharya-shreya.svg',
     tagline: 'Kundli Milan Specialist & Marital Bliss Counselor',
     bio: 'Trained in classical Ashtakoot Milan and Navamsha (D9) chart decoding. Helped over 12,000 couples achieve lasting relationship harmony.',
     primaryDiscipline: 'Love & Marriage',
@@ -474,7 +478,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-pt-madhav-sharma',
     name: 'Pandit Madhav Sharma',
-    avatar: '/assets/images/ai-astrologers/acharya-vikram.png',
+    avatar: '/assets/images/ai-astrologers/ai-pt-madhav-sharma.svg',
     tagline: 'Ashtakoot Milan & Inter-Caste Love Marriage Astrologer',
     bio: '22 years of resolving complex family opposition, Nadi Dosha, Bhakoot Dosha, and timing love-to-marriage conversions with Vedic remedies.',
     primaryDiscipline: 'Love & Marriage',
@@ -503,7 +507,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-guru-smita-patel',
     name: 'Guru Smita Patel',
-    avatar: '/assets/images/ai-astrologers/priya-sharma.png',
+    avatar: '/assets/images/ai-astrologers/ai-guru-smita-patel.svg',
     tagline: 'Relationship Healing & Venusian Energy Harmonizer',
     bio: 'Combines Vedic 7th/8th house astrology with emotional wellness counselling. Renowned for turning turbulent relationships into peaceful partnerships.',
     primaryDiscipline: 'Love & Marriage',
@@ -532,7 +536,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-pt-anurag-mishra',
     name: 'Pt. Anurag Mishra',
-    avatar: '/assets/images/ai-astrologers/acharya-devavrat.png',
+    avatar: '/assets/images/ai-astrologers/ai-pt-anurag-mishra.svg',
     tagline: 'Vedic Vivah Muhurtha & Kundli Dasha Specialist',
     bio: 'Dedicated to calculating auspicious Vivah Lagna and rectifying early marital friction through personalized Gauri-Shankar worship rituals.',
     primaryDiscipline: 'Love & Marriage',
@@ -560,7 +564,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-meera-devi-love',
-    name: 'Meera Devi (Divine Shakti)',
+    name: 'Yogini Meera Devi',
     avatar: '/assets/images/ai-astrologers/meera-devi.png',
     tagline: 'Spiritual Relationship Seer & Soul Connection Mentor',
     bio: 'Blends ancient Kamakhya and Radharani devotional traditions to heal heartbreak, attract pure love, and build unbreakable marital trusts.',
@@ -622,7 +626,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-dr-raman',
-    name: 'Dr. Raman (Career & Corporate)',
+    name: 'Dr. K. N. Raman',
     avatar: '/assets/images/ai-astrologers/dr-raman.png',
     tagline: 'Corporate Astrologer & Executive Decision Advisor',
     bio: 'Advises CXOs, entrepreneurs, and corporate professionals on career pivots, leadership yogas, board appointments, and lucrative business partnerships.',
@@ -652,7 +656,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-acharya-somesh-career',
     name: 'Acharya Someshwar Nath',
-    avatar: '/assets/images/ai-astrologers/acharya-devavrat.png',
+    avatar: '/assets/images/ai-astrologers/ai-acharya-somesh-career.svg',
     tagline: 'Sarkari Naukri (Govt Job) & UPSC Yogas Specialist',
     bio: 'Analyzes Sun, Mars, Jupiter, and 10th house strength to guide aspirants on cracking IAS, IPS, Banking, Judiciary, and Defense examinations.',
     primaryDiscipline: 'Career & Business',
@@ -681,7 +685,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-pt-vijay-choudhury',
     name: 'Pt. Vijay Choudhury',
-    avatar: '/assets/images/ai-astrologers/guru-anil.png',
+    avatar: '/assets/images/ai-astrologers/ai-pt-vijay-choudhury.svg',
     tagline: 'Business Expansion, Trade & Retail Growth Astrologer',
     bio: '30+ years advising traders, factory owners, and retailers on seasonal cashflow, inventory decisions, and Mercury-Jupiter trade alignment.',
     primaryDiscipline: 'Career & Business',
@@ -710,7 +714,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-guru-deepak-tech',
     name: 'Guru Deepak Verma',
-    avatar: '/assets/images/ai-astrologers/arjun-pandit.png',
+    avatar: '/assets/images/ai-astrologers/ai-guru-deepak-tech.svg',
     tagline: 'IT Career, Tech Switch & Foreign Onsite Mentor',
     bio: 'Specialist in Rahu-Mercury combinations governing software, AI careers, data science, onsite visa opportunities, and remote US/EU contracts.',
     primaryDiscipline: 'Career & Business',
@@ -739,7 +743,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-acharya-manish-legal',
     name: 'Acharya Manish Trivedi',
-    avatar: '/assets/images/ai-astrologers/acharya-vikram.png',
+    avatar: '/assets/images/ai-astrologers/ai-acharya-manish-legal.svg',
     tagline: 'Legal Disputes, Court Cases & Career Rehabilitation',
     bio: 'Expert in 6th house (Shatru Sthana) and Saturn-Mars conflicts. Helps clients clear office politics, court disputes, and career blockages.',
     primaryDiscipline: 'Career & Business',
@@ -772,7 +776,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-acharya-dhananjay',
     name: 'Acharya Dhananjay Shastri',
-    avatar: '/assets/images/ai-astrologers/swami-ji.png',
+    avatar: '/assets/images/ai-astrologers/ai-acharya-dhananjay.svg',
     tagline: 'Lakshmi Yoga, Wealth Multiplier & Debt Relief Authority',
     bio: 'Renowned for analyzing 2nd, 11th, and 9th wealth triangles (Dhana Yogas). Helps families build multi-generational prosperity and clear long-standing debts.',
     primaryDiscipline: 'Wealth & Finance',
@@ -830,7 +834,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-pt-kuberan-iyer',
     name: 'Pandit Kuberan Iyer',
-    avatar: '/assets/images/ai-astrologers/mr-krishnam.png',
+    avatar: '/assets/images/ai-astrologers/ai-pt-kuberan-iyer.svg',
     tagline: 'South Indian Dhana Karaka & Gold Prosperity Master',
     bio: 'Rooted in Thanjavur temple traditions. Master in invoking Lord Kubera and Kanakadhara Stotram to open locked cash flow and business liquidity.',
     primaryDiscipline: 'Wealth & Finance',
@@ -858,8 +862,8 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-acharya-lakshmi-kant',
-    name: 'Acharya Lakshmi Kant',
-    avatar: '/assets/images/ai-astrologers/acharya-joshi.png',
+    name: 'Acharya Lakshmi Kant Agnihotri',
+    avatar: '/assets/images/ai-astrologers/ai-acharya-lakshmi-kant.svg',
     tagline: 'Generational Wealth & Real Estate Investment Astrologer',
     bio: 'Specialist in 4th house (Property & Land) and Mars-Venus planetary combinations for ancestral land, new home purchase, and farm investments.',
     primaryDiscipline: 'Wealth & Finance',
@@ -888,7 +892,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-pt-dinanath-shukla',
     name: 'Pt. Dinanath Shukla',
-    avatar: '/assets/images/ai-astrologers/pandit-raghav.png',
+    avatar: '/assets/images/ai-astrologers/ai-pt-dinanath-shukla.svg',
     tagline: 'Debt Free Life (Karza Mukti) & Loan Settlement Specialist',
     bio: 'Specialist in Lal Kitab and Parashara debt relief remedies. Has helped thousands escape high-interest loans and financial stress.',
     primaryDiscipline: 'Wealth & Finance',
@@ -917,7 +921,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-guru-kamala-devi',
     name: 'Guru Kamala Devi',
-    avatar: '/assets/images/ai-astrologers/meera-devi.png',
+    avatar: '/assets/images/ai-astrologers/ai-guru-kamala-devi.svg',
     tagline: 'Mahalakshmi Blessings & Sacred Abundance Channel',
     bio: 'Guides women entrepreneurs, homemakers, and families on spiritual prosperity, jewelry wealth, and harmonious home economies.',
     primaryDiscipline: 'Wealth & Finance',
@@ -978,8 +982,8 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-vastu-meenakshi',
-    name: 'Vastu Acharya Meenakshi',
-    avatar: '/assets/images/ai-astrologers/astro-ananya.png',
+    name: 'Vastu Acharya Meenakshi Sundaram',
+    avatar: '/assets/images/ai-astrologers/ai-vastu-meenakshi.svg',
     tagline: 'Home Health, Sleep & Kitchen Vastu Specialist',
     bio: 'Specializes in aligning home zones (Fire/Agni, Water/Jal, Earth/Prithvi) to eliminate chronic illnesses, insomnia, and domestic friction.',
     primaryDiscipline: 'Vastu Shastra',
@@ -1008,7 +1012,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-pt-somnath-vastu',
     name: 'Pt. Somnath Dave',
-    avatar: '/assets/images/ai-astrologers/swami-ji.png',
+    avatar: '/assets/images/ai-astrologers/ai-pt-somnath-vastu.svg',
     tagline: 'Industrial, Warehouse & Commercial Vastu Specialist',
     bio: 'Consulted on over 500 manufacturing units, shopping complexes, and IT parks to optimize machine layout, cash counters, and labor harmony.',
     primaryDiscipline: 'Vastu Shastra',
@@ -1037,7 +1041,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-acharya-bhuvanesh',
     name: 'Acharya Bhuvanesh Joshi',
-    avatar: '/assets/images/ai-astrologers/acharya-joshi.png',
+    avatar: '/assets/images/ai-astrologers/ai-acharya-bhuvanesh.svg',
     tagline: 'Plot Selection, Soil Testing & Bhoomi Vastu Master',
     bio: 'Expert in selecting auspicious plots (Sher-Mukhi, Gau-Mukhi), slope analysis, and rectifying land with negative geopathic stress.',
     primaryDiscipline: 'Vastu Shastra',
@@ -1069,11 +1073,11 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   // ==========================================
   {
     id: 'ai-mr-krishnam',
-    name: 'Acharya Krishnam (Mr. Krishnam)',
+    name: 'Acharya Krishnamurti Das',
     avatar: '/assets/images/ai-astrologers/mr-krishnam.png',
     tagline: 'KP Stellar System & Jaimini Sutra Authority',
     bio: 'Expert in high-precision KP cuspal sub-lords and Jaimini Chara Karakas. Specializes in pinpointing exact months for promotions, business launches, and wealth yogas.',
-    primaryDiscipline: 'KP',
+    primaryDiscipline: 'KP Astrology',
     secondaryDisciplines: ['Jaimini', 'Vedic Jyotish'],
     specialities: ['Promotions & New Business', 'Financial Raj Yogas', 'Stock Market Timing', 'Property & Vehicles'],
     languages: ['English', 'Hindi', 'Tamil', 'Kannada', 'Telugu'],
@@ -1098,11 +1102,11 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-dr-anand-kp',
-    name: 'Dr. Anand Raman (KP Master)',
+    name: 'Dr. Anand Ramanathan',
     avatar: '/assets/images/ai-astrologers/dr-anand-raman.png',
     tagline: 'KP Stellar System & Precision Event Timing',
     bio: 'Former data scientist turned KP Stellar astrologer. Uses sub-lord cuspal theory and ruling planets to pinpoint exact event dates for jobs, visas, property, and court cases.',
-    primaryDiscipline: 'KP',
+    primaryDiscipline: 'KP Astrology',
     secondaryDisciplines: ['Prashna', 'Vedic Jyotish', 'Nadi'],
     specialities: ['Job Change Date', 'Foreign Visa / PR', 'Property Purchase', 'Court & Legal Outcomes'],
     languages: ['English', 'Telugu', 'Tamil', 'Hindi'],
@@ -1128,10 +1132,10 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-kp-acharya-murugan',
     name: 'KP Acharya Murugan',
-    avatar: '/assets/images/ai-astrologers/mr-rao.png',
+    avatar: '/assets/images/ai-astrologers/ai-kp-acharya-murugan.svg',
     tagline: 'KP 1-249 Horary Number & Instant Answers',
     bio: 'Master of Krishnamurti Padhdhati horary numbers (1 to 249). Answers single pressing queries within minutes with uncanny accuracy.',
-    primaryDiscipline: 'KP',
+    primaryDiscipline: 'KP Astrology',
     secondaryDisciplines: ['Prashna', 'Vedic Jyotish'],
     specialities: ['KP 1-249 Numbers', 'Will I Get The Job?', 'Lost Property Location', 'Immediate Yes/No'],
     languages: ['Tamil', 'English', 'Telugu', 'Hindi'],
@@ -1157,10 +1161,10 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-kp-shastri-venkatesh',
     name: 'KP Shastri Venkatesh',
-    avatar: '/assets/images/ai-astrologers/acharya-devavrat.png',
+    avatar: '/assets/images/ai-astrologers/ai-kp-shastri-venkatesh.svg',
     tagline: 'KP Marriage & Childbirth Sub-Lord Specialist',
     bio: 'Dedicated to analyzing 2nd, 7th, and 11th cuspal sub-lords for marriage, and 2nd, 5th, 11th for childbirth promises.',
-    primaryDiscipline: 'KP',
+    primaryDiscipline: 'KP Astrology',
     secondaryDisciplines: ['Love & Marriage', 'Vedic Jyotish'],
     specialities: ['Marriage Sub-Lord', 'Childbirth Confirmation', 'Health Timing', 'Spouse Career'],
     languages: ['Telugu', 'Kannada', 'English', 'Hindi'],
@@ -1189,11 +1193,11 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   // ==========================================
   {
     id: 'ai-meera-devi-nadi',
-    name: 'Astro Ananya (Nadi Seer)',
+    name: 'Astro Ananya Devi',
     avatar: '/assets/images/ai-astrologers/astro-ananya.png',
     tagline: 'Divine Nadi Seer & Karmic Past-Life Healer',
     bio: 'Descendant of Tamil Agastya Nadi readers. Decodes thumb impressions and planetary palm-leaf verses to reveal soul purpose and karmic lessons.',
-    primaryDiscipline: 'Nadi',
+    primaryDiscipline: 'Nadi Astrology',
     secondaryDisciplines: ['Vedic Jyotish', 'Remedial Astrology'],
     specialities: ['Past Life Karma (Prarabdha)', 'Soulmate Recognition', 'Ancestral Curses (Pitra Dosha)', 'Karmic Debt Relief'],
     languages: ['Tamil', 'Telugu', 'English', 'Hindi'],
@@ -1219,10 +1223,10 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-agastya-seer-senthil',
     name: 'Gurukkal Senthil Nathan',
-    avatar: '/assets/images/ai-astrologers/mr-rao.png',
+    avatar: '/assets/images/ai-astrologers/ai-agastya-seer-senthil.svg',
     tagline: 'Vaitheeswaran Koil Nadi Shastra Guru',
     bio: 'Trained at Vaitheeswaran Koil. Specializes in Siva Nadi and Koushika Nadi chapters to uncover hidden family doshas and specific temple remedies.',
-    primaryDiscipline: 'Nadi',
+    primaryDiscipline: 'Nadi Astrology',
     secondaryDisciplines: ['Remedial Astrology', 'Vedic Jyotish'],
     specialities: ['Kanda Chapters Decoding', 'Temple Pariharams', 'Navagraha Pilgrimages', 'Lineage Blessings'],
     languages: ['Tamil', 'English', 'Hindi', 'Malayalam'],
@@ -1247,11 +1251,11 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-nadi-master-thangavel',
-    name: 'Nadi Master Thangavel',
-    avatar: '/assets/images/ai-astrologers/mr-krishnam.png',
+    name: 'Nadi Master Thangavelu',
+    avatar: '/assets/images/ai-astrologers/ai-nadi-master-thangavel.svg',
     tagline: 'Bhrigu & Nandi Nadi Lineage Astrologer',
     bio: 'Master in combining Bhrigu Nadi principles with transit planetary conjunctions for instant predictions without requiring exact birth time.',
-    primaryDiscipline: 'Nadi',
+    primaryDiscipline: 'Nadi Astrology',
     secondaryDisciplines: ['Vedic Jyotish', 'Prashna'],
     specialities: ['Bhrigu Nandi Nadi', 'Planetary Conjunctions', 'No-Birth-Time Reading', 'Destiny Years'],
     languages: ['Tamil', 'Telugu', 'Kannada', 'English'],
@@ -1276,11 +1280,11 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-meera-devi-nadi-2',
-    name: 'Meera Devi (Nadi Seer)',
-    avatar: '/assets/images/ai-astrologers/meera-devi.png',
+    name: 'Nadi Seer Sharada Devi',
+    avatar: '/assets/images/ai-astrologers/ai-meera-devi-nadi-2.svg',
     tagline: 'Saptarishi Nadi Reader & Sacred Karmic Counselor',
     bio: 'Reads from ancient palm leaves passed down through seven generations. Focuses on unravelling difficult life patterns and restoring inner light.',
-    primaryDiscipline: 'Nadi',
+    primaryDiscipline: 'Nadi Astrology',
     secondaryDisciplines: ['Remedial Astrology', 'Vedic Jyotish'],
     specialities: ['Saptarishi Verses', 'Karmic Liberation', 'Family Lineage Healing', 'Chakra Balancing'],
     languages: ['Hindi', 'Tamil', 'English'],
@@ -1310,10 +1314,10 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-prashna-murthy',
     name: 'Acharya Prashna Murthy',
-    avatar: '/assets/images/ai-astrologers/mr-krishnam.png',
+    avatar: '/assets/images/ai-astrologers/ai-prashna-murthy.svg',
     tagline: 'Kerala Daivajna & Horary Prashna Authority',
     bio: 'Specialist in Ashtamangala Deva Prashna and Aarudha Lagna. Known for answering lost items, medical diagnosis clarity, and immediate decisions.',
-    primaryDiscipline: 'Prashna',
+    primaryDiscipline: 'Prashna Kundli',
     secondaryDisciplines: ['Vedic Jyotish', 'Remedial Astrology'],
     specialities: ['Lost Object Recovery', 'Instant Deal Outcome', 'Health Verdict', 'Immediate Yes/No'],
     languages: ['Malayalam', 'Tamil', 'English', 'Hindi'],
@@ -1339,10 +1343,10 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-pt-jagannath-prashna',
     name: 'Pandit Jagannath Mishra',
-    avatar: '/assets/images/ai-astrologers/arjun-pandit.png',
+    avatar: '/assets/images/ai-astrologers/ai-pt-jagannath-prashna.svg',
     tagline: 'Tajika Prashna & Immediate Decision Counselor',
     bio: 'Applies ancient Tajika Neelakanthi horary rules (Ithsala, Muthasila yogas) to predict court verdicts, election outcomes, and urgent business contracts.',
-    primaryDiscipline: 'Prashna',
+    primaryDiscipline: 'Prashna Kundli',
     secondaryDisciplines: ['Vedic Jyotish', 'Career & Business'],
     specialities: ['Contract Signings', 'Visa Approvals', 'Court Case Outcomes', 'Travel Safety'],
     languages: ['Hindi', 'English', 'Odia'],
@@ -1368,10 +1372,10 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-acharya-trikal',
     name: 'Acharya Trikal Sharma',
-    avatar: '/assets/images/ai-astrologers/swami-ji.png',
+    avatar: '/assets/images/ai-astrologers/ai-acharya-trikal.svg',
     tagline: 'Trikal Darshi Horary & Missing Person Tracker',
     bio: 'Harnesses planetary degree alignments at the moment of asking to give pinpointed information on missing items, job selections, and property settlements.',
-    primaryDiscipline: 'Prashna',
+    primaryDiscipline: 'Prashna Kundli',
     secondaryDisciplines: ['Vedic Jyotish', 'Remedial Astrology'],
     specialities: ['Missing Persons/Items', 'True Intentions of People', 'Immediate Results', 'Travel Success'],
     languages: ['Hindi', 'English', 'Nepali'],
@@ -1396,11 +1400,11 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-prashna-vidya-devi',
-    name: 'Vidya Devi (Prashna)',
-    avatar: '/assets/images/ai-astrologers/priya-sharma.png',
+    name: 'Vidya Devi Prashna',
+    avatar: '/assets/images/ai-astrologers/ai-prashna-vidya-devi.svg',
     tagline: 'Intuitive Horary Seer & Family Query Specialist',
     bio: 'Specialist in family questions, child health queries, and exam result forecasts through quick horary chart synthesis.',
-    primaryDiscipline: 'Prashna',
+    primaryDiscipline: 'Prashna Kundli',
     secondaryDisciplines: ['Love & Marriage', 'Numerology'],
     specialities: ['Exam Result Forecast', 'Child Health Query', 'Family Peace', 'Quick Consultations'],
     languages: ['Hindi', 'English', 'Gujarati'],
@@ -1429,7 +1433,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   // ==========================================
   {
     id: 'ai-pandit-raghav-lalkitab',
-    name: 'Pandit Raghav (Lal Kitab Master)',
+    name: 'Pandit Raghavendra Rao',
     avatar: '/assets/images/ai-astrologers/pandit-raghav.png',
     tagline: 'Lal Kitab Grandmaster & Debt-Relief Miracle Remedies',
     bio: 'Master of the 1952 Lal Kitab system. Famous for quick-acting remedies involving feeding birds, copper coin donations, and neutralizing ancestral debts.',
@@ -1459,7 +1463,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-acharya-girdhari-lal',
     name: 'Acharya Girdhari Lal',
-    avatar: '/assets/images/ai-astrologers/guru-anil.png',
+    avatar: '/assets/images/ai-astrologers/ai-acharya-girdhari-lal.svg',
     tagline: 'Lal Kitab Kundli & Hidden Karmic Debt Decoders',
     bio: 'Over 30 years practicing in Punjab and Delhi. Specializes in resolving mysterious bad luck, sleep disturbances, and sudden business crashes using Lal Kitab principles.',
     primaryDiscipline: 'Lal Kitab',
@@ -1488,7 +1492,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-pt-makhan-lal',
     name: 'Pt. Makhan Lal Sharma',
-    avatar: '/assets/images/ai-astrologers/acharya-joshi.png',
+    avatar: '/assets/images/ai-astrologers/ai-pt-makhan-lal.svg',
     tagline: 'Lal Kitab Varshphal & Annual Protection Master',
     bio: 'Specialist in calculating Lal Kitab Varshphal (Annual progression) to foresee upcoming hazards and take proactive remedial actions beforehand.',
     primaryDiscipline: 'Lal Kitab',
@@ -1520,7 +1524,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   // ==========================================
   {
     id: 'ai-priya-numerology',
-    name: 'Priya Sharma (Numerologist)',
+    name: 'Priya Sharma',
     avatar: '/assets/images/ai-astrologers/priya-sharma.png',
     tagline: 'Chaldean & Pythagorean Numerology Master',
     bio: 'World-renowned celebrity numerologist. Specializes in baby name corrections, business brand vibrations, lucky mobile numbers, and annual life-path forecasting.',
@@ -1550,7 +1554,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-anka-vidya-rishi',
     name: 'Rishi Anka Shastri',
-    avatar: '/assets/images/ai-astrologers/arjun-pandit.png',
+    avatar: '/assets/images/ai-astrologers/ai-anka-vidya-rishi.svg',
     tagline: 'Vedic Anka Vidya & Lo Shu Grid Authority',
     bio: 'Combines Vedic Anka Vidya with the ancient Lo Shu magic square grid to identify missing elemental planes in life and boost wealth vibrations.',
     primaryDiscipline: 'Numerology',
@@ -1578,8 +1582,8 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-numerologist-kabir',
-    name: 'Kabir Varma (Numerology)',
-    avatar: '/assets/images/ai-astrologers/dr-raman.png',
+    name: 'Kabir Varma',
+    avatar: '/assets/images/ai-astrologers/ai-numerologist-kabir.svg',
     tagline: 'Corporate Brand & Signature Numerology Consultant',
     bio: 'Advises startups, authors, and corporate entities on signature vibrations, company naming, and auspicious launch date numerology.',
     primaryDiscipline: 'Numerology',
@@ -1611,11 +1615,11 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   // ==========================================
   {
     id: 'ai-tarot-sophia',
-    name: 'Love Oracle (Mystic Sophia)',
+    name: 'Mystic Sophia',
     avatar: '/assets/images/ai-astrologers/love-oracle.png',
     tagline: 'Intuitive Tarot Reader & Relationship Oracle',
     bio: 'Blends ancient Tarot archetypes with cosmic psychological guidance. Specializes in soulmate connections, breakups, career pivots, and immediate decision forks.',
-    primaryDiscipline: 'Tarot',
+    primaryDiscipline: 'Tarot & Oracle',
     secondaryDisciplines: ['Numerology', 'Remedial Astrology'],
     specialities: ['Love & Soulmates', 'Breakup & Reconciliation', 'Career Crossroad', 'Decision Clarity'],
     languages: ['English', 'Hindi', 'Telugu'],
@@ -1644,7 +1648,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
     avatar: '/assets/images/ai-astrologers/mystic-sophia.png',
     tagline: 'Celtic Tarot & Aura Energy Reader',
     bio: 'Specialist in 10-card Celtic Cross spreads, angel card messages, and clearing stagnant emotional energies to manifest dreams.',
-    primaryDiscipline: 'Tarot',
+    primaryDiscipline: 'Tarot & Oracle',
     secondaryDisciplines: ['Numerology', 'Spiritual Awakening'],
     specialities: ['Celtic Cross Spreads', 'Angel Card Messages', 'Aura Energy Balancing', 'Manifestation Timelines'],
     languages: ['English', 'Hindi', 'French'],
@@ -1674,7 +1678,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   {
     id: 'ai-guru-anil-gems',
     name: 'Ratna Guru Anil Shastri',
-    avatar: '/assets/images/ai-astrologers/guru-anil.png',
+    avatar: '/assets/images/ai-astrologers/ai-guru-anil-gems.svg',
     tagline: 'Certified Gemologist & Energized Rudraksha Authority',
     bio: '30+ years recommending Jyotish-quality gemstones (Yellow Sapphire, Blue Sapphire, Emerald, Ruby) and genuine 1 to 14 Mukhi Rudrakshas.',
     primaryDiscipline: 'Remedial Astrology',
@@ -1702,7 +1706,7 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   },
   {
     id: 'ai-acharya-joshi-remedies',
-    name: 'Acharya Joshi (Dosh Nivaran)',
+    name: 'Acharya Joshi Dosh Nivaran',
     avatar: '/assets/images/ai-astrologers/acharya-joshi.png',
     tagline: 'Grand Master of Navagraha Shanti & Vedic Anushthan',
     bio: 'Rooted in Ujjain and Trimbakeshwar traditions. Specialist in Mahamrityunjaya Japa, Chandi Paath, Navagraha Homa, and dissolving stubborn life obstacles.',
@@ -1750,7 +1754,7 @@ const AVATAR_FALLBACK_MAP: Record<string, string> = {
 };
 
 export function normalizeAIAstrologerAvatar(astro: AIAstrologer): AIAstrologer {
-  if (!astro.avatar || astro.avatar.includes('unsplash.com') || astro.avatar.endsWith('.svg')) {
+  if (!astro.avatar || astro.avatar.includes('unsplash.com')) {
     const fallback =
       AVATAR_FALLBACK_MAP[astro.id] ||
       DEFAULT_AI_ASTROLOGERS.find((a) => a.id === astro.id)?.avatar ||
