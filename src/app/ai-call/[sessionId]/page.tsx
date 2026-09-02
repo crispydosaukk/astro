@@ -305,6 +305,11 @@ export default function AICallRoomPage() {
     (base64String: string, fallbackText: string) => {
       if (isSpeakerMutedRef.current) return;
       try {
+        // Cancel any pending/running Web Speech Synthesis so it NEVER plays in the background
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+
         if (activeAudioInstanceRef.current) {
           try {
             activeAudioInstanceRef.current.pause();

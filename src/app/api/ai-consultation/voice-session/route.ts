@@ -362,6 +362,85 @@ const FALLBACK_OPENAI_KEY = Buffer.from(
   'base64'
 ).toString('utf-8');
 
+function cleanTextForVedicVoice(text: string, language: string): string {
+  let cleaned = text;
+  const langLower = (language || '').toLowerCase();
+  const isTelugu = langLower.includes('telugu') || langLower.includes('te');
+  const isHindi = langLower.includes('hindi') || langLower.includes('hi');
+  const isTamil = langLower.includes('tamil') || langLower.includes('ta');
+
+  if (isTelugu) {
+    cleaned = cleaned
+      .replace(/2024\s*[-–—]\s*2026/g, 'రెండు వేల ఇరవై నాలుగు నుండి రెండు వేల ఇరవై ఆరు')
+      .replace(/2024\s*[-–—]\s*2025/g, 'రెండు వేల ఇరవై నాలుగు నుండి రెండు వేల ఇరవై ఐదు')
+      .replace(/2025\s*[-–—]\s*2026/g, 'రెండు వేల ఇరవై ఐదు నుండి రెండు వేల ఇరవై ఆరు')
+      .replace(/2026\s*[-–—]\s*2028/g, 'రెండు వేల ఇరవై ఆరు నుండి రెండు వేల ఇరవై ఎనిమిది')
+      .replace(/2024/g, 'రెండు వేల ఇరవై నాలుగు')
+      .replace(/2025/g, 'రెండు వేల ఇరవై ఐదు')
+      .replace(/2026/g, 'రెండు వేల ఇరవై ఆరు')
+      .replace(/2027/g, 'రెండు వేల ఇరవై ఏడు')
+      .replace(/2028/g, 'రెండు వేల ఇరవై ఎనిమిది')
+      .replace(/1008/g, 'వెయ్యి ఎనిమిది')
+      .replace(/108/g, 'నూట ఎనిమిది')
+      .replace(/51/g, 'యాభై ఒకటి')
+      .replace(/21/g, 'ఇరవై ఒకటి')
+      .replace(/11/g, 'పదకొండు')
+      .replace(/7వ/g, 'ఏడవ')
+      .replace(/10వ/g, 'పదవ')
+      .replace(/2వ/g, 'రెండవ')
+      .replace(/9వ/g, 'తొమ్మిదవ')
+      .replace(/11వ/g, 'పదకొండవ')
+      .replace(/12వ/g, 'పన్నెండవ')
+      .replace(/5వ/g, 'ఐదవ')
+      .replace(/4వ/g, 'నాల్గవ')
+      .replace(/8వ/g, 'ఎనిమిదవ')
+      .replace(/6వ/g, 'ఆరవ')
+      .replace(/1వ/g, 'మొదటి')
+      .replace(/12/g, 'పన్నెండు')
+      .replace(/10/g, 'పది')
+      .replace(/9/g, 'తొమ్మిది')
+      .replace(/8/g, 'ఎనిమిది')
+      .replace(/7/g, 'ఏడు')
+      .replace(/6/g, 'ఆరు')
+      .replace(/5/g, 'ఐదు')
+      .replace(/4/g, 'నాలుగు')
+      .replace(/3/g, 'మూడు')
+      .replace(/2/g, 'రెండు')
+      .replace(/1/g, 'ఒకటి');
+  } else if (isHindi) {
+    cleaned = cleaned
+      .replace(/2024\s*[-–—]\s*2026/g, 'दो हज़ार चौबीस से दो हज़ार छब्बीस')
+      .replace(/2024\s*[-–—]\s*2025/g, 'दो हज़ार चौबीस से दो हज़ार पच्चीस')
+      .replace(/2025\s*[-–—]\s*2026/g, 'दो हज़ार पच्चीस से दो हज़ार छब्बीस')
+      .replace(/2024/g, 'दो हज़ार चौबीस')
+      .replace(/2025/g, 'दो हज़ार पच्चीस')
+      .replace(/2026/g, 'दो हज़ार छब्बीस')
+      .replace(/1008/g, 'एक हज़ार आठ')
+      .replace(/108/g, 'एक सौ आठ')
+      .replace(/51/g, 'इक्यावन')
+      .replace(/21/g, 'इक्कीस')
+      .replace(/11/g, 'ग्यारह')
+      .replace(/7वें/g, 'सातवें')
+      .replace(/10वें/g, 'दसवें');
+  } else if (isTamil) {
+    cleaned = cleaned
+      .replace(/2024\s*[-–—]\s*2026/g, 'இரண்டாயிரத்து இருபத்து நான்கு முதல் இரண்டாயிரத்து இருபத்து ஆறு வரை')
+      .replace(/108/g, 'நூற்றி எட்டு')
+      .replace(/1008/g, 'ஆயிரத்து எட்டு')
+      .replace(/7ஆம்/g, 'ஏழாம்')
+      .replace(/10ஆம்/g, 'பத்தாம்');
+  }
+
+  // Strip markdown, hyphens, and harsh symbols that make TTS pronounce English characters
+  cleaned = cleaned
+    .replace(/[*#_~`^<>{}[\]\\]+/g, '')
+    .replace(/[-–—]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return cleaned;
+}
+
 // Universal Multilingual Speech Synthesizer
 async function generateMultilingualAudioBase64(
   text: string,
@@ -369,7 +448,8 @@ async function generateMultilingualAudioBase64(
   astrologer: AIAstrologer,
   openaiApiKey?: string | null
 ): Promise<string | null> {
-  const cleanInput = text.replace(/[\n\r]+/g, ' ').slice(0, 350).trim();
+  const sanitizedText = cleanTextForVedicVoice(text, language);
+  const cleanInput = sanitizedText.replace(/[\n\r]+/g, ' ').slice(0, 350).trim();
   if (!cleanInput) return null;
 
   const activeKey = (openaiApiKey || '').trim() || FALLBACK_OPENAI_KEY;
@@ -583,10 +663,12 @@ You MUST speak ONLY in ${sessionLanguage}.
 - If Hindi: Speak in pure Hindi script (हिन्दी). Use 'नमस्ते', 'जी', 'आपकी जन्म कुंडली के अनुसार'.
 - If English: Warm, serene, traditional Indian Vedic astrology tone.
 
-Spoken Call Style:
+Spoken Call Style & Number Rules:
 - Keep your answers concise, direct, and conversational (2 to 4 spoken sentences).
-- Give immediate Vedic astrological insights, auspicious time windows (e.g. 2024–2026), and 1 actionable remedy (mantra, donation, or pooja).
-- Do not use markdown bullet points, stars (*), or hashes (#). Keep it pure natural speech suitable for voice conversation.`;
+- NEVER use raw English digits or numbers (DO NOT write digits like 108, 2024, 7).
+- ALWAYS spell out numbers completely in words (e.g. in Telugu write 'నూట ఎనిమిది సార్లు', 'రెండు వేల ఇరవై ఆరు వరకు', 'ఏడవ భావం'; in Hindi write 'एक सौ आठ बार').
+- Give immediate Vedic astrological insights, auspicious time windows, and 1 actionable remedy (mantra, donation, or pooja).
+- Do not use markdown bullet points, stars (*), hyphens (-), or hashes (#). Keep it pure natural speech suitable for voice conversation.`;
 
         const messagesPayload: any[] = [{ role: 'system', content: systemPrompt }];
 
