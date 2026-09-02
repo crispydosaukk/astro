@@ -441,6 +441,11 @@ function cleanTextForVedicVoice(text: string, language: string): string {
   return cleaned;
 }
 
+function cleanApiKey(key?: string | null): string {
+  if (!key) return '';
+  return key.trim().replace(/^["']|["']$/g, '').trim();
+}
+
 // Universal Multilingual Speech Synthesizer
 async function generateMultilingualAudioBase64(
   text: string,
@@ -452,7 +457,10 @@ async function generateMultilingualAudioBase64(
   const cleanInput = sanitizedText.replace(/[\n\r]+/g, ' ').slice(0, 350).trim();
   if (!cleanInput) return null;
 
-  const activeKey = (openaiApiKey || '').trim() || FALLBACK_OPENAI_KEY;
+  let activeKey = cleanApiKey(openaiApiKey);
+  if (!activeKey || activeKey.length < 20) {
+    activeKey = FALLBACK_OPENAI_KEY;
+  }
 
   // 1. OpenAI TTS Engine
   if (activeKey) {
@@ -557,19 +565,19 @@ export async function POST(req: Request) {
     }
 
     // 1. Fetch OpenAI API Key
-    let openaiApiKey = (process.env.OPENAI_API_KEY || '').trim();
+    let openaiApiKey = cleanApiKey(process.env.OPENAI_API_KEY);
     if (!openaiApiKey) {
       try {
         const settingsSnap = await adminDb.collection('settings').doc('general').get();
         if (settingsSnap.exists) {
           const sData = settingsSnap.data();
-          if (sData?.openaiApiKey) openaiApiKey = (sData.openaiApiKey || '').trim();
+          if (sData?.openaiApiKey) openaiApiKey = cleanApiKey(sData.openaiApiKey);
         }
       } catch (sErr) {
         console.warn('Settings key fetch error:', sErr);
       }
     }
-    if (!openaiApiKey) {
+    if (!openaiApiKey || openaiApiKey.length < 20) {
       openaiApiKey = FALLBACK_OPENAI_KEY;
     }
 
@@ -756,5 +764,37 @@ Spoken Call Style & Number Rules:
       { error: error.message || 'Internal voice exchange error' },
       { status: 500 }
     );
+  }
+}
+
+export async function GET() {
+  const activeKey = (process.env.OPENAI_API_KEY || '').trim() || FALLBACK_OPENAI_KEY;
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${activeKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: 'Say hello in Telugu' }],
+        max_tokens: 30,
+      }),
+    });
+    const data = await res.json();
+    return NextResponse.json({
+      version: 'live-v2',
+      keyConfigured: Boolean(activeKey),
+      keyLength: activeKey.length,
+      openaiStatus: res.status,
+      openaiResponse: data?.choices?.[0]?.message?.content || data,
+    });
+  } catch (err: any) {
+    return NextResponse.json({
+      version: 'live-v2',
+      keyConfigured: Boolean(activeKey),
+      error: err.message || String(err),
+    });
   }
 }
