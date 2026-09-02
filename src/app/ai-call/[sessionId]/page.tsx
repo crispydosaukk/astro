@@ -72,6 +72,8 @@ export default function AICallRoomPage() {
   const inputTextRef = useRef<string>('');
   const activeLanguageRef = useRef<string>('Telugu');
   const isSpeakerMutedRef = useRef<boolean>(false);
+  const isGeneratingReplyRef = useRef<boolean>(false);
+  const handleSendMessageRef = useRef<((textToSend?: string) => void) | null>(null);
 
   // Keep refs in sync
   useEffect(() => {
@@ -237,12 +239,47 @@ export default function AICallRoomPage() {
         const utterance = new SpeechSynthesisUtterance(text);
         const langCode = getLangCode(activeLanguageRef.current);
         utterance.lang = langCode;
-        utterance.rate = 0.92;
-        utterance.pitch = 1.0;
+        utterance.rate = 0.90;
+
+        const isFemale =
+          session?.voiceGender === 'female' ||
+          session?.astrologerName?.toLowerCase().includes('devi') ||
+          session?.astrologerName?.toLowerCase().includes('mata') ||
+          session?.astrologerName?.toLowerCase().includes('priya') ||
+          session?.astrologerName?.toLowerCase().includes('ananya');
+
+        // Authentic voice pitch: lower pitch for male swamis / astrologers, higher for female
+        utterance.pitch = isFemale ? 1.05 : 0.82;
 
         const voices = window.speechSynthesis.getVoices();
-        const matchingVoice = voices.find((v) => v.lang.startsWith(langCode.substring(0, 2)));
-        if (matchingVoice) utterance.voice = matchingVoice;
+        const langVoices = voices.filter((v) => v.lang.startsWith(langCode.substring(0, 2)));
+
+        if (langVoices.length > 0) {
+          if (isFemale) {
+            const femaleVoice = langVoices.find(
+              (v) =>
+                v.name.toLowerCase().includes('female') ||
+                v.name.toLowerCase().includes('zira') ||
+                v.name.toLowerCase().includes('swara') ||
+                v.name.toLowerCase().includes('heera') ||
+                v.name.toLowerCase().includes('shruti') ||
+                v.name.toLowerCase().includes('pallavi')
+            );
+            utterance.voice = femaleVoice || langVoices[0];
+          } else {
+            const maleVoice = langVoices.find(
+              (v) =>
+                v.name.toLowerCase().includes('male') ||
+                v.name.toLowerCase().includes('david') ||
+                v.name.toLowerCase().includes('george') ||
+                v.name.toLowerCase().includes('ravi') ||
+                v.name.toLowerCase().includes('mohan') ||
+                v.name.toLowerCase().includes('valluvar') ||
+                v.name.toLowerCase().includes('madhav')
+            );
+            utterance.voice = maleVoice || langVoices[0];
+          }
+        }
 
         utterance.onstart = () => {
           setIsAiSpeaking(true);
@@ -260,7 +297,7 @@ export default function AICallRoomPage() {
         setIsAiSpeaking(false);
       }
     },
-    [getLangCode]
+    [getLangCode, session]
   );
 
   // Play Synthesized Voice Audio from Base64 MP3
@@ -308,6 +345,8 @@ export default function AICallRoomPage() {
   // 2. AI Voice / Speech Exchange Handler
   const triggerAiVoiceExchange = useCallback(
     async (userText: string, historyOverride: any[]) => {
+      if (isGeneratingReplyRef.current) return;
+      isGeneratingReplyRef.current = true;
       setIsGeneratingReply(true);
       setIsListening(false);
       setLiveTranscriptPreview('');
@@ -333,7 +372,13 @@ export default function AICallRoomPage() {
             content: data.replyText,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           };
-          setMessages((prev) => [...prev, aiMsg]);
+          setMessages((prev) => {
+            const lastMsg = prev[prev.length - 1];
+            if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content === data.replyText) {
+              return prev;
+            }
+            return [...prev, aiMsg];
+          });
 
           if (data.audioBase64 && !isSpeakerMutedRef.current) {
             playAudioFromBase64(data.audioBase64, data.replyText);
@@ -346,6 +391,7 @@ export default function AICallRoomPage() {
         toast.error('Could not connect to AI Astrologer. Please try again.');
       } finally {
         setIsGeneratingReply(false);
+        isGeneratingReplyRef.current = false;
       }
     },
     [sessionId, playAudioFromBase64, speakNativeWebSpeech]
@@ -355,7 +401,7 @@ export default function AICallRoomPage() {
   const handleSendMessage = useCallback(
     (textToSend?: string) => {
       const text = textToSend !== undefined ? textToSend : inputTextRef.current;
-      if (!text || !text.trim()) return;
+      if (!text || !text.trim() || isGeneratingReplyRef.current) return;
 
       const cleanedText = text.trim();
       const userMsg = {
@@ -364,21 +410,33 @@ export default function AICallRoomPage() {
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
-      // Immediately append to messages so user sees their question instantly
-      const updatedHistory = [...latestMessagesRef.current, userMsg];
-      setMessages(updatedHistory);
-
-      // Clear input fields immediately
+      // Clear input fields and buffers immediately
       setInputText('');
       inputTextRef.current = '';
       setLiveTranscriptPreview('');
       accumulatedSpeechRef.current = '';
 
+      // Immediately append to messages so user sees their question instantly (avoid duplicates)
+      let updatedHistory: any[] = [];
+      setMessages((prev) => {
+        const lastMsg = prev[prev.length - 1];
+        if (lastMsg && lastMsg.role === 'user' && lastMsg.content === cleanedText) {
+          updatedHistory = prev;
+          return prev;
+        }
+        updatedHistory = [...prev, userMsg];
+        return updatedHistory;
+      });
+
       // Trigger AI consultation
-      triggerAiVoiceExchange(cleanedText, updatedHistory);
+      triggerAiVoiceExchange(cleanedText, updatedHistory.length ? updatedHistory : [...latestMessagesRef.current, userMsg]);
     },
     [triggerAiVoiceExchange]
   );
+
+  useEffect(() => {
+    handleSendMessageRef.current = handleSendMessage;
+  }, [handleSendMessage]);
 
   // Auto-scroll chat transcript
   useEffect(() => {
@@ -437,7 +495,7 @@ export default function AICallRoomPage() {
     };
   }, [callActive, sessionId, session, isEndingCall, formatPrice]);
 
-  // 5. Native Speech Recognition Setup (Ultra-Responsive Voice Auto-Submit)
+  // 5. Native Speech Recognition Setup (Single instance with proper cleanup & debounce)
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
@@ -469,16 +527,20 @@ export default function AICallRoomPage() {
           setLiveTranscriptPreview(transcript);
         }
 
-        // Automatic 800ms silence detection: Immediately submit when user pauses speaking!
+        // Automatic 800ms silence detection: Immediately submit when user pauses speaking
         if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
         silenceTimerRef.current = setTimeout(() => {
           const text = (accumulatedSpeechRef.current || inputTextRef.current || '').trim();
           if (text.length > 0) {
+            accumulatedSpeechRef.current = '';
+            inputTextRef.current = '';
             try {
               rec.stop();
             } catch (e) {}
             setIsListening(false);
-            handleSendMessage(text);
+            if (handleSendMessageRef.current) {
+              handleSendMessageRef.current(text);
+            }
           }
         }, 800);
       };
@@ -486,10 +548,6 @@ export default function AICallRoomPage() {
       rec.onend = () => {
         setIsListening(false);
         if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-        const text = (accumulatedSpeechRef.current || inputTextRef.current || '').trim();
-        if (text.length > 0) {
-          handleSendMessage(text);
-        }
       };
 
       rec.onerror = (e: any) => {
@@ -498,8 +556,15 @@ export default function AICallRoomPage() {
       };
 
       recognitionRef.current = rec;
+
+      return () => {
+        try {
+          rec.abort();
+          rec.stop();
+        } catch (e) {}
+      };
     }
-  }, [activeLanguage, getLangCode, handleSendMessage]);
+  }, [activeLanguage, getLangCode]);
 
   // Start Voice Input
   const startListening = () => {
@@ -544,8 +609,10 @@ export default function AICallRoomPage() {
     }
 
     const textToSend = (accumulatedSpeechRef.current || inputTextRef.current || '').trim();
-    if (textToSend) {
-      handleSendMessage(textToSend);
+    accumulatedSpeechRef.current = '';
+    inputTextRef.current = '';
+    if (textToSend && handleSendMessageRef.current) {
+      handleSendMessageRef.current(textToSend);
     }
   };
 

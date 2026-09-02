@@ -136,6 +136,8 @@ export async function POST(req: Request) {
         astrologerName: astrologer?.name,
         astrologerAvatar: astrologer?.avatar,
         primaryDiscipline: astrologer?.primaryDiscipline,
+        voiceGender: astrologer?.voiceGender || 'male',
+        voiceId: astrologer?.voiceId || (astrologer?.voiceGender === 'female' ? 'nova' : 'onyx'),
         language,
         pricePerMin,
         currency: 'INR',

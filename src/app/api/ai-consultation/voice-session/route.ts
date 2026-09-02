@@ -538,7 +538,10 @@ export async function POST(req: Request) {
         if (sData?.language) sessionLanguage = sData.language;
 
         if (sData?.astrologerId) {
-          const found = DEFAULT_AI_ASTROLOGERS.find((a) => a.id === sData.astrologerId);
+          const found = DEFAULT_AI_ASTROLOGERS.find((a) => a.id === sData.astrologerId || a.name === sData.astrologerName);
+          if (found) astrologer = found;
+        } else if (sData?.astrologerName) {
+          const found = DEFAULT_AI_ASTROLOGERS.find((a) => a.name === sData.astrologerName);
           if (found) astrologer = found;
         }
       }
