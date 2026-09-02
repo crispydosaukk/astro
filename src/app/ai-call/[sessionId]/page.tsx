@@ -234,6 +234,12 @@ export default function AICallRoomPage() {
   const speakNativeWebSpeech = useCallback(
     (text: string) => {
       if (typeof window === 'undefined' || !('speechSynthesis' in window) || isSpeakerMutedRef.current) return;
+      
+      // If server-synthesized audio is currently playing, NEVER play browser speech to prevent dual voice
+      if (activeAudioInstanceRef.current && !activeAudioInstanceRef.current.paused) {
+        return;
+      }
+
       try {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
@@ -249,7 +255,7 @@ export default function AICallRoomPage() {
           session?.astrologerName?.toLowerCase().includes('ananya');
 
         // Authentic voice pitch: lower pitch for male swamis / astrologers, higher for female
-        utterance.pitch = isFemale ? 1.05 : 0.82;
+        utterance.pitch = isFemale ? 1.05 : 0.80;
 
         const voices = window.speechSynthesis.getVoices();
         const langVoices = voices.filter((v) => v.lang.startsWith(langCode.substring(0, 2)));
@@ -267,6 +273,7 @@ export default function AICallRoomPage() {
             );
             utterance.voice = femaleVoice || langVoices[0];
           } else {
+            // Strictly male voice for male astrologers
             const maleVoice = langVoices.find(
               (v) =>
                 v.name.toLowerCase().includes('male') ||
@@ -277,7 +284,12 @@ export default function AICallRoomPage() {
                 v.name.toLowerCase().includes('valluvar') ||
                 v.name.toLowerCase().includes('madhav')
             );
-            utterance.voice = maleVoice || langVoices[0];
+            if (maleVoice) {
+              utterance.voice = maleVoice;
+            } else {
+              // If no explicit male voice exists, significantly lower pitch to guarantee deep male tone
+              utterance.pitch = 0.70;
+            }
           }
         }
 
@@ -300,12 +312,12 @@ export default function AICallRoomPage() {
     [getLangCode, session]
   );
 
-  // Play Synthesized Voice Audio from Base64 MP3
+  // Play Synthesized Voice Audio from Base64 MP3 (Single Authority Audio Source)
   const playAudioFromBase64 = useCallback(
     (base64String: string, fallbackText: string) => {
       if (isSpeakerMutedRef.current) return;
       try {
-        // Cancel any pending/running Web Speech Synthesis so it NEVER plays in the background
+        // ALWAYS cancel and silence any pending browser SpeechSynthesis
         if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
           window.speechSynthesis.cancel();
         }
@@ -328,8 +340,8 @@ export default function AICallRoomPage() {
               setIsAiSpeaking(true);
             })
             .catch((err) => {
-              console.warn('Direct audio play blocked, falling back to Web Speech Synthesis:', err);
-              speakNativeWebSpeech(fallbackText);
+              console.warn('Direct audio play blocked by browser autoplay policy:', err);
+              // Do NOT call speakNativeWebSpeech here to avoid dual voice mixing!
             });
         }
         sound.onended = () => {
@@ -337,14 +349,14 @@ export default function AICallRoomPage() {
         };
         sound.onerror = () => {
           setIsAiSpeaking(false);
-          speakNativeWebSpeech(fallbackText);
+          // Do NOT trigger fallback speech to avoid dual voice mixing!
         };
       } catch (e) {
         console.warn('Audio playback error:', e);
-        speakNativeWebSpeech(fallbackText);
+        setIsAiSpeaking(false);
       }
     },
-    [speakNativeWebSpeech]
+    []
   );
 
   // 2. AI Voice / Speech Exchange Handler
@@ -793,23 +805,10 @@ export default function AICallRoomPage() {
                 Live Call Active
               </p>
               <span className="text-[#3D352A]">·</span>
-              {/* Language Selector */}
+              {/* Active Consultation Language Display */}
               <div className="flex items-center gap-1 text-[11px] text-[#E5B54F] font-semibold bg-[#221B14] px-2 py-0.5 rounded-md border border-[#C9952B]/40">
                 <Globe size={11} className="text-[#C9952B]" />
-                <select
-                  value={activeLanguage}
-                  onChange={(e) => {
-                    setActiveLanguage(e.target.value);
-                    activeLanguageRef.current = e.target.value;
-                    toast.success(`Language switched to ${e.target.value}`);
-                  }}
-                  className="bg-transparent text-[#FFFDFC] text-[11px] font-bold outline-none cursor-pointer"
-                >
-                  <option value="Telugu" className="bg-[#1C1814] text-white">✦ Telugu (తెలుగు)</option>
-                  <option value="Hindi" className="bg-[#1C1814] text-white">✦ Hindi (हिन्दी)</option>
-                  <option value="English" className="bg-[#1C1814] text-white">✦ English</option>
-                  <option value="Tamil" className="bg-[#1C1814] text-white">✦ Tamil (தமிழ்)</option>
-                </select>
+                <span>{activeLanguage}</span>
               </div>
             </div>
           </div>

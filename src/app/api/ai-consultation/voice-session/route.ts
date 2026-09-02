@@ -515,31 +515,33 @@ async function generateMultilingualAudioBase64(
     }
   }
 
-  // 2. Google Translate TTS Fallback
-  try {
-    const lLower = (language || '').toLowerCase();
-    let langCode = 'te';
-    if (lLower.includes('telugu') || lLower.includes('te') || /[\u0C00-\u0C7F]/.test(cleanInput)) langCode = 'te';
-    else if (lLower.includes('tamil') || lLower.includes('ta') || /[\u0B80-\u0BFF]/.test(cleanInput)) langCode = 'ta';
-    else if (lLower.includes('hindi') || lLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) langCode = 'hi';
-    else langCode = 'en';
+  // 2. Google Translate TTS Fallback (Only allowed if astrologer is female; never for male swamis)
+  if (astrologer.voiceGender === 'female') {
+    try {
+      const lLower = (language || '').toLowerCase();
+      let langCode = 'te';
+      if (lLower.includes('telugu') || lLower.includes('te') || /[\u0C00-\u0C7F]/.test(cleanInput)) langCode = 'te';
+      else if (lLower.includes('tamil') || lLower.includes('ta') || /[\u0B80-\u0BFF]/.test(cleanInput)) langCode = 'ta';
+      else if (lLower.includes('hindi') || lLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) langCode = 'hi';
+      else langCode = 'en';
 
-    const encodedText = encodeURIComponent(cleanInput.slice(0, 200));
-    const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
+      const encodedText = encodeURIComponent(cleanInput.slice(0, 200));
+      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
 
-    const gRes = await fetch(googleTtsUrl, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      },
-    });
+      const gRes = await fetch(googleTtsUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+      });
 
-    if (gRes.ok) {
-      const arrayBuffer = await gRes.arrayBuffer();
-      return Buffer.from(arrayBuffer).toString('base64');
+      if (gRes.ok) {
+        const arrayBuffer = await gRes.arrayBuffer();
+        return Buffer.from(arrayBuffer).toString('base64');
+      }
+    } catch (e) {
+      console.warn('Google TTS fallback warning:', e);
     }
-  } catch (e) {
-    console.warn('Google TTS fallback warning:', e);
   }
 
   return null;
