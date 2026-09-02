@@ -263,7 +263,7 @@ const EIGHT_SACRED_REMEDIES = [
       'Pure authentic Mukhi Rudraksha beads to pacify malefic planetary dashas, stabilize nervous energy, and boost inner focus.',
     href: '/remedies/rudraksha',
     badge: 'South-West (SW)',
-    image: '/assets/images/remedies/remedies_homam_1785738443734.png',
+    image: '/assets/images/remedies/remedies_rudraksha.png',
     iconColor: 'text-amber-700',
   },
   {

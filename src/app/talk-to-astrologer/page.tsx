@@ -491,6 +491,7 @@ export default function TalkToAstrologerPage() {
   const handleBook = async () => {
     if (!user || !userData) {
       toast.error('Please log in to book a consultation');
+      router.push(`/sign-up-login-screen?redirect=${encodeURIComponent('/talk-to-astrologer')}`);
       return;
     }
 

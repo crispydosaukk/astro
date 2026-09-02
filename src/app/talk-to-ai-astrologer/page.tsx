@@ -48,8 +48,9 @@ import {
   getAIDisciplines,
 } from '@/lib/aiAstrologerData';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 // Icon Map for disciplines
 const disciplineIconMap: Record<string, any> = {
@@ -67,8 +68,9 @@ const disciplineIconMap: Record<string, any> = {
   ShieldCheck,
 };
 
-export default function TalkToAIAstrologerPage() {
+function TalkToAIAstrologerContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, userData } = useUserData();
   const { formatPrice, currencySymbol } = useCurrency();
 
@@ -239,8 +241,30 @@ export default function TalkToAIAstrologerPage() {
       });
   }, [astrologers, search, selectedDiscipline, selectedLanguage, selectedAvailability, sortBy]);
 
+  // Auto-open astrologer modal if redirecting back with ?astrologer=ID
+  useEffect(() => {
+    const astroId = searchParams.get('astrologer');
+    if (astroId && astrologers.length > 0) {
+      const target = astrologers.find((a) => a.id === astroId);
+      if (target) {
+        setSelectedAstrologer(target);
+        if (target.languages?.length) {
+          setCallLanguage(target.languages[0]);
+        }
+        setShowBookingModal(true);
+      }
+    }
+  }, [searchParams, astrologers]);
+
   // Open consultation booking
   const handleInitiateConsultation = (astro: AIAstrologer) => {
+    if (!user) {
+      toast.error('Please sign in to start your AI Astrologer consultation');
+      const returnUrl = `/talk-to-ai-astrologer?astrologer=${astro.id}`;
+      router.push(`/sign-up-login-screen?redirect=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
+
     setSelectedAstrologer(astro);
     if (selectedLanguage !== 'all') {
       setCallLanguage(selectedLanguage);
@@ -259,7 +283,8 @@ export default function TalkToAIAstrologerPage() {
 
     if (!user) {
       toast.error('Please sign in to start your AI consultation');
-      router.push(`/sign-up-login-screen?redirect=${encodeURIComponent('/talk-to-ai-astrologer')}`);
+      const returnUrl = `/talk-to-ai-astrologer?astrologer=${selectedAstrologer.id}`;
+      router.push(`/sign-up-login-screen?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
 
@@ -268,8 +293,11 @@ export default function TalkToAIAstrologerPage() {
     const minRequired = pricePerMin * 5;
 
     if (currentBalance < minRequired) {
-      toast.error(`Insufficient balance. Minimum ${formatPrice(minRequired)} (5 mins) required.`);
-      router.push(`/wallet?redirect=${encodeURIComponent('/talk-to-ai-astrologer')}`);
+      toast.error(
+        `Insufficient balance in wallet (${formatPrice(currentBalance)} available, ${formatPrice(minRequired)} for 5 mins required). Redirecting to recharge...`
+      );
+      const returnUrl = `/talk-to-ai-astrologer?astrologer=${selectedAstrologer.id}`;
+      router.push(`/wallet?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
 
@@ -1085,5 +1113,19 @@ export default function TalkToAIAstrologerPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function TalkToAIAstrologerPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="animate-spin text-[#C9952B]" size={32} />
+        </div>
+      }
+    >
+      <TalkToAIAstrologerContent />
+    </Suspense>
   );
 }

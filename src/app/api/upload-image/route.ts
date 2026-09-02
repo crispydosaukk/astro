@@ -15,16 +15,22 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Create a unique filename
-    const ext = file.name.split('.').pop() || 'png';
-    const filename = `remedy_${Date.now()}.${ext}`;
+    const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+    const isPdf = ext === 'pdf';
+    const filename = isPdf ? `guide_${Date.now()}.pdf` : `remedy_${Date.now()}.${ext}`;
 
-    // Save the file to public/assets/images/remedies/
-    const uploadDir = path.join(process.cwd(), 'public', 'assets', 'images', 'remedies');
+    const subDir = isPdf ? path.join('assets', 'pdfs') : path.join('assets', 'images', 'remedies');
+    const uploadDir = path.join(process.cwd(), 'public', subDir);
+
+    const fs = require('fs');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
     const filePath = path.join(uploadDir, filename);
-
     await writeFile(filePath, buffer);
 
-    const fileUrl = `/assets/images/remedies/${filename}`;
+    const fileUrl = `/${subDir.replace(/\\/g, '/')}/${filename}`;
 
     return NextResponse.json({ success: true, url: fileUrl });
   } catch (error: any) {

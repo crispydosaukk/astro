@@ -141,6 +141,13 @@ export default function AuthScreen() {
     };
   }, []);
 
+  useEffect(() => {
+    const redirectParam = searchParams.get('redirect');
+    if (redirectParam) {
+      localStorage.setItem('auth_redirect', redirectParam);
+    }
+  }, [searchParams]);
+
   const getTargetRedirect = useCallback(() => {
     const redirectParam = searchParams.get('redirect');
     const storedRedirect = localStorage.getItem('auth_redirect');

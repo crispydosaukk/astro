@@ -16,18 +16,18 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
+  Wallet,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useUserData } from '@/lib/useUserData';
 import { getHomepageContent } from '@/lib/cms';
 import { useCurrency } from '@/lib/CurrencyContext';
-import { loadRazorpayScript } from '@/lib/razorpay';
 
 export default function VastuConsultationForm() {
   const router = useRouter();
-  const { user, loading } = useUserData();
-  const { convertPrice, currencyCode } = useCurrency();
+  const { user, userData, loading } = useUserData();
+  const { convertPrice, formatPrice, currencyCode } = useCurrency();
 
   // Vastu Specific Form State
   const [propertyType, setPropertyType] = useState('Residential Apartment / Flat');
@@ -121,138 +121,72 @@ export default function VastuConsultationForm() {
       return;
     }
 
+    const returnUrl =
+      typeof window !== 'undefined'
+        ? `${window.location.pathname}#get-report`
+        : '/remedies/vastu';
+
+    if (!user) {
+      router.push(`/sign-up-login-screen?redirect=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
+
+    const reportAmount = price !== null ? price : 149;
+    const walletBalance = Number(userData?.walletBalance) || 0;
+
+    // Check if wallet balance is insufficient
+    if (walletBalance < reportAmount) {
+      toast.error(
+        `Insufficient balance in wallet (${formatPrice(walletBalance)} available, ${formatPrice(reportAmount)} required). Redirecting to recharge wallet...`
+      );
+      router.push(`/wallet?redirect=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const resLoaded = await loadRazorpayScript();
-      if (!resLoaded) {
-        toast.error('Failed to load payment gateway. Please check your internet connection.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      const reportAmount = price !== null ? price : 149;
-
-      const reportDetails = {
-        userId: user?.uid || 'guest-user',
-        userEmail: user?.email || '',
-        type: 'Vastu Consultation Report',
-        serviceId: 'svc-vastu',
-        details: {
-          name: ownerName,
-          propertyType,
-          entranceFacing,
-          primaryConcern,
-          kitchenLocation,
-          masterBedroomLocation,
-          pujaLocation,
-          toiletLocation,
-          dob: dob || 'N/A',
-          time: time || 'N/A',
-          place,
-        },
-        currency: currencyCode.toLowerCase(),
-        displayAmount: convertPrice(reportAmount, priceUSD !== null ? priceUSD : undefined),
+      const details = {
+        name: ownerName,
+        propertyType,
+        entranceFacing,
+        primaryConcern,
+        kitchenLocation,
+        masterBedroomLocation,
+        pujaLocation,
+        toiletLocation,
+        dob: dob || 'N/A',
+        time: time || 'N/A',
+        place,
       };
 
-      // 1. Create Razorpay order
-      const response = await fetch('/api/create-razorpay-order', {
+      const deductRes = await fetch('/api/deduct-service-wallet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          userId: user.uid,
+          userEmail: user.email || '',
           amount: reportAmount,
-          currency: 'INR',
-          notes: {
-            type: 'report_purchase',
-            reportTitle: 'Vastu Consultation Report',
-            userId: reportDetails.userId,
-          },
+          serviceId: 'svc-vastu',
+          serviceTitle: 'Vastu Consultation Report',
+          serviceType: 'consultation',
+          details,
+          currency: currencyCode.toLowerCase(),
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to initialize payment');
+      const data = await deductRes.json();
+      if (!deductRes.ok) {
+        throw new Error(data.error || 'Failed to process wallet deduction');
       }
 
-      // 2. Open Razorpay Modal
-      const options = {
-        key: data.keyId || data.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
-        amount: data.amount,
-        currency: data.currency,
-        name: 'AstroParihar',
-        description: 'Personalized Vastu Consultation & Remedial Report',
-        image: '/astrologo.png',
-        order_id: data.orderId || data.id,
-        prefill: {
-          name: user?.displayName || ownerName,
-          email: user?.email || '',
-        },
-        theme: {
-          color: '#713B32',
-        },
-        handler: async function (paymentRes: any) {
-          try {
-            // Also generate rich OpenAI dynamic report through /api/generate-report
-            const genRes = await fetch('/api/generate-report', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                userId: user?.uid || 'guest-user',
-                userEmail: user?.email || '',
-                type: 'Vastu Consultation Report',
-                details: reportDetails.details,
-              }),
-            });
-
-            let reportData = null;
-            if (genRes.ok) {
-              const genData = await genRes.json();
-              reportData = genData.reportData;
-            }
-
-            const verifyRes = await fetch('/api/verify-razorpay-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: paymentRes.razorpay_order_id,
-                razorpay_payment_id: paymentRes.razorpay_payment_id,
-                razorpay_signature: paymentRes.razorpay_signature,
-                paymentType: 'report',
-                reportDetails: {
-                  ...reportDetails,
-                  reportContent: reportData ? JSON.stringify(reportData) : undefined,
-                },
-                amount: reportAmount,
-              }),
-            });
-
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok) {
-              throw new Error(verifyData.error || 'Payment verification failed');
-            }
-
-            toast.success('Vastu Report generated successfully! View in My Reports.');
-            router.push('/my-reports');
-          } catch (err: any) {
-            console.error(err);
-            toast.error(err.message || 'Error generating Vastu report');
-          } finally {
-            setIsSubmitting(false);
-          }
-        },
-        modal: {
-          ondismiss: function () {
-            setIsSubmitting(false);
-            toast.info('Payment process cancelled');
-          },
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      toast.success(
+        `Vastu Report generated successfully! ${formatPrice(reportAmount)} deducted from your wallet.`
+      );
+      router.push('/my-reports');
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Failed to submit Vastu consultation request.');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -608,11 +542,63 @@ export default function VastuConsultationForm() {
             </p>
           </div>
 
+          {/* Wallet Status Card */}
+          {user && (
+            <div
+              className={`rounded-2xl p-4 border flex items-center justify-between gap-3 ${
+                (Number(userData?.walletBalance) || 0) >= (price || 149)
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                  : 'bg-amber-50 border-amber-200 text-amber-900'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-xl ${
+                    (Number(userData?.walletBalance) || 0) >= (price || 149)
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-amber-100 text-amber-700'
+                  }`}
+                >
+                  <Wallet size={18} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-[#6B5E55]">Wallet Balance:</span>
+                    <span className="text-sm font-bold text-[#292522]">
+                      {formatPrice(Number(userData?.walletBalance) || 0)}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#6B5E55] mt-0.5">
+                    {(Number(userData?.walletBalance) || 0) >= (price || 149)
+                      ? '✓ Sufficient balance. Will be deducted directly from your wallet.'
+                      : `⚠️ Insufficient balance (${formatPrice(price || 149)} required). Please recharge.`}
+                  </p>
+                </div>
+              </div>
+              {(Number(userData?.walletBalance) || 0) < (price || 149) && (
+                <Link
+                  href={`/wallet?redirect=${encodeURIComponent(
+                    typeof window !== 'undefined'
+                      ? `${window.location.pathname}#get-report`
+                      : '/remedies/vastu'
+                  )}`}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#713B32] text-white hover:bg-[#5a2e27] whitespace-nowrap transition-colors shadow-sm"
+                >
+                  + Recharge
+                </Link>
+              )}
+            </div>
+          )}
+
           {/* Action / Submit Button */}
           <div>
             {!user ? (
               <Link
-                href="/auth/login"
+                href={`/sign-up-login-screen?redirect=${encodeURIComponent(
+                  typeof window !== 'undefined'
+                    ? `${window.location.pathname}#get-report`
+                    : '/remedies/vastu'
+                )}`}
                 className="w-full py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center justify-center gap-2 hover:brightness-110 shadow-xl shadow-[#C9952B]/30 text-sm sm:text-base cursor-pointer"
               >
                 <Lock size={16} /> Sign In to Generate Vastu Report →
@@ -627,14 +613,22 @@ export default function VastuConsultationForm() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin" size={18} />
-                    <span>Synthesizing Vastu Consultation...</span>
+                    <span>Processing & Deducting from Wallet...</span>
                   </>
-                ) : (
+                ) : (Number(userData?.walletBalance) || 0) >= (price || 149) ? (
                   <>
                     <Compass size={18} />
                     <span>
-                      Generate Vastu Consultation Report (
-                      {convertPrice(price || 149, priceUSD !== null ? priceUSD : undefined)})
+                      Generate Vastu Report —{' '}
+                      {formatPrice(price || 149, priceUSD !== null ? priceUSD : undefined)} (Pay from Wallet)
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Wallet size={18} />
+                    <span>
+                      Recharge Wallet to Generate (
+                      {formatPrice(price || 149, priceUSD !== null ? priceUSD : undefined)})
                     </span>
                   </>
                 )}

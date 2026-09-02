@@ -16,16 +16,18 @@ import {
   FileText,
   Sparkles,
   HelpCircle,
+  Wallet,
+  Download,
+  ExternalLink,
 } from 'lucide-react';
 import { useUserData } from '@/lib/useUserData';
 import { useCurrency } from '@/lib/CurrencyContext';
-import { getMahadashaGuide, MahadashaGuide } from '@/lib/mahadasha';
+import { getMahadashaGuide, MahadashaGuide, DEFAULT_MAHADASHA_GUIDES } from '@/lib/mahadasha';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
 
 import { useRouter } from 'next/navigation';
-import { loadRazorpayScript } from '@/lib/razorpay';
 import DynamicPageContent from '@/components/DynamicPageContent';
 
 interface MahadashaGuidePageViewProps {
@@ -34,7 +36,7 @@ interface MahadashaGuidePageViewProps {
 
 export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageViewProps) {
   const router = useRouter();
-  const { user } = useUserData();
+  const { user, userData, loading } = useUserData();
   const { currencyCode, convertPrice, formatPrice } = useCurrency();
 
   const [guide, setGuide] = useState<MahadashaGuide | null>(null);
@@ -42,6 +44,11 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
   const [hasPurchased, setHasPurchased] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showPdfModal, setShowPdfModal] = useState(false);
+  const [activeChapterIndex, setActiveChapterIndex] = useState(0);
+
+  const fallbackGuide = DEFAULT_MAHADASHA_GUIDES[guideId] || DEFAULT_MAHADASHA_GUIDES['rahu-stabilisation'];
+  const chapters = (guide?.chapters && guide.chapters.length > 0) ? guide.chapters : (fallbackGuide.chapters || []);
+  const currentChapter = chapters[activeChapterIndex] || chapters[0];
 
   useEffect(() => {
     async function loadData() {
@@ -72,117 +79,62 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
   const handleBuyGuide = async () => {
     if (!guide) return;
 
+    const returnUrl =
+      typeof window !== 'undefined' ? window.location.pathname : `/services/${guideId}`;
+
     if (!user) {
-      toast.error('Please sign in to purchase this guide');
-      const returnUrl =
-        typeof window !== 'undefined' ? window.location.pathname : `/services/${guideId}`;
+      toast.error('Please sign in to access this guide');
       router.push(`/sign-up-login-screen?redirect=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
+
+    const rawPrice = currencyCode === 'USD' ? guide.priceUSD || 19 : guide.price || 499;
+    const walletBalance = Number(userData?.walletBalance) || 0;
+
+    // Check if wallet balance is insufficient
+    if (walletBalance < rawPrice) {
+      toast.error(
+        `Insufficient balance in wallet (${formatPrice(walletBalance)} available, ${formatPrice(rawPrice)} required). Redirecting to recharge wallet...`
+      );
+      router.push(`/wallet?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
 
     setIsProcessingPayment(true);
     try {
-      const resLoaded = await loadRazorpayScript();
-      if (!resLoaded) {
-        toast.error('Failed to load Razorpay SDK. Please check your internet connection.');
-        setIsProcessingPayment(false);
-        return;
-      }
-
-      const rawPrice = currencyCode === 'USD' ? guide.priceUSD || 19 : guide.price || 499;
-
-      const reportDetails = {
-        userId: user.uid,
-        userEmail: user.email || '',
-        type: guide.title,
-        serviceId: guide.id,
-        displayAmount: rawPrice,
-        currency: currencyCode.toLowerCase(),
-        details: {
-          guideId: guide.id,
-          guideTitle: guide.title,
-          pdfUrl: guide.pdfUrl,
-        },
-      };
-
-      // 1. Create Razorpay Order
-      const res = await fetch('/api/create-razorpay-order', {
+      const deductRes = await fetch('/api/deduct-service-wallet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          userId: user.uid,
+          userEmail: user.email || '',
           amount: rawPrice,
-          currency: 'INR',
-          notes: {
-            type: 'guide_purchase',
+          serviceId: guide.id,
+          serviceTitle: guide.title,
+          serviceType: 'guide',
+          details: {
             guideId: guide.id,
-            userId: user.uid,
+            guideTitle: guide.title,
+            pdfUrl: guide.pdfUrl,
           },
+          pdfUrl: guide.pdfUrl,
+          currency: currencyCode.toLowerCase(),
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create payment session');
+      const data = await deductRes.json();
+      if (!deductRes.ok) {
+        throw new Error(data.error || 'Failed to unlock guide using wallet balance');
       }
 
-      // 2. Open Razorpay Modal
-      const options = {
-        key: data.keyId || data.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
-        amount: data.amount,
-        currency: data.currency,
-        name: 'AstroParihar',
-        description: `Guide: ${guide.title}`,
-        image: '/astrologo.png',
-        order_id: data.orderId || data.id,
-        prefill: {
-          name: user.displayName || '',
-          email: user.email || '',
-        },
-        theme: {
-          color: '#C9952B',
-        },
-        handler: async function (paymentRes: any) {
-          try {
-            const verifyRes = await fetch('/api/verify-razorpay-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: paymentRes.razorpay_order_id,
-                razorpay_payment_id: paymentRes.razorpay_payment_id,
-                razorpay_signature: paymentRes.razorpay_signature,
-                paymentType: 'report',
-                reportDetails,
-                amount: rawPrice,
-              }),
-            });
-
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok) {
-              throw new Error(verifyData.error || 'Payment verification failed');
-            }
-
-            toast.success('Guide purchased successfully!');
-            setHasPurchased(true);
-          } catch (err: any) {
-            console.error(err);
-            toast.error(err.message || 'Error granting guide access');
-          } finally {
-            setIsProcessingPayment(false);
-          }
-        },
-        modal: {
-          ondismiss: function () {
-            setIsProcessingPayment(false);
-            toast.info('Payment process cancelled');
-          },
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      toast.success(
+        `Guide unlocked successfully! ${formatPrice(rawPrice)} deducted from your wallet.`
+      );
+      setHasPurchased(true);
     } catch (err: any) {
-      console.error('Payment error:', err);
-      toast.error(err.message || 'Payment initiation failed. Please try again.');
+      console.error(err);
+      toast.error(err.message || 'Error granting guide access');
+    } finally {
       setIsProcessingPayment(false);
     }
   };
@@ -291,12 +243,23 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
                       disabled={isProcessingPayment}
                       className="px-8 py-4 rounded-full gold-gradient-bg text-[#292522] font-extrabold flex items-center gap-2.5 shadow-2xl shadow-[#C9952B]/40 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm sm:text-base"
                     >
-                      <Lock size={18} />
-                      <span>
-                        {isProcessingPayment
-                          ? 'Opening Razorpay...'
-                          : `Buy & Instant Access (${displayPrice})`}
-                      </span>
+                      {isProcessingPayment ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-[#292522] border-t-transparent rounded-full animate-spin" />
+                          <span>Deducting from Wallet...</span>
+                        </>
+                      ) : (Number(userData?.walletBalance) || 0) >=
+                        (currencyCode === 'USD' ? guide.priceUSD || 19 : guide.price || 499) ? (
+                        <>
+                          <Lock size={18} />
+                          <span>Unlock with Wallet ({displayPrice})</span>
+                        </>
+                      ) : (
+                        <>
+                          <Wallet size={18} />
+                          <span>Recharge Wallet to Unlock ({displayPrice})</span>
+                        </>
+                      )}
                     </button>
                     <Link
                       href="/my-reports"
@@ -370,12 +333,25 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
               <button
                 onClick={handleBuyGuide}
                 disabled={isProcessingPayment}
-                className="px-8 py-3.5 rounded-full gold-gradient-bg text-white font-bold text-sm shadow-xl hover:opacity-90 transition-opacity flex items-center gap-2"
+                className="px-8 py-3.5 rounded-full gold-gradient-bg text-[#292522] font-bold text-sm shadow-xl hover:opacity-90 transition-opacity flex items-center gap-2"
               >
-                <Lock size={16} />
-                <span>
-                  {isProcessingPayment ? 'Processing...' : `Get Guide Now (${displayPrice})`}
-                </span>
+                {isProcessingPayment ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-[#292522] border-t-transparent rounded-full animate-spin" />
+                    <span>Processing & Deducting...</span>
+                  </>
+                ) : (Number(userData?.walletBalance) || 0) >=
+                  (currencyCode === 'USD' ? guide.priceUSD || 19 : guide.price || 499) ? (
+                  <>
+                    <Lock size={16} />
+                    <span>Unlock with Wallet ({displayPrice})</span>
+                  </>
+                ) : (
+                  <>
+                    <Wallet size={16} />
+                    <span>Recharge to Unlock ({displayPrice})</span>
+                  </>
+                )}
               </button>
             )}
           </div>
@@ -384,42 +360,51 @@ export default function MahadashaGuidePageView({ guideId }: MahadashaGuidePageVi
 
       {/* PDF View Modal */}
       <AnimatePresence>
-        {showPdfModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-background/80 backdrop-blur-md">
+        {showPdfModal && guide && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-4xl max-h-[90vh] bg-card border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+              className="relative w-full max-w-5xl h-[90vh] bg-[#1E1712] border border-[#D8B66A]/30 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
             >
-              <div className="p-5 border-b border-white/10 flex items-center justify-between bg-muted/30">
-                <div className="flex items-center gap-3">
-                  <FileText className="text-[#C9952B]" size={20} />
-                  <h3 className="font-bold text-foreground text-sm sm:text-base">{guide.title}</h3>
+              {/* Modal Header */}
+              <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-[#140E0A] shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 rounded-xl bg-[#C9952B]/20 text-[#F6D075] shrink-0">
+                    <FileText size={20} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-white text-sm sm:text-base truncate">{guide.title}</h3>
+                    <p className="text-xs text-[#D8B66A] truncate">{guide.badge || 'Mahadasha Guide'}</p>
+                  </div>
                 </div>
+
                 <button
                   onClick={() => setShowPdfModal(false)}
-                  className="p-2 rounded-xl hover:bg-white/10 text-muted-foreground transition-colors"
+                  className="p-2 rounded-xl hover:bg-white/10 text-white/80 hover:text-white transition-colors shrink-0"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-hidden p-2 sm:p-4 bg-slate-950 flex flex-col">
+              {/* Direct PDF Embed */}
+              <div className="flex-1 w-full bg-slate-900 overflow-hidden">
                 <iframe
-                  src={guide.pdfUrl}
+                  src={`${guide.pdfUrl}#toolbar=0&navpanes=0`}
                   title={guide.title}
-                  className="w-full h-[65vh] sm:h-[70vh] rounded-2xl border border-white/10 bg-white"
+                  className="w-full h-full border-0 bg-white"
                 />
               </div>
 
-              <div className="p-5 border-t border-white/10 bg-muted/30 flex items-center justify-between flex-wrap gap-3">
-                <span className="text-xs text-muted-foreground font-mono">
-                  Status: Verified Purchase
+              {/* Modal Footer (No download/save options) */}
+              <div className="px-5 py-3 border-t border-white/10 bg-[#140E0A] flex items-center justify-between shrink-0">
+                <span className="text-xs text-white/60 font-mono">
+                  Status: Verified Lifetime Access
                 </span>
                 <button
                   onClick={() => setShowPdfModal(false)}
-                  className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-foreground text-xs font-bold transition-colors"
+                  className="px-6 py-2 rounded-full bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white text-xs font-bold transition-all shadow-md"
                 >
                   Close
                 </button>

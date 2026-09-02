@@ -22,6 +22,8 @@ import {
   Activity,
   PhoneCall,
   Bot,
+  Lock,
+  LogIn,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useUserData } from '@/lib/useUserData';
@@ -237,6 +239,26 @@ export default function RecentReports() {
           {loading ? (
             <div className="flex items-center justify-center h-48">
               <Loader2 className="animate-spin text-[#C9952B]" size={28} />
+            </div>
+          ) : !user ? (
+            <div className="flex flex-col items-center justify-center p-8 sm:p-12 text-center space-y-4 max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-2xl bg-[#C9952B]/15 border border-[#C9952B]/30 flex items-center justify-center text-[#C9952B] shadow-sm">
+                <Lock size={28} />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-lg sm:text-xl font-bold text-foreground">
+                  Please Sign In to View Your Reports
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Access all your personalized Vedic chart analysis, remedy reports, and unlocked Mahadasha guides in one place.
+                </p>
+              </div>
+              <Link
+                href="/sign-up-login-screen?redirect=/my-reports"
+                className="px-6 py-2.5 rounded-full gold-gradient-bg text-white font-bold text-xs sm:text-sm shadow-md hover:opacity-90 transition-all flex items-center gap-2"
+              >
+                <LogIn size={15} /> Sign In to Your Account
+              </Link>
             </div>
           ) : filteredReports.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-muted-foreground text-sm space-y-2">

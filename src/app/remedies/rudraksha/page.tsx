@@ -51,7 +51,7 @@ export default function RudrakshaServicePage() {
         {/* Background Image with Vedic Cosmic Overlay */}
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
           <Image
-            src="/assets/images/remedies/remedies_charity_1785738494717.png"
+            src="/assets/images/remedies/remedies_rudraksha.png"
             alt="Rudraksha Recommendations Background"
             fill
             className="object-cover object-center lg:object-right scale-100"

@@ -174,7 +174,7 @@ export const defaultHomepageContent: HomepageContent = {
         badge: 'South-West (SW)',
         price: 99,
         priceUSD: 1.99,
-        image: '/assets/images/remedies/remedies_homam_1785738443734.png',
+        image: '/assets/images/remedies/remedies_rudraksha.png',
       },
       {
         id: 'svc-vastu',
