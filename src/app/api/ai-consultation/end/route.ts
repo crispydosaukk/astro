@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { AIConsultationSummary } from '@/lib/aiAstrologerData';
 
+const FALLBACK_OPENAI_KEY = Buffer.from(
+  'c2stcHJvai1WRUFsc1d6ZEMxOTAwY1VVbmowei00VHAzaGJ3RUtjNzFGOGM2OVRwdFZWQllGUlkxbVF4TVdQbGdCMUNoOTVHc1FveEpTdFhOMVQzQmxia0ZKZ0FuQm1vQkZ0bTkzeGV0SmwxSzNMSTB5eER2Y1lDVThydGdhY3F0R00ycVdVeW9mNjVpQ0ZiLTk0aG5jSFBLQXo2ai1WZE9Wc0E=',
+  'base64'
+).toString('utf-8');
+
 export async function POST(req: Request) {
   try {
     const { sessionId, durationSeconds = 60, conversationTranscript = [] } = await req.json();
@@ -38,10 +43,7 @@ export async function POST(req: Request) {
       }
     }
     if (!openaiApiKey || openaiApiKey.length < 20) {
-      openaiApiKey = Buffer.from(
-        'c2stcHJvai1WRUFsc1d6ZEMxOTAwY1VVbmowei00VHAzaGJ3RUtjNzFGOGM2OVRwdFZWQllGUlkxbVF4TVdQbGdCMUNoOTVHc1FveEpTdFhOMVQzQmxia0ZKZ0FuQm1vQkZ0bTkzeGV0SmwxSzNMSTB5eER2Y1lDVThydGdhY3F0R00ycVdVeW9mNjVpQ0ZiLTk0aG5jSFBLQXo2ai1WZE9Wc0E=',
-        'base64'
-      ).toString('utf-8');
+      openaiApiKey = FALLBACK_OPENAI_KEY;
     }
 
     // Default High-Quality Astrology Summary fallback
@@ -114,7 +116,7 @@ Respond ONLY with a valid JSON object matching this schema:
   "panditJiFinalBlessing": "A compassionate and uplifting closing spiritual blessing"
 }`;
 
-        const openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        let openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -134,6 +136,30 @@ Respond ONLY with a valid JSON object matching this schema:
             response_format: { type: 'json_object' },
           }),
         });
+
+        if (openAiRes.status === 401 && openaiApiKey !== FALLBACK_OPENAI_KEY) {
+          console.warn('OpenAI end route 401 with primary key, retrying with fallback key');
+          openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                {
+                  role: 'user',
+                  content: `Consultation Transcript Context:\n${transcriptText || 'General consultation on ' + primaryConcern}`,
+                },
+              ],
+              temperature: 0.7,
+              max_tokens: 1500,
+              response_format: { type: 'json_object' },
+            }),
+          });
+        }
 
         if (openAiRes.ok) {
           const aiJson = await openAiRes.json();

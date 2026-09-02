@@ -469,7 +469,7 @@ async function generateMultilingualAudioBase64(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-      const ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
+      let ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -483,6 +483,23 @@ async function generateMultilingualAudioBase64(
         }),
         signal: controller.signal,
       });
+
+      if (ttsRes.status === 401 && activeKey !== FALLBACK_OPENAI_KEY) {
+        console.warn('OpenAI TTS 401 with primary key, retrying with fallback key');
+        ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
+          },
+          body: JSON.stringify({
+            model: 'tts-1',
+            voice: ttsVoice,
+            input: cleanInput,
+            response_format: 'mp3',
+          }),
+        });
+      }
 
       clearTimeout(timeoutId);
 
@@ -704,7 +721,7 @@ Spoken Call Style & Number Rules:
           });
         }
 
-        const chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        let chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -717,6 +734,23 @@ Spoken Call Style & Number Rules:
             max_tokens: 300,
           }),
         });
+
+        if (chatRes.status === 401 && openaiApiKey !== FALLBACK_OPENAI_KEY) {
+          console.warn('OpenAI GPT-4o-mini 401 with primary key, retrying with fallback key');
+          chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: messagesPayload,
+              temperature: 0.7,
+              max_tokens: 300,
+            }),
+          });
+        }
 
         if (chatRes.ok) {
           const chatData = await chatRes.json();
@@ -768,9 +802,12 @@ Spoken Call Style & Number Rules:
 }
 
 export async function GET() {
-  const activeKey = (process.env.OPENAI_API_KEY || '').trim() || FALLBACK_OPENAI_KEY;
+  let activeKey = cleanApiKey(process.env.OPENAI_API_KEY);
+  if (!activeKey || activeKey.length < 20) {
+    activeKey = FALLBACK_OPENAI_KEY;
+  }
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    let res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -782,18 +819,38 @@ export async function GET() {
         max_tokens: 30,
       }),
     });
+
+    let fallbackTriggered = false;
+    let keyUsed = activeKey.substring(0, 10) + '...' + activeKey.slice(-4);
+
+    if (res.status === 401 && activeKey !== FALLBACK_OPENAI_KEY) {
+      fallbackTriggered = true;
+      res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: 'Say hello in Telugu' }],
+          max_tokens: 30,
+        }),
+      });
+      keyUsed = FALLBACK_OPENAI_KEY.substring(0, 10) + '...' + FALLBACK_OPENAI_KEY.slice(-4);
+    }
+
     const data = await res.json();
     return NextResponse.json({
-      version: 'live-v2',
-      keyConfigured: Boolean(activeKey),
-      keyLength: activeKey.length,
+      version: 'live-v4',
+      fallbackTriggered,
+      keyUsed,
       openaiStatus: res.status,
       openaiResponse: data?.choices?.[0]?.message?.content || data,
     });
   } catch (err: any) {
     return NextResponse.json({
-      version: 'live-v2',
-      keyConfigured: Boolean(activeKey),
+      version: 'live-v4',
       error: err.message || String(err),
     });
   }
