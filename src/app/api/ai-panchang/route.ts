@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getSettings } from '@/lib/settings';
 import { getAIPromptSettings } from '@/lib/aiPromptSettings';
 import { calculatePanchang } from '@/lib/panchangEngine';
+import { getServerOpenAIApiKey } from '@/lib/aiConfig';
 
 export async function POST(req: Request) {
   try {
@@ -12,9 +12,8 @@ export async function POST(req: Request) {
     // 1. Calculate Astronomical Panchang data
     const panchang = calculatePanchang(date, location);
 
-    // 2. Fetch OpenAI key
-    const globalSettings = await getSettings();
-    const openaiApiKey = globalSettings.openaiApiKey || process.env.OPENAI_API_KEY;
+    // 2. Fetch OpenAI key reliably
+    const openaiApiKey = await getServerOpenAIApiKey();
 
     if (!openaiApiKey) {
       // Return structured fallback based on pure mathematical Vedic calculations
@@ -41,9 +40,11 @@ export async function POST(req: Request) {
     const aiPromptSettings = await getAIPromptSettings();
     const panchangPromptConfig = aiPromptSettings.prompts['panchang-daily'];
 
+    const currentYear = new Date().getFullYear();
     let systemPrompt =
       panchangPromptConfig?.systemPrompt ||
       'You are a master Vedic Panchang Astronomer and Jyotishi at AstroParihar.';
+    systemPrompt += `\n\nReal-Time Calendar Anchor:\n- Current Date: ${panchang.formattedDate} (Year: ${currentYear}). Compute and frame all panchang insights, muhurats, and wisdom for ${currentYear}. Never refer to 2024 as the active year.`;
     if (aiPromptSettings.config.globalExtraDirectives) {
       systemPrompt += `\n\nGlobal Directives:\n${aiPromptSettings.config.globalExtraDirectives}`;
     }

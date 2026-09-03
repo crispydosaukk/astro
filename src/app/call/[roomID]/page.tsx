@@ -29,6 +29,7 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import { getSettings } from '@/lib/settings';
+import { toast } from 'sonner';
 
 export default function CallPage() {
   const { roomID } = useParams();
@@ -109,7 +110,7 @@ export default function CallPage() {
             docData.status === 'cancelled' ||
             docData.status === 'declined'
           ) {
-            alert('This consultation call has already ended.');
+            toast.info('This consultation call has already ended.');
             const isAstrologer =
               window.location.href.includes('astrologer') || userData?.role === 'astrologer';
             router.push(isAstrologer ? '/astrologer-dashboard' : '/');
@@ -275,7 +276,7 @@ export default function CallPage() {
         const docRef = doc(db, 'consultations', activeConsultationId);
         updateDoc(docRef, { status: 'completed' }).catch(console.error);
       }
-      alert('Time limit completed. Your call session has ended.');
+      toast.info('Time limit completed. Your call session has ended.');
       const isAstrologer =
         window.location.href.includes('astrologer') || userData?.role === 'astrologer';
       router.push(isAstrologer ? '/astrologer-dashboard' : '/');
@@ -306,7 +307,7 @@ export default function CallPage() {
               const docRef = doc(db, 'consultations', activeConsultationId);
               await updateDoc(docRef, { status: 'completed' }).catch(console.error);
             }
-            alert('Your wallet balance is exhausted. The call has ended.');
+            toast.error('Your wallet balance is exhausted. The call has ended.');
             const isAstrologer =
               window.location.href.includes('astrologer') || userData?.role === 'astrologer';
             router.push(isAstrologer ? '/astrologer-dashboard' : '/');

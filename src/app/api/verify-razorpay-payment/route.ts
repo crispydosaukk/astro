@@ -83,22 +83,24 @@ export async function POST(req: Request) {
     if (paymentType === 'report' && reportDetails) {
       // Store completed service report in Firestore
       const reportTitle = reportDetails.type || 'Custom Report';
-      const detailsStr = reportDetails.details
-        ? `Dob: ${reportDetails.details.dob || ''}, Time: ${reportDetails.details.time || ''}, Place: ${reportDetails.details.place || ''}`
-        : '';
+      let dynamicReportData = reportDetails.reportData || null;
+      try {
+        const { generateReportDataInternal } = await import('@/lib/reportGenerator');
+        dynamicReportData = await generateReportDataInternal(reportTitle, reportDetails.details || {});
+      } catch (aiErr) {
+        console.warn('Error synthesizing AI report in razorpay payment:', aiErr);
+      }
 
       const generatedContent = JSON.stringify({
-        recommendationTitle: `Astrological Report: ${reportTitle}`,
-        recommendationName: `${reportTitle} Insights`,
-        timing: 'Immediate Delivery',
-        duration: 'Lifetime Guidance',
-        materials: 'Personalized Kundli & Planetary Transits',
-        astrologicalAnalysis: `Comprehensive astrological analysis for ${reportTitle}. ${detailsStr}. Your planetary chart has been analyzed according to Vedic astrological principles.`,
-        procedure:
-          'Perform daily morning meditation, chant relevant mantras for weak planets, and consult with our expert astrologers for deeper custom solutions.',
+        ...(dynamicReportData || {}),
+        recommendationTitle: dynamicReportData?.recommendationTitle || `Astrological Report: ${reportTitle}`,
+        recommendationName: dynamicReportData?.recommendationName || `${reportTitle} Insights`,
+        timing: dynamicReportData?.timing || 'Immediate Delivery',
+        duration: dynamicReportData?.duration || 'Lifetime Guidance',
       });
 
-      await addDoc(collection(db, 'service_requests'), {
+      const { adminDb } = await import('@/lib/firebase/admin');
+      await adminDb.collection('service_requests').add({
         userId: reportDetails.userId || userId || 'guest',
         userEmail: reportDetails.userEmail || '',
         type: reportTitle,
@@ -107,10 +109,11 @@ export async function POST(req: Request) {
         displayAmount: reportDetails.displayAmount || amount || 99,
         currency: reportDetails.currency || 'inr',
         reportContent: generatedContent,
+        reportData: dynamicReportData || null,
         status: 'completed',
         paymentId: razorpay_payment_id,
         orderId: razorpay_order_id,
-        createdAt: serverTimestamp(),
+        createdAt: new Date().toISOString(),
       });
 
       return NextResponse.json({

@@ -29,6 +29,7 @@ import CityLocationInput from '@/components/CityLocationInput';
 import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
 import { useUserData } from '@/lib/useUserData';
+import { calculateBirthChartData } from '@/lib/vedicAstrologyEngine';
 
 export default function FreeJanamKundliPage() {
   const { user } = useUserData();
@@ -62,164 +63,22 @@ export default function FreeJanamKundliPage() {
     e.preventDefault();
     setIsCalculating(true);
 
+    const calculatedBase = calculateBirthChartData(
+      formData.dob || new Date().toISOString().split('T')[0],
+      formData.tob || '12:00 PM',
+      formData.pob || 'India',
+      formData.lat || '20.59',
+      formData.lon || '78.96',
+      formData.name || 'Devotee',
+      formData.gender || 'Male'
+    );
+
     const computedHoroscope = {
       recommendationTitle: 'Free Janam Kundli Report',
       recommendationName: `${formData.name || 'Devotee'}'s Personalized Vedic Chart Analysis`,
       timing: `Generated on ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`,
       duration: 'Lifetime Kundli Insights',
-      name: formData.name || 'Devotee',
-      gender: formData.gender,
-      dob: formData.dob || new Date().toISOString().split('T')[0],
-      tob: formData.tob || '12:00 PM',
-      pob: formData.pob || 'India',
-      lat: formData.lat || '20.59',
-      lon: formData.lon || '78.96',
-      sunSign: 'Leo (Simha)',
-      moonSign: 'Aries (Mesha)',
-      ascendant: 'Scorpio (Vrishchika)',
-      nakshatra: 'Bharani (Pada 2)',
-      nakshatraLord: 'Venus (Shukra)',
-      tithi: 'Shukla Paksha Dwadashi',
-      yoga: 'Ayushman',
-      karana: 'Bava',
-      gan: 'Manushya',
-      yoni: 'Gaja (Elephant)',
-      nadi: 'Madhya',
-      planetaryDegrees: [
-        {
-          planet: 'Sun (Surya)',
-          rashi: 'Leo (Simha)',
-          degree: "14° 22'",
-          house: '10th House',
-          status: 'Own Sign (Strong)',
-        },
-        {
-          planet: 'Moon (Chandra)',
-          rashi: 'Aries (Mesha)',
-          degree: "08° 10'",
-          house: '6th House',
-          status: 'Exalted Nakshatra',
-        },
-        {
-          planet: 'Mars (Mangal)',
-          rashi: 'Scorpio (Vrishchika)',
-          degree: "21° 05'",
-          house: '1st House (Lagna)',
-          status: 'Own Sign (Lagna Lord)',
-        },
-        {
-          planet: 'Mercury (Budh)',
-          rashi: 'Virgo (Kanya)',
-          degree: "03° 40'",
-          house: '11th House',
-          status: 'Exalted',
-        },
-        {
-          planet: 'Jupiter (Guru)',
-          rashi: 'Cancer (Karka)',
-          degree: "18° 12'",
-          house: '9th House',
-          status: 'Exalted (Highly Auspicious)',
-        },
-        {
-          planet: 'Venus (Shukra)',
-          rashi: 'Taurus (Vrishabha)',
-          degree: "11° 50'",
-          house: '7th House',
-          status: 'Own Sign',
-        },
-        {
-          planet: 'Saturn (Shani)',
-          rashi: 'Aquarius (Kumbha)',
-          degree: "26° 15'",
-          house: '4th House',
-          status: 'Moolatrikona',
-        },
-        {
-          planet: 'Rahu',
-          rashi: 'Pisces (Meena)',
-          degree: "09° 04'",
-          house: '5th House',
-          status: 'Benefic Transit',
-        },
-        {
-          planet: 'Ketu',
-          rashi: 'Virgo (Kanya)',
-          degree: "09° 04'",
-          house: '11th House',
-          status: 'Spiritual Alignment',
-        },
-      ],
-      dasha: {
-        currentMahadasha: 'Jupiter (Guru)',
-        currentAntardasha: 'Saturn (Shani)',
-        endDate: '14 Nov 2028',
-        timeline: [
-          {
-            dasha: 'Jupiter - Saturn',
-            period: '2025 - 2028',
-            effect: 'Career restructuring & steady financial growth',
-          },
-          {
-            dasha: 'Jupiter - Mercury',
-            period: '2028 - 2030',
-            effect: 'Academic success, foreign travels & wealth',
-          },
-          {
-            dasha: 'Jupiter - Ketu',
-            period: '2030 - 2031',
-            effect: 'Spiritual awakening & deep meditation',
-          },
-          {
-            dasha: 'Jupiter - Venus',
-            period: '2031 - 2034',
-            effect: 'Marriage, luxury & social prestige',
-          },
-        ],
-      },
-      yogas: [
-        {
-          name: 'Raja Yoga',
-          desc: '1st Lord Mars & 10th Lord Sun in mutual connection granting leadership & governance authority.',
-        },
-        {
-          name: 'Dhana Yoga',
-          desc: '5th Lord Venus & 11th Lord Mercury in wealth houses generating financial prosperity.',
-        },
-        {
-          name: 'Gaj Kesari Yoga',
-          desc: 'Moon in Kendra to Jupiter granting wisdom, respect, and enduring reputation.',
-        },
-      ],
-      doshas: [
-        {
-          name: 'Mangal Dosha',
-          status: 'Mild (1st House Mars)',
-          cancelled: true,
-          remedy: 'Chant Hanuman Chalisa on Tuesdays.',
-        },
-        {
-          name: 'Kaal Sarp Dosha',
-          status: 'Absent',
-          cancelled: false,
-          remedy: 'Planets are evenly distributed across Kendra houses.',
-        },
-      ],
-      predictions: {
-        career:
-          'Exalted 10th house Sun and Jupiter aspect indicate strong potential for government authority, corporate leadership, law, or high-tech management.',
-        finance:
-          'Dhana Yoga ensures steady asset accumulation through property, investments, and professional income.',
-        marriage:
-          'Venus in 7th house in own sign promises a charming, supportive, and intellectually compatible spouse.',
-        health: 'Lagna Lord Mars ensures high stamina and vital power.',
-      },
-      remedies: [
-        'Wear a natural 6 to 7 Ratti Red Coral in Gold on Tuesday morning.',
-        'Chant "Om Namo Bhagavate Vasudevaya" 108 times daily.',
-        'Offer water mixed with red flowers to Surya Dev at sunrise.',
-      ],
-      astrologicalAnalysis: `Extensive birth chart analysis for ${formData.name || 'Devotee'} born on ${formData.dob} at ${formData.pob}.\n\n• Lagna: Scorpio (Vrishchika) ruled by Mars granting resilience and strategic leadership.\n• Moon Sign: Aries (Bharani Nakshatra) bestowing creativity and pioneering drive.\n• Planetary Alignments: Strong 10th House Sun and 9th House exalted Jupiter create powerful Raja Yoga for rapid career and financial growth.\n• Recommended Remedies: Tuesday Hanuman Chalisa and wearing Red Coral for protection.`,
+      ...calculatedBase,
     };
 
     setHoroscopeReport(computedHoroscope);

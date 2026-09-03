@@ -64,6 +64,8 @@ export default function AICallRoomPage() {
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeAudioInstanceRef = useRef<HTMLAudioElement | null>(null);
+  const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const speechKeepAliveRef = useRef<NodeJS.Timeout | null>(null);
   const recognitionRef = useRef<any>(null);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
   const latestMessagesRef = useRef<any[]>([]);
@@ -71,6 +73,7 @@ export default function AICallRoomPage() {
   const accumulatedSpeechRef = useRef<string>('');
   const inputTextRef = useRef<string>('');
   const activeLanguageRef = useRef<string>('Telugu');
+  const isAiSpeakingRef = useRef<boolean>(false);
   const isSpeakerMutedRef = useRef<boolean>(false);
   const isGeneratingReplyRef = useRef<boolean>(false);
   const handleSendMessageRef = useRef<((textToSend?: string) => void) | null>(null);
@@ -91,6 +94,10 @@ export default function AICallRoomPage() {
   useEffect(() => {
     isSpeakerMutedRef.current = isSpeakerMuted;
   }, [isSpeakerMuted]);
+
+  useEffect(() => {
+    isAiSpeakingRef.current = isAiSpeaking;
+  }, [isAiSpeaking]);
 
   // Language speech code translator
   const getLangCode = useCallback((lang: string) => {
@@ -124,6 +131,11 @@ export default function AICallRoomPage() {
   useEffect(() => {
     return () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (speechKeepAliveRef.current) {
+        clearInterval(speechKeepAliveRef.current);
+        speechKeepAliveRef.current = null;
+      }
+      activeUtteranceRef.current = null;
       if (activeAudioInstanceRef.current) {
         try {
           activeAudioInstanceRef.current.pause();
@@ -230,7 +242,7 @@ export default function AICallRoomPage() {
     }
   }, [userData]);
 
-  // Web Speech Synthesis (Client-side speaker fallback)
+  // Web Speech Synthesis (Client-side speaker fallback - reads ALL sentences sequentially till the end)
   const speakNativeWebSpeech = useCallback(
     (text: string) => {
       if (typeof window === 'undefined' || !('speechSynthesis' in window) || isSpeakerMutedRef.current) return;
@@ -242,71 +254,118 @@ export default function AICallRoomPage() {
 
       try {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        const langCode = getLangCode(activeLanguageRef.current);
-        utterance.lang = langCode;
-        utterance.rate = 0.90;
 
-        const isFemale =
-          session?.voiceGender === 'female' ||
-          session?.astrologerName?.toLowerCase().includes('devi') ||
-          session?.astrologerName?.toLowerCase().includes('mata') ||
-          session?.astrologerName?.toLowerCase().includes('priya') ||
-          session?.astrologerName?.toLowerCase().includes('ananya');
+        // Split text into natural sentences so Chrome/Edge never drops tail sentences on long responses
+        const sentenceRegex = /[^.!?।॥\n]+[.!?।॥\n]*/g;
+        const matched = text.match(sentenceRegex) || [text];
+        const sentences = matched.map((s) => s.trim()).filter((s) => s.length > 0);
 
-        // Authentic voice pitch: lower pitch for male swamis / astrologers, higher for female
-        utterance.pitch = isFemale ? 1.05 : 0.80;
+        if (sentences.length === 0) return;
 
-        const voices = window.speechSynthesis.getVoices();
-        const langVoices = voices.filter((v) => v.lang.startsWith(langCode.substring(0, 2)));
+        let currentIndex = 0;
 
-        if (langVoices.length > 0) {
-          if (isFemale) {
-            const femaleVoice = langVoices.find(
-              (v) =>
-                v.name.toLowerCase().includes('female') ||
-                v.name.toLowerCase().includes('zira') ||
-                v.name.toLowerCase().includes('swara') ||
-                v.name.toLowerCase().includes('heera') ||
-                v.name.toLowerCase().includes('shruti') ||
-                v.name.toLowerCase().includes('pallavi')
-            );
-            utterance.voice = femaleVoice || langVoices[0];
-          } else {
-            // Strictly male voice for male astrologers
-            const maleVoice = langVoices.find(
-              (v) =>
-                v.name.toLowerCase().includes('male') ||
-                v.name.toLowerCase().includes('david') ||
-                v.name.toLowerCase().includes('george') ||
-                v.name.toLowerCase().includes('ravi') ||
-                v.name.toLowerCase().includes('mohan') ||
-                v.name.toLowerCase().includes('valluvar') ||
-                v.name.toLowerCase().includes('madhav')
-            );
-            if (maleVoice) {
-              utterance.voice = maleVoice;
+        const speakSentence = () => {
+          if (currentIndex >= sentences.length) {
+            setIsAiSpeaking(false);
+            isAiSpeakingRef.current = false;
+            activeUtteranceRef.current = null;
+            if (speechKeepAliveRef.current) {
+              clearInterval(speechKeepAliveRef.current);
+              speechKeepAliveRef.current = null;
+            }
+            return;
+          }
+
+          const currentText = sentences[currentIndex];
+          currentIndex++;
+
+          const utterance = new SpeechSynthesisUtterance(currentText);
+          const langCode = getLangCode(activeLanguageRef.current);
+          utterance.lang = langCode;
+          utterance.rate = 0.90;
+
+          const isFemale =
+            session?.voiceGender === 'female' ||
+            session?.astrologerName?.toLowerCase().includes('devi') ||
+            session?.astrologerName?.toLowerCase().includes('mata') ||
+            session?.astrologerName?.toLowerCase().includes('priya') ||
+            session?.astrologerName?.toLowerCase().includes('ananya');
+
+          utterance.pitch = isFemale ? 1.05 : 0.80;
+
+          const voices = window.speechSynthesis.getVoices();
+          const langVoices = voices.filter((v) => v.lang.startsWith(langCode.substring(0, 2)));
+
+          if (langVoices.length > 0) {
+            if (isFemale) {
+              const femaleVoice = langVoices.find(
+                (v) =>
+                  v.name.toLowerCase().includes('female') ||
+                  v.name.toLowerCase().includes('zira') ||
+                  v.name.toLowerCase().includes('swara') ||
+                  v.name.toLowerCase().includes('heera') ||
+                  v.name.toLowerCase().includes('shruti') ||
+                  v.name.toLowerCase().includes('pallavi')
+              );
+              utterance.voice = femaleVoice || langVoices[0];
             } else {
-              // If no explicit male voice exists, significantly lower pitch to guarantee deep male tone
-              utterance.pitch = 0.70;
+              const maleVoice = langVoices.find(
+                (v) =>
+                  v.name.toLowerCase().includes('male') ||
+                  v.name.toLowerCase().includes('david') ||
+                  v.name.toLowerCase().includes('george') ||
+                  v.name.toLowerCase().includes('ravi') ||
+                  v.name.toLowerCase().includes('mohan') ||
+                  v.name.toLowerCase().includes('valluvar') ||
+                  v.name.toLowerCase().includes('madhav')
+              );
+              if (maleVoice) {
+                utterance.voice = maleVoice;
+              } else {
+                utterance.pitch = 0.70;
+              }
             }
           }
-        }
 
-        utterance.onstart = () => {
-          setIsAiSpeaking(true);
-        };
-        utterance.onend = () => {
-          setIsAiSpeaking(false);
-        };
-        utterance.onerror = () => {
-          setIsAiSpeaking(false);
+          activeUtteranceRef.current = utterance;
+
+          utterance.onstart = () => {
+            setIsAiSpeaking(true);
+            isAiSpeakingRef.current = true;
+          };
+          utterance.onend = () => {
+            speakSentence();
+          };
+          utterance.onerror = () => {
+            // Even if an error happens on one sentence, advance to the next so no line is missed
+            speakSentence();
+          };
+
+          window.speechSynthesis.speak(utterance);
         };
 
-        window.speechSynthesis.speak(utterance);
+        // Keepalive to prevent Chrome/Edge from pausing mid-speech
+        if (speechKeepAliveRef.current) clearInterval(speechKeepAliveRef.current);
+        speechKeepAliveRef.current = setInterval(() => {
+          if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.resume();
+          } else if (speechKeepAliveRef.current) {
+            clearInterval(speechKeepAliveRef.current);
+            speechKeepAliveRef.current = null;
+          }
+        }, 6000);
+
+        speakSentence();
       } catch (e) {
         console.warn('Speech synthesis error:', e);
         setIsAiSpeaking(false);
+        isAiSpeakingRef.current = false;
+        activeUtteranceRef.current = null;
+        if (speechKeepAliveRef.current) {
+          clearInterval(speechKeepAliveRef.current);
+          speechKeepAliveRef.current = null;
+        }
       }
     },
     [getLangCode, session]
@@ -338,6 +397,12 @@ export default function AICallRoomPage() {
           playPromise
             .then(() => {
               setIsAiSpeaking(true);
+              isAiSpeakingRef.current = true;
+              if (recognitionRef.current) {
+                try {
+                  recognitionRef.current.stop();
+                } catch (e) {}
+              }
             })
             .catch((err) => {
               console.warn('Direct audio play blocked by browser autoplay policy:', err);
@@ -346,14 +411,17 @@ export default function AICallRoomPage() {
         }
         sound.onended = () => {
           setIsAiSpeaking(false);
+          isAiSpeakingRef.current = false;
         };
         sound.onerror = () => {
           setIsAiSpeaking(false);
+          isAiSpeakingRef.current = false;
           // Do NOT trigger fallback speech to avoid dual voice mixing!
         };
       } catch (e) {
         console.warn('Audio playback error:', e);
         setIsAiSpeaking(false);
+        isAiSpeakingRef.current = false;
       }
     },
     []
@@ -531,6 +599,11 @@ export default function AICallRoomPage() {
       };
 
       rec.onresult = (event: any) => {
+        // If AI is currently reading guidance, ignore mic input so audio playback is never cut off
+        if (isAiSpeakingRef.current || (activeAudioInstanceRef.current && !activeAudioInstanceRef.current.paused)) {
+          return;
+        }
+
         let transcript = '';
         for (let i = 0; i < event.results.length; ++i) {
           transcript += event.results[i][0].transcript;

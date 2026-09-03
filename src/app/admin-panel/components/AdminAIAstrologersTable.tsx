@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AppImage from '@/components/ui/AppImage';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import {
   Bot,
   Sparkles,
@@ -67,6 +68,10 @@ export default function AdminAIAstrologersTable() {
   const [editingDisc, setEditingDisc] = useState<AIDiscipline | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Centered Confirmation Modals
+  const [showSyncConfirm, setShowSyncConfirm] = useState(false);
+  const [astroToDelete, setAstroToDelete] = useState<AIAstrologer | null>(null);
+
   useEffect(() => {
     fetchAdminData();
   }, []);
@@ -89,8 +94,11 @@ export default function AdminAIAstrologersTable() {
   };
 
   // Sync All 50 Astrologers to Database
-  const handleResetAstrologers = async () => {
-    if (!confirm('Sync and publish all 50 authentic AI Astrologers across all 12 Vedic disciplines to Firestore database?')) return;
+  const handleResetAstrologers = () => {
+    setShowSyncConfirm(true);
+  };
+
+  const executeSyncAllAstrologers = async () => {
     setIsResetting(true);
     try {
       const res = await fetch('/api/admin/ai-astrologers', {
@@ -103,12 +111,13 @@ export default function AdminAIAstrologersTable() {
         toast.success(`Successfully synced all ${data.count} AI Astrologers and ${data.disciplinesCount} disciplines!`);
         fetchAdminData();
       } else {
-        toast.error('Failed to sync astrologers');
+        toast.error('Sync failed: ' + (data.error || 'Unknown error'));
       }
-    } catch (e) {
-      toast.error('Sync request failed');
+    } catch (err: any) {
+      toast.error('Sync failed: ' + err.message);
     } finally {
       setIsResetting(false);
+      setShowSyncConfirm(false);
     }
   };
 
@@ -153,8 +162,13 @@ export default function AdminAIAstrologersTable() {
   };
 
   // Delete AI Astrologer
-  const handleDeleteAstrologer = async (astro: AIAstrologer) => {
-    if (!confirm(`Are you sure you want to permanently delete AI Astrologer "${astro.name}"?`)) return;
+  const handleDeleteAstrologer = (astro: AIAstrologer) => {
+    setAstroToDelete(astro);
+  };
+
+  const executeDeleteAstrologer = async () => {
+    if (!astroToDelete) return;
+    const astro = astroToDelete;
     try {
       const res = await fetch('/api/admin/ai-astrologers', {
         method: 'POST',
@@ -170,6 +184,8 @@ export default function AdminAIAstrologersTable() {
       }
     } catch (err) {
       toast.error('Failed to delete');
+    } finally {
+      setAstroToDelete(null);
     }
   };
 
@@ -1269,6 +1285,31 @@ export default function AdminAIAstrologersTable() {
 
       {/* Logout Confirmation Modal */}
       <LogoutModal isOpen={showLogoutModal} onClose={() => setShowLogoutModal(false)} />
+
+      {/* Sync All Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showSyncConfirm}
+        onClose={() => setShowSyncConfirm(false)}
+        onConfirm={executeSyncAllAstrologers}
+        title="Sync All 50 AI Astrologers?"
+        description="This will publish and synchronize all 50 authentic AI Astrologers across all 12 Vedic disciplines to your Firestore database. Do you wish to continue?"
+        confirmText="Yes, Sync Database"
+        cancelText="Cancel"
+        variant="primary"
+        confirmLoading={isResetting}
+      />
+
+      {/* Delete Astrologer Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!astroToDelete}
+        onClose={() => setAstroToDelete(null)}
+        onConfirm={executeDeleteAstrologer}
+        title={`Delete "${astroToDelete?.name}"?`}
+        description={`Are you sure you want to permanently remove AI Astrologer "${astroToDelete?.name}" (${astroToDelete?.primaryDiscipline})? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }

@@ -23,6 +23,7 @@ import {
   defaultRudrakshaContent,
 } from '@/lib/cms';
 import { Save, Loader2, Info } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminServicePagesEditor() {
   const [selectedService, setSelectedService] = useState('homa');
@@ -300,7 +301,7 @@ export default function AdminServicePagesEditor() {
                   const parsed = JSON.parse(e.target.value);
                   updatePremium({ ...premium, ...parsed });
                 } catch (err) {
-                  alert('Invalid JSON format in Premium Details');
+                  toast.error('Invalid JSON format in Premium Details');
                 }
               }}
               className="w-full px-3 py-2 rounded-lg bg-card border border-border text-sm font-mono"

@@ -24,6 +24,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCurrency } from '@/lib/CurrencyContext';
 import Link from 'next/link';
 import AppImage from '@/components/ui/AppImage';
+import Pagination from '@/components/ui/Pagination';
 
 export default function OrderHistoryPage() {
   const { user, loading: userLoading } = useUserData();
@@ -33,6 +34,11 @@ export default function OrderHistoryPage() {
   const [humanHistory, setHumanHistory] = useState<any[]>([]);
   const [aiHistory, setAiHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination states
+  const [aiPage, setAiPage] = useState(1);
+  const [humanPage, setHumanPage] = useState(1);
+  const itemsPerPage = 5;
 
   // Selected AI Session for detailed modal view
   const [selectedAiSession, setSelectedAiSession] = useState<any | null>(null);
@@ -125,7 +131,7 @@ export default function OrderHistoryPage() {
         {/* Page Title & Subtitle */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#292522] flex items-center gap-3 font-serif">
+            <h1 className="text-3xl font-bold text-[#292522] flex items-center gap-3 tracking-tight">
               <Clock className="text-[#713B32]" size={32} />
               Consultation & Order History
             </h1>
@@ -175,7 +181,7 @@ export default function OrderHistoryPage() {
           /* AI Consultations Tab */
           aiHistory.length > 0 ? (
             <div className="space-y-4">
-              {aiHistory.map((item, i) => (
+              {aiHistory.slice((aiPage - 1) * itemsPerPage, aiPage * itemsPerPage).map((item, i) => (
                 <motion.div
                   key={item.id || i}
                   initial={{ opacity: 0, y: 10 }}
@@ -199,7 +205,7 @@ export default function OrderHistoryPage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold text-lg text-[#292522] font-serif">
+                          <h3 className="font-bold text-lg text-[#292522]">
                             {item.astrologerName}
                           </h3>
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#F8F3EA] text-[#713B32] border border-[#E5D9C8]">
@@ -251,7 +257,7 @@ export default function OrderHistoryPage() {
                           setSelectedAiSession(item);
                           setModalTab('remedies');
                         }}
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#B08022] hover:from-[#B08022] hover:to-[#966B1A] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#B08022] hover:from-[#B08022] hover:to-[#966B1A] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
                       >
                         <Sparkles size={13} /> View Transcript & Remedies
                       </button>
@@ -259,13 +265,22 @@ export default function OrderHistoryPage() {
                   </div>
                 </motion.div>
               ))}
+
+              <Pagination
+                currentPage={aiPage}
+                totalPages={Math.max(1, Math.ceil(aiHistory.length / itemsPerPage))}
+                totalItems={aiHistory.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setAiPage}
+                itemLabel="AI consultations"
+              />
             </div>
           ) : (
             <div className="bg-[#FFFDFC] rounded-2xl border border-[#E5D9C8] p-12 text-center shadow-sm">
               <div className="w-16 h-16 rounded-full bg-[#EDE4D5] flex items-center justify-center mx-auto mb-4 text-[#713B32]">
                 <Bot size={28} />
               </div>
-              <h3 className="text-xl font-bold text-[#292522] mb-2 font-serif">
+              <h3 className="text-xl font-bold text-[#292522] mb-2">
                 No AI Consultations Yet
               </h3>
               <p className="text-[#6B5E55] mb-6 text-sm max-w-md mx-auto">
@@ -283,7 +298,7 @@ export default function OrderHistoryPage() {
           /* Human Astrologer Calls Tab */
           humanHistory.length > 0 ? (
             <div className="space-y-4">
-              {humanHistory.map((order, i) => (
+              {humanHistory.slice((humanPage - 1) * itemsPerPage, humanPage * itemsPerPage).map((order, i) => (
                 <motion.div
                   key={order.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -301,7 +316,7 @@ export default function OrderHistoryPage() {
                         )}
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg text-[#292522] font-serif">
+                        <h3 className="font-bold text-lg text-[#292522]">
                           {order.type === 'video' ? 'Video' : 'Audio'} Consultation with{' '}
                           {order.astrologerName}
                         </h3>
@@ -327,13 +342,22 @@ export default function OrderHistoryPage() {
                   </div>
                 </motion.div>
               ))}
+
+              <Pagination
+                currentPage={humanPage}
+                totalPages={Math.max(1, Math.ceil(humanHistory.length / itemsPerPage))}
+                totalItems={humanHistory.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setHumanPage}
+                itemLabel="astrologer calls"
+              />
             </div>
           ) : (
             <div className="bg-[#FFFDFC] rounded-2xl border border-[#E5D9C8] p-12 text-center shadow-sm">
               <div className="w-16 h-16 rounded-full bg-[#EDE4D5] flex items-center justify-center mx-auto mb-4 text-[#6B5E55]">
                 <Phone size={24} />
               </div>
-              <h3 className="text-xl font-bold text-[#292522] mb-2 font-serif">
+              <h3 className="text-xl font-bold text-[#292522] mb-2">
                 No Past Astrologer Calls
               </h3>
               <p className="text-[#6B5E55] mb-6 text-sm">
@@ -371,7 +395,7 @@ export default function OrderHistoryPage() {
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#FFFDFC]/20 text-[#FFFDFC] border border-white/30 mb-1.5">
                   <Sparkles size={12} /> {selectedAiSession.primaryDiscipline || 'Vedic Jyotish'}
                 </div>
-                <h2 className="text-2xl font-bold text-[#FFFDFC] font-serif">
+                <h2 className="text-2xl font-bold text-[#FFFDFC]">
                   Consultation with {selectedAiSession.astrologerName}
                 </h2>
                 <p className="text-xs text-[#F3EBDD] mt-1">
@@ -475,7 +499,7 @@ export default function OrderHistoryPage() {
 
                     {/* Blessing */}
                     {selectedAiSession.summary?.panditJiFinalBlessing && (
-                      <div className="p-4 bg-gradient-to-r from-[#F8F3EA] to-[#EDE4D5] rounded-2xl border border-[#C9952B]/50 text-center italic text-[#713B32] font-medium font-serif leading-relaxed">
+                      <div className="p-4 bg-gradient-to-r from-[#F8F3EA] to-[#EDE4D5] rounded-2xl border border-[#C9952B]/50 text-center italic text-[#713B32] font-medium leading-relaxed">
                         "{selectedAiSession.summary.panditJiFinalBlessing}"
                       </div>
                     )}

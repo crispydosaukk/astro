@@ -37,7 +37,7 @@ export const DEFAULT_GLOBAL_AI_CONFIG: GlobalAIConfig = {
   systemPersona:
     'You are a revered grandmaster Vedic Astrologer, Vastu Acharya, and Jyotish Scholar at AstroParihar. Your readings are authentic, compassionate, strictly non-fatalistic, empowering, and grounded in Parashara and Jaimini Vedic classics.',
   globalExtraDirectives:
-    '1. Always maintain a respectful, empowering, and spiritually uplifting tone.\n2. Do not promote fear-based astrology or exaggerated curses; provide practical remedies and clarity.\n3. Output crisp, modern, formatted markdown or structured JSON without generic filler.',
+    `1. Real-Time Calendar Anchor: The current year is strictly ${new Date().getFullYear()}. All planetary transits, dasha cycles, and astrological predictions must be anchored in ${new Date().getFullYear()} and future years. Never refer to 2024 or past years as current.\n2. Always maintain a respectful, empowering, and spiritually uplifting tone.\n3. Do not promote fear-based astrology or exaggerated curses; provide practical remedies and clarity.\n4. Output crisp, modern, formatted markdown or structured JSON without generic filler.`,
   enableDynamicSynthesis: true,
 };
 
@@ -416,6 +416,29 @@ Respond ONLY with a JSON object:
 
 export async function getAIPromptSettings(): Promise<AIPromptSettingsData> {
   try {
+    if (typeof window === 'undefined') {
+      try {
+        const { adminDb } = await import('./firebase/admin');
+        const snap = await adminDb.collection('settings').doc('ai_prompts').get();
+        if (snap.exists) {
+          const data = snap.data();
+          return {
+            config: {
+              ...DEFAULT_GLOBAL_AI_CONFIG,
+              ...(data.config || {}),
+            },
+            prompts: {
+              ...DEFAULT_AI_PROMPTS,
+              ...(data.prompts || {}),
+            },
+            lastSaved: data.lastSaved,
+          };
+        }
+      } catch (adminErr) {
+        console.warn('Server adminDb ai_prompts lookup warning:', adminErr);
+      }
+    }
+
     const docRef = doc(db, 'settings', 'ai_prompts');
     const docSnap = await getDoc(docRef);
 
@@ -448,15 +471,19 @@ export async function getAIPromptSettings(): Promise<AIPromptSettingsData> {
 
 export async function updateAIPromptSettings(data: AIPromptSettingsData): Promise<void> {
   try {
+    const payload = {
+      ...data,
+      lastSaved: new Date().toISOString(),
+    };
+
+    if (typeof window === 'undefined') {
+      const { adminDb } = await import('./firebase/admin');
+      await adminDb.collection('settings').doc('ai_prompts').set(payload, { merge: true });
+      return;
+    }
+
     const docRef = doc(db, 'settings', 'ai_prompts');
-    await setDoc(
-      docRef,
-      {
-        ...data,
-        lastSaved: new Date().toISOString(),
-      },
-      { merge: true }
-    );
+    await setDoc(docRef, payload, { merge: true });
   } catch (error) {
     console.error('Error saving AI prompt settings to Firestore:', error);
     throw error;

@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { CurrencyProvider } from '@/lib/CurrencyContext';
 import GlobalFooterAndBottomBar from '@/components/GlobalFooterAndBottomBar';
+import AIChatSidebar from '@/components/AIChatSidebar';
 import '../styles/tailwind.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -45,7 +46,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <CurrencyProvider>
           {children}
           <GlobalFooterAndBottomBar />
-          <Toaster position="bottom-right" richColors />
+          <AIChatSidebar />
+          <Toaster position="top-center" richColors closeButton />
         </CurrencyProvider>
       </body>
     </html>

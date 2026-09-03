@@ -23,6 +23,7 @@ import { useCurrency } from '@/lib/CurrencyContext';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import Link from 'next/link';
+import Pagination from '@/components/ui/Pagination';
 
 export default function AIConsultationsHistoryPage() {
   const { user, loading: userLoading } = useUserData();
@@ -31,6 +32,8 @@ export default function AIConsultationsHistoryPage() {
   const [consultations, setConsultations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
   const [selectedSession, setSelectedSession] = useState<any | null>(null);
   const [modalTab, setModalTab] = useState<'remedies' | 'transcript'>('remedies');
 
@@ -99,7 +102,7 @@ export default function AIConsultationsHistoryPage() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#FFFDFC]/20 text-[#FFFDFC] border border-white/30 mb-2">
                 <Bot size={13} /> Consultation Records
               </span>
-              <h1 className="text-3xl font-bold font-serif text-[#FFFDFC]">
+              <h1 className="text-3xl font-bold tracking-tight text-[#FFFDFC]">
                 AI Astrologer Consultations & Reports
               </h1>
               <p className="text-sm text-[#F3EBDD] mt-1">
@@ -128,7 +131,10 @@ export default function AIConsultationsHistoryPage() {
             type="text"
             placeholder="Search by astrologer name, language, or concern..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] focus:border-[#C9952B] text-xs text-[#292522] outline-none shadow-sm font-medium"
           />
         </div>
@@ -141,7 +147,7 @@ export default function AIConsultationsHistoryPage() {
         ) : filtered.length === 0 ? (
           <div className="py-20 text-center bg-[#FFFDFC] border border-[#E5D9C8] rounded-3xl p-8 max-w-md mx-auto shadow-sm">
             <Bot size={44} className="text-[#713B32] mx-auto mb-3 opacity-60" />
-            <h3 className="font-bold text-base text-[#292522] mb-1 font-serif">No Consultations Found</h3>
+            <h3 className="font-bold text-base text-[#292522] mb-1">No Consultations Found</h3>
             <p className="text-xs text-[#6B5E55] mb-6">
               You haven't conducted any AI voice consultations yet.
             </p>
@@ -153,104 +159,115 @@ export default function AIConsultationsHistoryPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((item) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#C9952B] rounded-3xl p-5 flex flex-col justify-between transition-all hover:shadow-md text-[#292522]"
-              >
-                <div>
-                  {/* Astrologer Top Header */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-[#C9952B] relative flex-shrink-0 shadow-sm">
-                      <AppImage
-                        src={
-                          item.astrologerAvatar ||
-                          'https://images.unsplash.com/photo-1544717305-2782549b5136?w=300'
-                        }
-                        alt={item.astrologerName}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-[#F8F3EA] text-[#713B32] border border-[#E5D9C8] uppercase">
-                          {item.primaryDiscipline || 'Vedic Jyotish'}
-                        </span>
-                        {item.language && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#FFF8ED] text-[#C9952B] border border-[#C9952B]/40">
-                            {item.language}
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="font-bold text-sm text-[#292522] truncate mt-0.5 font-serif">
-                        {item.astrologerName}
-                      </h4>
-                      <p className="text-[11px] text-[#6B5E55] truncate font-medium">
-                        {item.birthDetails?.primaryConcern || 'General Life Guidance'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Consultation Metrics */}
-                  <div className="grid grid-cols-3 gap-2 p-3 bg-[#F8F3EA] rounded-xl border border-[#E5D9C8] text-center mb-4 text-xs">
-                    <div>
-                      <span className="text-[10px] text-[#6B5E55] uppercase block font-semibold">
-                        Date
-                      </span>
-                      <span className="font-semibold text-[#292522]">
-                        {new Date(item.createdAt || item.startTime || Date.now()).toLocaleDateString([], {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-[#6B5E55] uppercase block font-semibold">
-                        Duration
-                      </span>
-                      <span className="font-semibold text-[#292522]">
-                        {item.billedMinutes || 1} min
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-[#6B5E55] uppercase block font-semibold">
-                        Amount
-                      </span>
-                      <span className="font-bold text-[#C9952B]">
-                        {formatPrice(item.totalBilledAmount || (item.billedMinutes || 1) * (item.pricePerMin || 20))}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Snapshot of Key Observation */}
-                  {item.summary?.astrologicalHighlights?.length > 0 && (
-                    <div className="mb-4">
-                      <span className="text-[10px] text-[#713B32] uppercase font-bold tracking-wider block mb-1">
-                        Key Planetary Insight
-                      </span>
-                      <p className="text-xs text-[#292522] line-clamp-2 bg-[#F8F3EA] p-2.5 rounded-lg border border-[#E5D9C8]">
-                        {item.summary.astrologicalHighlights[0]}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setSelectedSession(item);
-                    setModalTab('remedies');
-                  }}
-                  className="w-full py-2.5 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-[#FFFDFC] border border-[#E5D9C8] hover:border-[#C9952B] rounded-3xl p-5 flex flex-col justify-between transition-all hover:shadow-md text-[#292522]"
                 >
-                  <Sparkles size={13} /> View Transcript & Remedies
-                </button>
-              </motion.div>
-            ))}
-          </div>
+                  <div>
+                    {/* Astrologer Top Header */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-[#C9952B] relative flex-shrink-0 shadow-sm">
+                        <AppImage
+                          src={
+                            item.astrologerAvatar ||
+                            'https://images.unsplash.com/photo-1544717305-2782549b5136?w=300'
+                          }
+                          alt={item.astrologerName}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-[#F8F3EA] text-[#713B32] border border-[#E5D9C8] uppercase">
+                            {item.primaryDiscipline || 'Vedic Jyotish'}
+                          </span>
+                          {item.language && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#FFF8ED] text-[#C9952B] border border-[#C9952B]/40">
+                              {item.language}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-sm text-[#292522] truncate mt-0.5">
+                          {item.astrologerName}
+                        </h4>
+                        <p className="text-[11px] text-[#6B5E55] truncate font-medium">
+                          {item.birthDetails?.primaryConcern || 'General Life Guidance'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Consultation Metrics */}
+                    <div className="grid grid-cols-3 gap-2 p-3 bg-[#F8F3EA] rounded-xl border border-[#E5D9C8] text-center mb-4 text-xs">
+                      <div>
+                        <span className="text-[10px] text-[#6B5E55] uppercase block font-semibold">
+                          Date
+                        </span>
+                        <span className="font-semibold text-[#292522]">
+                          {new Date(item.createdAt || item.startTime || Date.now()).toLocaleDateString([], {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#6B5E55] uppercase block font-semibold">
+                          Duration
+                        </span>
+                        <span className="font-semibold text-[#292522]">
+                          {item.billedMinutes || 1} min
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#6B5E55] uppercase block font-semibold">
+                          Amount
+                        </span>
+                        <span className="font-bold text-[#C9952B]">
+                          {formatPrice(item.totalBilledAmount || (item.billedMinutes || 1) * (item.pricePerMin || 20))}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Snapshot of Key Observation */}
+                    {item.summary?.astrologicalHighlights?.length > 0 && (
+                      <div className="mb-4">
+                        <span className="text-[10px] text-[#713B32] uppercase font-bold tracking-wider block mb-1">
+                          Key Planetary Insight
+                        </span>
+                        <p className="text-xs text-[#292522] line-clamp-2 bg-[#F8F3EA] p-2.5 rounded-lg border border-[#E5D9C8]">
+                          {item.summary.astrologicalHighlights[0]}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setSelectedSession(item);
+                      setModalTab('remedies');
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                  >
+                    <Sparkles size={13} /> View Transcript & Remedies
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.max(1, Math.ceil(filtered.length / itemsPerPage))}
+              totalItems={filtered.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              itemLabel="AI consultations"
+            />
+          </>
         )}
       </section>
 
@@ -275,7 +292,7 @@ export default function AIConsultationsHistoryPage() {
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#FFFDFC]/20 text-[#FFFDFC] border border-white/30 mb-1.5">
                   <Sparkles size={12} /> {selectedSession.primaryDiscipline || 'Vedic Jyotish'}
                 </div>
-                <h2 className="text-2xl font-bold text-[#FFFDFC] font-serif">
+                <h2 className="text-2xl font-bold text-[#FFFDFC]">
                   Consultation with {selectedSession.astrologerName}
                 </h2>
                 <p className="text-xs text-[#F3EBDD] mt-1">
@@ -379,7 +396,7 @@ export default function AIConsultationsHistoryPage() {
 
                     {/* Blessing */}
                     {selectedSession.summary?.panditJiFinalBlessing && (
-                      <div className="p-4 bg-gradient-to-r from-[#F8F3EA] to-[#EDE4D5] rounded-2xl border border-[#C9952B]/50 text-center italic text-[#713B32] font-medium font-serif leading-relaxed">
+                      <div className="p-4 bg-gradient-to-r from-[#F8F3EA] to-[#EDE4D5] rounded-2xl border border-[#C9952B]/50 text-center italic text-[#713B32] font-medium leading-relaxed">
                         "{selectedSession.summary.panditJiFinalBlessing}"
                       </div>
                     )}

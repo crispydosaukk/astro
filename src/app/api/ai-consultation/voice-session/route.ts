@@ -446,7 +446,43 @@ function cleanApiKey(key?: string | null): string {
   return key.trim().replace(/^["']|["']$/g, '').trim();
 }
 
-// Universal Multilingual Speech Synthesizer
+// Split text into natural sentence chunks under maxChunkLength (safe limit for OpenAI TTS is 3500 chars)
+function splitIntoNaturalChunks(text: string, maxChunkLength = 3500): string[] {
+  if (text.length <= maxChunkLength) return [text];
+
+  const sentenceRegex = /[^.!?।॥\n]+[.!?।॥\n]*/g;
+  const matches = text.match(sentenceRegex) || [text];
+  const chunks: string[] = [];
+  let current = '';
+
+  for (const sentence of matches) {
+    if ((current + ' ' + sentence).trim().length <= maxChunkLength) {
+      current = (current + ' ' + sentence).trim();
+    } else {
+      if (current) chunks.push(current);
+      if (sentence.length > maxChunkLength) {
+        const words = sentence.split(' ');
+        let sub = '';
+        for (const w of words) {
+          if ((sub + ' ' + w).trim().length <= maxChunkLength) {
+            sub = (sub + ' ' + w).trim();
+          } else {
+            if (sub) chunks.push(sub);
+            sub = w;
+          }
+        }
+        if (sub) chunks.push(sub);
+        current = '';
+      } else {
+        current = sentence.trim();
+      }
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks.length > 0 ? chunks : [text];
+}
+
+// Universal Multilingual Speech Synthesizer (Zero Character Cutoff - Reads 100% of All Lines)
 async function generateMultilingualAudioBase64(
   text: string,
   language: string,
@@ -454,7 +490,7 @@ async function generateMultilingualAudioBase64(
   openaiApiKey?: string | null
 ): Promise<string | null> {
   const sanitizedText = cleanTextForVedicVoice(text, language);
-  const cleanInput = sanitizedText.replace(/[\n\r]+/g, ' ').slice(0, 350).trim();
+  const cleanInput = sanitizedText.replace(/[\n\r]+/g, ' ').trim();
   if (!cleanInput) return null;
 
   let activeKey = cleanApiKey(openaiApiKey);
@@ -462,60 +498,72 @@ async function generateMultilingualAudioBase64(
     activeKey = FALLBACK_OPENAI_KEY;
   }
 
-  // 1. OpenAI TTS Engine
+  // 1. OpenAI TTS Engine (Multi-chunk processing so ANY number of lines are read completely to the end)
   if (activeKey) {
     try {
       const ttsVoice = astrologer.voiceId || (astrologer.voiceGender === 'female' ? 'nova' : 'onyx');
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const textChunks = splitIntoNaturalChunks(cleanInput, 3500);
+      const audioBuffers: Buffer[] = [];
+      let allChunksSucceeded = true;
 
-      let ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${activeKey}`,
-        },
-        body: JSON.stringify({
-          model: 'tts-1',
-          voice: ttsVoice,
-          input: cleanInput,
-          response_format: 'mp3',
-        }),
-        signal: controller.signal,
-      });
+      for (const chunk of textChunks) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 35000);
 
-      if (ttsRes.status === 401 && activeKey !== FALLBACK_OPENAI_KEY) {
-        console.warn('OpenAI TTS 401 with primary key, retrying with fallback key');
-        ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
+        let ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
+            Authorization: `Bearer ${activeKey}`,
           },
           body: JSON.stringify({
             model: 'tts-1',
             voice: ttsVoice,
-            input: cleanInput,
+            input: chunk,
             response_format: 'mp3',
           }),
+          signal: controller.signal,
         });
+
+        if (ttsRes.status === 401 && activeKey !== FALLBACK_OPENAI_KEY) {
+          console.warn('OpenAI TTS 401 with primary key, retrying with fallback key');
+          ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
+            },
+            body: JSON.stringify({
+              model: 'tts-1',
+              voice: ttsVoice,
+              input: chunk,
+              response_format: 'mp3',
+            }),
+          });
+        }
+
+        clearTimeout(timeoutId);
+
+        if (ttsRes.ok) {
+          const audioBuffer = await ttsRes.arrayBuffer();
+          audioBuffers.push(Buffer.from(audioBuffer));
+        } else {
+          allChunksSucceeded = false;
+          const errText = await ttsRes.text();
+          console.warn('OpenAI TTS non-ok response:', ttsRes.status, errText);
+          break;
+        }
       }
 
-      clearTimeout(timeoutId);
-
-      if (ttsRes.ok) {
-        const audioBuffer = await ttsRes.arrayBuffer();
-        return Buffer.from(audioBuffer).toString('base64');
-      } else {
-        const errText = await ttsRes.text();
-        console.warn('OpenAI TTS non-ok response:', ttsRes.status, errText);
+      if (allChunksSucceeded && audioBuffers.length > 0) {
+        return Buffer.concat(audioBuffers).toString('base64');
       }
     } catch (e) {
       console.warn('OpenAI TTS error:', e);
     }
   }
 
-  // 2. Google Translate TTS Fallback (Only allowed if astrologer is female; never for male swamis)
+  // 2. Google Translate TTS Fallback (Concatenates all sentence chunks till the end)
   if (astrologer.voiceGender === 'female') {
     try {
       const lLower = (language || '').toLowerCase();
@@ -525,19 +573,28 @@ async function generateMultilingualAudioBase64(
       else if (lLower.includes('hindi') || lLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) langCode = 'hi';
       else langCode = 'en';
 
-      const encodedText = encodeURIComponent(cleanInput.slice(0, 200));
-      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
+      const chunks = splitIntoNaturalChunks(cleanInput, 180);
+      const audioBuffers: Buffer[] = [];
 
-      const gRes = await fetch(googleTtsUrl, {
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
-      });
+      for (const chunk of chunks) {
+        const encodedText = encodeURIComponent(chunk);
+        const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
 
-      if (gRes.ok) {
-        const arrayBuffer = await gRes.arrayBuffer();
-        return Buffer.from(arrayBuffer).toString('base64');
+        const gRes = await fetch(googleTtsUrl, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          },
+        });
+
+        if (gRes.ok) {
+          const arrayBuffer = await gRes.arrayBuffer();
+          audioBuffers.push(Buffer.from(arrayBuffer));
+        }
+      }
+
+      if (audioBuffers.length > 0) {
+        return Buffer.concat(audioBuffers).toString('base64');
       }
     } catch (e) {
       console.warn('Google TTS fallback warning:', e);
@@ -674,6 +731,9 @@ export async function POST(req: Request) {
 
     if (openaiApiKey) {
       try {
+        const currentYear = new Date().getFullYear();
+        const currentDateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
         const systemPrompt = `You are ${astrologer.name}, a revered, authentic Vedic Astrologer (${astrologer.primaryDiscipline}) with 25+ years of Vedic wisdom on AstroParihar.
 Devotee Profile:
 - Name: ${birthDetails.name || 'Devotee'}
@@ -682,6 +742,11 @@ Devotee Profile:
 - Nakshatra: ${astroContext.nakshatra}
 - Current Dasha: ${astroContext.currentDasha}
 - Primary Concern: ${birthDetails.primaryConcern}
+
+Real-Time Calendar Anchor:
+- Current Date: ${currentDateStr} (Year: ${currentYear})
+- The current year is strictly ${currentYear}. You are living and consulting in ${currentYear}. NEVER refer to 2024 or 2025 as the current or upcoming year.
+- All planetary transits, dasha forecasts, auspicious time windows, and remedies must be calculated for ${currentYear} and future years (${currentYear}, ${currentYear + 1}, ${currentYear + 2}).
 
 Language Instruction:
 You MUST speak ONLY in ${sessionLanguage}.
@@ -692,9 +757,10 @@ You MUST speak ONLY in ${sessionLanguage}.
 
 Spoken Call Style & Number Rules:
 - Keep your answers concise, direct, and conversational (2 to 4 spoken sentences).
-- NEVER use raw English digits or numbers (DO NOT write digits like 108, 2024, 7).
+- NEVER use raw English digits or numbers (DO NOT write digits like 108, ${currentYear}, 7).
 - ALWAYS spell out numbers completely in words (e.g. in Telugu write 'నూట ఎనిమిది సార్లు', 'రెండు వేల ఇరవై ఆరు వరకు', 'ఏడవ భావం'; in Hindi write 'एक सौ आठ बार').
 - Give immediate Vedic astrological insights, auspicious time windows, and 1 actionable remedy (mantra, donation, or pooja).
+- Finish every explanation, astrological prediction, and remedy completely to the end. Never stop mid-sentence or leave any thought incomplete.
 - Do not use markdown bullet points, stars (*), hyphens (-), or hashes (#). Keep it pure natural speech suitable for voice conversation.`;
 
         const messagesPayload: any[] = [{ role: 'system', content: systemPrompt }];
@@ -733,7 +799,7 @@ Spoken Call Style & Number Rules:
             model: 'gpt-4o-mini',
             messages: messagesPayload,
             temperature: 0.7,
-            max_tokens: 300,
+            max_tokens: 1200,
           }),
         });
 
@@ -749,7 +815,7 @@ Spoken Call Style & Number Rules:
               model: 'gpt-4o-mini',
               messages: messagesPayload,
               temperature: 0.7,
-              max_tokens: 300,
+              max_tokens: 1200,
             }),
           });
         }

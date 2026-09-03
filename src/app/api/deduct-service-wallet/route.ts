@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/firebase/config';
-import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { adminDb } from '@/lib/firebase/admin';
+import { generateReportDataInternal } from '@/lib/reportGenerator';
 
 export async function POST(req: Request) {
   try {
@@ -27,11 +27,11 @@ export async function POST(req: Request) {
 
     const numAmount = Number(amount) || 0;
 
-    // 1. Fetch user's current wallet balance
-    const userRef = doc(db, 'users', userId);
-    const userSnap = await getDoc(userRef);
+    // 1. Fetch user's current wallet balance via adminDb
+    const userRef = adminDb.collection('users').doc(userId);
+    const userSnap = await userRef.get();
 
-    if (!userSnap.exists()) {
+    if (!userSnap.exists) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
     }
 
@@ -53,10 +53,10 @@ export async function POST(req: Request) {
 
     // 3. Deduct amount from wallet balance
     const newBalance = Math.max(0, currentBalance - numAmount);
-    await setDoc(userRef, { walletBalance: newBalance }, { merge: true });
+    await userRef.set({ walletBalance: newBalance }, { merge: true });
 
     // 4. Record debit transaction in user's wallet_transactions subcollection
-    const txDoc = await addDoc(collection(db, 'users', userId, 'wallet_transactions'), {
+    const txDoc = await adminDb.collection('users').doc(userId).collection('wallet_transactions').add({
       userId,
       amount: numAmount,
       type: 'debit',
@@ -69,27 +69,25 @@ export async function POST(req: Request) {
       paymentMethod: 'wallet',
     });
 
-    // 5. Build structured report content
-    const detailsStr = details
-      ? Object.entries(details)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(', ')
-      : '';
+    // 5. Generate authentic, dynamic Vedic AI report using admin prompts
+    let dynamicReportData = reportData;
+    try {
+      dynamicReportData = await generateReportDataInternal(serviceTitle, details, reportData);
+    } catch (aiErr) {
+      console.warn('Error synthesizing AI report in wallet deduction:', aiErr);
+    }
 
     const generatedContent = JSON.stringify({
-      recommendationTitle: `Astrological Report: ${serviceTitle}`,
-      recommendationName: `${serviceTitle} Insights`,
-      timing: 'Immediate Delivery (Wallet Deducted)',
-      duration: 'Lifetime Guidance',
-      materials: 'Personalized Kundli, Transit & Vedic Calculations',
-      astrologicalAnalysis: `Comprehensive astrological analysis for ${serviceTitle}. ${detailsStr}. Planetary alignments and personalized insights calculated accurately based on ancient Vedic texts.`,
-      procedure:
-        'Perform daily morning meditation, chant relevant mantras for weak planets, and consult with our expert astrologers for deeper custom remedies.',
+      ...(dynamicReportData || {}),
+      recommendationTitle: dynamicReportData?.recommendationTitle || `Astrological Report: ${serviceTitle}`,
+      recommendationName: dynamicReportData?.recommendationName || `${serviceTitle} Insights`,
+      timing: dynamicReportData?.timing || 'Immediate Delivery (Wallet Deducted)',
+      duration: dynamicReportData?.duration || 'Lifetime Guidance',
       ...(pdfUrl ? { pdfUrl } : {}),
     });
 
     // 6. Save completed request to `service_requests` collection
-    const requestDoc = await addDoc(collection(db, 'service_requests'), {
+    const requestDoc = await adminDb.collection('service_requests').add({
       userId,
       userEmail: userEmail || userData?.email || '',
       type: serviceTitle,
@@ -98,12 +96,12 @@ export async function POST(req: Request) {
       displayAmount: numAmount,
       currency: currency.toLowerCase(),
       reportContent: generatedContent,
-      reportData: reportData || null,
+      reportData: dynamicReportData || null,
       status: 'completed',
       paymentId: `wallet_${txDoc.id}`,
       orderId: `wallet_ord_${Date.now()}`,
       paymentMethod: 'wallet',
-      createdAt: serverTimestamp(),
+      createdAt: new Date().toISOString(),
     });
 
     return NextResponse.json({
@@ -112,6 +110,7 @@ export async function POST(req: Request) {
       newBalance,
       requestId: requestDoc.id,
       transactionId: txDoc.id,
+      reportData: dynamicReportData,
     });
   } catch (error: any) {
     console.error('Error processing wallet service deduction:', error);

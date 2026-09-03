@@ -30,6 +30,7 @@ import { useUserData } from '@/lib/useUserData';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { getAllMahadashaGuides, MahadashaGuide } from '@/lib/mahadasha';
+import Pagination from '@/components/ui/Pagination';
 
 export default function RecentReports() {
   const { user } = useUserData();
@@ -40,6 +41,8 @@ export default function RecentReports() {
   const [activeCategory, setActiveCategory] = useState<
     'all' | 'services' | 'remedies' | 'mahadasha'
   >('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -222,8 +225,11 @@ export default function RecentReports() {
           ].map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.id as any)}
-              className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
+              onClick={() => {
+                setActiveCategory(cat.id as any);
+                setCurrentPage(1);
+              }}
+              className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 activeCategory === cat.id
                   ? 'gold-gradient-bg text-white shadow-lg'
                   : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'
@@ -269,7 +275,8 @@ export default function RecentReports() {
               </Link>
             </div>
           ) : (
-            <table className="w-full text-sm">
+            <>
+              <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
                   <th className="text-left px-6 py-3.5 text-xs font-bold text-muted-foreground uppercase tracking-wide">
@@ -290,7 +297,7 @@ export default function RecentReports() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {filteredReports.map((rep, i) => {
+                {filteredReports.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((rep, i) => {
                   const Icon = getIconForType(rep.type);
                   const category = getReportCategory(rep.type);
 
@@ -364,6 +371,18 @@ export default function RecentReports() {
                 })}
               </tbody>
             </table>
+
+            <div className="px-6 pb-2">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.max(1, Math.ceil(filteredReports.length / itemsPerPage))}
+                totalItems={filteredReports.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                itemLabel="reports"
+              />
+            </div>
+          </>
           )}
         </div>
       </div>

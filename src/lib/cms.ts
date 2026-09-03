@@ -317,11 +317,20 @@ export const defaultHomepageContent: HomepageContent = {
 };
 
 export async function getHomepageContent(): Promise<HomepageContent> {
+  // On the server, return defaultHomepageContent immediately to avoid slow client-SDK WebChannel connections that trigger the 10s timeout overlay.
+  // The client will hydrate and load/subscribe to live Firestore content in LandingPageView.
+  if (typeof window === 'undefined') {
+    return defaultHomepageContent;
+  }
+
   try {
     const docRef = doc(db, 'content', 'homepage');
-    const docSnap = await getDoc(docRef);
+    const docSnap = await Promise.race([
+      getDoc(docRef),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+    ]);
 
-    if (docSnap.exists()) {
+    if (docSnap && docSnap.exists()) {
       const data = docSnap.data() as Partial<HomepageContent>;
       const mergedServices = {
         ...defaultHomepageContent.services,
@@ -373,7 +382,7 @@ export async function getHomepageContent(): Promise<HomepageContent> {
       return defaultHomepageContent;
     }
   } catch (error) {
-    console.error('Error fetching homepage content:', error);
+    console.warn('Could not fetch latest homepage content, using defaults:', error);
     return defaultHomepageContent;
   }
 }

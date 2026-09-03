@@ -205,6 +205,29 @@ export default function AdminSettings() {
                 calculation engine.
               </p>
             </div>
+
+            <div className="space-y-2 pt-4 border-t border-border">
+              <label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <span>AI Chat Price Per Prompt (₹ INR)</span>
+              </label>
+              <div className="relative max-w-xs">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-accent">₹</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={settings.aiChatPricePerPrompt ?? 5}
+                  onChange={(e) =>
+                    setSettings({ ...settings, aiChatPricePerPrompt: Math.max(0, Number(e.target.value) || 0) })
+                  }
+                  placeholder="5"
+                  className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-background border border-border text-foreground focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-all font-bold text-sm"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                The amount deducted from the user's wallet for each question/prompt sent to Acharya Parihar in the AI Chat. If the user's wallet is lower than this amount, they will be prompted to recharge.
+              </p>
+            </div>
           </div>
         </div>
 

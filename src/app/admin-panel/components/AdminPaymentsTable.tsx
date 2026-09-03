@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import {
   Search,
   Download,
@@ -63,15 +64,14 @@ export default function AdminPaymentsTable() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [selectedTxn, setSelectedTxn] = useState<TransactionItem | null>(null);
+  const [refundTxnToConfirm, setRefundTxnToConfirm] = useState<TransactionItem | null>(null);
 
   // Filters & Search
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterGateway, setFilterGateway] = useState('all');
   const [filterType, setFilterType] = useState('all');
-
-  // Selected Transaction Modal
-  const [selectedTxn, setSelectedTxn] = useState<TransactionItem | null>(null);
 
   // Fetch all transactions and map with dynamic user data
   const fetchTransactions = async () => {
@@ -292,9 +292,13 @@ export default function AdminPaymentsTable() {
   };
 
   // Handle Refund Action
-  const handleProcessRefund = async (txn: TransactionItem) => {
-    if (!window.confirm(`Are you sure you want to mark transaction ${txn.id} as Refunded?`)) return;
+  const handleProcessRefund = (txn: TransactionItem) => {
+    setRefundTxnToConfirm(txn);
+  };
 
+  const executeProcessRefund = async () => {
+    if (!refundTxnToConfirm) return;
+    const txn = refundTxnToConfirm;
     try {
       if (txn.userId && txn.id) {
         const txDocRef = doc(db, 'users', txn.userId, 'wallet_transactions', txn.id);
@@ -309,6 +313,8 @@ export default function AdminPaymentsTable() {
     } catch (err) {
       console.error(err);
       toast.error('Failed to update refund status.');
+    } finally {
+      setRefundTxnToConfirm(null);
     }
   };
 
@@ -818,6 +824,17 @@ export default function AdminPaymentsTable() {
           </AnimatePresence>,
           document.body
         )}
+
+      <ConfirmModal
+        isOpen={!!refundTxnToConfirm}
+        onClose={() => setRefundTxnToConfirm(null)}
+        onConfirm={executeProcessRefund}
+        title="Mark Transaction as Refunded?"
+        description={`Are you sure you want to mark transaction ${refundTxnToConfirm?.id} (₹${refundTxnToConfirm?.amount}) as Refunded?`}
+        confirmText="Yes, Mark Refunded"
+        cancelText="Cancel"
+        variant="warning"
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getSettings } from '@/lib/settings';
 import { getAIPromptSettings } from '@/lib/aiPromptSettings';
+import { getServerOpenAIApiKey } from '@/lib/aiConfig';
 
 export async function POST(req: Request) {
   try {
@@ -15,8 +15,7 @@ export async function POST(req: Request) {
     } = body;
 
     // 1. Get OpenAI API Key
-    const globalSettings = await getSettings();
-    let openaiApiKey = globalSettings.openaiApiKey || process.env.OPENAI_API_KEY;
+    const openaiApiKey = await getServerOpenAIApiKey();
 
     if (!openaiApiKey) {
       return NextResponse.json(

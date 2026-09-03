@@ -98,7 +98,9 @@ export async function POST(req: Request) {
               .join('\n')
           : '';
 
+        const currentYear = new Date().getFullYear();
         const systemPrompt = `You are an elite Vedic astrology report generator for AstroParihar.
+Real-Time Calendar Anchor: The current year is strictly ${currentYear}. All timeline predictions and astrological highlights must be calculated for ${currentYear} and future years. Never refer to 2024 or 2025 as the current year.
 Synthesize a professional, inspiring, and authentic post-consultation astrology summary based on the consultation conducted by ${astrologerName} (${discipline}).
 Devotee Details: Name: ${birthDetails.name || 'Devotee'}, DOB: ${birthDetails.dob || 'N/A'}, Time: ${birthDetails.time || 'N/A'}, Place: ${birthDetails.place || 'N/A'}, Concern: ${primaryConcern}, Language: ${language}.
 

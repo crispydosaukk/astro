@@ -24,6 +24,7 @@ import {
   X,
   FileText,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const contentTabs = [
   { id: 'tab-hero', label: 'Hero Section', icon: LayoutTemplate },
@@ -137,7 +138,7 @@ export default function AdminContentManagement() {
       handleServiceChange(idx, 'image', data.url);
     } catch (error: any) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image: ' + error.message);
+      toast.error('Failed to upload image: ' + error.message);
     } finally {
       setUploadingImage((prev) => ({ ...prev, [idx]: false }));
     }

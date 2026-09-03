@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore } from 'firebase/firestore';
 import { getAnalytics, isSupported, Analytics } from 'firebase/analytics';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
@@ -18,8 +18,15 @@ const firebaseConfig = {
 // Initialize Firebase only if there are no other instances running
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-// Initialize and export Firestore database
-const db = getFirestore(app);
+// Initialize and export Firestore database with auto-detect long polling to prevent WebChannel 10s timeouts
+let db: any;
+try {
+  db = initializeFirestore(app, {
+    experimentalAutoDetectLongPolling: true,
+  });
+} catch (e) {
+  db = getFirestore(app);
+}
 
 // Initialize other services as needed
 const auth = getAuth(app);

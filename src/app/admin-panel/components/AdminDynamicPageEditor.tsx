@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import {
   Bold,
   Italic,
@@ -46,6 +47,7 @@ export default function AdminDynamicPageEditor() {
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   // Top Level View Mode: 'composer' (Create/Edit) | 'manager' (Saved Content & Live Previews)
   const [viewMode, setViewMode] = useState<'composer' | 'manager'>('composer');
@@ -211,8 +213,13 @@ export default function AdminDynamicPageEditor() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDeleteItem = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this content section?')) return;
+  const handleDeleteItem = (id: string) => {
+    setItemToDelete(id);
+  };
+
+  const executeDeleteItem = async () => {
+    if (!itemToDelete) return;
+    const id = itemToDelete;
     try {
       await deleteDynamicPageContent(id);
       if (editingId === id) {
@@ -224,6 +231,8 @@ export default function AdminDynamicPageEditor() {
     } catch (err) {
       console.error(err);
       setStatusMessage({ type: 'error', text: 'Failed to delete content.' });
+    } finally {
+      setItemToDelete(null);
     }
   };
 
@@ -1073,6 +1082,17 @@ export default function AdminDynamicPageEditor() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!itemToDelete}
+        onClose={() => setItemToDelete(null)}
+        onConfirm={executeDeleteItem}
+        title="Delete Content Section?"
+        description="Are you sure you want to permanently delete this content section? This action cannot be undone."
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }
