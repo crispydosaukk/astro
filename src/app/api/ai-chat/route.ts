@@ -183,13 +183,15 @@ You MUST respond STRICTLY in JSON format matching this schema:
     });
 
     if (!response.ok) {
+      const errText = await response.text();
+      console.error('OpenAI chat completion failed:', response.status, errText);
       // Refund if OpenAI fails
       if (deductedAmount > 0 && userRef) {
         await userRef.set({ walletBalance: initialBalance }, { merge: true });
       }
       return NextResponse.json(
         { error: 'Failed to generate guidance from AI. Your wallet balance has been refunded.' },
-        { status: 502 }
+        { status: 500 }
       );
     }
 

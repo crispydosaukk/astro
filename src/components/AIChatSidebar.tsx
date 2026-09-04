@@ -230,13 +230,27 @@ export default function AIChatSidebar() {
         }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      let data: any = null;
+
+      if (contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+      }
 
       if (!response.ok) {
-        if (data.isInsufficient) {
+        if (data?.isInsufficient) {
           setCurrentWallet(Number(data.availableBalance) || 0);
         }
-        throw new Error(data.error || 'Unable to receive guidance at this moment.');
+        throw new Error(
+          data?.error ||
+          (response.status === 404
+            ? 'The AI Astrologer service is currently updating. Please try again in a few moments.'
+            : 'Unable to receive guidance at this moment. Please try again.')
+        );
       }
 
       // Update remaining wallet balance
