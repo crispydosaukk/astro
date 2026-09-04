@@ -316,10 +316,67 @@ export const defaultHomepageContent: HomepageContent = {
   },
 };
 
+function mergeHomepageData(data: Partial<HomepageContent>): HomepageContent {
+  const mergedServices = {
+    ...defaultHomepageContent.services,
+    ...(data.services || {}),
+    items: defaultHomepageContent.services.items.map((defaultItem) => {
+      const customItem = (data.services?.items || []).find(
+        (item) => item.id === defaultItem.id
+      );
+      if (!customItem) return defaultItem;
+      return {
+        ...defaultItem,
+        ...customItem,
+      };
+    }),
+  };
+
+  const mergedComprehensiveServices = {
+    ...defaultHomepageContent.comprehensiveServices,
+    ...(data.comprehensiveServices || {}),
+    items: defaultHomepageContent.comprehensiveServices.items.map((defaultItem) => {
+      const customItem = (data.comprehensiveServices?.items || []).find(
+        (item) => item.id === defaultItem.id
+      );
+      if (!customItem) return defaultItem;
+      return {
+        ...defaultItem,
+        ...customItem,
+      };
+    }),
+  };
+
+  return {
+    ...defaultHomepageContent,
+    ...data,
+    hero: {
+      ...defaultHomepageContent.hero,
+      ...(data.hero || {}),
+      stats: data.hero?.stats || defaultHomepageContent.hero.stats,
+    },
+    services: mergedServices,
+    comprehensiveServices: mergedComprehensiveServices,
+    panchang: {
+      ...defaultHomepageContent.panchang,
+      ...(data.panchang || {}),
+    },
+  } as HomepageContent;
+}
+
 export async function getHomepageContent(): Promise<HomepageContent> {
-  // On the server, return defaultHomepageContent immediately to avoid slow client-SDK WebChannel connections that trigger the 10s timeout overlay.
-  // The client will hydrate and load/subscribe to live Firestore content in LandingPageView.
+  // On the server (SSR), use adminDb directly for instant, authentic data fetching without dummy fallback flashes
   if (typeof window === 'undefined') {
+    try {
+      const { adminDb } = await import('./firebase/admin');
+      const snap = await adminDb.collection('content').doc('homepage').get();
+      if (snap.exists) {
+        const data = snap.data() as Partial<HomepageContent>;
+        return mergeHomepageData(data);
+      }
+    } catch (adminErr) {
+      console.warn('adminDb getHomepageContent warning:', adminErr);
+    }
     return defaultHomepageContent;
   }
 
@@ -332,53 +389,8 @@ export async function getHomepageContent(): Promise<HomepageContent> {
 
     if (docSnap && docSnap.exists()) {
       const data = docSnap.data() as Partial<HomepageContent>;
-      const mergedServices = {
-        ...defaultHomepageContent.services,
-        ...(data.services || {}),
-        items: defaultHomepageContent.services.items.map((defaultItem) => {
-          const customItem = (data.services?.items || []).find(
-            (item) => item.id === defaultItem.id
-          );
-          if (!customItem) return defaultItem;
-          return {
-            ...defaultItem,
-            ...customItem,
-          };
-        }),
-      };
-
-      const mergedComprehensiveServices = {
-        ...defaultHomepageContent.comprehensiveServices,
-        ...(data.comprehensiveServices || {}),
-        items: defaultHomepageContent.comprehensiveServices.items.map((defaultItem) => {
-          const customItem = (data.comprehensiveServices?.items || []).find(
-            (item) => item.id === defaultItem.id
-          );
-          if (!customItem) return defaultItem;
-          return {
-            ...defaultItem,
-            ...customItem,
-          };
-        }),
-      };
-
-      return {
-        ...defaultHomepageContent,
-        ...data,
-        hero: {
-          ...defaultHomepageContent.hero,
-          ...(data.hero || {}),
-          stats: data.hero?.stats || defaultHomepageContent.hero.stats,
-        },
-        services: mergedServices,
-        comprehensiveServices: mergedComprehensiveServices,
-        panchang: {
-          ...defaultHomepageContent.panchang,
-          ...(data.panchang || {}),
-        },
-      } as HomepageContent;
+      return mergeHomepageData(data);
     } else {
-      // If no document exists, return the defaults
       return defaultHomepageContent;
     }
   } catch (error) {
@@ -395,62 +407,17 @@ export function subscribeHomepageContent(callback: (content: HomepageContent) =>
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data() as Partial<HomepageContent>;
-          const mergedServices = {
-            ...defaultHomepageContent.services,
-            ...(data.services || {}),
-            items: defaultHomepageContent.services.items.map((defaultItem) => {
-              const customItem = (data.services?.items || []).find(
-                (item) => item.id === defaultItem.id
-              );
-              if (!customItem) return defaultItem;
-              return {
-                ...defaultItem,
-                ...customItem,
-              };
-            }),
-          };
-
-          const mergedComprehensiveServices = {
-            ...defaultHomepageContent.comprehensiveServices,
-            ...(data.comprehensiveServices || {}),
-            items: defaultHomepageContent.comprehensiveServices.items.map((defaultItem) => {
-              const customItem = (data.comprehensiveServices?.items || []).find(
-                (item) => item.id === defaultItem.id
-              );
-              if (!customItem) return defaultItem;
-              return {
-                ...defaultItem,
-                ...customItem,
-              };
-            }),
-          };
-
-          callback({
-            ...defaultHomepageContent,
-            ...data,
-            hero: {
-              ...defaultHomepageContent.hero,
-              ...(data.hero || {}),
-              stats: data.hero?.stats || defaultHomepageContent.hero.stats,
-            },
-            services: mergedServices,
-            comprehensiveServices: mergedComprehensiveServices,
-            panchang: {
-              ...defaultHomepageContent.panchang,
-              ...(data.panchang || {}),
-            },
-          } as HomepageContent);
+          callback(mergeHomepageData(data));
         } else {
           callback(defaultHomepageContent);
         }
       },
       (error) => {
-        console.error('Error subscribing to homepage content:', error);
-        callback(defaultHomepageContent);
+        console.warn('subscribeHomepageContent error:', error);
       }
     );
-  } catch (error) {
-    console.error('Error setting up homepage subscription:', error);
+  } catch (err) {
+    console.warn('Could not setup homepage subscription:', err);
     return () => {};
   }
 }

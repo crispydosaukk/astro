@@ -58,15 +58,24 @@ export default function HeroSection({ content }: HeroSectionProps) {
               {/* Headline */}
               <div className="space-y-4">
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight hero-text-glow max-w-xl">
-                  {content?.headline1 || 'Discover Your'}{' '}
-                  <span className="block text-gradient-gold">
-                    {content?.headline2 || 'Cosmic Destiny'}
-                  </span>
+                  {content?.headline1 !== undefined ? content.headline1 : 'Discover Your'}
+                  {content?.headline2 && content.headline2.trim() ? (
+                    <span className="block text-gradient-gold">
+                      {content.headline2}
+                    </span>
+                  ) : null}
                 </h1>
-                <p className="text-sm sm:text-base lg:text-lg text-white/80 leading-relaxed max-w-lg">
-                  {content?.subtitle ||
-                    'Ancient Vedic wisdom meets modern precision. Get your personalized Kundli, sacred gemstone & mantra recommendations, and consult expert astrologers — all in one platform.'}
-                </p>
+                {content?.subtitle !== undefined ? (
+                  Boolean(content.subtitle?.trim()) && (
+                    <p className="text-sm sm:text-base lg:text-lg text-white/80 leading-relaxed max-w-lg">
+                      {content.subtitle}
+                    </p>
+                  )
+                ) : (
+                  <p className="text-sm sm:text-base lg:text-lg text-white/80 leading-relaxed max-w-lg">
+                    Ancient Vedic wisdom meets modern precision. Get your personalized Kundli, sacred gemstone &amp; mantra recommendations, and consult expert astrologers — all in one platform.
+                  </p>
+                )}
               </div>
 
               {/* CTAs */}
@@ -76,7 +85,7 @@ export default function HeroSection({ content }: HeroSectionProps) {
                   className="group flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold gold-gradient-bg text-white hover:opacity-95 transition-all duration-200 gold-shadow animate-pulse-gold transform hover:-translate-y-0.5"
                 >
                   <Bot size={18} className="animate-pulse" />
-                  AI Expert Astrologer
+                  {content?.primaryBtnText || 'AI Expert Astrologer'}
                   <Sparkles size={14} className="text-amber-200" />
                 </Link>
                 <Link

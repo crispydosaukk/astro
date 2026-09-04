@@ -360,8 +360,8 @@ function TalkToAIAstrologerContent() {
               <Sparkles size={13} className="text-[#C9952B]" /> 50 AI Astrologers · 24x7 Instant Voice Connect · Zero Queue
             </div>
 
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 font-serif text-[#FFFDFC]">
-              Talk to <span className="text-[#E5B54F]">AI Expert Astrologers</span>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 text-white hero-text-glow">
+              Talk to <span className="text-gradient-gold">AI Expert Astrologers</span>
             </h1>
             <p className="text-[#F3EBDD] max-w-2xl mx-auto text-xs sm:text-sm md:text-base mb-6 font-normal leading-relaxed">
               Instant, authentic voice consultations with 50 AI Astrologers across Vedic, KP, Nadi, Tarot, and Prashna systems.

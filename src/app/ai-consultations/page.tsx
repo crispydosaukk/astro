@@ -10,7 +10,6 @@ import {
   Calendar,
   Clock,
   CheckCircle2,
-  Download,
   Phone,
   MessageSquare,
   Search,
@@ -436,13 +435,7 @@ export default function AIConsultationsHistoryPage() {
               </div>
 
               {/* Footer */}
-              <div className="p-4 border-t border-[#E5D9C8] bg-[#F8F3EA] flex items-center justify-between">
-                <button
-                  onClick={() => window.print()}
-                  className="px-4 py-2 rounded-xl border border-[#E5D9C8] hover:border-[#C9952B] bg-[#FFFDFC] text-xs font-semibold text-[#292522] flex items-center gap-1.5 shadow-sm"
-                >
-                  <Download size={13} /> Print Summary
-                </button>
+              <div className="p-4 border-t border-[#E5D9C8] bg-[#F8F3EA] flex items-center justify-end">
                 <Link
                   href="/talk-to-ai-astrologer"
                   className="px-5 py-2 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white text-xs font-bold transition-colors shadow-sm"

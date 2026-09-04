@@ -42,7 +42,47 @@ const DEFAULT_RECOMMENDATIONS = [
   '🙏 What specific Vedic remedies or charity should I perform?',
 ];
 
-const QUICK_PROMPTS = DEFAULT_RECOMMENDATIONS;
+const QUICK_PROMPTS_BY_LANG: Record<string, string[]> = {
+  Telugu: [
+    '🔮 2026లో నా గ్రహ సంచారాల ఫలితాలు ఎలా ఉన్నాయి?',
+    '❤️ నా జాతకంలో వివాహ యోగం ఎప్పుడు ఉంది?',
+    '💼 కెరీర్ మార్పు లేదా ప్రమోషన్‌కు సరైన సమయం ఎప్పుడు?',
+    '✨ నా అదృష్ట రత్నం, రుద్రాక్ష మరియు నిత్య మంత్రం ఏమిటి?',
+    '🪐 నాకు శని సాడే సాతి లేదా రాహు మహర్దశ నడుస్తుందా?',
+    '🙏 నా జాతక దోష నివారణకు ఎలాంటి పరిహారాలు లేదా దానం చేయాలి?',
+  ],
+  Hindi: [
+    '🔮 2026 में मेरे मुख्य ग्रह गोचर का क्या प्रभाव रहेगा?',
+    '❤️ मेरे विवाह का शुभ योग कब बनेगा?',
+    '💼 करियर में पदोन्नति या व्यापार विस्तार का सबसे शुभ समय कब है?',
+    '✨ मेरे लिए भाग्यशाली रत्न, रुद्राक्ष और दैनिक मंत्र क्या है?',
+    '🪐 क्या मुझ पर शनि की साढ़ेसाती या राहु की महादशा चल रही है?',
+    '🙏 ग्रह शांति के लिए मुझे कौन सा विशेष दान या उपाय करना चाहिए?',
+  ],
+  Tamil: [
+    '🔮 2026-ல் எனது கிரக பெயர்ச்சி பலன்கள் எப்படி உள்ளன?',
+    '❤️ எனது திருமண யோகம் மற்றும் வாழ்க்கை எப்போது அமையும்?',
+    '💼 தொழில் வளர்ச்சி அல்லது வேலை மாற்றத்திற்கு உகந்த நேரம் எப்போது?',
+    '✨ எனது அதிர்ஷ்ட ரத்தினம், ருத்ராட்சம் மற்றும் தினசரி மந்திரம் எது?',
+    '🪐 எனக்கு ஏழரை சனி அல்லது ராகு தசை நடக்கிறதா?',
+    '🙏 கிரக தோஷ நிவர்த்திக்கு என்ன பரிகாரம் அல்லது தானம் செய்ய வேண்டும்?',
+  ],
+  English: [
+    '🔮 What do planetary transits say for me in 2026?',
+    '❤️ When will I meet my compatible life partner?',
+    '💼 When is the best time for a career change or promotion?',
+    '✨ What is my lucky gemstone, rudraksha & daily mantra?',
+    '🪐 Am I currently running Shani Sade Sati or Rahu Mahadasha?',
+    '🙏 What specific Vedic remedies or charity should I perform?',
+  ],
+};
+
+const PLACEHOLDERS_BY_LANG: Record<string, string> = {
+  Telugu: 'మీ కుండలి, ప్రేమ, కెరీర్ లేదా పరిహారాల గురించి అడగండి...',
+  Hindi: 'अपनी कुंडली, प्रेम, करियर या उपायों के बारे में पूछें...',
+  Tamil: 'உங்கள் ஜாதகம், தொழில், திருமணம் அல்லது பரிகாரங்கள் பற்றி கேளுங்கள்...',
+  English: 'Ask about your Kundli, love, career, or remedies...',
+};
 
 const LANGUAGES = [
   { code: 'Telugu', label: 'తెలుగు (Telugu)', short: 'తె' },
@@ -673,7 +713,7 @@ export default function AIChatSidebar() {
                 <span className="text-[10px] uppercase font-bold text-[#713B32] shrink-0 pl-1">
                   Suggestions:
                 </span>
-                {QUICK_PROMPTS.map((prompt, i) => (
+                {(QUICK_PROMPTS_BY_LANG[language] || QUICK_PROMPTS_BY_LANG.English).map((prompt, i) => (
                   <button
                     key={i}
                     type="button"
@@ -738,7 +778,7 @@ export default function AIChatSidebar() {
                         type="text"
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        placeholder="Ask about your Kundli, love, career, or remedies..."
+                        placeholder={PLACEHOLDERS_BY_LANG[language] || PLACEHOLDERS_BY_LANG.English}
                         disabled={loading}
                         className="flex-1 px-4 py-2.5 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] text-xs text-[#292522] placeholder:text-[#6B5E55] outline-none focus:ring-2 focus:ring-[#C9952B]/60 transition-all font-medium"
                       />
