@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAIPromptSettings } from '@/lib/aiPromptSettings';
-import { getServerOpenAIApiKey } from '@/lib/aiConfig';
+import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
 
 export async function POST(req: Request) {
   try {
@@ -92,22 +92,25 @@ export async function POST(req: Request) {
       finalSystemPrompt += `\n\nSpecific Output Directives for this module:\n${extraDirectives}`;
     }
 
-    const openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openaiApiKey}`,
+    const openAiRes = await fetchWithOpenAIFallback(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: chosenModel,
+          messages: [
+            { role: 'system', content: finalSystemPrompt },
+            { role: 'user', content: finalUserPrompt },
+          ],
+          temperature: Number(temperature) || 0.7,
+          response_format: { type: 'json_object' },
+        }),
       },
-      body: JSON.stringify({
-        model: chosenModel,
-        messages: [
-          { role: 'system', content: finalSystemPrompt },
-          { role: 'user', content: finalUserPrompt },
-        ],
-        temperature: Number(temperature) || 0.7,
-        response_format: { type: 'json_object' },
-      }),
-    });
+      openaiApiKey
+    );
 
     if (!openAiRes.ok) {
       const errorData = await openAiRes.json();

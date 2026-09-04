@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerOpenAIApiKey } from '@/lib/aiConfig';
+import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
 import { getSettings } from '@/lib/settings';
 import { adminDb } from '@/lib/firebase/admin';
 
@@ -167,20 +167,23 @@ You MUST respond STRICTLY in JSON format matching this schema:
       })),
     ];
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openaiApiKey}`,
+    const response = await fetchWithOpenAIFallback(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: conversationMessages,
+          temperature: 0.7,
+          max_tokens: 1200,
+          response_format: { type: 'json_object' },
+        }),
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: conversationMessages,
-        temperature: 0.7,
-        max_tokens: 1200,
-        response_format: { type: 'json_object' },
-      }),
-    });
+      openaiApiKey
+    );
 
     if (!response.ok) {
       const errText = await response.text();

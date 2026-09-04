@@ -1,6 +1,6 @@
 import { calculateAshtakootGunMilan } from '@/lib/vedicAstrologyEngine';
 import { getAIPromptSettings, AIPromptItem } from '@/lib/aiPromptSettings';
-import { getServerOpenAIApiKey } from '@/lib/aiConfig';
+import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
 
 export async function generateReportDataInternal(
   type: string,
@@ -136,23 +136,26 @@ export async function generateReportDataInternal(
 
       const modelToUse = globalConfig.defaultModel || 'gpt-4o-mini';
 
-      const openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${openaiApiKey}`,
+      const openAiRes = await fetchWithOpenAIFallback(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: modelToUse,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+            temperature: globalConfig.temperature || 0.7,
+            max_tokens: globalConfig.maxTokens || 1800,
+            response_format: { type: 'json_object' },
+          }),
         },
-        body: JSON.stringify({
-          model: modelToUse,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          temperature: globalConfig.temperature || 0.7,
-          max_tokens: globalConfig.maxTokens || 1800,
-          response_format: { type: 'json_object' },
-        }),
-      });
+        openaiApiKey
+      );
 
       if (openAiRes.ok) {
         const aiJson = await openAiRes.json();

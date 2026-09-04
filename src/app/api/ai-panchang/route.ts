@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAIPromptSettings } from '@/lib/aiPromptSettings';
 import { calculatePanchang } from '@/lib/panchangEngine';
-import { getServerOpenAIApiKey } from '@/lib/aiConfig';
+import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
 
 export async function POST(req: Request) {
   try {
@@ -75,22 +75,25 @@ export async function POST(req: Request) {
 
     const model = aiPromptSettings.config.defaultModel || 'gpt-4o-mini';
 
-    const openAiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openaiApiKey}`,
+    const openAiRes = await fetchWithOpenAIFallback(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          temperature: aiPromptSettings.config.temperature || 0.7,
+          response_format: { type: 'json_object' },
+        }),
       },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: aiPromptSettings.config.temperature || 0.7,
-        response_format: { type: 'json_object' },
-      }),
-    });
+      openaiApiKey
+    );
 
     if (openAiRes.ok) {
       const aiJson = await openAiRes.json();

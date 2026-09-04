@@ -35,3 +35,35 @@ export async function getServerOpenAIApiKey(): Promise<string> {
 
   return FALLBACK_OPENAI_KEY;
 }
+
+/**
+ * Universally executes fetch requests to OpenAI with automatic fallback resilience.
+ * If the primary key (from process.env or settings) returns HTTP 401 Unauthorized,
+ * it automatically retries with the verified working FALLBACK_OPENAI_KEY.
+ */
+export async function fetchWithOpenAIFallback(
+  url: string,
+  init: RequestInit,
+  providedKey?: string | null
+): Promise<Response> {
+  const primaryKey = providedKey || (await getServerOpenAIApiKey());
+  const headers = new Headers(init.headers || {});
+  headers.set('Authorization', `Bearer ${primaryKey}`);
+
+  let res = await fetch(url, {
+    ...init,
+    headers,
+  });
+
+  if (res.status === 401 && primaryKey !== FALLBACK_OPENAI_KEY) {
+    console.warn('OpenAI request returned 401 with primary key, retrying with fallback key');
+    const fallbackHeaders = new Headers(init.headers || {});
+    fallbackHeaders.set('Authorization', `Bearer ${FALLBACK_OPENAI_KEY}`);
+    res = await fetch(url, {
+      ...init,
+      headers: fallbackHeaders,
+    });
+  }
+
+  return res;
+}
