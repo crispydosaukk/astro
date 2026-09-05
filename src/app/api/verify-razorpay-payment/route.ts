@@ -86,7 +86,10 @@ export async function POST(req: Request) {
       let dynamicReportData = reportDetails.reportData || null;
       try {
         const { generateReportDataInternal } = await import('@/lib/reportGenerator');
-        dynamicReportData = await generateReportDataInternal(reportTitle, reportDetails.details || {});
+        dynamicReportData = await generateReportDataInternal(reportTitle, {
+          ...(reportDetails.details || {}),
+          serviceId: reportDetails.serviceId,
+        });
       } catch (aiErr) {
         console.warn('Error synthesizing AI report in razorpay payment:', aiErr);
       }

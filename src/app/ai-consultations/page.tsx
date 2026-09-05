@@ -62,10 +62,25 @@ export default function AIConsultationsHistoryPage() {
           console.warn('Cache merge warning:', e);
         }
 
-        // Sort by createdAt desc
-        items.sort(
-          (a, b) => new Date(b.createdAt || b.startTime || 0).getTime() - new Date(a.createdAt || a.startTime || 0).getTime()
-        );
+        // Sort by createdAt desc (latest first)
+        const parseTime = (item: any) => {
+          if (!item) return 0;
+          const raw = item.createdAt ?? item.startTime ?? item.date ?? item.timestamp;
+          if (!raw) return 0;
+          if (typeof raw.toMillis === 'function') {
+            try { const v = raw.toMillis(); if (!isNaN(v)) return v; } catch {}
+          }
+          if (typeof raw.toDate === 'function') {
+            try { const d = raw.toDate(); if (!isNaN(d.getTime())) return d.getTime(); } catch {}
+          }
+          if (typeof raw === 'object' && typeof raw.seconds === 'number') {
+            return raw.seconds * 1000;
+          }
+          const t = new Date(raw).getTime();
+          return isNaN(t) ? 0 : t;
+        };
+
+        items.sort((a, b) => parseTime(b) - parseTime(a));
         setConsultations(items);
       } catch (err) {
         console.error('Error fetching consultation history:', err);

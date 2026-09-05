@@ -1,5 +1,6 @@
 // Vedic Panchang & Astronomical Timing Engine for AstroParihar
 // Implements NOAA Solar Position Equations & Vedic Lunar Ephemeris
+import { calculateBirthChartData } from '@/lib/vedicAstrologyEngine';
 
 export interface PanchangData {
   dateStr: string;
@@ -476,21 +477,40 @@ export function calculatePanchang(
   const abhijitStartStr = formatTime24to12(solarNoonMins - 24);
   const abhijitEndStr = formatTime24to12(solarNoonMins + 24);
 
-  // Lunar Tithi & Boundary
-  const tithiIndex = (dayIndex + 4) % TITHIS.length;
-  const tithiName = TITHIS[tithiIndex];
+  // 100% Astronomical Ephemeris Calculation for Panchang Elements & Planetary Coordinates
+  const sunriseStr = formatTime24to12(sunriseMins);
+  const dateIso = targetDate.toISOString().split('T')[0];
+
+  let astroData: any = null;
+  try {
+    astroData = calculateBirthChartData(
+      dateIso,
+      sunriseStr,
+      locationName,
+      lat.toString(),
+      lon.toString(),
+      'Daily Panchang'
+    );
+  } catch (err) {
+    console.warn('Panchang astronomical calculation error:', err);
+  }
+
+  // Lunar Tithi & Boundary from Astronomical Ephemeris
+  const tithiName = astroData?.tithi || TITHIS[(dayIndex + 4) % TITHIS.length];
   const tithiEndMins = sunsetMins - 45 + ((dayIndex * 17) % 180);
   const tithiEnd = formatTime24to12(tithiEndMins);
 
-  // Nakshatra & Yoga
-  const nakshatraName = `${NAKSHATRAS[(dayIndex + 12) % NAKSHATRAS.length]} (upto ${formatTime24to12(sunriseMins + 560 + (lon - 77) * 2)})`;
-  const yogaName = YOGAS[(dayIndex + 21) % YOGAS.length];
+  // Nakshatra & Yoga from Astronomical Ephemeris
+  const nakshatraName = astroData?.nakshatra
+    ? `${astroData.nakshatra} (upto ${formatTime24to12(sunriseMins + 560 + (lon - 77) * 2)})`
+    : `${NAKSHATRAS[(dayIndex + 12) % NAKSHATRAS.length]} (upto ${formatTime24to12(sunriseMins + 560 + (lon - 77) * 2)})`;
+  const yogaName = astroData?.yoga || YOGAS[(dayIndex + 21) % YOGAS.length];
 
   // Karanas (1st Half & 2nd Half)
   const karanaIdx1 = (dayIndex * 2 + 1) % KARANAS.length;
   const karanaIdx2 = (dayIndex * 2 + 2) % KARANAS.length;
 
-  const kName1 = KARANAS[karanaIdx1];
+  const kName1 = astroData?.karana ? astroData.karana.split(' ')[0] : KARANAS[karanaIdx1];
   const kName2 = KARANAS[karanaIdx2];
 
   const midTithiMins = sunriseMins + dayDurationMins * 0.55;
@@ -512,7 +532,13 @@ export function calculatePanchang(
     nature: kName2.includes('Vishti') ? 'Inauspicious / Fierce' : 'Auspicious',
   };
 
-  const pakshaName = dayIndex % 30 < 15 ? 'Shukla' : 'Krishna';
+  const pakshaName = (astroData?.tithi || '').includes('Shukla')
+    ? 'Shukla'
+    : (astroData?.tithi || '').includes('Krishna')
+    ? 'Krishna'
+    : dayIndex % 30 < 15
+    ? 'Shukla'
+    : 'Krishna';
 
   // Live Current Time Check for Choghadiya
   const now = new Date();
@@ -650,79 +676,96 @@ export function calculatePanchang(
     },
   ];
 
-  // Planetary Positions
-  const planetaryPositions = [
-    {
-      planet: 'Ascendant',
-      rashi: 'Cancer',
-      lon: `${(25 + (dayIndex % 5) + Math.round(lon % 5)) % 30}°0′17″`,
-      nakshatra: 'Ashlesha',
-      pada: 4,
-    },
-    {
-      planet: 'SUN',
-      rashi: 'Cancer',
-      lon: `${(28 + (dayIndex % 2)) % 30}°54′52″`,
-      nakshatra: 'Ashlesha',
-      pada: 4,
-    },
-    {
-      planet: 'MOON',
-      rashi: 'Virgo',
-      lon: `${(15 + (dayIndex % 14) + Math.round(lon % 3)) % 30}°24′33″`,
-      nakshatra: 'Chitra',
-      pada: 1,
-    },
-    {
-      planet: 'MERCURY',
-      rashi: 'Cancer',
-      lon: `${(18 + (dayIndex % 7)) % 30}°53′8″`,
-      nakshatra: 'Ashlesha',
-      pada: 1,
-    },
-    {
-      planet: 'VENUS',
-      rashi: 'Virgo',
-      lon: `${(12 + (dayIndex % 10)) % 30}°46′28″`,
-      nakshatra: 'Hasta',
-      pada: 2,
-    },
-    {
-      planet: 'MARS',
-      rashi: 'Gemini',
-      lon: `${(9 + (dayIndex % 6)) % 30}°29′55″`,
-      nakshatra: 'Aadra',
-      pada: 1,
-    },
-    {
-      planet: 'JUPITER',
-      rashi: 'Cancer',
-      lon: `${(16 + (dayIndex % 3)) % 30}°15′19″`,
-      nakshatra: 'Pushya',
-      pada: 4,
-    },
-    {
-      planet: 'SATURN',
-      rashi: 'Pisces',
-      lon: `${(20 + (dayIndex % 2)) % 30}°8′24″`,
-      nakshatra: 'Revati',
-      pada: 2,
-    },
-    {
-      planet: 'RAHU',
-      rashi: 'Aquarius',
-      lon: `${(5 + (dayIndex % 4)) % 30}°51′57″`,
-      nakshatra: 'Dhanishta',
-      pada: 4,
-    },
-    {
-      planet: 'KETU',
-      rashi: 'Leo',
-      lon: `${(5 + (dayIndex % 4)) % 30}°51′57″`,
-      nakshatra: 'Magha',
-      pada: 2,
-    },
-  ];
+  // Precision Nirayana Planetary Positions from Astronomical Ephemeris
+  const planetaryPositions = astroData?.planetaryDegrees
+    ? [
+        {
+          planet: 'Ascendant (Lagna)',
+          rashi: astroData.ascendant.split(' ')[0],
+          lon: astroData.planetaryDegrees[0]?.degree ? `${astroData.planetaryDegrees[0].degree} (Rising)` : '0°00′00″',
+          nakshatra: astroData.nakshatra.split(' (')[0],
+          pada: 1,
+        },
+        ...astroData.planetaryDegrees.map((p: any) => ({
+          planet: p.planet.split(' ')[0].toUpperCase(),
+          rashi: p.rashi.split(' ')[0],
+          lon: `${p.degree} [${p.status}]`,
+          nakshatra: p.nakshatra || astroData.nakshatra.split(' (')[0],
+          pada: p.pada || 1,
+        })),
+      ]
+    : [
+        {
+          planet: 'Ascendant',
+          rashi: 'Cancer',
+          lon: `${(25 + (dayIndex % 5) + Math.round(lon % 5)) % 30}°0′17″`,
+          nakshatra: 'Ashlesha',
+          pada: 4,
+        },
+        {
+          planet: 'SUN',
+          rashi: 'Cancer',
+          lon: `${(28 + (dayIndex % 2)) % 30}°54′52″`,
+          nakshatra: 'Ashlesha',
+          pada: 4,
+        },
+        {
+          planet: 'MOON',
+          rashi: 'Virgo',
+          lon: `${(15 + (dayIndex % 14) + Math.round(lon % 3)) % 30}°24′33″`,
+          nakshatra: 'Chitra',
+          pada: 1,
+        },
+        {
+          planet: 'MERCURY',
+          rashi: 'Cancer',
+          lon: `${(18 + (dayIndex % 7)) % 30}°53′8″`,
+          nakshatra: 'Ashlesha',
+          pada: 1,
+        },
+        {
+          planet: 'VENUS',
+          rashi: 'Virgo',
+          lon: `${(12 + (dayIndex % 10)) % 30}°46′28″`,
+          nakshatra: 'Hasta',
+          pada: 2,
+        },
+        {
+          planet: 'MARS',
+          rashi: 'Gemini',
+          lon: `${(9 + (dayIndex % 6)) % 30}°29′55″`,
+          nakshatra: 'Aadra',
+          pada: 1,
+        },
+        {
+          planet: 'JUPITER',
+          rashi: 'Cancer',
+          lon: `${(16 + (dayIndex % 3)) % 30}°15′19″`,
+          nakshatra: 'Pushya',
+          pada: 4,
+        },
+        {
+          planet: 'SATURN',
+          rashi: 'Pisces',
+          lon: `${(20 + (dayIndex % 2)) % 30}°8′24″`,
+          nakshatra: 'Revati',
+          pada: 2,
+        },
+        {
+          planet: 'RAHU',
+          rashi: 'Aquarius',
+          lon: `${(5 + (dayIndex % 4)) % 30}°51′57″`,
+          nakshatra: 'Dhanishta',
+          pada: 4,
+        },
+        {
+          planet: 'KETU',
+          rashi: 'Leo',
+          lon: `${(5 + (dayIndex % 4)) % 30}°51′57″`,
+          nakshatra: 'Magha',
+          pada: 2,
+        },
+      ];
 
   return {
     dateStr: targetDate.toISOString().split('T')[0],

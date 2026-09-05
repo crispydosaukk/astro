@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Navbar from '@/components/Navbar';
-import RecentReports from '@/app/my-reports/components/RecentReports';
+import RecentReports, { ReportErrorBoundary } from '@/app/my-reports/components/RecentReports';
 import { useUserData } from '@/lib/useUserData';
 import { Bell, User } from 'lucide-react';
 import Link from 'next/link';
@@ -64,7 +64,9 @@ export default function MyReportsPage() {
         </div>
 
         <div className="px-6 lg:px-8 py-8 max-w-screen-2xl">
-          <RecentReports />
+          <ReportErrorBoundary>
+            <RecentReports />
+          </ReportErrorBoundary>
         </div>
       </div>
     </>

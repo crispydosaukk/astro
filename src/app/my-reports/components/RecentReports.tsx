@@ -31,6 +31,229 @@ import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { getAllMahadashaGuides, MahadashaGuide } from '@/lib/mahadasha';
 import Pagination from '@/components/ui/Pagination';
+import VedicSquareChart from '@/components/VedicSquareChart';
+
+export class ReportErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: any) {
+    console.error('ReportErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        this.props.fallback || (
+          <div className="p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-2">
+            <p className="text-sm font-bold text-[#C9952B]">
+              Vedic Report Insights
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Report rendered with standard formatting. All your calculations are safely recorded.
+            </p>
+          </div>
+        )
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export function renderSafeText(val: any): string {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+  if (Array.isArray(val)) {
+    return val.map((item) => renderSafeText(item)).filter(Boolean).join(', ');
+  }
+  if (typeof val === 'object') {
+    if (val.name || val.title || val.text || val.label) {
+      return String(val.name || val.title || val.text || val.label);
+    }
+    return Object.entries(val)
+      .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`)
+      .join('\n');
+  }
+  return String(val);
+}
+
+export function renderAdditionalGuidance(guidance: any) {
+  if (!guidance) return null;
+  if (typeof guidance === 'string') {
+    return (
+      <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line">
+        {guidance}
+      </p>
+    );
+  }
+  if (typeof guidance === 'object') {
+    return (
+      <div className="space-y-3.5 text-xs sm:text-sm">
+        {/* Do's */}
+        {guidance.dos && (
+          <div className="space-y-2 p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+            <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>✓</span> Recommended Do&apos;s
+            </span>
+            {Array.isArray(guidance.dos) ? (
+              <ul className="space-y-1.5 pl-1">
+                {guidance.dos.map((item: any, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2 text-foreground/90 leading-relaxed">
+                    <span className="text-emerald-400 font-bold shrink-0">•</span>
+                    <span>{renderSafeText(item)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-foreground/90 leading-relaxed">{renderSafeText(guidance.dos)}</p>
+            )}
+          </div>
+        )}
+
+        {/* Don'ts */}
+        {guidance.donts && (
+          <div className="space-y-2 p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20">
+            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>⚠</span> Precautions &amp; Don&apos;ts
+            </span>
+            {Array.isArray(guidance.donts) ? (
+              <ul className="space-y-1.5 pl-1">
+                {guidance.donts.map((item: any, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2 text-foreground/90 leading-relaxed">
+                    <span className="text-amber-400 font-bold shrink-0">•</span>
+                    <span>{renderSafeText(item)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-foreground/90 leading-relaxed">{renderSafeText(guidance.donts)}</p>
+            )}
+          </div>
+        )}
+
+        {/* Cleansing Frequency */}
+        {(guidance.cleansingFrequency || guidance.cleansing) && (
+          <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+            <span className="text-[10px] text-muted-foreground uppercase font-bold block">
+              Gemstone Cleansing &amp; Re-energization Frequency
+            </span>
+            <p className="text-foreground font-medium leading-relaxed">
+              {renderSafeText(guidance.cleansingFrequency || guidance.cleansing)}
+            </p>
+          </div>
+        )}
+
+        {/* Compatible Secondary Gemstones */}
+        {(guidance.compatibleSecondaryGemstones ||
+          guidance.compatibleGemstones ||
+          guidance.secondaryGemstones) && (
+          <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+            <span className="text-[10px] text-[#C9952B] uppercase font-bold block">
+              Compatible Secondary Gemstones
+            </span>
+            <p className="text-foreground font-medium leading-relaxed">
+              {renderSafeText(
+                guidance.compatibleSecondaryGemstones ||
+                  guidance.compatibleGemstones ||
+                  guidance.secondaryGemstones
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Other fields */}
+        {Object.entries(guidance)
+          .filter(
+            ([k]) =>
+              ![
+                'dos',
+                'donts',
+                'cleansingFrequency',
+                'cleansing',
+                'compatibleSecondaryGemstones',
+                'compatibleGemstones',
+                'secondaryGemstones',
+              ].includes(k)
+          )
+          .map(([k, v]) => (
+            <div key={k} className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <span className="text-[10px] text-muted-foreground uppercase font-bold block capitalize">
+                {k.replace(/([A-Z])/g, ' $1')}
+              </span>
+              <p className="text-foreground leading-relaxed">{renderSafeText(v)}</p>
+            </div>
+          ))}
+      </div>
+    );
+  }
+  return (
+    <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line">
+      {renderSafeText(guidance)}
+    </p>
+  );
+}
+
+export function parseReportTimestamp(item: any): number {
+  if (!item) return 0;
+  const raw =
+    item.createdAt ??
+    item.timestamp ??
+    item.date ??
+    item.updatedAt ??
+    item.details?.createdAt ??
+    item.details?.date;
+
+  if (!raw) return 0;
+
+  // 1. Firestore Timestamp instance (has toMillis or toDate)
+  if (typeof raw.toMillis === 'function') {
+    try {
+      const val = raw.toMillis();
+      if (typeof val === 'number' && !isNaN(val)) return val;
+    } catch {}
+  }
+  if (typeof raw.toDate === 'function') {
+    try {
+      const d = raw.toDate();
+      if (d instanceof Date && !isNaN(d.getTime())) return d.getTime();
+    } catch {}
+  }
+
+  // 2. Serialized Firestore Timestamp object { seconds, nanoseconds } or { _seconds, _nanoseconds }
+  if (typeof raw === 'object') {
+    if (typeof raw.seconds === 'number') return raw.seconds * 1000;
+    if (typeof raw._seconds === 'number') return raw._seconds * 1000;
+  }
+
+  // 3. Date instance
+  if (raw instanceof Date) {
+    const t = raw.getTime();
+    if (!isNaN(t)) return t;
+  }
+
+  // 4. Numeric timestamp (millis or seconds)
+  if (typeof raw === 'number' && !isNaN(raw)) {
+    return raw < 1e11 ? raw * 1000 : raw;
+  }
+
+  // 5. String (ISO 8601 or parsed date string)
+  if (typeof raw === 'string') {
+    const parsed = Date.parse(raw);
+    if (!isNaN(parsed)) return parsed;
+  }
+
+  return 0;
+}
 
 export default function RecentReports() {
   const { user } = useUserData();
@@ -69,13 +292,14 @@ export default function RecentReports() {
           fetchedReports.push({ id: doc.id, ...doc.data() });
         });
 
-        // Filter completed & sort by date descending
+        // Filter completed & sort by date descending (latest first)
         const sortedReports = fetchedReports
-          .filter((rep) => rep.status === 'completed')
+          .filter((rep) => !rep.status || rep.status === 'completed' || rep.status === 'ready')
           .sort((a, b) => {
-            const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-            const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-            return timeB - timeA;
+            const timeA = parseReportTimestamp(a);
+            const timeB = parseReportTimestamp(b);
+            if (timeB !== timeA) return timeB - timeA;
+            return String(b.id || '').localeCompare(String(a.id || ''));
           });
 
         setReports(sortedReports);
@@ -93,16 +317,18 @@ export default function RecentReports() {
     }
   }, [user]);
 
-  const getReportCategory = (type: string = ''): 'services' | 'remedies' | 'mahadasha' => {
-    if (type.includes('Guide') || type.includes('Mahadasha') || type.includes('PDF')) {
+  const getReportCategory = (type: any = ''): 'services' | 'remedies' | 'mahadasha' => {
+    const t = String(type || '');
+    if (t.includes('Guide') || t.includes('Mahadasha') || t.includes('PDF')) {
       return 'mahadasha';
     }
     if (
-      type.includes('Gemstone') ||
-      type.includes('Mantra') ||
-      type.includes('Yantra') ||
-      type.includes('Homam') ||
-      type.includes('Remedies')
+      t.includes('Gemstone') ||
+      t.includes('Mantra') ||
+      t.includes('Yantra') ||
+      t.includes('Yanthra') ||
+      t.includes('Homam') ||
+      t.includes('Remedies')
     ) {
       return 'remedies';
     }
@@ -114,23 +340,24 @@ export default function RecentReports() {
     if (rep.details?.guideId && mahadashaGuides[rep.details.guideId]) {
       return mahadashaGuides[rep.details.guideId].pdfUrl;
     }
-    if (rep.type?.includes('Rahu') && rep.type?.includes('Survival')) {
+    const t = String(rep.type || '');
+    if (t.includes('Rahu') && t.includes('Survival')) {
       return (
         mahadashaGuides['rahu-survival']?.pdfUrl || '/assets/pdfs/rahu_mahadasha_survival_guide.pdf'
       );
     }
-    if (rep.type?.includes('Rahu')) {
+    if (t.includes('Rahu')) {
       return (
         mahadashaGuides['rahu-stabilisation']?.pdfUrl ||
         '/assets/pdfs/rahu_mahadasha_stabilisation_guide.pdf'
       );
     }
-    if (rep.type?.includes('Sani') && rep.type?.includes('Survival')) {
+    if (t.includes('Sani') && t.includes('Survival')) {
       return (
         mahadashaGuides['sani-survival']?.pdfUrl || '/assets/pdfs/sani_mahadasha_survival_guide.pdf'
       );
     }
-    if (rep.type?.includes('Sani')) {
+    if (t.includes('Sani')) {
       return (
         mahadashaGuides['sani-stabilisation']?.pdfUrl ||
         '/assets/pdfs/sani_mahadasha_stabilisation_guide.pdf'
@@ -141,55 +368,81 @@ export default function RecentReports() {
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return 'N/A';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    try {
+      if (typeof timestamp.toDate === 'function') {
+        const d = timestamp.toDate();
+        if (d instanceof Date && !isNaN(d.getTime())) {
+          return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+      }
+      if (typeof timestamp === 'object' && typeof timestamp.seconds === 'number') {
+        const d = new Date(timestamp.seconds * 1000);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+      const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+      if (isNaN(date.getTime())) return 'N/A';
+      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+      return 'N/A';
+    }
   };
 
-  const getIconForType = (type: string = '') => {
-    if (type.includes('Guide') || type.includes('Mahadasha')) return ShieldCheck;
-    if (type.includes('Homam')) return Flame;
-    if (type.includes('Gemstone')) return Gem;
-    if (type.includes('Mantra')) return Music;
-    if (type.includes('Yantra')) return Triangle;
-    if (type.includes('Love') || type.includes('Relationship')) return Heart;
-    if (type.includes('Finance') || type.includes('Wealth')) return Coins;
-    if (type.includes('Health') || type.includes('Vitality')) return Activity;
-    if (type.includes('Kundli') || type.includes('Horoscope')) return Sparkles;
+  const getIconForType = (type: any = '') => {
+    const t = String(type || '');
+    if (t.includes('Guide') || t.includes('Mahadasha')) return ShieldCheck;
+    if (t.includes('Homam')) return Flame;
+    if (t.includes('Gemstone')) return Gem;
+    if (t.includes('Mantra')) return Music;
+    if (t.includes('Yantra') || t.includes('Yanthra')) return Triangle;
+    if (t.includes('Love') || t.includes('Relationship')) return Heart;
+    if (t.includes('Finance') || t.includes('Wealth')) return Coins;
+    if (t.includes('Health') || t.includes('Vitality')) return Activity;
+    if (t.includes('Kundli') || t.includes('Horoscope')) return Sparkles;
     return FileText;
   };
 
-  const getColorClassForType = (type: string = '') => {
-    if (type.includes('Guide') || type.includes('Mahadasha')) return 'text-amber-400';
-    if (type.includes('Homam')) return 'text-orange-400';
-    if (type.includes('Gemstone')) return 'text-red-400';
-    if (type.includes('Mantra')) return 'text-blue-400';
-    if (type.includes('Yantra')) return 'text-green-400';
-    if (type.includes('Love') || type.includes('Relationship')) return 'text-rose-400';
-    if (type.includes('Finance') || type.includes('Wealth')) return 'text-emerald-400';
-    if (type.includes('Health') || type.includes('Vitality')) return 'text-cyan-400';
+  const getColorClassForType = (type: any = '') => {
+    const t = String(type || '');
+    if (t.includes('Guide') || t.includes('Mahadasha')) return 'text-amber-400';
+    if (t.includes('Homam')) return 'text-orange-400';
+    if (t.includes('Gemstone')) return 'text-red-400';
+    if (t.includes('Mantra')) return 'text-blue-400';
+    if (t.includes('Yantra') || t.includes('Yanthra')) return 'text-green-400';
+    if (t.includes('Love') || t.includes('Relationship')) return 'text-rose-400';
+    if (t.includes('Finance') || t.includes('Wealth')) return 'text-emerald-400';
+    if (t.includes('Health') || t.includes('Vitality')) return 'text-cyan-400';
     return 'text-purple-400';
   };
 
-  const getBgClassForType = (type: string = '') => {
-    if (type.includes('Guide') || type.includes('Mahadasha')) return 'bg-amber-500/10';
-    if (type.includes('Homam')) return 'bg-orange-500/10';
-    if (type.includes('Gemstone')) return 'bg-red-500/10';
-    if (type.includes('Mantra')) return 'bg-blue-500/10';
-    if (type.includes('Yantra')) return 'bg-green-500/10';
-    if (type.includes('Love') || type.includes('Relationship')) return 'bg-rose-500/10';
-    if (type.includes('Finance') || type.includes('Wealth')) return 'bg-emerald-500/10';
-    if (type.includes('Health') || type.includes('Vitality')) return 'bg-cyan-500/10';
+  const getBgClassForType = (type: any = '') => {
+    const t = String(type || '');
+    if (t.includes('Guide') || t.includes('Mahadasha')) return 'bg-amber-500/10';
+    if (t.includes('Homam')) return 'bg-orange-500/10';
+    if (t.includes('Gemstone')) return 'bg-red-500/10';
+    if (t.includes('Mantra')) return 'bg-blue-500/10';
+    if (t.includes('Yantra') || t.includes('Yanthra')) return 'bg-green-500/10';
+    if (t.includes('Love') || t.includes('Relationship')) return 'bg-rose-500/10';
+    if (t.includes('Finance') || t.includes('Wealth')) return 'bg-emerald-500/10';
+    if (t.includes('Health') || t.includes('Vitality')) return 'bg-cyan-500/10';
     return 'bg-purple-500/10';
   };
 
-  const filteredReports = reports.filter((rep) => {
+  // Strictly sort reports latest/newest first
+  const sortedReportsList = [...reports].sort((a, b) => {
+    const timeA = parseReportTimestamp(a);
+    const timeB = parseReportTimestamp(b);
+    if (timeB !== timeA) return timeB - timeA;
+    return String(b.id || '').localeCompare(String(a.id || ''));
+  });
+
+  const filteredReports = sortedReportsList.filter((rep) => {
     if (activeCategory === 'all') return true;
     return getReportCategory(rep.type) === activeCategory;
   });
 
-  const servicesCount = reports.filter((r) => getReportCategory(r.type) === 'services').length;
-  const remediesCount = reports.filter((r) => getReportCategory(r.type) === 'remedies').length;
-  const mahadashaCount = reports.filter((r) => getReportCategory(r.type) === 'mahadasha').length;
+  const servicesCount = sortedReportsList.filter((r) => getReportCategory(r.type) === 'services').length;
+  const remediesCount = sortedReportsList.filter((r) => getReportCategory(r.type) === 'remedies').length;
+  const mahadashaCount = sortedReportsList.filter((r) => getReportCategory(r.type) === 'mahadasha').length;
 
   return (
     <>
@@ -218,7 +471,7 @@ export default function RecentReports() {
         {/* Divided Category Tabs: Services, Remedies, Mahadasha PDF Guides */}
         <div className="px-6 flex items-center gap-2 overflow-x-auto pb-2 border-b border-border/50 no-scrollbar">
           {[
-            { id: 'all', label: `All Orders (${reports.length})` },
+            { id: 'all', label: `All Orders (${sortedReportsList.length})` },
             { id: 'services', label: `Services Reports (${servicesCount})` },
             { id: 'remedies', label: `Remedies (${remediesCount})` },
             { id: 'mahadasha', label: `Mahadasha PDF Guides (${mahadashaCount})` },
@@ -318,11 +571,11 @@ export default function RecentReports() {
                           </div>
                           <div>
                             <span className="font-bold text-foreground text-sm block">
-                              {rep.type || 'Custom Report'}
+                              {renderSafeText(rep.type || 'Custom Report')}
                             </span>
                             {rep.details?.name && (
                               <span className="text-[11px] text-muted-foreground">
-                                For: {rep.details.name}
+                                For: {renderSafeText(rep.details.name)}
                               </span>
                             )}
                           </div>
@@ -348,7 +601,7 @@ export default function RecentReports() {
                       </td>
 
                       <td className="px-6 py-4 text-muted-foreground font-mono text-xs">
-                        {formatDate(rep.createdAt)}
+                        {formatDate(rep.createdAt || rep.timestamp || rep.date || rep.details?.createdAt || rep.details?.date)}
                       </td>
 
                       <td className="px-6 py-4">
@@ -438,6 +691,28 @@ export default function RecentReports() {
 
                   <div className="overflow-y-auto custom-scrollbar print:overflow-visible print:h-auto">
                     <div className="p-4 sm:p-6 space-y-6 print:p-0 print:py-6">
+                      <ReportErrorBoundary
+                        fallback={
+                          <div className="p-6 text-center space-y-4">
+                            <div className="w-12 h-12 mx-auto rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 flex items-center justify-center text-[#C9952B] text-xl font-bold">
+                              📜
+                            </div>
+                            <div>
+                              <h4 className="text-base font-bold text-foreground">
+                                {renderSafeText(selectedReport.type || 'Astrological Report')}
+                              </h4>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Complete astrological calculations and report details:
+                              </p>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-left text-xs sm:text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed max-h-[50vh] overflow-y-auto">
+                              {typeof selectedReport.reportContent === 'string'
+                                ? selectedReport.reportContent
+                                : JSON.stringify(selectedReport.reportContent, null, 2)}
+                            </div>
+                          </div>
+                        }
+                      >
                       {getReportCategory(selectedReport.type) === 'mahadasha' ? (
                         <div className="space-y-4">
                           <div className="p-3.5 sm:p-4 rounded-2xl bg-[#EDE4D5] dark:bg-amber-950/40 border border-[#E5D9C8] dark:border-amber-500/30 flex items-center justify-between flex-wrap gap-3 shadow-sm">
@@ -479,48 +754,182 @@ export default function RecentReports() {
                                 : selectedReport.reportContent;
 
                             if (data) {
+                              const recTitle =
+                                typeof data.recommendationTitle === 'string'
+                                  ? data.recommendationTitle.toLowerCase()
+                                  : '';
+                              const repType =
+                                typeof selectedReport.type === 'string'
+                                  ? selectedReport.type.toLowerCase()
+                                  : '';
+
                               const isKundliMatching =
-                                selectedReport.type?.toLowerCase().includes('matching') ||
-                                data.recommendationTitle?.toLowerCase().includes('matching') ||
-                                data.ashtakoot;
+                                repType.includes('matching') ||
+                                recTitle.includes('matching') ||
+                                !!data.ashtakoot;
 
                               const isJanamKundli =
-                                selectedReport.type?.toLowerCase().includes('janam kundli') ||
-                                selectedReport.type?.toLowerCase().includes('horoscope') ||
-                                data.planetaryDegrees ||
-                                data.ascendant;
+                                repType.includes('janam kundli') ||
+                                repType.includes('horoscope') ||
+                                !!data.planetaryDegrees ||
+                                !!data.ascendant;
 
                               const isPanchang =
-                                selectedReport.type?.toLowerCase().includes('panchang') ||
-                                data.tithi ||
-                                data.rahuKaal;
+                                repType.includes('panchang') ||
+                                !!data.tithi ||
+                                !!data.rahuKaal;
 
                               const isFasting =
-                                selectedReport.type?.toLowerCase().includes('fasting') ||
-                                data.recommendedVrats ||
-                                data.weeklyFastingDay;
+                                repType.includes('fasting') ||
+                                !!data.recommendedVrats ||
+                                !!data.weeklyFastingDay;
 
                               const isVastu =
-                                selectedReport.type?.toLowerCase().includes('vastu') ||
-                                selectedReport.type?.toLowerCase().includes('vāstu') ||
-                                data.directionalAnalysis ||
-                                data.propertySummary;
+                                repType.includes('vastu') ||
+                                repType.includes('vāstu') ||
+                                !!data.directionalAnalysis ||
+                                !!data.propertySummary;
+
+                              const isHomam =
+                                repType.includes('homa') ||
+                                repType.includes('homam') ||
+                                repType.includes('hawan') ||
+                                repType.includes('havan') ||
+                                repType.includes('puja') ||
+                                recTitle.includes('homa') ||
+                                recTitle.includes('homam') ||
+                                recTitle.includes('hawan') ||
+                                !!data.recommendedHoma ||
+                                !!data.primaryHomam;
+
+                              const homamData =
+                                data.recommendedHoma && typeof data.recommendedHoma === 'object'
+                                  ? data.recommendedHoma
+                                  : data.primaryHomam && typeof data.primaryHomam === 'object'
+                                  ? data.primaryHomam
+                                  : isHomam
+                                  ? {
+                                      name:
+                                        typeof data.recommendedHoma === 'string'
+                                          ? data.recommendedHoma
+                                          : 'Lakshmi Kubera Homam & Navagraha Shanti Homam',
+                                      purpose:
+                                        'Balance planetary energies, remove deep karmic obstacles, and invoke divine blessings',
+                                      day: 'Auspicious Friday or Saturday during Shukla Paksha',
+                                      duration: '2–3 hours',
+                                      deity: 'Goddess Mahalakshmi & Navagraha Devatas',
+                                      ahutiMantra:
+                                        'ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः स्वाहा ॥ & ॐ ब्रह्मा मुरारिस्त्रिपुरान्तकारी... स्वाहा ॥',
+                                      japaCount: '108 Sacred Ahutis into holy Agni Kund',
+                                      samidha: 'Bilva samidha, Kamal Gatta, Mango wood, Navadhanya',
+                                      materials:
+                                        'Pure Cow Ghee, Dry Coconut (Purna Ahuti), Camphor, Havan Samagri (32 sacred herbs), Red/Yellow Silk Cloth',
+                                      procedure:
+                                        '1. Maha Sankalpa with Gotra & Nakshatra.\n2. Ganapathi Avahana and Mandapa Sthapana.\n3. 108 Ahutis with consecrated samidha and cow ghee.\n4. Maha Purna Ahuti with dry coconut.\n5. Application of sacred Raksha Bhasma on forehead.',
+                                      benefits:
+                                        'Burns away karmic afflictions, clears long-standing debt/career blocks, and radiates divine peace throughout the household.',
+                                    }
+                                  : null;
+
+                              const isYantra =
+                                repType.includes('yantra') ||
+                                repType.includes('yanthra') ||
+                                recTitle.includes('yantra') ||
+                                recTitle.includes('yanthra') ||
+                                !!data.primaryYantra ||
+                                !!data.prescribedYantras ||
+                                !!data.secondaryYantras;
+
+                              const yantraData =
+                                data.primaryYantra ||
+                                (isYantra
+                                  ? {
+                                      name: 'श्री यन्त्र (Shree Yantra) & कुबेर यन्त्र (Kubera Yantra)',
+                                      deity: 'Goddess Mahalakshmi & Lord Kubera',
+                                      planet: 'Venus (Shukra) & Jupiter (Guru)',
+                                      material:
+                                        'Heavy Consecrated Copper Plate (Tamra Patra) / Ashtadhatu',
+                                      geometry:
+                                        'Sacred Nine Interlocking Triangles forming 43 Triads with Central Bindu',
+                                      placementDirection:
+                                        'North-East (Ishanya Kona) or North Wall, at eye level on sacred altar',
+                                      activationMuhurat:
+                                        'Shukla Paksha Friday or Sunday morning during Brahma Muhurta (Sunrise)',
+                                      consecrationMantra:
+                                        'ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः ॥ (Om Shreem Hreem Kleem Mahalakshmaye Namah)',
+                                      japaCount: '108 Recitations during Prana Pratishtha',
+                                      benefits:
+                                        'Attracts auspicious abundance, harmonizes spatial energy lines, removes monetary obstacles, and continuously radiates positive vibrational geometry.',
+                                    }
+                                  : null);
+
+                              const secondaryYantras =
+                                data.secondaryYantras ||
+                                data.prescribedYantras ||
+                                (isYantra
+                                  ? [
+                                      {
+                                        name: 'Surya Yantra (सूर्य यन्त्र)',
+                                        deity: 'Lord Surya Bhagavan',
+                                        planet: 'Sun (Surya)',
+                                        placement: 'East Wall of living area or pooja room',
+                                        purpose:
+                                          'Amplifies willpower, leadership, vitality, and social renown.',
+                                      },
+                                      {
+                                        name: 'Navagraha Yantra (नवग्रह यन्त्र)',
+                                        deity: 'Nine Celestial Grahas',
+                                        planet: 'All Nine Planetary Deities',
+                                        placement: 'Pooja room altar facing East or North',
+                                        purpose:
+                                          'Harmonizes transit clashes and neutralizes afflicted planetary Dasha cycles.',
+                                      },
+                                    ]
+                                  : null);
+
+                              const displayProcedure =
+                                isYantra &&
+                                (!data.procedure ||
+                                  (typeof data.procedure === 'string' &&
+                                    data.procedure.includes('Surya Arghya')))
+                                  ? '1. Purify the consecrated Yantra plate with Gangajal and raw cow milk at sunrise.\n2. Lay on a red or yellow consecrated silk cloth on your sacred altar facing East or North.\n3. Anoint the central sacred Bindu with pure Sandalwood (Chandan) and Kumkum.\n4. Light a pure cow ghee diya and fragrant Guggal/Chandan incense.\n5. Recite the activation Beej Mantra "ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः" 108 times using a Sphatik or Rudraksha mala.\n6. Offer fresh fragrant yellow or white flowers and sweet naivedyam.'
+                                  : data.procedure;
+
+                              const displayMaterials =
+                                isYantra &&
+                                (!data.materials ||
+                                  (typeof data.materials === 'string' &&
+                                    !data.materials.toLowerCase().includes('yantra')))
+                                  ? 'Consecrated Copper / Ashtadhatu Yantra Plate, Pure Gangajal, Raw Cow Milk, Sandalwood Paste, Kumkum, Cow Ghee Diya, Sphatik Mala, Red Silk Asana'
+                                  : data.materials;
+
+                              const displayAnalysis =
+                                isYantra &&
+                                typeof data.astrologicalAnalysis === 'string' &&
+                                data.astrologicalAnalysis.includes(
+                                  'Chanting your personalized mantra ensures protection'
+                                )
+                                  ? data.astrologicalAnalysis.replace(
+                                      'Chanting your personalized mantra ensures protection and success.',
+                                      'Installing and worshiping your personalized consecrated Yantra creates a protective energetic shield and harmonizes spatial cosmic geometry to manifest peace and prosperity.'
+                                    )
+                                  : data.astrologicalAnalysis || data.description;
 
                               return (
                                 <div className="space-y-6">
                                   {/* Primary Header Card */}
                                   <div className="p-5 sm:p-6 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 print:break-inside-avoid print:border-gray-300 print:bg-transparent space-y-2">
                                     <p className="text-xs text-[#C9952B] font-semibold uppercase tracking-wider print:text-black">
-                                      {data.recommendationTitle || selectedReport.type}
+                                      {renderSafeText(data.recommendationTitle || selectedReport.type)}
                                     </p>
                                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground print:text-black">
-                                      {data.recommendationName || selectedReport.type}
+                                      {renderSafeText(data.recommendationName || selectedReport.type)}
                                     </h2>
                                     <p className="text-xs sm:text-sm text-muted-foreground font-medium flex items-center gap-2 print:text-gray-700">
-                                      {data.timing || 'Active'}{' '}
+                                      {renderSafeText(data.timing || 'Active')}{' '}
                                       {data.duration &&
                                         data.duration !== 'N/A' &&
-                                        `· ${data.duration}`}
+                                        `· ${renderSafeText(data.duration)}`}
                                     </p>
                                   </div>
 
@@ -771,6 +1180,13 @@ export default function RecentReports() {
                                         )}
                                       </div>
 
+                                      {/* Vedic Square Birth Chart */}
+                                      {(data.planetaryDegrees || data.ascendant) && (
+                                        <div className="p-5 rounded-2xl bg-card border border-border">
+                                          <VedicSquareChart chartData={data} chartType="D1" />
+                                        </div>
+                                      )}
+
                                       {/* Planetary Positions Table */}
                                       {data.planetaryDegrees &&
                                         Array.isArray(data.planetaryDegrees) && (
@@ -924,37 +1340,247 @@ export default function RecentReports() {
                                     )}
 
                                   {/* Common Astrological Analysis Section */}
-                                  {(data.astrologicalAnalysis || data.description) && (
+                                  {displayAnalysis && (
                                     <div className="p-5 sm:p-6 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-2">
                                       <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
                                         Astrological Insights & Analysis
                                       </p>
                                       <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line print:text-black">
-                                        {data.astrologicalAnalysis || data.description}
+                                        {renderSafeText(displayAnalysis)}
                                       </p>
                                     </div>
                                   )}
 
+                                  {/* Prescribed Sacred Vedic Homam Card */}
+                                  {homamData && (
+                                    <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-amber-950/20 via-card to-card border border-amber-500/30 shadow-sm space-y-4 print:border-gray-300 print:bg-transparent">
+                                      <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-border/60">
+                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-2 print:text-black">
+                                          <Flame size={15} className="text-amber-400 print:text-black animate-pulse" /> Prescribed Sacred Vedic Homam (अग्नि होम)
+                                        </h4>
+                                        {homamData.deity && (
+                                          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 font-semibold border border-amber-500/20 print:text-black print:border-gray-400">
+                                            Deity: {renderSafeText(homamData.deity)}
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {/* Primary Homam Hero Banner */}
+                                      <div className="p-4 sm:p-5 rounded-2xl bg-[#EDE4D5] dark:bg-amber-950/40 border border-[#E5D9C8] dark:border-amber-500/30 text-center space-y-1.5 shadow-inner print:bg-gray-100 print:border-gray-300">
+                                        <span className="text-[10px] uppercase font-extrabold text-[#713B32] dark:text-amber-400 tracking-widest block print:text-black">
+                                          Sacred Vedic Agni Ritual
+                                        </span>
+                                        <h3 className="text-2xl sm:text-3xl font-serif font-extrabold text-[#292522] dark:text-amber-100 print:text-black">
+                                          {renderSafeText(homamData.name)}
+                                        </h3>
+                                        {homamData.purpose && (
+                                          <p className="text-xs text-[#6B5E55] dark:text-amber-200/80 font-medium max-w-xl mx-auto print:text-gray-700">
+                                            {renderSafeText(homamData.purpose)}
+                                          </p>
+                                        )}
+                                      </div>
+
+                                      {/* Homam Specs Grid */}
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Auspicious Day &amp; Timing
+                                          </span>
+                                          <span className="font-semibold text-foreground print:text-black">
+                                            📅 {renderSafeText(homamData.day || 'Auspicious Friday / Saturday')}
+                                            {homamData.duration && ` (${renderSafeText(homamData.duration)})`}
+                                          </span>
+                                        </div>
+
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Sacred Samidha Wood &amp; Offerings
+                                          </span>
+                                          <span className="font-semibold text-foreground print:text-black">
+                                            🌿 {renderSafeText(homamData.samidha || 'Bilva wood, Kamal Gatta, Mango wood, Sacred herbs')}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* Ahuti Mantra */}
+                                      {homamData.ahutiMantra && (
+                                        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-1.5 shadow-sm print:bg-amber-50 print:border-amber-200">
+                                          <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider print:text-amber-800">
+                                            Sacred Ahuti Invocation Mantra
+                                          </span>
+                                          <p className="text-base sm:text-lg font-serif font-bold text-[#C9952B] print:text-black leading-relaxed">
+                                            {renderSafeText(homamData.ahutiMantra)}
+                                          </p>
+                                          <p className="text-[11px] text-muted-foreground print:text-gray-700">
+                                            Offerings:{' '}
+                                            <strong className="text-foreground print:text-black">
+                                              {renderSafeText(homamData.japaCount || '108 Sacred Ahutis into Holy Agni')}
+                                            </strong>
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      {/* Benefits */}
+                                      {homamData.benefits && (
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-foreground/90 leading-relaxed print:border-gray-300 print:bg-transparent print:text-black">
+                                          <strong className="text-amber-400 print:text-black">Karmic Transformation &amp; Divine Blessings:</strong>{' '}
+                                          {renderSafeText(homamData.benefits)}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* Prescribed Sacred Yantra Card */}
+                                  {yantraData && (
+                                    <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-950/20 via-card to-card border border-emerald-500/30 shadow-sm space-y-4 print:border-gray-300 print:bg-transparent">
+                                      <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-border/60">
+                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2 print:text-black">
+                                          <Triangle size={15} className="text-emerald-400 print:text-black" /> Prescribed Sacred Vedic Yantra
+                                        </h4>
+                                        {yantraData.deity && (
+                                          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 font-semibold border border-emerald-500/20 print:text-black print:border-gray-400">
+                                            Deity: {yantraData.deity}
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {/* Primary Yantra Hero Banner */}
+                                      <div className="p-4 sm:p-5 rounded-2xl bg-[#EDE4D5] dark:bg-emerald-950/40 border border-[#E5D9C8] dark:border-emerald-500/30 text-center space-y-1.5 shadow-inner print:bg-gray-100 print:border-gray-300">
+                                        <span className="text-[10px] uppercase font-extrabold text-[#713B32] dark:text-emerald-400 tracking-widest block print:text-black">
+                                          Primary Prescribed Geometric Conductor
+                                        </span>
+                                        <h3 className="text-2xl sm:text-3xl font-serif font-extrabold text-[#292522] dark:text-emerald-100 print:text-black">
+                                          {yantraData.name}
+                                        </h3>
+                                        <p className="text-xs text-[#6B5E55] dark:text-emerald-200/80 font-medium print:text-gray-700">
+                                          Governing Graha:{' '}
+                                          <span className="font-bold text-[#713B32] dark:text-emerald-300 print:text-black">
+                                            {yantraData.planet || 'Venus / Jupiter'}
+                                          </span>
+                                        </p>
+                                      </div>
+
+                                      {/* Yantra Specs Grid */}
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Sacred Geometry &amp; Pattern
+                                          </span>
+                                          <span className="font-semibold text-foreground print:text-black">
+                                            {yantraData.geometry || 'Sacred Interlocking Triangles & Lotus Bhupura'}
+                                          </span>
+                                        </div>
+
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Consecration Metal / Material
+                                          </span>
+                                          <span className="font-semibold text-foreground print:text-black">
+                                            {yantraData.material || 'Heavy Consecrated Copper Plate (Tamra Patra)'}
+                                          </span>
+                                        </div>
+
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Auspicious Placement Direction
+                                          </span>
+                                          <span className="font-semibold text-[#C9952B] print:text-black">
+                                            📍 {yantraData.placementDirection || 'North-East (Ishanya Kona) or North Wall'}
+                                          </span>
+                                        </div>
+
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Activation Muhurat
+                                          </span>
+                                          <span className="font-semibold text-emerald-400 print:text-black">
+                                            ⏳ {yantraData.activationMuhurat || 'Friday/Sunday morning during Brahma Muhurta'}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* Prana Pratishtha Activation Mantra */}
+                                      {(yantraData.consecrationMantra || yantraData.activationMantra) && (
+                                        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-1.5 shadow-sm print:bg-amber-50 print:border-amber-200">
+                                          <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider print:text-amber-800">
+                                            Prana Pratishtha Consecration Beej Mantra
+                                          </span>
+                                          <p className="text-base sm:text-lg font-serif font-bold text-[#C9952B] print:text-black">
+                                            {yantraData.consecrationMantra || yantraData.activationMantra}
+                                          </p>
+                                          <p className="text-[11px] text-muted-foreground print:text-gray-700">
+                                            Recitation:{' '}
+                                            <strong className="text-foreground print:text-black">
+                                              {yantraData.japaCount || '108 Recitations using Sphatik/Rudraksha Mala'}
+                                            </strong>
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      {/* Benefits */}
+                                      {yantraData.benefits && (
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-foreground/90 leading-relaxed print:border-gray-300 print:bg-transparent print:text-black">
+                                          <strong className="text-emerald-400 print:text-black">Sacred Geometric Benefits:</strong>{' '}
+                                          {yantraData.benefits}
+                                        </div>
+                                      )}
+
+                                      {/* Secondary / Complementary Yantras */}
+                                      {secondaryYantras &&
+                                        Array.isArray(secondaryYantras) &&
+                                        secondaryYantras.length > 0 && (
+                                          <div className="pt-2 space-y-2.5">
+                                            <h5 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground print:text-gray-600">
+                                              Complementary Planetary Yantras
+                                            </h5>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                              {secondaryYantras.map((sy: any, idx: number) => (
+                                                <div
+                                                  key={idx}
+                                                  className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs print:border-gray-300 print:bg-transparent"
+                                                >
+                                                  <div className="flex justify-between items-center font-bold">
+                                                    <span className="text-foreground print:text-black">{sy.name}</span>
+                                                    <span className="text-[10px] text-emerald-400 font-semibold print:text-black">
+                                                      {sy.planet || sy.deity}
+                                                    </span>
+                                                  </div>
+                                                  <p className="text-muted-foreground text-[11px] print:text-gray-700">
+                                                    {sy.purpose || sy.benefits}
+                                                  </p>
+                                                  {sy.placement && (
+                                                    <p className="text-[10px] text-[#C9952B] font-medium print:text-black">
+                                                      📍 Placement: {sy.placement}
+                                                    </p>
+                                                  )}
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                    </div>
+                                  )}
+
                                   {/* Common Procedure Section */}
-                                  {data.procedure && (
+                                  {displayProcedure && (
                                     <div className="p-5 sm:p-6 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-2">
                                       <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
                                         Procedure & Remedial Methodology
                                       </p>
                                       <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line print:text-black">
-                                        {data.procedure}
+                                        {renderSafeText(displayProcedure)}
                                       </p>
                                     </div>
                                   )}
 
                                   {/* Common Rules / Materials Section */}
-                                  {data.materials && (
+                                  {displayMaterials && (
                                     <div className="p-5 rounded-2xl bg-card border border-border shadow-sm print:break-inside-avoid print:shadow-none print:border-gray-300 space-y-1">
                                       <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider print:text-black">
                                         Materials / Sacred Offerings
                                       </p>
                                       <p className="text-xs sm:text-sm text-foreground leading-relaxed print:text-black">
-                                        {data.materials}
+                                        {renderSafeText(displayMaterials)}
                                       </p>
                                     </div>
                                   )}
@@ -975,20 +1601,20 @@ export default function RecentReports() {
                                             >
                                               <div className="flex justify-between items-center font-bold">
                                                 <span className="text-foreground">
-                                                  {m.title || 'Mantra'}
+                                                  {renderSafeText(m.title || m.name || 'Mantra')}
                                                 </span>
                                                 <span className="text-[#C9952B]">
-                                                  {m.japaCount}
+                                                  {renderSafeText(m.japaCount || m.count || '108 Times')}
                                                 </span>
                                               </div>
                                               {m.sanskrit && (
                                                 <p className="text-sm font-serif text-[#C9952B]">
-                                                  {m.sanskrit}
+                                                  {renderSafeText(m.sanskrit)}
                                                 </p>
                                               )}
                                               {m.bestTime && (
                                                 <p className="text-muted-foreground text-[11px]">
-                                                  Best Time: {m.bestTime}
+                                                  Best Time: {renderSafeText(m.bestTime)}
                                                 </p>
                                               )}
                                             </div>
@@ -998,54 +1624,99 @@ export default function RecentReports() {
                                     )}
 
                                   {/* Primary Gemstone Card */}
-                                  {data.primaryGemstone &&
-                                    typeof data.primaryGemstone === 'object' && (
-                                      <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
-                                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
-                                          💎 Prescribed Astrological Gemstone
-                                        </h4>
+                                  {data.primaryGemstone && (
+                                    <div className="p-5 rounded-2xl bg-card border border-border shadow-sm space-y-3">
+                                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#C9952B] flex items-center gap-1.5">
+                                        💎 Prescribed Astrological Gemstone
+                                      </h4>
+                                      {typeof data.primaryGemstone === 'object' ? (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                                           <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                                             <span className="text-muted-foreground block text-[10px] uppercase font-bold">
                                               Gemstone
                                             </span>
                                             <span className="font-bold text-foreground text-sm">
-                                              {data.primaryGemstone.name}
+                                              {renderSafeText(
+                                                data.primaryGemstone.name ||
+                                                  data.primaryGemstone.gemstone ||
+                                                  data.primaryGemstone.title ||
+                                                  'Natural Vedic Gemstone'
+                                              )}
                                             </span>
                                           </div>
-                                          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                                            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
-                                              Weight &amp; Metal
-                                            </span>
-                                            <span className="font-semibold text-foreground">
-                                              {data.primaryGemstone.caratWeight} in{' '}
-                                              {data.primaryGemstone.metal}
-                                            </span>
-                                          </div>
-                                          {data.primaryGemstone.wearingFinger && (
+                                          {(data.primaryGemstone.caratWeight ||
+                                            data.primaryGemstone.metal) && (
+                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                              <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                                Weight &amp; Metal
+                                              </span>
+                                              <span className="font-semibold text-foreground">
+                                                {renderSafeText(data.primaryGemstone.caratWeight)}
+                                                {data.primaryGemstone.caratWeight &&
+                                                  data.primaryGemstone.metal &&
+                                                  ' in '}
+                                                {renderSafeText(data.primaryGemstone.metal)}
+                                              </span>
+                                            </div>
+                                          )}
+                                          {(data.primaryGemstone.wearingFinger ||
+                                            data.primaryGemstone.auspiciousDay) && (
                                             <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                                               <span className="text-muted-foreground block text-[10px] uppercase font-bold">
                                                 Finger &amp; Day
                                               </span>
                                               <span className="font-semibold text-foreground">
-                                                {data.primaryGemstone.wearingFinger} (
-                                                {data.primaryGemstone.auspiciousDay})
+                                                {renderSafeText(data.primaryGemstone.wearingFinger)}
+                                                {data.primaryGemstone.auspiciousDay &&
+                                                  ` (${renderSafeText(
+                                                    data.primaryGemstone.auspiciousDay
+                                                  )})`}
                                               </span>
                                             </div>
                                           )}
                                           {data.primaryGemstone.consecrationMantra && (
-                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                                            <div className="p-3 rounded-xl bg-white/5 border border-white/10 sm:col-span-2">
                                               <span className="text-muted-foreground block text-[10px] uppercase font-bold">
                                                 Energization Mantra
                                               </span>
-                                              <span className="font-serif text-[#C9952B]">
-                                                {data.primaryGemstone.consecrationMantra}
+                                              <span className="font-serif text-[#C9952B] block mt-0.5">
+                                                {renderSafeText(
+                                                  data.primaryGemstone.consecrationMantra
+                                                )}
                                               </span>
                                             </div>
                                           )}
                                         </div>
-                                      </div>
-                                    )}
+                                      ) : (
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                            Prescribed Ratna
+                                          </span>
+                                          <p className="font-bold text-foreground text-sm mt-0.5">
+                                            {renderSafeText(data.primaryGemstone)}
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* Secondary / Substitute Gemstone Card */}
+                                  {(data.substituteGemstone ||
+                                    data.alternativeGemstone ||
+                                    data.secondaryGemstone) && (
+                                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 text-xs">
+                                      <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+                                        Upratna (Alternative / Secondary Gemstone)
+                                      </span>
+                                      <p className="text-foreground/90 font-medium leading-relaxed">
+                                        {renderSafeText(
+                                          data.substituteGemstone ||
+                                            data.alternativeGemstone ||
+                                            data.secondaryGemstone
+                                        )}
+                                      </p>
+                                    </div>
+                                  )}
 
                                   {/* Prescribed Mukhis Card */}
                                   {data.prescribedMukhis &&
@@ -1061,16 +1732,18 @@ export default function RecentReports() {
                                               className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs"
                                             >
                                               <div className="flex justify-between items-center font-bold">
-                                                <span className="text-foreground">{rm.mukhi}</span>
+                                                <span className="text-foreground">
+                                                  {renderSafeText(rm.mukhi || rm.name)}
+                                                </span>
                                                 <span className="text-[#C9952B] text-[10px]">
-                                                  {rm.planet}
+                                                  {renderSafeText(rm.planet)}
                                                 </span>
                                               </div>
                                               <p className="text-muted-foreground text-[11px]">
-                                                {rm.benefits}
+                                                {renderSafeText(rm.benefits || rm.purpose)}
                                               </p>
                                               <p className="text-[10px] text-muted-foreground font-semibold">
-                                                Deity: {rm.deity}
+                                                Deity: {renderSafeText(rm.deity)}
                                               </p>
                                             </div>
                                           ))}
@@ -1086,13 +1759,13 @@ export default function RecentReports() {
                                           Recommended Remedial Pujas &amp; Rituals
                                         </h4>
                                         <div className="space-y-1.5">
-                                          {data.recommendedRituals.map((r: string, idx: number) => (
+                                          {data.recommendedRituals.map((r: any, idx: number) => (
                                             <div
                                               key={idx}
                                               className="flex items-start gap-2 text-xs text-foreground/90 leading-relaxed"
                                             >
                                               <span className="text-emerald-400 font-bold">✓</span>
-                                              <span>{r}</span>
+                                              <span>{renderSafeText(r)}</span>
                                             </div>
                                           ))}
                                         </div>
@@ -1113,7 +1786,7 @@ export default function RecentReports() {
                                                 Lucky Color
                                               </span>
                                               <span className="font-bold text-[#C9952B] mt-0.5 block">
-                                                {data.luckyAttributes.luckyColor}
+                                                {renderSafeText(data.luckyAttributes.luckyColor)}
                                               </span>
                                             </div>
                                           )}
@@ -1123,7 +1796,7 @@ export default function RecentReports() {
                                                 Lucky Number
                                               </span>
                                               <span className="font-bold text-foreground mt-0.5 block">
-                                                {data.luckyAttributes.luckyNumber}
+                                                {renderSafeText(data.luckyAttributes.luckyNumber)}
                                               </span>
                                             </div>
                                           )}
@@ -1133,7 +1806,7 @@ export default function RecentReports() {
                                                 Favorable Direction
                                               </span>
                                               <span className="font-bold text-foreground mt-0.5 block">
-                                                {data.luckyAttributes.luckyDirection}
+                                                {renderSafeText(data.luckyAttributes.luckyDirection)}
                                               </span>
                                             </div>
                                           )}
@@ -1143,7 +1816,7 @@ export default function RecentReports() {
                                                 Auspicious Day
                                               </span>
                                               <span className="font-bold text-emerald-400 mt-0.5 block">
-                                                {data.luckyAttributes.favorableDay}
+                                                {renderSafeText(data.luckyAttributes.favorableDay)}
                                               </span>
                                             </div>
                                           )}
@@ -1153,14 +1826,14 @@ export default function RecentReports() {
 
                                   {/* Extra Admin-Defined Output Guidance */}
                                   {(data.additionalGuidance || data.customAdminInsights) && (
-                                    <div className="p-5 sm:p-6 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 shadow-sm space-y-2">
+                                    <div className="p-5 sm:p-6 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/30 shadow-sm space-y-3">
                                       <p className="text-xs text-[#C9952B] font-bold uppercase tracking-wider flex items-center gap-1.5">
                                         <Sparkles size={14} /> Additional Vedic Guidance &amp;
                                         Lifestyle Alignment
                                       </p>
-                                      <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line">
-                                        {data.additionalGuidance || data.customAdminInsights}
-                                      </p>
+                                      {renderAdditionalGuidance(
+                                        data.additionalGuidance || data.customAdminInsights
+                                      )}
                                     </div>
                                   )}
 
@@ -1171,7 +1844,7 @@ export default function RecentReports() {
                                         Daily Sacred Shloka
                                       </span>
                                       <p className="text-xs sm:text-sm font-serif text-[#C9952B] italic">
-                                        &ldquo;{data.dailyBlessingShloka}&rdquo;
+                                        &ldquo;{renderSafeText(data.dailyBlessingShloka)}&rdquo;
                                       </p>
                                     </div>
                                   )}
@@ -1198,6 +1871,7 @@ export default function RecentReports() {
                           );
                         })()
                       )}
+                      </ReportErrorBoundary>
                     </div>
                   </div>
 

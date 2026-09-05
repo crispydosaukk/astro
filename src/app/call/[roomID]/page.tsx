@@ -252,11 +252,25 @@ export default function CallPage() {
       });
 
       const sorted = fetched
-        .filter((r) => r.status === 'completed')
+        .filter((r) => !r.status || r.status === 'completed' || r.status === 'ready')
         .sort((a, b) => {
-          const tA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-          const tB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-          return tB - tA;
+          const parseTime = (item: any) => {
+            if (!item) return 0;
+            const raw = item.createdAt ?? item.timestamp ?? item.date;
+            if (!raw) return 0;
+            if (typeof raw.toMillis === 'function') {
+              try { const v = raw.toMillis(); if (!isNaN(v)) return v; } catch {}
+            }
+            if (typeof raw.toDate === 'function') {
+              try { const d = raw.toDate(); if (!isNaN(d.getTime())) return d.getTime(); } catch {}
+            }
+            if (typeof raw === 'object' && typeof raw.seconds === 'number') {
+              return raw.seconds * 1000;
+            }
+            const t = new Date(raw).getTime();
+            return isNaN(t) ? 0 : t;
+          };
+          return parseTime(b) - parseTime(a);
         });
 
       setCustomerReports(sorted);

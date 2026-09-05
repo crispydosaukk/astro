@@ -59,13 +59,24 @@ export default function OrderHistoryPage() {
         );
         const humanSnap = await getDocs(humanQ);
         const humanData = humanSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        humanData.sort((a: any, b: any) => {
-          if (a.createdAt && b.createdAt) {
-            return (b.createdAt?.toMillis?.() || new Date(b.createdAt).getTime()) -
-                   (a.createdAt?.toMillis?.() || new Date(a.createdAt).getTime());
+        const parseTime = (item: any) => {
+          if (!item) return 0;
+          const raw = item.createdAt ?? item.startTime ?? item.date ?? item.timestamp;
+          if (!raw) return 0;
+          if (typeof raw.toMillis === 'function') {
+            try { const v = raw.toMillis(); if (!isNaN(v)) return v; } catch {}
           }
-          return 0;
-        });
+          if (typeof raw.toDate === 'function') {
+            try { const d = raw.toDate(); if (!isNaN(d.getTime())) return d.getTime(); } catch {}
+          }
+          if (typeof raw === 'object' && typeof raw.seconds === 'number') {
+            return raw.seconds * 1000;
+          }
+          const t = new Date(raw).getTime();
+          return isNaN(t) ? 0 : t;
+        };
+
+        humanData.sort((a: any, b: any) => parseTime(b) - parseTime(a));
         setHumanHistory(humanData);
 
         // 2. Fetch AI Astrologer Consultations
@@ -88,11 +99,7 @@ export default function OrderHistoryPage() {
           console.warn('Cache merge warning:', e);
         }
 
-        aiData.sort((a: any, b: any) => {
-          const timeB = new Date(b.createdAt || b.startTime || 0).getTime();
-          const timeA = new Date(a.createdAt || a.startTime || 0).getTime();
-          return timeB - timeA;
-        });
+        aiData.sort((a: any, b: any) => parseTime(b) - parseTime(a));
         setAiHistory(aiData);
 
         // Auto-open session if session ID is in URL query or if recently completed

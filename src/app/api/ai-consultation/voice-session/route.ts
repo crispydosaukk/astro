@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { DEFAULT_AI_ASTROLOGERS, AIAstrologer } from '@/lib/aiAstrologerData';
+import { ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES } from '@/lib/vedicRemediesEngine';
 
 // Rashi Name Native Translators
 function getNativeRashi(sign: string, lang: 'telugu' | 'tamil' | 'hindi' | 'english'): string {
@@ -238,15 +239,15 @@ function generateDynamicVedicReply(
     text.includes('विवाह')
   ) {
     if (isTelugu) {
-      return `${name} గారూ, మీ వివాహ స్థానమైన సప్తమ భావాన్ని పరిశీలించగా, శుక్ర మరియు గురు గ్రహాల సంచారం అనుకూలంగా ఉంది. మంచి సంబంధాలు కుదరడానికి మరియు దాంపత్య సౌఖ్యం కొరకు శుక్రవారం నాడు లక్ష్మీ దేవి పూజ చేయడం మరియు తెలుపు రంగు వస్త్రాలు లేదా పాలు దానం చేయడం శ్రేయస్కరం. వివాహ సమయం గురించి ఇంకా ఏమైనా వివరాలు కావాలా?`;
+      return `${name} గారూ, మీ వివాహ స్థానమైన సప్తమ భావాన్ని పరిశీలించగా, శుక్ర మరియు గురు గ్రహాల సంచారం అనుకూలంగా ఉంది. మంచి సంబంధాలు కుదరడానికి మరియు దాంపత్య సౌఖ్యం కొరకు శుక్రవారం నాడు లక్ష్మీ కుబేర హోమం నిర్వహించడం మరియు స్వయంవర పార్వతీ మంత్రం జపించడం అత్యంత శ్రేయస్కరం. వివాహ సమయం గురించి ఇంకా ఏమైనా వివరాలు కావాలా?`;
     }
     if (isTamil) {
-      return `${name}, உங்கள் 7ஆம் வீடான களத்திர ஸ்தானத்தில் சுக்கிரன் மற்றும் குருவின் சுப பார்வை நிலவுகிறது. திருமண காரியங்கள் விரைவில் கைகூட வெள்ளிக்கிழமைகளில் மகாலட்சுமி வழிபாடு மற்றும் நெய் தீபம் ஏற்றுவது நற்பலன்களைத் தரும்.`;
+      return `${name}, உங்கள் 7ஆம் வீடான களத்திர ஸ்தானத்தில் சுக்கிரன் மற்றும் குருவின் சுப பார்வை நிலவுகிறது. திருமண காரியங்கள் விரைவில் கைகூட வெள்ளிக்கிழமைகளில் லக்ஷ்மி குபேர ஹோமம் செய்வதும், சுயம்வர பார்வதி மந்திரம் சொல்வதும் நற்பலன்களைத் தரும்.`;
     }
     if (isHindi) {
-      return `${name} जी, 7वें भाव (विवाह स्थान) में शुभ ग्रहों की दृष्टि से आपके वैवाहिक जीवन में मधुरता के योग बन रहे हैं। शुक्रवार को मां लक्ष्मी की पूजा करने से अनुकूल रिश्ते प्राप्त होंगे।`;
+      return `${name} जी, 7वें भाव (विवाह स्थान) में शुभ ग्रहों की दृष्टि से आपके वैवाहिक जीवन में मधुरता के योग बन रहे हैं। शुक्रवार को लक्ष्मी कुबेर होम का अनुष्ठान और स्वयंवर पार्वती मंत्र का जाप करने से शीघ्र अनुकूल रिश्ते प्राप्त होंगे।`;
     }
-    return `${name}, analyzing your 7th house of Partnerships and Marriage, the planetary alignment of Venus and Jupiter creates auspicious vibrations. Offering white flowers to Goddess Lakshmi on Fridays will manifest favorable results.`;
+    return `${name}, analyzing your 7th house of Partnerships and Marriage, the planetary alignment of Venus and Jupiter creates auspicious vibrations. Performing the consecrated Lakshmi Kubera Homam on Fridays and reciting the Swayamvara Parvathi Mantra will manifest favorable results.`;
   }
 
   // 4. Career & Business
@@ -270,15 +271,15 @@ function generateDynamicVedicReply(
     text.includes('व्यापार')
   ) {
     if (isTelugu) {
-      return `${name} గారూ, మీ కుండలిలోని దశమ స్థానం (కర్మ స్థానం) బలమైన స్థితిలో ఉంది. రాబోయే కొద్ది నెలల్లో ఉద్యోగంలో ప్రమోషన్ లేదా నూతన వ్యాపార అవకాశాలు దక్కే యోగం ఉంది. ప్రతిరోజూ సూర్య నమస్కారాలు చేయడం మరియు ఆదిత్య హృదయ స్తోత్రం పఠించడం వల్ల ఉన్నత పదవులు లభిస్తాయి. ఉద్యోగ బదిలీ లేదా ఆదాయం గురించి ఇంకా ఏమైనా అడగాలనుకుంటున్నారా?`;
+      return `${name} గారూ, మీ కుండలిలోని దశమ స్థానం (కర్మ స్థానం) బలమైన స్థితిలో ఉంది. రాబోయే కొద్ది నెలల్లో ఉద్యోగంలో ప్రమోషన్ లేదా నూతన వ్యాపార అవకాశాలు దక్కే యోగం ఉంది. ఉద్యోగ అడ్డంకులు తొలగడానికి గణపతి హోమం నిర్వహించడం మరియు ఓం గం గణపతయే నమః మంత్రం లేదా ఆదిత్య హృదయ స్తోత్రం పఠించడం వల్ల ఉన్నత పదవులు లభిస్తాయి. ఉద్యోగ బదిలీ లేదా ఆదాయం గురించి ఇంకా ఏమైనా అడగాలనుకుంటున్నారా?`;
     }
     if (isTamil) {
-      return `${name}, உங்கள் 10ஆம் வீடான தொழில் ஸ்தானம் பலமாக உள்ளது. வரும் மாதங்களில் புதிய நல்ல வேலை வாய்ப்புகள் கூடிவரும். தினமும் சூரிய வழிபாடு மற்றும் ஆதித்ய ஹிருதய ஸ்தோத்திரம் சொல்வது தொழிலில் உயர்வை தரும்.`;
+      return `${name}, உங்கள் 10ஆம் வீடான தொழில் ஸ்தானம் பலமாக உள்ளது. வரும் மாதங்களில் புதிய நல்ல வேலை வாய்ப்புகள் கூடிவரும். தொழில் தடைகள் நீங்க கணபதி ஹோமம் செய்வதும், 'ஓம் கம் கணபதயே நமஹ' மந்திரம் மற்றும் ஆதித்ய ஹிருதய ஸ்தோத்திரம் சொல்வதும் தொழிலில் உயர்வை தரும்.`;
     }
     if (isHindi) {
-      return `${name} जी, आपकी कुंडली का 10वां भाव (कर्म भाव) बहुत प्रभावशाली है। आने वाले समय में पदोन्नति के योग बन रहे हैं। प्रतिदिन सूर्य को अर्घ्य दें और आदित्य हृदय स्तोत्र का पाठ करें।`;
+      return `${name} जी, आपकी कुंडली का 10वां भाव (कर्म भाव) बहुत प्रभावशाली है। आने वाले समय में पदोन्नति के योग बन रहे हैं। कार्यक्षेत्र में विघ्न निवारण के लिए गणपति होम का अनुष्ठान तथा 'ॐ गं गणपतये नमः' एवं आदित्य हृदय स्तोत्र का पाठ करें।`;
     }
-    return `${name}, in your chart, the 10th house of Profession is strongly positioned. Jupiter's aspect indicates high chances of career growth. Chanting the Aditya Hridaya Stotram will remove workplace obstacles.`;
+    return `${name}, in your chart, the 10th house of Profession is strongly positioned. Jupiter's aspect indicates high chances of career growth. Performing the Ganapathi Homam and chanting "Om Gam Ganapataye Namaha" alongside Aditya Hridaya Stotram will remove workplace obstacles.`;
   }
 
   // 5. Wealth, Finances & Debt
@@ -302,46 +303,80 @@ function generateDynamicVedicReply(
     text.includes('कर्ज')
   ) {
     if (isTelugu) {
-      return `${name} గారూ, మీ కుండలిలో 2వ స్థానం (ధన భావం) మరియు 11వ స్థానం (లాభ భావం) ప్రకారం రాబోయే కాలంలో ఆదాయ మార్గాలు మెరుగుపడతాయి. అప్పుల నివారణ మరియు స్థిర సంపద కొరకు శ్రీ సూక్తం పఠించడం మరియు పక్షులకు లేదా ఆవుకు ఆహారం ఇవ్వడం మంచి ఫలితాలను ఇస్తుంది.`;
+      return `${name} గారూ, మీ కుండలిలో 2వ స్థానం (ధన భావం) మరియు 11వ స్థానం (లాభ భావం) ప్రకారం రాబోయే కాలంలో ఆదాయ మార్గాలు మెరుగుపడతాయి. అప్పుల నివారణ మరియు స్థిర సంపద కొరకు శుక్రవారం నాడు లక్ష్మీ కుబేర హోమం నిర్వహించడం మరియు 'ఓం శ్రీం హ్రీం క్లీం మహాలక్ష్మ్యై నమః' మంత్రం లేదా కనకధార స్తోత్రం పఠించడం అత్యంత శ్రేయస్కరం.`;
     }
     if (isTamil) {
-      return `${name}, உங்கள் 2ஆம் (தனம்) மற்றும் 11ஆம் (லாபம்) வீடுகளில் பணவரவுக்கான அனுகூலம் காணப்படுகிறது. கடன் சுமை குறைய கனகதாரா ஸ்தோத்திரம் சொல்வதும் பசுவுக்கு அகத்திக்கீரை வழங்குவதும் சிறந்த பரிகாரமாகும்.`;
+      return `${name}, உங்கள் 2ஆம் (தனம்) மற்றும் 11ஆம் (லாபம்) வீடுகளில் பணவரவுக்கான அனுகூலம் காணப்படுகிறது. கடன் சுமை குறைய லக்ஷ்மி குபேர ஹோமம் செய்வதும், 'ஓம் ஸ்ரீம் ஹ்ரீம் க்லீம் மகாலக்ஷ்மியை நமஹ' மந்திரம் அல்லது கனகதாரா ஸ்தோத்திரம் சொல்வதும் சிறந்த பரிகாரமாகும்.`;
     }
     if (isHindi) {
-      return `${name} जी, आपकी कुंडली में द्वितीय (धन) और एकादश (लाभ) भाव में धन आगमन के अच्छे संकेत हैं। कनकधारा स्तोत्र का पाठ करने से आर्थिक स्थिति सुदृढ़ होगी।`;
+      return `${name} जी, आपकी कुंडली में द्वितीय (धन) और एकादश (लाभ) भाव में धन आगमन के अच्छे संकेत हैं। ऋण मुक्ति और स्थिर समृद्धि के लिए शुक्रवार को लक्ष्मी कुबेर होम का अनुष्ठान और 'ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः' मंत्र अथवा कनकधारा स्तोत्र का पाठ करें।`;
     }
-    return `${name}, evaluating your 2nd house of Wealth and 11th house of Financial Gains, steady growth is indicated. Reciting the Kanakadhara Stotram will balance financial cash flow.`;
+    return `${name}, evaluating your 2nd house of Wealth and 11th house of Financial Gains, steady growth is indicated. Performing the consecrated Lakshmi Kubera Homam and reciting "Om Shreem Hreem Kleem Mahalakshmaye Namah" or Kanakadhara Stotram will balance financial cash flow.`;
   }
 
-  // 6. Remedies & Poojas
+  // 6. Remedies & Poojas (Health, Protection, or General Planetary Doshas)
   if (
     text.includes('remedy') ||
     text.includes('remedies') ||
     text.includes('pooja') ||
     text.includes('puja') ||
+    text.includes('homam') ||
+    text.includes('homa') ||
     text.includes('mantra') ||
     text.includes('gemstone') ||
     text.includes('dosha') ||
     text.includes('పరిహార') ||
+    text.includes('హోమం') ||
     text.includes('పూజ') ||
     text.includes('మంత్ర') ||
     text.includes('దోష') ||
     text.includes('రత్న') ||
-    text.includes('పరికారం') ||
+    text.includes('பரிகாரம்') ||
+    text.includes('ஹோமம்') ||
     text.includes('தோஷம்') ||
     text.includes('उपाय') ||
+    text.includes('हवन') ||
     text.includes('दोष')
   ) {
+    const isHealth = text.includes('health') || text.includes('illness') || text.includes('ఆరోగ్య') || text.includes('రోగ') || text.includes('ஆரோக்கியம்') || text.includes('स्वास्थ्य') || text.includes('रोग');
+    const isProtection = text.includes('protection') || text.includes('evil') || text.includes('drishti') || text.includes('దిష్టి') || text.includes('రక్షణ') || text.includes('திருஷ்டி') || text.includes('नजर') || text.includes('सुरक्षा');
+
+    if (isHealth) {
+      if (isTelugu) {
+        return `${name} గారూ, సంపూర్ణ ఆరోగ్య సంరక్షణ మరియు దీర్ఘాయుష్షు కొరకు సోమవారం నాడు మహామృత్యుంజయ హోమం లేదా ఆయుష్య హోమం నిర్వహించడం మరియు ప్రతిరోజూ నూట ఎనిమిది సార్లు మహామృత్యుంజయ మంత్రం జపించడం అత్యంత శ్రేయస్కరం.`;
+      }
+      if (isTamil) {
+        return `${name}, பூரண உடல்நலம் மற்றும் ஆயுள் விருத்திக்காக மகா மிருத்யுஞ்சய ஹோமம் அல்லது ஆயுஷ் ஹோமம் செய்வதும், தினமும் நூற்றி எட்டு முறை மகா மிருத்யுஞ்சய மந்திரம் சொல்வதும் சிறந்த பலன் தரும்.`;
+      }
+      if (isHindi) {
+        return `${name} जी, उत्तम स्वास्थ्य और दीर्घायु के लिए महामृत्युंजय होम या आयुष्य होम का अनुष्ठान तथा प्रतिदिन 108 बार महामृत्युंजय मंत्र का जाप करना सर्वोत्तम उपाय है।`;
+      }
+      return `${name}, for health recovery and longevity, performing the sacred Mrityunjaya Homam and chanting the Maha Mrityunjaya Mantra 108 times daily creates strong spiritual healing.`;
+    }
+
+    if (isProtection) {
+      if (isTelugu) {
+        return `${name} గారూ, దిష్టి దోషాలు మరియు నకారాత్మక శక్తుల నివారణకు ఆదివారం నాడు సుదర్శన హోమం నిర్వహించడం మరియు సుదర్శన మహా మంత్రం లేదా హనుమాన్ చాలీసా పఠించడం మీకు అభేద్యమైన రక్షణ కల్పిస్తుంది.`;
+      }
+      if (isTamil) {
+        return `${name}, கண் திருஷ்டி மற்றும் எதிர்மறை சக்திகள் நீங்க ஞாயிற்றுக்கிழமைகளில் சுதர்சன ஹோமம் செய்வதும், சுதர்சன மகா மந்திரம் ஜெபிப்பதும் பூரண பாதுகாப்பு தரும்.`;
+      }
+      if (isHindi) {
+        return `${name} जी, नजर दोष और नकारात्मक ऊर्जा से सुरक्षा के लिए सुदर्शन होम का अनुष्ठान तथा सुदर्शन महामंत्र अथवा हनुमान चालीसा का पाठ करना अत्यंत प्रभावशाली है।`;
+      }
+      return `${name}, to neutralize negative energies and evil eye, performing the sacred Sudarshana Homam and chanting the Sudarshana Maha Mantra provides supreme spiritual protection.`;
+    }
+
     if (isTelugu) {
-      return `${name} గారూ, మీ కుండలిలోని గ్రహ దోష నివారణకు ప్రతిరోజూ గాయత్రీ మంత్రం లేదా మహామృత్యుంజయ మంత్రం జపించడం అత్యంత శ్రేయస్కరం. అలాగే సోమవారం శివారాధన మరియు శనివారం ఆంజనేయ స్వామి దర్శనం మీకు సర్వదా రక్షణ కల్పిస్తాయి.`;
+      return `${name} గారూ, మీ కుండలిలోని గ్రహ దోష నివారణకు శనివారం లేదా ఆదివారం నాడు నవగ్రహ హోమం నిర్వహించడం మరియు నవగ్రహ శాంతి మంత్రం లేదా గాయత్రీ మంత్రం జపించడం సర్వదా శుభప్రదం.`;
     }
     if (isTamil) {
-      return `${name}, உங்கள் ஜாதக தோஷங்கள் நீங்க தினமும் காயத்ரி மந்திரம் அல்லது மகா மிருத்யுஞ்சய மந்திரம் ஜெபிப்பது சிறந்தது. திங்கட்கிழமை சிவபெருமானையும், சனிக்கிழமை ஆஞ்சநேயரையும் வழிபடுவது பூரண பலன் தரும்.`;
+      return `${name}, உங்கள் ஜாதக தோஷங்கள் நீங்க சனிக்கிழமை அல்லது ஞாயிற்றுக்கிழமைகளில் நவக்கிரக ஹோமம் செய்வதும், நவக்கிரக சாந்தி மந்திரம் ஜெபிப்பதும் பூரண நன்மை தரும்.`;
     }
     if (isHindi) {
-      return `${name} जी, समस्त ग्रह शांति के लिए प्रतिदिन महामृत्युंजय मंत्र अथवा गायत्री मंत्र का 108 बार जाप करें। सोमवार को शिवलिंग पर जल-अभिषेक करना अत्यंत कल्याणकारी रहेगा।`;
+      return `${name} जी, समस्त ग्रह शांति के लिए नवग्रह होम का अनुष्ठान तथा नवग्रह शांति मंत्र अथवा गायत्री मंत्र का प्रतिदिन 108 बार जाप करें।`;
     }
-    return `${name}, chanting the Maha Mrityunjaya Mantra or Gayatri Mantra daily creates strong spiritual protection. Offering milk to Lord Shiva on Mondays will neutralize planetary afflicted energies.`;
+    return `${name}, to pacify afflicted planetary positions, performing the Navagraha Homam and chanting the Navagraha Shanti Mantra restores balance and cosmic harmony in your chart.`;
   }
 
   // Default Vedic Wisdom
@@ -761,7 +796,9 @@ Spoken Call Style & Number Rules:
 - ALWAYS spell out numbers completely in words (e.g. in Telugu write 'నూట ఎనిమిది సార్లు', 'రెండు వేల ఇరవై ఆరు వరకు', 'ఏడవ భావం'; in Hindi write 'एक सौ आठ बार').
 - Give immediate Vedic astrological insights, auspicious time windows, and 1 actionable remedy (mantra, donation, or pooja).
 - Finish every explanation, astrological prediction, and remedy completely to the end. Never stop mid-sentence or leave any thought incomplete.
-- Do not use markdown bullet points, stars (*), hyphens (-), or hashes (#). Keep it pure natural speech suitable for voice conversation.`;
+- Do not use markdown bullet points, stars (*), hyphens (-), or hashes (#). Keep it pure natural speech suitable for voice conversation.
+
+${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
 
         const messagesPayload: any[] = [{ role: 'system', content: systemPrompt }];
 

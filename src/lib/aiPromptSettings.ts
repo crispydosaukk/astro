@@ -56,7 +56,15 @@ Name: {name}
 Gender: {gender}
 DOB: {dob}, Time: {time}, Place: {place}
 Current Date: {currentDate}
+Calculated Vedic Ascendant (Lagna): {ascendant}
+Moon Sign (Chandra Rashi): {moonSign} ({nakshatra})
+Sun Sign (Surya Rashi): {sunSign}
+Vedic Tithi & Yoga: {tithi}, {yoga}
+Active Vimshottari Dasha: {currentDasha}
+Planetary Placements: {planetaryPlacements}
 Additional User Concerns: {userQuery}
+
+CRITICAL MANDATORY INSTRUCTION: Your astrologicalAnalysis and predictions must strictly speak about this calculated {ascendant} Ascendant, {moonSign} Moon, {sunSign} Sun, and active {currentDasha}. You must NEVER guess or state a different Ascendant, Moon sign, or Dasha.
 
 Respond ONLY with a JSON object containing:
 {
@@ -247,6 +255,58 @@ Respond ONLY with a JSON object:
     tags: ['Vastu', 'Directional', 'Non-Demolition', 'Home & Office'],
   },
 
+  'remedy-yantra': {
+    id: 'remedy-yantra',
+    category: 'remedies',
+    title: 'Sacred Yantra Geometry & Consecration',
+    description:
+      'Personalized geometric Yantra prescription, deity invocation, directional placement, and Prana Pratishtha activation ritual.',
+    systemPrompt:
+      'You are a grandmaster Vedic Yantra Acharya and Tantric Jyotish Scholar at AstroParihar. When given birth details (Name, DOB, Time, Place) and primary concerns, analyze the chart to determine afflicted or supportive planetary energies. Prescribe authentic Vedic Yantras (e.g., Shree Yantra, Kubera Yantra, Surya Yantra, Mahamrityunjaya Yantra, Mangal Yantra, etc.). Provide the exact geometric metal/plate, placement direction according to Vastu, auspicious consecration muhurat, Prana Pratishtha activation Beej mantra with japa count, step-by-step installation procedure, and sacred benefits.',
+    userPromptTemplate: `Service: Vedic Yantra Prescription & Consecration Report
+Devotee Name: {name}, Gender: {gender}
+DOB: {dob}, Time: {time}, Place: {place}
+Current Date: {currentDate}
+Additional Concern / Focus: {userQuery}
+
+Respond ONLY with a JSON object:
+{
+  "recommendationTitle": "Consecrated Vedic Yantra Prescription Report",
+  "recommendationName": "{name}'s Sacred Yantra Energy Alignment",
+  "timing": "{currentDate}",
+  "duration": "Lifetime Cosmic Energy Conductor",
+  "astrologicalAnalysis": "Detailed 3-paragraph personalized astrological breakdown explaining the planetary reason (Lagna/Dhana/Bhagya lord or active Dasha afflictions) why this sacred geometric frequency is prescribed, and how cosmic geometry harmonizes these vibrations.",
+  "primaryYantra": {
+    "name": "श्री यन्त्र (Shree Yantra) / कुबेर यन्त्र (Kubera Yantra) or specific Vedic Yantra",
+    "deity": "Ruling Divine Archetype (e.g., Goddess Mahalakshmi / Lord Shiva / Lord Kubera)",
+    "planet": "Governing Planet(s) (e.g., Venus / Jupiter / Sun)",
+    "material": "Consecrated Copper Plate (Tamra Patra) / Ashtadhatu / 24k Gold Foil",
+    "geometry": "Sacred geometric diagram pattern, interlocking triangles, and core Bindu symbolism",
+    "placementDirection": "Auspicious cardinal/ordinal direction (e.g. North-East / Ishanya Kona or North wall at eye level)",
+    "activationMuhurat": "Best day and timing (e.g., Shukla Paksha Friday or Sunday during Brahma Muhurta)",
+    "consecrationMantra": "Sanskrit Beej Mantra for Prana Pratishtha (e.g. ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः ॥)",
+    "japaCount": "108 Recitations during Prana Pratishtha",
+    "benefits": "Precise spiritual, financial, health, and spatial shielding outcomes."
+  },
+  "secondaryYantras": [
+    {
+      "name": "Surya Yantra / Kubera Yantra / Navagraha Yantra",
+      "deity": "Deity name",
+      "planet": "Governing Planet",
+      "placement": "Placement direction",
+      "purpose": "Targeted benefit"
+    }
+  ],
+  "procedure": "1. Morning snana and purification of Yantra plate with Gangajal and raw cow milk.\\n2. Lay on a red or yellow consecrated silk cloth on sacred altar facing East or North.\\n3. Anoint the central Bindu with pure Sandalwood (Chandan) and Kumkum.\\n4. Light a pure cow ghee diya and fragrant dhoop incense.\\n5. Recite the activation Beej Mantra 108 times using a Sphatik or Rudraksha mala.\\n6. Offer fresh fragrant flowers and sweet naivedyam.",
+  "materials": "Consecrated Yantra Plate, Pure Gangajal, Raw Cow Milk, Sandalwood paste, Kumkum, Cow Ghee Diya, Sphatik or Rudraksha Mala, Yellow/Red Silk Asana",
+  "rules": "Guidelines for maintaining sacred purity, daily dhoop, and periodic re-energization during eclipses or festivals.",
+  "additionalGuidance": "Directional Vastu tips, soft morning light recommendations, and lifestyle precautions."
+}`,
+    extraDirectives:
+      'Always specify the exact primary Yantra, Sanskrit Prana Pratishtha activation Beej mantra, placement direction, consecration metal, and 1-2 complementary secondary yantras.',
+    tags: ['Yantra', 'Sacred Geometry', 'Shree Yantra', 'Kubera', 'Prana Pratishtha'],
+  },
+
   'remedy-mantra': {
     id: 'remedy-mantra',
     category: 'remedies',
@@ -254,11 +314,11 @@ Respond ONLY with a JSON object:
     description:
       'Personalized Beej mantra, Deva japa counts, and pronunciation energization guidelines.',
     systemPrompt:
-      'You are a master Vedic Mantra Acharya at AstroParihar. Generate authentic, phonetically correct Vedic and Puranic Mantra prescriptions tailored to planetary alignments, alleviating obstacles and elevating spiritual consciousness.',
+      'You are a master Vedic Mantra Acharya at AstroParihar. Generate authentic, phonetically correct Vedic and Puranic Mantra prescriptions tailored to planetary alignments. Strictly prescribe from AstroParihar official mantras (Navagraha Beej Mantras, Maha Lakshmi Beej Mantra for wealth, Ganesha Moola Mantra for career/obstacles, Maha Mrityunjaya Mantra for health, Sudarshana Maha Mantra for protection, or Swayamvara Parvathi Mantra for marriage).',
     userPromptTemplate: `Service: Vedic Mantra Sadhana Report
 Devotee Name: {name}
 DOB: {dob}, Time: {time}, Place: {place}
-Core Objective: {objective}
+Core Objective: {userQuery}
 Current Date: {currentDate}
 
 Respond ONLY with a JSON object:
@@ -267,14 +327,14 @@ Respond ONLY with a JSON object:
   "recommendationName": "{name}'s Personalized Vedic Mantra Protocol",
   "astrologicalAnalysis": "Detailed 3-paragraph synthesis explaining the planetary frequency and resonant sound vibration of the prescribed mantra.",
   "prescribedMantras": [
-    { "title": "Primary Beej Mantra", "sanskrit": "ॐ ह्रीं क्लीं नमः", "japaCount": "108 times daily", "bestTime": "Brahma Muhurta (4:30 AM - 6:00 AM)" }
+    { "title": "Primary Sacred Mantra", "sanskrit": "ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः ॥", "transliteration": "Om Shreem Hreem Kleem Mahalakshmaye Namah", "japaCount": "108 times daily", "bestTime": "Brahma Muhurta (4:30 AM - 6:00 AM)", "mala": "Kamal Gatta or Sphatik Mala", "benefits": "Dissolves debts and unlocks abundance." }
   ],
-  "procedure": "1. Sit facing East or North on a pure woolen / kusha asana.\\n2. Use a certified Tulsi or Rudraksha mala.\\n3. Maintain inner devotion with focused breathing.",
-  "materials": "Consecrated Japa Mala, Gomukhi bag, Brass Diya with pure cow ghee",
-  "additionalGuidance": "Daily discipline, dietary sattvic recommendations, and sankalpa methodology."
+  "procedure": "1. Sit facing East or North on a pure woolen / kusha asana.\\n2. Light a pure cow ghee diya and offer flowers.\\n3. Use a certified Tulsi or Rudraksha mala and maintain focused breathing during 108 recitations.",
+  "materials": "Consecrated Japa Mala (108 beads), Gomukhi japa bag, Brass Diya with pure cow ghee, Sandalwood paste",
+  "additionalGuidance": "Daily discipline, dietary sattvic recommendations, and 48-day Mandala sankalpa methodology."
 }`,
     extraDirectives:
-      'Include exact Japa count, auspicious time of day, facing direction, and recommended mala type.',
+      'Include exact Japa count (108 times), auspicious time of day, facing direction, recommended mala type, and Sanskrit text with Roman transliteration.',
     tags: ['Mantra', 'Japa', 'Beej Mantra', 'Sadhana'],
   },
 
@@ -352,25 +412,37 @@ Respond ONLY with a JSON object:
     description:
       'Sacred Agni rituals for Navagraha Shanti, removing deep karmic blocks, and invoking divine blessings.',
     systemPrompt:
-      'You are a senior Vedic Purohit and Agnihotri scholar at AstroParihar. Prescribe sacred Vedic Homa and Hawan rituals tailored to pacify afflicted planetary positions, remove negativity, and bring peace.',
+      'You are a senior Vedic Purohit and Agnihotri scholar at AstroParihar. Prescribe sacred Vedic Homa and Hawan rituals tailored to pacify afflicted planetary positions, remove negativity, and bring peace. You MUST prescribe ONLY from AstroParihar\'s canonical 6 Homams: Navagraha Homam, Ganapathi Homam, Lakshmi Kubera Homam, Mrityunjaya Homam, Sudarshana Homam, or Ayush Homam to ensure complete harmony with our Remedies portal.',
     userPromptTemplate: `Service: Vedic Homa & Puja Recommendation
 Yajamana Name: {name}
 DOB: {dob}, Time: {time}, Place: {place}
-Purpose: {purpose}
+Purpose / Focus: {userQuery}
 Current Date: {currentDate}
 
 Respond ONLY with a JSON object:
 {
   "recommendationTitle": "Vedic Homa & Hawan Ritual Guide",
   "recommendationName": "{name}'s Prescribed Agni Homa Protocol",
-  "astrologicalAnalysis": "Detailed 3-paragraph breakdown of the cosmic purification through sacred Agni Devata.",
-  "recommendedHoma": "Navagraha Shanti Homa & Maha Mrityunjaya Hawan",
-  "procedure": "1. Sankalpa with family names and Gotra.\\n2. Ganapati Puja and Navagraha invocation.\\n3. Ahutis with sacred herbs and cow ghee into the consecrated Homa Kund.",
-  "materials": "Dry coconut, pure cow ghee, Havan Samagri (32 sacred herbs), camphor, lotus seeds, mango wood",
+  "astrologicalAnalysis": "Detailed 3-paragraph breakdown of the planetary afflictions or intentions necessitating this sacred Agni ritual.",
+  "recommendedHoma": {
+    "name": "Lakshmi Kubera Homam / Ganapathi Homam / Navagraha Homam / Mrityunjaya Homam / Sudarshana Homam / Ayush Homam",
+    "purpose": "Primary cosmic intention and relief provided",
+    "day": "Auspicious day (e.g., Friday / Poornima or Wednesday or Saturday)",
+    "duration": "2–3 hours",
+    "deity": "Ruling deity invoked",
+    "ahutiMantra": "Sanskrit Ahuti Mantra for sacred Agni offerings",
+    "japaCount": "108 Ahutis with consecrated samidha and cow ghee",
+    "samidha": "Specific sacred woods and herb offerings (e.g. Bilva, Kamal Gatta, Durva)",
+    "materials": "Pure Cow Ghee, Dry Coconut, Navadhanya, Camphor, Lotus seeds, Sacred silk cloth",
+    "procedure": "1. Maha Sankalpa with family Gotra and Nakshatra.\\n2. Ganapathi Avahana and Mandapa Sthapana.\\n3. 108 Ahutis with sacred samidha into Agni Kund.\\n4. Maha Purna Ahuti with dry coconut.\\n5. Anointing sacred Raksha Bhasma on forehead.",
+    "benefits": "Precise spiritual, karmic, and material outcomes of the ritual."
+  },
+  "procedure": "1. Fasting or Sattvic intake prior to the ceremony.\\n2. Sthapana of Kalasha and Agni Mathana.\\n3. 108 consecrated Ahutis into holy Agni.\\n4. Maha Purna Ahuti offering.\\n5. Prasad distribution and Brahmin dakshina.",
+  "materials": "Pure Cow Ghee, Havan Samagri (32 herbs), Dry Coconut, Camphor, Navadhanya, Sacred Silk Vastra",
   "additionalGuidance": "Auspicious Tithi and Muhurat window to perform the ceremony."
 }`,
     extraDirectives:
-      'List specific Homa samagri, number of ahutis, Gotra sankalpa details, and post-homa charity instructions.',
+      'Always select the most fitting Homam from AstroParihar\'s official 6 (Lakshmi Kubera, Ganapathi, Navagraha, Mrityunjaya, Sudarshana, Ayush) and supply full Ahuti mantra and Samidha details.',
     tags: ['Homa', 'Hawan', 'Agni', 'Navagraha Puja'],
   },
 

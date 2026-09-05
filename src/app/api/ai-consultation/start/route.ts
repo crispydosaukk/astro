@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { DEFAULT_AI_ASTROLOGERS, AIAstrologer } from '@/lib/aiAstrologerData';
 import {
+  calculateBirthChartData,
   calculateAstroPlacement,
   RASHIS,
   NAKSHATRAS_DATA,
@@ -53,37 +54,38 @@ export async function POST(req: Request) {
 
     // 3. Synthesize Dynamic Astrological Context based on Birth Details
     let astroContext = {
-      lagna: 'Scorpio (Vrishchika)',
-      moonRashi: 'Aries (Mesha)',
-      nakshatra: 'Bharani',
-      currentDasha: 'Jupiter - Mars (Vimshottari)',
-      summaryNotes: `Chart calculated for ${birthDetails.name || 'Devotee'}, born ${birthDetails.dob} ${birthDetails.time} at ${birthDetails.place}. Primary concern: ${birthDetails.primaryConcern || 'General Life Guidance'}.`,
+      lagna: 'Aries (Mesha)',
+      moonRashi: 'Taurus (Vrishabha)',
+      nakshatra: 'Rohini',
+      currentDasha: 'Jupiter Mahadasha (Vimshottari)',
+      summaryNotes: `Chart calculated for ${birthDetails.name || 'Devotee'}, born ${birthDetails.dob || 'N/A'} ${birthDetails.time || '12:00 PM'} at ${birthDetails.place || 'India'}. Primary concern: ${birthDetails.primaryConcern || 'General Life Guidance'}.`,
     };
 
     if (birthDetails.dob) {
       try {
-        const placement = calculateAstroPlacement(
+        const chart = calculateBirthChartData(
           birthDetails.dob,
-          birthDetails.time || '12:00',
-          birthDetails.lat,
-          birthDetails.lon
+          birthDetails.time || '12:00 PM',
+          birthDetails.place || 'India',
+          birthDetails.lat || '28.6139',
+          birthDetails.lon || '77.2090',
+          birthDetails.name || 'Devotee',
+          birthDetails.gender || 'Male'
         );
 
-        // Approximate Lagna based on Sun & Birth Hour
-        const [hr] = (birthDetails.time || '12:00').split(':').map((s: string) => parseInt(s, 10) || 12);
-        const birthMonth = new Date(birthDetails.dob).getMonth();
-        const lagnaIdx = (birthMonth + Math.floor(hr / 2) + 9) % 12;
-        const lagnaSign = RASHIS[lagnaIdx]?.name || 'Scorpio (Vrishchika)';
-
-        const nakshatraObj = NAKSHATRAS_DATA[placement.nakshatraIndex];
-        const dashaLord = nakshatraObj?.ruler || 'Jupiter';
-
         astroContext = {
-          lagna: lagnaSign,
-          moonRashi: placement.rashiName,
-          nakshatra: placement.nakshatraName,
-          currentDasha: `${dashaLord} Mahadasha (Vimshottari)`,
-          summaryNotes: `Authentic chart synthesized for ${birthDetails.name || 'Devotee'}. Lagna: ${lagnaSign}, Moon: ${placement.rashiName}, Nakshatra: ${placement.nakshatraName}, Dasha: ${dashaLord}. Primary topic: ${birthDetails.primaryConcern || 'General Guidance'}.`,
+          lagna: chart.ascendant,
+          moonRashi: chart.moonSign,
+          nakshatra: chart.nakshatra,
+          currentDasha: `${chart.dasha.currentMahadasha} - ${chart.dasha.currentAntardasha}`,
+          summaryNotes: `Authentic Vedic Janam Kundli synthesized for ${birthDetails.name || 'Devotee'} (Born: ${birthDetails.dob} at ${birthDetails.time || '12:00 PM'}, ${birthDetails.place || 'India'}).
+• Ascendant (Lagna): ${chart.ascendant}
+• Moon Sign: ${chart.moonSign} (${chart.nakshatra})
+• Sun Sign: ${chart.sunSign}
+• Active Vimshottari Dasha: ${chart.dasha.currentMahadasha} (${chart.dasha.currentAntardasha})
+• Tithi: ${chart.tithi}, Yoga: ${chart.yoga}
+• Manglik Status: ${chart.doshas[0]?.status}
+• Primary Topic: ${birthDetails.primaryConcern || 'General Guidance'}.`,
         };
       } catch (err) {
         console.warn('Error computing astro placement:', err);

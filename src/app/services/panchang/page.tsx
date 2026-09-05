@@ -426,7 +426,11 @@ export default function FreePanchangPage() {
               {aiSummary.additionalGuidance && (
                 <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300">
                   <strong className="text-[#C9952B]">Zonal &amp; Lifestyle Guidance: </strong>
-                  <span>{aiSummary.additionalGuidance}</span>
+                  <span>
+                    {typeof aiSummary.additionalGuidance === 'object'
+                      ? JSON.stringify(aiSummary.additionalGuidance)
+                      : String(aiSummary.additionalGuidance)}
+                  </span>
                 </div>
               )}
             </div>

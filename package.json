@@ -57,6 +57,7 @@
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "@zegocloud/zego-uikit-prebuilt": "^2.18.1",
+    "astronomy-engine": "^2.1.19",
     "country-list-with-dial-code-and-flag": "^5.1.1",
     "date-fns": "^4.4.0",
     "firebase": "^12.16.0",

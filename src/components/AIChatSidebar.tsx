@@ -20,7 +20,13 @@ import {
   AlertCircle,
   ArrowUpRight,
   LogIn,
+  CheckCircle2,
+  Compass,
+  AlertTriangle,
+  Calendar,
+  Flame,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useUserData } from '@/lib/useUserData';
 import AppImage from '@/components/ui/AppImage';
 import ConfirmModal from '@/components/ui/ConfirmModal';
@@ -31,6 +37,22 @@ interface ChatMessage {
   content: string;
   timestamp: string;
   recommendations?: string[];
+  structured?: {
+    diagnosis?: {
+      activeDasha?: string;
+      keyHouses?: string;
+      supportingFactors?: string[];
+      contradictoryFactors?: string[];
+    };
+    conclusion?: string;
+    timingWindow?: string;
+    whyAstroPariharSaysThis?: string[];
+    confidence?: 'Strong' | 'Moderate' | 'Mixed';
+    confidenceRationale?: string;
+    needsAstrologerReview?: boolean;
+    escalationReason?: string;
+    pariharProtocol?: any;
+  };
 }
 
 const DEFAULT_RECOMMENDATIONS = [
@@ -108,6 +130,10 @@ export default function AIChatSidebar() {
   const [pricePerPrompt, setPricePerPrompt] = useState<number>(5);
   const [currentWallet, setCurrentWallet] = useState<number>(0);
 
+  // Prediction Outcome Verification State
+  const [pendingVerification, setPendingVerification] = useState<any>(null);
+  const [verificationSubmitted, setVerificationSubmitted] = useState<boolean>(false);
+
   // Centered Modals
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [alertModal, setAlertModal] = useState<{
@@ -132,15 +158,19 @@ export default function AIChatSidebar() {
     }
   }, [userData]);
 
-  // Fetch dynamic price from backend
+  // Fetch dynamic price and pending predictions from backend
   useEffect(() => {
     async function fetchPricing() {
       try {
-        const res = await fetch('/api/ai-chat');
+        const queryUrl = `/api/ai-chat${user?.uid ? `?userId=${user.uid}` : ''}`;
+        const res = await fetch(queryUrl);
         if (res.ok) {
           const data = await res.json();
           if (data?.pricePerPrompt !== undefined) {
             setPricePerPrompt(Number(data.pricePerPrompt));
+          }
+          if (data?.pendingPrediction) {
+            setPendingVerification(data.pendingPrediction);
           }
         }
       } catch (err) {
@@ -148,7 +178,28 @@ export default function AIChatSidebar() {
       }
     }
     fetchPricing();
-  }, [isOpen]);
+  }, [isOpen, user?.uid]);
+
+  const handleVerifyOutcome = async (predictionId: string, outcome: string) => {
+    if (!user?.uid) return;
+    try {
+      const res = await fetch('/api/ai-chat', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid,
+          predictionId,
+          outcome,
+        }),
+      });
+      if (res.ok) {
+        setVerificationSubmitted(true);
+        toast.success('Thank you! Your outcome verification has been saved to AstroParihar Jyotish records.');
+      }
+    } catch (err) {
+      console.warn('Could not verify prediction outcome:', err);
+    }
+  };
 
   // Load chat from localStorage on mount
   useEffect(() => {
@@ -298,6 +349,10 @@ export default function AIChatSidebar() {
         setCurrentWallet(Number(data.newBalance));
       }
 
+      if (data.pendingVerification) {
+        setPendingVerification(data.pendingVerification);
+      }
+
       if (data.message) {
         const assistantMessage: ChatMessage = {
           id: `ai-${Date.now()}`,
@@ -306,6 +361,7 @@ export default function AIChatSidebar() {
           timestamp: data.message.timestamp || new Date().toISOString(),
           recommendations:
             data.recommendations || data.message.recommendations || DEFAULT_RECOMMENDATIONS,
+          structured: data.message.structured || data.structured || undefined,
         };
         setMessages((prev) => [...prev, assistantMessage]);
       }
@@ -578,6 +634,51 @@ export default function AIChatSidebar() {
                 </div>
               </div>
 
+              {/* Prediction Outcome Verification Banner (Did it work?) */}
+              {pendingVerification && !verificationSubmitted && user && (
+                <div className="mx-3 my-2 p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[#C9952B]/10 to-[#713B32]/10 border border-[#C9952B]/40 shadow-xs text-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#713B32] flex items-center gap-1.5 text-[11px]">
+                      <Sparkles size={13} className="text-[#C9952B]" />
+                      Astrological Outcome Verification
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setVerificationSubmitted(true)}
+                      className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                  <p className="text-[#292522] text-[11px] leading-snug">
+                    Acharya Parihar previously indicated a milestone for <strong>{pendingVerification.topic}</strong> around <em>{pendingVerification.targetPeriod}</em>. Did this event manifest in your life?
+                  </p>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => handleVerifyOutcome(pendingVerification.id, 'verified_accurate')}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] transition-colors cursor-pointer"
+                    >
+                      ✓ Yes, Accurately
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleVerifyOutcome(pendingVerification.id, 'partially_accurate')}
+                      className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] transition-colors cursor-pointer"
+                    >
+                      ⚡ Partially
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleVerifyOutcome(pendingVerification.id, 'inaccurate')}
+                      className="px-2.5 py-1 rounded-lg bg-slate-500 hover:bg-slate-600 text-white font-bold text-[10px] transition-colors cursor-pointer"
+                    >
+                      ✕ Not Yet
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Messages Scroll Area */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#FDFBF7]">
                 {messages.map((m) => {
@@ -598,28 +699,137 @@ export default function AIChatSidebar() {
 
                       {/* Bubble */}
                       <div
-                        className={`relative max-w-[85%] rounded-2xl p-3.5 leading-relaxed shadow-sm ${
+                        className={`relative max-w-[88%] rounded-2xl p-3.5 leading-relaxed shadow-sm ${
                           isUser
                             ? 'bg-[#713B32] text-white rounded-tr-xs font-medium'
                             : 'bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] rounded-tl-xs'
                         }`}
                       >
+                        {/* Astrological Confidence Badge for AI Responses */}
+                        {!isUser && m.structured?.confidence && (
+                          <div className="mb-2.5 flex items-center justify-between gap-2 pb-2 border-b border-[#E5D9C8]">
+                            <div className="flex items-center gap-1.5">
+                              {m.structured.confidence === 'Strong' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 font-extrabold text-[10px]">
+                                  <CheckCircle2 size={11} className="text-emerald-600" />
+                                  Astrology Confidence: Strong
+                                </span>
+                              ) : m.structured.confidence === 'Moderate' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-800 font-extrabold text-[10px]">
+                                  <Compass size={11} className="text-amber-600" />
+                                  Astrology Confidence: Moderate
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-800 font-extrabold text-[10px]">
+                                  <AlertTriangle size={11} className="text-rose-600" />
+                                  Astrology Confidence: Mixed
+                                </span>
+                              )}
+                            </div>
+                            {m.structured.confidenceRationale && (
+                              <span className="text-[10px] text-muted-foreground truncate max-w-[150px]" title={m.structured.confidenceRationale}>
+                                {m.structured.confidenceRationale}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         {/* Text Content */}
                         <div className="space-y-1.5 whitespace-pre-wrap font-sans">
-                          {m.content.split('\n\n').map((para, i) => (
-                            <p key={i}>
-                              {para.split('**').map((chunk, j) =>
-                                j % 2 === 1 ? (
-                                  <strong key={j} className={isUser ? 'text-[#FFEBB3]' : 'text-[#713B32]'}>
-                                    {chunk}
-                                  </strong>
-                                ) : (
-                                  chunk
-                                )
-                              )}
-                            </p>
-                          ))}
+                          {m.content.split('\n\n').map((para, i) => {
+                            if (para.startsWith('### ')) {
+                              return (
+                                <h4 key={i} className="text-xs font-bold text-[#713B32] mt-2.5 pt-1.5 border-t border-[#E5D9C8]/60 first:mt-0 first:border-0 first:pt-0">
+                                  {para.replace('### ', '')}
+                                </h4>
+                              );
+                            }
+                            return (
+                              <p key={i}>
+                                {para.split('**').map((chunk, j) =>
+                                  j % 2 === 1 ? (
+                                    <strong key={j} className={isUser ? 'text-[#FFEBB3]' : 'text-[#713B32]'}>
+                                      {chunk}
+                                    </strong>
+                                  ) : (
+                                    chunk
+                                  )
+                                )}
+                              </p>
+                            );
+                          })}
                         </div>
+
+                        {/* 48-Day Sacred Mandala Parihar Protocol Card */}
+                        {!isUser && m.structured?.pariharProtocol && (
+                          <div className="mt-3 p-3 rounded-xl bg-gradient-to-br from-[#F8F3EA] to-[#EDE4D5]/60 border border-[#C9952B]/40 shadow-xs space-y-2">
+                            <div className="flex items-center justify-between gap-1.5 text-xs font-bold text-[#713B32]">
+                              <span className="flex items-center gap-1.5">
+                                <Flame size={13} className="text-[#C9952B]" />
+                                48-Day Sacred Mandala Protocol
+                              </span>
+                              <span className="text-[10px] font-bold text-[#C9952B] px-1.5 py-0.5 rounded bg-white/70 border border-[#C9952B]/30">
+                                48 Days (మండలం)
+                              </span>
+                            </div>
+
+                            <p className="text-[11px] text-[#292522] font-semibold">
+                              {m.structured.pariharProtocol.title}
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
+                              <div className="p-1.5 rounded-lg bg-white/80 border border-[#E5D9C8]">
+                                <span className="text-muted-foreground block text-[9px]">Prescribed Homam:</span>
+                                <strong className="text-[#713B32] truncate block">{m.structured.pariharProtocol.recommendedHomam}</strong>
+                                <span className="text-[9px] text-[#C9952B] block">Day: {m.structured.pariharProtocol.homamAuspiciousDay}</span>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-white/80 border border-[#E5D9C8]">
+                                <span className="text-muted-foreground block text-[9px]">Daily Mantra Japa:</span>
+                                <strong className="text-[#713B32] truncate block" title={m.structured.pariharProtocol.dailyMantra}>
+                                  {m.structured.pariharProtocol.dailyMantra}
+                                </strong>
+                                <span className="text-[9px] text-emerald-700 block">108 recitations at Sunrise</span>
+                              </div>
+                            </div>
+
+                            {/* 3 Milestones */}
+                            <div className="pt-1.5 border-t border-[#E5D9C8] space-y-1 text-[10px] text-[#6B5E55]">
+                              <div className="flex items-start gap-1.5">
+                                <span className="font-bold text-[#713B32] shrink-0">Day 1:</span>
+                                <span>{m.structured.pariharProtocol.initiationDay1?.action}</span>
+                              </div>
+                              <div className="flex items-start gap-1.5">
+                                <span className="font-bold text-[#C9952B] shrink-0">Day 24:</span>
+                                <span>{m.structured.pariharProtocol.midMandalaMilestoneDay24?.charityDaana}</span>
+                              </div>
+                              <div className="flex items-start gap-1.5">
+                                <span className="font-bold text-emerald-700 shrink-0">Day 48:</span>
+                                <span>{m.structured.pariharProtocol.culminationDay48?.action}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Human Astrologer Escalation Card */}
+                        {!isUser && (m.structured?.needsAstrologerReview || m.structured?.confidence === 'Mixed') && (
+                          <div className="mt-3 p-3 rounded-xl bg-gradient-to-br from-[#713B32]/10 via-[#C9952B]/10 to-transparent border border-[#C9952B]/50 shadow-sm space-y-2">
+                            <div className="flex items-center gap-2 text-xs font-bold text-[#713B32]">
+                              <ShieldCheck size={14} className="text-[#C9952B]" />
+                              <span>Senior Astrologer Review Recommended</span>
+                            </div>
+                            <p className="text-[11px] text-[#292522] leading-snug">
+                              {m.structured?.escalationReason ||
+                                'This inquiry involves intricate planetary tensions between your active Dasha period and key houses. Direct verification with an AstroParihar Senior Astrologer is recommended.'}
+                            </p>
+                            <Link
+                              href="/talk-to-astrologer"
+                              className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl gold-gradient-bg text-white font-bold text-xs shadow-md hover:brightness-105 transition-all cursor-pointer"
+                            >
+                              <span>Consult Senior Vedic Astrologer</span>
+                              <ArrowUpRight size={13} />
+                            </Link>
+                          </div>
+                        )}
 
                         {/* Timestamp & Sound Readout */}
                         <div

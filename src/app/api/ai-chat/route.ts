@@ -2,8 +2,20 @@ import { NextResponse } from 'next/server';
 import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
 import { getSettings } from '@/lib/settings';
 import { adminDb } from '@/lib/firebase/admin';
+import {
+  ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES,
+  generate48DayRemedyProtocol,
+  RemedyProtocol48Day,
+} from '@/lib/vedicRemediesEngine';
+import {
+  calculateBirthChartData,
+  formatChartSummaryForAI,
+  extractBirthDetailsFromText,
+  analyzeInquiryEvidence,
+  JyotishEvidencePack,
+} from '@/lib/vedicAstrologyEngine';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const settings = await getSettings();
     const pricePerPrompt = Number(settings.aiChatPricePerPrompt) >= 0 ? Number(settings.aiChatPricePerPrompt) : 5;
@@ -15,12 +27,70 @@ export async function GET() {
       console.warn('Could not persist price setting to db:', dbErr);
     }
 
+    // Optional: Check pending predictions for outcome verification
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get('userId');
+    let pendingPrediction = null;
+
+    if (userId && userId !== 'guest' && userId !== 'guest-user') {
+      try {
+        const predSnap = await adminDb
+          .collection('users')
+          .doc(userId)
+          .collection('predictions')
+          .where('status', '==', 'pending')
+          .limit(1)
+          .get();
+        if (!predSnap.empty) {
+          const doc = predSnap.docs[0];
+          pendingPrediction = { id: doc.id, ...doc.data() };
+        }
+      } catch (err) {
+        console.warn('Could not fetch pending predictions:', err);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       pricePerPrompt,
+      pendingPrediction,
     });
   } catch (err: any) {
     return NextResponse.json({ success: true, pricePerPrompt: 5 });
+  }
+}
+
+// Prediction Outcome Verification Handler (Did it work?)
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json();
+    const { userId, predictionId, outcome, userNote } = body;
+
+    if (!userId || !predictionId || !outcome) {
+      return NextResponse.json({ error: 'Missing required verification fields' }, { status: 400 });
+    }
+
+    const predRef = adminDb
+      .collection('users')
+      .doc(userId)
+      .collection('predictions')
+      .doc(predictionId);
+
+    await predRef.set(
+      {
+        status: outcome, // 'verified_accurate' | 'partially_accurate' | 'inaccurate'
+        verifiedAt: new Date().toISOString(),
+        userFeedbackNote: userNote || '',
+      },
+      { merge: true }
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: 'Thank you for verifying your astrological outcome. Your feedback helps strengthen AstroParihar Jyotish accuracy.',
+    });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to update prediction outcome' }, { status: 500 });
   }
 }
 
@@ -121,10 +191,129 @@ export async function POST(req: Request) {
       day: 'numeric',
     });
 
-    // Build Astrological Persona System Prompt
+    // 5. Build Devotee Birth Profile
+    let birthInfo = {
+      name: userInfo?.name || userData?.name || 'Devotee',
+      gender: userInfo?.gender || userData?.gender || 'Devotee',
+      dob: userInfo?.dob || userData?.dob,
+      tob: userInfo?.tob || userData?.tob || '12:00 PM',
+      pob: userInfo?.pob || userData?.pob || 'India',
+      lat: userInfo?.lat || userData?.lat || '28.6139',
+      lon: userInfo?.lon || userData?.lon || '77.2090',
+    };
+
+    if (!birthInfo.dob && Array.isArray(messages) && messages.length > 0) {
+      const allUserTexts = messages
+        .filter((m: any) => m.role === 'user')
+        .map((m: any) => m.content)
+        .join(' ');
+      const extracted = extractBirthDetailsFromText(allUserTexts);
+      if (extracted?.dob) {
+        birthInfo.dob = extracted.dob;
+        birthInfo.tob = extracted.tob || birthInfo.tob;
+        birthInfo.pob = extracted.pob || birthInfo.pob;
+      }
+    }
+
+    // 6. Longitudinal Memory: Recall Past Consultations & Pending Predictions
+    let userMemoryContext = '';
+    let pastPendingPrediction: any = null;
+
+    try {
+      const memorySnap = await userRef
+        .collection('ai_astrology_memory')
+        .orderBy('createdAt', 'desc')
+        .limit(3)
+        .get();
+
+      if (!memorySnap.empty) {
+        const pastSessions = memorySnap.docs.map((d: any) => d.data());
+        const sessionLines = pastSessions
+          .map(
+            (s: any) =>
+              `- [${s.date || 'Previous Session'}]: Devotee asked about "${s.topic || s.inquiry}". Prediction given: "${s.prediction || 'Guided'}". Active Remedy: ${s.prescribedHomam || 'Vedic Upaya'}.`
+          )
+          .join('\n');
+        userMemoryContext = `\n\nLONGITUDINAL DEVOTEE MEMORY (PAST SESSIONS):\n${sessionLines}\n*DIRECTIVE: Acknowledge their continuing spiritual journey when relevant. Do not ask for birth details again if they are already recorded.*`;
+      }
+
+      // Check for any unverified predictions
+      const predSnap = await userRef
+        .collection('predictions')
+        .where('status', '==', 'pending')
+        .limit(1)
+        .get();
+      if (!predSnap.empty) {
+        const pDoc = predSnap.docs[0];
+        pastPendingPrediction = { id: pDoc.id, ...pDoc.data() };
+      }
+    } catch (memErr) {
+      console.warn('Longitudinal memory lookup notice:', memErr);
+    }
+
+    // 7. Deterministic Jyotish Evidence & Rule Engine Evaluation
+    const latestUserMessage =
+      [...messages].reverse().find((m: any) => m.role === 'user')?.content || '';
+
     let userContext = '';
-    if (userInfo) {
-      userContext = `\nDevotee Profile:\n- Name: ${userInfo.name || 'Devotee'}\n- Gender: ${userInfo.gender || 'Not specified'}\n- Date of Birth: ${userInfo.dob || 'Not provided'}\n- Time of Birth: ${userInfo.tob || 'Not provided'}\n- Place of Birth: ${userInfo.pob || 'Not provided'}`;
+    let birthChartSummary = '';
+    let evidence: JyotishEvidencePack | null = null;
+    let pariharProtocol: RemedyProtocol48Day | null = null;
+    let evidencePrompt = '';
+
+    if (birthInfo.dob) {
+      try {
+        const chart = calculateBirthChartData(
+          birthInfo.dob,
+          birthInfo.tob,
+          birthInfo.pob,
+          birthInfo.lat,
+          birthInfo.lon,
+          birthInfo.name,
+          birthInfo.gender
+        );
+        birthChartSummary = `\n\n${formatChartSummaryForAI(chart)}`;
+
+        // Run Deterministic Jyotish Evidence Analysis
+        evidence = analyzeInquiryEvidence(chart, latestUserMessage);
+
+        // Generate 48-Day Executable Parihar Protocol
+        pariharProtocol = generate48DayRemedyProtocol({
+          domain: evidence.domain,
+          planet: evidence.primaryAfflictedPlanet,
+          concern: latestUserMessage,
+        });
+
+        evidencePrompt = `
+================================================================================
+DETERMINISTIC JYOTISH EVIDENCE GENERATED BY ASTROPARIHAR ENGINE:
+================================================================================
+- Domain Identified: ${evidence.domainTitle}
+- Target Houses: Houses ${evidence.relevantHouseNumbers.join(', ')}
+- Relevant House Alignments in D1:
+${evidence.relevantHouses.map((h: any) => `  * House ${h.houseNumber} (${h.sign}) ruled by ${h.lord}: Occupying Grahas = ${h.planets}`).join('\n')}
+- Active Vimshottari Cycle: ${evidence.activeDashaSummary}
+- Supporting Astrological Factors:
+${evidence.supportingFactors.map((f: any) => `  * ${f}`).join('\n')}
+- Contradictory / Karmic Resistance Factors:
+${evidence.contradictoryFactors.map((f: any) => `  * ${f}`).join('\n')}
+- Astrological Confidence Score: ${evidence.confidence} (${evidence.confidenceRationale})
+- Potent Timing Window: ${evidence.timingWindow}
+- Prescribed 48-Day Sacred Protocol: ${pariharProtocol.title}
+  * Recommended Homam: ${pariharProtocol.recommendedHomam} (${pariharProtocol.homamAuspiciousDay})
+  * Daily Mantra: ${pariharProtocol.dailyMantra} (${pariharProtocol.dailyJapaCount})
+  * Day 24 Sacred Daana: ${pariharProtocol.midMandalaMilestoneDay24.charityDaana}
+  * Day 48 Purnahuti: ${pariharProtocol.culminationDay48.action}
+- Needs Astrologer Escalation: ${evidence.needsAstrologerReview ? 'YES - ' + evidence.escalationReason : 'NO'}
+
+CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
+1. You MUST explicitly reference the verified Ascendant (${chart.ascendant}), Moon Sign (${chart.moonSign}), Nakshatra (${chart.nakshatra}), and active Dasha (${chart.dasha.currentMahadasha} - ${chart.dasha.currentAntardasha}).
+2. Ground your reasoning in the above verified supporting and contradictory factors. Never contradict this evidence.`;
+      } catch (err) {
+        console.warn('Error calculating birth chart or evidence:', err);
+      }
+    } else {
+      userContext = `\nDevotee Profile:\n- Name: ${birthInfo.name}\n- Birth Details: Not provided yet. Kindly invite them to share their Date, Time, and Place of Birth to calculate their authentic Vedic Janam Kundli.`;
     }
 
     const isIndic = ['Telugu', 'Hindi', 'Tamil'].includes(language);
@@ -137,46 +326,62 @@ export async function POST(req: Request) {
         ? 'Tamil script (தமிழ்)'
         : 'English';
 
-    const systemPrompt = `You are "Acharya Parihar", the master Vedic Astrologer, Jyotishacharya, and spiritual guide at AstroParihar. You possess profound mastery over Parashari Jyotish, Jaimini Sutras, Ashtakavarga, Nakshatra Pada analysis, and Vedic remedies (Upayas).
+    const systemPrompt = `You are "Acharya Parihar", the master Vedic Astrologer, Jyotishacharya, and spiritual guide at AstroParihar. You possess profound mastery over Parashari Jyotish, Jaimini Sutras, Ashtakavarga, Nakshatra analysis, and Vedic Upayas.
 
 Real-Time Calendar Anchor:
 - Today's Date: ${currentDate}.
 - Current Year: STRICTLY ${currentYear}.
-- You are living and practicing in ${currentYear}. All transit predictions (Saturn/Shani, Jupiter/Brihaspati, Rahu, Ketu), Mahadashas, and advice must strictly reference ${currentYear} and future years (${currentYear + 1}, ${currentYear + 2}). Never refer to 2024 or 2025 as the present or upcoming year.
+- You are practicing in ${currentYear}. All transit predictions (Saturn/Shani, Jupiter/Brihaspati, Rahu, Ketu), Mahadashas, and advice must reference ${currentYear} and future years (${currentYear + 1}, ${currentYear + 2}).
 
-MANDATORY LANGUAGE REQUIREMENT (CRITICAL & NON-NEGOTIABLE):
-- The devotee has explicitly selected the language: **${language.toUpperCase()}** (${scriptName}).
-- You MUST generate your ENTIRE consultation "reply" 100% in ${language} using ${scriptName}.
-${isIndic ? `- Even if the devotee asks their question in English or Roman script (e.g. "What is my lucky gemstone?"), you MUST translate their question and deliver your complete answer, astrological insights, headings, and remedies 100% in ${language} (${scriptName}). DO NOT reply in English.` : ''}
-- Tone: Warm, compassionate, wise, and spiritually uplifting (start with a warm Vedic greeting in ${language}: ${language === 'Telugu' ? '"నమస్కారం"' : language === 'Hindi' ? '"नमस्ते / प्रणाम"' : language === 'Tamil' ? '"வணக்கம்"' : '"Namaste / Hari Om"'}).
-- Provide clear, actionable, authentic Vedic astrology insights. If birth details are provided, analyze their Lagna, Moon sign, planetary houses, and active Dasha influences.
-- When answering questions about career, love, finance, health, or remedies, offer specific Vedic recommendations:
-  1. Auspicious planetary mantras (with chanting counts like 108 times).
-  2. Gemstone (Ratna) and Rudraksha guidance.
-  3. Auspicious days and charitable acts (Daan).
-  4. Temples or deity worship (Ishta Devata).
-- Keep replies concise, structured with clear bullet points, and easy to read on mobile devices.${userContext}
+MANDATORY LANGUAGE REQUIREMENT (CRITICAL):
+- Selected Language: **${language.toUpperCase()}** (${scriptName}).
+- You MUST generate your entire consultation response 100% in ${language} using ${scriptName}.
+${isIndic ? `- Even if the devotee asks in English or Roman script, translate and answer 100% in ${language} (${scriptName}).` : ''}
+- Tone: Warm, compassionate, spiritually uplifting (start with a warm Vedic greeting in ${language}: ${language === 'Telugu' ? '"నమస్కారం"' : language === 'Hindi' ? '"नमस्ते / प्रणाम"' : language === 'Tamil' ? '"வணக்கம்"' : '"Namaste / Hari Om"'}).${userContext}${userMemoryContext}${birthChartSummary}${evidencePrompt}
 
-Important Rules:
-- Never give fatalistic, frightening, or negative death predictions. Always provide remedial hope and constructive spiritual solutions.
-- Format your consultation text using clean Markdown with bold headings and readable bullet points.
+${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}
 
-Output Format Requirements:
+================================================================================
+STRUCTURED CONSULTATION FORMAT REQUIREMENT (MANDATORY & ZERO-DEVIATION):
+================================================================================
 You MUST respond STRICTLY in JSON format matching this schema:
 {
-  "reply": "Your complete detailed Markdown astrological consultation written 100% in ${language} (${scriptName}). Do NOT write in English unless English was chosen.",
+  "diagnosis": {
+    "activeDasha": "${evidence?.activeDashaSummary || 'Current Mahadasha & Antardasha'}",
+    "keyHouses": "Relevant houses involved in this inquiry",
+    "supportingFactors": ["2 to 3 classical supporting planetary factors in ${language}"],
+    "contradictoryFactors": ["1 to 2 friction points or karmic tests in ${language}"]
+  },
+  "conclusion": "Direct, decisive answer in 2-4 sentences in ${language} directly answering the devotee's question.",
+  "timingWindow": "Clear, specific timing window for this event or transition in ${language}.",
+  "whyAstroPariharSaysThis": [
+    "3 to 5 clear astrological bullet points in ${language} explaining Observation -> Classical Rule -> Interpretation"
+  ],
+  "confidence": "${evidence?.confidence || 'Moderate'}",
+  "confidenceRationale": "${evidence?.confidenceRationale || 'Evaluated across natal chart factors.'}",
+  "needsAstrologerReview": ${Boolean(evidence?.needsAstrologerReview)},
+  "escalationReason": "${evidence?.escalationReason || ''}",
+  "pariharSummary": "Concise summary of the 48-day sacred remedy protocol in ${language}",
+  "reply": "Your complete beautifully formatted Markdown response in ${language} (${scriptName}) incorporating:
+### 🔍 Astrological Diagnosis
+### 🎯 AI Conclusion
+### ⏳ Timing Window
+### 📜 Why AstroParihar Says This
+### 🪔 48-Day Sacred Parihar Protocol
+### ⚖️ Astrological Confidence: [Strong / Moderate / Mixed]
+(If confidence is Mixed, add: '✨ Senior Astrologer Review Recommended: This chart exhibits intricate planetary tensions. Connect directly with our Senior Astrologers.')",
   "recommendations": [
-    "5 to 6 engaging follow-up inquiry questions written 100% in ${language} (${scriptName}) that the devotee can ask next based on this reading"
+    "5 to 6 engaging follow-up inquiry questions written 100% in ${language} (${scriptName})"
   ]
 }`;
 
-    // Prepare conversation messages with language reinforcement
+    // Prepare conversation messages
     const conversationMessages = [
       { role: 'system', content: systemPrompt },
-      ...messages.slice(-12).map((m: any, idx: number, arr: any[]) => {
+      ...messages.slice(-10).map((m: any, idx: number, arr: any[]) => {
         let content = m.content || '';
         if (idx === arr.length - 1 && m.role === 'user' && language && language !== 'English') {
-          content += `\n\n[MANDATORY DIRECTIVE: The user's chosen language is ${language}. You MUST formulate your entire response in ${scriptName}. Do NOT reply in English.]`;
+          content += `\n\n[MANDATORY DIRECTIVE: Deliver the complete consultation formatted in ${scriptName}. Do NOT reply in English.]`;
         }
         return {
           role: m.role === 'user' ? 'user' : 'assistant',
@@ -195,8 +400,8 @@ You MUST respond STRICTLY in JSON format matching this schema:
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: conversationMessages,
-          temperature: 0.7,
-          max_tokens: 1200,
+          temperature: 0.6,
+          max_tokens: 1500,
           response_format: { type: 'json_object' },
         }),
       },
@@ -219,10 +424,11 @@ You MUST respond STRICTLY in JSON format matching this schema:
     const data = await response.json();
     let replyContent = '';
     let recommendations: string[] = [];
+    let parsed: any = {};
 
     try {
       const rawText = data.choices?.[0]?.message?.content || '{}';
-      const parsed = JSON.parse(rawText);
+      parsed = JSON.parse(rawText);
       replyContent = parsed.reply || rawText;
       if (Array.isArray(parsed.recommendations) && parsed.recommendations.length > 0) {
         recommendations = parsed.recommendations
@@ -276,7 +482,59 @@ You MUST respond STRICTLY in JSON format matching this schema:
       }
     }
 
+    // 8. Longitudinal Memory & Prediction Persistence (Outcome Tracking)
+    try {
+      const sessionDate = new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+
+      await userRef.collection('ai_astrology_memory').add({
+        date: sessionDate,
+        topic: evidence?.domainTitle || latestUserMessage.slice(0, 60),
+        inquiry: latestUserMessage.slice(0, 150),
+        conclusion: parsed.conclusion || replyContent.slice(0, 200),
+        prediction: parsed.timingWindow || evidence?.timingWindow || '',
+        prescribedHomam: pariharProtocol?.recommendedHomam || '',
+        confidence: evidence?.confidence || parsed.confidence || 'Moderate',
+        createdAt: new Date().toISOString(),
+      });
+
+      // Save structured prediction for future outcome validation
+      if (parsed.timingWindow || evidence?.timingWindow) {
+        await userRef.collection('predictions').add({
+          topic: evidence?.domainTitle || 'Cosmic Timing',
+          predictedEvent: parsed.conclusion || 'Key Astrological Shift',
+          targetPeriod: parsed.timingWindow || evidence?.timingWindow || '',
+          confidence: evidence?.confidence || parsed.confidence || 'Moderate',
+          remedyPrescribed: pariharProtocol?.recommendedHomam || '',
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+        });
+      }
+    } catch (persistErr) {
+      console.warn('Astrology memory persistence notice:', persistErr);
+    }
+
     const finalBalance = Math.max(0, initialBalance - deductedAmount);
+
+    const structuredPayload = {
+      diagnosis: parsed.diagnosis || {
+        activeDasha: evidence?.activeDashaSummary || '',
+        keyHouses: `Houses ${evidence?.relevantHouseNumbers.join(', ') || '1, 9, 10'}`,
+        supportingFactors: evidence?.supportingFactors || [],
+        contradictoryFactors: evidence?.contradictoryFactors || [],
+      },
+      conclusion: parsed.conclusion || '',
+      timingWindow: parsed.timingWindow || evidence?.timingWindow || '',
+      whyAstroPariharSaysThis: parsed.whyAstroPariharSaysThis || evidence?.supportingFactors || [],
+      confidence: (evidence?.confidence || parsed.confidence || 'Moderate') as 'Strong' | 'Moderate' | 'Mixed',
+      confidenceRationale: evidence?.confidenceRationale || parsed.confidenceRationale || '',
+      needsAstrologerReview: Boolean(evidence?.needsAstrologerReview || parsed.needsAstrologerReview),
+      escalationReason: evidence?.escalationReason || parsed.escalationReason || '',
+      pariharProtocol: pariharProtocol || null,
+    };
 
     return NextResponse.json({
       success: true,
@@ -285,7 +543,10 @@ You MUST respond STRICTLY in JSON format matching this schema:
         content: replyContent,
         timestamp: new Date().toISOString(),
         recommendations: recommendations.slice(0, 6),
+        structured: structuredPayload,
       },
+      structured: structuredPayload,
+      pendingVerification: pastPendingPrediction,
       recommendations: recommendations.slice(0, 6),
       deducted: deductedAmount,
       newBalance: finalBalance,
@@ -306,3 +567,4 @@ You MUST respond STRICTLY in JSON format matching this schema:
     );
   }
 }
+

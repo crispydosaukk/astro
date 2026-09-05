@@ -30,6 +30,7 @@ import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
 import { useUserData } from '@/lib/useUserData';
 import { calculateBirthChartData } from '@/lib/vedicAstrologyEngine';
+import VedicSquareChart from '@/components/VedicSquareChart';
 
 export default function FreeJanamKundliPage() {
   const { user } = useUserData();
@@ -683,86 +684,82 @@ export default function FreeJanamKundliPage() {
 
               {/* Tab 2: D1 Lagna Chart */}
               {activeTab === 'd1' && (
-                <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-6">
-                  <div className="flex justify-between items-center flex-wrap gap-2">
-                    <h3 className="text-xl font-bold text-foreground">
-                      Lagna Chart (D1 Main Birth Chart)
-                    </h3>
-                    <span className="text-xs font-bold text-[#C9952B] bg-[#C9952B]/10 px-3 py-1 rounded-full border border-[#C9952B]/20">
-                      Ascendant: Scorpio (8)
-                    </span>
-                  </div>
+                <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-8">
+                  {/* Square Vedic Birth Chart (South Indian / North Indian) */}
+                  <VedicSquareChart chartData={horoscopeReport} chartType="D1" />
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {[
-                      { house: 'H1 (Lagna)', sign: 'Scorpio', planets: 'Mars, Sun' },
-                      { house: 'H2 (Dhana)', sign: 'Sagittarius', planets: 'Jupiter' },
-                      { house: 'H3 (Sahaj)', sign: 'Capricorn', planets: 'Empty' },
-                      { house: 'H4 (Sukha)', sign: 'Aquarius', planets: 'Saturn' },
-                      { house: 'H5 (Putra)', sign: 'Pisces', planets: 'Rahu' },
-                      { house: 'H6 (Shatru)', sign: 'Aries', planets: 'Moon' },
-                      { house: 'H7 (Yuvati)', sign: 'Taurus', planets: 'Venus' },
-                      { house: 'H8 (Aayu)', sign: 'Gemini', planets: 'Empty' },
-                      { house: 'H9 (Bhagya)', sign: 'Cancer', planets: 'Exalted Jupiter' },
-                      { house: 'H10 (Karma)', sign: 'Leo', planets: 'Sun' },
-                      { house: 'H11 (Labha)', sign: 'Virgo', planets: 'Mercury, Ketu' },
-                      { house: 'H12 (Vyaya)', sign: 'Libra', planets: 'Empty' },
-                    ].map((item) => (
-                      <div
-                        key={item.house}
-                        className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
-                      >
-                        <div className="flex justify-between text-xs font-bold">
-                          <span className="text-[#C9952B]">{item.house}</span>
-                          <span className="text-muted-foreground">{item.sign}</span>
+                  {/* Detailed 12-House Breakdown */}
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <h4 className="text-base font-bold text-foreground">
+                        12 Bhavas (House-wise Breakdown)
+                      </h4>
+                      <span className="text-xs font-bold text-[#C9952B] bg-[#C9952B]/10 px-3 py-1 rounded-full border border-[#C9952B]/20">
+                        Ascendant: {horoscopeReport.ascendant}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {(horoscopeReport.d1Houses || []).map((item: any) => (
+                        <div
+                          key={item.house}
+                          className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+                        >
+                          <div className="flex justify-between text-xs font-bold">
+                            <span className="text-[#C9952B]">{item.house}</span>
+                            <span className="text-muted-foreground">{item.sign}</span>
+                          </div>
+                          <p className="text-xs font-semibold text-foreground pt-1">
+                            {item.planets === 'Empty' ? (
+                              <span className="text-muted-foreground/60">No Planets</span>
+                            ) : (
+                              item.planets
+                            )}
+                          </p>
                         </div>
-                        <p className="text-xs font-semibold text-foreground pt-1">
-                          {item.planets === 'Empty' ? (
-                            <span className="text-muted-foreground/60">No Planets</span>
-                          ) : (
-                            item.planets
-                          )}
-                        </p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
 
               {/* Tab 3: D9 Navamsha Chart */}
               {activeTab === 'd9' && (
-                <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-6">
-                  <div className="flex justify-between items-center flex-wrap gap-2">
-                    <h3 className="text-xl font-bold text-foreground">
-                      Navamsha Chart (D9 Marriage & Spiritual Strength)
-                    </h3>
-                    <span className="text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
-                      Spousal & Karmic Strength
-                    </span>
-                  </div>
+                <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 space-y-8">
+                  {/* Square Vedic Navamsha Chart (South Indian / North Indian) */}
+                  <VedicSquareChart chartData={horoscopeReport} chartType="D9" />
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {[
-                      { house: 'D9 H1', sign: 'Taurus', planets: 'Venus' },
-                      { house: 'D9 H2', sign: 'Gemini', planets: 'Mercury' },
-                      { house: 'D9 H4', sign: 'Leo', planets: 'Sun' },
-                      { house: 'D9 H7', sign: 'Scorpio', planets: 'Jupiter, Moon' },
-                      { house: 'D9 H9', sign: 'Capricorn', planets: 'Mars' },
-                      { house: 'D9 H10', sign: 'Aquarius', planets: 'Saturn' },
-                      { house: 'D9 H11', sign: 'Pisces', planets: 'Rahu' },
-                      { house: 'D9 H12', sign: 'Aries', planets: 'Ketu' },
-                    ].map((item) => (
-                      <div
-                        key={item.house}
-                        className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
-                      >
-                        <div className="flex justify-between text-xs font-bold">
-                          <span className="text-[#C9952B]">{item.house}</span>
-                          <span className="text-muted-foreground">{item.sign}</span>
+                  {/* Detailed 12-House Breakdown */}
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <h4 className="text-base font-bold text-foreground">
+                        D9 Navamsha Bhavas Breakdown
+                      </h4>
+                      <span className="text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+                        Spousal & Karmic Strength
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {(horoscopeReport.d9Houses || []).map((item: any) => (
+                        <div
+                          key={item.house}
+                          className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+                        >
+                          <div className="flex justify-between text-xs font-bold">
+                            <span className="text-[#C9952B]">{item.house}</span>
+                            <span className="text-muted-foreground">{item.sign}</span>
+                          </div>
+                          <p className="text-xs font-semibold text-foreground pt-1">
+                            {item.planets === 'Empty' ? (
+                              <span className="text-muted-foreground/60">No Planets</span>
+                            ) : (
+                              item.planets
+                            )}
+                          </p>
                         </div>
-                        <p className="text-xs font-semibold text-foreground pt-1">{item.planets}</p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

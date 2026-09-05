@@ -56,7 +56,7 @@ export default function GlobalFooterAndBottomBar() {
       label: 'My Reports',
       href: '/my-reports',
       icon: FileText,
-      isActive: pathname?.startsWith('/my-reports') || pathname?.startsWith('/user-dashboard'),
+      isActive: pathname?.startsWith('/my-reports'),
     },
   ];
 

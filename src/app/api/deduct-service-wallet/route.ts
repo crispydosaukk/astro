@@ -72,7 +72,11 @@ export async function POST(req: Request) {
     // 5. Generate authentic, dynamic Vedic AI report using admin prompts
     let dynamicReportData = reportData;
     try {
-      dynamicReportData = await generateReportDataInternal(serviceTitle, details, reportData);
+      dynamicReportData = await generateReportDataInternal(
+        serviceTitle,
+        { ...(details || {}), serviceId },
+        reportData
+      );
     } catch (aiErr) {
       console.warn('Error synthesizing AI report in wallet deduction:', aiErr);
     }

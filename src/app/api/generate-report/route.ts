@@ -26,7 +26,11 @@ export async function POST(request: Request) {
       }
     }
 
-    const reportJsonObj = await generateReportDataInternal(type, details, existingData);
+    const reportJsonObj = await generateReportDataInternal(
+      type,
+      { ...(details || {}), serviceId: body.serviceId || details?.serviceId },
+      existingData
+    );
     const reportContent = JSON.stringify(reportJsonObj);
 
     // Save to Firestore `service_requests` collection using adminDb

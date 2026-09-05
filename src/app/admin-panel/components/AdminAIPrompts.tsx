@@ -63,6 +63,13 @@ const PROMPT_OPTIONS: PromptOption[] = [
     description: '8-Direction spatial audit and non-demolition remedies',
   },
   {
+    id: 'remedy-yantra',
+    category: 'Remedies',
+    name: 'Sacred Yantra Geometry',
+    icon: '📐',
+    description: 'Vedic Yantra prescriptions, directional placement, and Prana Pratishtha rituals',
+  },
+  {
     id: 'remedy-mantra',
     category: 'Remedies',
     name: 'Mantra Shakti & Japa Sadhana',
