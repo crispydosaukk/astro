@@ -113,6 +113,122 @@ const LANGUAGES = [
   { code: 'Tamil', label: 'தமிழ் (Tamil)', short: 'த' },
 ];
 
+function renderFormattedMessageContent(rawContent: string, isUser: boolean) {
+  if (!rawContent) return null;
+
+  // 1. Normalize line endings
+  const cleaned = rawContent
+    .replace(/\r\n/g, '\n')
+    // Remove empty markdown headers with no text following
+    .replace(/^#+\s*$/gm, '')
+    // Ensure headings have clean line spacing
+    .replace(/([^\n])\n(###?\s+)/g, '$1\n\n$2')
+    // Strip redundant protocol/confidence headings if they leaked into text
+    .replace(/###?\s*[\u{1F300}-\u{1F9FF}\s]*(?:48[- ]?Day|Parihar Protocol|Sacred Mandala|Astrological Confidence|Confidence)[^\n]*/giu, '')
+    .replace(/###?\s*[\u{1F300}-\u{1F9FF}\s]*(?:48[- ]?రోజుల|పరిహార ప్రోటోకాల్|జ్యోతిష్య నమ్మకం|ఆత్మవిశ్వాసం)[^\n]*/giu, '')
+    .trim();
+
+  // Split into paragraphs / blocks
+  const rawBlocks = cleaned
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+
+  // Filter out any consecutive empty headers that have no text between them
+  const blocks: string[] = [];
+  for (let i = 0; i < rawBlocks.length; i++) {
+    const curr = rawBlocks[i];
+    const isHeading = /^#+\s+/.test(curr);
+    if (isHeading) {
+      const lines = curr.split('\n').filter(Boolean);
+      // If curr itself has multiple stacked headings with no content:
+      if (lines.length > 1 && lines.every((l) => /^#+\s+/.test(l.trim()))) {
+        continue;
+      }
+      // If single heading but next block is also a heading:
+      if (i + 1 < rawBlocks.length && /^#+\s+/.test(rawBlocks[i + 1])) {
+        continue;
+      }
+    }
+    blocks.push(curr);
+  }
+
+  return (
+    <div className="space-y-2 text-xs sm:text-sm font-sans">
+      {blocks.map((block, idx) => {
+        // Heading block
+        if (block.startsWith('### ') || block.startsWith('## ') || block.startsWith('# ')) {
+          const headingText = block.replace(/^#+\s+/, '').trim();
+          if (!headingText) return null;
+          return (
+            <h4
+              key={idx}
+              className="text-xs font-bold text-[#713B32] mt-3 pt-2 border-t border-[#E5D9C8]/60 first:mt-0 first:border-0 first:pt-0"
+            >
+              {headingText}
+            </h4>
+          );
+        }
+
+        // List block or regular paragraph
+        const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+
+        if (
+          lines.length > 1 &&
+          lines.every(
+            (l) => l.startsWith('•') || l.startsWith('-') || /^\d+[\.\)]/.test(l)
+          )
+        ) {
+          return (
+            <ul key={idx} className="space-y-1.5 pl-1 my-1.5">
+              {lines.map((line, lIdx) => {
+                const cleanLine = line.replace(/^[•\-\d\.\)]\s*/, '').trim();
+                return (
+                  <li key={lIdx} className="flex items-start gap-1.5 text-xs leading-relaxed">
+                    <span className="text-[#C9952B] font-bold shrink-0">•</span>
+                    <span>
+                      {cleanLine.split('**').map((chunk, j) =>
+                        j % 2 === 1 ? (
+                          <strong
+                            key={j}
+                            className={isUser ? 'text-[#FFEBB3]' : 'text-[#713B32]'}
+                          >
+                            {chunk}
+                          </strong>
+                        ) : (
+                          chunk
+                        )
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+
+        // Regular paragraph
+        return (
+          <p key={idx} className="text-xs leading-relaxed whitespace-pre-line">
+            {block.split('**').map((chunk, j) =>
+              j % 2 === 1 ? (
+                <strong
+                  key={j}
+                  className={isUser ? 'text-[#FFEBB3]' : 'text-[#713B32]'}
+                >
+                  {chunk}
+                </strong>
+              ) : (
+                chunk
+              )
+            )}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AIChatSidebar() {
   const pathname = usePathname();
   const { user, userData } = useUserData();
@@ -735,29 +851,8 @@ export default function AIChatSidebar() {
                         )}
 
                         {/* Text Content */}
-                        <div className="space-y-1.5 whitespace-pre-wrap font-sans">
-                          {m.content.split('\n\n').map((para, i) => {
-                            if (para.startsWith('### ')) {
-                              return (
-                                <h4 key={i} className="text-xs font-bold text-[#713B32] mt-2.5 pt-1.5 border-t border-[#E5D9C8]/60 first:mt-0 first:border-0 first:pt-0">
-                                  {para.replace('### ', '')}
-                                </h4>
-                              );
-                            }
-                            return (
-                              <p key={i}>
-                                {para.split('**').map((chunk, j) =>
-                                  j % 2 === 1 ? (
-                                    <strong key={j} className={isUser ? 'text-[#FFEBB3]' : 'text-[#713B32]'}>
-                                      {chunk}
-                                    </strong>
-                                  ) : (
-                                    chunk
-                                  )
-                                )}
-                              </p>
-                            );
-                          })}
+                        <div className="space-y-1.5 font-sans">
+                          {renderFormattedMessageContent(m.content, isUser)}
                         </div>
 
                         {/* 48-Day Sacred Mandala Parihar Protocol Card */}

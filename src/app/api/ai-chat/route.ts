@@ -362,14 +362,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
   "needsAstrologerReview": ${Boolean(evidence?.needsAstrologerReview)},
   "escalationReason": "${evidence?.escalationReason || ''}",
   "pariharSummary": "Concise summary of the 48-day sacred remedy protocol in ${language}",
-  "reply": "Your complete beautifully formatted Markdown response in ${language} (${scriptName}) incorporating:
-### 🔍 Astrological Diagnosis
-### 🎯 AI Conclusion
-### ⏳ Timing Window
-### 📜 Why AstroParihar Says This
-### 🪔 48-Day Sacred Parihar Protocol
-### ⚖️ Astrological Confidence: [Strong / Moderate / Mixed]
-(If confidence is Mixed, add: '✨ Senior Astrologer Review Recommended: This chart exhibits intricate planetary tensions. Connect directly with our Senior Astrologers.')",
+  "reply": "Your complete, warm, beautifully phrased Vedic consultation response in ${language} (${scriptName}). Speak directly to the devotee as Acharya Parihar. Begin with a traditional greeting. Deliver your astrological verdict and explain the active planetary influences with deep compassion and wisdom. Clearly specify the auspicious timing window. Do NOT output raw empty markdown headers, checklists, or English placeholder words.",
   "recommendations": [
     "5 to 6 engaging follow-up inquiry questions written 100% in ${language} (${scriptName})"
   ]
@@ -429,7 +422,39 @@ You MUST respond STRICTLY in JSON format matching this schema:
     try {
       const rawText = data.choices?.[0]?.message?.content || '{}';
       parsed = JSON.parse(rawText);
-      replyContent = parsed.reply || rawText;
+
+      let mainReply = (parsed.reply || '').trim();
+
+      // Check if reply is empty or has only empty/stacked headers with no real content
+      const cleanBody = mainReply
+        .split('\n')
+        .map((l: string) => l.trim())
+        .filter((l: string) => !l.startsWith('#') && !/^[🔍🏺🎯⏳🪔⚖️📜✨]/.test(l) && l.length > 0)
+        .join(' ');
+
+      if (cleanBody.length < 30 && (parsed.conclusion || parsed.whyAstroPariharSaysThis)) {
+        const sections: string[] = [];
+        if (parsed.conclusion) {
+          sections.push(parsed.conclusion);
+        }
+        if (Array.isArray(parsed.whyAstroPariharSaysThis) && parsed.whyAstroPariharSaysThis.length > 0) {
+          sections.push(parsed.whyAstroPariharSaysThis.map((pt: string) => `• ${pt}`).join('\n'));
+        }
+        if (parsed.timingWindow) {
+          sections.push(`⏳ **${parsed.timingWindow}**`);
+        }
+        mainReply = sections.join('\n\n');
+      }
+
+      // Strip redundant protocol/confidence headers from text since they are rendered as separate visual cards
+      mainReply = mainReply
+        .replace(/###?\s*[\u{1F300}-\u{1F9FF}\s]*(?:48[- ]?Day|Parihar Protocol|Sacred Mandala|Astrological Confidence|Confidence)[^\n]*/giu, '')
+        .replace(/###?\s*[\u{1F300}-\u{1F9FF}\s]*(?:48[- ]?రోజుల|పరిహార ప్రోటోకాల్|జ్యోతిష్య నమ్మకం|ఆత్మవిశ్వాసం)[^\n]*/giu, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+
+      replyContent = mainReply || parsed.conclusion || rawText;
+
       if (Array.isArray(parsed.recommendations) && parsed.recommendations.length > 0) {
         recommendations = parsed.recommendations
           .filter((r: any) => typeof r === 'string' && r.trim().length > 0)
