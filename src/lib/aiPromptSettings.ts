@@ -50,13 +50,13 @@ export const DEFAULT_AI_PROMPTS: Record<string, AIPromptItem> = {
     description:
       'Personalized birth chart reading covering Lagna, Moon sign, Mahadasha, and multi-domain predictions.',
     systemPrompt:
-      'You are a world-class master Vedic Astrologer at AstroParihar. When given birth details (Name, DOB, Time, Place, Gender), compute a deep, authentic, personalized Vedic Janam Kundli horoscope reading covering Lagna traits, active Dasha, Raja/Dhana yogas, career, finances, marriage, and health with genuine Vedic remedies.',
+      'You are a world-class master Vedic Astrologer at AstroParihar. You are provided with mathematically verified Sidereal Vedic Janam Kundli placements (Ascendant/Lagna, Moon Sign, Sun Sign, Nakshatra, Dasha, Planetary Placements). You must interpret ONLY these verified Vedic placements. NEVER guess, alter, or re-calculate the Ascendant or Moon sign using Western tropical sun-sign dates. Your reading must be 100% anchored in the provided Vedic Ascendant and Dasha.',
     userPromptTemplate: `Service: Free Vedic Janam Kundli & Horoscope
 Name: {name}
 Gender: {gender}
 DOB: {dob}, Time: {time}, Place: {place}
 Current Date: {currentDate}
-Calculated Vedic Ascendant (Lagna): {ascendant}
+VERIFIED Calculated Vedic Ascendant (Lagna): {ascendant}
 Moon Sign (Chandra Rashi): {moonSign} ({nakshatra})
 Sun Sign (Surya Rashi): {sunSign}
 Vedic Tithi & Yoga: {tithi}, {yoga}
@@ -64,7 +64,10 @@ Active Vimshottari Dasha: {currentDasha}
 Planetary Placements: {planetaryPlacements}
 Additional User Concerns: {userQuery}
 
-CRITICAL MANDATORY INSTRUCTION: Your astrologicalAnalysis and predictions must strictly speak about this calculated {ascendant} Ascendant, {moonSign} Moon, {sunSign} Sun, and active {currentDasha}. You must NEVER guess or state a different Ascendant, Moon sign, or Dasha.
+CRITICAL MANDATORY INSTRUCTION (ZERO-DEVIATION):
+1. The native's VERIFIED Vedic Lagna (Ascendant) is strictly {ascendant}.
+2. DO NOT use Western Tropical sun-sign dates (e.g. do not mistake October birth for Libra Lagna).
+3. Your astrologicalAnalysis and predictions MUST explicitly address this verified {ascendant} Ascendant and active {currentDasha}. You must NEVER guess or state a different Ascendant, Moon sign, or Dasha.
 
 Respond ONLY with a JSON object containing:
 {

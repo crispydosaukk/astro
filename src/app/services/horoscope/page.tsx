@@ -108,12 +108,32 @@ export default function FreeHoroscopePage() {
 
       const data = await res.json();
       if (data?.reportData) {
-        setApiReportData(data.reportData);
+        const verifiedLagna = computedHoroscope.ascendant;
+        const verifiedMoon = computedHoroscope.moonSign;
+        const verifiedNakshatra = computedHoroscope.nakshatra;
+        const verifiedDasha = computedHoroscope.dasha;
+        const lagnaName = (verifiedLagna || '').split(' ')[0];
+
+        let safeAnalysis = data.reportData.astrologicalAnalysis || computedHoroscope.astrologicalAnalysis;
+        if (verifiedLagna && lagnaName && !safeAnalysis.toLowerCase().includes(lagnaName.toLowerCase())) {
+          safeAnalysis = `${computedHoroscope.astrologicalAnalysis}\n\n${safeAnalysis}`;
+        }
+
+        const safeReportData = {
+          ...data.reportData,
+          ascendant: verifiedLagna,
+          moonSign: verifiedMoon,
+          nakshatra: verifiedNakshatra,
+          dasha: verifiedDasha,
+          astrologicalAnalysis: safeAnalysis,
+        };
+
+        setApiReportData(safeReportData);
         setHoroscopeReport((prev: any) => ({
           ...prev,
-          ...data.reportData,
+          ...safeReportData,
           predictions: data.reportData.predictions || prev?.predictions,
-          astrologicalAnalysis: data.reportData.astrologicalAnalysis || prev?.astrologicalAnalysis,
+          astrologicalAnalysis: safeAnalysis,
         }));
       }
     } catch (err) {

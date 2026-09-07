@@ -148,6 +148,31 @@ export async function generateReportDataInternal(
         systemPrompt += `\n\nSpecific Module Extra Directives:\n${promptConfig.extraDirectives}`;
       }
 
+      const verifiedLagna = reportJsonObj?.ascendant || '';
+      const verifiedMoon = reportJsonObj?.moonSign || '';
+      const verifiedNakshatra = reportJsonObj?.nakshatra || '';
+      const verifiedSun = reportJsonObj?.sunSign || '';
+      const verifiedDasha = reportJsonObj?.dasha?.currentMahadasha
+        ? `${reportJsonObj.dasha.currentMahadasha} (${reportJsonObj.dasha.currentAntardasha || ''})`
+        : '';
+
+      if (verifiedLagna) {
+        systemPrompt += `\n\n================================================================================
+CRITICAL ASTRONOMICAL GROUND TRUTH (ZERO-HALLUCINATION DIRECTIVE):
+================================================================================
+The native's birth chart has ALREADY been calculated with precision ephemeris:
+- Ascendant (Lagna): ${verifiedLagna}
+- Moon Sign (Chandra Rashi): ${verifiedMoon} ${verifiedNakshatra ? `(${verifiedNakshatra})` : ''}
+- Sun Sign (Surya Rashi): ${verifiedSun}
+- Active Vimshottari Dasha: ${verifiedDasha}
+
+MANDATORY RULES:
+1. You MUST explicitly state that the native is born with ${verifiedLagna} Ascendant.
+2. DO NOT use Western Tropical sun sign dates (e.g. October birth date does NOT mean Libra Lagna). This is Vedic Sidereal (Nirayana) Astrology. The Lagna is strictly ${verifiedLagna}.
+3. NEVER state or imply a different Ascendant, Moon sign, or Dasha. Any response claiming a different Lagna is strictly forbidden.
+4. Your astrologicalAnalysis MUST interpret the genuine house placements of ${verifiedLagna} Lagna.`;
+      }
+
       // Build User Prompt using Template Interpolation
       let userPrompt = promptConfig.userPromptTemplate;
       const userName = details.name || details.fullName || details.groomName || 'Devotee';
@@ -237,14 +262,78 @@ export async function generateReportDataInternal(
         const parsed = JSON.parse(aiJson.choices[0].message.content);
         if (!reportJsonObj) reportJsonObj = {};
 
-        // Merge all dynamic outputs
+        // Keys calculated by verified mathematical engine that must NEVER be overwritten by LLM hallucinations
+        const IMMUTABLE_ASTRONOMICAL_KEYS = new Set([
+          'ascendant',
+          'ascendantSignNumber',
+          'lagnaIndex',
+          'moonSign',
+          'sunSign',
+          'nakshatra',
+          'nakshatraLord',
+          'dasha',
+          'tithi',
+          'yoga',
+          'karana',
+          'gan',
+          'yoni',
+          'nadi',
+          'planetaryDegrees',
+          'd1Houses',
+          'd9Houses',
+          'd9LagnaSignIdx',
+          'd9Planets',
+          'yogas',
+          'doshas',
+        ]);
+
+        // Merge dynamic outputs while protecting verified astronomical data
         Object.keys(parsed).forEach((k) => {
+          if (IMMUTABLE_ASTRONOMICAL_KEYS.has(k) && reportJsonObj[k]) {
+            // Keep verified mathematical computation intact
+            return;
+          }
           if (k === 'predictions' && reportJsonObj.predictions) {
             reportJsonObj.predictions = { ...reportJsonObj.predictions, ...parsed.predictions };
           } else {
             reportJsonObj[k] = parsed[k];
           }
         });
+
+        // Enforce verified Astrological Analysis to prevent LLM Lagna hallucination
+        const activeVerifiedLagna = reportJsonObj.ascendant || '';
+        const lagnaSign = activeVerifiedLagna.split(' ')[0].trim();
+
+        if (activeVerifiedLagna && parsed.astrologicalAnalysis && typeof parsed.astrologicalAnalysis === 'string') {
+          let cleanedAnalysis = parsed.astrologicalAnalysis;
+
+          const ALL_RASHIS = [
+            'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+            'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+          ];
+          const conflictingSigns = ALL_RASHIS.filter(
+            (s) => s.toLowerCase() !== lagnaSign.toLowerCase()
+          );
+
+          // Remove any hallucinated Lagna claims for other signs
+          for (const wrong of conflictingSigns) {
+            cleanedAnalysis = cleanedAnalysis
+              .replace(new RegExp(`\\b${wrong}\\s+(?:Lagna|Ascendant)(?:\\s*\\([^)]*\\))?`, 'gi'), `${activeVerifiedLagna} Ascendant`)
+              .replace(new RegExp(`born under (?:the\\s+)?${wrong}(?:\\s+(?:Lagna|Ascendant))?(?:\\s*\\([^)]*\\))?`, 'gi'), `born under the ${activeVerifiedLagna} Ascendant`)
+              .replace(new RegExp(`\\bYour ${wrong} disposition\\b`, 'gi'), `Your ${lagnaSign} disposition`);
+          }
+
+          // If the AI completely missed the true Lagna or spoke of a wrong sign, guarantee the verified baseline is present
+          const baselineText = reportJsonObj.astrologicalAnalysis && reportJsonObj.astrologicalAnalysis.includes(lagnaSign)
+            ? reportJsonObj.astrologicalAnalysis
+            : `Personalized Vedic Janam Kundli analysis for ${userName} born on ${userDob} at ${userPlace}.\n\n• Ascendant (Lagna): ${activeVerifiedLagna}\n• Moon Sign: ${reportJsonObj.moonSign} (${reportJsonObj.nakshatra})\n• Sun Sign: ${reportJsonObj.sunSign}\n• Active Vimshottari Dasha: ${reportJsonObj.dasha?.currentMahadasha || ''} (${reportJsonObj.dasha?.currentAntardasha || ''})`;
+
+          if (!cleanedAnalysis.toLowerCase().includes(lagnaSign.toLowerCase())) {
+            reportJsonObj.astrologicalAnalysis = `${baselineText}\n\n${cleanedAnalysis}`;
+          } else {
+            reportJsonObj.astrologicalAnalysis = cleanedAnalysis;
+          }
+        }
 
         // Normalize remedies outputs to ensure 100% parity with AstroParihar canonical catalogue
         if (isHomam) {
