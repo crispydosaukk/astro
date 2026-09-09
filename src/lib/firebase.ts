@@ -6,7 +6,7 @@ import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, isSupported, Analytics } from 'firebase/analytics';
 
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCXZ9S7Th0lpAVLMnZnRlgusCH1dPgF98g",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "astroparihar-85e2d.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "astroparihar-85e2d",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "astroparihar-85e2d.firebasestorage.app",
