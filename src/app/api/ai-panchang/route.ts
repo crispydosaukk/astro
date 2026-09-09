@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAIPromptSettings } from '@/lib/aiPromptSettings';
 import { calculatePanchang } from '@/lib/panchangEngine';
 import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
+import { safeParseAIJson } from '@/lib/aiResponseParser';
 
 export async function POST(req: Request) {
   try {
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
 
     if (openAiRes.ok) {
       const aiJson = await openAiRes.json();
-      const parsedAi = JSON.parse(aiJson.choices[0].message.content);
+      const parsedAi = safeParseAIJson(aiJson.choices?.[0]?.message?.content) || null;
       return NextResponse.json({
         panchang,
         aiSummary: parsedAi,

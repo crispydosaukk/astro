@@ -350,26 +350,26 @@ export default function FreePanchangPage() {
         >
           {/* Dynamic AI Cosmic Insights Card (Admin Configured Engine) */}
           {aiSummary && (
-            <div className="glass-card p-6 sm:p-8 rounded-3xl border border-[#C9952B]/40 bg-gradient-to-br from-[#2A1713]/80 via-[#1F100E]/70 to-[#120807]/90 shadow-2xl space-y-5 relative overflow-hidden">
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#C9952B]/20">
+            <div className="glass-card p-6 sm:p-8 rounded-3xl border border-[#B88A44]/35 bg-[#FFFDFC]/95 shadow-xl space-y-5 relative overflow-hidden">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E5D9C8]">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-[#C9952B]/20 text-[#F3E5AB]">
+                  <div className="p-2.5 rounded-xl bg-[#B88A44]/15 text-[#713B32]">
                     <Sparkles size={18} />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-black text-[#F3E5AB]">
+                    <h3 className="text-base sm:text-lg font-black text-[#713B32]">
                       ✨ AI Vedic Cosmic Weather &amp; Daily Guidance
                     </h3>
-                    <p className="text-xs text-amber-200/70">
+                    <p className="text-xs text-[#6B5E55] font-medium">
                       Personalized daily synthesis powered by AstroParihar OpenAI Engine
                     </p>
                   </div>
                 </div>
-                {aiLoading && <Loader2 size={16} className="animate-spin text-[#C9952B]" />}
+                {aiLoading && <Loader2 size={16} className="animate-spin text-[#B88A44]" />}
               </div>
 
               {aiSummary.dailyVedicSummary && (
-                <p className="text-xs sm:text-sm text-gray-200 leading-relaxed whitespace-pre-line">
+                <p className="text-sm sm:text-base text-[#292522] leading-relaxed whitespace-pre-line font-normal">
                   {aiSummary.dailyVedicSummary}
                 </p>
               )}
@@ -377,15 +377,15 @@ export default function FreePanchangPage() {
               {/* Favorable Activities & Precautions Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                 {aiSummary.favorableActivities && Array.isArray(aiSummary.favorableActivities) && (
-                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
+                  <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 space-y-2.5 shadow-sm">
+                    <span className="text-xs font-black text-emerald-800 uppercase tracking-wider block">
                       ✓ Favorable Deeds &amp; Activities
                     </span>
-                    <ul className="space-y-1 text-xs text-gray-200">
+                    <ul className="space-y-1.5 text-xs text-[#292522]">
                       {aiSummary.favorableActivities.map((act: string, idx: number) => (
-                        <li key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                          <span className="text-emerald-400 font-bold">•</span>
-                          <span>{act}</span>
+                        <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                          <span className="text-emerald-700 font-bold text-sm leading-none mt-0.5">•</span>
+                          <span className="font-medium">{act}</span>
                         </li>
                       ))}
                     </ul>
@@ -394,15 +394,15 @@ export default function FreePanchangPage() {
 
                 {aiSummary.inauspiciousPrecautions &&
                   Array.isArray(aiSummary.inauspiciousPrecautions) && (
-                    <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-2">
-                      <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block">
+                    <div className="p-4 rounded-2xl bg-rose-50/80 border border-rose-200/80 space-y-2.5 shadow-sm">
+                      <span className="text-xs font-black text-rose-800 uppercase tracking-wider block">
                         ⚠ Inauspicious Periods &amp; Precautions
                       </span>
-                      <ul className="space-y-1 text-xs text-gray-200">
+                      <ul className="space-y-1.5 text-xs text-[#292522]">
                         {aiSummary.inauspiciousPrecautions.map((prec: string, idx: number) => (
-                          <li key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-rose-400 font-bold">•</span>
-                            <span>{prec}</span>
+                          <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                            <span className="text-rose-700 font-bold text-sm leading-none mt-0.5">•</span>
+                            <span className="font-medium">{prec}</span>
                           </li>
                         ))}
                       </ul>
@@ -412,21 +412,20 @@ export default function FreePanchangPage() {
 
               {/* Sacred Daily Shloka */}
               {aiSummary.dailyBlessingShloka && (
-                <div className="p-4 rounded-2xl bg-[#C9952B]/10 border border-[#C9952B]/20 text-center space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-[#F3E5AB]">
+                <div className="p-4.5 rounded-2xl bg-[#FAF4EB] border border-[#B88A44]/30 text-center space-y-1.5 shadow-sm">
+                  <span className="text-[11px] uppercase font-bold tracking-wider text-[#8E4C41] block">
                     Daily Sacred Vedic Shloka
                   </span>
-                  <p className="text-xs sm:text-sm font-serif text-[#F3E5AB] italic">
+                  <p className="text-sm sm:text-base font-serif text-[#713B32] font-semibold italic">
                     &ldquo;{aiSummary.dailyBlessingShloka}&rdquo;
                   </p>
                 </div>
               )}
 
-              {/* Admin Extra Guidance */}
               {aiSummary.additionalGuidance && (
-                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300">
-                  <strong className="text-[#C9952B]">Zonal &amp; Lifestyle Guidance: </strong>
-                  <span>
+                <div className="p-3.5 rounded-xl bg-[#FAF4EB] border border-[#E5D9C8] text-xs text-[#292522] leading-relaxed">
+                  <strong className="text-[#713B32] font-bold">Zonal &amp; Lifestyle Guidance: </strong>
+                  <span className="text-[#292522] font-medium">
                     {typeof aiSummary.additionalGuidance === 'object'
                       ? JSON.stringify(aiSummary.additionalGuidance)
                       : String(aiSummary.additionalGuidance)}
@@ -438,8 +437,8 @@ export default function FreePanchangPage() {
 
           {/* Sun & Moon Timings Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto">
+            <div className="glass-card p-5 rounded-2xl border border-[#E5D9C8] text-center space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center mx-auto">
                 <Sun size={20} />
               </div>
               <span className="text-xs text-muted-foreground font-semibold block">☀️ Sunrise</span>
@@ -448,16 +447,16 @@ export default function FreePanchangPage() {
               </span>
             </div>
 
-            <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center mx-auto">
+            <div className="glass-card p-5 rounded-2xl border border-[#E5D9C8] text-center space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-700 flex items-center justify-center mx-auto">
                 <Sun size={20} />
               </div>
               <span className="text-xs text-muted-foreground font-semibold block">🌅 Sunset</span>
               <span className="text-lg font-bold text-foreground font-mono">{panchang.sunset}</span>
             </div>
 
-            <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto">
+            <div className="glass-card p-5 rounded-2xl border border-[#E5D9C8] text-center space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-700 flex items-center justify-center mx-auto">
                 <Moon size={20} />
               </div>
               <span className="text-xs text-muted-foreground font-semibold block">🌕 Moonrise</span>
@@ -466,8 +465,8 @@ export default function FreePanchangPage() {
               </span>
             </div>
 
-            <div className="glass-card p-5 rounded-2xl border border-white/10 text-center space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
+            <div className="glass-card p-5 rounded-2xl border border-[#E5D9C8] text-center space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-700 flex items-center justify-center mx-auto">
                 <Moon size={20} />
               </div>
               <span className="text-xs text-muted-foreground font-semibold block">🌑 Moonset</span>
@@ -478,9 +477,9 @@ export default function FreePanchangPage() {
           </div>
 
           {/* Core 5 Limbs Elements Grid */}
-          <div className="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 space-y-6">
-            <h2 className="text-xl font-bold text-[#C9952B] flex items-center gap-2">
-              <Sparkles size={20} /> Core Panchangam Elements
+          <div className="glass-card p-6 sm:p-8 rounded-3xl border border-[#E5D9C8] space-y-6">
+            <h2 className="text-xl font-bold text-[#713B32] flex items-center gap-2">
+              <Sparkles size={20} className="text-[#B88A44]" /> Core Panchangam Elements
             </h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -496,7 +495,7 @@ export default function FreePanchangPage() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1"
+                  className="p-4 rounded-2xl bg-[#FAF4EB]/80 border border-[#E5D9C8] space-y-1"
                 >
                   <span className="text-[11px] font-bold text-muted-foreground uppercase">
                     {item.label}
@@ -508,12 +507,12 @@ export default function FreePanchangPage() {
           </div>
 
           {/* Inauspicious Timings */}
-          <div className="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 space-y-6">
+          <div className="glass-card p-6 sm:p-8 rounded-3xl border border-[#E5D9C8] space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <h2 className="text-xl font-bold text-red-400 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-rose-700 flex items-center gap-2">
                 <ShieldAlert size={20} /> Inauspicious Timings (Ashubha Muhurat)
               </h2>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground font-medium">
                 Avoid starting major tasks in Rahu Kaal
               </span>
             </div>
@@ -521,19 +520,19 @@ export default function FreePanchangPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/5 text-left text-xs font-bold text-muted-foreground uppercase">
+                  <tr className="border-b border-[#E5D9C8] bg-[#FAF4EB] text-left text-xs font-bold text-[#713B32] uppercase">
                     <th className="px-4 py-3">Inauspicious Period</th>
                     <th className="px-4 py-3">Timing Range</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#E5D9C8]">
                   {panchang.ashubhaMuhurats.map((row) => (
                     <tr
                       key={row.name}
-                      className={`hover:bg-white/5 transition-colors ${row.isRahu ? 'bg-red-500/10 font-bold' : ''}`}
+                      className={`hover:bg-[#FAF4EB]/60 transition-colors ${row.isRahu ? 'bg-rose-50/80 font-bold' : ''}`}
                     >
                       <td className="px-4 py-3 font-bold text-foreground">{row.name}</td>
-                      <td className="px-4 py-3 text-red-400 font-mono text-xs font-semibold">
+                      <td className="px-4 py-3 text-rose-700 font-mono text-xs font-bold">
                         {row.time}
                       </td>
                     </tr>
@@ -545,22 +544,22 @@ export default function FreePanchangPage() {
 
           {/* Auspicious Timings */}
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
-              <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
-                <CheckCircle2 size={18} /> Abhijit Muhurat
+            <div className="glass-card p-6 rounded-3xl border border-[#E5D9C8] space-y-4">
+              <h3 className="text-lg font-bold text-emerald-800 flex items-center gap-2">
+                <CheckCircle2 size={18} className="text-emerald-600" /> Abhijit Muhurat
               </h3>
               <p className="text-xs text-muted-foreground">Most auspicious window of the day</p>
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center font-mono font-bold text-emerald-400 text-sm">
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center font-mono font-bold text-emerald-900 text-sm">
                 {panchang.abhijitMuhurat.start} – {panchang.abhijitMuhurat.end}
               </div>
             </div>
 
-            <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
-              <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
-                <Clock size={18} /> Choghadiya
+            <div className="glass-card p-6 rounded-3xl border border-[#E5D9C8] space-y-4">
+              <h3 className="text-lg font-bold text-amber-900 flex items-center gap-2">
+                <Clock size={18} className="text-[#B88A44]" /> Choghadiya
               </h3>
               <p className="text-xs text-muted-foreground">Shubh, Amrit, Labh & Chara Muhurats</p>
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center font-mono font-bold text-amber-400 text-xs leading-relaxed">
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center font-mono font-bold text-amber-950 text-xs leading-relaxed">
                 Amrit: {panchang.dayChoghadiya[0]?.start || '05:51 AM'} -{' '}
                 {panchang.dayChoghadiya[0]?.end || '07:29 AM'} <br />
                 Shubh: {panchang.dayChoghadiya[2]?.start || '09:08 AM'} -{' '}
@@ -568,12 +567,12 @@ export default function FreePanchangPage() {
               </div>
             </div>
 
-            <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-4">
-              <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2">
-                <Star size={18} /> Hora Timing
+            <div className="glass-card p-6 rounded-3xl border border-[#E5D9C8] space-y-4">
+              <h3 className="text-lg font-bold text-blue-900 flex items-center gap-2">
+                <Star size={18} className="text-blue-600" /> Hora Timing
               </h3>
               <p className="text-xs text-muted-foreground">Planetary ruling hours</p>
-              <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-center font-mono font-bold text-blue-400 text-xs leading-relaxed">
+              <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-center font-mono font-bold text-blue-950 text-xs leading-relaxed">
                 Sun Hora: {panchang.sunrise} - 07:00 AM <br />
                 Jupiter Hora: 12:00 PM - 01:00 PM
               </div>
@@ -581,15 +580,15 @@ export default function FreePanchangPage() {
           </div>
 
           {/* Planetary Positions */}
-          <div className="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 space-y-6">
-            <h2 className="text-xl font-bold text-[#C9952B] flex items-center gap-2">
-              <Star size={20} /> Planetary Positions (Graha Sthiti)
+          <div className="glass-card p-6 sm:p-8 rounded-3xl border border-[#E5D9C8] space-y-6">
+            <h2 className="text-xl font-bold text-[#713B32] flex items-center gap-2">
+              <Star size={20} className="text-[#B88A44]" /> Planetary Positions (Graha Sthiti)
             </h2>
 
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/5 text-left text-xs font-bold text-muted-foreground uppercase">
+                  <tr className="border-b border-[#E5D9C8] bg-[#FAF4EB] text-left text-xs font-bold text-[#713B32] uppercase">
                     <th className="px-4 py-3">Planets</th>
                     <th className="px-4 py-3">Rashi</th>
                     <th className="px-4 py-3">Longitude</th>
@@ -597,16 +596,16 @@ export default function FreePanchangPage() {
                     <th className="px-4 py-3">Pada</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#E5D9C8]">
                   {panchang.planetaryPositions.map((row) => (
-                    <tr key={row.planet} className="hover:bg-white/5 transition-colors">
+                    <tr key={row.planet} className="hover:bg-[#FAF4EB]/60 transition-colors">
                       <td className="px-4 py-3 font-bold text-foreground">{row.planet}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{row.rashi}</td>
-                      <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
+                      <td className="px-4 py-3 text-muted-foreground font-medium">{row.rashi}</td>
+                      <td className="px-4 py-3 text-[#292522] font-mono text-xs font-semibold">
                         {row.lon}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">{row.nakshatra}</td>
-                      <td className="px-4 py-3 font-bold text-[#C9952B]">{row.pada}</td>
+                      <td className="px-4 py-3 text-muted-foreground font-medium">{row.nakshatra}</td>
+                      <td className="px-4 py-3 font-bold text-[#966F33]">{row.pada}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -634,7 +633,7 @@ export default function FreePanchangPage() {
                 <Link
                   key={page.title}
                   href={page.href}
-                  className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-foreground text-center flex items-center justify-center gap-1 transition-all group"
+                  className="p-3 rounded-2xl bg-white hover:bg-[#FAF4EB] border border-[#E5D9C8] text-xs font-semibold text-foreground text-center flex items-center justify-center gap-1 transition-all group shadow-sm"
                 >
                   <span>{page.title}</span>
                   <ChevronRight

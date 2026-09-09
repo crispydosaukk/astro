@@ -93,7 +93,7 @@ export interface AIConsultationSummary {
   astrologicalHighlights: string[];
   timelinePredictions: string[];
   recommendedRemedies: {
-    type: 'mantra' | 'gemstone' | 'daan' | 'puja' | 'vastu';
+    type: 'mantra' | 'gemstone' | 'daan' | 'puja' | 'vastu' | 'homam' | 'ishta_devata';
     title: string;
     instructions: string;
   }[];

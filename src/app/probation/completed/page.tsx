@@ -1,0 +1,100 @@
+'use client';
+import React from 'react';
+import AppLayout from '@/components/AppLayout';
+import { BadgeCheck, Calendar, User, Star, CheckCircle2, XCircle, Clock } from 'lucide-react';
+
+interface CompletedProbation {
+  id: string;
+  candidate: string;
+  specialisation: string;
+  startDate: string;
+  endDate: string;
+  finalScore: number;
+  outcome: 'verified' | 'failed' | 'extended';
+  reviewedBy: string;
+  notes: string;
+  checkpointScores: number[];
+}
+
+const completed: CompletedProbation[] = [
+  { id: 'PRB-C001', candidate: 'Dr. Meena Krishnamurthy', specialisation: 'Vedic Jyotish', startDate: '2026-06-15', endDate: '2026-07-15', finalScore: 94, outcome: 'verified', reviewedBy: 'Verification Manager', notes: 'Excellent performance throughout. Strong client feedback. Recommended for verification.', checkpointScores: [92, 94, 96] },
+  { id: 'PRB-C002', candidate: 'Acharya Venkatesh Iyer', specialisation: 'Vedic Jyotish', startDate: '2026-06-20', endDate: '2026-07-20', finalScore: 97, outcome: 'verified', reviewedBy: 'Verification Manager', notes: 'Outstanding performance. Exceptional knowledge and professionalism.', checkpointScores: [95, 97, 99] },
+  { id: 'PRB-C003', candidate: 'Pandit Gopal Mishra', specialisation: 'Vedic Jyotish', startDate: '2026-07-01', endDate: '2026-07-31', finalScore: 91, outcome: 'verified', reviewedBy: 'Verification Manager', notes: 'Good performance. Minor issues resolved. Approved for verification.', checkpointScores: [88, 91, 94] },
+  { id: 'PRB-C004', candidate: 'Candidate X', specialisation: 'KP System', startDate: '2026-06-01', endDate: '2026-06-30', finalScore: 58, outcome: 'failed', reviewedBy: 'Verification Manager', notes: 'Inconsistent performance. Multiple client complaints. Not recommended.', checkpointScores: [65, 58, 52] },
+  { id: 'PRB-C005', candidate: 'Candidate Y', specialisation: 'Prashna Jyotish', startDate: '2026-05-15', endDate: '2026-07-14', finalScore: 74, outcome: 'extended', reviewedBy: 'Verification Manager', notes: 'Probation extended by 30 days due to borderline performance. Needs improvement.', checkpointScores: [70, 74, 78] },
+];
+
+const outcomeConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+  verified: { label: 'Verified', color: 'bg-green-100 text-green-700', icon: <BadgeCheck size={12} /> },
+  failed: { label: 'Failed', color: 'bg-red-100 text-red-700', icon: <XCircle size={12} /> },
+  extended: { label: 'Extended', color: 'bg-amber-100 text-amber-700', icon: <Clock size={12} /> },
+};
+
+export default function ProbationCompletedPage() {
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            <CheckCircle2 size={28} className="text-primary" /> Completed Probation
+          </h1>
+          <p className="text-muted-foreground mt-1">Historical record of all completed probation periods and outcomes</p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: 'Total Completed', value: completed.length, color: 'text-foreground' },
+            { label: 'Verified', value: completed.filter(c => c.outcome === 'verified').length, color: 'text-green-600' },
+            { label: 'Failed', value: completed.filter(c => c.outcome === 'failed').length, color: 'text-red-600' },
+          ].map(s => (
+            <div key={s.label} className="bg-card border border-border rounded-xl p-4">
+              <p className="text-xs text-muted-foreground font-medium">{s.label}</p>
+              <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Records */}
+        <div className="space-y-4">
+          {completed.map(p => {
+            const oc = outcomeConfig[p.outcome];
+            return (
+              <div key={p.id} className="bg-card border border-border rounded-xl p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground">{p.candidate}</p>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${oc.color}`}>
+                        {oc.icon} {oc.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{p.specialisation}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-foreground">{p.finalScore}%</p>
+                    <p className="text-xs text-muted-foreground">Final Score</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-xs">
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Calendar size={11} /> {p.startDate} – {p.endDate}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <User size={11} /> {p.reviewedBy}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Star size={11} /> Checkpoints: {p.checkpointScores.join(', ')}
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">{p.notes}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </AppLayout>
+  );
+}

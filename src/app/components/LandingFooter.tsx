@@ -16,6 +16,7 @@ const footerLinks = {
     { label: 'Blog', href: '/' },
     { label: 'Careers', href: '/' },
     { label: 'Admin Panel', href: '/admin-panel' },
+    { label: 'AiASTRO Platform', href: '/aiastro' },
   ],
   Astrologers: [
     { label: 'Astrologer Login', href: '/astrologer-login' },

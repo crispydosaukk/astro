@@ -11,6 +11,14 @@ export function cleanApiKey(key?: string | null): string {
 }
 
 /**
+ * Resolves the active OpenAI API key from environment variables or fallback
+ */
+export function getOpenAIApiKey(): string {
+  const envKey = cleanApiKey(process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY);
+  return envKey || FALLBACK_OPENAI_KEY;
+}
+
+/**
  * Universally resolves the active OpenAI API key on server-side endpoints:
  * 1. Checks process.env.OPENAI_API_KEY
  * 2. Checks Firestore 'settings/general' via adminDb

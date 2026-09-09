@@ -328,7 +328,15 @@ export default function RecentReports() {
       t.includes('Yantra') ||
       t.includes('Yanthra') ||
       t.includes('Homam') ||
-      t.includes('Remedies')
+      t.includes('Remedies') ||
+      t.includes('Ishta') ||
+      t.includes('Ista') ||
+      t.includes('Devata') ||
+      t.includes('Rudraksha') ||
+      t.includes('Charity') ||
+      t.includes('Daan') ||
+      t.includes('Muhurtham') ||
+      t.includes('Muhurtha')
     ) {
       return 'remedies';
     }
@@ -394,6 +402,8 @@ export default function RecentReports() {
     if (t.includes('Gemstone')) return Gem;
     if (t.includes('Mantra')) return Music;
     if (t.includes('Yantra') || t.includes('Yanthra')) return Triangle;
+    if (t.includes('Ishta') || t.includes('Ista') || t.includes('Devata')) return Sparkles;
+    if (t.includes('Rudraksha')) return Sparkles;
     if (t.includes('Love') || t.includes('Relationship')) return Heart;
     if (t.includes('Finance') || t.includes('Wealth')) return Coins;
     if (t.includes('Health') || t.includes('Vitality')) return Activity;
@@ -408,6 +418,8 @@ export default function RecentReports() {
     if (t.includes('Gemstone')) return 'text-red-400';
     if (t.includes('Mantra')) return 'text-blue-400';
     if (t.includes('Yantra') || t.includes('Yanthra')) return 'text-green-400';
+    if (t.includes('Ishta') || t.includes('Ista') || t.includes('Devata')) return 'text-amber-400';
+    if (t.includes('Rudraksha')) return 'text-amber-500';
     if (t.includes('Love') || t.includes('Relationship')) return 'text-rose-400';
     if (t.includes('Finance') || t.includes('Wealth')) return 'text-emerald-400';
     if (t.includes('Health') || t.includes('Vitality')) return 'text-cyan-400';
@@ -421,6 +433,8 @@ export default function RecentReports() {
     if (t.includes('Gemstone')) return 'bg-red-500/10';
     if (t.includes('Mantra')) return 'bg-blue-500/10';
     if (t.includes('Yantra') || t.includes('Yanthra')) return 'bg-green-500/10';
+    if (t.includes('Ishta') || t.includes('Ista') || t.includes('Devata')) return 'bg-amber-500/10';
+    if (t.includes('Rudraksha')) return 'bg-amber-500/10';
     if (t.includes('Love') || t.includes('Relationship')) return 'bg-rose-500/10';
     if (t.includes('Finance') || t.includes('Wealth')) return 'bg-emerald-500/10';
     if (t.includes('Health') || t.includes('Vitality')) return 'bg-cyan-500/10';
@@ -830,6 +844,56 @@ export default function RecentReports() {
                                         'Burns away karmic afflictions, clears long-standing debt/career blocks, and radiates divine peace throughout the household.',
                                     }
                                   : null;
+
+                              const isIshta =
+                                repType.includes('ishta') ||
+                                repType.includes('ista') ||
+                                repType.includes('devata') ||
+                                recTitle.includes('ishta') ||
+                                recTitle.includes('ista') ||
+                                recTitle.includes('devata') ||
+                                !!data.ishtaDevata ||
+                                (!!data.deity && !isHomam);
+
+                              const ishtaData = isIshta
+                                ? {
+                                    deity:
+                                      data.deity ||
+                                      data.ishtaDevata?.deityName ||
+                                      'Lord Maha Vishnu',
+                                    indicator:
+                                      data.astrologicalIndicator ||
+                                      data.ishtaDevata?.indicator ||
+                                      '12th from Karakamsa in Navamsha (D9)',
+                                    mantra:
+                                      data.prescribedMantra ||
+                                      data.ishtaDevata?.primaryMantra ||
+                                      'Om Namo Bhagavate Vasudevaya',
+                                    day:
+                                      data.auspiciousDay ||
+                                      data.ishtaDevata?.auspiciousDay ||
+                                      'Wednesday & Shukla Ekadashi',
+                                    stotras:
+                                      data.recommendedStotras ||
+                                      (data.ishtaDevata?.stotra
+                                        ? [data.ishtaDevata.stotra]
+                                        : ['Vishnu Sahasranama Stotram']),
+                                    offerings:
+                                      data.sacredOfferings ||
+                                      data.materials ||
+                                      data.ishtaDevata?.offerings ||
+                                      'Tulsi leaves, Yellow marigold flowers, Pure Cow Ghee Lamp',
+                                    worshipGuide:
+                                      data.dailyWorshipGuide ||
+                                      data.procedure ||
+                                      data.ishtaDevata?.worshipProcedure ||
+                                      'Sit facing North-East during Brahma Muhurta. Light a pure cow ghee lamp and chant 108 times.',
+                                    significance:
+                                      data.spiritualSignificance ||
+                                      data.ishtaDevata?.spiritualSignificance ||
+                                      'Your Ishta Devata serves as your soul\'s ultimate protector and beacon of liberation.',
+                                  }
+                                : null;
 
                               const isYantra =
                                 repType.includes('yantra') ||
@@ -1348,6 +1412,100 @@ export default function RecentReports() {
                                       <p className="text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-line print:text-black">
                                         {renderSafeText(displayAnalysis)}
                                       </p>
+                                    </div>
+                                  )}
+
+                                  {/* Prescribed Sacred Ishta Devata Card */}
+                                  {ishtaData && (
+                                    <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-amber-950/30 via-card to-card border border-[#C9952B]/40 shadow-sm space-y-4 print:border-gray-300 print:bg-transparent">
+                                      <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-border/60">
+                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#C9952B] flex items-center gap-2 print:text-black">
+                                          <Sparkles size={15} className="text-[#C9952B] animate-pulse" /> Prescribed Sacred Ishta Devata (ఇష్ట దైవం / इष्ट देवता)
+                                        </h4>
+                                        {ishtaData.indicator && (
+                                          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#C9952B]/15 text-[#F6D075] font-semibold border border-[#C9952B]/30 print:text-black print:border-gray-400">
+                                            Indicator: {renderSafeText(ishtaData.indicator)}
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {/* Divine Guardian Hero Banner */}
+                                      <div className="p-4 sm:p-5 rounded-2xl bg-[#EDE4D5] dark:bg-amber-950/40 border border-[#E5D9C8] dark:border-amber-500/30 text-center space-y-1.5 shadow-inner print:bg-gray-100 print:border-gray-300">
+                                        <span className="text-[10px] uppercase font-extrabold text-[#713B32] dark:text-amber-400 tracking-widest block print:text-black">
+                                          Personal Soul Guardian &amp; Moksha Karaka
+                                        </span>
+                                        <h3 className="text-2xl sm:text-3xl font-serif font-extrabold text-[#292522] dark:text-amber-100 print:text-black">
+                                          {renderSafeText(ishtaData.deity)}
+                                        </h3>
+                                        {ishtaData.significance && (
+                                          <p className="text-xs text-[#6B5E55] dark:text-amber-200/80 font-medium max-w-xl mx-auto print:text-gray-700">
+                                            {renderSafeText(ishtaData.significance)}
+                                          </p>
+                                        )}
+                                      </div>
+
+                                      {/* Ishta Specs Grid */}
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Auspicious Day of Worship
+                                          </span>
+                                          <span className="font-semibold text-foreground print:text-black">
+                                            📅 {renderSafeText(ishtaData.day)}
+                                          </span>
+                                        </div>
+
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Sacred Offerings &amp; Deepam
+                                          </span>
+                                          <span className="font-semibold text-foreground print:text-black">
+                                            🪔 {renderSafeText(ishtaData.offerings)}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* Primary Upasana Mantra */}
+                                      {ishtaData.mantra && (
+                                        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center space-y-1.5 shadow-sm print:bg-amber-50 print:border-amber-200">
+                                          <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider print:text-amber-800">
+                                            Consecrated Ishta Devata Japa Mantra
+                                          </span>
+                                          <p className="text-base sm:text-lg font-serif font-bold text-[#C9952B] print:text-black leading-relaxed">
+                                            {renderSafeText(ishtaData.mantra)}
+                                          </p>
+                                          <p className="text-[11px] text-muted-foreground print:text-gray-700">
+                                            Chant 108 times daily facing North-East using Tulsi or Rudraksha Mala
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      {/* Recommended Stotras */}
+                                      {ishtaData.stotras && ishtaData.stotras.length > 0 && (
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1 text-xs print:border-gray-300 print:bg-transparent">
+                                          <span className="text-muted-foreground block text-[10px] uppercase font-bold print:text-gray-600">
+                                            Recommended Sacred Stotras
+                                          </span>
+                                          <div className="flex flex-wrap gap-2 pt-0.5">
+                                            {ishtaData.stotras.map((st: string, sIdx: number) => (
+                                              <span
+                                                key={sIdx}
+                                                className="px-2.5 py-1 rounded-lg bg-[#C9952B]/15 border border-[#C9952B]/30 text-xs font-semibold text-[#F6D075] print:text-black print:border-gray-400"
+                                              >
+                                                📖 {renderSafeText(st)}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {/* Daily Worship Protocol */}
+                                      {ishtaData.worshipGuide && (
+                                        <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-foreground/90 leading-relaxed print:border-gray-300 print:bg-transparent print:text-black">
+                                          <strong className="text-amber-400 print:text-black">Daily Upasana Sadhana Protocol:</strong>{' '}
+                                          {renderSafeText(ishtaData.worshipGuide)}
+                                        </div>
+                                      )}
                                     </div>
                                   )}
 

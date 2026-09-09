@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAIPromptSettings } from '@/lib/aiPromptSettings';
 import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
+import { safeParseAIJson } from '@/lib/aiResponseParser';
 
 export async function POST(req: Request) {
   try {
@@ -121,13 +122,8 @@ export async function POST(req: Request) {
     }
 
     const aiJson = await openAiRes.json();
-    const rawContent = aiJson.choices[0].message.content;
-    let parsedContent = null;
-    try {
-      parsedContent = JSON.parse(rawContent);
-    } catch {
-      parsedContent = { rawText: rawContent };
-    }
+    const rawContent = aiJson.choices?.[0]?.message?.content;
+    const parsedContent = safeParseAIJson(rawContent) || { rawText: rawContent };
 
     return NextResponse.json({
       success: true,

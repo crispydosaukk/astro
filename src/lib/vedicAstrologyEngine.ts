@@ -18,6 +18,24 @@ export interface PlanetaryMoonData {
   nadi: 'Adi' | 'Madhya' | 'Antya';
 }
 
+export interface IshtaDevataDetails {
+  deityName: string;
+  sanskritName: string;
+  governingPlanet: string;
+  atmakarakaPlanet: string;
+  karakamsaRashi: string;
+  twelfthSignFromKarakamsa: string;
+  indicator: string;
+  primaryMantra: string;
+  mantraTransliteration: string;
+  dailyJapaCount: string;
+  stotra: string;
+  worshipProcedure: string;
+  auspiciousDay: string;
+  offerings: string;
+  spiritualSignificance: string;
+}
+
 export interface AshtakootScoreItem {
   koot: string;
   score: string;
@@ -148,6 +166,102 @@ export const PLANET_FRIENDSHIPS: Record<string, Record<string, number>> = {
   Saturn: { Sun: -1, Moon: -1, Mars: -1, Mercury: 1, Jupiter: 0, Venus: 1, Saturn: 1 },
 };
 
+// ---------------- CANONICAL CITY COORDINATES & GEOCODING ----------------
+export const CANONICAL_CITY_COORDINATES: Record<string, { lat: string; lon: string }> = {
+  mumbai: { lat: '19.0760', lon: '72.8777' },
+  bombay: { lat: '19.0760', lon: '72.8777' },
+  delhi: { lat: '28.6139', lon: '77.2090' },
+  'new delhi': { lat: '28.6139', lon: '77.2090' },
+  bengaluru: { lat: '12.9716', lon: '77.5946' },
+  bangalore: { lat: '12.9716', lon: '77.5946' },
+  hyderabad: { lat: '17.3850', lon: '78.4867' },
+  chennai: { lat: '13.0827', lon: '80.2707' },
+  madras: { lat: '13.0827', lon: '80.2707' },
+  kolkata: { lat: '22.5726', lon: '88.3639' },
+  calcutta: { lat: '22.5726', lon: '88.3639' },
+  pune: { lat: '18.5204', lon: '73.8567' },
+  ahmedabad: { lat: '23.0225', lon: '72.5714' },
+  jaipur: { lat: '26.9124', lon: '75.7873' },
+  lucknow: { lat: '26.8467', lon: '80.9462' },
+  kanpur: { lat: '26.4499', lon: '80.3319' },
+  nagpur: { lat: '21.1458', lon: '79.0882' },
+  indore: { lat: '22.7196', lon: '75.8577' },
+  thane: { lat: '19.2183', lon: '72.9781' },
+  bhopal: { lat: '23.2599', lon: '77.4126' },
+  visakhapatnam: { lat: '17.6868', lon: '83.2185' },
+  vizag: { lat: '17.6868', lon: '83.2185' },
+  patna: { lat: '25.5941', lon: '85.1376' },
+  vadodara: { lat: '22.3072', lon: '73.1812' },
+  baroda: { lat: '22.3072', lon: '73.1812' },
+  ghaziabad: { lat: '28.6692', lon: '77.4538' },
+  ludhiana: { lat: '30.9010', lon: '75.8573' },
+  agra: { lat: '27.1767', lon: '78.0081' },
+  nashik: { lat: '19.9975', lon: '73.7898' },
+  faridabad: { lat: '28.4089', lon: '77.3178' },
+  meerut: { lat: '28.9845', lon: '77.7064' },
+  rajkot: { lat: '22.3039', lon: '70.8022' },
+  varanasi: { lat: '25.3176', lon: '82.9739' },
+  kashi: { lat: '25.3176', lon: '82.9739' },
+  srinagar: { lat: '34.0837', lon: '74.7973' },
+  aurangabad: { lat: '19.8762', lon: '75.3433' },
+  dhanbad: { lat: '23.7957', lon: '86.4304' },
+  amritsar: { lat: '31.6340', lon: '74.8723' },
+  allahabad: { lat: '25.4358', lon: '81.8463' },
+  prayagraj: { lat: '25.4358', lon: '81.8463' },
+  ranchi: { lat: '23.3441', lon: '85.3096' },
+  howrah: { lat: '22.5958', lon: '88.2636' },
+  coimbatore: { lat: '11.0168', lon: '76.9558' },
+  jabalpur: { lat: '23.1815', lon: '79.9864' },
+  gwalior: { lat: '26.2183', lon: '78.1828' },
+  vijayawada: { lat: '16.5062', lon: '80.6480' },
+  jodhpur: { lat: '26.2389', lon: '73.0243' },
+  madurai: { lat: '9.9252', lon: '78.1198' },
+  raipur: { lat: '21.2514', lon: '81.6296' },
+  kota: { lat: '25.2138', lon: '75.8648' },
+  guwahati: { lat: '26.1445', lon: '91.7362' },
+  chandigarh: { lat: '30.7333', lon: '76.7794' },
+  solapur: { lat: '17.6599', lon: '75.9064' },
+  hubli: { lat: '15.3647', lon: '75.1240' },
+  tiruchirappalli: { lat: '10.7905', lon: '78.7047' },
+  trichy: { lat: '10.7905', lon: '78.7047' },
+  bareilly: { lat: '28.3670', lon: '79.4304' },
+  mysore: { lat: '12.2958', lon: '76.6394' },
+  mysuru: { lat: '12.2958', lon: '76.6394' },
+  gurgaon: { lat: '28.4595', lon: '77.0266' },
+  gurugram: { lat: '28.4595', lon: '77.0266' },
+  noida: { lat: '28.5355', lon: '77.3910' },
+  dehradun: { lat: '30.3165', lon: '78.0322' },
+  warangal: { lat: '17.9689', lon: '79.5941' },
+  guntur: { lat: '16.3067', lon: '80.4365' },
+  bhubaneswar: { lat: '20.2961', lon: '85.8245' },
+  tirupati: { lat: '13.6288', lon: '79.4192' },
+  salem: { lat: '11.6643', lon: '78.1460' },
+  surat: { lat: '21.1702', lon: '72.8311' },
+  london: { lat: '51.5074', lon: '-0.1278' },
+  'new york': { lat: '40.7128', lon: '-74.0060' },
+  dubai: { lat: '25.2048', lon: '55.2708' },
+  singapore: { lat: '1.3521', lon: '103.8198' },
+  toronto: { lat: '43.6532', lon: '-79.3832' },
+  sydney: { lat: '-33.8688', lon: '151.2093' },
+};
+
+export function resolveCityCoordinates(
+  cityName?: string,
+  fallbackLat?: string,
+  fallbackLon?: string
+): { lat: string; lon: string } {
+  if (!cityName || typeof cityName !== 'string') {
+    return { lat: fallbackLat || '28.6139', lon: fallbackLon || '77.2090' };
+  }
+  const clean = cityName.toLowerCase().trim();
+  for (const [key, coords] of Object.entries(CANONICAL_CITY_COORDINATES)) {
+    if (clean === key || clean.includes(key) || key.includes(clean)) {
+      return coords;
+    }
+  }
+  return { lat: fallbackLat || '28.6139', lon: fallbackLon || '77.2090' };
+}
+
 // ---------------- ASTRONOMICAL VEDIC CALCULATION HELPERS ----------------
 
 // Parse birth date/time into UTC Date object
@@ -232,10 +346,25 @@ export function calculateAstroPlacement(
   dob: string,
   tob: string,
   lat?: string,
-  lon?: string
+  lon?: string,
+  pob?: string
 ): PlanetaryMoonData {
-  const latNum = parseFloat(lat || '28.6139') || 28.6139;
-  const lonNum = parseFloat(lon || '77.2090') || 77.2090;
+  let resolvedLat = lat;
+  let resolvedLon = lon;
+  const isDefaultOrMissing =
+    !lat ||
+    lat === '28.6139' ||
+    lat === '20.59' ||
+    !lon ||
+    lon === '77.2090' ||
+    lon === '78.96';
+  if (isDefaultOrMissing && pob && pob !== 'India') {
+    const resolved = resolveCityCoordinates(pob, lat, lon);
+    resolvedLat = resolved.lat;
+    resolvedLon = resolved.lon;
+  }
+  const latNum = parseFloat(resolvedLat || '28.6139') || 28.6139;
+  const lonNum = parseFloat(resolvedLon || '77.2090') || 77.2090;
   const utcDate = parseBirthDateTimeToUTC(dob, tob, lonNum);
   const time = Astronomy.MakeTime(utcDate);
   const ayanamsha = getLahiriAyanamsha(time);
@@ -381,8 +510,8 @@ export function calculateAshtakootGunMilan(
   groomName: string = 'Your Name',
   brideName: string = "Partner's Name"
 ): KundliMatchingResult {
-  const groomAstro = calculateAstroPlacement(groomDob, groomTob);
-  const brideAstro = calculateAstroPlacement(brideDob, brideTob);
+  const groomAstro = calculateAstroPlacement(groomDob, groomTob, undefined, undefined, groomPob);
+  const brideAstro = calculateAstroPlacement(brideDob, brideTob, undefined, undefined, bridePob);
 
   const ashtakoot: AshtakootScoreItem[] = [];
 
@@ -685,8 +814,22 @@ export function calculateBirthChartData(
   name: string = 'Devotee',
   gender: string = 'Male'
 ) {
-  const latNum = parseFloat(lat || '28.6139') || 28.6139;
-  const lonNum = parseFloat(lon || '77.2090') || 77.2090;
+  let resolvedLat = lat;
+  let resolvedLon = lon;
+  const isDefaultOrMissing =
+    !lat ||
+    lat === '28.6139' ||
+    lat === '20.59' ||
+    !lon ||
+    lon === '77.2090' ||
+    lon === '78.96';
+  if (isDefaultOrMissing && pob && pob !== 'India') {
+    const resolved = resolveCityCoordinates(pob, lat, lon);
+    resolvedLat = resolved.lat;
+    resolvedLon = resolved.lon;
+  }
+  const latNum = parseFloat(resolvedLat || '28.6139') || 28.6139;
+  const lonNum = parseFloat(resolvedLon || '77.2090') || 77.2090;
 
   const birthUtc = parseBirthDateTimeToUTC(dob, tob, lonNum);
   const time = Astronomy.MakeTime(birthUtc);
@@ -732,7 +875,7 @@ export function calculateBirthChartData(
   const moonTropical = Astronomy.Ecliptic(moonGeo).elon;
   const moonDeg = ((moonTropical - ayanamsha + 360) % 360);
   const moonSignIdx = Math.floor(moonDeg / 30) % 12;
-  const moonAstro = calculateAstroPlacement(dob, tob, lat, lon);
+  const moonAstro = calculateAstroPlacement(dob, tob, resolvedLat, resolvedLon, pob);
 
   // Mars
   const marsGeo = Astronomy.GeoVector(Astronomy.Body.Mars, time, false);
@@ -1069,6 +1212,193 @@ export function calculateBirthChartData(
     },
   ];
 
+  // 10. Authentic Jaimini & Parashara Ishta Devata Calculation
+  // Determine Saptakaraka Atmakaraka (highest degree 0°–30° among 7 major planets)
+  const karakaCandidates = [
+    { name: 'Sun', lord: 'Sun', deg: sunDeg % 30, navSignIdx: getNavamshaSignIdx(sunDeg) },
+    { name: 'Moon', lord: 'Moon', deg: moonDeg % 30, navSignIdx: getNavamshaSignIdx(moonDeg) },
+    { name: 'Mars', lord: 'Mars', deg: marsDeg % 30, navSignIdx: getNavamshaSignIdx(marsDeg) },
+    { name: 'Mercury', lord: 'Mercury', deg: mercuryDeg % 30, navSignIdx: getNavamshaSignIdx(mercuryDeg) },
+    { name: 'Jupiter', lord: 'Jupiter', deg: jupiterDeg % 30, navSignIdx: getNavamshaSignIdx(jupiterDeg) },
+    { name: 'Venus', lord: 'Venus', deg: venusDeg % 30, navSignIdx: getNavamshaSignIdx(venusDeg) },
+    { name: 'Saturn', lord: 'Saturn', deg: saturnDeg % 30, navSignIdx: getNavamshaSignIdx(saturnDeg) },
+  ];
+  karakaCandidates.sort((a, b) => b.deg - a.deg);
+  const atmakaraka = karakaCandidates[0];
+  const karakamsaSignIdx = atmakaraka.navSignIdx;
+  const karakamsaRashi = RASHIS[karakamsaSignIdx];
+
+  // 12th from Karakamsa in Navamsha (Jeevanmuktamsa Sthana)
+  const twelfthSignIdx = (karakamsaSignIdx + 11) % 12;
+  const twelfthRashi = RASHIS[twelfthSignIdx];
+  const planetIn12th = d9Planets.find((p) => p.signIdx === twelfthSignIdx);
+  const ishtaGoverningPlanet = planetIn12th ? planetIn12th.name : twelfthRashi.lord;
+
+  // Canonical Parashara Deity Mappings
+  const ISHTA_DEITY_MAP: Record<
+    string,
+    {
+      deityName: string;
+      sanskritName: string;
+      primaryMantra: string;
+      mantraTransliteration: string;
+      dailyJapaCount: string;
+      stotra: string;
+      worshipProcedure: string;
+      auspiciousDay: string;
+      offerings: string;
+      spiritualSignificance: string;
+    }
+  > = {
+    Sun: {
+      deityName: 'Lord Shiva (Surya Narayana & Sri Rama)',
+      sanskritName: 'भगवान शिव एवं श्रीराम',
+      primaryMantra: 'ॐ नमः शिवाय ॥ & ॐ घृणि सूर्याय नमः ॥',
+      mantraTransliteration: 'Om Namah Shivaya || & Om Ghrinih Suryaya Namah ||',
+      dailyJapaCount: '108 recitations facing East at sunrise',
+      stotra: 'Aditya Hridaya Stotram & Shiva Panchakshari Stotram',
+      worshipProcedure:
+        'Wake during Brahma Muhurtha. Offer sacred water with red kumkum and flowers to Surya Dev in a pure copper vessel. Light a ghee lamp and chant 108 times.',
+      auspiciousDay: 'Sunday',
+      offerings: 'Red Sandalwood (Rakta Chandan), Bilva leaves, Red hibiscus, Copper vessel water',
+      spiritualSignificance:
+        'Illuminates the soul with inner clarity, burns ancestral karmic debts, and empowers leadership and spiritual dignity.',
+    },
+    Moon: {
+      deityName: 'Goddess Lalitha Tripura Sundari & Maa Gauri (Lord Krishna)',
+      sanskritName: 'माता ललिता त्रिपुरसुन्दरी एवं माँ गौरी',
+      primaryMantra: 'ॐ ऐं ह्रीं श्रीं ललिता महात्रिपुरसुन्दर्यै नमः ॥',
+      mantraTransliteration: 'Om Aim Hreem Shreem Lalitha Mahatripurasundaryai Namah ||',
+      dailyJapaCount: '108 recitations at dusk or evening',
+      stotra: 'Sri Lalitha Sahasranama & Sri Suktam',
+      worshipProcedure:
+        'Sit facing North-East after dusk. Light a silver or brass ghee lamp. Offer white jasmine flowers and chant with pure devotion.',
+      auspiciousDay: 'Monday & Shukla Paksha Purnima',
+      offerings: 'White fragrant flowers, Chandana, Sweet milk payasam, Silver vessel water',
+      spiritualSignificance:
+        'Establishes deep mental tranquility, soothes nervous anxiety, and blesses with maternal protective grace.',
+    },
+    Mars: {
+      deityName: 'Lord Subrahmanya (Kartikeya / Muruga) & Lord Hanuman',
+      sanskritName: 'भगवान कार्तिकेय (मुरुगन) एवं श्री हनुमान',
+      primaryMantra: 'ॐ शरवणभवाय नमः ॥ & ॐ हं हनुमते नमः ॥',
+      mantraTransliteration: 'Om Sharavanabhavaya Namah || & Om Ham Hanumate Namah ||',
+      dailyJapaCount: '108 recitations at sunrise',
+      stotra: 'Subrahmanya Bhujangam & Hanuman Chalisa',
+      worshipProcedure:
+        'Face East. Light a sesame oil deepam. Offer red oleander or hibiscus flowers and chant for courage and obstacle elimination.',
+      auspiciousDay: 'Tuesday & Shasthi Tithi',
+      offerings: 'Red hibiscus, Jaggery with roasted gram, Sesame oil lamp, Sindoor',
+      spiritualSignificance:
+        'Annihilates fear, purifies vital blood energy, shields against occult harm, and imparts unshakeable fortitude.',
+    },
+    Mercury: {
+      deityName: 'Lord Maha Vishnu (Narayana) & Goddess Saraswati',
+      sanskritName: 'भगवान महाविष्णु (श्री नारायण) एवं माँ सरस्वती',
+      primaryMantra: 'ॐ नमो भगवते वासुदेवाय ॥ & ॐ ऐं सरस्वत्यै नमः ॥',
+      mantraTransliteration: 'Om Namo Bhagavate Vasudevaya || & Om Aim Saraswatyai Namah ||',
+      dailyJapaCount: '108 recitations in the morning',
+      stotra: 'Vishnu Sahasranama Stotram & Narayana Suktam',
+      worshipProcedure:
+        'Place consecrated Tulsi leaves before Lord Vishnu or Shaligram. Light a pure cow ghee lamp and chant facing East.',
+      auspiciousDay: 'Wednesday & Shukla Ekadashi',
+      offerings: 'Fresh Tulsi leaves, Yellow marigold flowers, Panchamrita, Sandalwood paste',
+      spiritualSignificance:
+        'Bestows superior intellect, eloquent speech, commercial success, and steady preservation of wealth.',
+    },
+    Jupiter: {
+      deityName: 'Lord Shiva (Dakshinamurthy) & Sri Dattatreya (Lord Brihaspati)',
+      sanskritName: 'भगवान दक्षिणामूर्ति (शिव) एवं श्री दत्तात्रेय',
+      primaryMantra: 'ॐ नमो भगवते दक्षिणामूर्तये मह्यं मेधां प्रज्ञां प्रयच्छ स्वाहा ॥',
+      mantraTransliteration:
+        'Om Namo Bhagavate Dakshinamurtaye Mahyam Medham Prajnam Prayachha Swaha ||',
+      dailyJapaCount: '108 recitations on Thursday morning',
+      stotra: 'Sri Dakshinamurthy Stotram & Guru Paduka Stotram',
+      worshipProcedure:
+        'Face North or North-East. Offer yellow flowers and chana dal. Apply turmeric or saffron tilak and meditate on the primordial Guru.',
+      auspiciousDay: 'Thursday & Guru Purnima',
+      offerings: 'Yellow flowers, Chana dal, Turmeric, Ghee lamp, Kesar (saffron) milk',
+      spiritualSignificance:
+        'Unlocks divine spiritual wisdom (Jnana), purifies the intellect, and attracts the guiding presence of enlightened Masters.',
+    },
+    Venus: {
+      deityName: 'Goddess Maha Lakshmi & Goddess Radha',
+      sanskritName: 'माँ महालक्ष्मी एवं श्री राधा रानी',
+      primaryMantra: 'ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः ॥',
+      mantraTransliteration: 'Om Shreem Hreem Kleem Mahalakshmaye Namah ||',
+      dailyJapaCount: '108 recitations at sunrise or sunset',
+      stotra: 'Sri Kanakadhara Stotram & Mahalakshmi Ashtakam',
+      worshipProcedure:
+        'Clean the altar. Light a two-wick ghee lamp. Offer fresh lotus or fragrant white flowers and recite with pure gratitude.',
+      auspiciousDay: 'Friday',
+      offerings: 'Pink Lotus flowers, White sweets, Kheer, Rose water, Camphor',
+      spiritualSignificance:
+        'Fosters unconditional love, emotional and aesthetic harmony, auspicious domestic fortune, and supreme grace.',
+    },
+    Saturn: {
+      deityName: 'Lord Shiva (Maha Mrityunjaya) & Lord Kala Bhairava',
+      sanskritName: 'भगवान शिव (महामृत्युंजय) एवं श्री कालभैरव',
+      primaryMantra: 'ॐ नमः शिवाय ॥ & ॐ कालभैरवाय नमः ॥',
+      mantraTransliteration: 'Om Namah Shivaya || & Om Kala Bhairavaya Namah ||',
+      dailyJapaCount: '108 recitations during evening Pradosham',
+      stotra: 'Maha Mrityunjaya Stotram & Kala Bhairava Ashtakam',
+      worshipProcedure:
+        'Light a sesame oil or mustard oil lamp facing West or North. Offer Bilva leaves and black sesame seeds to the Shiva Lingam.',
+      auspiciousDay: 'Saturday & Pradosham (Trayodashi)',
+      offerings: 'Bilva patra, Black sesame seeds, Pure mustard oil lamp, Sacred Vibhuti',
+      spiritualSignificance:
+        'Neutralizes severe karmic blockages, cures chronic grief, shields against untimely accidents, and grants eternal peace.',
+    },
+    Rahu: {
+      deityName: 'Goddess Durga (Mahishasura Mardini) & Maa Kali',
+      sanskritName: 'माँ दुर्गा (महिषासुरमर्दिनी) एवं माँ महाकाली',
+      primaryMantra: 'ॐ दुं दुर्गायै नमः ॥ & ॐ क्रीं कालिकायै नमः ॥',
+      mantraTransliteration: 'Om Dum Durgayai Namah || & Om Kreem Kalikayai Namah ||',
+      dailyJapaCount: '108 recitations during Rahu Kalam',
+      stotra: 'Durga Saptashati & Mahishasura Mardini Stotram',
+      worshipProcedure:
+        'During Tuesday or Friday Rahu Kalam, light an inverted lemon peel ghee lamp (Nimbu Deepam) and chant for psychic protection.',
+      auspiciousDay: 'Tuesday or Friday during Rahu Kalam',
+      offerings: 'Lemon lamp (Nimbu deepam), Red flowers, Pomegranate, Kumkum',
+      spiritualSignificance:
+        'Dissolves fears of witchcraft or enemies, transforms illusions into spiritual clarity, and grants victory over crises.',
+    },
+    Ketu: {
+      deityName: 'Lord Maha Ganapathi (Vighnaharta) & Lord Matsya',
+      sanskritName: 'भगवान महागणपति (विघ्नहर्ता) एवं भगवान मत्स्य',
+      primaryMantra: 'ॐ गं गणपतये नमः ॥',
+      mantraTransliteration: 'Om Gam Ganapataye Namah ||',
+      dailyJapaCount: '108 recitations at sunrise',
+      stotra: 'Sankata Nashana Ganesha Stotram & Ganesha Atharvashirsha',
+      worshipProcedure:
+        'Offer 21 blades of Durva grass and modak to Lord Ganesha. Light a pure cow ghee lamp and pray for obstacle removal.',
+      auspiciousDay: 'Wednesday & Shukla Chaturthi',
+      offerings: '21 Durva grass blades, Modaka, Red sandalwood paste, Jaggery',
+      spiritualSignificance:
+        'Unlocks Moksha, purifies intuition, dissolves past-life knots (karmic bandhan), and removes invisible hurdles.',
+    },
+  };
+
+  const ishtaInfo = ISHTA_DEITY_MAP[ishtaGoverningPlanet] || ISHTA_DEITY_MAP.Sun;
+
+  const ishtaDevata: IshtaDevataDetails = {
+    deityName: ishtaInfo.deityName,
+    sanskritName: ishtaInfo.sanskritName,
+    governingPlanet: ishtaGoverningPlanet,
+    atmakarakaPlanet: atmakaraka.name,
+    karakamsaRashi: karakamsaRashi.name,
+    twelfthSignFromKarakamsa: twelfthRashi.name,
+    indicator: `12th from Karakamsa (${twelfthRashi.name} ruled by ${twelfthRashi.lord}) with Atmakaraka ${atmakaraka.name} in Navamsha ${karakamsaRashi.name}`,
+    primaryMantra: ishtaInfo.primaryMantra,
+    mantraTransliteration: ishtaInfo.mantraTransliteration,
+    dailyJapaCount: ishtaInfo.dailyJapaCount,
+    stotra: ishtaInfo.stotra,
+    worshipProcedure: ishtaInfo.worshipProcedure,
+    auspiciousDay: ishtaInfo.auspiciousDay,
+    offerings: ishtaInfo.offerings,
+    spiritualSignificance: ishtaInfo.spiritualSignificance,
+  };
+
   const currentYear = new Date().getFullYear();
 
   return {
@@ -1100,6 +1430,7 @@ export function calculateBirthChartData(
     dasha,
     yogas,
     doshas,
+    ishtaDevata,
     predictions: {
       career: `${lagnaRashi.name} Ascendant with ${sunRashi.name} Sun positions you favorably for leadership, advisory excellence, executive management, or specialized high-skill ventures.`,
       finance: `Dhana configurations governed by ${RASHIS[(lagnaIndex + 1) % 12].lord} highlight progressive financial accumulation with favorable opportunities throughout ${currentYear}.`,
@@ -1180,10 +1511,372 @@ export function extractBirthDetailsFromText(text: string): {
   return null;
 }
 
+export function normalizeRashi(str?: string | null) {
+  if (!str) return null;
+  const s = String(str).toLowerCase();
+  for (let i = 0; i < RASHIS.length; i++) {
+    const r = RASHIS[i];
+    if (s.includes(r.shortName.toLowerCase())) return { ...r, index: i };
+    const englishName = r.name.toLowerCase();
+    if (s.includes(englishName)) return { ...r, index: i };
+    const m = r.name.match(/\(([^)]+)\)/);
+    if (m && s.includes(m[1].toLowerCase())) return { ...r, index: i };
+  }
+  return null;
+}
+
+export interface CoupleInquiryDetails {
+  isCoupleMatch: boolean;
+  partner1: {
+    name: string;
+    rashi?: { name: string; shortName: string; lord: string; varna: string; vashya: string; signNumber: number; index: number };
+    dob?: string;
+    tob?: string;
+    pob?: string;
+  };
+  partner2: {
+    name: string;
+    rashi?: { name: string; shortName: string; lord: string; varna: string; vashya: string; signNumber: number; index: number };
+    dob?: string;
+    tob?: string;
+    pob?: string;
+  };
+  compatibility?: {
+    totalScore: number;
+    maxScore: number;
+    status: string;
+    verdict: string;
+    varna: { score: number; max: number; desc: string };
+    vashya: { score: number; max: number; desc: string };
+    grahaMaitri: { score: number; max: number; desc: string };
+    bhakoot: { score: number; max: number; desc: string };
+    summary: string;
+  };
+  ashtakootResult?: any;
+}
+
+export function calculateRashiCompatibility(
+  p1RashiStr: string,
+  p2RashiStr: string,
+  p1Name: string = 'Partner 1',
+  p2Name: string = 'Partner 2'
+) {
+  const r1 = normalizeRashi(p1RashiStr);
+  const r2 = normalizeRashi(p2RashiStr);
+  if (!r1 || !r2) return null;
+
+  // 1. Varna (1 pt)
+  const varnaWeights: Record<string, number> = { Brahmin: 4, Kshatriya: 3, Vaishya: 2, Shudra: 1 };
+  const w1 = varnaWeights[r1.varna] || 1;
+  const w2 = varnaWeights[r2.varna] || 1;
+  const varnaScore = w1 >= w2 ? 1 : 0;
+  const varnaDesc =
+    varnaScore === 1
+      ? `${p1Name} (${r1.varna}) and ${p2Name} (${r2.varna}) possess balanced spiritual temperament and mutual reverence.`
+      : `${p1Name} and ${p2Name} have different ego dynamics; gentle mutual appreciation is recommended.`;
+
+  // 2. Vashya (2 pts)
+  let vashyaScore = 1;
+  if (r1.vashya === r2.vashya) {
+    vashyaScore = 2;
+  } else if (
+    (r1.vashya === 'Manava' && r2.vashya === 'Chatushpada') ||
+    (r1.vashya === 'Chatushpada' && r2.vashya === 'Manava')
+  ) {
+    vashyaScore = 1;
+  } else if (r1.vashya === 'Vanachara' || r2.vashya === 'Keeta') {
+    vashyaScore = 0.5;
+  }
+  const vashyaDesc =
+    vashyaScore >= 1.5
+      ? `Strong magnetic affinity and harmonious accommodation of each other's opinions.`
+      : `Balanced partnership; mutual flexibility ensures cooperative decision-making.`;
+
+  // 3. Graha Maitri (5 pts)
+  let maitriScore = 3;
+  const l1 = r1.lord;
+  const l2 = r2.lord;
+  if (l1 === l2) {
+    maitriScore = 5;
+  } else {
+    const f1to2 = PLANET_FRIENDSHIPS[l1]?.[l2] ?? 0;
+    const f2to1 = PLANET_FRIENDSHIPS[l2]?.[l1] ?? 0;
+    if (f1to2 === 1 && f2to1 === 1) maitriScore = 5;
+    else if ((f1to2 === 1 && f2to1 === 0) || (f1to2 === 0 && f2to1 === 1)) maitriScore = 4;
+    else if (f1to2 === 0 && f2to1 === 0) maitriScore = 3;
+    else if ((f1to2 === 1 && f2to1 === -1) || (f1to2 === -1 && f2to1 === 1)) maitriScore = 1;
+    else maitriScore = 0.5;
+  }
+  const maitriDesc =
+    maitriScore >= 4
+      ? `Planetary ruling lords (${l1} & ${l2}) share natural friendship, creating extraordinary intellectual companionship and mutual trust.`
+      : maitriScore >= 3
+      ? `Constructive mutual discussions and collaborative problem-solving.`
+      : `Contrasting worldviews; cultivating active listening and patience will deepen intimacy.`;
+
+  // 4. Bhakoot (7 pts)
+  const distance = (r2.signNumber - r1.signNumber + 12) % 12 || 12;
+  let bhakootScore = 7;
+  let bhakootDesc = '';
+  if ([1, 7, 3, 11, 4, 10].includes(distance)) {
+    bhakootScore = 7;
+    bhakootDesc = `Auspicious Kendra/Trikona Bhakoot alignment between ${r1.name} and ${r2.name}, fostering mutual emotional prosperity and longevity.`;
+  } else if ([6, 8, 2, 12, 5, 9].includes(distance)) {
+    if (maitriScore >= 4) {
+      bhakootScore = 7;
+      bhakootDesc = `Bhakoot distance (${distance}/Shadashtaka) is cancelled by the friendly ruling lords (${l1} & ${l2}), preserving domestic warmth.`;
+    } else {
+      bhakootScore = 0;
+      bhakootDesc = `Bhakoot relationship requires patience in financial and domestic planning; joint prayers foster peace.`;
+    }
+  }
+
+  // Estimated baseline for Nakshatra-dependent Kootas (Tara: 1.5/3, Yoni: 2/4, Gana: 3/6, Nadi: 4/8 = 10.5)
+  const nakshatraEstimated = 10.5;
+  const calculatedRashiPoints = varnaScore + vashyaScore + maitriScore + bhakootScore;
+  const totalScore = Math.round(calculatedRashiPoints + nakshatraEstimated);
+  const status = totalScore >= 25 ? 'Highly Auspicious' : totalScore >= 18 ? 'Auspicious & Favorable' : 'Requires Remedies';
+  const verdict =
+    totalScore >= 18
+      ? `The estimated Ashtakoot Gun Milan score is ~${totalScore} out of 36 points, indicating a harmonious, supportive, and auspicious matrimonial alliance.`
+      : `The estimated Ashtakoot score is ~${totalScore} out of 36 points; performing Vedic Parihar rituals will harmonize planetary energies.`;
+
+  return {
+    totalScore,
+    maxScore: 36,
+    status,
+    verdict,
+    varna: { score: varnaScore, max: 1, desc: varnaDesc },
+    vashya: { score: vashyaScore, max: 2, desc: vashyaDesc },
+    grahaMaitri: { score: maitriScore, max: 5, desc: maitriDesc },
+    bhakoot: { score: bhakootScore, max: 7, desc: bhakootDesc },
+    summary: `Graha Maitri: ${maitriScore}/5 (${l1} & ${l2}), Bhakoot: ${bhakootScore}/7, Varna: ${varnaScore}/1, Vashya: ${vashyaScore}/2. Total estimated score: ~${totalScore}/36.`,
+  };
+}
+
+export function cleanPartnerName(rawName: string): string {
+  if (!rawName) return 'Partner';
+  const cleaned = rawName
+    .replace(/^(?:boy|groom|girl|bride|partner\s*2|partner\s*1|partner|with|for|is|he\s+is|she\s+is|his\s+name\s+is|her\s+name\s+is|name:?)\s*:?/gi, '')
+    .replace(/^(?:with|for|of|to|and|about|please|can|i|we|my|his|her|tell|check)\s+/gi, '')
+    .replace(/[^a-zA-Z\s]/g, ' ')
+    .trim();
+  if (!cleaned) return 'Partner';
+  return cleaned
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
+
+export function extractCoupleDetails(
+  text: string,
+  defaultUser?: {
+    name: string;
+    rashi?: { name: string; shortName: string; lord: string; varna: string; vashya: string; signNumber: number; index: number } | null;
+    dob?: string;
+    tob?: string;
+    pob?: string;
+  }
+): CoupleInquiryDetails | null {
+  if (!text) return null;
+
+  // 1. Check if input is a JSON string of couple details
+  try {
+    const trimmed = text.trim();
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      const obj = JSON.parse(trimmed);
+      const keys = Object.keys(obj);
+      if (keys.length >= 2) {
+        const p1 = cleanPartnerName(keys[0]);
+        const p2 = cleanPartnerName(keys[1]);
+        const r1Str = obj[keys[0]]?.Rashi || obj[keys[0]]?.rashi || (typeof obj[keys[0]] === 'string' ? obj[keys[0]] : '');
+        const r2Str = obj[keys[1]]?.Rashi || obj[keys[1]]?.rashi || (typeof obj[keys[1]] === 'string' ? obj[keys[1]] : '');
+        const r1 = normalizeRashi(r1Str || p1);
+        const r2 = normalizeRashi(r2Str || p2);
+        if (r1 && r2) {
+          const comp = calculateRashiCompatibility(r1.name, r2.name, p1, p2);
+          return {
+            isCoupleMatch: true,
+            partner1: { name: p1, rashi: r1 },
+            partner2: { name: p2, rashi: r2 },
+            compatibility: comp || undefined,
+          };
+        }
+      }
+    }
+  } catch {}
+
+  // 2. Check for DOBs
+  const allDobs = [...text.matchAll(/\b(19\d\d|20\d\d)[-/](0?[1-9]|1[0-2])[-/](0?[1-9]|[12]\d|3[01])\b/g)];
+  if (allDobs.length < 2) {
+    const dmyMatches = [...text.matchAll(/\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](19\d\d|20\d\d)\b/g)];
+    if (dmyMatches.length >= 2) {
+      allDobs.push(
+        { 0: `${dmyMatches[0][3]}-${dmyMatches[0][2].padStart(2, '0')}-${dmyMatches[0][1].padStart(2, '0')}` } as any,
+        { 0: `${dmyMatches[1][3]}-${dmyMatches[1][2].padStart(2, '0')}-${dmyMatches[1][1].padStart(2, '0')}` } as any
+      );
+    }
+  }
+
+  if (allDobs.length >= 2) {
+    const d1 = allDobs[0][0];
+    const d2 = allDobs[1][0];
+    try {
+      const matchResult = calculateAshtakootGunMilan(d1, '12:00 PM', 'India', d2, '12:00 PM', 'India', 'Partner 1', 'Partner 2');
+      return {
+        isCoupleMatch: true,
+        partner1: { name: 'Partner 1', dob: d1 },
+        partner2: { name: 'Partner 2', dob: d2 },
+        ashtakootResult: matchResult,
+      };
+    } catch {}
+  } else if (allDobs.length === 1 && defaultUser?.dob) {
+    const d1 = defaultUser.dob;
+    const d2 = allDobs[0][0];
+    const textWithoutDate = text
+      .replace(allDobs[0][0], '')
+      .replace(/\b(?:dob|born|on|date of birth|kundli|matching|match|with|for|partner)\b/gi, ' ')
+      .trim();
+    const partnerNameMatch = textWithoutDate.match(/([a-zA-Z\s]{2,30})/);
+    const p2Name = partnerNameMatch ? cleanPartnerName(partnerNameMatch[1]) : 'Partner';
+    try {
+      const matchResult = calculateAshtakootGunMilan(
+        d1,
+        defaultUser.tob || '12:00 PM',
+        defaultUser.pob || 'India',
+        d2,
+        '12:00 PM',
+        'India',
+        defaultUser.name,
+        p2Name
+      );
+      return {
+        isCoupleMatch: true,
+        partner1: { name: defaultUser.name, dob: d1 },
+        partner2: { name: p2Name, dob: d2 },
+        ashtakootResult: matchResult,
+      };
+    } catch {}
+  }
+
+  // 3. Check for text mentioning Rashis
+  const rashiNames = RASHIS.map((r) => r.shortName).join('|');
+  const sanskritNames = 'Mesha|Vrishabha|Mithuna|Karka|Simha|Kanya|Tula|Vrishchika|Dhanu|Makara|Kumbha|Meena';
+  const rashiRegex = new RegExp(`\\b(${rashiNames}|${sanskritNames})\\b`, 'gi');
+
+  const foundRashis: Array<{ rashi: ReturnType<typeof normalizeRashi>; index: number }> = [];
+  let m: RegExpExecArray | null;
+  while ((m = rashiRegex.exec(text)) !== null) {
+    const norm = normalizeRashi(m[1]);
+    if (norm) {
+      const last = foundRashis[foundRashis.length - 1];
+      if (last && (last.rashi?.index === norm.index || m.index - last.index < 25)) {
+        continue;
+      }
+      foundRashis.push({ rashi: norm, index: m.index });
+    }
+  }
+
+  // Case 3A: Two rashis mentioned in text
+  if (foundRashis.length >= 2) {
+    const r1 = foundRashis[0].rashi!;
+    const r2 = foundRashis[1].rashi!;
+
+    let p1Name = 'Partner 1';
+    let p2Name = 'Partner 2';
+
+    const p1Prefix = text.slice(0, foundRashis[0].index);
+    const p1Match = p1Prefix.match(/([a-zA-Z\s]{2,30})[:\s(]*$/);
+    if (p1Match && p1Match[1].trim().length > 1) {
+      p1Name = cleanPartnerName(p1Match[1]);
+    }
+
+    const p2Prefix = text.slice(foundRashis[0].index, foundRashis[1].index);
+    const p2Match = p2Prefix.match(/(?:and|&|,|girl:|bride:|partner\s*2:)\s*([a-zA-Z\s]{2,30})[:\s(]*$/i);
+    if (p2Match && p2Match[1].trim().length > 1) {
+      p2Name = cleanPartnerName(p2Match[1]);
+    }
+
+    const comp = calculateRashiCompatibility(r1.name, r2.name, p1Name, p2Name);
+    return {
+      isCoupleMatch: true,
+      partner1: { name: p1Name || 'Partner 1', rashi: r1 },
+      partner2: { name: p2Name || 'Partner 2', rashi: r2 },
+      compatibility: comp || undefined,
+    };
+  }
+
+  // Case 3B: Single rashi mentioned in text AND user has profile rashi (e.g. devotee Sai Sri Pravalika with Leo matching with Karthik Reddy: Scorpio)
+  if (foundRashis.length === 1 && defaultUser?.rashi) {
+    const r1 = defaultUser.rashi;
+    const r2 = foundRashis[0].rashi!;
+
+    let p2Name = 'Partner';
+    const textWithoutRashi = text.replace(rashiRegex, ' ').replace(/[():,]/g, ' ').trim();
+    const cleanNameMatch = textWithoutRashi.match(/([a-zA-Z]{2,20}(?:\s+[a-zA-Z]{2,20}){0,3})/i);
+    if (cleanNameMatch && cleanNameMatch[1].trim().length > 1) {
+      p2Name = cleanPartnerName(cleanNameMatch[1]);
+    }
+
+    const comp = calculateRashiCompatibility(r1.name, r2.name, defaultUser.name, p2Name);
+    return {
+      isCoupleMatch: true,
+      partner1: { name: defaultUser.name, rashi: r1 },
+      partner2: { name: p2Name, rashi: r2 },
+      compatibility: comp || undefined,
+    };
+  }
+
+  // Case 4: Text explicitly asks for matching with a named person (e.g. "Kundli matching with Karthik Reddy", "marry Srikanth Naidu")
+  const matchAsk = text.match(
+    /(?:kundli\s+matching|kundli\s+match|gun\s*milan|compatibility|horoscope|marry|marriage)?\s*(?:matching\s+with|matching\s+for|match\s+with|match\s+for|with|for|marry)\s+([a-zA-Z\s]{2,30})/i
+  );
+  if (matchAsk && defaultUser) {
+    const p2Name = cleanPartnerName(matchAsk[1]);
+    if (p2Name.length > 1 && p2Name !== 'Partner') {
+      return {
+        isCoupleMatch: true,
+        partner1: { name: defaultUser.name, rashi: defaultUser.rashi || undefined, dob: defaultUser.dob },
+        partner2: { name: p2Name },
+      };
+    }
+  }
+
+  // Case 5: Devotee provides a single prospective partner full name (e.g. "Karthik Reddy", "Srikanth Naidu", "His name is Rahul Sharma")
+  const singleNameMatch = text.match(
+    /^(?:his\s+name\s+is|her\s+name\s+is|name\s*:?|he\s+is|she\s+is|partner\s*:?)?\s*([a-zA-Z]{2,20}(?:\s+[a-zA-Z]{2,20}){0,3})\s*[.!?]?$/i
+  );
+  if (singleNameMatch && defaultUser) {
+    const candidateName = cleanPartnerName(singleNameMatch[1]);
+    const commonNonNames = ['Tell Me', 'Thank You', 'Hari Om', 'Namaste', 'Good Morning', 'Good Evening', 'Help Me', 'Hello', 'Hi'];
+    if (!commonNonNames.includes(candidateName) && candidateName !== 'Partner') {
+      return {
+        isCoupleMatch: true,
+        partner1: { name: defaultUser.name, rashi: defaultUser.rashi || undefined, dob: defaultUser.dob },
+        partner2: { name: candidateName },
+      };
+    }
+  }
+
+  return null;
+}
+
 // ---------------- DETERMINISTIC JYOTISH EVIDENCE & REASONING ENGINE ----------------
 
 export interface JyotishEvidencePack {
-  domain: 'career' | 'marriage' | 'finance' | 'health' | 'education' | 'children' | 'spirituality' | 'general';
+  domain:
+    | 'career'
+    | 'marriage'
+    | 'finance'
+    | 'health'
+    | 'education'
+    | 'children'
+    | 'spirituality'
+    | 'ishta_devata'
+    | 'homam'
+    | 'mantra'
+    | 'general';
   domainTitle: string;
   relevantHouseNumbers: number[];
   relevantHouses: Array<{
@@ -1220,6 +1913,43 @@ export function analyzeInquiryEvidence(
   let targetHouses = [1, 9, 10, 11];
 
   if (
+    q.includes('ishta') ||
+    q.includes('ista') ||
+    q.includes('devata') ||
+    q.includes('deity') ||
+    q.includes('daivam') ||
+    q.includes('kuladevata') ||
+    q.includes('upasana') ||
+    q.includes('jeevanmuktamsa') ||
+    q.includes('atmakaraka') ||
+    (q.includes('my god') || q.includes('who is my god') || q.includes('which god'))
+  ) {
+    domain = 'ishta_devata';
+    domainTitle = 'Ishta Devata & Atmakaraka Jeevanmuktamsa Upasana (12th from Karakamsa)';
+    targetHouses = [12, 9, 5, 1];
+  } else if (
+    q.includes('homam') ||
+    q.includes('homa') ||
+    q.includes('hawan') ||
+    q.includes('havan') ||
+    q.includes('yajna') ||
+    q.includes('yaga')
+  ) {
+    domain = 'homam';
+    domainTitle = 'Sacred Vedic Agni Homam & Hawan Ritual';
+    targetHouses = [9, 1, 5, 11];
+  } else if (
+    q.includes('mantra') ||
+    q.includes('japa') ||
+    q.includes('chant') ||
+    q.includes('beej mantra') ||
+    q.includes('stotra') ||
+    q.includes('sloka')
+  ) {
+    domain = 'mantra';
+    domainTitle = 'Sacred Vedic Mantra Sadhana & Sound Vibration Japa';
+    targetHouses = [5, 9, 1, 12];
+  } else if (
     q.includes('job') ||
     q.includes('career') ||
     q.includes('promotion') ||
@@ -1248,11 +1978,21 @@ export function analyzeInquiryEvidence(
     q.includes('relationship') ||
     q.includes('divorce') ||
     q.includes('shadi') ||
-    q.includes('vivah')
+    q.includes('vivah') ||
+    q.includes('matching') ||
+    q.includes('match') ||
+    q.includes('milan') ||
+    q.includes('gun milan') ||
+    q.includes('guna milan') ||
+    q.includes('ashtakoot') ||
+    q.includes('compatibility') ||
+    q.includes('couple') ||
+    q.includes('kundali match') ||
+    q.includes('kundli match')
   ) {
     domain = 'marriage';
-    domainTitle = 'Marriage & Relationship Harmony (Kalatra Bhava)';
-    targetHouses = [7, 2, 11, 4];
+    domainTitle = 'Marriage, Kundli Matching & Relationship Harmony (Kalatra Bhava)';
+    targetHouses = [7, 2, 11, 4, 5];
   } else if (
     q.includes('money') ||
     q.includes('wealth') ||
@@ -1314,7 +2054,6 @@ export function analyzeInquiryEvidence(
     q.includes('moksha') ||
     q.includes('kundalini') ||
     q.includes('meditation') ||
-    q.includes('mantra') ||
     q.includes('temple') ||
     q.includes('guru') ||
     q.includes('karma')
@@ -1340,7 +2079,20 @@ export function analyzeInquiryEvidence(
 
   const supportingFactors: string[] = [];
   const contradictoryFactors: string[] = [];
-  let primaryAfflictedPlanet = 'Rahu';
+  let primaryAfflictedPlanet = domain === 'marriage' ? 'Venus' : 'Rahu';
+
+  if (domain === 'ishta_devata' && chart.ishtaDevata) {
+    primaryAfflictedPlanet = chart.ishtaDevata.governingPlanet;
+    supportingFactors.push(
+      `Atmakaraka (highest degree soul planet) is ${chart.ishtaDevata.atmakarakaPlanet}, situated in Navamsha sign ${chart.ishtaDevata.karakamsaRashi} (Karakamsa).`
+    );
+    supportingFactors.push(
+      `12th house from Karakamsa (Jeevanmuktamsa Sthana) is ${chart.ishtaDevata.twelfthSignFromKarakamsa}, governed by ${chart.ishtaDevata.governingPlanet}, establishing ${chart.ishtaDevata.deityName} as your verified Ishta Devata.`
+    );
+    supportingFactors.push(
+      `Prescribed Canonical Upasana Mantra: ${chart.ishtaDevata.primaryMantra} (${chart.ishtaDevata.dailyJapaCount}) with ${chart.ishtaDevata.stotra}. Auspicious Day: ${chart.ishtaDevata.auspiciousDay}.`
+    );
+  }
 
   // 3. Evaluate House Planets & Dignities
   relevantHouses.forEach((h) => {

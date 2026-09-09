@@ -116,8 +116,33 @@ const LANGUAGES = [
 function renderFormattedMessageContent(rawContent: string, isUser: boolean) {
   if (!rawContent) return null;
 
+  // Defensive safety: If assistant message content is a JSON object string (e.g. {"Ajay Kumar": ...})
+  let textToFormat = rawContent;
+  if (!isUser && rawContent.trim().startsWith('{') && rawContent.trim().endsWith('}')) {
+    try {
+      const obj = JSON.parse(rawContent.trim());
+      if (obj.reply && typeof obj.reply === 'string') {
+        textToFormat = obj.reply;
+      } else if (obj.conclusion && typeof obj.conclusion === 'string') {
+        textToFormat = obj.conclusion;
+      } else {
+        textToFormat = Object.entries(obj)
+          .map(([k, v]) => {
+            if (typeof v === 'object' && v !== null) {
+              const inner = Object.entries(v)
+                .map(([ik, iv]) => `${ik}: ${iv}`)
+                .join(', ');
+              return `**${k}** (${inner})`;
+            }
+            return `**${k}**: ${v}`;
+          })
+          .join('\n\n');
+      }
+    } catch {}
+  }
+
   // 1. Normalize line endings
-  const cleaned = rawContent
+  const cleaned = textToFormat
     .replace(/\r\n/g, '\n')
     // Remove empty markdown headers with no text following
     .replace(/^#+\s*$/gm, '')
@@ -264,8 +289,31 @@ export default function AIChatSidebar() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Exclude floating button on active call rooms
-  const isCallRoom = pathname?.startsWith('/call/') || pathname?.startsWith('/ai-call/');
+  // Exclude floating button on active call rooms, admin panels, and all AI platform dashboard routes
+  const isExcluded =
+    pathname?.startsWith('/call/') ||
+    pathname?.startsWith('/ai-call/') ||
+    pathname?.startsWith('/admin-panel') ||
+    pathname?.startsWith('/astrologer-dashboard') ||
+    pathname?.startsWith('/aiastro') ||
+    pathname?.startsWith('/admin-dashboard') ||
+    pathname?.startsWith('/ai-operations') ||
+    pathname?.startsWith('/application-management') ||
+    pathname?.startsWith('/audit-logs') ||
+    pathname?.startsWith('/candidate-management') ||
+    pathname?.startsWith('/candidates') ||
+    pathname?.startsWith('/discovery-campaign-management') ||
+    pathname?.startsWith('/discovery-jobs') ||
+    pathname?.startsWith('/enrolment') ||
+    pathname?.startsWith('/human-review-module') ||
+    pathname?.startsWith('/outreach') ||
+    pathname?.startsWith('/probation') ||
+    pathname?.startsWith('/reports') ||
+    pathname?.startsWith('/search-history') ||
+    pathname?.startsWith('/search-sources') ||
+    pathname?.startsWith('/settings') ||
+    pathname?.startsWith('/users-roles') ||
+    pathname?.startsWith('/verification');
 
   // Sync wallet balance
   useEffect(() => {
@@ -539,7 +587,7 @@ export default function AIChatSidebar() {
     window.speechSynthesis.speak(utterance);
   };
 
-  if (isCallRoom) {
+  if (isExcluded) {
     return null;
   }
 

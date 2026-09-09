@@ -177,7 +177,8 @@ export const TARGET_PAGES = [
     category: 'panchang',
     route: '/panchang/vaar',
   },
-  { id: 'panchang-main', title: 'Panchang Central Hub', category: 'panchang', route: '/panchang' },
+  { id: 'panchang', title: 'Panchang Central Hub', category: 'panchang', route: '/panchang' },
+  { id: 'panchang-main', title: 'Panchang Main Portal', category: 'panchang', route: '/panchang' },
   {
     id: 'services-panchang',
     title: 'Services Panchang Portal',
@@ -290,9 +291,15 @@ export async function getPublishedPageContents(
   sectionPlacement?: string
 ): Promise<DynamicPageItem[]> {
   try {
+    const pageIdList = [pageId];
+    if (pageId === 'panchang' || pageId === 'panchang-main' || pageId === 'services-panchang') {
+      pageIdList.push('panchang', 'panchang-main', 'services-panchang');
+    }
+    const uniquePageIds = Array.from(new Set(pageIdList));
+
     const q = query(
       collection(db, COLLECTION_NAME),
-      where('pageId', '==', pageId),
+      where('pageId', 'in', uniquePageIds.slice(0, 10)),
       where('status', '==', 'published')
     );
     const snap = await getDocs(q);

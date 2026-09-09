@@ -4,9 +4,11 @@ import { DEFAULT_AI_ASTROLOGERS, AIAstrologer } from '@/lib/aiAstrologerData';
 import {
   calculateBirthChartData,
   calculateAstroPlacement,
+  formatChartSummaryForAI,
   RASHIS,
   NAKSHATRAS_DATA,
 } from '@/lib/vedicAstrologyEngine';
+import { resolveVedicRemedies } from '@/lib/vedicRemediesEngine';
 
 export async function POST(req: Request) {
   try {
@@ -53,11 +55,14 @@ export async function POST(req: Request) {
     const walletTxRef = userRef.collection('wallet_transactions').doc();
 
     // 3. Synthesize Dynamic Astrological Context based on Birth Details
-    let astroContext = {
+    let astroContext: any = {
       lagna: 'Aries (Mesha)',
       moonRashi: 'Taurus (Vrishabha)',
       nakshatra: 'Rohini',
+      sunSign: 'Sun in Mesha',
       currentDasha: 'Jupiter Mahadasha (Vimshottari)',
+      chartSummary: '',
+      planetaryPlacements: '',
       summaryNotes: `Chart calculated for ${birthDetails.name || 'Devotee'}, born ${birthDetails.dob || 'N/A'} ${birthDetails.time || '12:00 PM'} at ${birthDetails.place || 'India'}. Primary concern: ${birthDetails.primaryConcern || 'General Life Guidance'}.`,
     };
 
@@ -73,16 +78,34 @@ export async function POST(req: Request) {
           birthDetails.gender || 'Male'
         );
 
+        const resolvedRemedies = resolveVedicRemedies({
+          concern: birthDetails.primaryConcern || 'General Life Guidance',
+          lagna: chart.ascendant,
+          moonRashi: chart.moonSign,
+          dasha: `${chart.dasha.currentMahadasha} - ${chart.dasha.currentAntardasha}`,
+          name: birthDetails.name || 'Devotee',
+        });
+
         astroContext = {
           lagna: chart.ascendant,
           moonRashi: chart.moonSign,
           nakshatra: chart.nakshatra,
+          sunSign: chart.sunSign,
           currentDasha: `${chart.dasha.currentMahadasha} - ${chart.dasha.currentAntardasha}`,
+          chartSummary: formatChartSummaryForAI(chart),
+          planetaryPlacements: Array.isArray(chart.planetaryDegrees)
+            ? chart.planetaryDegrees.map((p: any) => `${p.planet}: ${p.rashi} in ${p.house}`).join(', ')
+            : '',
+          ishtaDevata: chart.ishtaDevata,
+          canonicalRemedies: resolvedRemedies,
           summaryNotes: `Authentic Vedic Janam Kundli synthesized for ${birthDetails.name || 'Devotee'} (Born: ${birthDetails.dob} at ${birthDetails.time || '12:00 PM'}, ${birthDetails.place || 'India'}).
 • Ascendant (Lagna): ${chart.ascendant}
 • Moon Sign: ${chart.moonSign} (${chart.nakshatra})
 • Sun Sign: ${chart.sunSign}
 • Active Vimshottari Dasha: ${chart.dasha.currentMahadasha} (${chart.dasha.currentAntardasha})
+• Ishta Devata: ${chart.ishtaDevata.deityName} (${chart.ishtaDevata.indicator})
+• Canonical Homam: ${resolvedRemedies.primaryHomam.name}
+• Canonical Mantra: ${resolvedRemedies.primaryMantra.title}
 • Tithi: ${chart.tithi}, Yoga: ${chart.yoga}
 • Manglik Status: ${chart.doshas[0]?.status}
 • Primary Topic: ${birthDetails.primaryConcern || 'General Guidance'}.`,

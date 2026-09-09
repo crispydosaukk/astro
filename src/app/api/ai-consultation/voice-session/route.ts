@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { DEFAULT_AI_ASTROLOGERS, AIAstrologer } from '@/lib/aiAstrologerData';
-import { ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES } from '@/lib/vedicRemediesEngine';
+import { ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES, resolveVedicRemedies } from '@/lib/vedicRemediesEngine';
+import { calculateBirthChartData, formatChartSummaryForAI } from '@/lib/vedicAstrologyEngine';
+import { fetchWithOpenAIFallback } from '@/lib/aiConfig';
 
 // Rashi Name Native Translators
 function getNativeRashi(sign: string, lang: 'telugu' | 'tamil' | 'hindi' | 'english'): string {
@@ -312,6 +314,36 @@ function generateDynamicVedicReply(
       return `${name} जी, आपकी कुंडली में द्वितीय (धन) और एकादश (लाभ) भाव में धन आगमन के अच्छे संकेत हैं। ऋण मुक्ति और स्थिर समृद्धि के लिए शुक्रवार को लक्ष्मी कुबेर होम का अनुष्ठान और 'ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः' मंत्र अथवा कनकधारा स्तोत्र का पाठ करें।`;
     }
     return `${name}, evaluating your 2nd house of Wealth and 11th house of Financial Gains, steady growth is indicated. Performing the consecrated Lakshmi Kubera Homam and reciting "Om Shreem Hreem Kleem Mahalakshmaye Namah" or Kanakadhara Stotram will balance financial cash flow.`;
+  }
+
+  // 5.5 Ishta Devata & Divine Guardian
+  if (
+    text.includes('ishta') ||
+    text.includes('ista') ||
+    text.includes('devata') ||
+    text.includes('deity') ||
+    text.includes('god') ||
+    text.includes('daivam') ||
+    text.includes('kuladevata') ||
+    text.includes('దైవం') ||
+    text.includes('దేవుడు') ||
+    text.includes('தெய்வம்') ||
+    text.includes('கடவுள்') ||
+    text.includes('इष्ट') ||
+    text.includes('देवता')
+  ) {
+    const deity = astroContext.ishtaDevata?.deityName || 'Lord Shiva / Maha Vishnu';
+    const mantra = astroContext.ishtaDevata?.primaryMantra || 'Om Namah Shivaya';
+    if (isTelugu) {
+      return `${name} గారూ, మీ కుండలిలోని ఆత్మకారక గ్రహం మరియు కారకాంంశ నుండి పన్నెండవ స్థానాన్ని పరిశీలించగా, మీ ఇష్ట దైవం ${deity}. మీరు నిత్యం "${mantra}" మంత్రాన్ని జపించడం వల్ల ఆధ్యాత్మిక ప్రశాంతత మరియు సర్వ కార్యసిద్ధి లభిస్తాయి.`;
+    }
+    if (isTamil) {
+      return `${name}, உங்கள் ஜாதகத்தில் ஆத்மகாரக கிரகத்தின்படி, உங்கள் இஷ்ட தெய்வம் ${deity}. தினமும் "${mantra}" மந்திரத்தை ஜெபித்து வர சகல நன்மைகளும் உண்டாகும்.`;
+    }
+    if (isHindi) {
+      return `${name} जी, आपकी कुंडली में आत्मकारक ग्रह एवं कारकांश से 12वें भाव के अनुसार, आपके इष्ट देवता ${deity} हैं। नित्य "${mantra}" का जाप करने से समस्त बाधाएं दूर होंगी।`;
+    }
+    return `${name}, evaluating your soul planet Atmakaraka and the 12th house from Karakamsa, your verified Ishta Devata is ${deity}. Chanting "${mantra}" brings supreme spiritual grace and inner peace.`;
   }
 
   // 6. Remedies & Poojas (Health, Protection, or General Planetary Doshas)
@@ -723,21 +755,24 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Fetch Consultation Session Context from Firestore
+    // 3. Fetch Consultation Session Context from Firestore & Dynamic Ephemeris Calculation
     let astrologer: AIAstrologer = DEFAULT_AI_ASTROLOGERS[0];
     let birthDetails: any = {
       name: 'Devotee',
       gender: 'Male',
-      dob: '1995-05-15',
-      time: '14:30',
-      place: 'New Delhi, India',
+      dob: '',
+      time: '12:00 PM',
+      place: 'India',
       primaryConcern: 'Career & Life Guidance',
     };
     let astroContext: any = {
-      lagna: 'Leo (Simha)',
-      moonRashi: 'Capricorn (Makara)',
-      nakshatra: 'Uttara Ashadha',
+      lagna: 'Aries (Mesha)',
+      moonRashi: 'Taurus (Vrishabha)',
+      nakshatra: 'Rohini',
+      sunSign: 'Sun in Mesha',
       currentDasha: 'Jupiter Mahadasha',
+      chartSummary: '',
+      planetaryPlacements: '',
     };
     let sessionLanguage = reqLanguage || 'Telugu';
 
@@ -761,6 +796,50 @@ export async function POST(req: Request) {
       console.warn('Session Firestore lookup warning:', e);
     }
 
+    let ishtaDevata = astroContext.ishtaDevata || null;
+    let canonicalRemedies = astroContext.canonicalRemedies || null;
+
+    // Authentically compute Sidereal Vedic Birth Chart if DOB is present
+    if (birthDetails.dob) {
+      try {
+        const chart = calculateBirthChartData(
+          birthDetails.dob,
+          birthDetails.time || '12:00 PM',
+          birthDetails.place || 'India',
+          birthDetails.lat,
+          birthDetails.lon,
+          birthDetails.name || 'Devotee',
+          birthDetails.gender || 'Male'
+        );
+
+        ishtaDevata = chart.ishtaDevata;
+        canonicalRemedies = resolveVedicRemedies({
+          concern: birthDetails.primaryConcern || 'Life Guidance',
+          lagna: chart.ascendant,
+          moonRashi: chart.moonSign,
+          dasha: `${chart.dasha.currentMahadasha} - ${chart.dasha.currentAntardasha}`,
+          name: birthDetails.name || 'Devotee',
+        });
+
+        astroContext = {
+          ...astroContext,
+          lagna: chart.ascendant,
+          moonRashi: chart.moonSign,
+          nakshatra: chart.nakshatra,
+          sunSign: chart.sunSign,
+          currentDasha: `${chart.dasha.currentMahadasha} - ${chart.dasha.currentAntardasha}`,
+          chartSummary: formatChartSummaryForAI(chart),
+          planetaryPlacements: Array.isArray(chart.planetaryDegrees)
+            ? chart.planetaryDegrees.map((p: any) => `${p.planet}: ${p.rashi} in ${p.house}`).join(', ')
+            : '',
+          ishtaDevata,
+          canonicalRemedies,
+        };
+      } catch (calcErr) {
+        console.warn('Dynamic chart calculation in voice session warning:', calcErr);
+      }
+    }
+
     // 4. Live AI Generation via OpenAI GPT-4o-mini
     let replyText = '';
 
@@ -772,11 +851,13 @@ export async function POST(req: Request) {
         const systemPrompt = `You are ${astrologer.name}, a revered, authentic Vedic Astrologer (${astrologer.primaryDiscipline}) with 25+ years of Vedic wisdom on AstroParihar.
 Devotee Profile:
 - Name: ${birthDetails.name || 'Devotee'}
-- Lagna: ${astroContext.lagna}
-- Moon Rashi: ${astroContext.moonRashi}
+- Lagna (Ascendant): ${astroContext.lagna}
+- Moon Rashi (Chandra Sign): ${astroContext.moonRashi}
 - Nakshatra: ${astroContext.nakshatra}
-- Current Dasha: ${astroContext.currentDasha}
-- Primary Concern: ${birthDetails.primaryConcern}
+- Active Vimshottari Dasha: ${astroContext.currentDasha}
+- Primary Concern: ${birthDetails.primaryConcern || 'Life Guidance'}
+${astroContext.chartSummary ? `\nAstronomical Ground Truth (Verified Sidereal Birth Chart Placements):\n${astroContext.chartSummary}` : ''}
+${astroContext.planetaryPlacements ? `\nPlanetary Positions by House:\n${astroContext.planetaryPlacements}` : ''}
 
 Real-Time Calendar Anchor:
 - Current Date: ${currentDateStr} (Year: ${currentYear})
@@ -792,11 +873,17 @@ You MUST speak ONLY in ${sessionLanguage}.
 
 Spoken Call Style & Number Rules:
 - Keep your answers concise, direct, and conversational (2 to 4 spoken sentences).
+- Base your insights strictly on their verified Ascendant (${astroContext.lagna}) and active Dasha (${astroContext.currentDasha}).
 - NEVER use raw English digits or numbers (DO NOT write digits like 108, ${currentYear}, 7).
 - ALWAYS spell out numbers completely in words (e.g. in Telugu write 'నూట ఎనిమిది సార్లు', 'రెండు వేల ఇరవై ఆరు వరకు', 'ఏడవ భావం'; in Hindi write 'एक सौ आठ बार').
-- Give immediate Vedic astrological insights, auspicious time windows, and 1 actionable remedy (mantra, donation, or pooja).
+- Give immediate Vedic astrological insights, auspicious time windows, and 1 actionable remedy (mantra, donation, or pooja) matching AstroParihar canonical guidelines.
 - Finish every explanation, astrological prediction, and remedy completely to the end. Never stop mid-sentence or leave any thought incomplete.
 - Do not use markdown bullet points, stars (*), hyphens (-), or hashes (#). Keep it pure natural speech suitable for voice conversation.
+
+CRITICAL CANONICAL REMEDIES & ISHTA DEVATA GROUND TRUTH:
+${ishtaDevata ? `- Verified Ishta Devata: ${ishtaDevata.deityName} (Soul Atmakaraka: ${ishtaDevata.atmakarakaPlanet}, 12th from Karakamsa: ${ishtaDevata.twelfthSignFromKarakamsa} governed by ${ishtaDevata.governingPlanet}). Prescribed Ishta Mantra: "${ishtaDevata.primaryMantra}". If the devotee asks who their Ishta Devata, Kuladevata, or personal God is, you MUST state ONLY "${ishtaDevata.deityName}". NEVER name any other deity.` : ''}
+${canonicalRemedies ? `- Prescribed Canonical Homam for their concern (${birthDetails.primaryConcern || 'Life Guidance'}): ${canonicalRemedies.primaryHomam.name} (${canonicalRemedies.primaryHomam.day})
+- Prescribed Canonical Daily Mantra: ${canonicalRemedies.primaryMantra.title} ("${canonicalRemedies.primaryMantra.transliteration}")` : ''}
 
 ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
 
@@ -826,27 +913,12 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
           });
         }
 
-        let chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${openaiApiKey}`,
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: messagesPayload,
-            temperature: 0.7,
-            max_tokens: 1200,
-          }),
-        });
-
-        if (chatRes.status === 401 && openaiApiKey !== FALLBACK_OPENAI_KEY) {
-          console.warn('OpenAI GPT-4o-mini 401 with primary key, retrying with fallback key');
-          chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        const chatRes = await fetchWithOpenAIFallback(
+          'https://api.openai.com/v1/chat/completions',
+          {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
             },
             body: JSON.stringify({
               model: 'gpt-4o-mini',
@@ -854,8 +926,9 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
               temperature: 0.7,
               max_tokens: 1200,
             }),
-          });
-        }
+          },
+          openaiApiKey
+        );
 
         if (chatRes.ok) {
           const chatData = await chatRes.json();

@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { CurrencyProvider } from '@/lib/CurrencyContext';
+import { AuthProvider } from '@/context/AuthContext';
 import GlobalFooterAndBottomBar from '@/components/GlobalFooterAndBottomBar';
 import AIChatSidebar from '@/components/AIChatSidebar';
 import '../styles/tailwind.css';
@@ -43,12 +44,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${ibmPlexMono.variable} dark`}>
       <body className={plusJakartaSans.className} suppressHydrationWarning>
-        <CurrencyProvider>
-          {children}
-          <GlobalFooterAndBottomBar />
-          <AIChatSidebar />
-          <Toaster position="top-center" richColors closeButton />
-        </CurrencyProvider>
+        <AuthProvider>
+          <CurrencyProvider>
+            {children}
+            <GlobalFooterAndBottomBar />
+            <AIChatSidebar />
+            <Toaster position="top-center" richColors closeButton />
+          </CurrencyProvider>
+        </AuthProvider>
       </body>
     </html>
   );

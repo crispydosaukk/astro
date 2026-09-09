@@ -449,6 +449,48 @@ Respond ONLY with a JSON object:
     tags: ['Homa', 'Hawan', 'Agni', 'Navagraha Puja'],
   },
 
+  'remedy-ishta': {
+    id: 'remedy-ishta',
+    category: 'remedies',
+    title: 'Ishta Devata Upasana & Sadhana Report',
+    description:
+      "Comprehensive Vedic personal deity discovery report based on 12th house from Karakamsa (Jeevanmuktamsa) and 5th house Bhakti sthana.",
+    systemPrompt:
+      "You are a revered master Vedic Astrologer at AstroParihar specializing in personal Ishta Devata discovery, Upasana, and Mantrashastra. Synthesize a deeply sacred, personalized, and authoritative Ishta Devata report grounded strictly in the native's calculated astronomical birth chart.",
+    userPromptTemplate: `Service: Ishta Devata Discovery & Upasana Report
+Devotee: {name}, Gender: {gender}
+DOB: {dob}, Time: {time}, Place: {place}
+Ascendant (Lagna): {ascendant}
+Moon Sign: {moonSign} ({nakshatra})
+Sun Sign: {sunSign}
+Calculated Ishta Devata: {ishtaDevataName}
+Governing Planet: {ishtaGoverningPlanet}
+Atmakaraka: {atmakaraka}
+Indicator: {ishtaIndicator}
+Prescribed Mantra: {ishtaMantra} ({ishtaJapaCount})
+Prescribed Stotra: {ishtaStotra}
+Auspicious Day: {ishtaDay}
+Current Date: {currentDate}
+
+Respond ONLY with a valid JSON object matching this schema:
+{
+  "recommendationTitle": "Ishta Devata Discovery & Upasana Report",
+  "recommendationName": "{name}'s Guiding Ishta Devata Sadhana",
+  "deity": "{ishtaDevataName}",
+  "astrologicalIndicator": "{ishtaIndicator}",
+  "astrologicalAnalysis": "Detailed 3-paragraph personalized Vedic guidance on the soul's divine connection to this Ishta Devata, spiritual evolution, and protective grace based on Karakamsa.",
+  "prescribedMantra": "{ishtaMantra}",
+  "dailyWorshipGuide": "Step-by-step daily worship procedure including morning timing, lamp offerings, and japa count.",
+  "recommendedStotras": ["{ishtaStotra}", "Secondary classical stotra"],
+  "auspiciousDay": "{ishtaDay}",
+  "sacredOfferings": "List of favorable flowers, samidha, and naivedyam offerings for this deity.",
+  "annualFestivals": "Key sacred festivals and tithis aligned with this deity."
+}`,
+    extraDirectives:
+      "Strictly respect the native's calculated Ishta Devata. Do NOT alter the deity name, mantra, or governing planet.",
+    tags: ['Ishta Devata', 'Remedies', 'Mantra', 'Sadhana', 'Upasana'],
+  },
+
   // ---------------- PANCHANG & TIMING ----------------
   'panchang-daily': {
     id: 'panchang-daily',

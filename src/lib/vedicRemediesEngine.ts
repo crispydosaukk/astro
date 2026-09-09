@@ -474,6 +474,16 @@ export function resolveVedicRemedies(input: RemedyResolutionInput = {}): Resolve
     text.includes('partner') ||
     text.includes('spouse') ||
     text.includes('vivah') ||
+    text.includes('matching') ||
+    text.includes('match') ||
+    text.includes('milan') ||
+    text.includes('gun milan') ||
+    text.includes('guna milan') ||
+    text.includes('ashtakoot') ||
+    text.includes('compatibility') ||
+    text.includes('couple') ||
+    text.includes('kundali match') ||
+    text.includes('kundli match') ||
     text.includes('వివాహ') ||
     text.includes('పెళ్లి') ||
     text.includes('ప్రేమ') ||
@@ -637,6 +647,46 @@ export function resolveVedicRemedies(input: RemedyResolutionInput = {}): Resolve
         placement: 'East Wall of living room or personal study/office facing West/North',
         consecrationMantra: 'ॐ गं गणपतये नमः ॥ & ॐ घृणि सूर्याय नमः ॥',
         benefits: 'Dissolves workplace friction, accelerates executive promotions, and imparts authority and clarity.',
+      },
+    };
+  }
+
+  // 5.5 Ishta Devata & Divine Guardian Sadhana
+  if (
+    text.includes('ishta') ||
+    text.includes('ista') ||
+    text.includes('devata') ||
+    text.includes('deity') ||
+    text.includes('kuladevata') ||
+    text.includes('ఇష్ట') ||
+    text.includes('దైవ') ||
+    text.includes('దేవుడు') ||
+    text.includes('தெய்வம்') ||
+    text.includes('இஷ்ட') ||
+    text.includes('इष्ट') ||
+    text.includes('देवता')
+  ) {
+    return {
+      primaryHomam: ASTROPARIHAR_HOMAMS.navagraha,
+      secondaryHomam: ASTROPARIHAR_HOMAMS.lakshmi_kubera,
+      primaryMantra: ASTROPARIHAR_MANTRAS.mahalakshmi,
+      secondaryMantra: ASTROPARIHAR_MANTRAS.mrityunjaya_mantra,
+      gemstone: {
+        name: 'Sattvic Spiritual Ratna (Yellow Sapphire / Natural Pearl)',
+        caratWeight: '3.5 to 5.25 Carats',
+        metal: '22k Gold or Pure Silver',
+        finger: 'Index or Little finger of right hand',
+        auspiciousDay: 'Thursday or Monday morning during Shukla Paksha',
+        mantra: 'Om Namo Bhagavate Vasudevaya (108 times)',
+      },
+      yantra: {
+        name: 'श्री यन्त्र (Shree Yantra) & Navagraha Yantra',
+        deity: 'Supreme Divine Guardian & Navagrahas',
+        planet: 'Jupiter (Guru) & Sun (Surya)',
+        material: 'Heavy Consecrated Copper / Brass Plate',
+        placement: 'North-East (Ishanya Kona) altar facing East',
+        consecrationMantra: 'ॐ श्रीं ह्रीं क्लीं महाలక్ష్మ్యై నమః ॥',
+        benefits: 'Deepens soul communion with your Ishta Devata, establishes spiritual equanimity, and dissolves karmic bondages.',
       },
     };
   }

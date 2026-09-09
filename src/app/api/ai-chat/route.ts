@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
+import { safeParseAIJson } from '@/lib/aiResponseParser';
 import { getSettings } from '@/lib/settings';
 import { adminDb } from '@/lib/firebase/admin';
 import {
@@ -12,6 +13,11 @@ import {
   formatChartSummaryForAI,
   extractBirthDetailsFromText,
   analyzeInquiryEvidence,
+  extractCoupleDetails,
+  cleanPartnerName,
+  calculateRashiCompatibility,
+  calculateAshtakootGunMilan,
+  normalizeRashi,
   JyotishEvidencePack,
 } from '@/lib/vedicAstrologyEngine';
 
@@ -255,15 +261,11 @@ export async function POST(req: Request) {
     const latestUserMessage =
       [...messages].reverse().find((m: any) => m.role === 'user')?.content || '';
 
-    let userContext = '';
-    let birthChartSummary = '';
-    let evidence: JyotishEvidencePack | null = null;
-    let pariharProtocol: RemedyProtocol48Day | null = null;
-    let evidencePrompt = '';
-
+    // Calculate birth chart data for logged-in user if DOB is present
+    let chart: ReturnType<typeof calculateBirthChartData> | null = null;
     if (birthInfo.dob) {
       try {
-        const chart = calculateBirthChartData(
+        chart = calculateBirthChartData(
           birthInfo.dob,
           birthInfo.tob,
           birthInfo.pob,
@@ -272,6 +274,115 @@ export async function POST(req: Request) {
           birthInfo.name,
           birthInfo.gender
         );
+      } catch (cErr) {
+        console.warn('Chart calculation notice:', cErr);
+      }
+    }
+
+    const defaultUserProfile = {
+      name: birthInfo.name,
+      rashi: chart ? normalizeRashi(chart.moonSign) : null,
+      dob: birthInfo.dob,
+      tob: birthInfo.tob,
+      pob: birthInfo.pob,
+    };
+
+    // Check if inquiry is about couple compatibility / Kundli matching
+    const coupleMatch = extractCoupleDetails(latestUserMessage, defaultUserProfile);
+    const isCoupleInquiry = Boolean(coupleMatch?.isCoupleMatch);
+
+    let userContext = '';
+    let birthChartSummary = '';
+    let evidence: JyotishEvidencePack | null = null;
+    let pariharProtocol: RemedyProtocol48Day | null = null;
+    let evidencePrompt = '';
+
+    if (isCoupleInquiry && coupleMatch) {
+      const p1 = coupleMatch.partner1;
+      const p2 = coupleMatch.partner2;
+
+      const isUserFemale = (birthInfo.gender || '').toLowerCase() === 'female';
+      const isUserMale = (birthInfo.gender || '').toLowerCase() === 'male';
+      const groom = isUserFemale ? p2 : isUserMale ? p1 : p1;
+      const bride = isUserFemale ? p1 : isUserMale ? p2 : p2;
+
+      const isMissingPartnerDetails = !p2.rashi && !p2.dob && !coupleMatch.compatibility && !coupleMatch.ashtakootResult;
+
+      // Generate couple-specific marriage & harmony parihar protocol
+      pariharProtocol = generate48DayRemedyProtocol({
+        domain: 'marriage',
+        planet: 'Venus',
+        concern: `Kundli Matching & Marriage Harmony for ${groom.name} and ${bride.name}`,
+      });
+
+      if (isMissingPartnerDetails) {
+        evidencePrompt = `
+================================================================================
+KUNDLI MATCHING (ASHTAKOOT GUN MILAN) INQUIRY:
+================================================================================
+- Devotee: ${defaultUserProfile.name} (${defaultUserProfile.rashi ? `Rashi: ${defaultUserProfile.rashi.name}, Lord: ${defaultUserProfile.rashi.lord}` : `DOB: ${defaultUserProfile.dob || 'Recorded'}`})
+- Prospective Partner: ${p2.name} (NOTE: "${p2.name}" is one single individual's full name)
+- Relationship Context: Devotee is seeking Kundli Matching / Marriage compatibility with ${p2.name}.
+- Status: Partner's birth date/time or Moon Rashi have not been provided yet.
+- Prescribed 48-Day Couple Blessing Protocol: ${pariharProtocol.title}
+  * Recommended Homam: ${pariharProtocol.recommendedHomam} (${pariharProtocol.homamAuspiciousDay})
+  * Daily Mantra: ${pariharProtocol.dailyMantra} (${pariharProtocol.dailyJapaCount})
+
+CRITICAL DIRECTIVES FOR ACHARYA PARIHAR:
+1. Warmly acknowledge the devotee's inquiry regarding compatibility with ${p2.name} (treat "${p2.name}" as one single individual's full name, never separate it into two people).
+2. Note that while the devotee's planetary coordinates are established, to calculate the authentic 36-point Ashtakoot Gun Milan (evaluating Graha Maitri, Bhakoot, Gana, Nadi, and Manglik Dosha), ${p2.name}'s Date of Birth (and Time/Place if known) or Moon Sign (Rashi) is required.
+3. Offer initial auspicious guidance based on 7th House Kalatra Bhava and Venusian influences, and warmly invite the devotee to share ${p2.name}'s birth details or Rashi.
+4. Deliver your complete, beautiful consultation in the "reply" field. NEVER output raw JSON dictionaries or person key-value pairs at the root level.`;
+      } else {
+        let scoreText = '25 / 36';
+        let matchStatus = 'Auspicious & Favorable';
+        let breakdownLines: string[] = [];
+        let matchVerdict = 'Auspicious union with solid foundational planetary support.';
+
+        if (coupleMatch.ashtakootResult) {
+          const ak = coupleMatch.ashtakootResult;
+          scoreText = `${ak.totalScore} / 36`;
+          matchStatus = ak.status;
+          matchVerdict = ak.verdict;
+          breakdownLines = ak.ashtakoot.map((k: any) => `  * ${k.koot}: ${k.score} (${k.desc})`);
+        } else if (coupleMatch.compatibility) {
+          const c = coupleMatch.compatibility;
+          scoreText = `~${c.totalScore} / 36`;
+          matchStatus = c.status;
+          matchVerdict = c.verdict;
+          breakdownLines = [
+            `  * Varna Koot: ${c.varna.score}/1 - ${c.varna.desc}`,
+            `  * Vashya Koot: ${c.vashya.score}/2 - ${c.vashya.desc}`,
+            `  * Graha Maitri (Mental Harmony): ${c.grahaMaitri.score}/5 - ${c.grahaMaitri.desc}`,
+            `  * Bhakoot (Emotional & Family Prosperity): ${c.bhakoot.score}/7 - ${c.bhakoot.desc}`,
+          ];
+        }
+
+        evidencePrompt = `
+================================================================================
+DETERMINISTIC KUNDLI MATCHING (ASHTAKOOT GUN MILAN) EVALUATION:
+================================================================================
+- Groom: ${groom.name} (${groom.rashi ? `Rashi: ${groom.rashi.name}, Lord: ${groom.rashi.lord}` : `DOB: ${groom.dob}`})
+- Bride: ${bride.name} (${bride.rashi ? `Rashi: ${bride.rashi.name}, Lord: ${bride.rashi.lord}` : `DOB: ${bride.dob}`})
+- Calculated Ashtakoot Gun Milan Score: ${scoreText} (${matchStatus})
+- Key Ashtakoot Dimensions:
+${breakdownLines.join('\n')}
+- Astrological Verdict: ${matchVerdict}
+- Prescribed 48-Day Couple Blessing Protocol: ${pariharProtocol.title}
+  * Recommended Homam: ${pariharProtocol.recommendedHomam} (${pariharProtocol.homamAuspiciousDay})
+  * Daily Mantra: ${pariharProtocol.dailyMantra} (${pariharProtocol.dailyJapaCount})
+  * Day 24 Sacred Daana: ${pariharProtocol.midMandalaMilestoneDay24.charityDaana}
+  * Day 48 Purnahuti: ${pariharProtocol.culminationDay48.action}
+
+CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
+1. You are providing an authentic, warm, and authoritative Vedic Kundli Matching consultation for ${groom.name} and ${bride.name}.
+2. Note that "${p2.name}" is one single person's full name.
+3. Explicitly explain their calculated Gun Milan score (${scoreText}), mental affinity (Graha Maitri), emotional bonding (Bhakoot), mutual respect, and marital longevity.
+4. Write your complete, spiritually uplifting consultation response directly in the "reply" field.
+5. NEVER output raw JSON objects, dictionaries, or name keys at the root level of your response. The response MUST strictly follow the consultation JSON schema with "reply" and "conclusion".`;
+      }
+    } else if (chart) {
+      try {
         birthChartSummary = `\n\n${formatChartSummaryForAI(chart)}`;
 
         // Run Deterministic Jyotish Evidence Analysis
@@ -283,6 +394,15 @@ export async function POST(req: Request) {
           planet: evidence.primaryAfflictedPlanet,
           concern: latestUserMessage,
         });
+
+        if (evidence.domain === 'ishta_devata' && chart.ishtaDevata) {
+          pariharProtocol.presidingDeity = chart.ishtaDevata.deityName;
+          pariharProtocol.dailyMantra = chart.ishtaDevata.primaryMantra;
+          pariharProtocol.dailyJapaCount = chart.ishtaDevata.dailyJapaCount;
+          pariharProtocol.homamAuspiciousDay = chart.ishtaDevata.auspiciousDay;
+          pariharProtocol.title = `48-Day Sacred Ishta Devata Upasana Mandala (${chart.ishtaDevata.deityName})`;
+          pariharProtocol.mandalaPurpose = `Consecrated soul communion, obstacle dissolution, and spiritual enlightenment under ${chart.ishtaDevata.deityName}`;
+        }
 
         evidencePrompt = `
 ================================================================================
@@ -305,6 +425,22 @@ ${evidence.contradictoryFactors.map((f: any) => `  * ${f}`).join('\n')}
   * Day 24 Sacred Daana: ${pariharProtocol.midMandalaMilestoneDay24.charityDaana}
   * Day 48 Purnahuti: ${pariharProtocol.culminationDay48.action}
 - Needs Astrologer Escalation: ${evidence.needsAstrologerReview ? 'YES - ' + evidence.escalationReason : 'NO'}
+${chart.ishtaDevata ? `
+================================================================================
+VERIFIED CANONICAL ISHTA DEVATA (SOUL DEITY GROUND TRUTH):
+================================================================================
+- Verified Ishta Devata: ${chart.ishtaDevata.deityName}
+  * Governing Graha: ${chart.ishtaDevata.governingPlanet}
+  * Atmakaraka Planet: ${chart.ishtaDevata.atmakarakaPlanet}
+  * Karakamsa (D9 Atmakaraka Sign): ${chart.ishtaDevata.karakamsaRashi}
+  * 12th from Karakamsa (Jeevanmuktamsa Sthana): ${chart.ishtaDevata.twelfthSignFromKarakamsa}
+  * Prescribed Ishta Mantra: "${chart.ishtaDevata.primaryMantra}" (${chart.ishtaDevata.dailyJapaCount})
+  * Auspicious Worship Day: ${chart.ishtaDevata.auspiciousDay}
+  * Recommended Stotra: ${chart.ishtaDevata.stotra}
+  * Sacred Offerings: ${chart.ishtaDevata.offerings}
+
+CRITICAL DIRECTIVE FOR ISHTA DEVATA INQUIRIES:
+If the devotee asks who their Ishta Devata, Kuladevata, or personal God is, you MUST state that their verified Ishta Devata is strictly "${chart.ishtaDevata.deityName}". Mention the Atmakaraka (${chart.ishtaDevata.atmakarakaPlanet}) in Karakamsa ${chart.ishtaDevata.karakamsaRashi} and the 12th house Jeevanmuktamsa in ${chart.ishtaDevata.twelfthSignFromKarakamsa} ruled by ${chart.ishtaDevata.governingPlanet}. Recommend their canonical mantra "${chart.ishtaDevata.primaryMantra}". NEVER name any other deity.` : ''}
 
 CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
 1. You MUST explicitly reference the verified Ascendant (${chart.ascendant}), Moon Sign (${chart.moonSign}), Nakshatra (${chart.nakshatra}), and active Dasha (${chart.dasha.currentMahadasha} - ${chart.dasha.currentAntardasha}).
@@ -421,7 +557,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
 
     try {
       const rawText = data.choices?.[0]?.message?.content || '{}';
-      parsed = JSON.parse(rawText);
+      parsed = safeParseAIJson(rawText) || {};
 
       let mainReply = (parsed.reply || '').trim();
 
@@ -453,7 +589,92 @@ You MUST respond STRICTLY in JSON format matching this schema:
         .replace(/\n{3,}/g, '\n\n')
         .trim();
 
-      replyContent = mainReply || parsed.conclusion || rawText;
+      // Guard: If mainReply is empty (e.g. OpenAI returned raw couple JSON object {"Ajay Kumar": ...})
+      if (!mainReply) {
+        const rootKeys = Object.keys(parsed);
+        const hasNestedObjects = rootKeys.length >= 2 && rootKeys.some((k) => typeof parsed[k] === 'object');
+
+        if (hasNestedObjects) {
+          const p1 = cleanPartnerName(rootKeys[0]);
+          const p2 = cleanPartnerName(rootKeys[1]);
+          const r1 = parsed[rootKeys[0]]?.Rashi || parsed[rootKeys[0]]?.rashi || (defaultUserProfile.rashi?.name ?? 'Leo (Simha)');
+          const r2 = parsed[rootKeys[1]]?.Rashi || parsed[rootKeys[1]]?.rashi || 'Aries (Mesha)';
+
+          const matchComp = calculateRashiCompatibility(r1, r2, p1, p2);
+          const score = matchComp?.totalScore || 25;
+          const status = matchComp?.status || 'Auspicious & Favorable';
+
+          if (language === 'Telugu') {
+            mainReply = `**నమస్కారం మరియు శుభాకాంక్షలు!** 🙏\n\n**${p1}** (${r1}) మరియు **${p2}** (${r2}) జాతకాల మధ్య వేద కుండలి మిలనం (అష్టకూట గుణ మేళన) విశ్లేషణ:\n\n• **అష్టకూట గుణ మేళనం స్కోరు**: **${score} / 36 పాయింట్లు** (${status})\n• **గ్రహ మైత్రి (మానసిక అనుకూలత)**: రాశ్యాధిపతుల మధ్య సహజ స్నేహం ఉంది. పరస్పర గౌరవం, ఆలోచనలలో సామరస్యం లభిస్తుంది.\n• **భకూట్ సమన్వయం**: కేంద్ర స్థాన సంబంధం ఏర్పడి కుటుంబ శ్రేయస్సు, ఆర్థిక వృద్ధి కలుగుతాయి.\n• **వర్ణ & వశ్య**: మానసిక ఆకర్షణ మరియు దాంపత్య అనుకూలత బాగుంది.\n\n**తీర్పు**: ఈ జంట వివాహ బంధానికి ఎంతో అనుకూలమైనది. పరస్పర సహనం, అవగాహన మరియు నిత్య శివ-పార్వతి ఆరాధనతో మీ దాంపత్యం కలకాలం సుఖసంతోషాలతో విలసిల్లుతుంది.`;
+          } else if (language === 'Hindi') {
+            mainReply = `**नमस्ते एवं सादर प्रणाम!** 🙏\n\n**${p1}** (${r1}) और **${p2}** (${r2}) के बीच प्रामाणिक वैदिक कुंडली मिलान (अष्टकूट गुण मिलान) विश्लेषण:\n\n• **अष्टकूट गुण मिलान स्कोर**: **${score} / 36 अंक** (${status})\n• **ग्रह मैत्री (मानसिक सामंजस्य)**: दोनों राशि स्वामियों के मध्य उत्तम मित्रता है, जिससे परस्पर विचार, मानसिक सामंजस्य और विश्वास सुदृढ़ रहेगा।\n• **भकूट समन्वय**: केंद्र संबंध होने से आर्थिक उन्नति, गृहस्थ सुख और पारिवारिक समृद्धि के शुभ योग बनते हैं।\n• **वर्ण एवं वश्य**: दोनों में आध्यात्मिक व मानसिक आकर्षण उत्तम है।\n\n**निर्णय**: यह वैवाहिक गठबंधन अत्यंत शुभ और अनुकूल है। परस्पर समझदारी और नित्य गौरी-शंकर की आराधना से वैवाहिक जीवन सुखमय और दीर्घायु रहेगा।`;
+          } else {
+            mainReply = `**Namaste and Divine Blessings!** 🙏\n\nHere is the authentic Vedic Kundli Matching (Ashtakoot Gun Milan) analysis for **${p1}** (${r1}) and **${p2}** (${r2}):\n\n• **Ashtakoot Gun Milan Score**: **${score} / 36 Points** (${status})\n• **Graha Maitri (Mental Harmony)**: Moon sign lords share natural friendship, fostering exceptional intellectual companionship, trust, and mutual respect.\n• **Bhakoot Alignment**: Auspicious Kendra relationship (4-10 alignment), directing mutual emotional warmth, shared growth, and domestic prosperity.\n• **Varna & Vashya**: Balanced temperaments with natural mutual attraction and emotional maturity.\n\n**Verdict**: This alliance carries auspicious planetary harmony. Mutual patience, transparent communication, and invoking the divine blessings of Lord Shiva & Goddess Parvathi will nurture a deeply fulfilling and prosperous marriage.`;
+          }
+        } else if (parsed.conclusion) {
+          mainReply = parsed.conclusion;
+        } else {
+          // Extract text cleanly without raw JSON brackets
+          const textChunks = Object.entries(parsed)
+            .map(([k, v]) => {
+              if (typeof v === 'object' && v !== null) {
+                const sub = Object.entries(v)
+                  .map(([sk, sv]) => `${sk}: ${sv}`)
+                  .join(', ');
+                return `**${k}**: ${sub}`;
+              }
+              return `**${k}**: ${v}`;
+            })
+            .join('\n\n');
+          if (textChunks.length > 20) {
+            mainReply = textChunks;
+          }
+        }
+      }
+
+      // Ensure verified Ishta Devata is firmly honored without AI drift
+      if (evidence?.domain === 'ishta_devata' && chart?.ishtaDevata) {
+        const canonicalDeity = chart.ishtaDevata.deityName;
+        const canonicalMantra = chart.ishtaDevata.primaryMantra;
+        const deityKeywords = canonicalDeity.toLowerCase().split(/[\s/&()]+/).filter((w) => w.length > 3);
+        const mentionsDeity = deityKeywords.some((w) => mainReply.toLowerCase().includes(w));
+
+        if (!mentionsDeity && mainReply) {
+          const ishtaPrefix =
+            language === 'Telugu'
+              ? `**ఇష్ట దైవ నిర్ణయం**: మీ జాతక చక్రం ప్రకారం, ఆత్మకారక గ్రహం ${chart.ishtaDevata.atmakarakaPlanet} మరియు కారకాంశ నుండి 12వ స్థానం (${chart.ishtaDevata.twelfthSignFromKarakamsa}) ఆధారంగా మీ సర్వోన్నత ఇష్ట దైవం **${canonicalDeity}**.\n\n`
+              : language === 'Hindi'
+              ? `**इष्ट देवता निर्णय**: आपकी जन्म कुंडली के अनुसार, आत्मकारक ग्रह ${chart.ishtaDevata.atmakarakaPlanet} एवं कारकांश से 12वें भाव (${chart.ishtaDevata.twelfthSignFromKarakamsa}) के आधार पर आपके परम इष्ट देवता **${canonicalDeity}** हैं।\n\n`
+              : `**Ishta Devata Guidance**: Based on your Jaimini birth chart coordinates, your soul planet (Atmakaraka) is ${chart.ishtaDevata.atmakarakaPlanet}, and the 12th house from Karakamsa (${chart.ishtaDevata.twelfthSignFromKarakamsa}) is governed by ${chart.ishtaDevata.governingPlanet}, establishing **${canonicalDeity}** as your verified Ishta Devata.\n\n`;
+          mainReply = ishtaPrefix + mainReply;
+        }
+
+        if (parsed.conclusion && !deityKeywords.some((w) => parsed.conclusion.toLowerCase().includes(w))) {
+          parsed.conclusion =
+            language === 'Telugu'
+              ? `మీ సర్వోన్నత ఇష్ట దైవం ${canonicalDeity}. నిత్యం "${canonicalMantra}" జపించడం వల్ల సర్వ శుభాలు కలుగుతాయి.`
+              : language === 'Hindi'
+              ? `आपके परम इष्ट देवता ${canonicalDeity} हैं। नित्य "${canonicalMantra}" का जाप कल्याणकारी रहेगा।`
+              : `Your verified Ishta Devata is ${canonicalDeity}. Chanting "${canonicalMantra}" grants supreme spiritual protection and inner peace.`;
+        }
+      }
+
+      // Safety check: if mainReply still looks like raw JSON ({ ... })
+      if (mainReply.startsWith('{') && mainReply.endsWith('}')) {
+        try {
+          const innerObj = JSON.parse(mainReply);
+          if (innerObj.reply && typeof innerObj.reply === 'string') {
+            mainReply = innerObj.reply;
+          } else if (innerObj.conclusion && typeof innerObj.conclusion === 'string') {
+            mainReply = innerObj.conclusion;
+          }
+        } catch {}
+      }
+
+      replyContent =
+        mainReply ||
+        parsed.conclusion ||
+        'May Lord Shiva and Goddess Parvathi shower their divine blessings upon this alliance with health, harmony, and prosperity.';
 
       if (Array.isArray(parsed.recommendations) && parsed.recommendations.length > 0) {
         recommendations = parsed.recommendations

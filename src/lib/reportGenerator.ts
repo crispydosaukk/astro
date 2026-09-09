@@ -1,6 +1,7 @@
 import { calculateAshtakootGunMilan, calculateBirthChartData } from '@/lib/vedicAstrologyEngine';
 import { getAIPromptSettings, AIPromptItem } from '@/lib/aiPromptSettings';
 import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
+import { safeParseAIJson } from '@/lib/aiResponseParser';
 import { resolveVedicRemedies, ASTROPARIHAR_HOMAMS } from '@/lib/vedicRemediesEngine';
 
 export async function generateReportDataInternal(
@@ -42,19 +43,15 @@ export async function generateReportDataInternal(
     );
   }
 
-  // 1b. If Janam Kundli / Horoscope report, ensure precision astronomical birth chart is computed
+  // 1b. Ensure precision astronomical birth chart is computed whenever birth details are provided
   if (
-    (!reportJsonObj || !reportJsonObj.ascendant) &&
-    (typeLower.includes('kundli') ||
-      typeLower.includes('horoscope') ||
-      typeLower.includes('birth chart') ||
-      serviceIdLower.includes('kundli') ||
-      serviceIdLower.includes('horoscope'))
+    (!reportJsonObj || !reportJsonObj.ascendant || !reportJsonObj.ishtaDevata) &&
+    (details.dob || details.date || details.birthDate || !reportJsonObj)
   ) {
     const chart = calculateBirthChartData(
-      details.dob || '1995-01-01',
-      details.time || details.tob || '12:00 PM',
-      details.place || details.pob || 'India',
+      details.dob || details.date || details.birthDate || '1995-01-01',
+      details.time || details.tob || details.birthTime || '12:00 PM',
+      details.place || details.pob || details.birthPlace || 'India',
       details.lat || '28.6139',
       details.lon || '77.2090',
       userName,
@@ -79,12 +76,19 @@ export async function generateReportDataInternal(
       tithi: chart.tithi,
       yoga: chart.yoga,
       karana: chart.karana,
+      ishtaDevata: chart.ishtaDevata,
     };
   }
 
   // 2. Fetch Server OpenAI API Key
   const openaiApiKey = await getServerOpenAIApiKey();
 
+  const isIshtaDevata =
+    typeLower.includes('ishta') ||
+    typeLower.includes('ista') ||
+    typeLower.includes('devata') ||
+    serviceIdLower === 'svc-ishta' ||
+    serviceIdLower.includes('ishta');
   const isVastu =
     typeLower.includes('vastu') || typeLower.includes('vāstu') || typeLower.includes('spatial') || serviceIdLower.includes('vastu');
   const isYantra =
@@ -120,7 +124,8 @@ export async function generateReportDataInternal(
 
       // Select the matching prompt module
       let promptKey = 'kundli-general';
-      if (isVastu) promptKey = 'remedy-vastu';
+      if (isIshtaDevata) promptKey = 'remedy-ishta';
+      else if (isVastu) promptKey = 'remedy-vastu';
       else if (type.includes('Matching') || reportJsonObj?.ashtakoot)
         promptKey = 'kundli-matching';
       else if (isYantra) promptKey = 'remedy-yantra';
@@ -228,6 +233,14 @@ MANDATORY RULES:
         planetaryPlacements: Array.isArray(reportJsonObj?.planetaryDegrees)
           ? reportJsonObj.planetaryDegrees.map((p: any) => `${p.planet}: ${p.rashi} in ${p.house}`).join(', ')
           : '9 Grahas positioned in Vedic houses',
+        ishtaDevataName: reportJsonObj?.ishtaDevata?.deityName || 'Lord Maha Vishnu',
+        ishtaGoverningPlanet: reportJsonObj?.ishtaDevata?.governingPlanet || 'Jupiter',
+        atmakaraka: reportJsonObj?.ishtaDevata?.atmakarakaPlanet || 'Sun',
+        ishtaIndicator: reportJsonObj?.ishtaDevata?.indicator || '12th from Karakamsa (Navamsha)',
+        ishtaMantra: reportJsonObj?.ishtaDevata?.primaryMantra || 'Om Namo Bhagavate Vasudevaya',
+        ishtaJapaCount: reportJsonObj?.ishtaDevata?.dailyJapaCount || '108 times daily',
+        ishtaStotra: reportJsonObj?.ishtaDevata?.stotra || 'Vishnu Sahasranama Stotram',
+        ishtaDay: reportJsonObj?.ishtaDevata?.auspiciousDay || 'Wednesday & Shukla Ekadashi',
       };
 
       Object.entries(replacements).forEach(([key, val]) => {
@@ -259,7 +272,7 @@ MANDATORY RULES:
 
       if (openAiRes.ok) {
         const aiJson = await openAiRes.json();
-        const parsed = JSON.parse(aiJson.choices[0].message.content);
+        const parsed = safeParseAIJson(aiJson.choices?.[0]?.message?.content || aiJson.choices?.[0]);
         if (!reportJsonObj) reportJsonObj = {};
 
         // Keys calculated by verified mathematical engine that must NEVER be overwritten by LLM hallucinations
@@ -285,6 +298,7 @@ MANDATORY RULES:
           'd9Planets',
           'yogas',
           'doshas',
+          'ishtaDevata',
         ]);
 
         // Merge dynamic outputs while protecting verified astronomical data
@@ -340,95 +354,66 @@ MANDATORY RULES:
           const resolved = resolveVedicRemedies({
             concern: details.primaryConcern || details.userQuery || details.focus || type,
             domain: details.category || type,
+            lagna: reportJsonObj?.ascendant,
+            moonRashi: reportJsonObj?.moonSign,
+            dasha: reportJsonObj?.dasha ? `${reportJsonObj.dasha.currentMahadasha} - ${reportJsonObj.dasha.currentAntardasha}` : '',
             name: userName,
           });
           const canonical = resolved.primaryHomam;
-          if (!reportJsonObj.recommendedHoma || typeof reportJsonObj.recommendedHoma === 'string') {
-            let homaName = canonical.name;
-            if (typeof reportJsonObj.recommendedHoma === 'string' && reportJsonObj.recommendedHoma.length > 5) {
-              const strLower = reportJsonObj.recommendedHoma.toLowerCase();
-              const baseCanonical = canonical.id.toLowerCase();
-              if (
-                strLower.includes(baseCanonical) ||
-                (baseCanonical === 'lakshmi_kubera' && (strLower.includes('lakshmi') || strLower.includes('kubera'))) ||
-                (baseCanonical === 'ganapathi' && (strLower.includes('ganapathi') || strLower.includes('ganesh'))) ||
-                (baseCanonical === 'mrityunjaya' && (strLower.includes('mrityunjaya') || strLower.includes('shiva'))) ||
-                (baseCanonical === 'sudarshana' && (strLower.includes('sudarshana') || strLower.includes('narasimha'))) ||
-                (baseCanonical === 'ayush' && strLower.includes('ayush'))
-              ) {
-                homaName = reportJsonObj.recommendedHoma;
-              }
-            }
-
-            reportJsonObj.recommendedHoma = {
-              name: homaName,
-              purpose: canonical.purpose,
-              day: canonical.day,
-              duration: canonical.duration,
-              deity: canonical.deity,
-              ahutiMantra: canonical.ahutiMantra,
-              japaCount: canonical.japaCount,
-              samidha: canonical.samidha,
-              materials: reportJsonObj.materials || canonical.materials,
-              procedure: reportJsonObj.procedure || canonical.procedure,
-              benefits: canonical.benefits,
-            };
-          } else if (typeof reportJsonObj.recommendedHoma === 'object') {
-            reportJsonObj.recommendedHoma = {
-              ...canonical,
-              ...reportJsonObj.recommendedHoma,
-            };
-          }
+          reportJsonObj.recommendedHoma = {
+            name: canonical.name,
+            purpose: canonical.purpose,
+            day: canonical.day,
+            duration: canonical.duration,
+            deity: canonical.deity,
+            ahutiMantra: canonical.ahutiMantra,
+            japaCount: canonical.japaCount,
+            samidha: canonical.samidha,
+            materials: reportJsonObj.materials || canonical.materials,
+            procedure: reportJsonObj.procedure || canonical.procedure,
+            benefits: canonical.benefits,
+          };
         }
 
         if (isMantra) {
           const resolved = resolveVedicRemedies({
             concern: details.primaryConcern || details.userQuery || details.focus || type,
             domain: details.category || type,
+            lagna: reportJsonObj?.ascendant,
+            moonRashi: reportJsonObj?.moonSign,
+            dasha: reportJsonObj?.dasha ? `${reportJsonObj.dasha.currentMahadasha} - ${reportJsonObj.dasha.currentAntardasha}` : '',
             name: userName,
           });
           const canonicalMantra = resolved.primaryMantra;
-          if (!reportJsonObj.prescribedMantras || !Array.isArray(reportJsonObj.prescribedMantras) || reportJsonObj.prescribedMantras.length === 0) {
-            reportJsonObj.prescribedMantras = [
-              {
-                title: canonicalMantra.title,
-                sanskrit: canonicalMantra.sanskrit,
-                transliteration: canonicalMantra.transliteration,
-                japaCount: canonicalMantra.japaCount,
-                bestTime: canonicalMantra.bestTime,
-                mala: canonicalMantra.mala,
-                benefits: canonicalMantra.benefits,
-              },
-              {
-                title: resolved.secondaryMantra.title,
-                sanskrit: resolved.secondaryMantra.sanskrit,
-                transliteration: resolved.secondaryMantra.transliteration,
-                japaCount: resolved.secondaryMantra.japaCount,
-                bestTime: resolved.secondaryMantra.bestTime,
-                mala: resolved.secondaryMantra.mala,
-                benefits: resolved.secondaryMantra.benefits,
-              },
-            ];
-          } else {
-            reportJsonObj.prescribedMantras = reportJsonObj.prescribedMantras.map((m: any, idx: number) => {
-              const fallbackM = idx === 0 ? canonicalMantra : resolved.secondaryMantra;
-              return {
-                title: m.title || fallbackM.title,
-                sanskrit: m.sanskrit || fallbackM.sanskrit,
-                transliteration: m.transliteration || fallbackM.transliteration,
-                japaCount: m.japaCount || fallbackM.japaCount,
-                bestTime: m.bestTime || fallbackM.bestTime,
-                mala: m.mala || fallbackM.mala,
-                benefits: m.benefits || fallbackM.benefits,
-              };
-            });
-          }
+          reportJsonObj.prescribedMantras = [
+            {
+              title: canonicalMantra.title,
+              sanskrit: canonicalMantra.sanskrit,
+              transliteration: canonicalMantra.transliteration,
+              japaCount: canonicalMantra.japaCount,
+              bestTime: canonicalMantra.bestTime,
+              mala: canonicalMantra.mala,
+              benefits: canonicalMantra.benefits,
+            },
+            {
+              title: resolved.secondaryMantra.title,
+              sanskrit: resolved.secondaryMantra.sanskrit,
+              transliteration: resolved.secondaryMantra.transliteration,
+              japaCount: resolved.secondaryMantra.japaCount,
+              bestTime: resolved.secondaryMantra.bestTime,
+              mala: resolved.secondaryMantra.mala,
+              benefits: resolved.secondaryMantra.benefits,
+            },
+          ];
         }
 
         if (isGemstone) {
           const resolved = resolveVedicRemedies({
             concern: details.primaryConcern || details.userQuery || details.focus || type,
             domain: details.category || type,
+            lagna: reportJsonObj?.ascendant,
+            moonRashi: reportJsonObj?.moonSign,
+            dasha: reportJsonObj?.dasha ? `${reportJsonObj.dasha.currentMahadasha} - ${reportJsonObj.dasha.currentAntardasha}` : '',
             name: userName,
           });
           const canonicalGem = resolved.gemstone;
@@ -455,6 +440,27 @@ MANDATORY RULES:
             }
           }
         }
+
+        if (isIshtaDevata) {
+          const ishta = reportJsonObj?.ishtaDevata;
+          if (ishta) {
+            reportJsonObj.deity = ishta.deityName;
+            reportJsonObj.astrologicalIndicator = ishta.indicator;
+            reportJsonObj.prescribedMantra = ishta.primaryMantra;
+            reportJsonObj.auspiciousDay = ishta.auspiciousDay;
+            reportJsonObj.recommendedStotras = [ishta.stotra];
+            reportJsonObj.sacredOfferings = ishta.offerings;
+            if (!reportJsonObj.dailyWorshipGuide) {
+              reportJsonObj.dailyWorshipGuide = ishta.worshipProcedure;
+            }
+            if (!reportJsonObj.spiritualSignificance) {
+              reportJsonObj.spiritualSignificance = ishta.spiritualSignificance;
+            }
+            if (!reportJsonObj.annualFestivals) {
+              reportJsonObj.annualFestivals = `Auspicious worship day: ${ishta.auspiciousDay}, alongside major annual Shivaratri, Navaratri, and Purnima tithis.`;
+            }
+          }
+        }
       }
     } catch (aiErr) {
       console.warn('OpenAI report generation warning:', aiErr);
@@ -467,7 +473,34 @@ MANDATORY RULES:
     const birthPlace = details.pob || details.place || 'India';
     const birthDob = details.dob || 'N/A';
 
-    if (isVastu) {
+    if (isIshtaDevata) {
+      const ishta = reportJsonObj?.ishtaDevata;
+      reportJsonObj = {
+        recommendationTitle: 'Ishta Devata Discovery & Upasana Report',
+        recommendationName: `${userName}'s Guiding Ishta Devata Sadhana`,
+        timing: `${currentDate}`,
+        duration: 'Lifetime Divine Protection',
+        deity: ishta?.deityName || 'Lord Maha Vishnu',
+        astrologicalIndicator: ishta?.indicator || '12th from Karakamsa (Navamsha)',
+        prescribedMantra: ishta?.primaryMantra || 'Om Namo Bhagavate Vasudevaya',
+        prescribedMantras: [
+          {
+            title: `${ishta?.deityName || 'Ishta Devata'} Sacred Upasana Mantra`,
+            sanskrit: ishta?.primaryMantra || 'Om Namo Bhagavate Vasudevaya',
+            japaCount: ishta?.dailyJapaCount || '108 Times Daily (1 Mala)',
+            bestTime: ishta?.auspiciousDay || 'Brahma Muhurta / Morning',
+          },
+        ],
+        auspiciousDay: ishta?.auspiciousDay || 'Wednesday & Shukla Ekadashi',
+        recommendedStotras: [ishta?.stotra || 'Vishnu Sahasranama Stotram'],
+        sacredOfferings: ishta?.offerings || 'Tulsi leaves, Yellow marigold flowers, Panchamrita',
+        dailyWorshipGuide: ishta?.worshipProcedure || 'Sit facing North-East. Light a pure cow ghee lamp and chant 108 times.',
+        spiritualSignificance: ishta?.spiritualSignificance || 'Your Ishta Devata serves as your soul\'s ultimate protector and beacon of liberation.',
+        procedure: ishta?.worshipProcedure || 'Sit facing North-East. Light a pure cow ghee lamp and chant 108 times.',
+        materials: ishta?.offerings || 'Pure Cow Ghee Diya, Flowers, Consecrated Japa Mala',
+        astrologicalAnalysis: `Vedic Ishta Devata analysis for ${userName} born on ${birthDob} at ${birthPlace}. In accordance with classical Jaimini and Parashara principles, your soul planet (Atmakaraka) points to ${ishta?.deityName || 'Lord Maha Vishnu'} as your personal divine guardian. Regular upasana harmonizes your entire birth chart and dissolves negative transits.`,
+      };
+    } else if (isVastu) {
       reportJsonObj = {
         recommendationTitle: 'Vedic Vastu Shastra Consultation Report',
         recommendationName: `${userName}'s 8-Direction Spatial Analysis`,
@@ -529,6 +562,9 @@ MANDATORY RULES:
       const resolved = resolveVedicRemedies({
         concern: details.primaryConcern || details.userQuery || details.focus || type,
         domain: details.category || type,
+        lagna: reportJsonObj?.ascendant,
+        moonRashi: reportJsonObj?.moonSign,
+        dasha: reportJsonObj?.dasha ? `${reportJsonObj.dasha.currentMahadasha} - ${reportJsonObj.dasha.currentAntardasha}` : '',
         name: userName,
       });
       const homa = resolved.primaryHomam;
@@ -560,6 +596,9 @@ MANDATORY RULES:
       const resolved = resolveVedicRemedies({
         concern: details.primaryConcern || details.userQuery || details.focus || type,
         domain: details.category || type,
+        lagna: reportJsonObj?.ascendant,
+        moonRashi: reportJsonObj?.moonSign,
+        dasha: reportJsonObj?.dasha ? `${reportJsonObj.dasha.currentMahadasha} - ${reportJsonObj.dasha.currentAntardasha}` : '',
         name: userName,
       });
       const m1 = resolved.primaryMantra;
@@ -599,6 +638,9 @@ MANDATORY RULES:
       const resolved = resolveVedicRemedies({
         concern: details.primaryConcern || details.userQuery || details.focus || type,
         domain: details.category || type,
+        lagna: reportJsonObj?.ascendant,
+        moonRashi: reportJsonObj?.moonSign,
+        dasha: reportJsonObj?.dasha ? `${reportJsonObj.dasha.currentMahadasha} - ${reportJsonObj.dasha.currentAntardasha}` : '',
         name: userName,
       });
       const gem = resolved.gemstone;

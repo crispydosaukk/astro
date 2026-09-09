@@ -1,8 +1,14 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { imageHosts } from './image-hosts.config.mjs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  outputFileTracingRoot: __dirname,
   productionBrowserSourceMaps: false, // Disabled to save memory
   experimental: {
     // Reduce memory usage during build on limited GoDaddy servers
