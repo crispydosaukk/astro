@@ -31,20 +31,7 @@ export interface Candidate {
   updatedAt?: any;
 }
 
-export const initialCandidatesData: Candidate[] = [
-  { id: 'cand-001', name: 'Venkataraman Subramanian', businessName: 'Sri Jyotish Kendra', location: 'Chennai, TN', specialisations: ['Vedic', 'Prashna'], aiScore: 94, source: 'Google Places', outreachStatus: 'Approved', applicationStatus: 'Submitted', lifecycleStatus: 'human-review', discoveredDate: '12 Aug 2026', isDuplicate: false, experience: '18 yrs' },
-  { id: 'cand-002', name: 'Padmavathi Krishnaswamy', businessName: 'Nakshatra Jyotish', location: 'Coimbatore, TN', specialisations: ['KP System'], aiScore: 88, source: 'Web Search', outreachStatus: 'Sent', applicationStatus: 'Under Screening', lifecycleStatus: 'screening', discoveredDate: '10 Aug 2026', isDuplicate: false, experience: '12 yrs' },
-  { id: 'cand-003', name: 'Ravi Kumar Pandey', businessName: 'Vaidik Jyotish Centre', location: 'Varanasi, UP', specialisations: ['Vedic', 'Muhurtha'], aiScore: 91, source: 'Google Places', outreachStatus: 'Sent', applicationStatus: 'Submitted', lifecycleStatus: 'probation', discoveredDate: '05 Aug 2026', isDuplicate: false, experience: '22 yrs' },
-  { id: 'cand-004', name: 'Meenakshi Sundaram Iyer', businessName: 'Jyotish Aalayam', location: 'Madurai, TN', specialisations: ['Vedic', 'Nadi'], aiScore: 96, source: 'Google Places', outreachStatus: 'Sent', applicationStatus: 'Approved', lifecycleStatus: 'verified', discoveredDate: '01 Aug 2026', isDuplicate: false, experience: '25 yrs' },
-  { id: 'cand-005', name: 'Subramaniam Narayanan', businessName: 'Saptarishi Astrology', location: 'Bengaluru, KA', specialisations: ['KP System', 'Numerology'], aiScore: 82, source: 'Web Search', outreachStatus: 'Pending Approval', applicationStatus: null, lifecycleStatus: 'ready-for-outreach', discoveredDate: '15 Aug 2026', isDuplicate: false, experience: '9 yrs' },
-  { id: 'cand-006', name: 'Annapurna Devi Sharma', businessName: 'Devi Jyotish Sansthan', location: 'Jaipur, RJ', specialisations: ['Vedic', 'Vastu'], aiScore: 79, source: 'Directory', outreachStatus: 'Not Sent', applicationStatus: null, lifecycleStatus: 'qualified', discoveredDate: '14 Aug 2026', isDuplicate: false, experience: '14 yrs' },
-  { id: 'cand-007', name: 'Krishnamurthy Pillai', businessName: 'KP Jyotish Hub', location: 'Thrissur, KL', specialisations: ['KP System'], aiScore: 87, source: 'Google Places', outreachStatus: 'Sent', applicationStatus: 'Started', lifecycleStatus: 'applied', discoveredDate: '08 Aug 2026', isDuplicate: false, experience: '16 yrs' },
-  { id: 'cand-008', name: 'Rajeshwari Balasubramanian', businessName: 'Nadi Jyotish Trust', location: 'Thanjavur, TN', specialisations: ['Nadi'], aiScore: 93, source: 'Web Search', outreachStatus: 'Approved', applicationStatus: null, lifecycleStatus: 'outreach-approved', discoveredDate: '13 Aug 2026', isDuplicate: false, experience: '20 yrs' },
-  { id: 'cand-009', name: 'Govind Prasad Upadhyay', businessName: 'Kashi Jyotish Mandir', location: 'Varanasi, UP', specialisations: ['Vedic', 'Prashna', 'Muhurtha'], aiScore: 76, source: 'Web Search', outreachStatus: 'Not Sent', applicationStatus: null, lifecycleStatus: 'discovered', discoveredDate: '17 Aug 2026', isDuplicate: false, experience: '11 yrs' },
-  { id: 'cand-010', name: 'Shantha Kumari Nambiar', businessName: 'Parashara Jyotish', location: 'Thiruvananthapuram, KL', specialisations: ['Vedic'], aiScore: 85, source: 'Google Places', outreachStatus: 'Sent', applicationStatus: 'Submitted', lifecycleStatus: 'screening', discoveredDate: '09 Aug 2026', isDuplicate: false, experience: '13 yrs' },
-  { id: 'cand-011', name: 'Murugesan Thiyagarajan', businessName: 'Agasthya Nadi Centre', location: 'Kumbakonam, TN', specialisations: ['Nadi', 'Prashna'], aiScore: 90, source: 'Directory', outreachStatus: 'Sent', applicationStatus: 'Submitted', lifecycleStatus: 'human-review', discoveredDate: '07 Aug 2026', isDuplicate: false, experience: '19 yrs' },
-  { id: 'cand-012', name: 'Prabhavathi Venkatesan', businessName: 'Cosmic Jyotish Nilayam', location: 'Puducherry, PY', specialisations: ['Vedic', 'Numerology'], aiScore: 62, source: 'Web Search', outreachStatus: 'Not Sent', applicationStatus: null, lifecycleStatus: 'discovered', discoveredDate: '16 Aug 2026', isDuplicate: true, experience: '6 yrs' },
-];
+export const initialCandidatesData: Candidate[] = [];
 
 const CANDIDATES_COLLECTION = 'candidates';
 
@@ -61,7 +48,7 @@ export async function getCandidatesFromFirestore(): Promise<Candidate[]> {
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as Candidate));
   } catch (error) {
     console.error('Error fetching candidates from Firestore:', error);
-    throw error;
+    return [];
   }
 }
 

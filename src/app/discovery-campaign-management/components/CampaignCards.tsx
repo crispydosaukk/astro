@@ -1,15 +1,19 @@
 'use client';
 
 import React from 'react';
-import { MapPin, Target, Zap, TrendingUp, Play, Loader2 } from 'lucide-react';
+import { MapPin, Target, Zap, TrendingUp, Play, Loader2, Pause, CheckCircle2 } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { useDiscovery } from '../DiscoveryContext';
 
 export default function CampaignCards() {
-  const { campaigns, runCampaign, isExecuting } = useDiscovery();
+  const { campaigns, runCampaign, isExecuting, pauseCampaign, resumeCampaign } = useDiscovery();
 
   // Show running or top 3 campaigns
   const activeCampaigns = campaigns.slice(0, 3);
+
+  if (activeCampaigns.length === 0) {
+    return null;
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4">
@@ -34,20 +38,41 @@ export default function CampaignCards() {
               <span className="text-xs text-muted-foreground">Min score: {c.minScore}</span>
             </div>
 
-            {c.status !== 'running' && (
+            {c.status === 'completed' ? (
+              <span className="text-2xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                <CheckCircle2 size={11} /> Target Reached
+              </span>
+            ) : c.status === 'paused' ? (
+              <button
+                onClick={() => resumeCampaign(c.id)}
+                disabled={isExecuting}
+                className="text-2xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
+                title={`Resume discovering up to target ${c.target}`}
+              >
+                <Play size={10} /> Resume ({c.discovered}/{c.target})
+              </button>
+            ) : isExecuting && c.status === 'running' ? (
+              <div className="flex items-center gap-1.5">
+                <span className="text-2xs font-bold text-blue-600 flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                  <Loader2 size={10} className="animate-spin" /> Discovering...
+                </span>
+                <button
+                  onClick={() => pauseCampaign(c.id)}
+                  className="text-2xs font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md transition-colors"
+                  title="Pause discovery"
+                >
+                  <Pause size={9} /> Pause
+                </button>
+              </div>
+            ) : (
               <button
                 onClick={() => runCampaign(c)}
                 disabled={isExecuting}
-                className="text-2xs font-bold text-primary hover:text-primary/80 flex items-center gap-1 bg-primary/10 px-2.5 py-1 rounded-md transition-colors"
-                title="Trigger live Google Places & GPT-4o discovery"
+                className="text-2xs font-bold text-primary hover:text-primary/80 flex items-center gap-1 bg-primary/10 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
+                title={`Continuously discover until target of ${c.target} is reached`}
               >
-                <Play size={10} /> Run Now
+                <Play size={10} /> {c.discovered > 0 ? `Continue to ${c.target}` : `Run to Target (${c.target})`}
               </button>
-            )}
-            {c.status === 'running' && (
-              <span className="text-2xs font-bold text-blue-600 flex items-center gap-1">
-                <Loader2 size={10} className="animate-spin" /> Discovering
-              </span>
             )}
           </div>
 

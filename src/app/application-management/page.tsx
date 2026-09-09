@@ -7,7 +7,6 @@ import ApplicationPipelineSummary from './components/ApplicationPipelineSummary'
 import ApplicationTable from './components/ApplicationTable';
 import { 
   Candidate, 
-  initialCandidatesData, 
   subscribeToCandidates, 
   updateCandidateStatus 
 } from '@/lib/firebase/candidateService';
@@ -27,18 +26,17 @@ export default function ApplicationManagementPage() {
     try {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
-          const pool = allCandidates && allCandidates.length > 0 ? allCandidates : initialCandidatesData;
-          setCandidates(pool);
+          setCandidates(allCandidates || []);
           setLoading(false);
         },
         () => {
-          setCandidates(initialCandidatesData);
+          setCandidates([]);
           setLoading(false);
         }
       );
       return () => unsubscribe();
     } catch {
-      setCandidates(initialCandidatesData);
+      setCandidates([]);
       setLoading(false);
     }
   }, []);

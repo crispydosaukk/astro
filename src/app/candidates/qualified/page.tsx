@@ -23,15 +23,14 @@ export default function QualifiedCandidatesPage() {
     try {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
-          const pool = allCandidates && allCandidates.length > 0 ? allCandidates : initialCandidatesData;
+          const pool = allCandidates || [];
           // Filter for AI qualified candidates (aiScore >= 80 or lifecycleStatus is qualified)
           const qualifiedPool = pool.filter(c => c.aiScore >= 80 || c.lifecycleStatus === 'qualified');
           setCandidates(qualifiedPool);
         },
         (err) => {
           console.warn('Qualified candidates subscription fallback:', err);
-          const qualifiedPool = initialCandidatesData.filter(c => c.aiScore >= 80 || c.lifecycleStatus === 'qualified');
-          setCandidates(qualifiedPool);
+          setCandidates([]);
         }
       );
       return () => unsubscribe();

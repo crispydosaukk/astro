@@ -18,29 +18,14 @@ export default function VerifiedAstrologersPage() {
     try {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
-          const pool = allCandidates && allCandidates.length > 0 ? allCandidates : initialCandidatesData;
+          const pool = allCandidates || [];
           // Filter for verified astrologers
           const verified = pool.filter(c => c.lifecycleStatus === 'verified' || c.applicationStatus === 'Approved');
-          setCandidates(verified.length > 0 ? verified : [
-            {
-              id: 'cand-004',
-              name: 'Meenakshi Sundaram Iyer',
-              businessName: 'Jyotish Aalayam',
-              location: 'Madurai, TN',
-              specialisations: ['Vedic', 'Nadi'],
-              aiScore: 96,
-              source: 'Google Places',
-              outreachStatus: 'Sent',
-              applicationStatus: 'Approved',
-              lifecycleStatus: 'verified',
-              discoveredDate: '01 Aug 2026',
-              isDuplicate: false,
-              experience: '25 yrs',
-            }
-          ]);
+          setCandidates(verified);
         },
         (err) => {
           console.warn('Verified candidates subscription fallback:', err);
+          setCandidates([]);
         }
       );
       return () => unsubscribe();
@@ -152,7 +137,14 @@ export default function VerifiedAstrologersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map((c, i) => (
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-10 text-muted-foreground text-sm">
+                      No verified astrologers yet. Candidates who complete probation will be credentialed here.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((c, i) => (
                   <tr key={c.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs font-bold text-primary">
                       AP-VER-2026-{String(i + 1).padStart(3, '0')}
@@ -195,7 +187,7 @@ export default function VerifiedAstrologersPage() {
                       </Link>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

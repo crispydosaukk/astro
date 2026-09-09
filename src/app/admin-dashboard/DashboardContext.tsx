@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { 
   Candidate, 
-  initialCandidatesData, 
   subscribeToCandidates,
   getCandidatesFromFirestore 
 } from '@/lib/firebase/candidateService';
@@ -81,7 +80,7 @@ interface DashboardContextType {
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
-  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidatesData);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLive, setIsLive] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedRange, setSelectedRange] = useState('range-30d');
@@ -111,8 +110,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
             setCandidates(firestoreCandidates);
             setIsLive(true);
           } else {
-            // Keep initial dataset if Firestore collection is not seeded yet
-            setCandidates(initialCandidatesData);
+            setCandidates([]);
             setIsLive(false);
           }
         },
@@ -229,10 +227,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       count,
     })).sort((a, b) => b.count - a.count);
 
-    return entries.length > 0 ? entries.slice(0, 7) : [
-      { id: 'spec-0', spec: 'Vedic', count: 1 },
-      { id: 'spec-1', spec: 'KP System', count: 1 },
-    ];
+    return entries.slice(0, 7);
   }, [candidates]);
 
   // Compute Discovery Trend (dynamic monthly progression based on candidate data)
@@ -242,14 +237,24 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const qual = stats.aiQualified;
     const ver = stats.verified;
 
+    if (total === 0) {
+      return months.map((m) => ({
+        id: `trend-${m.toLowerCase()}`,
+        month: m,
+        discovered: 0,
+        qualified: 0,
+        verified: 0,
+      }));
+    }
+
     // Distribute dynamically across months leading up to the current total
     return months.map((m, idx) => {
       const progressFactor = (idx + 1) / months.length;
       return {
         id: `trend-${m.toLowerCase()}`,
         month: m,
-        discovered: Math.max(1, Math.round(total * progressFactor * 0.95)),
-        qualified: Math.max(1, Math.round(qual * progressFactor * 0.92)),
+        discovered: Math.max(0, Math.round(total * progressFactor * 0.95)),
+        qualified: Math.max(0, Math.round(qual * progressFactor * 0.92)),
         verified: Math.max(0, Math.round(ver * progressFactor)),
       };
     });
@@ -360,10 +365,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setIsRefreshing(true);
     try {
       const liveData = await getCandidatesFromFirestore();
-      if (liveData && liveData.length > 0) {
-        setCandidates(liveData);
-        setIsLive(true);
-      }
+      setCandidates(liveData || []);
+      setIsLive(Boolean(liveData && liveData.length > 0));
       const now = new Date();
       setLastUpdated(now.toLocaleDateString('en-IN', {
         day: 'numeric',

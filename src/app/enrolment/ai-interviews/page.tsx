@@ -20,12 +20,7 @@ interface AIInterview {
   concerns?: string[];
 }
 
-const defaultInterviews: AIInterview[] = [
-  { id: 'INT-001', candidate: 'Dr. Meena Krishnamurthy', applicationId: 'APP-001', scheduledDate: '2026-08-13', completedDate: '2026-08-13', duration: '42 min', questionsAsked: 12, totalQuestions: 12, aiScore: 89, recommendation: 'Strong Candidate', status: 'completed', strengths: ['Deep Vedic knowledge', 'Clear communication', 'Strong chart analysis'], concerns: ['Limited KP experience'] },
-  { id: 'INT-002', candidate: 'Acharya Venkatesh Iyer', applicationId: 'APP-002', scheduledDate: '2026-08-14', completedDate: '2026-08-14', duration: '48 min', questionsAsked: 12, totalQuestions: 12, aiScore: 95, recommendation: 'Strong Candidate', status: 'completed', strengths: ['Exceptional Vedic expertise', 'Excellent case analysis', 'Professional demeanor'], concerns: [] },
-  { id: 'INT-003', candidate: 'Pandit Suresh Sharma', applicationId: 'APP-003', scheduledDate: 'Today', questionsAsked: 0, totalQuestions: 12, status: 'scheduled' },
-  { id: 'INT-004', candidate: 'Jyotish Acharya Rajan', applicationId: 'APP-004', questionsAsked: 0, totalQuestions: 12, status: 'pending' },
-];
+const defaultInterviews: AIInterview[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   scheduled: { label: 'Scheduled', color: 'bg-blue-100 text-blue-700', icon: <Clock size={11} /> },
@@ -48,7 +43,7 @@ export default function AIInterviewsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isSimulating, setIsSimulating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [candidateName, setCandidateName] = useState('Pandit Suresh Sharma');
+  const [candidateName, setCandidateName] = useState('');
   const [specialisation, setSpecialisation] = useState('Vedic Astrology');
 
   const handleSimulateInterview = async (e: React.FormEvent) => {
@@ -161,7 +156,14 @@ export default function AIInterviewsPage() {
 
         {/* Cards */}
         <div className="space-y-4">
-          {filtered.map(interview => {
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground card-elevated">
+              <Video size={32} className="mx-auto text-muted-foreground/40 mb-2" />
+              <p className="font-semibold text-foreground text-sm">No AI interviews scheduled or completed yet.</p>
+              <p className="text-xs text-muted-foreground mt-1">Use &quot;Simulate AI Interview&quot; or advance candidates from applications to begin.</p>
+            </div>
+          ) : (
+            filtered.map(interview => {
             const sc = statusConfig[interview.status] || statusConfig.scheduled;
             return (
               <div key={interview.id} className="card-elevated p-5 shadow-sm space-y-3">
@@ -214,7 +216,7 @@ export default function AIInterviewsPage() {
                 )}
               </div>
             );
-          })}
+          }))}
         </div>
 
         {/* Simulate Modal */}
@@ -238,6 +240,7 @@ export default function AIInterviewsPage() {
                     required
                     value={candidateName}
                     onChange={e => setCandidateName(e.target.value)}
+                    placeholder="Enter astrologer name..."
                     className="w-full px-3 py-2 border border-border rounded-lg bg-background font-medium"
                   />
                 </div>

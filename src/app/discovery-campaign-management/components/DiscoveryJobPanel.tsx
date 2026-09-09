@@ -79,12 +79,18 @@ export default function DiscoveryJobPanel() {
             </button>
             {queriesExpanded && (
               <div className="p-3 space-y-1.5 bg-background border-t border-border">
-                {activeJob.queries.map((q, i) => (
-                  <div key={i} className="text-xs font-mono text-muted-foreground flex items-center gap-2">
-                    <span className="text-primary font-bold">›</span>
-                    <span className="truncate">{q}</span>
-                  </div>
-                ))}
+                {activeJob.queries.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-2 text-xs font-sans">
+                    No search queries executed yet.
+                  </p>
+                ) : (
+                  activeJob.queries.map((q, i) => (
+                    <div key={i} className="text-xs font-mono text-muted-foreground flex items-center gap-2">
+                      <span className="text-primary font-bold">›</span>
+                      <span className="truncate">{q}</span>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>
@@ -103,23 +109,29 @@ export default function DiscoveryJobPanel() {
             </button>
             {logsExpanded && (
               <div className="p-3 space-y-2 bg-background border-t border-border max-h-56 overflow-y-auto font-mono text-xs">
-                {activeJob.logs.map((log) => (
-                  <div key={log.id} className="flex items-start gap-2 leading-relaxed">
-                    <span className="text-2xs text-muted-foreground flex-shrink-0 mt-0.5">{log.time}</span>
-                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
-                      log.type === 'success' ? 'bg-green-500' :
-                      log.type === 'error' ? 'bg-red-500' :
-                      log.type === 'warn' ? 'bg-amber-500' : 'bg-blue-500'
-                    }`} />
-                    <span className={`flex-1 min-w-0 ${
-                      log.type === 'success' ? 'text-green-700 font-medium' :
-                      log.type === 'error' ? 'text-red-700' :
-                      log.type === 'warn' ? 'text-amber-700' : 'text-foreground'
-                    }`}>
-                      {log.message}
-                    </span>
-                  </div>
-                ))}
+                {activeJob.logs.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4 text-xs font-sans">
+                    No active job logs. Launch a campaign to view live events.
+                  </p>
+                ) : (
+                  activeJob.logs.map((log) => (
+                    <div key={log.id} className="flex items-start gap-2 leading-relaxed">
+                      <span className="text-2xs text-muted-foreground flex-shrink-0 mt-0.5">{log.time}</span>
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
+                        log.type === 'success' ? 'bg-green-500' :
+                        log.type === 'error' ? 'bg-red-500' :
+                        log.type === 'warn' ? 'bg-amber-500' : 'bg-blue-500'
+                      }`} />
+                      <span className={`flex-1 min-w-0 ${
+                        log.type === 'success' ? 'text-green-700 font-medium' :
+                        log.type === 'error' ? 'text-red-700' :
+                        log.type === 'warn' ? 'text-amber-700' : 'text-foreground'
+                      }`}>
+                        {log.message}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>

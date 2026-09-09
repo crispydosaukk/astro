@@ -20,13 +20,7 @@ interface VerificationRecord {
   notes?: string;
 }
 
-const initialRecords: VerificationRecord[] = [
-  { id: 'VER-001', candidate: 'Dr. Meena Krishnamurthy', specialisation: 'Vedic Jyotish', probationScore: 94, probationEndDate: '2026-07-15', status: 'pending_review', submittedDate: '2026-07-16' },
-  { id: 'VER-002', candidate: 'Acharya Venkatesh Iyer', specialisation: 'Vedic Jyotish', probationScore: 97, probationEndDate: '2026-07-20', status: 'in_review', submittedDate: '2026-07-21', reviewedBy: 'Super Admin' },
-  { id: 'VER-003', candidate: 'Pandit Gopal Mishra', specialisation: 'Vedic Jyotish', probationScore: 91, probationEndDate: '2026-07-31', status: 'verified', submittedDate: '2026-08-01', reviewedBy: 'Super Admin', verificationId: 'AP-VER-2026-003', notes: 'All criteria met. Approved for verification.' },
-  { id: 'VER-004', candidate: 'Candidate X', specialisation: 'KP System', probationScore: 58, probationEndDate: '2026-06-30', status: 'rejected', submittedDate: '2026-07-01', reviewedBy: 'Super Admin', notes: 'Failed probation. Multiple client complaints. Not suitable.' },
-  { id: 'VER-005', candidate: 'Dr. Savitha Rao', specialisation: 'KP System', probationScore: 82, probationEndDate: '2026-09-09', status: 'further_review', submittedDate: '2026-09-10', reviewedBy: 'Super Admin', notes: 'Borderline performance. Requesting additional review period.' },
-];
+const initialRecords: VerificationRecord[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   pending_review: { label: 'Pending Review', color: 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300', icon: <Clock size={11} /> },
@@ -37,7 +31,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 };
 
 export default function VerificationPage() {
-  const [records, setRecords] = useState<VerificationRecord[]>(initialRecords);
+  const [records, setRecords] = useState<VerificationRecord[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -67,17 +61,15 @@ export default function VerificationPage() {
               notes: 'Evaluated against AstroParihar verification standard.',
             }));
 
-          if (liveFromCandidates.length > 0) {
-            setRecords(prev => {
-              const ids = new Set(liveFromCandidates.map(r => r.id));
-              const remaining = prev.filter(r => !ids.has(r.id));
-              return [...liveFromCandidates, ...remaining];
-            });
-          }
+          setRecords(liveFromCandidates);
+        } else {
+          setRecords([]);
         }
       });
       return () => unsubscribe();
-    } catch (_e) {}
+    } catch (_e) {
+      setRecords([]);
+    }
   }, []);
 
   const handleGrantVerification = async (record: VerificationRecord) => {
@@ -204,7 +196,14 @@ export default function VerificationPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map(r => {
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-10 text-muted-foreground text-sm">
+                      No astrologers in verification queue. Candidates who complete probation will be queued here for credentialing.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map(r => {
                   const sc = statusConfig[r.status];
                   return (
                     <tr key={r.id} className="hover:bg-muted/20 transition-colors">
@@ -263,7 +262,7 @@ export default function VerificationPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>

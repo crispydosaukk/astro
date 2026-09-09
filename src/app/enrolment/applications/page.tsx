@@ -22,7 +22,7 @@ export default function EnrolmentApplicationsPage() {
     try {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
-          const pool = allCandidates && allCandidates.length > 0 ? allCandidates : initialCandidatesData;
+          const pool = allCandidates || [];
           // Filter candidates with application data or in screening/review
           const appCandidates = pool.filter(c => 
             c.applicationStatus !== null || 
@@ -30,9 +30,12 @@ export default function EnrolmentApplicationsPage() {
             c.lifecycleStatus === 'applied' || 
             c.lifecycleStatus === 'human-review'
           );
-          setCandidates(appCandidates.length > 0 ? appCandidates : pool.slice(0, 5));
+          setCandidates(appCandidates);
         },
-        (err) => console.warn('Enrolment applications fallback:', err)
+        (err) => {
+          console.warn('Enrolment applications fallback:', err);
+          setCandidates([]);
+        }
       );
       return () => unsubscribe();
     } catch (e) {
@@ -149,7 +152,14 @@ export default function EnrolmentApplicationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map(c => (
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-10 text-muted-foreground text-sm">
+                      No candidate applications in enrolment pipeline yet.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map(c => (
                   <tr key={c.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3">
                       <p className="font-semibold text-foreground">{c.name}</p>
@@ -194,7 +204,7 @@ export default function EnrolmentApplicationsPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

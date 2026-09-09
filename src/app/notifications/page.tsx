@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import { Bell, CheckCircle2, AlertCircle, Info, X, Trash2 } from 'lucide-react';
-import { subscribeToCandidates, initialCandidatesData } from '@/lib/firebase/candidateService';
+import { subscribeToCandidates } from '@/lib/firebase/candidateService';
 
 interface Notification {
   id: string;
@@ -31,18 +31,18 @@ export default function NotificationsPage() {
     try {
       const unsubscribe = subscribeToCandidates(
         (candidates) => {
-          const pool = candidates && candidates.length > 0 ? candidates : initialCandidatesData;
+          const pool = candidates || [];
           const dynamicAlerts: Notification[] = [];
 
           // 1. Verified astrologers
           const verified = pool.filter(c => c.lifecycleStatus === 'verified');
-          verified.forEach((c, idx) => {
+          verified.forEach((c) => {
             dynamicAlerts.push({
               id: `notif-ver-${c.id}`,
               type: 'success',
               title: 'Candidate Verified',
               message: `${c.name} has been credentialed with AstroParihar Elite verification badge.`,
-              time: '10 min ago',
+              time: 'Recently',
               read: false,
               category: 'probation',
             });
@@ -56,7 +56,7 @@ export default function NotificationsPage() {
               type: 'warning',
               title: 'Probation Milestone Due',
               message: `Day 15 consultation quality check due for ${c.name} (${c.location}).`,
-              time: '45 min ago',
+              time: 'Recently',
               read: false,
               category: 'probation',
             });
@@ -70,7 +70,7 @@ export default function NotificationsPage() {
               type: 'info',
               title: 'Human Review Pending',
               message: `${inReview.length} candidate applications awaiting committee advisory signoff.`,
-              time: '2 hrs ago',
+              time: 'Recently',
               read: false,
               category: 'review',
             });
@@ -84,22 +84,11 @@ export default function NotificationsPage() {
               type: 'info',
               title: 'Outreach Approval Queue',
               message: `${outreach.length} candidate invitations ready for admin approval.`,
-              time: '3 hrs ago',
+              time: 'Recently',
               read: true,
               category: 'discovery',
             });
           }
-
-          // 5. System discovery active
-          dynamicAlerts.push({
-            id: 'notif-sys-places',
-            type: 'success',
-            title: 'Google Places API Connected',
-            message: 'Live Google Places search active with valid API key.',
-            time: 'Today',
-            read: true,
-            category: 'system',
-          });
 
           setNotifs(dynamicAlerts);
         },

@@ -18,16 +18,7 @@ interface Checkpoint {
   status: 'upcoming' | 'due' | 'completed' | 'overdue';
 }
 
-const defaultCheckpoints: Checkpoint[] = [
-  { id: 'CP-001', candidate: 'Dr. Meena Krishnamurthy', probationId: 'PRB-001', day: 7, scheduledDate: '2026-07-25', completedDate: '2026-07-25', reviewerScore: 92, reviewerComments: 'Excellent performance. Strong client feedback. Punctual and professional.', recommendation: 'Continue', status: 'completed' },
-  { id: 'CP-002', candidate: 'Dr. Meena Krishnamurthy', probationId: 'PRB-001', day: 15, scheduledDate: '2026-08-02', completedDate: '2026-08-02', reviewerScore: 94, reviewerComments: 'Consistently high quality. No issues reported.', recommendation: 'Continue', status: 'completed' },
-  { id: 'CP-003', candidate: 'Dr. Meena Krishnamurthy', probationId: 'PRB-001', day: 30, scheduledDate: 'Today', reviewerScore: undefined, status: 'due' },
-  { id: 'CP-004', candidate: 'Acharya Venkatesh Iyer', probationId: 'PRB-002', day: 7, scheduledDate: '2026-08-01', completedDate: '2026-08-01', reviewerScore: 96, reviewerComments: 'Outstanding. Exceptional astrology knowledge demonstrated.', recommendation: 'Continue', status: 'completed' },
-  { id: 'CP-005', candidate: 'Acharya Venkatesh Iyer', probationId: 'PRB-002', day: 15, scheduledDate: '2026-08-09', completedDate: '2026-08-09', reviewerScore: 97, reviewerComments: 'Excellent client satisfaction. No concerns.', recommendation: 'Continue', status: 'completed' },
-  { id: 'CP-006', candidate: 'Acharya Venkatesh Iyer', probationId: 'PRB-002', day: 30, scheduledDate: 'In 7 days', status: 'upcoming' },
-  { id: 'CP-007', candidate: 'Pandit Gopal Mishra', probationId: 'PRB-003', day: 7, scheduledDate: '2026-08-09', completedDate: '2026-08-09', reviewerScore: 85, reviewerComments: 'Good performance. One minor scheduling issue noted.', issues: 'Late for one session', recommendation: 'Continue', status: 'completed' },
-  { id: 'CP-008', candidate: 'Pandit Gopal Mishra', probationId: 'PRB-003', day: 15, scheduledDate: 'Today', status: 'due' },
-];
+const defaultCheckpoints: Checkpoint[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   upcoming: { label: 'Upcoming', color: 'bg-blue-100 text-blue-700', icon: <Calendar size={11} /> },
@@ -141,7 +132,14 @@ export default function ProbationCheckpointsPage() {
 
         {/* Checkpoints */}
         <div className="space-y-3">
-          {filtered.map(cp => {
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground card-elevated">
+              <CheckSquare size={32} className="mx-auto text-muted-foreground/40 mb-2" />
+              <p className="font-semibold text-foreground text-sm">No probation audit checkpoints due.</p>
+              <p className="text-xs text-muted-foreground mt-1">Day 7, Day 15, and Day 30 milestones will automatically appear when astrologers enter probation.</p>
+            </div>
+          ) : (
+            filtered.map(cp => {
             const sc = statusConfig[cp.status];
             return (
               <div key={cp.id} className="card-elevated p-4 shadow-sm">
@@ -202,7 +200,7 @@ export default function ProbationCheckpointsPage() {
                 )}
               </div>
             );
-          })}
+          }))}
         </div>
 
         {/* Modal */}

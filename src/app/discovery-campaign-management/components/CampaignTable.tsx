@@ -46,7 +46,14 @@ export default function CampaignTable() {
               </tr>
             </thead>
             <tbody>
-              {campaigns.map(c => (
+              {campaigns.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="text-center py-16 text-muted-foreground text-sm">
+                    No discovery campaigns found. Click &quot;+ New Campaign&quot; above to create a new AI discovery run.
+                  </td>
+                </tr>
+              ) : (
+                campaigns.map(c => (
                 <tr key={c.id} className="table-row group hover:bg-muted/30 transition-colors">
                   <td className="table-cell">
                     <p className="font-semibold text-sm text-foreground">{c.name}</p>
@@ -149,8 +156,8 @@ export default function CampaignTable() {
                     </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
+                )))}
+              </tbody>
           </table>
         </div>
       </div>

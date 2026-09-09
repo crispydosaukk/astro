@@ -29,111 +29,7 @@ interface Assessment {
   };
 }
 
-const initialAssessments: Assessment[] = [
-  { 
-    id: 'ASS-001', 
-    candidate: 'Dr. Meena Krishnamurthy', 
-    applicationId: 'APP-001', 
-    questionsScore: 88, 
-    questionsCompleted: 25, 
-    questionsTotal: 25, 
-    chartCasesScore: 82, 
-    chartCasesCompleted: 5, 
-    chartCasesTotal: 5, 
-    status: 'evaluated', 
-    assignedDate: '2026-08-10', 
-    submittedDate: '2026-08-12', 
-    aiEvaluated: true,
-    evaluationDetails: {
-      overallScore: 85,
-      grade: 'Grade A (Distinction)',
-      strengths: ['Flawless D-9 Navamsha chart interpretation', 'Strong classical Parashara principles', 'Ethical and transparent remedy recommendations'],
-      areasForImprovement: ['KP sub-lord precision in twin birth edge cases'],
-      evaluationSummary: 'Exceptional traditional Vedic foundation paired with clear and compassionate counseling communication.'
-    }
-  },
-  { 
-    id: 'ASS-002', 
-    candidate: 'Acharya Venkatesh Iyer', 
-    applicationId: 'APP-002', 
-    questionsScore: 94, 
-    questionsCompleted: 25, 
-    questionsTotal: 25, 
-    chartCasesScore: 91, 
-    chartCasesCompleted: 5, 
-    chartCasesTotal: 5, 
-    status: 'evaluated', 
-    assignedDate: '2026-08-11', 
-    submittedDate: '2026-08-13', 
-    aiEvaluated: true,
-    evaluationDetails: {
-      overallScore: 92.5,
-      grade: 'Grade A+ (Exemplary)',
-      strengths: ['Mastery of Prashna and Horary timing', 'Accurate Dasha-Antardasha transition calculations', 'Deep scholarly knowledge of Brihat Parashara Hora Shastra'],
-      areasForImprovement: ['Can enrich modern context in relationship guidance'],
-      evaluationSummary: 'Top 2% candidate nationally. Clear authority in Prashna Tantra with robust analytical rigor.'
-    }
-  },
-  { 
-    id: 'ASS-003', 
-    candidate: 'Pandit Suresh Sharma', 
-    applicationId: 'APP-003', 
-    questionsCompleted: 18, 
-    questionsTotal: 25, 
-    chartCasesCompleted: 2, 
-    chartCasesTotal: 5, 
-    status: 'in_progress', 
-    assignedDate: '2026-08-15', 
-    aiEvaluated: false 
-  },
-  { 
-    id: 'ASS-004', 
-    candidate: 'Jyotish Acharya Rajan', 
-    applicationId: 'APP-004', 
-    questionsCompleted: 0, 
-    questionsTotal: 25, 
-    chartCasesCompleted: 0, 
-    chartCasesTotal: 5, 
-    status: 'not_started', 
-    assignedDate: '2026-08-16', 
-    aiEvaluated: false 
-  },
-  { 
-    id: 'ASS-005', 
-    candidate: 'Smt. Lakshmi Devi', 
-    applicationId: 'APP-005', 
-    questionsScore: 71, 
-    questionsCompleted: 25, 
-    questionsTotal: 25, 
-    chartCasesScore: 68, 
-    chartCasesCompleted: 5, 
-    chartCasesTotal: 5, 
-    status: 'evaluated', 
-    assignedDate: '2026-08-08', 
-    submittedDate: '2026-08-10', 
-    aiEvaluated: true,
-    evaluationDetails: {
-      overallScore: 69.5,
-      grade: 'Grade B (Competent)',
-      strengths: ['Intuitive Prashna answers', 'Deep traditional remedies and Stotram recommendations'],
-      areasForImprovement: ['Requires refresher on complex Ashtakavarga bindu balancing'],
-      evaluationSummary: 'Solid cultural and spiritual rapport. Moderate theoretical precision.'
-    }
-  },
-  { 
-    id: 'ASS-006', 
-    candidate: 'Pandit Ramesh Bhat', 
-    applicationId: 'APP-006', 
-    questionsCompleted: 25, 
-    questionsTotal: 25, 
-    chartCasesCompleted: 5, 
-    chartCasesTotal: 5, 
-    status: 'submitted', 
-    assignedDate: '2026-08-14', 
-    submittedDate: '2026-08-16', 
-    aiEvaluated: false 
-  },
-];
+const initialAssessments: Assessment[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   not_started: { label: 'Not Started', color: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300', icon: <Clock size={11} /> },
@@ -308,7 +204,14 @@ export default function EnrolmentAssessmentsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map(a => {
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-10 text-muted-foreground text-sm">
+                      No candidate assessments submitted yet.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map(a => {
                   const sc = statusConfig[a.status] || statusConfig.not_started;
                   const isEvaluating = evaluatingId === a.id;
 
@@ -387,7 +290,7 @@ export default function EnrolmentAssessmentsPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>

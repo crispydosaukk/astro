@@ -21,11 +21,11 @@ interface SearchSource {
 }
 
 const initialSources: SearchSource[] = [
-  { id: 'src-001', name: 'Google Places API', type: 'Google Places', baseUrl: 'https://maps.googleapis.com/maps/api/place', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '2026-08-17 09:15', totalSearches: 1240, successRate: 99.4 },
-  { id: 'src-002', name: 'Web Search Engine', type: 'Web Search', baseUrl: 'https://api.search.provider', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '2026-08-17 09:00', totalSearches: 3450, successRate: 99.1 },
-  { id: 'src-003', name: 'Astrology Directory India', type: 'Directory', baseUrl: 'https://astrologydirectory.in', apiEnabled: false, apiConfigured: false, enabled: true, lastSearch: '2026-08-16 18:00', totalSearches: 820, successRate: 94.5 },
-  { id: 'src-004', name: 'JustDial Business Listings', type: 'Directory', baseUrl: 'https://www.justdial.com', apiEnabled: false, apiConfigured: false, enabled: false, lastSearch: '2026-08-14 12:00', totalSearches: 560, successRate: 87.3 },
-  { id: 'src-005', name: 'Sulekha Professional Listings', type: 'Directory', baseUrl: 'https://www.sulekha.com', apiEnabled: false, apiConfigured: false, enabled: true, lastSearch: '2026-08-15 10:30', totalSearches: 340, successRate: 91.2 },
+  { id: 'src-001', name: 'Google Places API', type: 'Google Places', baseUrl: 'https://maps.googleapis.com/maps/api/place', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
+  { id: 'src-002', name: 'Web Search Engine', type: 'Web Search', baseUrl: 'https://api.search.provider', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
+  { id: 'src-003', name: 'Astrology Directory India', type: 'Directory', baseUrl: 'https://astrologydirectory.in', apiEnabled: false, apiConfigured: false, enabled: false, lastSearch: '—', totalSearches: 0, successRate: 0 },
+  { id: 'src-004', name: 'JustDial Business Listings', type: 'Directory', baseUrl: 'https://www.justdial.com', apiEnabled: false, apiConfigured: false, enabled: false, lastSearch: '—', totalSearches: 0, successRate: 0 },
+  { id: 'src-005', name: 'Sulekha Professional Listings', type: 'Directory', baseUrl: 'https://www.sulekha.com', apiEnabled: false, apiConfigured: false, enabled: false, lastSearch: '—', totalSearches: 0, successRate: 0 },
   { id: 'src-006', name: 'Custom API Provider', type: 'API', baseUrl: 'https://api.custom-provider.com', apiEnabled: true, apiConfigured: false, enabled: false, errorStatus: 'API key not configured', totalSearches: 0, successRate: 0 },
 ];
 

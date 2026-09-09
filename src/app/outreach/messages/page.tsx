@@ -22,102 +22,7 @@ interface Message {
   email?: string;
 }
 
-const initialMessages: Message[] = [
-  { 
-    id: 'MSG-001', 
-    candidate: 'Pandit Suresh Sharma', 
-    location: 'Chennai', 
-    channel: 'Email', 
-    template: 'Standard Invitation', 
-    sentAt: '2026-08-17 09:30', 
-    status: 'opened', 
-    campaign: 'Vedic Astrologers Chennai – Wave 1',
-    subject: 'Invitation to Join AstroParihar Elite Astrologer Network',
-    body: 'Dear Pandit Suresh Sharma,\n\nWe have reviewed your distinguished practice in Vedic Astrology and Prashna in Chennai. AstroParihar is building India\'s most trusted, verified platform for authentic astrologers. We would be honored to welcome you.\n\nWarm regards,\nAstroParihar Onboarding Team'
-  },
-  { 
-    id: 'MSG-002', 
-    candidate: 'Dr. Meena Krishnamurthy', 
-    location: 'Chennai', 
-    channel: 'Email', 
-    template: 'Standard Invitation', 
-    sentAt: '2026-08-17 09:31', 
-    status: 'responded', 
-    campaign: 'Vedic Astrologers Chennai – Wave 1',
-    subject: 'Special Invitation for Dr. Meena Krishnamurthy',
-    body: 'Respected Dr. Meena Krishnamurthy,\n\nYour academic and practical acumen in KP System and Vedic Astrology matches our highest tier. We would love to discuss a premier partnership.\n\nBest regards,\nAstroParihar'
-  },
-  { 
-    id: 'MSG-003', 
-    candidate: 'Jyotish Acharya Rajan', 
-    location: 'Chennai', 
-    channel: 'Email', 
-    template: 'Specialist Invitation', 
-    sentAt: '2026-08-17 09:32', 
-    status: 'delivered', 
-    campaign: 'Vedic Astrologers Chennai – Wave 1',
-    subject: 'Invitation: Specialist Vedic Astrologer at AstroParihar',
-    body: 'Pranam Acharya Rajan ji,\n\nWe invite you to participate in our verified astrologer panel. Please review our credentialing process.\n\nRegards,\nAstroParihar Team'
-  },
-  { 
-    id: 'MSG-004', 
-    candidate: 'Smt. Lakshmi Devi', 
-    location: 'Chennai', 
-    channel: 'WhatsApp', 
-    template: 'WhatsApp Short Invite', 
-    sentAt: '2026-08-17 09:33', 
-    status: 'pending', 
-    campaign: 'Vedic Astrologers Chennai – Wave 1',
-    body: 'Namaste Smt. Lakshmi Devi 🙏 AstroParihar invites you to join our network of certified astrologers. Tap to view your qualification details: https://astroparihar.com/join'
-  },
-  { 
-    id: 'MSG-005', 
-    candidate: 'Acharya Venkatesh Iyer', 
-    location: 'Chennai', 
-    channel: 'Email', 
-    template: 'Standard Invitation', 
-    sentAt: '2026-08-15 10:00', 
-    status: 'responded', 
-    campaign: 'Vedic Astrologers Chennai – Wave 1',
-    subject: 'Invitation to Join AstroParihar – Verified Network',
-    body: 'Pranam Venkatesh ji, AstroParihar warmly invites you to join our platform...'
-  },
-  { 
-    id: 'MSG-006', 
-    candidate: 'Pandit Ramesh Bhat', 
-    location: 'Chennai', 
-    channel: 'Email', 
-    template: 'Standard Invitation', 
-    sentAt: '2026-08-15 10:01', 
-    status: 'failed', 
-    campaign: 'Vedic Astrologers Chennai – Wave 1',
-    subject: 'Astrologer Network Invitation',
-    body: 'Delivery failed: Mailbox unreachable.'
-  },
-  { 
-    id: 'MSG-007', 
-    candidate: 'Nadi Specialist Kumar', 
-    location: 'Thanjavur', 
-    channel: 'Email', 
-    template: 'Specialist Invitation', 
-    sentAt: '2026-08-10 11:00', 
-    status: 'delivered', 
-    campaign: 'Nadi Specialists Tamil Nadu',
-    subject: 'Nadi Astrology Specialist Invitation',
-    body: 'Dear Kumar ji, we are reaching out regarding your Nadi astrology expertise...'
-  },
-  { 
-    id: 'MSG-008', 
-    candidate: 'Priya Nair Jyotish', 
-    location: 'Kochi', 
-    channel: 'WhatsApp', 
-    template: 'WhatsApp Short Invite', 
-    sentAt: '2026-08-10 11:05', 
-    status: 'responded', 
-    campaign: 'Nadi Specialists Tamil Nadu',
-    body: 'Namaste Priya ji! Discover AstroParihar\'s high-growth consultation network. Visit https://astroparihar.com/join'
-  },
-];
+const initialMessages: Message[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   delivered: { label: 'Delivered', color: 'bg-blue-100 text-blue-700', icon: <CheckCircle2 size={11} /> },
@@ -355,7 +260,16 @@ export default function OutreachMessagesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map(m => {
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-muted-foreground">
+                      <MessageSquare size={32} className="mx-auto text-muted-foreground/30 mb-2" />
+                      <p className="font-semibold text-sm">No outreach messages recorded</p>
+                      <p className="text-xs">Sent email and WhatsApp invitations will appear here.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map(m => {
                   const sc = statusConfig[m.status] || statusConfig.delivered;
                   return (
                     <tr key={m.id} className="hover:bg-muted/20 transition-colors">
@@ -386,7 +300,7 @@ export default function OutreachMessagesPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>

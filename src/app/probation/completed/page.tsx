@@ -16,13 +16,7 @@ interface CompletedProbation {
   checkpointScores: number[];
 }
 
-const completed: CompletedProbation[] = [
-  { id: 'PRB-C001', candidate: 'Dr. Meena Krishnamurthy', specialisation: 'Vedic Jyotish', startDate: '2026-06-15', endDate: '2026-07-15', finalScore: 94, outcome: 'verified', reviewedBy: 'Verification Manager', notes: 'Excellent performance throughout. Strong client feedback. Recommended for verification.', checkpointScores: [92, 94, 96] },
-  { id: 'PRB-C002', candidate: 'Acharya Venkatesh Iyer', specialisation: 'Vedic Jyotish', startDate: '2026-06-20', endDate: '2026-07-20', finalScore: 97, outcome: 'verified', reviewedBy: 'Verification Manager', notes: 'Outstanding performance. Exceptional knowledge and professionalism.', checkpointScores: [95, 97, 99] },
-  { id: 'PRB-C003', candidate: 'Pandit Gopal Mishra', specialisation: 'Vedic Jyotish', startDate: '2026-07-01', endDate: '2026-07-31', finalScore: 91, outcome: 'verified', reviewedBy: 'Verification Manager', notes: 'Good performance. Minor issues resolved. Approved for verification.', checkpointScores: [88, 91, 94] },
-  { id: 'PRB-C004', candidate: 'Candidate X', specialisation: 'KP System', startDate: '2026-06-01', endDate: '2026-06-30', finalScore: 58, outcome: 'failed', reviewedBy: 'Verification Manager', notes: 'Inconsistent performance. Multiple client complaints. Not recommended.', checkpointScores: [65, 58, 52] },
-  { id: 'PRB-C005', candidate: 'Candidate Y', specialisation: 'Prashna Jyotish', startDate: '2026-05-15', endDate: '2026-07-14', finalScore: 74, outcome: 'extended', reviewedBy: 'Verification Manager', notes: 'Probation extended by 30 days due to borderline performance. Needs improvement.', checkpointScores: [70, 74, 78] },
-];
+const completed: CompletedProbation[] = [];
 
 const outcomeConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   verified: { label: 'Verified', color: 'bg-green-100 text-green-700', icon: <BadgeCheck size={12} /> },
@@ -57,7 +51,14 @@ export default function ProbationCompletedPage() {
 
         {/* Records */}
         <div className="space-y-4">
-          {completed.map(p => {
+          {completed.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground card-elevated">
+              <CheckCircle2 size={32} className="mx-auto text-muted-foreground/40 mb-2" />
+              <p className="font-semibold text-foreground text-sm">No completed probation records found.</p>
+              <p className="text-xs text-muted-foreground mt-1">Concluded 30-day candidate evaluations will be archived here.</p>
+            </div>
+          ) : (
+            completed.map(p => {
             const oc = outcomeConfig[p.outcome];
             return (
               <div key={p.id} className="bg-card border border-border rounded-xl p-5">
@@ -92,7 +93,7 @@ export default function ProbationCompletedPage() {
                 <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">{p.notes}</p>
               </div>
             );
-          })}
+          }))}
         </div>
       </div>
     </AppLayout>

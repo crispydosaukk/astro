@@ -5,7 +5,6 @@ import AppLayout from '@/components/AppLayout';
 import { ScrollText, Search, ChevronDown, CheckCircle2, XCircle, Clock, RefreshCw } from 'lucide-react';
 import { 
   SearchRecord, 
-  initialSearchHistory, 
   subscribeToSearchHistory 
 } from '@/lib/firebase/discoveryService';
 
@@ -16,7 +15,7 @@ const statusConfig = {
 };
 
 export default function SearchHistoryPage() {
-  const [history, setHistory] = useState<SearchRecord[]>(initialSearchHistory);
+  const [history, setHistory] = useState<SearchRecord[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isLive, setIsLive] = useState(false);
@@ -127,7 +126,16 @@ export default function SearchHistoryPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(h => {
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                      <ScrollText size={32} className="mx-auto text-muted-foreground/30 mb-2" />
+                      <p className="font-semibold text-sm">No search history recorded</p>
+                      <p className="text-xs">Executed queries from discovery campaigns will be logged here.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map(h => {
                   const cfg = statusConfig[h.status] || statusConfig.success;
                   return (
                     <tr key={h.id} className="table-row">
@@ -162,7 +170,7 @@ export default function SearchHistoryPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>

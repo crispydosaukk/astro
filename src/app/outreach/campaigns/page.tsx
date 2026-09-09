@@ -12,7 +12,7 @@ import {
 import Link from 'next/link';
 
 export default function OutreachCampaignsPage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCampaignName, setNewCampaignName] = useState('');
@@ -24,7 +24,7 @@ export default function OutreachCampaignsPage() {
     try {
       const unsubscribe = subscribeToCampaigns(
         (data) => {
-          if (data && data.length > 0) setCampaigns(data);
+          setCampaigns(data || []);
         },
         (err) => console.warn('Outreach campaigns subscription fallback:', err)
       );
@@ -151,7 +151,14 @@ export default function OutreachCampaignsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map(c => (
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-10 text-muted-foreground text-sm">
+                      No outreach campaigns active. Click &quot;+ New Campaign&quot; to create one.
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map(c => (
                   <tr key={c.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3 font-semibold text-foreground">{c.name}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{c.location}</td>
@@ -190,7 +197,7 @@ export default function OutreachCampaignsPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

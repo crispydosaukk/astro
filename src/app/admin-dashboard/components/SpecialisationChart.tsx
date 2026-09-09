@@ -26,17 +26,23 @@ export default function SpecialisationChart() {
   return (
     <div className="card-elevated p-5">
       <h3 className="text-md font-bold text-foreground mb-3">Candidates by Specialisation</h3>
-      <div style={{ height: 140 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={specialisationData} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>
-            <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="spec" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="count" fill="var(--primary)" radius={[3, 3, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {specialisationData.length === 0 ? (
+        <div className="h-[140px] flex items-center justify-center text-xs text-muted-foreground text-center">
+          No specialisation data available yet.
+        </div>
+      ) : (
+        <div style={{ height: 140 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={specialisationData} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="spec" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="count" fill="var(--primary)" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

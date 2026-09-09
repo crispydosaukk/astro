@@ -37,13 +37,12 @@ const navItems: NavItem[] = [
     id: 'nav-candidates',
     label: 'Candidates',
     icon: <Users size={16} />,
-    badge: 47,
     children: [
       { id: 'nav-all-candidates', label: 'All Candidates', icon: <Users size={14} />, href: '/candidate-management' },
       { id: 'nav-qualified', label: 'Qualified', icon: <Star size={14} />, href: '/candidates/qualified' },
-      { id: 'nav-outreach-pending', label: 'Outreach Pending', icon: <Send size={14} />, href: '/candidates/outreach-pending', badge: 12 },
+      { id: 'nav-outreach-pending', label: 'Outreach Pending', icon: <Send size={14} />, href: '/candidates/outreach-pending' },
       { id: 'nav-applications', label: 'Applications', icon: <FileText size={14} />, href: '/application-management' },
-      { id: 'nav-duplicates', label: 'Duplicates', icon: <FolderOpen size={14} />, href: '/candidates/duplicates', badge: 3 },
+      { id: 'nav-duplicates', label: 'Duplicates', icon: <FolderOpen size={14} />, href: '/candidates/duplicates' },
       { id: 'nav-verified', label: 'Verified Astrologers', icon: <BadgeCheck size={14} />, href: '/candidates/verified' },
     ],
   },
@@ -67,7 +66,7 @@ const navItems: NavItem[] = [
       { id: 'nav-assessments', label: 'Assessments', icon: <CheckSquare size={14} />, href: '/enrolment/assessments' },
       { id: 'nav-chart-cases', label: 'Chart Cases', icon: <BarChart3 size={14} />, href: '/enrolment/chart-cases' },
       { id: 'nav-ai-interviews', label: 'AI Interviews', icon: <Video size={14} />, href: '/enrolment/ai-interviews' },
-      { id: 'nav-human-review', label: 'Human Review', icon: <UserCheck size={14} />, href: '/human-review-module', badge: 5 },
+      { id: 'nav-human-review', label: 'Human Review', icon: <UserCheck size={14} />, href: '/human-review-module' },
     ],
   },
   {
@@ -75,7 +74,7 @@ const navItems: NavItem[] = [
     label: 'Probation',
     icon: <Timer size={16} />,
     children: [
-      { id: 'nav-prob-active', label: 'Active', icon: <Timer size={14} />, href: '/probation/active', badge: 8 },
+      { id: 'nav-prob-active', label: 'Active', icon: <Timer size={14} />, href: '/probation/active' },
       { id: 'nav-prob-checkpoints', label: 'Checkpoints', icon: <CheckSquare size={14} />, href: '/probation/checkpoints' },
       { id: 'nav-prob-completed', label: 'Completed', icon: <BadgeCheck size={14} />, href: '/probation/completed' },
     ],
@@ -103,7 +102,6 @@ const navItems: NavItem[] = [
     label: 'Notifications',
     icon: <Bell size={16} />,
     href: '/notifications',
-    badge: 7,
   },
   {
     id: 'nav-users',
@@ -239,20 +237,15 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <Link
         href="/"
         title="Back to AstroParihar Main Website"
-        className={`flex items-center border-b border-border flex-shrink-0 hover:bg-muted/40 transition-colors ${collapsed ? 'justify-center px-0 py-4' : 'px-4 py-4 gap-2.5'}`}
+        className={`flex items-center justify-center border-b border-border flex-shrink-0 hover:bg-muted/40 transition-colors ${
+          collapsed ? 'px-2 py-3.5' : 'px-3 py-3.5'
+        }`}
       >
         <AppLogo
-          src="/assets/images/AstroParihar_Logo-1786957316255.webp"
-          size={collapsed ? 32 : 32}
+          src={collapsed ? "/assets/images/app_logo.png" : "/assets/images/AstroParihar_Logo-1786957316255.webp"}
+          size={collapsed ? 30 : 42}
+          imageClassName={collapsed ? "object-contain" : "object-contain max-w-[215px]"}
         />
-        {!collapsed && (
-          <div className="min-w-0">
-            <span className="font-bold text-xl text-primary tracking-tight leading-none block">
-              AstroParihar
-            </span>
-            <span className="text-2xs text-muted-foreground font-medium">AI Astrologer Platform</span>
-          </div>
-        )}
       </Link>
 
       {/* Navigation */}

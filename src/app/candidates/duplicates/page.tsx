@@ -22,7 +22,7 @@ interface DuplicatePair {
 }
 
 export default function DuplicatesPage() {
-  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidatesData);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [duplicatePairs, setDuplicatePairs] = useState<DuplicatePair[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -32,7 +32,7 @@ export default function DuplicatesPage() {
     try {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
-          const pool = allCandidates && allCandidates.length > 0 ? allCandidates : initialCandidatesData;
+          const pool = allCandidates || [];
           setCandidates(pool);
 
           // Dynamically compute duplicate candidates
@@ -53,32 +53,21 @@ export default function DuplicatesPage() {
                   id: `DUP-${a.id.slice(-3)}-${b.id.slice(-3)}`,
                   candidateA: a,
                   candidateB: b,
-                  matchReason: duplicateFlag ? 'Flagged during discovery ingestion' : `Similar name pattern in ${a.location}`,
-                  confidence: duplicateFlag ? 96 : 88,
+                  matchReason: duplicateFlag ? 'Flagged as duplicate candidate record' : 'High similarity in astrologer name and active location',
+                  confidence: 90,
                   status: 'pending_review',
-                  detectedDate: '17 Aug 2026',
+                  detectedDate: 'Recent',
                 });
               }
             }
-          }
-
-          // Fallback if no pairs detected
-          if (pairs.length === 0 && pool.length >= 2) {
-            pairs.push({
-              id: 'DUP-001',
-              candidateA: pool[0],
-              candidateB: { ...pool[0], id: `copy-${pool[0].id}`, name: `${pool[0].name} Jyotish`, source: 'Directory' },
-              matchReason: 'Similar name and identical city practice',
-              confidence: 94,
-              status: 'pending_review',
-              detectedDate: 'Today',
-            });
           }
 
           setDuplicatePairs(pairs);
         },
         (err) => {
           console.warn('Duplicates subscription error:', err);
+          setCandidates([]);
+          setDuplicatePairs([]);
         }
       );
       return () => unsubscribe();

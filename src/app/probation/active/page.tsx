@@ -24,102 +24,7 @@ interface ProbationRecord {
   checkpointLogs?: { day: number; date: string; notes: string; score: number }[];
 }
 
-const initialProbations: ProbationRecord[] = [
-  { 
-    id: 'PRB-001', 
-    candidate: 'Dr. Meena Krishnamurthy', 
-    specialisation: 'Vedic Jyotish', 
-    startDate: '2026-07-18', 
-    endDate: '2026-08-17', 
-    daysRemaining: 0, 
-    daysTotal: 30, 
-    assignedReviewer: 'Super Admin', 
-    checkpointsCompleted: 3, 
-    checkpointsTotal: 3, 
-    currentScore: 94, 
-    issues: 0, 
-    status: 'active',
-    checkpointLogs: [
-      { day: 7, date: '2026-07-25', notes: 'First 5 consultations monitored. Client sentiment 4.9/5.', score: 92 },
-      { day: 15, date: '2026-08-02', notes: 'Remedy adherence check passed without any commercial pressure.', score: 95 },
-      { day: 30, date: '2026-08-17', notes: 'Full probation period successfully concluded. All benchmarks satisfied.', score: 95 }
-    ]
-  },
-  { 
-    id: 'PRB-002', 
-    candidate: 'Acharya Venkatesh Iyer', 
-    specialisation: 'Vedic Jyotish', 
-    startDate: '2026-07-25', 
-    endDate: '2026-08-24', 
-    daysRemaining: 7, 
-    daysTotal: 30, 
-    assignedReviewer: 'Super Admin', 
-    checkpointsCompleted: 2, 
-    checkpointsTotal: 3, 
-    currentScore: 97, 
-    issues: 0, 
-    status: 'active',
-    checkpointLogs: [
-      { day: 7, date: '2026-08-01', notes: 'Timeliness 100%. Excellent Prashna accuracy feedback.', score: 96 },
-      { day: 15, date: '2026-08-09', notes: '12 consultations reviewed. Flawless ratings.', score: 98 }
-    ]
-  },
-  { 
-    id: 'PRB-003', 
-    candidate: 'Pandit Gopal Mishra', 
-    specialisation: 'Vedic Jyotish', 
-    startDate: '2026-08-02', 
-    endDate: '2026-09-01', 
-    daysRemaining: 15, 
-    daysTotal: 30, 
-    assignedReviewer: 'Super Admin', 
-    checkpointsCompleted: 1, 
-    checkpointsTotal: 3, 
-    currentScore: 88, 
-    issues: 1, 
-    status: 'active',
-    checkpointLogs: [
-      { day: 7, date: '2026-08-09', notes: 'One minor delay in submitting consultation audio log.', score: 88 }
-    ]
-  },
-  { 
-    id: 'PRB-004', 
-    candidate: 'Dr. Savitha Rao', 
-    specialisation: 'KP System', 
-    startDate: '2026-08-10', 
-    endDate: '2026-09-09', 
-    daysRemaining: 23, 
-    daysTotal: 30, 
-    assignedReviewer: 'Super Admin', 
-    checkpointsCompleted: 1, 
-    checkpointsTotal: 3, 
-    currentScore: 82, 
-    issues: 2, 
-    status: 'at_risk',
-    checkpointLogs: [
-      { day: 7, date: '2026-08-17', notes: 'Client reported consultation started 15 mins late. Warning issued.', score: 82 }
-    ]
-  },
-  { 
-    id: 'PRB-005', 
-    candidate: 'Priya Nair Jyotish', 
-    specialisation: 'Vedic Jyotish', 
-    startDate: '2026-07-01', 
-    endDate: '2026-08-30', 
-    daysRemaining: 13, 
-    daysTotal: 60, 
-    assignedReviewer: 'Super Admin', 
-    checkpointsCompleted: 2, 
-    checkpointsTotal: 4, 
-    currentScore: 79, 
-    issues: 3, 
-    status: 'extended',
-    checkpointLogs: [
-      { day: 15, date: '2026-07-16', notes: 'Inconsistent documentation.', score: 80 },
-      { day: 30, date: '2026-07-31', notes: 'Probation extended by 30 days to evaluate quality consistency.', score: 78 }
-    ]
-  },
-];
+const initialProbations: ProbationRecord[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   active: { label: 'Active', color: 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300', icon: <CheckCircle2 size={11} /> },
@@ -128,7 +33,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 };
 
 export default function ProbationActivePage() {
-  const [probations, setProbations] = useState<ProbationRecord[]>(initialProbations);
+  const [probations, setProbations] = useState<ProbationRecord[]>([]);
   const [search, setSearch] = useState('');
 
   // Milestone modal
@@ -223,7 +128,14 @@ export default function ProbationActivePage() {
 
         {/* Cards */}
         <div className="space-y-4">
-          {filtered.map(p => {
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground card-elevated">
+              <Timer size={32} className="mx-auto text-muted-foreground/40 mb-2" />
+              <p className="font-semibold text-foreground text-sm">No astrologers currently on probation.</p>
+              <p className="text-xs text-muted-foreground mt-1">Candidates approved from human review will enter the 30-day monitored probation stage here.</p>
+            </div>
+          ) : (
+            filtered.map(p => {
             const sc = statusConfig[p.status];
             const progressPct = Math.round(((p.daysTotal - p.daysRemaining) / p.daysTotal) * 100);
             return (
@@ -291,7 +203,7 @@ export default function ProbationActivePage() {
                 )}
               </div>
             );
-          })}
+          }))}
         </div>
 
         {/* Milestone Detail & Audit Modal */}

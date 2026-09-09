@@ -6,6 +6,7 @@ import { Plus, Settings, RefreshCw, CheckCircle2, Sparkles } from 'lucide-react'
 import Modal from '@/components/ui/Modal';
 import { useForm } from 'react-hook-form';
 import { useDiscovery } from '../DiscoveryContext';
+import LocationAutocomplete from '@/components/ui/LocationAutocomplete';
 
 interface CampaignFormData {
   name: string;
@@ -23,10 +24,9 @@ const specialisations = [
   'Vedic Jyotish', 
   'KP System', 
   'Nadi Astrology', 
+  'Prashna Kundali', 
   'Numerology', 
   'Vastu Shastra', 
-  'Prashna Jyotish', 
-  'Muhurtha', 
   'Lal Kitab'
 ];
 
@@ -43,10 +43,14 @@ export default function CampaignHeader() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
     reset,
   } = useForm<CampaignFormData>({
     defaultValues: {
+      name: '',
+      location: '',
       country: 'India',
       specialisation: 'Vedic Jyotish',
       minAiScore: 80,
@@ -56,6 +60,12 @@ export default function CampaignHeader() {
       startImmediately: true,
     },
   });
+
+  const locationValue = watch('location') || '';
+
+  React.useEffect(() => {
+    register('location', { required: 'Target location is required' });
+  }, [register]);
 
   const onSubmit = async (data: CampaignFormData) => {
     setIsSubmitting(true);
@@ -141,12 +151,20 @@ export default function CampaignHeader() {
 
             <div>
               <label className="text-xs font-semibold text-muted-foreground block mb-1">Target City / Location *</label>
-              <input
-                {...register('location', { required: 'Location is required' })}
-                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
-                placeholder="e.g. Pune, Maharashtra"
+              <LocationAutocomplete
+                value={locationValue}
+                onChange={(val) => {
+                  setValue('location', val, { shouldValidate: true });
+                  const currentName = watch('name');
+                  if (!currentName && val) {
+                    const cityName = val.split(',')[0].trim();
+                    const currentSpec = watch('specialisation') || 'Astrologers';
+                    setValue('name', `${cityName} ${currentSpec} Discovery`, { shouldValidate: true });
+                  }
+                }}
+                placeholder="Search city / location (e.g. Hyderabad, Telangana)..."
+                error={errors.location?.message}
               />
-              {errors.location && <p className="text-2xs text-red-600 mt-1">{errors.location.message}</p>}
             </div>
 
             <div>

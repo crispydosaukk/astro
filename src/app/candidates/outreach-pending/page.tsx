@@ -22,7 +22,7 @@ export default function OutreachPendingPage() {
     try {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
-          const pool = allCandidates && allCandidates.length > 0 ? allCandidates : initialCandidatesData;
+          const pool = allCandidates || [];
           // Candidates pending outreach approval or ready for outreach
           const pending = pool.filter(c => 
             c.lifecycleStatus === 'ready-for-outreach' || 
@@ -33,7 +33,7 @@ export default function OutreachPendingPage() {
         },
         (err) => {
           console.warn('Outreach pending subscription error:', err);
-          setCandidates(initialCandidatesData.filter(c => c.lifecycleStatus === 'ready-for-outreach' || c.outreachStatus === 'Pending Approval'));
+          setCandidates([]);
         }
       );
       return () => unsubscribe();

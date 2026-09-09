@@ -26,7 +26,8 @@ import {
   Download,
   X,
   Plus,
-  Check
+  Check,
+  Users
 } from 'lucide-react';
 import { 
   Candidate, 
@@ -41,7 +42,7 @@ import {
 type SortKey = 'name' | 'aiScore' | 'discoveredDate' | 'lifecycleStatus';
 
 export default function CandidateTable() {
-  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidatesData);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isFirestoreLive, setIsFirestoreLive] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
@@ -65,12 +66,8 @@ export default function CandidateTable() {
     try {
       const unsubscribe = subscribeToCandidates(
         (firestoreCandidates) => {
-          if (firestoreCandidates && firestoreCandidates.length > 0) {
-            setCandidates(firestoreCandidates);
-            setIsFirestoreLive(true);
-          } else {
-            setIsFirestoreLive(false);
-          }
+          setCandidates(firestoreCandidates || []);
+          setIsFirestoreLive(true);
         },
         (err) => {
           console.warn('Firestore subscription status:', err.message);
@@ -405,7 +402,20 @@ export default function CandidateTable() {
             </tr>
           </thead>
           <tbody>
-            {paginated.map(candidate => (
+            {paginated.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="text-center py-16 text-muted-foreground text-sm">
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <Users size={32} className="opacity-30 text-muted-foreground" />
+                    <p className="font-semibold text-foreground text-base">No candidates in pipeline</p>
+                    <p className="text-xs text-muted-foreground max-w-sm">
+                      Run an AI discovery campaign or import candidates via CSV to populate your pipeline.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              paginated.map(candidate => (
               <tr
                 key={candidate.id}
                 className={`table-row ${selectedRows.includes(candidate.id) ? 'selected' : ''}`}
@@ -583,7 +593,7 @@ export default function CandidateTable() {
                   </div>
                 </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>

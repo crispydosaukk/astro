@@ -71,7 +71,9 @@ export default function ApplicationTable({ candidates, onUpdateStatus }: Applica
             {paginated.length === 0 ? (
               <tr>
                 <td colSpan={12} className="py-12 text-center text-muted-foreground">
-                  <p className="text-sm font-semibold">No applications found matching the current filters.</p>
+                  <UserCheck size={32} className="mx-auto text-muted-foreground/30 mb-2" />
+                  <p className="font-semibold text-sm">No applications found</p>
+                  <p className="text-xs">Candidates entering the application and onboarding funnel will appear here.</p>
                 </td>
               </tr>
             ) : (

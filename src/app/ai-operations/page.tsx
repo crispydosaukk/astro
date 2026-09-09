@@ -16,18 +16,11 @@ interface AIJob {
   error?: string;
 }
 
-const jobs: AIJob[] = [
-  { id: 'AIJ-001', type: 'Candidate Qualification', agent: 'Discovery Agent', status: 'completed', startedAt: '2026-08-17 09:05', completedAt: '2026-08-17 09:08', duration: '3m 12s', model: 'gpt-4o', tokensUsed: 12400 },
-  { id: 'AIJ-002', type: 'Duplicate Detection', agent: 'Discovery Agent', status: 'completed', startedAt: '2026-08-17 09:10', completedAt: '2026-08-17 09:11', duration: '1m 45s', model: 'gpt-4o', tokensUsed: 5200 },
-  { id: 'AIJ-003', type: 'AI Interview', agent: 'Enrolment Agent', status: 'running', startedAt: '2026-08-17 10:30', model: 'gpt-4o', tokensUsed: 8900 },
-  { id: 'AIJ-004', type: 'Assessment Evaluation', agent: 'Enrolment Agent', status: 'queued', startedAt: '2026-08-17 11:00', model: 'gpt-4o' },
-  { id: 'AIJ-005', type: 'Candidate Extraction', agent: 'Discovery Agent', status: 'failed', startedAt: '2026-08-17 08:00', completedAt: '2026-08-17 08:02', duration: '2m 01s', model: 'gpt-4o', error: 'Rate limit exceeded. Retry scheduled.' },
-  { id: 'AIJ-006', type: 'AI Scoring', agent: 'Discovery Agent', status: 'completed', startedAt: '2026-08-16 18:00', completedAt: '2026-08-16 18:04', duration: '4m 22s', model: 'gpt-4o', tokensUsed: 18700 },
-];
+const jobs: AIJob[] = [];
 
 const agentStatus = [
-  { name: 'Discovery Agent', status: 'operational', lastRun: '2026-08-17 09:10', jobsToday: 4, successRate: 92 },
-  { name: 'Enrolment Agent', status: 'running', lastRun: '2026-08-17 10:30', jobsToday: 2, successRate: 100 },
+  { name: 'Discovery Agent', status: 'operational', lastRun: '—', jobsToday: 0, successRate: 100 },
+  { name: 'Enrolment Agent', status: 'operational', lastRun: '—', jobsToday: 0, successRate: 100 },
 ];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -222,7 +215,16 @@ export default function AIOperationsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {jobList.map(job => {
+                  {jobList.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                        <Bot size={32} className="mx-auto text-muted-foreground/30 mb-2" />
+                        <p className="font-semibold text-sm">No AI operations executed yet</p>
+                        <p className="text-xs">Click &ldquo;Test Agent (GPT-4o)&rdquo; in the Agents tab to trigger an evaluation.</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    jobList.map(job => {
                     const sc = statusConfig[job.status];
                     return (
                       <tr key={job.id} className="hover:bg-muted/20 transition-colors">
@@ -248,7 +250,7 @@ export default function AIOperationsPage() {
                         </td>
                       </tr>
                     );
-                  })}
+                  }))}
                 </tbody>
               </table>
             </div>

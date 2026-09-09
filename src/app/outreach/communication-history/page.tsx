@@ -18,12 +18,7 @@ interface CommRecord {
   direction: 'outbound' | 'inbound' | 'system';
 }
 
-const defaultRecords: CommRecord[] = [
-  { id: 'CH-001', candidate: 'Pandit Suresh Sharma', type: 'Email Sent', subject: 'Invitation to Join AstroParihar Elite Astrologer Network', preview: 'We have reviewed your distinguished practice in Vedic Astrology and Prashna in Chennai. AstroParihar is building India\'s most trusted, verified platform...', date: 'Today, 09:30', channel: 'Email', direction: 'outbound' },
-  { id: 'CH-002', candidate: 'Dr. Meena Krishnamurthy', type: 'Email Sent', subject: 'Special Invitation for Dr. Meena Krishnamurthy', preview: 'Your academic and practical acumen in KP System and Vedic Astrology matches our highest tier. We would love to discuss a premier partnership...', date: 'Today, 09:31', channel: 'Email', direction: 'outbound' },
-  { id: 'CH-003', candidate: 'Acharya Venkatesh Iyer', type: 'Email Sent', subject: 'Invitation: Specialist Vedic Astrologer at AstroParihar', preview: 'Pranam Venkatesh ji, AstroParihar warmly invites you to join our platform of credentialed practitioners...', date: 'Yesterday, 10:00', channel: 'Email', direction: 'outbound' },
-  { id: 'CH-004', candidate: 'Smt. Lakshmi Devi', type: 'WhatsApp Sent', preview: 'Namaste Smt. Lakshmi Devi 🙏 AstroParihar invites you to join our network of certified astrologers. Tap to view your qualification details: https://astroparihar.com/join', date: 'Yesterday, 14:15', channel: 'WhatsApp', direction: 'outbound' },
-];
+const defaultRecords: CommRecord[] = [];
 
 const directionConfig: Record<string, { color: string; icon: React.ReactNode }> = {
   outbound: { color: 'border-l-primary', icon: <Mail size={14} className="text-primary" /> },
@@ -32,7 +27,7 @@ const directionConfig: Record<string, { color: string; icon: React.ReactNode }> 
 };
 
 export default function CommunicationHistoryPage() {
-  const [records, setRecords] = useState<CommRecord[]>(defaultRecords);
+  const [records, setRecords] = useState<CommRecord[]>([]);
   const [search, setSearch] = useState('');
   const [channelFilter, setChannelFilter] = useState('all');
 
@@ -57,10 +52,15 @@ export default function CommunicationHistoryPage() {
                 direction: 'outbound',
               };
             });
-            setRecords([...liveMailRecords, ...defaultRecords]);
+            setRecords(liveMailRecords);
+          } else {
+            setRecords([]);
           }
         },
-        (err) => console.warn('Mail collection history fallback:', err)
+        (err) => {
+          console.warn('Mail collection history fallback:', err);
+          setRecords([]);
+        }
       );
       return () => unsubscribe();
     } catch (e) {
@@ -113,9 +113,16 @@ export default function CommunicationHistoryPage() {
 
         {/* List of communications */}
         <div className="space-y-3">
-          {filtered.map(r => {
-            const dir = directionConfig[r.direction] || directionConfig.outbound;
-            return (
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground card-elevated">
+              <ScrollText size={32} className="mx-auto text-muted-foreground/40 mb-2" />
+              <p className="font-semibold text-foreground text-sm">No communication logs found.</p>
+              <p className="text-xs text-muted-foreground mt-1">Dispatched emails and outreach invitations will appear here in real time.</p>
+            </div>
+          ) : (
+            filtered.map(r => {
+              const dir = directionConfig[r.direction] || directionConfig.outbound;
+              return (
               <div
                 key={r.id}
                 className={`card-elevated p-4 border-l-4 ${dir.color} hover:shadow-card-hover transition-all`}
@@ -145,7 +152,7 @@ export default function CommunicationHistoryPage() {
                 </p>
               </div>
             );
-          })}
+          }))}
         </div>
       </div>
     </AppLayout>

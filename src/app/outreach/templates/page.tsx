@@ -24,8 +24,8 @@ const defaultTemplates: Template[] = [
     subject: 'Invitation to Join AstroParihar – Verified Astrologer Network',
     preview: 'Namaste {{candidate_name}},\n\nAstroParihar is expanding its network of verified, authentic astrologers. Having reviewed your esteemed practice in {{specialisation}} in {{location}}, we would be honored to invite you to our credentialed platform.\n\nWarm regards,\nAstroParihar Onboarding Committee',
     variables: ['candidate_name', 'specialisation', 'location'],
-    usageCount: 123,
-    lastUsed: 'Today',
+    usageCount: 0,
+    lastUsed: '—',
     status: 'active',
   },
   {
@@ -35,8 +35,8 @@ const defaultTemplates: Template[] = [
     subject: 'Special Partnership for {{specialisation}} Practitioners',
     preview: 'Respected {{candidate_name}},\n\nYour deep expertise in {{specialisation}} matches our highest tier. We invite you to explore premier consultations with AstroParihar verified network.',
     variables: ['candidate_name', 'specialisation'],
-    usageCount: 81,
-    lastUsed: 'Yesterday',
+    usageCount: 0,
+    lastUsed: '—',
     status: 'active',
   },
   {
@@ -45,8 +45,8 @@ const defaultTemplates: Template[] = [
     channel: 'WhatsApp',
     preview: 'Namaste {{candidate_name}} 🙏 AstroParihar invites you to join India\'s trusted verified astrologer network. Review your onboarding details: https://astroparihar.com/join',
     variables: ['candidate_name'],
-    usageCount: 45,
-    lastUsed: '16 Aug 2026',
+    usageCount: 0,
+    lastUsed: '—',
     status: 'active',
   },
 ];

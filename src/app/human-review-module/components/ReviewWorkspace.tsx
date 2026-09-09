@@ -60,7 +60,7 @@ export default function ReviewWorkspace() {
     try {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
-          const pool = allCandidates && allCandidates.length > 0 ? allCandidates : initialCandidatesData;
+          const pool = allCandidates || [];
           // Prioritize candidates with application or in review stages
           const reviewPool = pool.filter(c => 
             c.lifecycleStatus === 'human-review' || 
@@ -68,26 +68,25 @@ export default function ReviewWorkspace() {
             c.lifecycleStatus === 'applied' ||
             c.applicationStatus !== null
           );
-          const finalPool = reviewPool.length > 0 ? reviewPool : pool;
-          const mapped = finalPool.map((c, i) => mapCandidateToReview(c, i));
+          const mapped = reviewPool.map((c, i) => mapCandidateToReview(c, i));
           setCandidates(mapped);
           if (mapped.length > 0) {
             setSelectedId(prev => (prev && mapped.some(m => m.id === prev) ? prev : mapped[0].id));
+          } else {
+            setSelectedId('');
           }
           setLoading(false);
         },
         () => {
-          const mapped = initialCandidatesData.map((c, i) => mapCandidateToReview(c, i));
-          setCandidates(mapped);
-          if (mapped.length > 0) setSelectedId(mapped[0].id);
+          setCandidates([]);
+          setSelectedId('');
           setLoading(false);
         }
       );
       return () => unsubscribe();
     } catch {
-      const mapped = initialCandidatesData.map((c, i) => mapCandidateToReview(c, i));
-      setCandidates(mapped);
-      if (mapped.length > 0) setSelectedId(mapped[0].id);
+      setCandidates([]);
+      setSelectedId('');
       setLoading(false);
     }
   }, []);

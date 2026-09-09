@@ -15,18 +15,7 @@ interface AuditEntry {
   category: 'auth' | 'candidate' | 'discovery' | 'outreach' | 'application' | 'review' | 'settings' | 'system';
 }
 
-const auditLogs: AuditEntry[] = [
-  { id: 'AUD-001', user: 'astroai@gmail.com', action: 'OUTREACH_APPROVED', entity: 'Outreach Campaign', entityId: 'OC-001', timestamp: '2026-08-17 09:45', ipAddress: '192.168.1.1', details: 'Approved 12 candidates for outreach in Vedic Astrologers Chennai campaign', category: 'outreach' },
-  { id: 'AUD-002', user: 'astroai@gmail.com', action: 'DISCOVERY_JOB_STARTED', entity: 'Discovery Job', entityId: 'JOB-001', timestamp: '2026-08-17 09:00', ipAddress: '192.168.1.1', details: 'Started discovery job for Vedic Astrologers Chennai campaign', category: 'discovery' },
-  { id: 'AUD-003', user: 'astroai@gmail.com', action: 'REVIEW_DECISION', entity: 'Application', entityId: 'APP-001', timestamp: '2026-08-17 08:30', ipAddress: '192.168.1.5', details: 'Approved Dr. Meena Krishnamurthy for probation', category: 'review' },
-  { id: 'AUD-004', user: 'astroai@gmail.com', action: 'CANDIDATE_UPDATED', entity: 'Candidate', entityId: 'C-1021', timestamp: '2026-08-16 17:00', ipAddress: '192.168.1.1', details: 'Updated candidate status to OUTREACH_APPROVED', category: 'candidate' },
-  { id: 'AUD-005', user: 'astroai@gmail.com', action: 'CANDIDATE_VERIFIED', entity: 'Candidate', entityId: 'C-1055', timestamp: '2026-08-16 16:00', ipAddress: '192.168.1.8', details: 'Verified Pandit Gopal Mishra. Verification ID: AP-VER-2026-003', category: 'review' },
-  { id: 'AUD-006', user: 'astroai@gmail.com', action: 'LOGIN', entity: 'User', entityId: 'U-001', timestamp: '2026-08-17 09:00', ipAddress: '192.168.1.1', category: 'auth' },
-  { id: 'AUD-007', user: 'astroai@gmail.com', action: 'CAMPAIGN_CREATED', entity: 'Discovery Campaign', entityId: 'DC-004', timestamp: '2026-08-16 14:00', ipAddress: '192.168.1.3', details: 'Created campaign: Vastu Consultants Delhi', category: 'discovery' },
-  { id: 'AUD-008', user: 'astroai@gmail.com', action: 'SETTINGS_UPDATED', entity: 'Settings', entityId: 'scoring-config', timestamp: '2026-08-15 11:00', ipAddress: '192.168.1.1', details: 'Updated scoring weights configuration', category: 'settings' },
-  { id: 'AUD-009', user: 'astroai@gmail.com', action: 'DUPLICATE_MERGED', entity: 'Candidate', entityId: 'C-1021', timestamp: '2026-08-15 10:30', ipAddress: '192.168.1.5', details: 'Merged duplicate candidates C-1021 and C-1045', category: 'candidate' },
-  { id: 'AUD-010', user: 'astroai@gmail.com', action: 'BULK_APPROVE', entity: 'Candidates', entityId: 'BULK-001', timestamp: '2026-08-14 16:00', ipAddress: '192.168.1.1', details: 'Bulk approved 8 candidates for outreach', category: 'outreach' },
-];
+const auditLogs: AuditEntry[] = [];
 
 const categoryColor: Record<string, string> = {
   auth: 'bg-slate-100 text-slate-600',
@@ -121,7 +110,16 @@ export default function AuditLogsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map(log => (
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-muted-foreground">
+                      <ScrollText size={32} className="mx-auto text-muted-foreground/30 mb-2" />
+                      <p className="font-semibold text-sm">No audit logs recorded</p>
+                      <p className="text-xs">All user actions and pipeline events will be recorded here.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map(log => (
                   <tr key={log.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3 text-xs text-muted-foreground font-mono">{log.timestamp}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{log.user}</td>
@@ -143,7 +141,7 @@ export default function AuditLogsPage() {
                       <button className="p-1.5 rounded hover:bg-muted"><Eye size={13} /></button>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>

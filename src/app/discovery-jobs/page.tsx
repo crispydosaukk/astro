@@ -21,6 +21,7 @@ import {
   Check
 } from 'lucide-react';
 import { saveCandidateToFirestore, Candidate } from '@/lib/firebase/candidateService';
+import LocationAutocomplete from '@/components/ui/LocationAutocomplete';
 
 interface DiscoveryJob {
   id: string;
@@ -40,12 +41,7 @@ interface DiscoveryJob {
   source?: string;
 }
 
-const initialJobs: DiscoveryJob[] = [
-  { id: 'JOB-001', campaign: 'Vedic Astrologers – Chennai', location: 'Chennai', specialisation: 'Vedic Jyotish', status: 'completed', startTime: 'Today 09:00', endTime: 'Today 09:15', searched: 340, discovered: 87, rejected: 23, duplicates: 8, qualified: 56, errors: 0, apiUsage: 1240, source: 'Google Places' },
-  { id: 'JOB-002', campaign: 'Nadi Astrologers – Tamil Nadu', location: 'Tamil Nadu', specialisation: 'Nadi Jyotish', status: 'completed', startTime: 'Yesterday 14:00', endTime: 'Yesterday 18:30', searched: 520, discovered: 134, rejected: 41, duplicates: 12, qualified: 81, errors: 0, apiUsage: 2100, source: 'Web Search' },
-  { id: 'JOB-003', campaign: 'KP Astrologers – Mumbai', location: 'Mumbai', specialisation: 'KP System', status: 'paused', startTime: 'Yesterday 07:30', searched: 120, discovered: 31, rejected: 9, duplicates: 3, qualified: 19, errors: 1, apiUsage: 480, source: 'Directory' },
-  { id: 'JOB-004', campaign: 'Vastu Consultants – Delhi', location: 'Delhi', specialisation: 'Vastu Shastra', status: 'queued', startTime: 'Scheduled', searched: 0, discovered: 0, rejected: 0, duplicates: 0, qualified: 0, errors: 0, apiUsage: 0, source: 'Google Places' },
-];
+const initialJobs: DiscoveryJob[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   running: { label: 'Running', color: 'bg-blue-100 text-blue-700', icon: <Loader2 size={12} className="animate-spin" /> },
@@ -329,7 +325,16 @@ export default function DiscoveryJobsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map(job => {
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="py-12 text-center text-muted-foreground">
+                      <Zap size={32} className="mx-auto text-muted-foreground/30 mb-2" />
+                      <p className="font-semibold text-sm">No discovery jobs recorded</p>
+                      <p className="text-xs">Click &ldquo;Run New AI Job (GPT-4o)&rdquo; above to launch automated astrologer discovery.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map(job => {
                   const sc = statusConfig[job.status] || statusConfig.queued;
                   return (
                     <tr key={job.id} className="hover:bg-muted/20 transition-colors">
@@ -390,16 +395,10 @@ export default function DiscoveryJobsPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>
-          {filtered.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Zap size={32} className="mx-auto mb-3 opacity-30" />
-              <p className="font-medium">No discovery jobs found</p>
-            </div>
-          )}
         </div>
 
         {/* Modal: Start New AI Discovery Job */}
@@ -434,12 +433,11 @@ export default function DiscoveryJobsPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-foreground mb-1.5">Location / City</label>
-                    <input
-                      type="text"
-                      required
+                    <LocationAutocomplete
                       value={location}
-                      onChange={e => setLocation(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      onChange={setLocation}
+                      placeholder="e.g. Hyderabad, Telangana"
+                      required
                     />
                   </div>
 
