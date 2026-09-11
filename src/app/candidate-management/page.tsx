@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import AppLayout from '@/components/AppLayout';
 import CandidateTable from './components/CandidateTable';
 
@@ -9,10 +9,12 @@ export default function CandidateManagementPage() {
         <div>
           <h1 className="text-4xl font-bold text-foreground">Candidate Management</h1>
           <p className="text-muted-foreground mt-1 text-md">
-            Live candidate tracking across all lifecycle stages
+            Live candidate tracking across all lifecycle stages & communication channels
           </p>
         </div>
-        <CandidateTable />
+        <Suspense fallback={<div className="p-8 text-center text-sm text-muted-foreground">Loading Candidate Database...</div>}>
+          <CandidateTable />
+        </Suspense>
       </div>
     </AppLayout>
   );

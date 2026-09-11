@@ -4,7 +4,8 @@ import React, { createContext, useContext, useState, useEffect, useMemo, ReactNo
 import { 
   Candidate, 
   subscribeToCandidates,
-  getCandidatesFromFirestore 
+  getCandidatesFromFirestore,
+  resolveCandidateContact
 } from '@/lib/firebase/candidateService';
 
 export interface DashboardStats {
@@ -25,6 +26,14 @@ export interface DashboardStats {
   verificationRate: number;
   rejectionRate: string;
   overallConversionRate: string;
+  
+  // Dedicated Channel Outreach Metrics
+  emailSent: number;
+  needEmail: number;
+  whatsappSent: number;
+  needWhatsapp: number;
+  phoneOnly: number;
+  bothEmailAndPhone: number;
 }
 
 export interface FunnelItem {
@@ -166,6 +175,39 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     const rejected = pool.filter(c => c.lifecycleStatus === 'rejected').length;
     const outreachApprovalQueue = readyForOutreach;
 
+    // Detailed Outreach Channel Analysis
+    let needWhatsapp = 0;
+    let needEmail = 0;
+    let whatsappSent = 0;
+    let emailSent = 0;
+    let phoneOnly = 0;
+    let bothEmailAndPhone = 0;
+
+    pool.forEach(c => {
+      const contact = resolveCandidateContact(c);
+      const hasPhone = Boolean(c.phone || contact.phone);
+      const hasEmail = Boolean(c.email || contact.email);
+      const isSent = c.outreachStatus === 'Sent' || c.outreachStatus === 'Contacted' || c.lifecycleStatus === 'outreach-sent' || c.lifecycleStatus === 'contacted';
+      const isApproved = c.outreachStatus === 'Approved' || c.outreachStatus === 'Pending Approval' || c.outreachStatus === 'Not Sent' || c.lifecycleStatus === 'ready-for-outreach' || c.lifecycleStatus === 'discovered' || c.lifecycleStatus === 'qualified';
+
+      if (hasPhone && !hasEmail) phoneOnly++;
+      if (hasPhone && hasEmail) bothEmailAndPhone++;
+
+      // WhatsApp metrics
+      if (hasPhone && (c.outreachStatus?.toLowerCase().includes('whatsapp') || (isSent && !hasEmail))) {
+        whatsappSent++;
+      } else if (hasPhone && isApproved) {
+        needWhatsapp++;
+      }
+
+      // Email metrics
+      if (hasEmail && (c.outreachStatus?.toLowerCase().includes('email') || (isSent && hasEmail))) {
+        emailSent++;
+      } else if (hasEmail && isApproved) {
+        needEmail++;
+      }
+    });
+
     const qualificationRate = totalCandidates > 0 ? Math.round((aiQualified / totalCandidates) * 100) : 0;
     const outreachDeliveryRate = outreachSent > 0 ? Math.min(100, Math.round((contacted / outreachSent) * 100)) : 95;
     const verificationRate = totalCandidates > 0 ? Math.round((verified / totalCandidates) * 100) : 0;
@@ -190,6 +232,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       verificationRate,
       rejectionRate,
       overallConversionRate,
+      emailSent,
+      needEmail,
+      whatsappSent,
+      needWhatsapp,
+      phoneOnly,
+      bothEmailAndPhone,
     };
   }, [filteredCandidates, candidates]);
 

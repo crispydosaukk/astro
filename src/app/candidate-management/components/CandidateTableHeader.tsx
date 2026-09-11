@@ -1,12 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Filter, Download, Plus, SlidersHorizontal, X, Check } from 'lucide-react';
+import { Search, Filter, Download, Plus, SlidersHorizontal, X, MessageCircle, Mail, Phone, Users, CheckCircle2, Send } from 'lucide-react';
 
 const statusOptions = ['All', 'Discovered', 'AI Qualified', 'Ready for Outreach', 'Contacted', 'Applied', 'Screening', 'Human Review', 'Probation', 'Verified'];
 const specialisations = ['All', 'Vedic Jyotish', 'KP System', 'Nadi Astrology', 'Numerology', 'Vastu Shastra', 'Prashna', 'Muhurtha', 'Lal Kitab', 'Gemology', 'Palmistry'];
 const sources = ['All', 'Google Places', 'Manual Entry', 'Web Search', 'CSV Upload', 'Referral', 'Directory'];
 const scoreRanges = ['All', '90–100', '80–89', '70–79', '60–69', 'Below 60'];
+const channelFilterOptions = [
+  { value: 'all', label: 'All Channels' },
+  { value: 'need-whatsapp', label: '💬 Need WhatsApp Outreach' },
+  { value: 'need-email', label: '📧 Need Email Outreach' },
+  { value: 'whatsapp-sent', label: '✅ WhatsApp Sent' },
+  { value: 'email-sent', label: '✅ Email Sent' },
+  { value: 'phone-only', label: '📱 Phone Only (No Email)' },
+  { value: 'both', label: '✨ Both Phone & Email' },
+];
 
 export interface ColumnVisibility {
   contact: boolean;
@@ -17,6 +26,15 @@ export interface ColumnVisibility {
   outreach: boolean;
   lifecycle: boolean;
   discovered: boolean;
+}
+
+export interface OutreachCounts {
+  total: number;
+  needWhatsapp: number;
+  needEmail: number;
+  whatsappSent: number;
+  emailSent: number;
+  phoneOnly: number;
 }
 
 interface CandidateTableHeaderProps {
@@ -30,6 +48,9 @@ interface CandidateTableHeaderProps {
   onSourceChange: (value: string) => void;
   scoreRange: string;
   onScoreRangeChange: (value: string) => void;
+  channelFilter: string;
+  onChannelFilterChange: (value: string) => void;
+  counts?: OutreachCounts;
   onExportCsv: () => void;
   onAddCandidateClick: () => void;
   columns?: ColumnVisibility;
@@ -47,6 +68,9 @@ export default function CandidateTableHeader({
   onSourceChange,
   scoreRange,
   onScoreRangeChange,
+  channelFilter,
+  onChannelFilterChange,
+  counts,
   onExportCsv,
   onAddCandidateClick,
   columns,
@@ -55,7 +79,13 @@ export default function CandidateTableHeader({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [columnsOpen, setColumnsOpen] = useState(false);
 
-  const activeFilters = [status, spec, source, scoreRange].filter(f => f !== 'All').length;
+  const activeFilters = [
+    status !== 'All',
+    spec !== 'All',
+    source !== 'All',
+    scoreRange !== 'All',
+    channelFilter !== 'all'
+  ].filter(Boolean).length;
 
   const columnLabels: { key: keyof ColumnVisibility; label: string }[] = [
     { key: 'contact', label: 'Contact Info' },
@@ -70,6 +100,7 @@ export default function CandidateTableHeader({
 
   return (
     <div className="space-y-3">
+      {/* Top Action Row */}
       <div className="flex items-center gap-3 flex-wrap">
         {/* Search */}
         <div className="relative flex-1 min-w-64">
@@ -166,10 +197,105 @@ export default function CandidateTableHeader({
         </button>
       </div>
 
-      {/* Filter panel */}
+      {/* Quick Filter Metric Chips (Channel & Outreach Status) */}
+      {counts && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <button
+            onClick={() => onChannelFilterChange('all')}
+            className={`px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 border transition-all whitespace-nowrap cursor-pointer ${
+              channelFilter === 'all'
+                ? 'bg-foreground text-background border-foreground shadow-xs'
+                : 'bg-card text-muted-foreground border-border hover:border-foreground/30 hover:text-foreground'
+            }`}
+          >
+            <Users size={12} />
+            <span>All Pipeline ({counts.total})</span>
+          </button>
+
+          <button
+            onClick={() => onChannelFilterChange('need-whatsapp')}
+            className={`px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 border transition-all whitespace-nowrap cursor-pointer ${
+              channelFilter === 'need-whatsapp'
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
+            }`}
+            title="Candidates with verified phone numbers waiting for WhatsApp invitation"
+          >
+            <MessageCircle size={12} />
+            <span>Need WhatsApp ({counts.needWhatsapp})</span>
+          </button>
+
+          <button
+            onClick={() => onChannelFilterChange('need-email')}
+            className={`px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 border transition-all whitespace-nowrap cursor-pointer ${
+              channelFilter === 'need-email'
+                ? 'bg-primary text-primary-foreground border-primary shadow-xs'
+                : 'bg-primary/10 text-primary border-primary/30 hover:bg-primary/20'
+            }`}
+            title="Candidates with listed email addresses waiting for email outreach"
+          >
+            <Mail size={12} />
+            <span>Need Email ({counts.needEmail})</span>
+          </button>
+
+          <button
+            onClick={() => onChannelFilterChange('whatsapp-sent')}
+            className={`px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 border transition-all whitespace-nowrap cursor-pointer ${
+              channelFilter === 'whatsapp-sent'
+                ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
+                : 'bg-card text-emerald-700 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-50'
+            }`}
+            title="Candidates already contacted via WhatsApp"
+          >
+            <CheckCircle2 size={12} />
+            <span>WhatsApp Sent ({counts.whatsappSent})</span>
+          </button>
+
+          <button
+            onClick={() => onChannelFilterChange('email-sent')}
+            className={`px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 border transition-all whitespace-nowrap cursor-pointer ${
+              channelFilter === 'email-sent'
+                ? 'bg-violet-600 text-white border-violet-600 shadow-xs'
+                : 'bg-card text-violet-700 dark:text-violet-400 border-violet-500/30 hover:bg-violet-50'
+            }`}
+            title="Candidates already dispatched via Gmail SMTP"
+          >
+            <Send size={12} />
+            <span>Email Sent ({counts.emailSent})</span>
+          </button>
+
+          <button
+            onClick={() => onChannelFilterChange('phone-only')}
+            className={`px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 border transition-all whitespace-nowrap cursor-pointer ${
+              channelFilter === 'phone-only'
+                ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                : 'bg-card text-amber-700 dark:text-amber-400 border-amber-500/30 hover:bg-amber-50'
+            }`}
+            title="Candidates who only have phone listed (no email)"
+          >
+            <Phone size={12} />
+            <span>Phone Only ({counts.phoneOnly})</span>
+          </button>
+        </div>
+      )}
+
+      {/* Expanded Filter Panel */}
       {filtersOpen && (
         <div className="card-elevated p-4 animate-slide-up">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div>
+              <label className="label-field text-xs">Outreach Channel</label>
+              <select
+                value={channelFilter}
+                onChange={e => onChannelFilterChange(e.target.value)}
+                className="input-field text-sm py-2"
+              >
+                {channelFilterOptions.map(opt => (
+                  <option key={`ch-opt-${opt.value}`} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="label-field text-xs">Status / Lifecycle</label>
               <select
@@ -182,6 +308,7 @@ export default function CandidateTableHeader({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="label-field text-xs">Specialisation</label>
               <select
@@ -194,6 +321,7 @@ export default function CandidateTableHeader({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="label-field text-xs">Discovery Source</label>
               <select
@@ -206,6 +334,7 @@ export default function CandidateTableHeader({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="label-field text-xs">AI Score Range</label>
               <select
@@ -225,7 +354,8 @@ export default function CandidateTableHeader({
                 onStatusChange('All'); 
                 onSpecChange('All'); 
                 onSourceChange('All'); 
-                onScoreRangeChange('All'); 
+                onScoreRangeChange('All');
+                onChannelFilterChange('all');
               }}
               className="btn-ghost text-sm text-muted-foreground hover:text-foreground"
             >

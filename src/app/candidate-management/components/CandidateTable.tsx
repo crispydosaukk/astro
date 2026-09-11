@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import StatusBadge from '@/components/ui/StatusBadge';
 import AIScoreBadge from '@/components/ui/AIScoreBadge';
 import { 
@@ -28,7 +29,8 @@ import {
   Globe,
   UserPlus,
   MapPin,
-  CheckCircle2
+  CheckCircle2,
+  MessageCircle
 } from 'lucide-react';
 import { 
   Candidate, 
@@ -43,7 +45,7 @@ import {
 import CandidateProfileModal from '@/components/candidates/CandidateProfileModal';
 import AddCandidateModal from '@/components/candidates/AddCandidateModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
-import CandidateTableHeader, { ColumnVisibility } from './CandidateTableHeader';
+import CandidateTableHeader, { ColumnVisibility, OutreachCounts } from './CandidateTableHeader';
 
 type SortKey = 'name' | 'rating' | 'discoveredDate' | 'lifecycleStatus';
 
@@ -61,6 +63,7 @@ export default function CandidateTable() {
   const [filterSpec, setFilterSpec] = useState('All');
   const [filterSource, setFilterSource] = useState('All');
   const [filterScoreRange, setFilterScoreRange] = useState('All');
+  const [channelFilter, setChannelFilter] = useState('all');
 
   // Column Visibility State
   const [columns, setColumns] = useState<ColumnVisibility>({
@@ -109,6 +112,54 @@ export default function CandidateTable() {
       setIsFirestoreLive(false);
     }
   }, []);
+
+  const searchParams = useSearchParams();
+
+  // Sync state with URL search parameters on mount or navigation
+  useEffect(() => {
+    const channelParam = searchParams?.get('channel');
+    if (channelParam) {
+      setChannelFilter(channelParam);
+    }
+    const statusParam = searchParams?.get('status');
+    if (statusParam) {
+      setFilterStatus(statusParam);
+    }
+  }, [searchParams]);
+
+  const handleChannelFilterChange = (newChannel: string) => {
+    setChannelFilter(newChannel);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (newChannel === 'all') {
+        url.searchParams.delete('channel');
+      } else {
+        url.searchParams.set('channel', newChannel);
+      }
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  const handleDirectWhatsApp = async (candidate: Candidate, phoneNum: string) => {
+    const cleanPhone = phoneNum.replace(/[^\d+]/g, '').replace(/^0+/, '');
+    const phoneWithCountry = cleanPhone.startsWith('+') 
+      ? cleanPhone.slice(1) 
+      : cleanPhone.length === 10 
+      ? `91${cleanPhone}` 
+      : cleanPhone;
+
+    const appUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}&phone=${encodeURIComponent(cleanPhone)}`
+      : `/apply?id=${candidate.id}`;
+
+    const text = `Namaste ${candidate.name} Ji 🙏,\n\nWe came across your esteemed astrology practice in ${candidate.location}. At AstroParihar, we are onboarding verified Astrologers for our global platform.\n\nWe would be honored to invite you to join our panel. You can review our invitation and complete your verification here:\n${appUrl}\n\nWarm regards,\nRecruitment Team, AstroParihar`;
+
+    window.open(`https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(text)}`, '_blank');
+
+    // Update status to Sent (WhatsApp)
+    await handleStatusChange(candidate.id, 'ready-for-outreach', 'Sent (WhatsApp)');
+    showToast('WhatsApp Outreach Dispatched', `Direct invitation sent to ${candidate.name} (${phoneWithCountry}).`, 'success');
+  };
 
   const showToast = (title: string, desc?: string, type: 'success' | 'info' | 'error' = 'success') => {
     setToastMessage({ title, desc, type });
@@ -290,7 +341,49 @@ export default function CandidateTable() {
     }
   };
 
-  // Filter candidates based on search & filter panel
+  // Outreach Channel & Method Counts
+  const outreachCounts: OutreachCounts = useMemo(() => {
+    let needWhatsapp = 0;
+    let needEmail = 0;
+    let whatsappSent = 0;
+    let emailSent = 0;
+    let phoneOnly = 0;
+
+    candidates.forEach(c => {
+      const contact = resolveCandidateContact(c);
+      const hasPhone = Boolean(c.phone || contact.phone);
+      const hasEmail = Boolean(c.email || contact.email);
+      const isSent = c.outreachStatus === 'Sent' || c.outreachStatus === 'Contacted';
+      const isApproved = c.outreachStatus === 'Approved' || c.outreachStatus === 'Pending Approval' || c.outreachStatus === 'Not Sent';
+
+      if (hasPhone && !hasEmail) phoneOnly++;
+
+      // WhatsApp metrics
+      if (hasPhone && (c.outreachStatus?.toLowerCase().includes('whatsapp') || (isSent && !hasEmail))) {
+        whatsappSent++;
+      } else if (hasPhone && isApproved) {
+        needWhatsapp++;
+      }
+
+      // Email metrics
+      if (hasEmail && (c.outreachStatus?.toLowerCase().includes('email') || (isSent && hasEmail))) {
+        emailSent++;
+      } else if (hasEmail && isApproved) {
+        needEmail++;
+      }
+    });
+
+    return {
+      total: candidates.length,
+      needWhatsapp,
+      needEmail,
+      whatsappSent,
+      emailSent,
+      phoneOnly,
+    };
+  }, [candidates]);
+
+  // Filter candidates based on search, filter panel & outreach channel
   const filteredCandidates = useMemo(() => {
     return candidates.filter((c) => {
       // 1. Search Query
@@ -347,9 +440,34 @@ export default function CandidateTable() {
         if (filterScoreRange === 'Below 60' && score >= 60) return false;
       }
 
+      // 6. Outreach Channel Filter
+      if (channelFilter !== 'all') {
+        const contact = resolveCandidateContact(c);
+        const hasPhone = Boolean(c.phone || contact.phone);
+        const hasEmail = Boolean(c.email || contact.email);
+        const isSent = c.outreachStatus === 'Sent' || c.outreachStatus === 'Contacted';
+        const isApproved = c.outreachStatus === 'Approved' || c.outreachStatus === 'Pending Approval' || c.outreachStatus === 'Not Sent';
+
+        if (channelFilter === 'need-whatsapp') {
+          if (!hasPhone || !isApproved) return false;
+        } else if (channelFilter === 'need-email') {
+          if (!hasEmail || !isApproved) return false;
+        } else if (channelFilter === 'whatsapp-sent') {
+          const wasWhatsapp = hasPhone && (c.outreachStatus?.toLowerCase().includes('whatsapp') || (isSent && !hasEmail));
+          if (!wasWhatsapp) return false;
+        } else if (channelFilter === 'email-sent') {
+          const wasEmail = hasEmail && (c.outreachStatus?.toLowerCase().includes('email') || (isSent && hasEmail));
+          if (!wasEmail) return false;
+        } else if (channelFilter === 'phone-only') {
+          if (!hasPhone || hasEmail) return false;
+        } else if (channelFilter === 'both') {
+          if (!hasPhone || !hasEmail) return false;
+        }
+      }
+
       return true;
     });
-  }, [candidates, search, filterStatus, filterSpec, filterSource, filterScoreRange]);
+  }, [candidates, search, filterStatus, filterSpec, filterSource, filterScoreRange, channelFilter]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -420,7 +538,7 @@ export default function CandidateTable() {
         </div>
       )}
 
-      {/* Top Controls Header Bar */}
+      {/* Top Controls Header Bar with Outreach Chips & Counts */}
       <CandidateTableHeader
         search={search}
         onSearchChange={setSearch}
@@ -432,6 +550,9 @@ export default function CandidateTable() {
         onSourceChange={setFilterSource}
         scoreRange={filterScoreRange}
         onScoreRangeChange={setFilterScoreRange}
+        channelFilter={channelFilter}
+        onChannelFilterChange={handleChannelFilterChange}
+        counts={outreachCounts}
         onExportCsv={handleExportCsv}
         onAddCandidateClick={() => setIsAddCandidateOpen(true)}
         columns={columns}
@@ -779,22 +900,47 @@ export default function CandidateTable() {
                     {/* Outreach status */}
                     {columns.outreach && (
                       <td className="table-cell">
-                        {candidate.outreachStatus === 'Pending Approval' || candidate.outreachStatus === 'Not Sent' ? (
-                          <button 
-                            onClick={() => handleStatusChange(candidate.id, 'ready-for-outreach', 'Approved')}
-                            className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full hover:bg-primary/20 transition-colors flex items-center gap-1"
-                          >
-                            <Send size={10} />
-                            Approve
-                          </button>
-                        ) : (
-                          <span className={`text-xs font-semibold ${
-                            candidate.outreachStatus === 'Sent' ? 'text-violet-700 dark:text-violet-400' :
-                            candidate.outreachStatus === 'Approved'? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'
-                          }`}>
-                            {candidate.outreachStatus}
-                          </span>
-                        )}
+                        {(() => {
+                          const contact = resolveCandidateContact(candidate);
+                          const isSentWA = candidate.outreachStatus?.includes('WhatsApp') || (candidate.outreachStatus === 'Sent' && !contact.email);
+                          const isSentEmail = candidate.outreachStatus?.includes('Email') || (candidate.outreachStatus === 'Sent' && contact.email);
+
+                          if (candidate.outreachStatus === 'Pending Approval' || candidate.outreachStatus === 'Not Sent') {
+                            return (
+                              <button 
+                                onClick={() => handleStatusChange(candidate.id, 'ready-for-outreach', 'Approved')}
+                                className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full hover:bg-primary/20 transition-colors flex items-center gap-1 cursor-pointer"
+                                title="Approve this astrologer for outreach"
+                              >
+                                <Send size={10} />
+                                Approve
+                              </button>
+                            );
+                          }
+                          if (isSentWA) {
+                            return (
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60">
+                                <MessageCircle size={11} className="text-emerald-600" />
+                                WhatsApp Sent
+                              </span>
+                            );
+                          }
+                          if (isSentEmail) {
+                            return (
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/40 text-violet-800 dark:text-violet-300 border border-violet-300/60">
+                                <Mail size={11} className="text-violet-600" />
+                                Email Sent
+                              </span>
+                            );
+                          }
+                          return (
+                            <span className={`text-xs font-semibold ${
+                              candidate.outreachStatus === 'Approved'? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'
+                            }`}>
+                              {candidate.outreachStatus}
+                            </span>
+                          );
+                        })()}
                       </td>
                     )}
 
@@ -826,6 +972,30 @@ export default function CandidateTable() {
                             >
                               <Eye size={15} />
                             </button>
+
+                            {/* Direct WhatsApp Action */}
+                            {contact.phone && (
+                              <button
+                                onClick={() => handleDirectWhatsApp(candidate, contact.phone!)}
+                                className="btn-ghost p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded transition-colors"
+                                title={`Send Direct WhatsApp Invitation to ${candidate.name} (${contact.phone})`}
+                              >
+                                <MessageCircle size={15} />
+                              </button>
+                            )}
+
+                            {/* AI Email Compose Link */}
+                            {contact.email && (
+                              <Link
+                                href={`/outreach/messages?name=${encodeURIComponent(candidate.name)}&email=${encodeURIComponent(contact.email)}${contact.phone ? `&phone=${encodeURIComponent(contact.phone)}` : ''}&location=${encodeURIComponent(candidate.location)}&specialisation=${encodeURIComponent(candidate.specialisations?.[0] || 'Vedic Astrology')}`}
+                                className="btn-ghost p-1.5 text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-950/50 rounded"
+                                title={`Send AI Email Outreach to ${contact.email}`}
+                              >
+                                <Mail size={15} />
+                              </Link>
+                            )}
+
+                            {/* AI Dossier Modal */}
                             <button
                               onClick={() => handleAiQualify(candidate)}
                               className="btn-ghost p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded"
@@ -833,13 +1003,8 @@ export default function CandidateTable() {
                             >
                               <Sparkles size={14} />
                             </button>
-                            <Link
-                              href={`/outreach/messages?name=${encodeURIComponent(candidate.name)}${contact.email ? `&email=${encodeURIComponent(contact.email)}` : ''}${contact.phone ? `&phone=${encodeURIComponent(contact.phone)}` : ''}&location=${encodeURIComponent(candidate.location)}&specialisation=${encodeURIComponent(candidate.specialisations?.[0] || 'Vedic Astrology')}`}
-                              className="btn-ghost p-1.5 text-muted-foreground hover:text-foreground rounded"
-                              title="Compose Outreach with AI"
-                            >
-                              <Send size={14} />
-                            </Link>
+
+                            {/* More Actions Dropdown */}
                             <div className="relative">
                               <button
                                 onClick={() => setActionMenuOpen(actionMenuOpen === candidate.id ? null : candidate.id)}

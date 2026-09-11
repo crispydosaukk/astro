@@ -5,6 +5,8 @@ import type { ReviewCandidate } from './ReviewWorkspace';
 import Modal from '@/components/ui/Modal';
 import { CheckCircle2, XCircle, MessageSquare, PauseCircle, AlertTriangle, Shield } from 'lucide-react';
 import { updateCandidateStatus } from '@/lib/firebase/candidateService';
+import { db } from '@/lib/firebase/config';
+import { doc, setDoc } from 'firebase/firestore';
 
 interface ReviewDecisionBarProps {
   candidate: ReviewCandidate;
@@ -23,7 +25,7 @@ export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps)
     try {
       // Map decision to lifecycle status
       let newLifecycle = candidate.status;
-      if (confirmModal === 'approve') newLifecycle = 'probation';
+      if (confirmModal === 'approve') newLifecycle = 'verified';
       else if (confirmModal === 'reject') newLifecycle = 'rejected';
       else if (confirmModal === 'request-info') newLifecycle = 'pending-info';
       else if (confirmModal === 'hold') newLifecycle = 'on-hold';
@@ -34,6 +36,68 @@ export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps)
           lifecycleStatus: newLifecycle,
           applicationStatus: confirmModal === 'approve' ? 'Approved' : confirmModal === 'reject' ? 'Rejected' : 'Under Review'
         });
+
+        // If approved, activate astrologer account in 'astrologers' collection
+        if (confirmModal === 'approve' && db) {
+          const astRef = doc(db, 'astrologers', candidate.id);
+          await setDoc(astRef, {
+            id: candidate.id,
+            name: candidate.name,
+            location: candidate.location,
+            speciality: candidate.specialisations?.[0] || 'Vedic Astrology',
+            isVerified: true,
+            status: 'active',
+            verifiedAt: new Date().toISOString(),
+          }, { merge: true });
+
+          // Send approval confirmation email
+          const targetEmail = (candidate as any).email;
+          if (targetEmail && targetEmail.includes('@')) {
+            try {
+              const html = `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1a1a1a; line-height: 1.6; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                  <div style="text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #713B32;">
+                    <h2 style="color: #713B32; margin: 0; font-size: 22px;">AstroParihar Onboarding Approval</h2>
+                    <p style="color: #16a34a; margin: 4px 0 0 0; font-size: 14px; font-weight: bold;">✓ Profile Verified & Activated</p>
+                  </div>
+                  
+                  <p style="font-size: 16px;">Namaste <strong>${candidate.name} Ji</strong> 🙏,</p>
+                  
+                  <p>Congratulations! Your astrologer credentials, Vedic assessment, and AI screening interview have been approved by the <strong>AstroParihar Verification Committee</strong>.</p>
+                  
+                  <p>Your verified astrologer panel access is now active. You can log in to your Astrologer Dashboard to manage your schedule, accept consultations, and view client earnings.</p>
+                  
+                  <div style="text-align: center; margin: 28px 0;">
+                    <a href="https://astroparihar.com/astrologer-login" style="background: #713B32; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 15px; display: inline-block;">
+                      Login to Astrologer Dashboard →
+                    </a>
+                  </div>
+                  
+                  <p style="font-size: 13px; color: #718096; margin-top: 24px;">
+                    Warm regards,<br/>
+                    <strong>Recruitment & Astrological Compliance Panel</strong><br/>
+                    AstroParihar (astropariharuk@gmail.com)
+                  </p>
+                </div>
+              `;
+
+              await fetch('/api/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  to: targetEmail,
+                  subject: `Account Verified: Welcome to AstroParihar Astrologer Panel`,
+                  body: `Namaste ${candidate.name} Ji,\n\nCongratulations! Your AstroParihar Astrologer Account has been verified and approved.\n\nYou can log in at: https://astroparihar.com/astrologer-login\n\nWarm regards,\nAstroParihar Team`,
+                  html,
+                  candidateName: candidate.name,
+                  candidateId: candidate.id,
+                })
+              });
+            } catch (err) {
+              console.warn('Approval email send error:', err);
+            }
+          }
+        }
       } catch (e) {
         console.warn('Could not sync directly to Firestore (local record update):', e);
       }
@@ -44,7 +108,7 @@ export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps)
       setConfirmModal(null);
       setDecided(true);
       setDecisionMade(
-        confirmModal === 'approve' ? 'Approved for 30-Day Probation' :
+        confirmModal === 'approve' ? 'Approved & Account Activated' :
         confirmModal === 'reject' ? 'Application Rejected' :
         confirmModal === 'request-info' ? 'Additional Information Requested' :
         'Placed on Hold'
