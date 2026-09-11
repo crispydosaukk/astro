@@ -7,8 +7,10 @@ import {
   Candidate, 
   initialCandidatesData, 
   subscribeToCandidates, 
-  updateCandidateStatus 
+  updateCandidateStatus,
+  resolveCandidateContact
 } from '@/lib/firebase/candidateService';
+import CandidateProfileModal from '@/components/candidates/CandidateProfileModal';
 import Link from 'next/link';
 
 export default function OutreachPendingPage() {
@@ -17,6 +19,7 @@ export default function OutreachPendingPage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [viewCandidate, setViewCandidate] = useState<Candidate | null>(null);
 
   useEffect(() => {
     try {
@@ -150,7 +153,7 @@ export default function OutreachPendingPage() {
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Candidate</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Specialisation</th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">AI Score</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Rating</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
                   <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</th>
                 </tr>
@@ -176,8 +179,49 @@ export default function OutreachPendingPage() {
                           />
                         </td>
                         <td className="px-4 py-3">
-                          <p className="font-semibold text-foreground">{c.name}</p>
-                          <p className="text-xs text-muted-foreground">{c.businessName || c.location} · {c.experience}</p>
+                          {(() => {
+                            const contact = resolveCandidateContact(c);
+                            return (
+                              <div>
+                                <button
+                                  onClick={() => setViewCandidate(c)}
+                                  className="font-semibold text-foreground text-left hover:text-primary hover:underline transition-colors block"
+                                  title="Click to view complete profile and contact details"
+                                >
+                                  {c.name}
+                                </button>
+                                <p className="text-xs text-muted-foreground">{c.businessName || c.location} · {c.experience}</p>
+                                <div className="flex flex-wrap items-center gap-2 mt-1 text-2xs text-muted-foreground">
+                                {contact.phone && <span className="font-mono text-foreground">{contact.phone}</span>}
+                                {contact.phone && (contact.website || contact.email) && <span>•</span>}
+                                {contact.website && (
+                                  <a
+                                    href={contact.website}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline truncate max-w-[140px]"
+                                  >
+                                    {contact.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                                  </a>
+                                )}
+                                {contact.email && (
+                                  <>
+                                    {contact.website && <span>•</span>}
+                                    <a
+                                      href={`mailto:${contact.email}`}
+                                      className="text-muted-foreground hover:text-primary hover:underline truncate max-w-[180px]"
+                                    >
+                                      {contact.email}
+                                    </a>
+                                  </>
+                                )}
+                                {!contact.phone && !contact.website && !contact.email && (
+                                  <span className="text-muted-foreground/60 italic">Contact not publicly listed</span>
+                                )}
+                              </div>
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <div className="flex flex-wrap gap-1">
@@ -189,8 +233,8 @@ export default function OutreachPendingPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary">
-                            <Sparkles size={11} /> {c.aiScore}
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                            ★ {c.rating || 4.8}
                           </span>
                         </td>
                         <td className="px-4 py-3">
@@ -199,21 +243,33 @@ export default function OutreachPendingPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => handleApprove(c.id)}
-                              disabled={isUpdating}
-                              className="px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1 transition-colors"
-                            >
-                              <CheckCircle2 size={12} /> Approve
-                            </button>
-                            <Link
-                              href={`/outreach/messages`}
-                              className="px-3 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-semibold flex items-center gap-1 transition-opacity"
-                            >
-                              <Send size={12} /> Compose Invite
-                            </Link>
-                          </div>
+                          {(() => {
+                            const contact = resolveCandidateContact(c);
+                            return (
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button
+                                  onClick={() => setViewCandidate(c)}
+                                  className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                  title="View Candidate Profile & Contact Details (Eye)"
+                                >
+                                  <Eye size={15} />
+                                </button>
+                                <button
+                                  onClick={() => handleApprove(c.id)}
+                                  disabled={isUpdating}
+                                  className="px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1 transition-colors"
+                                >
+                                  <CheckCircle2 size={12} /> Approve
+                                </button>
+                                <Link
+                                  href={`/outreach/messages?name=${encodeURIComponent(c.name)}&email=${encodeURIComponent(contact.email || '')}&phone=${encodeURIComponent(contact.phone || '')}&location=${encodeURIComponent(c.location)}&specialisation=${encodeURIComponent(c.specialisations?.[0] || 'Vedic Astrology')}`}
+                                  className="px-3 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-semibold flex items-center gap-1 transition-opacity"
+                                >
+                                  <Send size={12} /> Compose
+                                </Link>
+                              </div>
+                            );
+                          })()}
                         </td>
                       </tr>
                     );
@@ -223,6 +279,13 @@ export default function OutreachPendingPage() {
             </table>
           </div>
         </div>
+
+        {/* View Profile & History Modal */}
+        <CandidateProfileModal
+          candidate={viewCandidate}
+          onClose={() => setViewCandidate(null)}
+          onApproveOutreach={(id) => handleApprove(id)}
+        />
       </div>
     </AppLayout>
   );

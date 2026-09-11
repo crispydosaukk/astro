@@ -7,8 +7,10 @@ import {
   Candidate, 
   initialCandidatesData, 
   subscribeToCandidates, 
-  updateCandidateStatus 
+  updateCandidateStatus,
+  resolveCandidateContact
 } from '@/lib/firebase/candidateService';
+import CandidateProfileModal from '@/components/candidates/CandidateProfileModal';
 import Link from 'next/link';
 
 export default function QualifiedCandidatesPage() {
@@ -184,7 +186,7 @@ export default function QualifiedCandidatesPage() {
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Candidate</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Specialisation</th>
-                  <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">AI Score</th>
+                  <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Rating</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Outreach Status</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Discovery Source</th>
                   <th className="text-center px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</th>
@@ -207,8 +209,49 @@ export default function QualifiedCandidatesPage() {
                         />
                       </td>
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-foreground">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.businessName || c.location} · {c.experience}</p>
+                        {(() => {
+                          const contact = resolveCandidateContact(c);
+                          return (
+                            <div>
+                              <button
+                                onClick={() => setViewCandidate(c)}
+                                className="font-semibold text-foreground text-left hover:text-primary hover:underline transition-colors block"
+                                title="Click to view complete profile and contact details"
+                              >
+                                {c.name}
+                              </button>
+                              <p className="text-xs text-muted-foreground">{c.businessName || c.location} · {c.experience}</p>
+                              <div className="flex flex-wrap items-center gap-2 mt-1 text-2xs text-muted-foreground">
+                                {contact.phone && <span className="font-mono text-foreground">{contact.phone}</span>}
+                                {contact.phone && (contact.website || contact.email) && <span>•</span>}
+                                {contact.website && (
+                                  <a
+                                    href={contact.website}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline truncate max-w-[150px]"
+                                  >
+                                    {contact.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                                  </a>
+                                )}
+                                {contact.email && (
+                                  <>
+                                    {contact.website && <span>•</span>}
+                                    <a
+                                      href={`mailto:${contact.email}`}
+                                      className="text-muted-foreground hover:text-primary hover:underline truncate max-w-[180px]"
+                                    >
+                                      {contact.email}
+                                    </a>
+                                  </>
+                                )}
+                                {!contact.phone && !contact.website && !contact.email && (
+                                  <span className="text-muted-foreground/60 italic">Contact not publicly listed</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <div className="flex flex-wrap gap-1">
@@ -220,10 +263,8 @@ export default function QualifiedCandidatesPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          c.aiScore >= 90 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
-                        }`}>
-                          <Sparkles size={11} /> {c.aiScore}
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                          ★ {c.rating || 4.8}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -274,74 +315,12 @@ export default function QualifiedCandidatesPage() {
           </div>
         </div>
 
-        {/* View Modal */}
-        {viewCandidate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-card border border-border w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4">
-              <div className="flex items-start justify-between border-b border-border pb-3">
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">{viewCandidate.name}</h3>
-                  <p className="text-xs text-muted-foreground">{viewCandidate.businessName} · {viewCandidate.location}</p>
-                </div>
-                <button 
-                  onClick={() => setViewCandidate(null)}
-                  className="p-1 rounded-lg text-muted-foreground hover:bg-muted"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="space-y-3 text-sm">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-muted/40 p-3 rounded-xl">
-                    <p className="text-2xs font-semibold text-muted-foreground uppercase">AI Qualification Score</p>
-                    <p className="text-xl font-bold text-primary mt-0.5">{viewCandidate.aiScore} / 100</p>
-                  </div>
-                  <div className="bg-muted/40 p-3 rounded-xl">
-                    <p className="text-2xs font-semibold text-muted-foreground uppercase">Experience</p>
-                    <p className="text-xl font-bold text-foreground mt-0.5">{viewCandidate.experience}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground mb-1">Specialisations:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {viewCandidate.specialisations.map((s, i) => (
-                      <span key={i} className="text-xs bg-primary/10 text-primary font-medium px-2.5 py-1 rounded-full">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground mb-1">Lifecycle Stage:</p>
-                  <p className="text-xs font-mono font-medium text-foreground bg-muted p-2 rounded-lg">{viewCandidate.lifecycleStatus}</p>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-border">
-                <button
-                  onClick={() => setViewCandidate(null)}
-                  className="btn-secondary text-xs py-2 px-4"
-                >
-                  Close
-                </button>
-                {viewCandidate.outreachStatus !== 'Approved' && (
-                  <button
-                    onClick={() => {
-                      handleApprove(viewCandidate.id);
-                      setViewCandidate(null);
-                    }}
-                    className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5"
-                  >
-                    <Send size={12} /> Approve Outreach
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* View Modal - Complete Profile & History */}
+        <CandidateProfileModal
+          candidate={viewCandidate}
+          onClose={() => setViewCandidate(null)}
+          onApproveOutreach={(id) => handleApprove(id)}
+        />
       </div>
     </AppLayout>
   );

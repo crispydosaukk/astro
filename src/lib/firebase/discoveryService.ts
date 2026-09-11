@@ -126,8 +126,11 @@ export function subscribeToCampaigns(
 export async function saveCampaignToFirestore(campaign: Campaign): Promise<void> {
   try {
     const docRef = doc(db, CAMPAIGNS_COLLECTION, campaign.id);
+    const cleanData = Object.fromEntries(
+      Object.entries(campaign).filter(([_, val]) => val !== undefined)
+    );
     await setDoc(docRef, {
-      ...campaign,
+      ...cleanData,
       createdAt: campaign.createdAt || serverTimestamp(),
     }, { merge: true });
   } catch (err) {
@@ -148,12 +151,49 @@ export async function deleteCampaignFromFirestore(id: string): Promise<void> {
 }
 
 /**
+ * Delete ALL campaigns from Firestore
+ */
+export async function deleteAllCampaignsFromFirestore(): Promise<{ count: number; success: boolean }> {
+  try {
+    const colRef = collection(db, CAMPAIGNS_COLLECTION);
+    const snap = await getDocs(colRef);
+    let deleted = 0;
+    for (const docSnap of snap.docs) {
+      await deleteDoc(docSnap.ref);
+      deleted++;
+    }
+    return { count: deleted, success: true };
+  } catch (err) {
+    console.error('Failed to delete all campaigns:', err);
+    return { count: 0, success: false };
+  }
+}
+
+/**
+ * Clear search history from Firestore
+ */
+export async function clearSearchHistoryFromFirestore(): Promise<void> {
+  try {
+    const colRef = collection(db, SEARCH_HISTORY_COLLECTION);
+    const snap = await getDocs(colRef);
+    for (const docSnap of snap.docs) {
+      await deleteDoc(docSnap.ref);
+    }
+  } catch (err) {
+    console.warn('Failed to clear search history:', err);
+  }
+}
+
+/**
  * Save search history record
  */
 export async function saveSearchRecordToFirestore(record: SearchRecord): Promise<void> {
   try {
     const docRef = doc(db, SEARCH_HISTORY_COLLECTION, record.id);
-    await setDoc(docRef, record, { merge: true });
+    const cleanData = Object.fromEntries(
+      Object.entries(record).filter(([_, val]) => val !== undefined)
+    );
+    await setDoc(docRef, cleanData, { merge: true });
   } catch (err) {
     console.warn('Error saving search record to Firestore:', err);
   }

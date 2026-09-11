@@ -35,7 +35,6 @@ export default function CampaignCards() {
               <span className="text-xs font-semibold bg-accent/10 text-accent px-2 py-0.5 rounded-full">
                 {c.specialisation}
               </span>
-              <span className="text-xs text-muted-foreground">Min score: {c.minScore}</span>
             </div>
 
             {c.status === 'completed' ? (

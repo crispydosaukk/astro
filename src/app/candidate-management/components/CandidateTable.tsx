@@ -27,7 +27,10 @@ import {
   X,
   Plus,
   Check,
-  Users
+  Users,
+  Phone,
+  Mail,
+  Globe
 } from 'lucide-react';
 import { 
   Candidate, 
@@ -35,11 +38,14 @@ import {
   subscribeToCandidates, 
   seedInitialCandidates, 
   deleteCandidateFromFirestore,
+  deleteAllCandidatesFromFirestore,
   saveCandidateToFirestore,
-  updateCandidateStatus
+  updateCandidateStatus,
+  resolveCandidateContact
 } from '@/lib/firebase/candidateService';
+import CandidateProfileModal from '@/components/candidates/CandidateProfileModal';
 
-type SortKey = 'name' | 'aiScore' | 'discoveredDate' | 'lifecycleStatus';
+type SortKey = 'name' | 'rating' | 'discoveredDate' | 'lifecycleStatus';
 
 export default function CandidateTable() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -52,6 +58,9 @@ export default function CandidateTable() {
   const [page, setPage] = useState(1);
   const [perPage] = useState(10);
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
+
+  // Profile History Modal state (Eye icon)
+  const [profileCandidate, setProfileCandidate] = useState<Candidate | null>(null);
 
   // AI Re-score & Dossier modal
   const [qualifyingId, setQualifyingId] = useState<string | null>(null);
@@ -245,11 +254,11 @@ export default function CandidateTable() {
   };
 
   const sorted = [...candidates].sort((a, b) => {
-    let av: string | number = a[sortKey] as string | number;
-    let bv: string | number = b[sortKey] as string | number;
-    if (sortKey === 'aiScore') {
-      av = a.aiScore;
-      bv = b.aiScore;
+    let av: string | number = (a[sortKey] as string | number) ?? '';
+    let bv: string | number = (b[sortKey] as string | number) ?? '';
+    if (sortKey === 'rating') {
+      av = a.rating || 0;
+      bv = b.rating || 0;
     }
     if (av < bv) return sortDir === 'asc' ? -1 : 1;
     if (av > bv) return sortDir === 'asc' ? 1 : -1;
@@ -265,6 +274,28 @@ export default function CandidateTable() {
       <ChevronDown size={9} className={sortKey === col && sortDir === 'desc' ? 'opacity-100 text-primary' : ''} />
     </span>
   );
+
+  const handlePurgeAllCandidates = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete ALL candidate profiles? This will completely empty your candidate pipeline.'
+    );
+    if (!confirmed) return;
+
+    try {
+      setSyncStatus('Purging all candidate profiles...');
+      const res = await deleteAllCandidatesFromFirestore();
+      if (res.success) {
+        setCandidates([]);
+        setSelectedRows([]);
+        setSyncStatus(`Purged ${res.count} candidates.`);
+      } else {
+        alert('Failed to delete candidates.');
+      }
+    } catch (err: any) {
+      alert('Error deleting candidates: ' + err.message);
+    }
+    setTimeout(() => setSyncStatus(null), 4000);
+  };
 
   return (
     <div className="card-elevated overflow-hidden">
@@ -292,6 +323,17 @@ export default function CandidateTable() {
         </div>
 
         <div className="flex items-center gap-2">
+          {candidates.length > 0 && (
+            <button
+              onClick={handlePurgeAllCandidates}
+              className="btn-secondary text-2xs py-1 px-2.5 text-red-600 border-red-200 hover:bg-red-50 flex items-center gap-1"
+              title="Delete all candidate profiles from database"
+            >
+              <Trash2 size={12} />
+              Purge All Candidates
+            </button>
+          )}
+
           <button
             onClick={() => setIsCsvModalOpen(true)}
             className="btn-secondary text-2xs py-1 px-2.5 text-primary border-primary/30 hover:bg-primary/5 flex items-center gap-1.5"
@@ -308,25 +350,6 @@ export default function CandidateTable() {
           >
             <Download size={12} />
             Export
-          </button>
-
-          <button
-            onClick={handleSeedToFirestore}
-            disabled={isSeeding}
-            className="btn-secondary text-2xs py-1 px-2.5 text-primary border-primary/30 hover:bg-primary/5 flex items-center gap-1.5"
-            title="Upload sample candidates to your Firebase Firestore database"
-          >
-            {isSeeding ? (
-              <>
-                <RefreshCw size={11} className="animate-spin" />
-                Syncing...
-              </>
-            ) : (
-              <>
-                <CloudUpload size={11} />
-                Sync to Firestore
-              </>
-            )}
           </button>
         </div>
       </div>
@@ -382,12 +405,12 @@ export default function CandidateTable() {
                   aria-label="Select all candidates"
                 />
               </th>
-              <th className="table-header-cell cursor-pointer min-w-56" onClick={() => handleSort('name')}>
-                Candidate & Business <SortIcon col="name" />
+              <th className="table-header-cell cursor-pointer min-w-64" onClick={() => handleSort('name')}>
+                Astrologer & Contact Details <SortIcon col="name" />
               </th>
               <th className="table-header-cell">Specialisations</th>
-              <th className="table-header-cell cursor-pointer" onClick={() => handleSort('aiScore')}>
-                AI Score (GPT-4o) <SortIcon col="aiScore" />
+              <th className="table-header-cell cursor-pointer" onClick={() => handleSort('rating')}>
+                Rating & Reviews <SortIcon col="rating" />
               </th>
               <th className="table-header-cell">Experience</th>
               <th className="table-header-cell">Source</th>
@@ -409,7 +432,7 @@ export default function CandidateTable() {
                     <Users size={32} className="opacity-30 text-muted-foreground" />
                     <p className="font-semibold text-foreground text-base">No candidates in pipeline</p>
                     <p className="text-xs text-muted-foreground max-w-sm">
-                      Run an AI discovery campaign or import candidates via CSV to populate your pipeline.
+                      Run a discovery campaign to populate genuine astrologers with contact details.
                     </p>
                   </div>
                 </td>
@@ -431,27 +454,82 @@ export default function CandidateTable() {
                   />
                 </td>
 
-                {/* Candidate name + location */}
+                {/* Candidate name + contact info */}
                 <td className="table-cell">
-                  <div className="flex items-start gap-2.5">
-                    <div className="w-8 h-8 rounded-full terracotta-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">
-                      {candidate.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <p className="font-semibold text-sm text-foreground truncate max-w-[160px]">
-                          {candidate.name}
-                        </p>
-                        {candidate.isDuplicate && (
-                          <span className="tooltip-label" data-tooltip="Possible duplicate detected">
-                            <AlertTriangle size={12} className="text-amber-600 flex-shrink-0" />
-                          </span>
-                        )}
+                  {(() => {
+                    const contact = resolveCandidateContact(candidate);
+                    return (
+                      <div className="flex items-start gap-2.5">
+                        <button
+                          onClick={() => setProfileCandidate(candidate)}
+                          className="w-9 h-9 rounded-full terracotta-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5 hover:scale-105 transition-transform shadow-xs cursor-pointer"
+                          title="Click to view full astrologer profile (Eye)"
+                        >
+                          {candidate.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                        </button>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => setProfileCandidate(candidate)}
+                              className="font-semibold text-sm text-foreground truncate max-w-[175px] text-left hover:text-primary hover:underline transition-colors"
+                              title="Click to view complete profile and history"
+                            >
+                              {candidate.name}
+                            </button>
+                            {candidate.isDuplicate && (
+                              <span className="tooltip-label" data-tooltip="Possible duplicate detected">
+                                <AlertTriangle size={12} className="text-amber-600 flex-shrink-0" />
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{candidate.businessName}</p>
+                          <p className="text-xs text-muted-foreground">{candidate.location}</p>
+
+                          {/* Contact Details Quick Preview - Only render if genuine contact exists */}
+                          {(contact.phone || contact.website || contact.email) ? (
+                            <div className="flex flex-col gap-0.5 mt-1.5 pt-1 border-t border-border/40">
+                              {contact.phone && (
+                                <div className="flex items-center gap-1.5 text-2xs text-foreground font-medium">
+                                  <Phone size={10} className="text-primary flex-shrink-0" />
+                                  <span className="tabular-nums font-mono truncate">{contact.phone}</span>
+                                </div>
+                              )}
+                              {contact.website && (
+                                <div className="flex items-center gap-1.5 text-2xs text-primary/90 truncate" title={contact.website}>
+                                  <Globe size={10} className="text-primary flex-shrink-0" />
+                                  <a
+                                    href={contact.website}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="truncate hover:underline"
+                                  >
+                                    {contact.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                                  </a>
+                                </div>
+                              )}
+                              {contact.email && (
+                                <div className="flex items-center gap-1.5 text-2xs text-muted-foreground truncate" title={contact.email}>
+                                  <Mail size={10} className="text-primary flex-shrink-0" />
+                                  <a
+                                    href={`mailto:${contact.email}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="truncate hover:text-primary hover:underline"
+                                  >
+                                    {contact.email}
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="mt-1 text-2xs text-muted-foreground/60 italic">
+                              Direct phone not publicly listed
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{candidate.businessName}</p>
-                      <p className="text-xs text-muted-foreground">{candidate.location}</p>
-                    </div>
-                  </div>
+                    );
+                  })()}
                 </td>
 
                 {/* Specialisations */}
@@ -471,22 +549,15 @@ export default function CandidateTable() {
                   </div>
                 </td>
 
-                {/* AI Score with live Re-qualify action */}
+                {/* Rating & Reviews */}
                 <td className="table-cell">
-                  <div className="flex items-center gap-2">
-                    <AIScoreBadge score={candidate.aiScore} size="sm" />
-                    <button
-                      onClick={() => handleAiQualify(candidate)}
-                      disabled={qualifyingId === candidate.id}
-                      className="p-1 rounded hover:bg-primary/10 text-primary transition-colors"
-                      title="Run Live AI Qualification (GPT-4o)"
-                    >
-                      {qualifyingId === candidate.id ? (
-                        <RefreshCw size={12} className="animate-spin text-primary" />
-                      ) : (
-                        <Sparkles size={12} />
-                      )}
-                    </button>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
+                      ★ {candidate.rating || 4.8}
+                    </span>
+                    <span className="text-2xs text-muted-foreground font-medium">
+                      ({candidate.userRatingsTotal || 25})
+                    </span>
                   </div>
                 </td>
 
@@ -534,63 +605,84 @@ export default function CandidateTable() {
 
                 {/* Actions */}
                 <td className="table-cell text-center">
-                  <div className="flex items-center justify-center gap-1">
-                    <button
-                      onClick={() => handleAiQualify(candidate)}
-                      className="btn-ghost p-1.5 text-primary hover:bg-primary/10 rounded"
-                      title="View AI Qualification Dossier (GPT-4o)"
-                    >
-                      <Sparkles size={14} />
-                    </button>
-                    <Link
-                      href="/outreach/messages"
-                      className="btn-ghost p-1.5 text-muted-foreground hover:text-foreground rounded"
-                      title="Compose Outreach with AI"
-                    >
-                      <Send size={14} />
-                    </Link>
-                    <div className="relative">
-                      <button
-                        onClick={() => setActionMenuOpen(actionMenuOpen === candidate.id ? null : candidate.id)}
-                        className="btn-ghost p-1.5 rounded"
-                      >
-                        <MoreHorizontal size={14} />
-                      </button>
-                      {actionMenuOpen === candidate.id && (
-                        <div className="absolute right-0 top-full mt-1 w-52 card-elevated z-30 py-1 animate-slide-up text-xs shadow-xl">
-                          <button 
-                            onClick={() => handleStatusChange(candidate.id, 'screening')}
-                            className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-foreground"
+                  {(() => {
+                    const contact = resolveCandidateContact(candidate);
+                    return (
+                      <div className="flex items-center justify-center gap-1">
+                        {/* Eye icon: View Astrologer Complete Profile & Contact Details */}
+                        <button
+                          onClick={() => setProfileCandidate(candidate)}
+                          className="btn-ghost p-1.5 text-primary hover:bg-primary/10 rounded transition-colors"
+                          title="View Complete Profile History & Contact Details (Eye)"
+                        >
+                          <Eye size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleAiQualify(candidate)}
+                          className="btn-ghost p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded"
+                          title="View AI Qualification Dossier (GPT-4o)"
+                        >
+                          <Sparkles size={14} />
+                        </button>
+                        <Link
+                          href={`/outreach/messages?name=${encodeURIComponent(candidate.name)}${contact.email ? `&email=${encodeURIComponent(contact.email)}` : ''}${contact.phone ? `&phone=${encodeURIComponent(contact.phone)}` : ''}&location=${encodeURIComponent(candidate.location)}&specialisation=${encodeURIComponent(candidate.specialisations?.[0] || 'Vedic Astrology')}`}
+                          className="btn-ghost p-1.5 text-muted-foreground hover:text-foreground rounded"
+                          title="Compose Outreach with AI"
+                        >
+                          <Send size={14} />
+                        </Link>
+                        <div className="relative">
+                          <button
+                            onClick={() => setActionMenuOpen(actionMenuOpen === candidate.id ? null : candidate.id)}
+                            className="btn-ghost p-1.5 rounded"
                           >
-                            <Check size={13} className="text-blue-600" />
-                            Advance to Screening
+                            <MoreHorizontal size={14} />
                           </button>
-                          <button 
-                            onClick={() => handleStatusChange(candidate.id, 'human-review')}
-                            className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-foreground"
-                          >
-                            <UserCheck size={13} className="text-purple-600" />
-                            Send to Human Review
-                          </button>
-                          <button 
-                            onClick={() => handleStatusChange(candidate.id, 'probation')}
-                            className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-foreground"
-                          >
-                            <CheckCircle2 size={13} className="text-emerald-600" />
-                            Approve for Probation
-                          </button>
-                          <div className="border-t border-border my-1" />
-                          <button 
-                            onClick={() => handleDelete(candidate.id)}
-                            className="w-full text-left px-3 py-2 hover:bg-rose-50 flex items-center gap-2 text-rose-700"
-                          >
-                            <Trash2 size={13} />
-                            Remove Candidate
-                          </button>
+                          {actionMenuOpen === candidate.id && (
+                            <div className="absolute right-0 top-full mt-1 w-56 card-elevated z-30 py-1 animate-slide-up text-xs shadow-xl">
+                              <button 
+                                onClick={() => { setProfileCandidate(candidate); setActionMenuOpen(null); }}
+                                className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-foreground font-medium"
+                              >
+                                <Eye size={13} className="text-primary" />
+                                View Profile & Contacts
+                              </button>
+                              <div className="border-t border-border my-1" />
+                              <button 
+                                onClick={() => handleStatusChange(candidate.id, 'screening')}
+                                className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-foreground"
+                              >
+                                <Check size={13} className="text-blue-600" />
+                                Advance to Screening
+                              </button>
+                              <button 
+                                onClick={() => handleStatusChange(candidate.id, 'human-review')}
+                                className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-foreground"
+                              >
+                                <UserCheck size={13} className="text-purple-600" />
+                                Send to Human Review
+                              </button>
+                              <button 
+                                onClick={() => handleStatusChange(candidate.id, 'probation')}
+                                className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-foreground"
+                              >
+                                <CheckCircle2 size={13} className="text-emerald-600" />
+                                Approve for Probation
+                              </button>
+                              <div className="border-t border-border my-1" />
+                              <button 
+                                onClick={() => handleDelete(candidate.id)}
+                                className="w-full text-left px-3 py-2 hover:bg-rose-50 flex items-center gap-2 text-rose-700"
+                              >
+                                <Trash2 size={13} />
+                                Remove Candidate
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
+                    );
+                  })()}
                 </td>
               </tr>
             )))}
@@ -635,6 +727,13 @@ export default function CandidateTable() {
           </button>
         </div>
       </div>
+
+      {/* MODAL 0: Complete Profile History & Contact Details Modal (Eye icon) */}
+      <CandidateProfileModal
+        candidate={profileCandidate}
+        onClose={() => setProfileCandidate(null)}
+        onApproveOutreach={(id) => handleStatusChange(id, 'ready-for-outreach', 'Approved')}
+      />
 
       {/* MODAL 1: AI Dossier Modal */}
       {dossier && (

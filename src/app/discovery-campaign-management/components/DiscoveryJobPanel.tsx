@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Zap, Clock, CheckCircle2, ChevronDown, ChevronUp, RefreshCw, Loader2, Sparkles, Play } from 'lucide-react';
+import Link from 'next/link';
+import { Zap, Clock, CheckCircle2, ChevronDown, ChevronUp, RefreshCw, Loader2, Sparkles, Play, Users, ArrowRight } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { useDiscovery } from '../DiscoveryContext';
 
@@ -67,6 +68,19 @@ export default function DiscoveryJobPanel() {
               </div>
             ))}
           </div>
+
+          {activeJob.discovered > 0 && (
+            <Link
+              href="/candidate-management"
+              className="w-full py-2.5 px-3.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-xs font-semibold rounded-lg flex items-center justify-between transition-colors shadow-2xs"
+            >
+              <span className="flex items-center gap-2">
+                <Users size={14} />
+                View Discovered Astrologers & Contacts ({activeJob.discovered} Found)
+              </span>
+              <ArrowRight size={13} />
+            </Link>
+          )}
 
           {/* Search Queries dropdown */}
           <div className="border border-border rounded-lg overflow-hidden">

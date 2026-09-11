@@ -39,7 +39,6 @@ export default function CampaignTable() {
                 <th className="table-header-cell text-right">Found</th>
                 <th className="table-header-cell text-right">Qualified</th>
                 <th className="table-header-cell text-right">Dupes</th>
-                <th className="table-header-cell">Min Score</th>
                 <th className="table-header-cell">Status</th>
                 <th className="table-header-cell">Last Run</th>
                 <th className="table-header-cell w-28 text-center">Actions</th>
@@ -48,8 +47,8 @@ export default function CampaignTable() {
             <tbody>
               {campaigns.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-16 text-muted-foreground text-sm">
-                    No discovery campaigns found. Click &quot;+ New Campaign&quot; above to create a new AI discovery run.
+                  <td colSpan={9} className="text-center py-16 text-muted-foreground text-sm">
+                    No discovery campaigns found. Click &quot;+ New Campaign&quot; above to create a new discovery run.
                   </td>
                 </tr>
               ) : (
@@ -80,9 +79,6 @@ export default function CampaignTable() {
                     <span className={`font-bold tabular-nums text-sm ${c.duplicates > 0 ? 'text-amber-700' : 'text-muted-foreground'}`}>
                       {c.duplicates}
                     </span>
-                  </td>
-                  <td className="table-cell">
-                    <span className="text-sm font-bold tabular-nums text-foreground">{c.minScore}</span>
                   </td>
                   <td className="table-cell">
                     <StatusBadge status={c.status} size="sm" />

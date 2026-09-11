@@ -1,9 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import AppLayout from '@/components/AppLayout';
 import { 
   MessageSquare, Search, ChevronDown, CheckCircle2, XCircle, Clock, 
-  Mail, Smartphone, Sparkles, Send, Eye, X, Copy, Check, RefreshCw
+  Mail, Smartphone, Sparkles, Send, Eye, X, Copy, Check, RefreshCw,
+  Users, ArrowRight, Info
 } from 'lucide-react';
 
 import { queueEmailViaCloudFunction } from '@/lib/firebase/emailService';
@@ -57,6 +59,32 @@ export default function OutreachMessagesPage() {
   // View Modal State
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Auto-fill from query params when navigating from Candidate Profile Modal
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const nameParam = params.get('name');
+      const emailParam = params.get('email');
+      const phoneParam = params.get('phone');
+      const locParam = params.get('location');
+      const specParam = params.get('specialisation');
+      if (nameParam) {
+        setCandidateName(nameParam);
+        if (emailParam && emailParam !== 'null' && emailParam !== 'undefined') setRecipientEmail(emailParam);
+        if (phoneParam && phoneParam !== 'null' && phoneParam !== 'undefined') {
+          setRecipientPhone(phoneParam);
+          // If phone is available but email is not, default to WhatsApp channel
+          if (!emailParam || emailParam === 'null' || emailParam === 'undefined') {
+            setChannel('WhatsApp');
+          }
+        }
+        if (locParam) setLocation(locParam);
+        if (specParam) setSpecialisation(specParam);
+        setIsComposeOpen(true);
+      }
+    }
+  }, []);
 
   const handleGenerateAI = async () => {
     if (!candidateName.trim()) {
@@ -263,9 +291,27 @@ export default function OutreachMessagesPage() {
                 {filtered.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-muted-foreground">
-                      <MessageSquare size={32} className="mx-auto text-muted-foreground/30 mb-2" />
-                      <p className="font-semibold text-sm">No outreach messages recorded</p>
-                      <p className="text-xs">Sent email and WhatsApp invitations will appear here.</p>
+                      <MessageSquare size={36} className="mx-auto text-muted-foreground/30 mb-2.5" />
+                      <p className="font-semibold text-base text-foreground">No outreach messages recorded yet</p>
+                      <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
+                        Discovered astrologers from campaigns live in your candidate pipeline. Sent email and WhatsApp invitations will be tracked here.
+                      </p>
+                      <div className="mt-4 flex items-center justify-center gap-3">
+                        <Link
+                          href="/candidate-management"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-lg hover:opacity-90 transition shadow-xs"
+                        >
+                          <Users size={13} />
+                          View Discovered Candidates & Contact Info
+                        </Link>
+                        <button
+                          onClick={() => setIsComposeOpen(true)}
+                          className="btn-secondary text-xs py-2 px-3.5 flex items-center gap-1.5"
+                        >
+                          <Sparkles size={12} />
+                          Compose AI Message
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ) : (

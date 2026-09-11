@@ -12,31 +12,34 @@ interface CampaignFormData {
   name: string;
   location: string;
   country: string;
-  specialisation: string;
-  targetCount: number;
+  specialisations: string[];
   minExperience: number;
-  minAiScore: number;
+  targetCount: number;
   sources: string[];
   startImmediately: boolean;
 }
 
-const specialisations = [
+const availableSpecialisations = [
   'Vedic Jyotish', 
-  'KP System', 
+  'KP Astrology', 
   'Nadi Astrology', 
   'Prashna Kundali', 
   'Numerology', 
   'Vastu Shastra', 
-  'Lal Kitab'
+  'Lal Kitab',
+  'Tarot Reading',
+  'Palmistry'
 ];
 
-const searchSourcesList = ['Google Places', 'Web Search', 'Approved Directories', 'Social Profiles'];
+const searchSourcesList = ['Google Places', 'Justdial & Sulekha', 'Web Search', 'Verified Astrologer Directories'];
 
 export default function CampaignHeader() {
   const { campaigns, createCampaign, isExecuting } = useDiscovery();
   const [modalOpen, setModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPurging, setIsPurging] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [selectedSpecs, setSelectedSpecs] = useState<string[]>(['KP Astrology']);
 
   const runningCount = campaigns.filter(c => c.status === 'running').length;
 
@@ -52,11 +55,10 @@ export default function CampaignHeader() {
       name: '',
       location: '',
       country: 'India',
-      specialisation: 'Vedic Jyotish',
-      minAiScore: 80,
+      specialisations: ['KP Astrology'],
       minExperience: 5,
       targetCount: 50,
-      sources: ['Google Places', 'Web Search'],
+      sources: ['Google Places', 'Justdial & Sulekha'],
       startImmediately: true,
     },
   });
@@ -67,17 +69,66 @@ export default function CampaignHeader() {
     register('location', { required: 'Target location is required' });
   }, [register]);
 
+  const toggleSpecialisation = (spec: string) => {
+    let updated: string[];
+    if (selectedSpecs.includes(spec)) {
+      if (selectedSpecs.length === 1) return; // keep at least one
+      updated = selectedSpecs.filter(s => s !== spec);
+    } else {
+      updated = [...selectedSpecs, spec];
+    }
+    setSelectedSpecs(updated);
+    setValue('specialisations', updated);
+
+    const currentName = watch('name');
+    const loc = watch('location');
+    if (loc && (!currentName || currentName.includes('Discovery'))) {
+      const cityName = loc.split(',')[0].trim();
+      setValue('name', `${cityName} ${updated.join(' & ')} Discovery`);
+    }
+  };
+
+  const handlePurgeAll = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete ALL campaigns, candidate profiles, and search records? This will completely reset your database.'
+    );
+    if (!confirmed) return;
+
+    setIsPurging(true);
+    try {
+      const res = await fetch('/api/admin/purge-data', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setToastMsg('All campaigns and candidates have been deleted!');
+        setTimeout(() => setToastMsg(null), 4000);
+        window.location.reload();
+      } else {
+        alert(data.error || 'Failed to purge data');
+      }
+    } catch (err: any) {
+      alert('Error purging data: ' + err.message);
+    } finally {
+      setIsPurging(false);
+    }
+  };
+
   const onSubmit = async (data: CampaignFormData) => {
+    if (selectedSpecs.length === 0) {
+      alert('Please select at least one specialisation.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await createCampaign({
         name: data.name,
         location: data.location,
-        specialisation: data.specialisation,
+        specialisation: selectedSpecs.join(', '),
+        specialisations: selectedSpecs,
         targetCount: Number(data.targetCount),
-        minAiScore: Number(data.minAiScore),
+        minAiScore: 0,
         minExperience: Number(data.minExperience),
-        sources: data.sources || ['Google Places'],
+        sources: data.sources || ['Google Places', 'Justdial & Sulekha'],
         startImmediately: data.startImmediately,
       });
 
@@ -85,6 +136,7 @@ export default function CampaignHeader() {
       setTimeout(() => setToastMsg(null), 4000);
       setModalOpen(false);
       reset();
+      setSelectedSpecs(['KP Astrology']);
     } catch (err: any) {
       alert(`Failed to create campaign: ${err.message}`);
     } finally {
@@ -98,14 +150,14 @@ export default function CampaignHeader() {
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="flex items-center gap-1.5 bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs font-bold border border-green-200">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            Discovery Agent: Online (GPT-4o)
+            Live Search Agent: Online
           </div>
           <div className="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs font-bold border border-blue-200">
             <span className={`w-2 h-2 rounded-full ${runningCount > 0 ? 'bg-blue-500 animate-pulse' : 'bg-blue-400'}`} />
             {runningCount} Job{runningCount !== 1 ? 's' : ''} Active
           </div>
           <div className="flex items-center gap-1.5 bg-muted text-muted-foreground px-3 py-1.5 rounded-full text-xs font-semibold">
-            Google Places + Web Search Active
+            Google Places + Justdial / Sulekha
           </div>
           {toastMsg && (
             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 animate-fadeIn flex items-center gap-1">
@@ -115,6 +167,14 @@ export default function CampaignHeader() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={handlePurgeAll}
+            disabled={isPurging}
+            className="px-3 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors flex items-center gap-1.5"
+            title="Delete all campaigns and candidate profiles from Firestore"
+          >
+            {isPurging ? 'Purging Data...' : 'Delete All Data'}
+          </button>
           <Link href="/search-sources" className="btn-secondary text-sm py-2 flex items-center gap-1.5">
             <Settings size={13} />
             Search Sources
@@ -134,7 +194,7 @@ export default function CampaignHeader() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title="Create Discovery Campaign"
-        subtitle="Configure parameters to discover astrologers via Google Places & GPT-4o"
+        subtitle="Select multiple specialisations to discover real astrologers via Google Places & Directories"
         size="xl"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -144,7 +204,7 @@ export default function CampaignHeader() {
               <input
                 {...register('name', { required: 'Campaign name is required' })}
                 className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background font-medium"
-                placeholder="e.g. Pune KP Astrologers Discovery"
+                placeholder="e.g. Hyderabad KP & Vedic Astrologers Discovery"
               />
               {errors.name && <p className="text-2xs text-red-600 mt-1">{errors.name.message}</p>}
             </div>
@@ -158,25 +218,12 @@ export default function CampaignHeader() {
                   const currentName = watch('name');
                   if (!currentName && val) {
                     const cityName = val.split(',')[0].trim();
-                    const currentSpec = watch('specialisation') || 'Astrologers';
-                    setValue('name', `${cityName} ${currentSpec} Discovery`, { shouldValidate: true });
+                    setValue('name', `${cityName} ${selectedSpecs.join(' & ')} Discovery`, { shouldValidate: true });
                   }
                 }}
                 placeholder="Search city / location (e.g. Hyderabad, Telangana)..."
                 error={errors.location?.message}
               />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">Specialisation *</label>
-              <select
-                {...register('specialisation')}
-                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
-              >
-                {specialisations.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
             </div>
 
             <div>
@@ -186,16 +233,6 @@ export default function CampaignHeader() {
                 {...register('targetCount', { min: 5, max: 500 })}
                 className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
                 placeholder="50"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1">Min AI Score Threshold (0-100)</label>
-              <input
-                type="number"
-                {...register('minAiScore', { min: 50, max: 100 })}
-                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
-                placeholder="80"
               />
             </div>
 
@@ -210,6 +247,36 @@ export default function CampaignHeader() {
             </div>
           </div>
 
+          {/* Multiple Specialisations Selector */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-muted-foreground block">
+                Target Specialisations * ({selectedSpecs.length} selected)
+              </label>
+              <span className="text-2xs text-primary font-medium">Select one or more branches</span>
+            </div>
+            <div className="flex flex-wrap gap-2 p-3 bg-muted/20 border border-border rounded-xl">
+              {availableSpecialisations.map(spec => {
+                const isSelected = selectedSpecs.includes(spec);
+                return (
+                  <button
+                    key={spec}
+                    type="button"
+                    onClick={() => toggleSpecialisation(spec)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
+                      isSelected
+                        ? 'bg-primary text-primary-foreground border-primary shadow-xs'
+                        : 'bg-background text-foreground border-border hover:border-primary/40 hover:bg-muted/40'
+                    }`}
+                  >
+                    <span>{spec}</span>
+                    {isSelected && <span className="text-xs font-bold">✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div>
             <label className="text-xs font-semibold text-muted-foreground block mb-2">Search Sources</label>
             <div className="grid grid-cols-2 gap-2">
@@ -219,7 +286,7 @@ export default function CampaignHeader() {
                     type="checkbox"
                     value={src}
                     {...register('sources')}
-                    defaultChecked={src === 'Google Places' || src === 'Web Search'}
+                    defaultChecked={src === 'Google Places' || src === 'Justdial & Sulekha'}
                     className="rounded text-primary focus:ring-primary"
                   />
                   <span>{src}</span>
@@ -233,7 +300,7 @@ export default function CampaignHeader() {
               <p className="text-xs font-bold text-primary flex items-center gap-1">
                 <Sparkles size={13} /> Start Discovery Immediately
               </p>
-              <p className="text-2xs text-muted-foreground">Automatically query Google Places & GPT-4o upon creation</p>
+              <p className="text-2xs text-muted-foreground">Automatically query Google Places, Justdial & Sulekha upon creation</p>
             </div>
             <input
               type="checkbox"
