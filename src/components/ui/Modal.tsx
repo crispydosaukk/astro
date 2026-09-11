@@ -34,16 +34,16 @@ export default function Modal({ isOpen, onClose, title, subtitle, children, size
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
       <div
-        className="absolute inset-0 bg-secondary/40 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className={`relative w-full ${sizeMap[size]} bg-card rounded-xl shadow-modal animate-slide-up overflow-hidden`}>
+      <div className={`relative w-full ${sizeMap[size]} bg-card border border-border rounded-2xl shadow-2xl animate-slide-up overflow-hidden m-auto my-auto z-10`}>
         <div className="flex items-start justify-between px-6 py-5 border-b border-border">
           <div>
             <h2 id="modal-title" className="text-xl font-bold text-foreground">{title}</h2>

@@ -1,6 +1,5 @@
 import React from 'react';
 import AppLayout from '@/components/AppLayout';
-import CandidateTableHeader from './components/CandidateTableHeader';
 import CandidateTable from './components/CandidateTable';
 
 export default function CandidateManagementPage() {
@@ -13,7 +12,6 @@ export default function CandidateManagementPage() {
             Live candidate tracking across all lifecycle stages
           </p>
         </div>
-        <CandidateTableHeader />
         <CandidateTable />
       </div>
     </AppLayout>

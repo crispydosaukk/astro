@@ -73,9 +73,9 @@ export default function CandidateProfileModal({
   )}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in" onClick={onClose}>
       <div 
-        className="bg-card border border-border rounded-2xl max-w-2xl w-full my-8 shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]"
+        className="relative bg-card border border-border rounded-2xl max-w-2xl w-full m-auto my-auto shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -130,11 +130,15 @@ export default function CandidateProfileModal({
                 <Phone size={14} className="text-primary" /> Verified Contact Details
               </h4>
               <span className={`text-2xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1 ${
-                contact.phone || contact.website
+                contact.phone || contact.website || contact.email
                   ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
                   : 'text-amber-700 bg-amber-50 border border-amber-200'
               }`}>
-                <CheckCircle2 size={11} /> {contact.phone ? 'Phone Verified on Google' : 'Consultation Center Verified'}
+                <CheckCircle2 size={11} /> {
+                  candidate.source === 'Manual Entry' 
+                    ? 'Manually Verified Profile' 
+                    : (contact.phone ? 'Phone Verified on Google' : 'Consultation Center Verified')
+                }
               </span>
             </div>
 
@@ -145,7 +149,7 @@ export default function CandidateProfileModal({
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                        <Phone size={11} /> Phone Number (Google Maps)
+                        <Phone size={11} /> {candidate.source === 'Manual Entry' ? 'Phone / WhatsApp' : 'Phone Number (Google Maps)'}
                       </span>
                       <button
                         onClick={() => handleCopy(contact.phone!, 'phone')}
@@ -188,7 +192,7 @@ export default function CandidateProfileModal({
               ) : (
                 <div className="p-3.5 bg-muted/20 rounded-xl border border-dashed border-border flex flex-col justify-center items-center py-4 text-center">
                   <Phone size={18} className="text-muted-foreground/40 mb-1" />
-                  <p className="text-xs font-semibold text-muted-foreground">Phone not listed on Google profile</p>
+                  <p className="text-xs font-semibold text-muted-foreground">Phone not provided</p>
                   <p className="text-2xs text-muted-foreground/70 mt-0.5">Contact via verified consultation center address below.</p>
                 </div>
               )}
@@ -234,8 +238,8 @@ export default function CandidateProfileModal({
               ) : (
                 <div className="p-3.5 bg-muted/20 rounded-xl border border-dashed border-border flex flex-col justify-center items-center py-4 text-center">
                   <Mail size={18} className="text-muted-foreground/40 mb-1" />
-                  <p className="text-xs font-semibold text-muted-foreground">Direct email not publicly listed</p>
-                  <p className="text-2xs text-muted-foreground/70 mt-0.5">Google Maps profiles provide phone & website for contact.</p>
+                  <p className="text-xs font-semibold text-muted-foreground">Direct email not provided</p>
+                  <p className="text-2xs text-muted-foreground/70 mt-0.5">Contact via direct phone call or postal correspondence.</p>
                 </div>
               )}
             </div>

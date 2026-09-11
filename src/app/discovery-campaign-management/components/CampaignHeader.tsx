@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Plus, Settings, RefreshCw, CheckCircle2, Sparkles } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useForm } from 'react-hook-form';
 import { useDiscovery } from '../DiscoveryContext';
 import LocationAutocomplete from '@/components/ui/LocationAutocomplete';
@@ -28,18 +29,25 @@ const availableSpecialisations = [
   'Vastu Shastra', 
   'Lal Kitab',
   'Tarot Reading',
-  'Palmistry'
+  'Western Astrology', 
+  'Gemology'
 ];
 
-const searchSourcesList = ['Google Places', 'Justdial & Sulekha', 'Web Search', 'Verified Astrologer Directories'];
+const searchSourcesList = [
+  'Google Places', 
+  'Justdial & Sulekha', 
+  'Astrology Directories', 
+  'Yellow Pages'
+];
 
 export default function CampaignHeader() {
   const { campaigns, createCampaign, isExecuting } = useDiscovery();
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSpecs, setSelectedSpecs] = useState<string[]>(['Vedic Jyotish']);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPurgeConfirmOpen, setIsPurgeConfirmOpen] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [selectedSpecs, setSelectedSpecs] = useState<string[]>(['KP Astrology']);
 
   const runningCount = campaigns.filter(c => c.status === 'running').length;
 
@@ -53,9 +61,9 @@ export default function CampaignHeader() {
   } = useForm<CampaignFormData>({
     defaultValues: {
       name: '',
-      location: '',
+      location: 'New Delhi, Delhi, India',
       country: 'India',
-      specialisations: ['KP Astrology'],
+      specialisations: ['Vedic Jyotish'],
       minExperience: 5,
       targetCount: 50,
       sources: ['Google Places', 'Justdial & Sulekha'],
@@ -88,27 +96,31 @@ export default function CampaignHeader() {
     }
   };
 
-  const handlePurgeAll = async () => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete ALL campaigns, candidate profiles, and search records? This will completely reset your database.'
-    );
-    if (!confirmed) return;
+  const handlePurgeAll = () => {
+    setIsPurgeConfirmOpen(true);
+  };
 
+  const handleConfirmPurge = async () => {
     setIsPurging(true);
     try {
       const res = await fetch('/api/admin/purge-data', { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         setToastMsg('All campaigns and candidates have been deleted!');
-        setTimeout(() => setToastMsg(null), 4000);
-        window.location.reload();
+        setTimeout(() => {
+          setToastMsg(null);
+          window.location.reload();
+        }, 1500);
       } else {
-        alert(data.error || 'Failed to purge data');
+        setToastMsg(data.error || 'Failed to purge data');
+        setTimeout(() => setToastMsg(null), 4000);
       }
     } catch (err: any) {
-      alert('Error purging data: ' + err.message);
+      setToastMsg('Error purging data: ' + err.message);
+      setTimeout(() => setToastMsg(null), 4000);
     } finally {
       setIsPurging(false);
+      setIsPurgeConfirmOpen(false);
     }
   };
 
@@ -314,20 +326,33 @@ export default function CampaignHeader() {
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="btn-secondary text-sm py-2 px-4"
+              className="btn-secondary text-sm py-2 px-4 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || isExecuting}
-              className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5"
+              className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5 cursor-pointer"
             >
               {isSubmitting ? 'Creating...' : 'Create & Launch Campaign'}
             </button>
           </div>
         </form>
       </Modal>
+
+      {/* Purge Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isPurgeConfirmOpen}
+        onClose={() => setIsPurgeConfirmOpen(false)}
+        onConfirm={handleConfirmPurge}
+        variant="danger"
+        confirmLoading={isPurging}
+        title="Delete All Campaigns & Candidate Data?"
+        description="Are you sure you want to delete ALL campaigns, candidate profiles, and search records? This will completely reset your database and cannot be undone."
+        confirmText="Yes, Purge Everything"
+        cancelText="Cancel"
+      />
     </>
   );
 }
