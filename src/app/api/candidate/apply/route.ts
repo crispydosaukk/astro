@@ -13,10 +13,16 @@ export async function POST(req: NextRequest) {
       name,
       email,
       phone,
+      whatsapp,
       location,
       specialisations = ['Vedic Jyotish'],
       experience = '10+ years',
       bio = '',
+      learningBackground = '',
+      courseDetails = '',
+      idProofType = 'aadhaar',
+      idProofNumber = '',
+      idProofDocument = '',
       password = '',
       languages = ['Hindi', 'English'],
       theoryScore = 0,
@@ -26,6 +32,18 @@ export async function POST(req: NextRequest) {
       theoryAnswers = {},
       chartCaseAnalysis = '',
       conversationHistory = [],
+      // Dynamic AI Score & Assessment Settings
+      passingThreshold = 75,
+      theoryWeight = 35,
+      chartCaseWeight = 25,
+      aiInterviewWeight = 40,
+      isAiDynamicQuestions = false,
+      questionCount = 5,
+      // Anti-Cheating & Proctoring Metadata
+      tabViolations = 0,
+      proctorLogs = [],
+      isDisqualified = false,
+      disqualificationReason = '',
     } = body;
 
     if (!name || !phone) {
@@ -36,45 +54,96 @@ export async function POST(req: NextRequest) {
     }
 
     const effectiveId = candidateId || `ast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    
+    // Dynamic Weighted Composite Score Calculation
+    const totalWeight = (Number(theoryWeight) || 35) + (Number(chartCaseWeight) || 25) + (Number(aiInterviewWeight) || 40);
+    const normalizedTheoryWeight = (Number(theoryWeight) || 35) / totalWeight;
+    const normalizedChartWeight = (Number(chartCaseWeight) || 25) / totalWeight;
+    const normalizedInterviewWeight = (Number(aiInterviewWeight) || 40) / totalWeight;
+
     const overallScore = Math.round(
-      (theoryScore * 0.35) + 
-      (chartCaseScore * 0.25) + 
-      (aiInterviewScore * 0.40)
+      (theoryScore * normalizedTheoryWeight) + 
+      (chartCaseScore * normalizedChartWeight) + 
+      (aiInterviewScore * normalizedInterviewWeight)
     ) || theoryScore || 85;
+
+    const isQualifiedByThreshold = !isDisqualified && (overallScore >= (Number(passingThreshold) || 75));
 
     const applicationPayload = {
       id: effectiveId,
       name,
       email: email || '',
       phone: phone || '',
+      whatsapp: whatsapp || phone || '',
       location: location || 'India',
       specialisations: Array.isArray(specialisations) ? specialisations : [specialisations],
       experience,
       bio,
+      learningBackground,
+      courseDetails,
+      idProofType,
+      idProofNumber,
+      idProofDocument,
       languages,
       password: password || '', // For staging astrologer account
-      aiScore: overallScore,
+      aiScore: isDisqualified ? 0 : overallScore,
       theoryScore,
       chartCaseScore,
       aiInterviewScore,
-      lifecycleStatus: 'human-review',
-      applicationStatus: 'Under Review',
-      outreachStatus: 'Applied & Tested',
+      // Dynamic Score & Threshold Metadata
+      passingThreshold: Number(passingThreshold) || 75,
+      theoryWeight: Number(theoryWeight) || 35,
+      chartCaseWeight: Number(chartCaseWeight) || 25,
+      aiInterviewWeight: Number(aiInterviewWeight) || 40,
+      isAiDynamicQuestions: Boolean(isAiDynamicQuestions),
+      questionCount: Number(questionCount) || 5,
+      // Anti-Cheating & Proctoring Fields
+      tabViolations: Number(tabViolations) || 0,
+      proctorLogs: Array.isArray(proctorLogs) ? proctorLogs : [],
+      isDisqualified: Boolean(isDisqualified),
+      disqualificationReason: disqualificationReason || '',
+      isQualifiedByThreshold,
+      lifecycleStatus: isDisqualified ? 'rejected' : 'human-review',
+      applicationStatus: isDisqualified 
+        ? 'Disqualified (Proctoring Violation / Cheating)' 
+        : (isQualifiedByThreshold ? 'Qualified (Under Review)' : 'Review Required'),
+      outreachStatus: isDisqualified ? 'Disqualified' : 'Applied & Tested',
       appliedAt: new Date().toISOString(),
       updatedAt: serverTimestamp(),
       applicationData: {
+        learningBackground,
+        courseDetails,
+        idProofType,
+        idProofNumber,
+        idProofDocument,
         theoryAnswers,
         chartCaseAnalysis,
         aiInterviewEvaluation,
         conversationHistory,
+        proctoring: {
+          tabViolations: Number(tabViolations) || 0,
+          proctorLogs: Array.isArray(proctorLogs) ? proctorLogs : [],
+          isDisqualified: Boolean(isDisqualified),
+          disqualificationReason: disqualificationReason || '',
+        },
+        scoringConfig: {
+          passingThreshold: Number(passingThreshold) || 75,
+          theoryWeight: Number(theoryWeight) || 35,
+          chartCaseWeight: Number(chartCaseWeight) || 25,
+          aiInterviewWeight: Number(aiInterviewWeight) || 40,
+          isAiDynamicQuestions: Boolean(isAiDynamicQuestions),
+          questionCount: Number(questionCount) || 5,
+        }
       },
       history: [
         {
-          stage: 'Application & Screening Completed',
+          stage: isDisqualified ? 'Disqualified for Malpractice' : 'Application & Screening Completed',
           timestamp: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-          notes: `Completed Vedic Theory Assessment (${theoryScore}/100), Blind Kundali Case (${chartCaseScore}/100), and GPT-4o AI Technical Interview (${aiInterviewScore}/100). Overall Score: ${overallScore}/100.`,
-          actor: 'Candidate Self-Service & AI Examiner',
-          status: 'success',
+          notes: isDisqualified
+            ? `Candidate DISQUALIFIED during online exam. Reason: ${disqualificationReason || '3 Tab switches / unauthorized window loss detected'}. Total Violations: ${tabViolations}.`
+            : `Completed Vedic Theory Assessment (${theoryScore}/100, ${theoryWeight}% wt), Blind Kundali Case (${chartCaseScore}/100, ${chartCaseWeight}% wt), and AI Technical Interview (${aiInterviewScore}/100, ${aiInterviewWeight}% wt). Overall Score: ${overallScore}/100 (Threshold: ${passingThreshold}%, Status: ${isQualifiedByThreshold ? 'QUALIFIED' : 'NEEDS REVIEW'}). Proctoring Violations: ${tabViolations}. Question Mode: ${isAiDynamicQuestions ? 'AI Dynamic Random' : 'Curated Bank'} (${questionCount} questions).`,
+          actor: isDisqualified ? 'AI Anti-Cheating Proctor Engine' : 'Candidate Self-Service & AI Examiner',
+          status: isDisqualified ? 'error' : (isQualifiedByThreshold ? 'success' : 'info'),
         }
       ]
     };

@@ -309,6 +309,41 @@ export default function CandidateProfileModal({
               <p className="text-xs text-muted-foreground leading-relaxed pt-1">
                 {contact.profileSummary}
               </p>
+
+              {(contact.learningBackground || candidate.learningBackground || contact.idProofType || candidate.idProofType) && (
+                <div className="mt-3 pt-2.5 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  {(contact.learningBackground || candidate.learningBackground) && (
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-2.5">
+                      <span className="text-2xs font-bold uppercase tracking-wider text-primary flex items-center gap-1">
+                        <Award size={11} /> Astrological Training / Guru
+                      </span>
+                      <p className="font-semibold text-foreground text-xs mt-1">
+                        {contact.learningBackground || candidate.learningBackground}
+                      </p>
+                      {candidate.courseDetails && (
+                        <p className="text-2xs text-muted-foreground mt-0.5">{candidate.courseDetails}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {(contact.idProofType || candidate.idProofType) && (
+                    <div className="bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 rounded-lg p-2.5">
+                      <span className="text-2xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 size={11} /> Verified ID Proof
+                      </span>
+                      <p className="font-semibold text-foreground text-xs mt-1">
+                        {(contact.idProofType || candidate.idProofType)?.toUpperCase()} 
+                        {candidate.idProofNumber ? ` • ${candidate.idProofNumber}` : ''}
+                      </p>
+                      {(contact.idProofDocument || candidate.idProofDocument) && (
+                        <span className="inline-flex items-center gap-1 text-2xs text-emerald-700 dark:text-emerald-300 font-semibold mt-0.5">
+                          ✓ Document Photo Attached
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

@@ -273,7 +273,7 @@ export default function ProbationActivePage() {
                   <div className="flex justify-end">
                     <button
                       onClick={handleAddCheckpoint}
-                      className="btn-primary text-xs px-4 py-2 rounded-lg font-medium"
+                      className="btn-primary text-xs px-4 py-2 rounded-lg font-medium cursor-pointer"
                     >
                       Save Milestone Audit
                     </button>
@@ -285,20 +285,55 @@ export default function ProbationActivePage() {
                     <CheckCircle2 size={20} />
                   </div>
                   <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">All 3 Milestones Completed!</p>
-                  <p className="text-xs text-muted-foreground">Candidate has fulfilled the 30-day monitoring period and is eligible for final badge verification.</p>
-                  <Link
-                    href="/verification"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline pt-1"
-                  >
-                    Open Final Verification Panel <ChevronRight size={13} />
-                  </Link>
+                  <p className="text-xs text-muted-foreground">Candidate has fulfilled the monitoring period and is eligible for Full-Time certification.</p>
                 </div>
               )}
+
+              {/* Full-Time Approval Action Banner */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 via-primary/5 to-transparent border border-emerald-500/30 flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Award size={15} className="text-emerald-600 dark:text-emerald-400" />
+                    Full-Time Astrologer Conversion
+                  </p>
+                  <p className="text-2xs text-muted-foreground mt-0.5">
+                    Approves astrologer permanently and unlocks dashboard consultation access without probation restrictions.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/admin/approve-fulltime', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          astrologerId: activeRecord.id,
+                          action: 'approve_full_time',
+                          adminNotes: `Approved by Verification Committee with probation score of ${activeRecord.currentScore}%.`
+                        })
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        setNotification(`Successfully granted Full-Time Approval to ${activeRecord.candidate}!`);
+                        setProbations(prev => prev.filter(p => p.id !== activeRecord.id));
+                        setActiveRecord(null);
+                      }
+                    } catch (err: any) {
+                      alert('Error approving full-time status: ' + err.message);
+                    }
+                  }}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5 transition-all"
+                >
+                  <CheckCircle2 size={14} />
+                  <span>Grant Full-Time Approval</span>
+                </button>
+              </div>
 
               <div className="flex justify-end pt-2">
                 <button
                   onClick={() => setActiveRecord(null)}
-                  className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted"
+                  className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted cursor-pointer"
                 >
                   Close
                 </button>

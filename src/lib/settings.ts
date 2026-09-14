@@ -10,6 +10,10 @@ export interface GlobalSettings {
   zegoServerSecret?: string;
   openaiApiKey?: string;
   aiChatPricePerPrompt?: number;
+  probationDurationMonths?: number;
+  autoLockAfterProbation?: boolean;
+  minRatingForFullTime?: number;
+  minConsultationsForFullTime?: number;
 }
 
 const defaultSettings: GlobalSettings = {
@@ -21,6 +25,10 @@ const defaultSettings: GlobalSettings = {
   zegoServerSecret: 'd68c140051b7d8f2404c2b2b9b586886',
   openaiApiKey: '',
   aiChatPricePerPrompt: 5,
+  probationDurationMonths: 3,
+  autoLockAfterProbation: true,
+  minRatingForFullTime: 4.5,
+  minConsultationsForFullTime: 25,
 };
 
 export async function getSettings(): Promise<GlobalSettings> {

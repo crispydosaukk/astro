@@ -36,10 +36,16 @@ export interface Candidate {
   isDuplicate: boolean;
   experience: string;
   phone?: string;
+  whatsapp?: string;
   email?: string;
   address?: string;
   website?: string;
   profileSummary?: string;
+  learningBackground?: string;
+  courseDetails?: string;
+  idProofType?: 'aadhaar' | 'pan' | string;
+  idProofNumber?: string;
+  idProofDocument?: string;
   campaignName?: string;
   rating?: number;
   userRatingsTotal?: number;
@@ -51,10 +57,15 @@ export interface Candidate {
 export interface ResolvedCandidateContact {
   phone: string | null;
   rawPhone: string | null;
+  whatsapp: string | null;
   email: string | null;
   address: string;
   website: string | null;
   profileSummary: string;
+  learningBackground?: string;
+  idProofType?: string;
+  idProofNumber?: string;
+  idProofDocument?: string;
   history: CandidateHistoryItem[];
 }
 
@@ -138,10 +149,15 @@ export function resolveCandidateContact(candidate: Candidate): ResolvedCandidate
   return {
     phone,
     rawPhone,
+    whatsapp: candidate.whatsapp || phone,
     email,
     address,
     website,
     profileSummary,
+    learningBackground: candidate.learningBackground,
+    idProofType: candidate.idProofType,
+    idProofNumber: candidate.idProofNumber,
+    idProofDocument: candidate.idProofDocument,
     history
   };
 }

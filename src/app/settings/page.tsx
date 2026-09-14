@@ -650,32 +650,111 @@ export default function SettingsPage() {
 
             {activeSection === 'probation' && (
               <>
-                <h2 className="text-lg font-semibold text-foreground">Probation Settings</h2>
-                <div className="space-y-4">
-                  {[
-                    { label: 'Default Probation Period (days)', value: '30', type: 'number' },
-                    { label: 'Extension Period (days)', value: '30', type: 'number' },
-                  ]?.map(field => (
-                    <div key={field?.label}>
-                      <label className="block text-sm font-medium text-foreground mb-1">{field?.label}</label>
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <Timer size={20} className="text-primary" /> Astrologer Probation & Full-Time Approval Policy
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      Configure mandatory probation duration (in months) and lock rules before granting Full-Time Astrologer status.
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                    <Shield size={12} /> Compliance Enforced
+                  </span>
+                </div>
+
+                <div className="space-y-5">
+                  {/* Probation Period Duration in Months */}
+                  <div className="p-4 rounded-xl bg-muted/20 border border-border space-y-3">
+                    <label className="block text-sm font-bold text-foreground">
+                      Mandatory Probation Duration (Months) *
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Number of months an astrologer must serve in supervised trial before becoming eligible for Full-Time status.
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                      {[
+                        { label: '1 Month (30 Days)', value: 1 },
+                        { label: '2 Months (60 Days)', value: 2 },
+                        { label: '3 Months (Standard)', value: 3 },
+                        { label: '6 Months (Extended)', value: 6 },
+                      ].map(item => (
+                        <label
+                          key={item.value}
+                          className="flex items-center gap-2 p-3 rounded-xl border border-border bg-card hover:bg-muted/40 cursor-pointer text-xs font-semibold text-foreground has-checked:border-primary has-checked:bg-primary/5"
+                        >
+                          <input
+                            type="radio"
+                            name="probationMonths"
+                            value={item.value}
+                            defaultChecked={item.value === 3}
+                            className="text-primary focus:ring-primary h-3.5 w-3.5"
+                          />
+                          <span>{item.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Auto-Lock / Require Full-Time Approval Toggle */}
+                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                          <AlertCircle size={16} className="text-amber-600 dark:text-amber-400" />
+                          Lock Dashboard After Probation Ends Until Full-Time Approved
+                        </h4>
+                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                          When enabled, once the astrologer's probation period concludes (e.g. 3 months), their login & dashboard access is <strong>automatically locked</strong> with an on-screen notice. They cannot accept new consultations until an Admin explicitly grants <strong>Full-Time Astrologer Approval</strong>.
+                        </p>
+                      </div>
                       <input
-                        type={field?.type}
-                        defaultValue={field?.value}
-                        className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        type="checkbox"
+                        defaultChecked
+                        className="rounded border-input text-primary focus:ring-primary h-5 w-5 mt-1 cursor-pointer"
                       />
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Criteria for Full-Time Conversion */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">
+                        Minimum Supervised Consultations Required
+                      </label>
+                      <input
+                        type="number"
+                        defaultValue="25"
+                        className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                      <p className="text-2xs text-muted-foreground mt-1">Total trial calls completed before audit review</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-1">
+                        Minimum Average Customer Rating Required
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        defaultValue="4.5"
+                        className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                      <p className="text-2xs text-muted-foreground mt-1">Out of 5.0 stars (e.g. 4.5 minimum)</p>
+                    </div>
+                  </div>
+
+                  {/* Milestone Checkpoints */}
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Checkpoint Days</label>
-                    <div className="flex gap-2">
-                      {['7', '15', '30']?.map(day => (
-                        <div key={day} className="flex items-center gap-1.5 bg-muted/40 px-3 py-1.5 rounded-lg text-sm">
-                          Day {day} <button className="text-muted-foreground hover:text-red-500 ml-1">×</button>
+                    <label className="block text-sm font-medium text-foreground mb-2">Milestone Performance Checkpoint Audits</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {['Day 7 (Early Audit)', 'Day 15 (Midway Review)', 'Day 30 (Final Evaluation)']?.map(day => (
+                        <div key={day} className="flex items-center gap-1.5 bg-muted/50 border border-border px-3 py-1.5 rounded-lg text-xs font-semibold text-foreground">
+                          <CheckCircle2 size={12} className="text-emerald-600" />
+                          {day}
                         </div>
                       ))}
-                      <button className="px-3 py-1.5 border border-dashed border-border rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors">
-                        + Add
-                      </button>
                     </div>
                   </div>
                 </div>

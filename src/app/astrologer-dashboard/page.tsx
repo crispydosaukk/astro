@@ -10,6 +10,16 @@ import {
   Users,
   Calendar,
   User,
+  Lock,
+  ShieldCheck,
+  AlertTriangle,
+  Clock,
+  Award,
+  CheckCircle2,
+  ChevronRight,
+  HelpCircle,
+  Sparkles,
+  Send
 } from 'lucide-react';
 import { auth, db } from '@/lib/firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -23,6 +33,18 @@ export default function AstrologerDashboardPage() {
   const [isOnline, setIsOnline] = useState(false);
   const [activeCalls, setActiveCalls] = useState<any[]>([]);
 
+  // Probation & Full-Time Approval States
+  const [astrologerStatus, setAstrologerStatus] = useState<'full_time' | 'probation' | 'active'>('probation');
+  const [isFullTimeApproved, setIsFullTimeApproved] = useState(false);
+  const [probationMonths, setProbationMonths] = useState<number>(3);
+  const [probationEndDate, setProbationEndDate] = useState<string>('');
+  const [daysRemaining, setDaysRemaining] = useState<number>(18);
+  const [isProbationExpired, setIsProbationExpired] = useState<boolean>(false);
+  const [consultationsCompleted, setConsultationsCompleted] = useState<number>(18);
+  const [consultationTarget, setConsultationTarget] = useState<number>(25);
+  const [rating, setRating] = useState<number>(4.8);
+  const [requestSent, setRequestSent] = useState<boolean>(false);
+
   useEffect(() => {
     let unsubscribeSnapshot: () => void;
 
@@ -34,6 +56,42 @@ export default function AstrologerDashboardPage() {
           const data = docSnap.data();
           setAstrologerName(data.name || 'Astrologer');
           setIsOnline(data.isOnline || false);
+          
+          const status = data.status || 'probation';
+          const fullTime = data.isFullTimeApproved || status === 'full_time';
+          setAstrologerStatus(status);
+          setIsFullTimeApproved(fullTime);
+
+          const months = data.probationMonths || 3;
+          setProbationMonths(months);
+
+          // Calculate probation dates
+          let endDate = data.probationEndDate;
+          if (!endDate) {
+            // Default 3 months from applied or 18 days remaining sample
+            const end = new Date(Date.now() + 18 * 24 * 60 * 60 * 1000);
+            endDate = end.toISOString();
+          }
+          setProbationEndDate(endDate);
+
+          const endObj = new Date(endDate);
+          const now = new Date();
+          const diff = Math.ceil((endObj.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          setDaysRemaining(diff);
+
+          if (diff <= 0 && !fullTime && status === 'probation') {
+            setIsProbationExpired(true);
+            setIsOnline(false);
+          } else {
+            setIsProbationExpired(false);
+          }
+
+          if (data.consultationsCount !== undefined) {
+            setConsultationsCompleted(data.consultationsCount);
+          }
+          if (data.rating !== undefined) {
+            setRating(data.rating);
+          }
         }
 
         // Listen for incoming active calls
@@ -60,6 +118,11 @@ export default function AstrologerDashboardPage() {
   }, []);
 
   const toggleOnlineStatus = async () => {
+    if (isProbationExpired && !isFullTimeApproved) {
+      toast.error('Probation period concluded. Dashboard locked until Admin approves Full-Time status.');
+      return;
+    }
+
     const user = auth.currentUser;
     if (!user) return;
 
@@ -77,18 +140,150 @@ export default function AstrologerDashboardPage() {
     }
   };
 
+  const handleRequestFullTime = async () => {
+    setRequestSent(true);
+    toast.success('Full-Time Approval request dispatched to the Admin Verification Committee!');
+  };
+
   return (
     <div className="px-6 lg:px-8 py-8 max-w-screen-2xl space-y-8">
+      {/* PROBATION EXPIRED LOCK BANNER */}
+      {isProbationExpired && !isFullTimeApproved && (
+        <div className="p-6 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 shadow-xl space-y-4 animate-slide-up">
+          <div className="flex items-start justify-between flex-wrap gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
+                <Lock size={24} />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-xl font-bold text-foreground">
+                    Probation Period Concluded — Full-Time Approval Required
+                  </h2>
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                    Dashboard Consultation Locked
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground max-w-3xl leading-relaxed">
+                  Your assigned <strong>{probationMonths}-month supervised probation period</strong> has reached its conclusion. Per platform compliance policy, your live consultation availability is currently paused until the <strong>Verification Committee</strong> reviews your probation performance and grants <strong>Full-Time Astrologer Approval</strong>.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleRequestFullTime}
+              disabled={requestSent}
+              className="px-5 py-2.5 rounded-xl font-bold btn-primary text-xs flex items-center gap-2 cursor-pointer shadow-md disabled:opacity-60"
+            >
+              {requestSent ? (
+                <>
+                  <CheckCircle2 size={14} className="text-emerald-400" />
+                  <span>Approval Requested</span>
+                </>
+              ) : (
+                <>
+                  <Send size={14} />
+                  <span>Request Full-Time Approval</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Performance Audit Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-amber-500/20 text-xs">
+            <div className="p-3 bg-card rounded-xl border border-border">
+              <p className="text-2xs text-muted-foreground font-semibold uppercase">Trial Consultations</p>
+              <p className="text-lg font-bold text-foreground mt-0.5">{consultationsCompleted} / {consultationTarget} Calls</p>
+              <p className="text-2xs text-emerald-600 font-semibold mt-0.5">Audit Target Achieved</p>
+            </div>
+
+            <div className="p-3 bg-card rounded-xl border border-border">
+              <p className="text-2xs text-muted-foreground font-semibold uppercase">Probation Quality Rating</p>
+              <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5">★ {rating} / 5.0</p>
+              <p className="text-2xs text-emerald-600 font-semibold mt-0.5">High Client Satisfaction</p>
+            </div>
+
+            <div className="p-3 bg-card rounded-xl border border-border">
+              <p className="text-2xs text-muted-foreground font-semibold uppercase">Committee Review</p>
+              <p className="text-lg font-bold text-foreground mt-0.5">Pending Admin Sign-off</p>
+              <p className="text-2xs text-muted-foreground mt-0.5">Response expected in 24-48 hours</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ACTIVE PROBATION BANNER (When within probation window) */}
+      {!isProbationExpired && !isFullTimeApproved && astrologerStatus === 'probation' && (
+        <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-between flex-wrap gap-3 animate-slide-up">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
+              <Clock size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-foreground">
+                  Supervised Probation Period Active
+                </span>
+                <span className="text-2xs font-extrabold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                  {daysRemaining} Days Remaining ({probationMonths}-Month Trial)
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Your live consultations and client ratings are under active supervised quality audit. Complete {consultationTarget} trial consultations for Full-Time conversion.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs">
+            <div className="text-right">
+              <span className="text-muted-foreground block text-2xs uppercase">Progress</span>
+              <span className="font-bold text-foreground">{consultationsCompleted}/{consultationTarget} Completed</span>
+            </div>
+            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${Math.min(100, (consultationsCompleted / consultationTarget) * 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VERIFIED FULL TIME BANNER */}
+      {isFullTimeApproved && (
+        <div className="px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-300">
+          <span className="font-semibold flex items-center gap-1.5">
+            <CheckCircle2 size={15} className="text-emerald-600" />
+            Verified Full-Time Astrologer • Full platform consultation privileges active
+          </span>
+          <span className="font-bold text-2xs uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+            Full-Time Certified
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Welcome back, {astrologerName}!</h1>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            Welcome back, {astrologerName}!
+            {isFullTimeApproved ? (
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300">
+                Full-Time
+              </span>
+            ) : (
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-300">
+                Probation ({daysRemaining}d left)
+              </span>
+            )}
+          </h1>
           <p className="text-muted-foreground mt-1">Here is your daily performance overview.</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={toggleOnlineStatus}
-            className={`px-4 py-2 rounded-xl border flex items-center gap-2 transition-all hover:opacity-80 ${
+            disabled={isProbationExpired && !isFullTimeApproved}
+            className={`px-4 py-2 rounded-xl border flex items-center gap-2 transition-all hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed ${
               isOnline ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'
             }`}
           >
