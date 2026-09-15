@@ -19,7 +19,9 @@ import {
   Building2,
   Award,
   FileText,
-  UserCheck
+  UserCheck,
+  Smartphone,
+  Zap
 } from 'lucide-react';
 import { Candidate, resolveCandidateContact } from '@/lib/firebase/candidateService';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -183,10 +185,17 @@ export default function CandidateProfileModal({
                       href={whatsAppLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 py-1.5 px-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-xs font-semibold text-center flex items-center justify-center gap-1 transition-colors"
+                      className="flex-1 py-1.5 px-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200 rounded-lg text-xs font-semibold text-center flex items-center justify-center gap-1 transition-colors"
                     >
                       <MessageCircle size={11} /> WhatsApp
                     </a>
+                    <Link
+                      href={`/outreach/messages?name=${encodeURIComponent(candidate.name)}&phone=${encodeURIComponent(contact.phone)}&channel=sms`}
+                      onClick={onClose}
+                      className="flex-1 py-1.5 px-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-200 rounded-lg text-xs font-semibold text-center flex items-center justify-center gap-1 transition-colors"
+                    >
+                      <Smartphone size={11} /> SMS
+                    </Link>
                   </div>
                 </div>
               ) : (

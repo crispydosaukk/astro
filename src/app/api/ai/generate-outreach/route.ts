@@ -15,7 +15,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const channelNormalized = (body?.channel && body.channel.toLowerCase() === 'whatsapp') ? 'WhatsApp' : 'Email';
+    let channelNormalized: 'Email' | 'WhatsApp' | 'SMS' = 'Email';
+    if (body?.channel) {
+      const ch = body.channel.toLowerCase();
+      if (ch === 'whatsapp') channelNormalized = 'WhatsApp';
+      else if (ch === 'sms') channelNormalized = 'SMS';
+    }
 
     const result = await generateOutreachMessage({
       name: candidateName,

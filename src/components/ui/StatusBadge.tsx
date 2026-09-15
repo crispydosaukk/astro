@@ -68,14 +68,14 @@ interface StatusBadgeProps {
 }
 
 export default function StatusBadge({ status, className = '', size = 'md' }: StatusBadgeProps) {
-  const key = status.toLowerCase().replace(/\s+/g, '-');
+  const key = (status || '').toLowerCase().replace(/\s+/g, '-');
   const cls = variantMap[key] || 'status-badge-hold';
-  const label = labelMap[key] || status;
+  const label = labelMap[key] || status || 'Pending';
 
   return (
     <span
-      className={`inline-flex items-center font-semibold rounded-full ${cls} ${
-        size === 'sm' ? 'text-2xs px-2 py-0.5' : 'text-xs px-2.5 py-1'
+      className={`inline-flex items-center justify-center font-semibold rounded-full whitespace-nowrap tracking-normal leading-none shrink-0 ${cls} ${
+        size === 'sm' ? 'text-2xs px-2.5 py-1' : 'text-xs px-3 py-1.5'
       } ${className}`}
     >
       {label}

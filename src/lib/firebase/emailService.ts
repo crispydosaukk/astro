@@ -43,6 +43,7 @@ export async function queueEmailViaCloudFunction(data: {
     // 1. Dispatch email directly via our Next.js SMTP API route
     let dispatchSuccess = false;
     let messageId = '';
+    let errorMessage = '';
     try {
       const res = await fetch('/api/email/send', {
         method: 'POST',
@@ -60,8 +61,11 @@ export async function queueEmailViaCloudFunction(data: {
       if (resData.success) {
         dispatchSuccess = true;
         messageId = resData.messageId;
+      } else {
+        errorMessage = resData.error || 'SMTP dispatch failed';
       }
-    } catch (apiErr) {
+    } catch (apiErr: any) {
+      errorMessage = apiErr.message || 'Failed to call email API';
       console.warn('Direct SMTP dispatch route warning:', apiErr);
     }
 
@@ -82,8 +86,8 @@ export async function queueEmailViaCloudFunction(data: {
           dispatchedAt: new Date().toISOString(),
           messageId: messageId || null,
         },
-        status: dispatchSuccess ? 'sent' : 'queued',
-        delivery: dispatchSuccess ? { state: 'SUCCESS', sentAt: new Date().toISOString() } : undefined,
+        status: dispatchSuccess ? 'sent' : 'failed',
+        delivery: dispatchSuccess ? { state: 'SUCCESS', sentAt: new Date().toISOString() } : { state: 'FAILED', error: errorMessage },
         createdAt: serverTimestamp(),
       });
       docId = docRef.id;
@@ -91,7 +95,7 @@ export async function queueEmailViaCloudFunction(data: {
       console.warn('Firestore mail logging warning:', firestoreErr);
     }
 
-    return { id: docId, success: true };
+    return { id: docId, success: dispatchSuccess, error: errorMessage || undefined };
   } catch (error: any) {
     console.error('Email queue error:', error);
     return { id: `err-${Date.now()}`, success: false, error: error.message };

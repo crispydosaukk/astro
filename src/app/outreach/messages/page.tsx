@@ -5,16 +5,17 @@ import AppLayout from '@/components/AppLayout';
 import { 
   MessageSquare, Search, ChevronDown, CheckCircle2, XCircle, Clock, 
   Mail, Smartphone, Sparkles, Send, Eye, X, Copy, Check, RefreshCw,
-  Users, ArrowRight, Info
+  Users, ArrowRight, Info, AlertTriangle, Layers
 } from 'lucide-react';
 
 import { queueEmailViaCloudFunction } from '@/lib/firebase/emailService';
+import { queueSmsViaMsg91, dispatchParallelOutreach } from '@/lib/firebase/smsService';
 
 interface Message {
   id: string;
   candidate: string;
   location: string;
-  channel: 'Email' | 'WhatsApp';
+  channel: 'Email' | 'WhatsApp' | 'SMS' | 'Parallel (Email + SMS)';
   template: string;
   sentAt: string;
   status: 'delivered' | 'failed' | 'pending' | 'opened' | 'responded';
@@ -22,16 +23,17 @@ interface Message {
   subject?: string;
   body?: string;
   email?: string;
+  phone?: string;
 }
 
 const initialMessages: Message[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  delivered: { label: 'Delivered', color: 'bg-blue-100 text-blue-700', icon: <CheckCircle2 size={11} /> },
-  failed: { label: 'Failed', color: 'bg-red-100 text-red-700', icon: <XCircle size={11} /> },
-  pending: { label: 'Pending', color: 'bg-amber-100 text-amber-700', icon: <Clock size={11} /> },
-  opened: { label: 'Opened', color: 'bg-purple-100 text-purple-700', icon: <Mail size={11} /> },
-  responded: { label: 'Responded', color: 'bg-green-100 text-green-700', icon: <CheckCircle2 size={11} /> },
+  delivered: { label: 'Delivered', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300', icon: <CheckCircle2 size={11} /> },
+  failed: { label: 'Failed', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300', icon: <XCircle size={11} /> },
+  pending: { label: 'Pending', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', icon: <Clock size={11} /> },
+  opened: { label: 'Opened', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300', icon: <Mail size={11} /> },
+  responded: { label: 'Responded', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', icon: <CheckCircle2 size={11} /> },
 };
 
 export default function OutreachMessagesPage() {
@@ -48,11 +50,15 @@ export default function OutreachMessagesPage() {
   const [location, setLocation] = useState('');
   const [specialisation, setSpecialisation] = useState('Vedic Astrology');
   const [experience, setExperience] = useState('10+ years');
-  const [channel, setChannel] = useState<'Email' | 'WhatsApp'>('Email');
+  const [channel, setChannel] = useState<'Email' | 'WhatsApp' | 'SMS' | 'Parallel'>('Email');
   const [tone, setTone] = useState<'respectful' | 'prestigious' | 'concise'>('respectful');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedSubject, setGeneratedSubject] = useState('');
   const [generatedBody, setGeneratedBody] = useState('');
+  const [generatedSmsBody, setGeneratedSmsBody] = useState('');
+  
+  // Confirmation Modal State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [sendSuccessMessage, setSendSuccessMessage] = useState<string | null>(null);
 
@@ -71,14 +77,21 @@ export default function OutreachMessagesPage() {
       const specParam = params.get('specialisation');
       if (nameParam) {
         setCandidateName(nameParam);
-        if (emailParam && emailParam !== 'null' && emailParam !== 'undefined') setRecipientEmail(emailParam);
-        if (phoneParam && phoneParam !== 'null' && phoneParam !== 'undefined') {
-          setRecipientPhone(phoneParam);
-          // If phone is available but email is not, default to WhatsApp channel
-          if (!emailParam || emailParam === 'null' || emailParam === 'undefined') {
-            setChannel('WhatsApp');
-          }
+        const hasValidEmail = emailParam && emailParam !== 'null' && emailParam !== 'undefined';
+        const hasValidPhone = phoneParam && phoneParam !== 'null' && phoneParam !== 'undefined';
+
+        if (hasValidEmail) setRecipientEmail(emailParam);
+        if (hasValidPhone) setRecipientPhone(phoneParam);
+
+        // Smart channel default: if both available, offer Parallel dispatch!
+        if (hasValidEmail && hasValidPhone) {
+          setChannel('Parallel');
+        } else if (hasValidPhone && !hasValidEmail) {
+          setChannel('SMS');
+        } else {
+          setChannel('Email');
         }
+
         if (locParam) setLocation(locParam);
         if (specParam) setSpecialisation(specParam);
         setIsComposeOpen(true);
@@ -94,25 +107,70 @@ export default function OutreachMessagesPage() {
 
     setIsGenerating(true);
     try {
-      const res = await fetch('/api/ai/generate-outreach', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          candidateName,
-          specialisation,
-          location: location || 'India',
-          experience,
-          channel: channel.toLowerCase(),
-          tone,
-        }),
-      });
+      if (channel === 'Parallel') {
+        // Generate both email and SMS in parallel
+        const [emailRes, smsRes] = await Promise.all([
+          fetch('/api/ai/generate-outreach', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              candidateName,
+              specialisation,
+              location: location || 'India',
+              experience,
+              channel: 'email',
+              tone,
+            }),
+          }).then(r => r.json()),
+          fetch('/api/ai/generate-outreach', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              candidateName,
+              specialisation,
+              location: location || 'India',
+              experience,
+              channel: 'sms',
+              tone,
+            }),
+          }).then(r => r.json()),
+        ]);
 
-      const data = await res.json();
-      if (data.success) {
-        setGeneratedSubject(data.subject || `Invitation to Join AstroParihar for ${candidateName}`);
-        setGeneratedBody(data.body);
+        if (emailRes.success) {
+          setGeneratedSubject(emailRes.subject || `Invitation to Join AstroParihar for ${candidateName}`);
+          setGeneratedBody(emailRes.body);
+        }
+        if (smsRes.success) {
+          setGeneratedSmsBody(smsRes.body || `Namaste ${candidateName} ji, AstroParihar invites you to join our verified astrologer panel. Details: https://astroparihar.com/join`);
+        }
       } else {
-        alert(data.error || 'Failed to generate message with AI');
+        const res = await fetch('/api/ai/generate-outreach', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            candidateName,
+            specialisation,
+            location: location || 'India',
+            experience,
+            channel: channel.toLowerCase(),
+            tone,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          if (channel === 'Email') {
+            setGeneratedSubject(data.subject || `Invitation to Join AstroParihar for ${candidateName}`);
+            setGeneratedBody(data.body);
+          } else if (channel === 'SMS') {
+            setGeneratedSmsBody(data.body);
+            setGeneratedBody(data.body);
+          } else {
+            setGeneratedBody(data.body);
+          }
+        } else {
+          alert(data.error || 'Failed to generate message with AI');
+        }
       }
     } catch (err: any) {
       alert(`AI Generation error: ${err.message}`);
@@ -121,53 +179,148 @@ export default function OutreachMessagesPage() {
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!candidateName || !generatedBody) {
-      alert('Please fill candidate details and generate message body first.');
+  const handleOpenConfirmation = () => {
+    if (!candidateName) {
+      alert('Please enter the candidate name.');
       return;
     }
 
-    setIsSending(true);
+    if (channel === 'Email' && !generatedBody) {
+      alert('Please generate or compose the email message first.');
+      return;
+    }
 
-    const destEmail = recipientEmail.trim() || `${candidateName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@astroparihar.verified`;
+    if (channel === 'SMS' && (!generatedSmsBody && !generatedBody)) {
+      alert('Please generate or compose the SMS text first.');
+      return;
+    }
 
-    if (channel === 'Email') {
-      try {
-        await queueEmailViaCloudFunction({
-          to: destEmail,
-          candidateName,
-          subject: generatedSubject || `Invitation to Join AstroParihar - ${candidateName}`,
-          body: generatedBody,
-        });
-      } catch (err) {
-        console.warn('Firebase Cloud Function queue warning:', err);
+    if (channel === 'Parallel') {
+      if (!generatedBody || !generatedSmsBody) {
+        alert('Please generate both the Email and SMS message contents before sending.');
+        return;
       }
     }
 
-    setTimeout(() => {
-      const newMsg: Message = {
-        id: `MSG-${String(messages.length + 1).padStart(3, '0')}`,
-        candidate: candidateName,
-        location: location || 'India',
-        channel,
-        template: `AI GPT-4o (${tone})`,
-        sentAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-        status: 'delivered',
-        campaign: channel === 'Email' ? `Firebase Cloud Functions (${destEmail})` : 'Direct AI Personalized Outreach',
-        subject: generatedSubject,
-        body: generatedBody,
-        email: destEmail,
-      };
+    setIsConfirmOpen(true);
+  };
 
-      setMessages([newMsg, ...messages]);
-      setIsSending(false);
+  const handleExecuteDispatch = async () => {
+    setIsSending(true);
+    const destEmail = recipientEmail.trim() || `${candidateName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@astroparihar.verified`;
+    const destPhone = recipientPhone.trim();
+    const effectiveSmsText = generatedSmsBody.trim() || generatedBody.trim();
+    const effectiveEmailBody = generatedBody.trim();
+    const effectiveSubject = generatedSubject.trim() || `Invitation to Join AstroParihar - ${candidateName}`;
+
+    try {
+      if (channel === 'Parallel') {
+        // Parallel multi-channel dispatch
+        const parallelRes = await dispatchParallelOutreach({
+          candidateName,
+          email: destEmail,
+          emailSubject: effectiveSubject,
+          emailBody: effectiveEmailBody,
+          phone: destPhone || undefined,
+          smsMessage: effectiveSmsText,
+          specialisation,
+          location,
+        });
+
+        const newMsg: Message = {
+          id: `MSG-${String(messages.length + 1).padStart(3, '0')}`,
+          candidate: candidateName,
+          location: location || 'India',
+          channel: 'Parallel (Email + SMS)',
+          template: `AI GPT-4o Parallel (${tone})`,
+          sentAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          status: 'delivered',
+          campaign: `Parallel Outreach · Email & SMS (MSG91)`,
+          subject: effectiveSubject,
+          body: `[EMAIL CONTENT]\nSubject: ${effectiveSubject}\n\n${effectiveEmailBody}\n\n-------------------------\n[SMS CONTENT]\n${effectiveSmsText}`,
+          email: destEmail,
+          phone: destPhone || undefined,
+        };
+
+        setMessages(prev => [newMsg, ...prev]);
+        setSendSuccessMessage(
+          `Parallel outreach dispatched successfully! Email queued to ${destEmail}${destPhone ? ` and SMS sent to ${destPhone} via MSG91.` : '.'}`
+        );
+      } else if (channel === 'SMS') {
+        // SMS Single dispatch via MSG91
+        await queueSmsViaMsg91({
+          phone: destPhone || '919876543210',
+          candidateName,
+          message: effectiveSmsText,
+          variables: {
+            candidate_name: candidateName,
+            specialisation,
+            location,
+          },
+        });
+
+        const newMsg: Message = {
+          id: `MSG-${String(messages.length + 1).padStart(3, '0')}`,
+          candidate: candidateName,
+          location: location || 'India',
+          channel: 'SMS',
+          template: `AI GPT-4o SMS (${tone})`,
+          sentAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          status: 'delivered',
+          campaign: `MSG91 SMS Gateway (${destPhone || 'Direct'})`,
+          body: effectiveSmsText,
+          phone: destPhone,
+        };
+
+        setMessages(prev => [newMsg, ...prev]);
+        setSendSuccessMessage(`SMS invitation dispatched to ${candidateName} (${destPhone || 'Registered Mobile'}) via MSG91!`);
+      } else if (channel === 'Email') {
+        // Email dispatch
+        await queueEmailViaCloudFunction({
+          to: destEmail,
+          candidateName,
+          subject: effectiveSubject,
+          body: effectiveEmailBody,
+        });
+
+        const newMsg: Message = {
+          id: `MSG-${String(messages.length + 1).padStart(3, '0')}`,
+          candidate: candidateName,
+          location: location || 'India',
+          channel: 'Email',
+          template: `AI GPT-4o (${tone})`,
+          sentAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          status: 'delivered',
+          campaign: `SMTP Direct (${destEmail})`,
+          subject: effectiveSubject,
+          body: effectiveEmailBody,
+          email: destEmail,
+        };
+
+        setMessages(prev => [newMsg, ...prev]);
+        setSendSuccessMessage(`Email invitation queued to Firebase (/mail) and addressed to: ${destEmail}`);
+      } else {
+        // WhatsApp dispatch
+        const newMsg: Message = {
+          id: `MSG-${String(messages.length + 1).padStart(3, '0')}`,
+          candidate: candidateName,
+          location: location || 'India',
+          channel: 'WhatsApp',
+          template: `AI GPT-4o WhatsApp (${tone})`,
+          sentAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+          status: 'delivered',
+          campaign: `WhatsApp Direct Outreach (${destPhone || candidateName})`,
+          body: effectiveEmailBody || effectiveSmsText,
+          phone: destPhone,
+        };
+
+        setMessages(prev => [newMsg, ...prev]);
+        setSendSuccessMessage(`WhatsApp invitation dispatched to ${candidateName}!`);
+      }
+
+      setIsConfirmOpen(false);
       setIsComposeOpen(false);
-      setSendSuccessMessage(
-        channel === 'Email'
-          ? `Email successfully queued to Firebase (/mail) & addressed to: ${destEmail}`
-          : `Message successfully dispatched to ${candidateName} via ${channel}!`
-      );
-      setTimeout(() => setSendSuccessMessage(null), 5000);
+      setTimeout(() => setSendSuccessMessage(null), 6000);
 
       // Reset form
       setCandidateName('');
@@ -176,7 +329,12 @@ export default function OutreachMessagesPage() {
       setLocation('');
       setGeneratedSubject('');
       setGeneratedBody('');
-    }, 500);
+      setGeneratedSmsBody('');
+    } catch (err: any) {
+      alert(`Dispatch error: ${err.message}`);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleCopyBody = (text: string) => {
@@ -188,20 +346,53 @@ export default function OutreachMessagesPage() {
   const filtered = messages.filter(m => {
     const matchSearch = m.candidate.toLowerCase().includes(search.toLowerCase()) || m.campaign.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'all' || m.status === statusFilter;
-    const matchChannel = channelFilter === 'all' || m.channel === channelFilter;
+    const matchChannel = channelFilter === 'all' 
+      ? true 
+      : channelFilter === 'Parallel' 
+        ? m.channel.includes('Parallel') 
+        : m.channel === channelFilter;
     return matchSearch && matchStatus && matchChannel;
   });
+
+  const getChannelBadge = (ch: string) => {
+    if (ch.includes('Parallel')) {
+      return (
+        <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+          <Layers size={11} /> Email + SMS (Parallel)
+        </span>
+      );
+    }
+    if (ch === 'SMS') {
+      return (
+        <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+          <Smartphone size={11} /> SMS (MSG91)
+        </span>
+      );
+    }
+    if (ch === 'WhatsApp') {
+      return (
+        <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+          <MessageSquare size={11} /> WhatsApp
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+        <Mail size={11} /> Email
+      </span>
+    );
+  };
 
   return (
     <AppLayout>
       <div className="space-y-6">
         {sendSuccessMessage && (
-          <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 flex items-center justify-between animate-fadeIn">
+          <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 flex items-center justify-between animate-fadeIn shadow-xs">
             <span className="flex items-center gap-2 font-medium text-sm">
-              <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
               {sendSuccessMessage}
             </span>
-            <button onClick={() => setSendSuccessMessage(null)} className="text-xs hover:underline">Dismiss</button>
+            <button onClick={() => setSendSuccessMessage(null)} className="text-xs hover:underline shrink-0">Dismiss</button>
           </div>
         )}
 
@@ -210,7 +401,9 @@ export default function OutreachMessagesPage() {
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
               <MessageSquare size={28} className="text-primary" /> Outreach Messages
             </h1>
-            <p className="text-muted-foreground mt-1">Track, generate, and dispatch personalized AI candidate invitations</p>
+            <p className="text-muted-foreground mt-1">
+              Track, compose, and dispatch multichannel candidate invitations across Email, WhatsApp & SMS (MSG91)
+            </p>
           </div>
           <button 
             onClick={() => setIsComposeOpen(true)}
@@ -223,7 +416,7 @@ export default function OutreachMessagesPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {Object.entries(statusConfig).map(([key, sc]) => (
-            <div key={key} className="bg-card border border-border rounded-xl p-3 text-center">
+            <div key={key} className="bg-card border border-border rounded-xl p-3 text-center shadow-2xs">
               <p className="text-xl font-bold text-foreground">{messages.filter(m => m.status === key).length}</p>
               <span className={`inline-flex items-center gap-1 text-xs font-medium ${sc.color} px-2 py-0.5 rounded-full mt-1`}>
                 {sc.icon} {sc.label}
@@ -245,7 +438,7 @@ export default function OutreachMessagesPage() {
           </div>
           <div className="relative">
             <select
-              className="appearance-none pl-3 pr-8 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="appearance-none pl-3 pr-8 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium"
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
             >
@@ -260,13 +453,15 @@ export default function OutreachMessagesPage() {
           </div>
           <div className="relative">
             <select
-              className="appearance-none pl-3 pr-8 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="appearance-none pl-3 pr-8 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium"
               value={channelFilter}
               onChange={e => setChannelFilter(e.target.value)}
             >
               <option value="all">All Channels</option>
-              <option value="Email">Email</option>
-              <option value="WhatsApp">WhatsApp</option>
+              <option value="Parallel">⚡ Parallel (Email + SMS)</option>
+              <option value="Email">✉️ Email</option>
+              <option value="SMS">📱 SMS (MSG91)</option>
+              <option value="WhatsApp">💬 WhatsApp</option>
             </select>
             <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           </div>
@@ -294,7 +489,7 @@ export default function OutreachMessagesPage() {
                       <MessageSquare size={36} className="mx-auto text-muted-foreground/30 mb-2.5" />
                       <p className="font-semibold text-base text-foreground">No outreach messages recorded yet</p>
                       <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">
-                        Discovered astrologers from campaigns live in your candidate pipeline. Sent email and WhatsApp invitations will be tracked here.
+                        Discovered astrologers live in your pipeline. Dispatched Email, WhatsApp & SMS invitations will be tracked here.
                       </p>
                       <div className="mt-4 flex items-center justify-center gap-3">
                         <Link
@@ -302,7 +497,7 @@ export default function OutreachMessagesPage() {
                           className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-lg hover:opacity-90 transition shadow-xs"
                         >
                           <Users size={13} />
-                          View Discovered Candidates & Contact Info
+                          View Candidates
                         </Link>
                         <button
                           onClick={() => setIsComposeOpen(true)}
@@ -316,37 +511,36 @@ export default function OutreachMessagesPage() {
                   </tr>
                 ) : (
                   filtered.map(m => {
-                  const sc = statusConfig[m.status] || statusConfig.delivered;
-                  return (
-                    <tr key={m.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-foreground">{m.candidate}</p>
-                        <p className="text-xs text-muted-foreground">{m.location}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${m.channel === 'Email' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'}`}>
-                          {m.channel === 'Email' ? <Mail size={11} /> : <Smartphone size={11} />} {m.channel}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{m.template}</td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground max-w-[200px] truncate">{m.campaign}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${sc.color}`}>
-                          {sc.icon} {sc.label}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{m.sentAt}</td>
-                      <td className="px-4 py-3 text-right">
-                        <button 
-                          onClick={() => setSelectedMessage(m)}
-                          className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline px-2 py-1 rounded bg-primary/10 hover:bg-primary/20 transition"
-                        >
-                          <Eye size={12} /> View
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                }))}
+                    const sc = statusConfig[m.status] || statusConfig.delivered;
+                    return (
+                      <tr key={m.id} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-foreground">{m.candidate}</p>
+                          <p className="text-xs text-muted-foreground">{m.location}</p>
+                        </td>
+                        <td className="px-4 py-3">
+                          {getChannelBadge(m.channel)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground">{m.template}</td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground max-w-[200px] truncate">{m.campaign}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${sc.color}`}>
+                            {sc.icon} {sc.label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">{m.sentAt}</td>
+                        <td className="px-4 py-3 text-right">
+                          <button 
+                            onClick={() => setSelectedMessage(m)}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline px-2 py-1 rounded bg-primary/10 hover:bg-primary/20 transition"
+                          >
+                            <Eye size={12} /> View
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -360,9 +554,7 @@ export default function OutreachMessagesPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl font-bold text-foreground">{selectedMessage.candidate}</h2>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${selectedMessage.channel === 'Email' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'}`}>
-                      {selectedMessage.channel}
-                    </span>
+                    {getChannelBadge(selectedMessage.channel)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{selectedMessage.location} · {selectedMessage.sentAt}</p>
                 </div>
@@ -393,7 +585,7 @@ export default function OutreachMessagesPage() {
                   </button>
                 </div>
                 <div className="p-4 bg-muted/20 border border-border rounded-xl text-sm font-mono whitespace-pre-wrap max-h-60 overflow-y-auto leading-relaxed text-foreground">
-                  {selectedMessage.body || 'No detailed body recorded for legacy message.'}
+                  {selectedMessage.body || 'No detailed body recorded for message.'}
                 </div>
               </div>
 
@@ -412,7 +604,7 @@ export default function OutreachMessagesPage() {
         {/* Compose with AI Modal */}
         {isComposeOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-card border border-border w-full max-w-2xl rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-card border border-border w-full max-w-2xl rounded-2xl p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
               <div className="flex items-start justify-between border-b border-border pb-3">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -420,7 +612,7 @@ export default function OutreachMessagesPage() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-foreground">Compose Outreach with AI (GPT-4o)</h2>
-                    <p className="text-xs text-muted-foreground">Generates culturally nuanced, respectful invitations for astrologers</p>
+                    <p className="text-xs text-muted-foreground">Culturally nuanced candidate invitations for Email, WhatsApp & SMS (MSG91)</p>
                   </div>
                 </div>
                 <button 
@@ -431,28 +623,99 @@ export default function OutreachMessagesPage() {
                 </button>
               </div>
 
+              {/* Channel Selector Pills */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1.5">Select Outreach Channel Mode</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setChannel('Parallel')}
+                    className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                      channel === 'Parallel'
+                        ? 'bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 ring-2 ring-amber-500/30'
+                        : 'border-border bg-background hover:bg-muted/50 text-foreground'
+                    }`}
+                  >
+                    <Layers size={14} className="text-amber-600" />
+                    <span>⚡ Parallel (Email+SMS)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setChannel('Email')}
+                    className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                      channel === 'Email'
+                        ? 'bg-blue-500/15 border-blue-500 text-blue-900 dark:text-blue-200 ring-2 ring-blue-500/30'
+                        : 'border-border bg-background hover:bg-muted/50 text-foreground'
+                    }`}
+                  >
+                    <Mail size={14} className="text-blue-600" />
+                    <span>Email Only</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setChannel('SMS')}
+                    className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                      channel === 'SMS'
+                        ? 'bg-indigo-500/15 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/30'
+                        : 'border-border bg-background hover:bg-muted/50 text-foreground'
+                    }`}
+                  >
+                    <Smartphone size={14} className="text-indigo-600" />
+                    <span>SMS (MSG91)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setChannel('WhatsApp')}
+                    className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                      channel === 'WhatsApp'
+                        ? 'bg-emerald-500/15 border-emerald-500 text-emerald-900 dark:text-emerald-200 ring-2 ring-emerald-500/30'
+                        : 'border-border bg-background hover:bg-muted/50 text-foreground'
+                    }`}
+                  >
+                    <MessageSquare size={14} className="text-emerald-600" />
+                    <span>WhatsApp</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground block mb-1">Candidate Name *</label>
                   <input
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background font-medium"
                     placeholder="e.g. Pandit Radhakrishnan"
                     value={candidateName}
                     onChange={e => setCandidateName(e.target.value)}
                   />
                 </div>
+
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
-                    {channel === 'Email' ? 'Recipient Email (Where email is delivered) *' : 'Recipient Mobile'}
-                  </label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Recipient Email</label>
                   <input
-                    type={channel === 'Email' ? 'email' : 'tel'}
+                    type="email"
                     className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
-                    placeholder={channel === 'Email' ? 'e.g. astroai@gmail.com (to test yourself)' : '+91 98765 43210'}
-                    value={channel === 'Email' ? recipientEmail : recipientPhone}
-                    onChange={e => channel === 'Email' ? setRecipientEmail(e.target.value) : setRecipientPhone(e.target.value)}
+                    placeholder="e.g. astrologer@gmail.com"
+                    value={recipientEmail}
+                    onChange={e => setRecipientEmail(e.target.value)}
                   />
                 </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                    Recipient Mobile Number (for SMS / WhatsApp)
+                  </label>
+                  <input
+                    type="tel"
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
+                    placeholder="+91 98765 43210"
+                    value={recipientPhone}
+                    onChange={e => setRecipientPhone(e.target.value)}
+                  />
+                </div>
+
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground block mb-1">Location</label>
                   <input
@@ -462,6 +725,7 @@ export default function OutreachMessagesPage() {
                     onChange={e => setLocation(e.target.value)}
                   />
                 </div>
+
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground block mb-1">Specialisation</label>
                   <select
@@ -477,26 +741,7 @@ export default function OutreachMessagesPage() {
                     <option value="Numerology">Numerology</option>
                   </select>
                 </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Experience</label>
-                  <input
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
-                    placeholder="e.g. 15+ years"
-                    value={experience}
-                    onChange={e => setExperience(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Channel</label>
-                  <select
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
-                    value={channel}
-                    onChange={e => setChannel(e.target.value as any)}
-                  >
-                    <option value="Email">Email (Formal letter)</option>
-                    <option value="WhatsApp">WhatsApp (Concise & crisp)</option>
-                  </select>
-                </div>
+
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground block mb-1">Tone & Voice</label>
                   <select
@@ -523,28 +768,70 @@ export default function OutreachMessagesPage() {
                     </>
                   ) : (
                     <>
-                      <Sparkles size={14} /> Generate with GPT-4o
+                      <Sparkles size={14} /> Generate {channel === 'Parallel' ? 'Email & SMS' : channel} with GPT-4o
                     </>
                   )}
                 </button>
               </div>
 
-              {generatedSubject && channel === 'Email' && (
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-muted-foreground">Generated Subject Line:</label>
-                  <input
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background font-medium"
-                    value={generatedSubject}
-                    onChange={e => setGeneratedSubject(e.target.value)}
+              {/* Email Content Box (Shown for Email and Parallel) */}
+              {(channel === 'Email' || channel === 'Parallel') && (
+                <div className="space-y-2 p-3.5 bg-blue-50/50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-900">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-blue-800 dark:text-blue-300">
+                    <Mail size={14} /> Email Outreach Letter
+                  </div>
+                  <div>
+                    <label className="text-2xs font-semibold text-muted-foreground block mb-0.5">Subject Line:</label>
+                    <input
+                      className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background font-medium"
+                      value={generatedSubject}
+                      placeholder="e.g. Invitation to Join AstroParihar Astrologer Network"
+                      onChange={e => setGeneratedSubject(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-2xs font-semibold text-muted-foreground block mb-0.5">Email Body:</label>
+                    <textarea
+                      rows={5}
+                      className="w-full p-2.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 leading-relaxed font-sans"
+                      placeholder="Email invitation content..."
+                      value={generatedBody}
+                      onChange={e => setGeneratedBody(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* SMS Content Box (Shown for SMS and Parallel) */}
+              {(channel === 'SMS' || channel === 'Parallel') && (
+                <div className="space-y-2 p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-900">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-800 dark:text-indigo-300">
+                      <Smartphone size={14} /> SMS Outreach (MSG91 DLT)
+                    </div>
+                    <span className="text-2xs text-muted-foreground font-mono">
+                      {(generatedSmsBody || generatedBody).length} chars · {Math.ceil(((generatedSmsBody || generatedBody).length) / 160) || 1} SMS
+                    </span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    className="w-full p-2.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono text-xs leading-relaxed"
+                    placeholder="Short SMS invitation text with link..."
+                    value={generatedSmsBody || (channel === 'SMS' ? generatedBody : '')}
+                    onChange={e => {
+                      setGeneratedSmsBody(e.target.value);
+                      if (channel === 'SMS') setGeneratedBody(e.target.value);
+                    }}
                   />
                 </div>
               )}
 
-              {generatedBody && (
+              {/* WhatsApp Box */}
+              {channel === 'WhatsApp' && (
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-muted-foreground">Generated Message Body (Editable):</label>
+                  <label className="text-xs font-semibold text-muted-foreground">WhatsApp Message Body:</label>
                   <textarea
-                    rows={7}
+                    rows={6}
                     className="w-full p-3 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 leading-relaxed font-sans"
                     value={generatedBody}
                     onChange={e => setGeneratedBody(e.target.value)}
@@ -555,21 +842,139 @@ export default function OutreachMessagesPage() {
               <div className="flex items-center justify-between pt-3 border-t border-border">
                 <button 
                   onClick={() => setIsComposeOpen(false)}
-                  className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted"
+                  className="px-4 py-2 border border-border rounded-lg text-sm hover:bg-muted font-medium"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleSendMessage}
-                  disabled={!generatedBody || isSending}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                  onClick={handleOpenConfirmation}
+                  disabled={!candidateName || (!generatedBody && !generatedSmsBody) || isSending}
+                  className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition disabled:opacity-50"
+                >
+                  {channel === 'Parallel' ? (
+                    <>
+                      <Layers size={15} /> Review & Send Parallel (Email + SMS)
+                    </>
+                  ) : (
+                    <>
+                      <Send size={15} /> Review & Send via {channel}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Modal */}
+        {isConfirmOpen && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+            <div className="bg-card border border-border w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4">
+              <div className="flex items-start justify-between border-b border-border pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
+                    <AlertTriangle size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground">Confirm Outreach Dispatch</h3>
+                    <p className="text-xs text-muted-foreground">Review destination channels and message preview</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsConfirmOpen(false)}
+                  className="p-1 rounded-lg text-muted-foreground hover:bg-muted"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Target Candidate Summary */}
+              <div className="p-3 bg-muted/40 rounded-xl space-y-1.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground font-semibold">Candidate:</span>
+                  <span className="font-bold text-foreground">{candidateName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground font-semibold">Specialisation / Location:</span>
+                  <span className="text-foreground">{specialisation} · {location || 'India'}</span>
+                </div>
+              </div>
+
+              {/* Dispatch Channel Checklist */}
+              <div className="space-y-2.5">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Channels to Dispatch:</p>
+
+                {(channel === 'Email' || channel === 'Parallel') && (
+                  <div className="p-3 rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50/40 dark:bg-blue-950/20 flex items-start gap-3">
+                    <Mail size={18} className="text-blue-600 shrink-0 mt-0.5" />
+                    <div className="flex-1 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-blue-900 dark:text-blue-200">Email Invitation (SMTP)</span>
+                        <span className="text-2xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 px-1.5 py-0.5 rounded font-mono">Ready</span>
+                      </div>
+                      <p className="text-muted-foreground mt-0.5">
+                        Recipient: <strong className="text-foreground">{recipientEmail || `${candidateName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@astroparihar.verified`}</strong>
+                      </p>
+                      <p className="text-muted-foreground mt-0.5 truncate max-w-sm">
+                        Subject: <em>{generatedSubject || 'Invitation to Join AstroParihar'}</em>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {(channel === 'SMS' || channel === 'Parallel') && (
+                  <div className="p-3 rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50/40 dark:bg-indigo-950/20 flex items-start gap-3">
+                    <Smartphone size={18} className="text-indigo-600 shrink-0 mt-0.5" />
+                    <div className="flex-1 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-indigo-900 dark:text-indigo-200">SMS Invitation (MSG91)</span>
+                        <span className="text-2xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 px-1.5 py-0.5 rounded font-mono">Ready</span>
+                      </div>
+                      <p className="text-muted-foreground mt-0.5">
+                        Mobile: <strong className="text-foreground">{recipientPhone || '+91 Candidate Mobile'}</strong>
+                      </p>
+                      <p className="text-muted-foreground mt-0.5 font-mono text-2xs line-clamp-2">
+                        {generatedSmsBody || generatedBody}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {channel === 'WhatsApp' && (
+                  <div className="p-3 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/40 dark:bg-emerald-950/20 flex items-start gap-3">
+                    <MessageSquare size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="flex-1 text-xs">
+                      <span className="font-bold text-emerald-900 dark:text-emerald-200">WhatsApp Invitation</span>
+                      <p className="text-muted-foreground mt-0.5">Recipient: {recipientPhone || candidateName}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmOpen(false)}
+                  disabled={isSending}
+                  className="px-4 py-2 border border-border rounded-lg text-xs font-semibold hover:bg-muted"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecuteDispatch}
+                  disabled={isSending}
+                  className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition disabled:opacity-50"
                 >
                   {isSending ? (
-                    <RefreshCw size={14} className="animate-spin" />
+                    <>
+                      <RefreshCw size={14} className="animate-spin" /> Dispatching...
+                    </>
                   ) : (
-                    <Send size={14} />
+                    <>
+                      <CheckCircle2 size={14} /> Confirm & Dispatch Now
+                    </>
                   )}
-                  {isSending ? 'Sending...' : `Send via ${channel}`}
                 </button>
               </div>
             </div>

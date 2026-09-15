@@ -116,7 +116,7 @@ export async function generateOutreachMessage(candidate: {
   specialization?: string;
   experienceYears?: number;
   platformSource?: string;
-  channel?: 'Email' | 'WhatsApp';
+  channel?: 'Email' | 'WhatsApp' | 'SMS';
 }): Promise<{ subject: string; body: string }> {
   const openai = getOpenAIClient();
   const channel = candidate.channel || 'Email';
@@ -133,6 +133,7 @@ Channel: ${channel}
 Guidelines:
 - If Email: Include an engaging subject line, warm opening greeting, 2 paragraphs explaining why they were selected for AstroParihar's Verified Astrologer Panel, and a clear call-to-action link.
 - If WhatsApp: Keep subject empty or short, and write a friendly 3-5 line WhatsApp message with bullet points and an invite link.
+- If SMS: Keep subject empty. Write a highly concise, respectful SMS (under 160 characters if possible or under 2 short sentences) including their name, an invitation to the AstroParihar Verified Panel, and link https://astroparihar.com/join.
 
 Return strictly JSON format:
 {

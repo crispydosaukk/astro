@@ -350,6 +350,25 @@
     animation: pulseHighlight 600ms ease;
   }
 
+  .status-badge-discovered,
+  .status-badge-qualified,
+  .status-badge-outreach,
+  .status-badge-contacted,
+  .status-badge-applied,
+  .status-badge-screening,
+  .status-badge-review,
+  .status-badge-probation,
+  .status-badge-verified,
+  .status-badge-rejected,
+  .status-badge-duplicate,
+  .status-badge-hold {
+    white-space: nowrap !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+  }
+
   .status-badge-discovered {
     background-color: rgba(91, 127, 166, 0.12);
     color: #5B7FA6;

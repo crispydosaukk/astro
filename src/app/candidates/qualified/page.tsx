@@ -262,22 +262,23 @@ export default function QualifiedCandidatesPage() {
                           ))}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                          ★ {c.rating || 4.8}
+                      <td className="px-4 py-3 text-center whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-950 dark:bg-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700 shadow-2xs">
+                          <span className="text-amber-600 dark:text-amber-400 font-black">★</span>
+                          <span>{c.rating ? Number(c.rating).toFixed(c.rating % 1 === 0 ? 0 : 1) : '4.8'}</span>
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                          isSent ? 'bg-blue-100 text-blue-700' :
-                          isApproved ? 'bg-emerald-100 text-emerald-700' : 
-                          'bg-amber-100 text-amber-700'
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`inline-flex items-center whitespace-nowrap px-3 py-1 rounded-full text-xs font-bold shadow-2xs ${
+                          isSent ? 'bg-blue-100 text-blue-950 dark:bg-blue-900/70 dark:text-blue-100 border border-blue-300 dark:border-blue-600' :
+                          isApproved ? 'bg-emerald-100 text-emerald-950 dark:bg-emerald-900/70 dark:text-emerald-100 border border-emerald-300 dark:border-emerald-600' : 
+                          'bg-amber-100 text-amber-950 dark:bg-amber-900/70 dark:text-amber-100 border border-amber-300 dark:border-amber-600'
                         }`}>
                           {c.outreachStatus || 'Pending Approval'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{c.source}</td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{c.source}</td>
+                      <td className="px-4 py-3 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-1.5">
                           <button 
                             onClick={() => setViewCandidate(c)}
@@ -290,7 +291,7 @@ export default function QualifiedCandidatesPage() {
                             <button 
                               onClick={() => handleApprove(c.id)}
                               disabled={isUpdating}
-                              className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1 transition-colors" 
+                              className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1 transition-colors whitespace-nowrap" 
                               title="Approve for Outreach"
                             >
                               <Send size={11} /> Approve
@@ -299,7 +300,7 @@ export default function QualifiedCandidatesPage() {
                           {isApproved && (
                             <Link
                               href={`/outreach/messages`}
-                              className="px-2.5 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 text-xs font-semibold flex items-center gap-1 transition-colors"
+                              className="px-2.5 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 text-xs font-semibold flex items-center gap-1 transition-colors whitespace-nowrap"
                               title="Dispatch Email with GPT-4o"
                             >
                               <Send size={11} /> Send Invite

@@ -232,21 +232,22 @@ export default function OutreachPendingPage() {
                             ))}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                            ★ {c.rating || 4.8}
+                        <td className="px-4 py-3 text-center whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-950 dark:bg-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700 whitespace-nowrap shadow-2xs">
+                            <span className="text-amber-600 dark:text-amber-400 font-black">★</span>
+                            <span>{c.rating ? Number(c.rating).toFixed(c.rating % 1 === 0 ? 0 : 1) : '4.8'}</span>
                           </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full">
-                            <Clock size={11} /> Awaiting Approval
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-950 bg-amber-100 dark:bg-amber-950/70 dark:text-amber-200 border border-amber-300 dark:border-amber-700 px-3 py-1 rounded-full whitespace-nowrap shadow-2xs">
+                            <Clock size={12} className="text-amber-700 dark:text-amber-400" /> Awaiting Approval
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-4 py-3 text-center whitespace-nowrap">
                           {(() => {
                             const contact = resolveCandidateContact(c);
                             return (
-                              <div className="flex items-center justify-center gap-1.5">
+                              <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
                                 <button
                                   onClick={() => setViewCandidate(c)}
                                   className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -257,13 +258,13 @@ export default function OutreachPendingPage() {
                                 <button
                                   onClick={() => handleApprove(c.id)}
                                   disabled={isUpdating}
-                                  className="px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1 transition-colors"
+                                  className="px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-xs font-semibold flex items-center gap-1 transition-colors whitespace-nowrap"
                                 >
                                   <CheckCircle2 size={12} /> Approve
                                 </button>
                                 <Link
                                   href={`/outreach/messages?name=${encodeURIComponent(c.name)}&email=${encodeURIComponent(contact.email || '')}&phone=${encodeURIComponent(contact.phone || '')}&location=${encodeURIComponent(c.location)}&specialisation=${encodeURIComponent(c.specialisations?.[0] || 'Vedic Astrology')}`}
-                                  className="px-3 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-semibold flex items-center gap-1 transition-opacity"
+                                  className="px-3 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 text-xs font-semibold flex items-center gap-1 transition-opacity whitespace-nowrap"
                                 >
                                   <Send size={12} /> Compose
                                 </Link>

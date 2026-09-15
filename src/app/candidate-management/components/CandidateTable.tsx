@@ -30,7 +30,11 @@ import {
   UserPlus,
   MapPin,
   CheckCircle2,
-  MessageCircle
+  MessageCircle,
+  Smartphone,
+  Zap,
+  Layers,
+  RefreshCw
 } from 'lucide-react';
 import { 
   Candidate, 
@@ -42,6 +46,7 @@ import {
   updateCandidateStatus,
   resolveCandidateContact
 } from '@/lib/firebase/candidateService';
+import { queueSmsViaMsg91, dispatchParallelOutreach } from '@/lib/firebase/smsService';
 import CandidateProfileModal from '@/components/candidates/CandidateProfileModal';
 import AddCandidateModal from '@/components/candidates/AddCandidateModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
@@ -92,6 +97,10 @@ export default function CandidateTable() {
   const [dossier, setDossier] = useState<{ candidate: Candidate; evaluation: any } | null>(null);
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const [csvContent, setCsvContent] = useState('');
+  const [quickParallelCandidate, setQuickParallelCandidate] = useState<Candidate | null>(null);
+  const [quickParallelEmail, setQuickParallelEmail] = useState('');
+  const [quickParallelPhone, setQuickParallelPhone] = useState('');
+  const [isSendingQuickParallel, setIsSendingQuickParallel] = useState(false);
 
   // Subscribe to real-time updates from Firestore
   useEffect(() => {
@@ -159,6 +168,112 @@ export default function CandidateTable() {
     // Update status to Sent (WhatsApp)
     await handleStatusChange(candidate.id, 'ready-for-outreach', 'Sent (WhatsApp)');
     showToast('WhatsApp Outreach Dispatched', `Direct invitation sent to ${candidate.name} (${phoneWithCountry}).`, 'success');
+  };
+
+  const handleDirectSms = async (candidate: Candidate, phoneNum: string) => {
+    const cleanPhone = phoneNum.replace(/[^\d+]/g, '').replace(/^0+/, '');
+    const appUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}&phone=${encodeURIComponent(cleanPhone)}`
+      : `https://astroparihar.com/apply?id=${candidate.id}`;
+
+    const smsText = `Namaste ${candidate.name} Ji, AstroParihar invites you to join our verified panel of astrologers. Apply here: ${appUrl}`;
+
+    try {
+      showToast('Dispatching SMS...', `Sending invitation to ${candidate.name} via MSG91 Gateway.`, 'info');
+      const res = await queueSmsViaMsg91({
+        phone: cleanPhone,
+        candidateName: candidate.name,
+        candidateId: candidate.id,
+        message: smsText,
+        variables: {
+          candidate_name: candidate.name,
+          specialisation: candidate.specialisations?.[0] || 'Vedic Astrology',
+          location: candidate.location || 'India',
+        }
+      });
+
+      if (res.success) {
+        await handleStatusChange(candidate.id, 'ready-for-outreach', 'Sent (SMS)');
+        showToast('SMS Dispatched Successfully', `SMS invitation sent to ${candidate.name} (${cleanPhone}) via MSG91.`, 'success');
+      } else {
+        showToast('SMS Dispatch Warning', res.error || 'Gateway logged transaction with note.', 'info');
+      }
+    } catch (err: any) {
+      showToast('SMS Dispatch Failed', err.message, 'error');
+    }
+  };
+
+  const handleOpenQuickParallel = (candidate: Candidate) => {
+    const contact = resolveCandidateContact(candidate);
+    setQuickParallelCandidate(candidate);
+    setQuickParallelEmail(contact.email || candidate.email || '');
+    setQuickParallelPhone(contact.phone || candidate.phone || '');
+  };
+
+  const handleExecuteQuickParallel = async (candidate: Candidate, targetEmail: string, targetPhone: string) => {
+    setIsSendingQuickParallel(true);
+    const cleanPhone = targetPhone.replace(/[^\d+]/g, '').replace(/^0+/, '');
+    const cleanEmail = targetEmail.trim();
+
+    const appUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}`
+      : `https://astroparihar.com/apply?id=${candidate.id}`;
+
+    const emailSubject = `Invitation to Join AstroParihar Astrologer Panel – ${candidate.name}`;
+    const emailBody = `Namaste ${candidate.name} Ji,\n\nWe are delighted to invite you to join AstroParihar's premier network of verified astrologers. Having reviewed your esteemed practice in ${candidate.location} specializing in ${candidate.specialisations?.join(', ') || 'Vedic Astrology'}, we would be honored to partner with you.\n\nPlease review your verification dossier and onboarding details at:\n${appUrl}\n\nWarm regards,\nRecruitment Committee, AstroParihar UK`;
+    const smsText = `Namaste ${candidate.name} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: ${appUrl}`;
+
+    try {
+      const res = await dispatchParallelOutreach({
+        candidateName: candidate.name,
+        candidateId: candidate.id,
+        email: cleanEmail || undefined,
+        emailSubject,
+        emailBody,
+        phone: cleanPhone || undefined,
+        smsMessage: smsText,
+        specialisation: candidate.specialisations?.[0] || 'Vedic Astrology',
+        location: candidate.location || 'India',
+      });
+
+      const emailOk = !cleanEmail || res.email.success;
+      const smsOk = !cleanPhone || res.sms.success;
+
+      if (emailOk && smsOk) {
+        const statusLabel = cleanEmail && cleanPhone ? 'Sent (Email + SMS)' : cleanEmail ? 'Sent (Email)' : 'Sent (SMS)';
+        await handleStatusChange(candidate.id, 'ready-for-outreach', statusLabel);
+        setQuickParallelCandidate(null);
+        showToast(
+          '⚡ Dual Outreach Dispatched!',
+          `Successfully dispatched message${cleanEmail ? ` to Email (${cleanEmail})` : ''}${cleanPhone ? ` and SMS (${cleanPhone})` : ''}!`,
+          'success'
+        );
+      } else if (res.email.success && !res.sms.success) {
+        await handleStatusChange(candidate.id, 'ready-for-outreach', 'Sent (Email)');
+        showToast(
+          'Email Sent, SMS Failed',
+          `Email sent to ${cleanEmail}. SMS Error: ${res.sms.error || 'Gateway rejected SMS'}`,
+          'info'
+        );
+      } else if (!res.email.success && res.sms.success) {
+        await handleStatusChange(candidate.id, 'ready-for-outreach', 'Sent (SMS)');
+        showToast(
+          'SMS Sent, Email Failed',
+          `SMS sent to ${cleanPhone}. Email Error: ${res.email.error || 'SMTP rejected'}`,
+          'info'
+        );
+      } else {
+        showToast(
+          'Outreach Dispatch Failed',
+          `Email: ${res.email.error || 'Error'} | SMS: ${res.sms.error || 'Error'}`,
+          'error'
+        );
+      }
+    } catch (err: any) {
+      showToast('Parallel Dispatch Exception', err.message, 'error');
+    } finally {
+      setIsSendingQuickParallel(false);
+    }
   };
 
   const showToast = (title: string, desc?: string, type: 'success' | 'info' | 'error' = 'success') => {
@@ -262,7 +377,7 @@ export default function CandidateTable() {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line || line.toLowerCase().startsWith('name,')) continue;
-      const parts = line.split(',').map(p => p.trim());
+      const parts = line.split(',').map((p: string) => p.trim());
       if (parts.length >= 2) {
         const name = parts[0];
         const location = parts[1] || 'India';
@@ -693,25 +808,25 @@ export default function CandidateTable() {
                   </th>
                 )}
                 {columns.experience && (
-                  <th className="table-header-cell">Experience</th>
+                  <th className="table-header-cell whitespace-nowrap">Experience</th>
                 )}
                 {columns.source && (
-                  <th className="table-header-cell">Source</th>
+                  <th className="table-header-cell whitespace-nowrap min-w-[130px]">Source</th>
                 )}
                 {columns.outreach && (
-                  <th className="table-header-cell">Outreach</th>
+                  <th className="table-header-cell whitespace-nowrap min-w-[140px]">Outreach</th>
                 )}
                 {columns.lifecycle && (
-                  <th className="table-header-cell cursor-pointer" onClick={() => handleSort('lifecycleStatus')}>
+                  <th className="table-header-cell cursor-pointer whitespace-nowrap min-w-[160px]" onClick={() => handleSort('lifecycleStatus')}>
                     Lifecycle Stage <SortIcon col="lifecycleStatus" />
                   </th>
                 )}
                 {columns.discovered && (
-                  <th className="table-header-cell cursor-pointer" onClick={() => handleSort('discoveredDate')}>
+                  <th className="table-header-cell cursor-pointer whitespace-nowrap min-w-[120px]" onClick={() => handleSort('discoveredDate')}>
                     Discovered <SortIcon col="discoveredDate" />
                   </th>
                 )}
-                <th className="table-header-cell w-28 text-center">Actions</th>
+                <th className="table-header-cell w-28 text-center whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -865,12 +980,13 @@ export default function CandidateTable() {
 
                     {/* Rating & Reviews */}
                     {columns.rating && (
-                      <td className="table-cell">
+                      <td className="table-cell whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
-                            ★ {candidate.rating || 4.8}
+                          <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-950 dark:bg-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700 shadow-2xs">
+                            <span className="text-amber-600 dark:text-amber-400 font-black">★</span>
+                            <span>{candidate.rating ? Number(candidate.rating).toFixed(candidate.rating % 1 === 0 ? 0 : 1) : '4.8'}</span>
                           </span>
-                          <span className="text-2xs text-muted-foreground font-medium">
+                          <span className="text-2xs text-muted-foreground font-semibold">
                             ({candidate.userRatingsTotal || 25})
                           </span>
                         </div>
@@ -879,18 +995,18 @@ export default function CandidateTable() {
 
                     {/* Experience */}
                     {columns.experience && (
-                      <td className="table-cell">
+                      <td className="table-cell whitespace-nowrap">
                         <span className="text-sm font-semibold tabular-nums text-foreground">{candidate.experience}</span>
                       </td>
                     )}
 
                     {/* Source */}
                     {columns.source && (
-                      <td className="table-cell">
-                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                      <td className="table-cell whitespace-nowrap">
+                        <span className={`inline-flex items-center justify-center whitespace-nowrap text-xs px-2.5 py-1 rounded-md font-bold tracking-normal ${
                           candidate.source === 'Manual Entry' 
-                            ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700' 
-                            : 'text-muted-foreground bg-muted'
+                            ? 'bg-amber-100 text-amber-950 dark:bg-amber-900/60 dark:text-amber-100 border border-amber-300 dark:border-amber-600' 
+                            : 'bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-600'
                         }`}>
                           {candidate.source}
                         </span>
@@ -899,43 +1015,54 @@ export default function CandidateTable() {
 
                     {/* Outreach status */}
                     {columns.outreach && (
-                      <td className="table-cell">
+                      <td className="table-cell whitespace-nowrap">
                         {(() => {
                           const contact = resolveCandidateContact(candidate);
                           const isSentWA = candidate.outreachStatus?.includes('WhatsApp') || (candidate.outreachStatus === 'Sent' && !contact.email);
                           const isSentEmail = candidate.outreachStatus?.includes('Email') || (candidate.outreachStatus === 'Sent' && contact.email);
+                          const isSentSMS = candidate.outreachStatus?.includes('SMS');
 
                           if (candidate.outreachStatus === 'Pending Approval' || candidate.outreachStatus === 'Not Sent') {
                             return (
                               <button 
                                 onClick={() => handleStatusChange(candidate.id, 'ready-for-outreach', 'Approved')}
-                                className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full hover:bg-primary/20 transition-colors flex items-center gap-1 cursor-pointer"
+                                className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-bold text-[#713B32] bg-[#713B32]/10 hover:bg-[#713B32]/20 dark:text-amber-200 dark:bg-amber-900/40 px-3 py-1 rounded-full transition-colors cursor-pointer border border-[#713B32]/30 dark:border-amber-600/40 shadow-2xs"
                                 title="Approve this astrologer for outreach"
                               >
-                                <Send size={10} />
+                                <Send size={11} className="shrink-0 text-[#713B32] dark:text-amber-300" />
                                 Approve
                               </button>
                             );
                           }
+                          if (isSentSMS) {
+                            return (
+                              <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-bold px-3 py-1 rounded-full bg-indigo-100 text-indigo-950 dark:bg-indigo-900/70 dark:text-indigo-100 border border-indigo-300 dark:border-indigo-600 shadow-2xs">
+                                <Phone size={12} className="text-indigo-700 dark:text-indigo-300 shrink-0" />
+                                SMS Sent
+                              </span>
+                            );
+                          }
                           if (isSentWA) {
                             return (
-                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60">
-                                <MessageCircle size={11} className="text-emerald-600" />
+                              <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 dark:bg-emerald-900/70 dark:text-emerald-100 border border-emerald-400 dark:border-emerald-600 shadow-2xs">
+                                <MessageCircle size={12} className="text-emerald-700 dark:text-emerald-300 shrink-0" />
                                 WhatsApp Sent
                               </span>
                             );
                           }
                           if (isSentEmail) {
                             return (
-                              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/40 text-violet-800 dark:text-violet-300 border border-violet-300/60">
-                                <Mail size={11} className="text-violet-600" />
+                              <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-950 dark:bg-blue-900/70 dark:text-blue-100 border border-blue-300 dark:border-blue-600 shadow-2xs">
+                                <Mail size={12} className="text-blue-700 dark:text-blue-300 shrink-0" />
                                 Email Sent
                               </span>
                             );
                           }
                           return (
-                            <span className={`text-xs font-semibold ${
-                              candidate.outreachStatus === 'Approved'? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'
+                            <span className={`inline-flex items-center whitespace-nowrap text-xs font-bold px-3 py-1 rounded-full ${
+                              candidate.outreachStatus === 'Approved' 
+                                ? 'bg-emerald-100 text-emerald-950 dark:bg-emerald-900/60 dark:text-emerald-100 border border-emerald-300 dark:border-emerald-600' 
+                                : 'bg-muted text-muted-foreground border border-border'
                             }`}>
                               {candidate.outreachStatus}
                             </span>
@@ -946,14 +1073,14 @@ export default function CandidateTable() {
 
                     {/* Lifecycle status */}
                     {columns.lifecycle && (
-                      <td className="table-cell">
+                      <td className="table-cell whitespace-nowrap">
                         <StatusBadge status={candidate.lifecycleStatus} />
                       </td>
                     )}
 
                     {/* Discovered date */}
                     {columns.discovered && (
-                      <td className="table-cell text-xs text-muted-foreground">
+                      <td className="table-cell whitespace-nowrap text-xs text-muted-foreground">
                         {candidate.discoveredDate}
                       </td>
                     )}
@@ -962,6 +1089,10 @@ export default function CandidateTable() {
                     <td className="table-cell text-center">
                       {(() => {
                         const contact = resolveCandidateContact(candidate);
+                        const hasPhone = Boolean(contact.phone);
+                        const hasEmail = Boolean(contact.email);
+                        const hasBoth = hasPhone && hasEmail;
+
                         return (
                           <div className="flex items-center justify-center gap-1">
                             {/* Eye icon: View Astrologer Complete Profile & Contact Details */}
@@ -973,8 +1104,30 @@ export default function CandidateTable() {
                               <Eye size={15} />
                             </button>
 
+                            {/* ⚡ 1-Click Parallel Email + SMS Action */}
+                            {(hasBoth || (hasPhone && hasEmail)) && (
+                              <button
+                                onClick={() => handleOpenQuickParallel(candidate)}
+                                className="btn-ghost p-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/60 rounded transition-colors"
+                                title={`⚡ 1-Click Dual Outreach: Send Email & SMS simultaneously to ${candidate.name}`}
+                              >
+                                <Zap size={15} className="fill-amber-500 text-amber-500" />
+                              </button>
+                            )}
+
+                            {/* Direct SMS Action */}
+                            {hasPhone && (
+                              <button
+                                onClick={() => handleDirectSms(candidate, contact.phone!)}
+                                className="btn-ghost p-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded transition-colors"
+                                title={`Send SMS Invitation via MSG91 to ${candidate.name} (${contact.phone})`}
+                              >
+                                <Smartphone size={15} />
+                              </button>
+                            )}
+
                             {/* Direct WhatsApp Action */}
-                            {contact.phone && (
+                            {hasPhone && (
                               <button
                                 onClick={() => handleDirectWhatsApp(candidate, contact.phone!)}
                                 className="btn-ghost p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded transition-colors"
@@ -985,10 +1138,10 @@ export default function CandidateTable() {
                             )}
 
                             {/* AI Email Compose Link */}
-                            {contact.email && (
+                            {hasEmail && (
                               <Link
-                                href={`/outreach/messages?name=${encodeURIComponent(candidate.name)}&email=${encodeURIComponent(contact.email)}${contact.phone ? `&phone=${encodeURIComponent(contact.phone)}` : ''}&location=${encodeURIComponent(candidate.location)}&specialisation=${encodeURIComponent(candidate.specialisations?.[0] || 'Vedic Astrology')}`}
-                                className="btn-ghost p-1.5 text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-950/50 rounded"
+                                href={`/outreach/messages?name=${encodeURIComponent(candidate.name)}&email=${encodeURIComponent(contact.email!)}${contact.phone ? `&phone=${encodeURIComponent(contact.phone)}` : ''}&location=${encodeURIComponent(candidate.location)}&specialisation=${encodeURIComponent(candidate.specialisations?.[0] || 'Vedic Astrology')}`}
+                                className="btn-ghost p-1.5 text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-950/50 rounded transition-colors"
                                 title={`Send AI Email Outreach to ${contact.email}`}
                               >
                                 <Mail size={15} />
@@ -1022,6 +1175,15 @@ export default function CandidateTable() {
                                     <Eye size={13} className="text-primary" />
                                     View Full Profile & History
                                   </button>
+                                  {hasBoth && (
+                                    <button 
+                                      onClick={() => { handleOpenQuickParallel(candidate); setActionMenuOpen(null); }}
+                                      className="w-full text-left px-3 py-2 hover:bg-amber-50 dark:hover:bg-amber-950/40 flex items-center gap-2 text-amber-700 dark:text-amber-300 font-semibold"
+                                    >
+                                      <Zap size={13} className="fill-amber-500 text-amber-500" />
+                                      ⚡ 1-Click Parallel Send (Mail + SMS)
+                                    </button>
+                                  )}
                                   <div className="border-t border-border my-1" />
                                   <button 
                                     onClick={() => handleStatusChange(candidate.id, 'screening')}
@@ -1261,6 +1423,124 @@ export default function CandidateTable() {
         confirmText="Yes, Purge Pipeline"
         cancelText="Keep Candidates"
       />
+
+      {/* MODAL 5: 1-Click Parallel Outreach Confirmation Modal */}
+      {quickParallelCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
+          <div className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl p-6 space-y-4 m-auto my-auto animate-slide-up">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                  <Zap size={20} className="fill-amber-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-foreground">1-Click Dual Channel Outreach</h3>
+                  <p className="text-xs text-muted-foreground">Send concurrent personalized invitations via Email & SMS</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setQuickParallelCandidate(null)}
+                disabled={isSendingQuickParallel}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Candidate Quick Summary */}
+            <div className="p-3 bg-muted/40 rounded-xl border border-border flex items-center justify-between gap-3">
+              <div>
+                <h4 className="font-bold text-sm text-foreground">{quickParallelCandidate.name}</h4>
+                <p className="text-xs text-muted-foreground">
+                  {quickParallelCandidate.specialisations?.join(', ') || 'Vedic Astrology'} • {quickParallelCandidate.location}
+                </p>
+              </div>
+              <StatusBadge status={quickParallelCandidate.lifecycleStatus} size="sm" />
+            </div>
+
+            {/* Recipient Channels Info (Editable for live testing) */}
+            <div className="space-y-3 text-xs">
+              <div className="p-3 rounded-lg border border-violet-500/20 bg-violet-500/5 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Mail size={14} className="text-violet-600 dark:text-violet-400" />
+                    Target Email Address
+                  </label>
+                  <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300">
+                    SMTP Verified
+                  </span>
+                </div>
+                <input
+                  type="email"
+                  value={quickParallelEmail}
+                  onChange={(e) => setQuickParallelEmail(e.target.value)}
+                  placeholder="Enter recipient or your test email (e.g. yourname@gmail.com)"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-violet-500/40 text-foreground"
+                />
+              </div>
+
+              <div className="p-3 rounded-lg border border-indigo-500/20 bg-indigo-500/5 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Smartphone size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    Target Mobile / SMS Number
+                  </label>
+                  <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
+                    MSG91 Flow
+                  </span>
+                </div>
+                <input
+                  type="tel"
+                  value={quickParallelPhone}
+                  onChange={(e) => setQuickParallelPhone(e.target.value)}
+                  placeholder="Enter 10-digit mobile number (e.g. 9876543210 or +919876543210)"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-foreground"
+                />
+              </div>
+            </div>
+
+            {/* Notice */}
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-2xs text-amber-800 dark:text-amber-300">
+              <p className="font-semibold flex items-center gap-1 mb-0.5">
+                <Zap size={12} className="fill-amber-500" />
+                Dual-Channel Execution Note
+              </p>
+              Both Email and SMS messages will be queued and dispatched synchronously to the entered addresses. Status will update to <strong className="font-bold">Sent (Email + SMS)</strong> and delivery logs will appear in Communication History.
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setQuickParallelCandidate(null)}
+                disabled={isSendingQuickParallel}
+                className="btn-ghost text-xs py-2 px-3 rounded-lg cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExecuteQuickParallel(quickParallelCandidate, quickParallelEmail, quickParallelPhone)}
+                disabled={isSendingQuickParallel || (!quickParallelEmail.trim() && !quickParallelPhone.trim())}
+                className="btn-primary text-xs py-2 px-4 rounded-lg flex items-center gap-1.5 cursor-pointer bg-gradient-to-r from-amber-600 to-primary hover:from-amber-700 hover:to-primary/90 text-white font-semibold shadow-md disabled:opacity-50"
+              >
+                {isSendingQuickParallel ? (
+                  <>
+                    <RefreshCw size={13} className="animate-spin" />
+                    Sending Concurrently...
+                  </>
+                ) : (
+                  <>
+                    <Zap size={13} className="fill-white" />
+                    ⚡ Send Email & SMS Concurrently
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

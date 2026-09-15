@@ -32,19 +32,35 @@ export async function sendSmtpEmail({
   });
 
   const defaultHtml = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1a1a1a; line-height: 1.6; border: 1px solid #f0e6e0; border-radius: 12px;">
-      <div style="margin-bottom: 20px; border-bottom: 2px solid #713B32; padding-bottom: 12px;">
-        <h2 style="color: #713B32; margin: 0; font-size: 20px;">AstroParihar Verified Astrologer Network</h2>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject}</title>
+    </head>
+    <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fcfaf8; color: #1e293b;">
+      <div style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8dfd8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div style="background-color: #713B32; padding: 20px 24px; color: #ffffff;">
+          <h1 style="margin: 0; font-size: 19px; font-weight: 700; letter-spacing: 0.5px;">AstroParihar Astrologer Network</h1>
+          <p style="margin: 4px 0 0 0; font-size: 12px; opacity: 0.85;">Official Astrologer Verification & Onboarding</p>
+        </div>
+        
+        <div style="padding: 24px; line-height: 1.7; font-size: 14.5px; color: #334155;">
+          ${textBody.replace(/\n/g, '<br/>')}
+        </div>
+        
+        <div style="background-color: #f8fafc; padding: 18px 24px; border-top: 1px solid #f1f5f9; font-size: 11.5px; color: #64748b; line-height: 1.5;">
+          <p style="margin: 0 0 6px 0;">
+            This invitation was dispatched by the <strong>AstroParihar UK Recruitment Committee</strong> for verified astrology practitioners.
+          </p>
+          <p style="margin: 0;">
+            Sender: <a href="mailto:${smtpUser}" style="color: #713B32; text-decoration: none;">${smtpUser}</a> • AstroParihar Global Astrologer Verification System
+          </p>
+        </div>
       </div>
-      <div style="white-space: pre-wrap; font-size: 15px; color: #2d3748; line-height: 1.7;">
-        ${textBody.replace(/\n/g, '<br/>')}
-      </div>
-      <hr style="border: none; border-top: 1px solid #eaeaea; margin: 28px 0;" />
-      <p style="font-size: 12px; color: #718096; margin: 0;">
-        Sent by AstroParihar UK Recruitment Team (${smtpUser})<br/>
-        © 2026 AstroParihar · India's Premier Astrologer Verification Platform
-      </p>
-    </div>
+    </body>
+    </html>
   `;
 
   const info = await transporter.sendMail({
@@ -53,6 +69,11 @@ export async function sendSmtpEmail({
     subject,
     text: textBody,
     html: customHtml || defaultHtml,
+    headers: {
+      'X-Mailer': 'AstroParihar Verified Astrologer System',
+      'X-Auto-Response-Suppress': 'OOF, AutoReply',
+      'List-Unsubscribe': `<mailto:${smtpUser}?subject=unsubscribe>`,
+    },
   });
 
   return {
