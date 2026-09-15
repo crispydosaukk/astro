@@ -88,7 +88,7 @@ export default function DashboardKPIGrid() {
       change: stats.qualificationRate,
       changeLabel: 'Score ≥80 benchmark',
       icon: <Sparkles size={18} />,
-      variant: 'positive',
+      variant: 'default',
       href: '/candidate-management',
     },
     {
@@ -98,7 +98,7 @@ export default function DashboardKPIGrid() {
       change: 0,
       changeLabel: 'Awaiting outreach dispatch',
       icon: <AlertTriangle size={18} />,
-      variant: stats.readyForOutreach > 0 ? 'alert' : 'default',
+      variant: 'default',
       href: '/candidate-management',
     },
     {
@@ -128,7 +128,7 @@ export default function DashboardKPIGrid() {
       change: 0,
       changeLabel: 'Completed intake forms',
       icon: <FileText size={18} />,
-      variant: 'positive',
+      variant: 'default',
       href: '/application-management',
     },
     {
@@ -138,7 +138,7 @@ export default function DashboardKPIGrid() {
       change: 0,
       changeLabel: 'Theory & doc audits',
       icon: <Search size={18} />,
-      variant: 'warning',
+      variant: 'default',
       href: '/application-management',
     },
     {
@@ -148,7 +148,7 @@ export default function DashboardKPIGrid() {
       change: 0,
       changeLabel: stats.humanReview > 0 ? `${stats.humanReview} awaiting committee` : 'Queue cleared',
       icon: <UserCheck size={18} />,
-      variant: stats.humanReview > 0 ? 'alert' : 'default',
+      variant: 'default',
       href: '/human-review-module',
     },
     {
@@ -158,7 +158,7 @@ export default function DashboardKPIGrid() {
       change: 0,
       changeLabel: '30-day live trials active',
       icon: <Timer size={18} />,
-      variant: 'warning',
+      variant: 'default',
       href: '/probation/active',
     },
     {
@@ -168,7 +168,7 @@ export default function DashboardKPIGrid() {
       change: stats.verificationRate,
       changeLabel: `${stats.overallConversionRate}% conversion yield`,
       icon: <BadgeCheck size={18} />,
-      variant: 'positive',
+      variant: 'default',
       href: '/verification',
     },
     {
@@ -188,7 +188,7 @@ export default function DashboardKPIGrid() {
       change: 0,
       changeLabel: 'Approve in candidates table',
       icon: <Send size={18} />,
-      variant: stats.outreachApprovalQueue > 0 ? 'alert' : 'default',
+      variant: 'default',
       href: '/candidate-management',
     },
   ];
