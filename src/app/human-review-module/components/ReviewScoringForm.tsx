@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { ReviewCandidate } from './ReviewWorkspace';
-import { Star } from 'lucide-react';
+import { Star, CheckCircle, Loader2 } from 'lucide-react';
+import { updateCandidateStatus } from '@/lib/firebase/candidateService';
 
 interface ReviewFormData {
   knowledgeScore: number;
@@ -68,6 +69,8 @@ export default function ReviewScoringForm({ candidate }: ReviewScoringFormProps)
     professionalismScore: 0,
     overallSuitabilityScore: 0,
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<ReviewFormData>();
 
@@ -76,9 +79,28 @@ export default function ReviewScoringForm({ candidate }: ReviewScoringFormProps)
   );
 
   const onSubmit = async (data: ReviewFormData) => {
-    // Backend integration point: POST /api/reviews
-    const fullData = { ...data, ...scores, candidateId: candidate.id };
-    console.log('Review submitted:', fullData);
+    try {
+      setIsSaving(true);
+      await updateCandidateStatus(candidate.id, {
+        reviewerScores: {
+          ...scores,
+          averageScore,
+          recommendation: data.recommendation,
+          reviewNotes: data.reviewNotes,
+          privateNotes: data.privateNotes,
+          savedAt: new Date().toISOString(),
+        },
+        applicationStatus:
+          data.recommendation === 'approve-probation' ? 'Approved' :
+          data.recommendation === 'reject' ? 'Rejected' : 'Human Review',
+      });
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 4000);
+    } catch (err: any) {
+      alert(`Failed to save reviewer scores: ${err.message}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -164,9 +186,21 @@ export default function ReviewScoringForm({ candidate }: ReviewScoringFormProps)
           />
         </div>
 
-        <button type="submit" className="btn-primary py-2.5 px-6">
-          Save Review Scores
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            type="submit" 
+            disabled={isSaving}
+            className="btn-primary py-2.5 px-6 flex items-center gap-2"
+          >
+            {isSaving && <Loader2 size={15} className="animate-spin" />}
+            {isSaving ? 'Saving Scores...' : 'Save Review Scores'}
+          </button>
+          {savedSuccess && (
+            <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 animate-fade-in">
+              <CheckCircle size={14} /> Review scores saved to candidate record!
+            </span>
+          )}
+        </div>
       </form>
     </div>
   );

@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${plusJakartaSans.variable} ${ibmPlexMono.variable} dark`}>
+    <html lang="en" className={`${plusJakartaSans.variable} ${ibmPlexMono.variable}`}>
       <body className={plusJakartaSans.className} suppressHydrationWarning>
         <AuthProvider>
           <CurrencyProvider>

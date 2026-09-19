@@ -255,6 +255,13 @@ export default function OutreachPendingPage() {
                                 >
                                   <Eye size={15} />
                                 </button>
+                                <Link
+                                  href={`/human-review-module?id=${c.id}`}
+                                  className="p-1.5 rounded hover:bg-primary/10 text-primary transition-colors"
+                                  title="Open 360° Candidate Review Workspace"
+                                >
+                                  <Sparkles size={15} />
+                                </Link>
                                 <button
                                   onClick={() => handleApprove(c.id)}
                                   disabled={isUpdating}

@@ -28,6 +28,9 @@ export interface Candidate {
   location: string;
   specialisations: string[];
   aiScore: number;
+  theoryScore?: number;
+  chartCaseScore?: number;
+  aiInterviewScore?: number;
   source: string;
   outreachStatus: string;
   applicationStatus: string | null;
@@ -50,6 +53,31 @@ export interface Candidate {
   rating?: number;
   userRatingsTotal?: number;
   history?: CandidateHistoryItem[];
+  // Assessment, Kundali, and Interview Details
+  chartCaseTitle?: string;
+  chartCaseLagna?: string;
+  chartCaseQuery?: string;
+  chartCasePlacements?: any[];
+  chartCaseAnalysis?: string;
+  chartRemedy?: string;
+  chartEvaluation?: any;
+  conversationHistory?: Array<{ role: 'ai' | 'user' | string; text: string; topic?: string; timestamp?: string }>;
+  aiInterviewEvaluation?: any;
+  theoryAnswers?: Record<number, number>;
+  theoryQuestionsList?: any[];
+  interviewDurationSeconds?: number;
+  interviewDurationFormatted?: string;
+  assessmentDurationSeconds?: number;
+  assessmentDurationFormatted?: string;
+  assessmentLanguage?: string;
+  tabViolations?: number;
+  proctorLogs?: any[];
+  isDisqualified?: boolean;
+  disqualificationReason?: string;
+  bio?: string;
+  languages?: string;
+  appliedAt?: any;
+  applicationData?: any;
   createdAt?: any;
   updatedAt?: any;
 }
@@ -67,6 +95,30 @@ export interface ResolvedCandidateContact {
   idProofNumber?: string;
   idProofDocument?: string;
   history: CandidateHistoryItem[];
+  // Assessment fields
+  theoryScore: number;
+  chartCaseScore: number;
+  aiInterviewScore: number;
+  overallScore: number;
+  chartCaseAnalysis: string;
+  chartRemedy: string;
+  chartEvaluation: any;
+  chartCaseTitle?: string;
+  chartCaseLagna?: string;
+  chartCaseQuery?: string;
+  chartCasePlacements?: any[];
+  conversationHistory: Array<{ role: 'ai' | 'user' | string; text: string; topic?: string; timestamp?: string }>;
+  aiInterviewEvaluation: any;
+  theoryAnswers: Record<number, number>;
+  theoryQuestionsList: any[];
+  interviewDurationSeconds: number;
+  interviewDurationFormatted: string;
+  assessmentDurationFormatted: string;
+  tabViolations: number;
+  proctorLogs: any[];
+  isDisqualified: boolean;
+  disqualificationReason: string;
+  assessmentLanguage: string;
 }
 
 /**
@@ -146,6 +198,27 @@ export function resolveCandidateContact(candidate: Candidate): ResolvedCandidate
     ? candidate.history
     : defaultHistory;
 
+  const appData = candidate.applicationData || {};
+  const chartCaseAnalysis = candidate.chartCaseAnalysis || appData.chartCaseAnalysis || '';
+  const chartRemedy = candidate.chartRemedy || appData.chartRemedy || '';
+  const chartEvaluation = candidate.chartEvaluation || appData.chartEvaluation || null;
+  const conversationHistory = candidate.conversationHistory || appData.conversationHistory || [];
+  const aiInterviewEvaluation = candidate.aiInterviewEvaluation || appData.aiInterviewEvaluation || null;
+  const theoryAnswers = candidate.theoryAnswers || appData.theoryAnswers || {};
+  const theoryQuestionsList = candidate.theoryQuestionsList || appData.theoryQuestionsList || [];
+  const theoryScore = candidate.theoryScore ?? appData.theoryScore ?? 0;
+  const chartCaseScore = candidate.chartCaseScore ?? appData.chartCaseScore ?? 0;
+  const aiInterviewScore = candidate.aiInterviewScore ?? appData.aiInterviewScore ?? 0;
+  const overallScore = candidate.aiScore ?? 0;
+  const interviewDurationSeconds = candidate.interviewDurationSeconds ?? appData.interviewDurationSeconds ?? 0;
+  const interviewDurationFormatted = candidate.interviewDurationFormatted || appData.interviewDurationFormatted || (interviewDurationSeconds > 0 ? `${Math.floor(interviewDurationSeconds / 60)}m ${interviewDurationSeconds % 60}s` : 'Not recorded');
+  const assessmentDurationFormatted = candidate.assessmentDurationFormatted || appData.assessmentDurationFormatted || 'Completed';
+  const tabViolations = candidate.tabViolations ?? appData.tabViolations ?? appData.proctoring?.tabViolations ?? 0;
+  const proctorLogs = candidate.proctorLogs || appData.proctorLogs || appData.proctoring?.proctorLogs || [];
+  const isDisqualified = Boolean(candidate.isDisqualified ?? appData.isDisqualified ?? appData.proctoring?.isDisqualified);
+  const disqualificationReason = candidate.disqualificationReason || appData.disqualificationReason || appData.proctoring?.disqualificationReason || '';
+  const assessmentLanguage = candidate.assessmentLanguage || appData.assessmentLanguage || 'en';
+
   return {
     phone,
     rawPhone,
@@ -154,11 +227,34 @@ export function resolveCandidateContact(candidate: Candidate): ResolvedCandidate
     address,
     website,
     profileSummary,
-    learningBackground: candidate.learningBackground,
-    idProofType: candidate.idProofType,
-    idProofNumber: candidate.idProofNumber,
-    idProofDocument: candidate.idProofDocument,
-    history
+    learningBackground: candidate.learningBackground || appData.learningBackground,
+    idProofType: candidate.idProofType || appData.idProofType,
+    idProofNumber: candidate.idProofNumber || appData.idProofNumber,
+    idProofDocument: candidate.idProofDocument || appData.idProofDocument,
+    history,
+    theoryScore,
+    chartCaseScore,
+    aiInterviewScore,
+    overallScore,
+    chartCaseAnalysis,
+    chartRemedy,
+    chartEvaluation,
+    chartCaseTitle: candidate.chartCaseTitle || appData.chartCaseTitle || '',
+    chartCaseLagna: candidate.chartCaseLagna || appData.chartCaseLagna || '',
+    chartCaseQuery: candidate.chartCaseQuery || appData.chartCaseQuery || '',
+    chartCasePlacements: candidate.chartCasePlacements || appData.chartCasePlacements || [],
+    conversationHistory,
+    aiInterviewEvaluation,
+    theoryAnswers,
+    theoryQuestionsList,
+    interviewDurationSeconds,
+    interviewDurationFormatted,
+    assessmentDurationFormatted,
+    tabViolations,
+    proctorLogs,
+    isDisqualified,
+    disqualificationReason,
+    assessmentLanguage,
   };
 }
 
@@ -223,15 +319,18 @@ export async function saveCandidateToFirestore(candidate: Candidate): Promise<vo
 }
 
 /**
- * Update candidate lifecycle or outreach status
+ * Update candidate lifecycle, outreach status, assessment, or review data
  */
 export async function updateCandidateStatus(
   id: string, 
-  updates: Partial<Pick<Candidate, 'lifecycleStatus' | 'outreachStatus' | 'applicationStatus' | 'aiScore'>>
+  updates: Partial<Candidate> | Record<string, any>
 ): Promise<void> {
   const docRef = doc(db, CANDIDATES_COLLECTION, id);
+  const clean = Object.fromEntries(
+    Object.entries(updates).filter(([_, v]) => v !== undefined)
+  );
   await updateDoc(docRef, {
-    ...updates,
+    ...clean,
     updatedAt: serverTimestamp(),
   });
 }

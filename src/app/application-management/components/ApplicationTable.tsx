@@ -156,12 +156,12 @@ export default function ApplicationTable({ candidates, onUpdateStatus }: Applica
 
                     {/* Theory Score */}
                     <td className="table-cell text-center">
-                      <AIScoreBadge score={Math.min(99, Math.round(cand.aiScore * 0.95))} size="sm" />
+                      <AIScoreBadge score={cand.theoryScore ?? cand.applicationData?.theoryScore ?? cand.aiScore} size="sm" />
                     </td>
 
                     {/* Chart cases */}
                     <td className="table-cell text-center">
-                      <AIScoreBadge score={Math.min(99, Math.round(cand.aiScore * 0.98))} size="sm" />
+                      <AIScoreBadge score={cand.chartCaseScore ?? cand.applicationData?.chartCaseScore ?? cand.aiScore} size="sm" />
                     </td>
 
                     {/* AI Interview */}
@@ -185,9 +185,9 @@ export default function ApplicationTable({ candidates, onUpdateStatus }: Applica
                     <td className="table-cell text-center">
                       <div className="flex items-center justify-center gap-1">
                         <Link
-                          href="/human-review-module"
+                          href={`/human-review-module?id=${cand.id}`}
                           className="btn-ghost p-1.5 text-primary hover:bg-primary/10 rounded"
-                          title="Open Full Review Workspace"
+                          title="Open Full 360° Review Workspace"
                         >
                           <Eye size={14} />
                         </Link>
@@ -201,11 +201,11 @@ export default function ApplicationTable({ candidates, onUpdateStatus }: Applica
                           {actionOpen === cand.id && (
                             <div className="absolute right-0 top-full mt-1 w-48 card-elevated z-20 py-1 shadow-lg animate-slide-up text-left">
                               <Link 
-                                href="/human-review-module" 
-                                className="w-full text-left px-3 py-2 text-xs hover:bg-muted flex items-center gap-2 text-foreground"
+                                href={`/human-review-module?id=${cand.id}`} 
+                                className="w-full text-left px-3 py-2 text-xs hover:bg-muted flex items-center gap-2 text-foreground font-medium"
                               >
                                 <Eye size={12} />
-                                Review in Workspace
+                                Review 360° in Workspace
                               </Link>
                               <button 
                                 onClick={async () => {

@@ -1,136 +1,370 @@
 import React from 'react';
 import AIScoreBadge from '@/components/ui/AIScoreBadge';
 import type { ReviewCandidate } from '../ReviewWorkspace';
+import { 
+  BookOpen, 
+  Sparkles, 
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle, 
+  HelpCircle,
+  FileQuestion,
+  ShieldCheck,
+  Check,
+  X
+} from 'lucide-react';
+import { 
+  THEORY_QUESTIONS, 
+  getQuestionText, 
+  getOptionsList, 
+  getExplanationText, 
+  getTopicText 
+} from '@/lib/theoryQuestions';
 
 interface ReviewAssessmentTabProps {
   candidate: ReviewCandidate;
 }
 
-const questionResults = [
-  { id: 'q-001', num: 1, category: 'Vedic Fundamentals', question: 'Explain the significance of the Lagna (Ascendant) in a natal chart and its role in personality determination.', score: 9, maxScore: 10, aiEval: 'Excellent — comprehensive explanation with practical examples' },
-  { id: 'q-002', num: 2, category: 'Planetary Dignities', question: 'Describe the concept of Shadbala and how it is used to assess planetary strength.', score: 8, maxScore: 10, aiEval: 'Good — covered primary components but missed Sthana Bala nuance' },
-  { id: 'q-003', num: 3, category: 'Dasha Systems', question: 'Compare Vimshottari Dasha with Ashtottari Dasha — when would you use each?', score: 9, maxScore: 10, aiEval: 'Excellent — demonstrated deep practical knowledge' },
-  { id: 'q-004', num: 4, category: 'Divisional Charts', question: 'Explain the use of Navamsha (D9) chart in marriage and relationship analysis.', score: 10, maxScore: 10, aiEval: 'Outstanding — included advanced interpretation techniques' },
-  { id: 'q-005', num: 5, category: 'Prashna', question: 'Describe the key principles of Prashna Jyotish and how it differs from natal chart analysis.', score: 9, maxScore: 10, aiEval: 'Excellent — clear differentiation with practical application' },
-];
-
-const chartCases = [
-  {
-    id: 'cc-001',
-    caseNum: 1,
-    scenario: 'Career Analysis — Male, born 14 March 1985, 06:30 AM, Chennai',
-    candidateAnswer: 'The native has Leo Lagna with Sun in 8th house conjunct Mercury. Saturn aspects Lagna from 10th, indicating career delays but ultimate stability. Jupiter in 5th house in Sagittarius strengthens dharmic career paths. The native is likely in a research, technical or spiritual profession with government connections possible after age 35 due to Saturn maturation...',
-    aiScore: 88,
-    aiFeedback: 'Good analysis of Lagna lord placement and Saturn influence. Could have expanded on Dasha timing and current period analysis.',
-    expectedAreas: ['Lagna analysis', 'Career houses (2, 6, 10)', 'Dasha period', 'Planetary periods'],
-  },
-  {
-    id: 'cc-002',
-    caseNum: 2,
-    scenario: 'Marriage Timing — Female, born 22 July 1990, 11:45 PM, Madurai',
-    candidateAnswer: 'Scorpio Lagna with Mars in 7th house in Taurus — strong desire for partnership but delays indicated. Venus as 7th lord placed in 8th house (Gemini) with Mercury suggests unconventional marriage timing. Navamsha examination shows Venus in Pisces (exalted) — quality of marriage is good despite timing delays. Current Rahu Dasha (2018-2036) with Jupiter antardasha (2023-2026) is highly favourable for marriage...',
-    aiScore: 94,
-    aiFeedback: 'Excellent Navamsha integration. Precise Dasha-Antardasha analysis with timing. Strong case analysis.',
-    expectedAreas: ['7th house analysis', 'Venus placement', 'Navamsha', 'Dasha timing'],
-  },
-];
-
 export default function ReviewAssessmentTab({ candidate }: ReviewAssessmentTabProps) {
+  const hasRealChart = Boolean(candidate.chartCaseAnalysis && candidate.chartCaseAnalysis.trim().length > 0);
+  
+  // Resolve questions list: use candidate's actual questions list, or fallback to curated THEORY_QUESTIONS
+  const questionsList: any[] = (candidate.theoryQuestionsList && candidate.theoryQuestionsList.length > 0)
+    ? candidate.theoryQuestionsList
+    : THEORY_QUESTIONS;
+
+  const candidateAnswers = candidate.theoryAnswers || {};
+  const lang = (candidate.assessmentLanguage || 'en') as 'en' | 'hi' | 'te' | 'ta';
+
+  // Helper to safely resolve candidate's chosen option across string keys, numeric keys, and index keys
+  const getCandidateChoice = (q: any, qIndex: number) => {
+    if (candidateAnswers[q.id] !== undefined && candidateAnswers[q.id] !== null) {
+      return candidateAnswers[q.id];
+    }
+    if (candidateAnswers[String(q.id)] !== undefined && candidateAnswers[String(q.id)] !== null) {
+      return candidateAnswers[String(q.id)];
+    }
+    if (candidateAnswers[qIndex + 1] !== undefined && candidateAnswers[qIndex + 1] !== null) {
+      return candidateAnswers[qIndex + 1];
+    }
+    if (candidateAnswers[qIndex] !== undefined && candidateAnswers[qIndex] !== null) {
+      return candidateAnswers[qIndex];
+    }
+    return undefined;
+  };
+
+  // Calculate actual correct count based on candidate's answers
+  let correctCount = 0;
+  let answeredCount = 0;
+  questionsList.forEach((q, qIndex) => {
+    const chosenIdx = getCandidateChoice(q, qIndex);
+    if (chosenIdx !== undefined && chosenIdx !== null) {
+      answeredCount++;
+      if (chosenIdx === q.correctIndex) {
+        correctCount++;
+      }
+    }
+  });
+
   return (
-    <div className="space-y-7">
-      {/* 25 Questions Summary */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-md font-bold text-foreground">25-Question Assessment</h4>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Overall Score:</span>
-            <AIScoreBadge score={candidate.questionsScore} size="md" showLabel />
+    <div className="space-y-8">
+      {/* 1. BLIND KUNDALI CASE ASSESSMENT - REAL CANDIDATE SUBMISSION */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h4 className="text-base font-bold text-foreground flex items-center gap-2">
+              <BookOpen size={18} className="text-primary" /> {candidate.chartCaseTitle || 'Blind Kundali Case Assessment #K-402'}
+            </h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {candidate.chartCaseLagna 
+                ? `Case Setup: ${candidate.chartCaseLagna} Lagna` 
+                : 'Case Setup: Scorpio Lagna, Capricorn Moon, Saturn-Rahu Dasha, Mars 10th House Digbala in Leo'}
+            </p>
           </div>
-        </div>
-
-        <div className="space-y-3">
-          {questionResults.map(q => (
-            <div key={q.id} className="p-4 bg-muted/30 rounded-xl border border-border">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <span className="text-xs font-bold text-muted-foreground bg-muted rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5 tabular-nums">
-                    {q.num}
-                  </span>
-                  <div className="min-w-0">
-                    <span className="text-2xs font-bold text-accent uppercase tracking-wide">{q.category}</span>
-                    <p className="text-sm text-foreground font-medium mt-0.5 leading-snug">{q.question}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="font-bold text-md tabular-nums text-foreground">{q.score}/{q.maxScore}</span>
-                </div>
-              </div>
-              <div className="ml-9 mt-2 p-2.5 bg-green-50/60 rounded-lg border border-green-200">
-                <p className="text-xs text-green-800 font-medium">
-                  <span className="font-bold">AI Evaluation:</span> {q.aiEval}
-                </p>
-              </div>
-            </div>
-          ))}
-
-          <div className="p-3 bg-muted/40 rounded-lg text-center text-xs text-muted-foreground">
-            Showing 5 of 25 questions — <span className="text-primary font-semibold cursor-pointer hover:underline">View all 25 questions</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Chart Cases */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-md font-bold text-foreground">5 Chart Case Assessments</h4>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Overall Score:</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Case Score:</span>
             <AIScoreBadge score={candidate.chartScore} size="md" showLabel />
           </div>
         </div>
 
-        <div className="space-y-4">
-          {chartCases.map(cc => (
-            <div key={cc.id} className="border border-border rounded-xl overflow-hidden">
-              <div className="px-4 py-3 bg-muted/40 border-b border-border flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold text-primary uppercase tracking-wide">Chart Case {cc.caseNum}</span>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{cc.scenario}</p>
+        <div className="border border-border rounded-xl overflow-hidden bg-card">
+          <div className="px-4 py-3 bg-muted/40 border-b border-border flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span className="text-2xs font-bold text-primary uppercase tracking-wide">Client Query</span>
+              <p className="text-xs text-foreground mt-0.5 font-medium">
+                {candidate.chartCaseQuery 
+                  ? `"${candidate.chartCaseQuery}"` 
+                  : '"Severe career delays and mental restlessness over past 8 months. Will my business venture launch successfully, and what Vedic remedies do you recommend?"'}
+              </p>
+            </div>
+            <span className="text-2xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+              Evaluated by AI Examiner
+            </span>
+          </div>
+
+          <div className="p-5 space-y-4">
+            <div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                <FileQuestion size={13} className="text-primary" />
+                Candidate's Submitted Astrological Reading
+              </p>
+              {hasRealChart ? (
+                <div className="text-xs text-foreground leading-relaxed bg-muted/30 rounded-xl p-4 whitespace-pre-wrap border border-border/80 font-normal">
+                  {candidate.chartCaseAnalysis}
                 </div>
-                <AIScoreBadge score={cc.aiScore} size="md" showLabel />
+              ) : (
+                <div className="text-xs text-muted-foreground italic bg-muted/20 rounded-xl p-4 border border-dashed border-border">
+                  No written astrological interpretation submitted yet.
+                </div>
+              )}
+            </div>
+
+            {candidate.chartRemedy && (
+              <div>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                  <Sparkles size={13} className="text-amber-500" />
+                  Candidate's Prescribed Remedies
+                </p>
+                <div className="text-xs text-foreground leading-relaxed bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5 whitespace-pre-wrap font-medium">
+                  {candidate.chartRemedy}
+                </div>
+              </div>
+            )}
+
+            {candidate.chartEvaluation && (
+              <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-primary" />
+                    AI Examiner Rubric & Verdict: <span className="text-primary">{candidate.chartEvaluation.verdict || 'EVALUATED'}</span>
+                  </p>
+                  <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary">
+                    Score: {candidate.chartEvaluation.chartScore ?? candidate.chartScore}/100
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {candidate.chartEvaluation.summary || candidate.chartEvaluation.feedbackInLanguage}
+                </p>
+                {candidate.chartEvaluation.strengths?.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1 text-2xs">
+                    <span className="font-bold text-emerald-700 dark:text-emerald-400">Strengths:</span>
+                    {candidate.chartEvaluation.strengths.map((str: string, i: number) => (
+                      <span key={i} className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
+                        {str}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {candidate.chartEvaluation.improvements?.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1 text-2xs">
+                    <span className="font-bold text-amber-700 dark:text-amber-400">Improvements:</span>
+                    {candidate.chartEvaluation.improvements.map((imp: string, i: number) => (
+                      <span key={i} className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium">
+                        {imp}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+              <div className="p-3 bg-muted/20 rounded-lg border border-border">
+                <p className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">Expected Core Principles</p>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {['Scorpio Lagna lord Mars in 10th (Digbala)', 'Saturn-Rahu Dasha friction delays', 'Sun in 11th recovery & gains', 'Sattvic Shani/Rahu remedies'].map((item, i) => (
+                    <span key={i} className="text-2xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                      {item}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              <div className="p-4 space-y-3">
-                <div>
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Candidate Interpretation</p>
-                  <p className="text-sm text-foreground leading-relaxed bg-muted/30 rounded-lg p-3">
-                    {cc.candidateAnswer}
-                  </p>
+              <div className="p-3 bg-muted/20 rounded-lg border border-border">
+                <p className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">Anti-Cheating / Proctoring Audit</p>
+                <div className="mt-1.5 flex items-center justify-between">
+                  <span className="text-muted-foreground">Tab Switches:</span>
+                  <span className="font-bold tabular-nums">{candidate.tabViolations ?? 0}</span>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Expected Areas</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {cc.expectedAreas.map((area, i) => (
-                        <span key={`ea-${cc.id}-${i}`} className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">
-                          {area}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1.5">AI Feedback</p>
-                    <p className="text-xs text-foreground leading-relaxed">{cc.aiFeedback}</p>
-                  </div>
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-muted-foreground">Exam Integrity:</span>
+                  <span className={`font-semibold ${candidate.isDisqualified ? 'text-red-600' : 'text-emerald-600'}`}>
+                    {candidate.isDisqualified ? 'Malpractice Flagged' : 'Verified Clean'}
+                  </span>
                 </div>
               </div>
             </div>
-          ))}
-
-          <div className="p-3 bg-muted/40 rounded-lg text-center text-xs text-muted-foreground">
-            Showing 2 of 5 chart cases — <span className="text-primary font-semibold cursor-pointer hover:underline">View all 5 cases</span>
           </div>
+        </div>
+      </div>
+
+      {/* 2. DYNAMIC VEDIC THEORY ASSESSMENT - QUESTIONS & REAL CANDIDATE ANSWERS */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h4 className="text-base font-bold text-foreground flex items-center gap-2">
+              <FileQuestion size={18} className="text-primary" />
+              Vedic Theory Assessment — Detailed Question Breakdown
+            </h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Review candidate's exact choices for each multiple-choice question against authentic classical Jyotish keys
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Theory Score:</span>
+            <AIScoreBadge score={candidate.questionsScore} size="md" showLabel />
+          </div>
+        </div>
+
+        {/* Scorecard banner */}
+        <div className="p-4 bg-muted/30 rounded-xl border border-border flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div>
+              <p className="text-2xs text-muted-foreground uppercase tracking-wider font-semibold">Total Questions</p>
+              <p className="text-lg font-bold text-foreground">{questionsList.length}</p>
+            </div>
+            <div className="w-px h-8 bg-border hidden sm:block" />
+            <div>
+              <p className="text-2xs text-muted-foreground uppercase tracking-wider font-semibold">Answered</p>
+              <p className="text-lg font-bold text-foreground">{answeredCount} of {questionsList.length}</p>
+            </div>
+            <div className="w-px h-8 bg-border hidden sm:block" />
+            <div>
+              <p className="text-2xs text-muted-foreground uppercase tracking-wider font-semibold">Correct Answers</p>
+              <p className="text-lg font-bold text-emerald-600">{correctCount} of {questionsList.length}</p>
+            </div>
+            <div className="w-px h-8 bg-border hidden sm:block" />
+            <div>
+              <p className="text-2xs text-muted-foreground uppercase tracking-wider font-semibold">Calculated Score</p>
+              <p className="text-lg font-bold text-primary">{candidate.questionsScore} / 100</p>
+            </div>
+          </div>
+
+          <span className={`text-xs font-bold px-3 py-1.5 rounded-full border ${
+            candidate.questionsScore >= 75
+              ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
+              : 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
+          }`}>
+            {candidate.questionsScore >= 75 ? 'PASSED THEORY CRITERIA' : 'BELOW 75% THRESHOLD'}
+          </span>
+        </div>
+
+        {/* Detailed Question Cards */}
+        <div className="space-y-4">
+          {questionsList.map((q, qIndex) => {
+            const chosenOptionIndex = getCandidateChoice(q, qIndex);
+            const isAnswered = chosenOptionIndex !== undefined && chosenOptionIndex !== null;
+            const isCorrect = isAnswered && chosenOptionIndex === q.correctIndex;
+            const options = getOptionsList(q, lang);
+            const questionText = getQuestionText(q, lang);
+            const explanation = getExplanationText(q, lang);
+            const topic = getTopicText(q, lang);
+
+            return (
+              <div 
+                key={q.id || qIndex} 
+                className={`p-4 rounded-xl border transition-all ${
+                  !isAnswered
+                    ? 'bg-muted/20 border-border'
+                    : isCorrect
+                    ? 'bg-emerald-50/30 dark:bg-emerald-950/10 border-emerald-200 dark:border-emerald-800/60'
+                    : 'bg-rose-50/30 dark:bg-rose-950/10 border-rose-200 dark:border-rose-800/60'
+                }`}
+              >
+                {/* Question Header */}
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      {qIndex + 1}
+                    </span>
+                    <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                      {topic}
+                    </span>
+                  </div>
+
+                  {/* Status Badge */}
+                  {isAnswered ? (
+                    isCorrect ? (
+                      <span className="inline-flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+                        <Check size={11} /> Correct (+{Math.round(100 / (questionsList.length || 1))} pts)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300">
+                        <X size={11} /> Incorrect (0 pts)
+                      </span>
+                    )
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-2xs font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      Unanswered
+                    </span>
+                  )}
+                </div>
+
+                {/* Question Text */}
+                <p className="text-sm font-semibold text-foreground mb-3 leading-relaxed">
+                  {questionText}
+                </p>
+
+                {/* Options List */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                  {options.map((opt: string, optIdx: number) => {
+                    const isCandidateChoice = chosenOptionIndex === optIdx;
+                    const isTheCorrectOption = optIdx === q.correctIndex;
+
+                    let optStyle = 'border-border bg-card/60 text-muted-foreground';
+                    let badge = null;
+
+                    if (isCandidateChoice && isTheCorrectOption) {
+                      optStyle = 'border-emerald-500 bg-emerald-100/70 dark:bg-emerald-900/40 text-emerald-950 dark:text-emerald-200 font-bold ring-1 ring-emerald-500';
+                      badge = (
+                        <span className="ml-auto text-2xs bg-emerald-600 text-white font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                          <Check size={10} /> Candidate Answer (Correct)
+                        </span>
+                      );
+                    } else if (isCandidateChoice && !isTheCorrectOption) {
+                      optStyle = 'border-rose-500 bg-rose-100/70 dark:bg-rose-900/40 text-rose-950 dark:text-rose-200 font-bold ring-1 ring-rose-500';
+                      badge = (
+                        <span className="ml-auto text-2xs bg-rose-600 text-white font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                          <X size={10} /> Candidate Selected (Wrong)
+                        </span>
+                      );
+                    } else if (isTheCorrectOption) {
+                      optStyle = 'border-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 font-semibold border-dashed';
+                      badge = (
+                        <span className="ml-auto text-2xs bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100 font-bold px-1.5 py-0.5 rounded">
+                          ✓ Correct Answer
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={optIdx}
+                        className={`p-2.5 rounded-lg border text-xs flex items-center gap-2 transition-colors ${optStyle}`}
+                      >
+                        <span className="w-5 h-5 rounded-md bg-muted/60 text-foreground font-mono font-bold flex items-center justify-center flex-shrink-0 text-2xs">
+                          {String.fromCharCode(65 + optIdx)}
+                        </span>
+                        <span className="flex-1">{opt}</span>
+                        {badge}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Classical Vedic Explanation */}
+                {explanation && (
+                  <div className="p-2.5 rounded-lg bg-muted/40 border border-border text-2xs text-muted-foreground flex items-start gap-2">
+                    <Sparkles size={12} className="text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-foreground">Classical Shastra Principle: </span>
+                      <span>{explanation}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

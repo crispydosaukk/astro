@@ -23,14 +23,27 @@ export default function EnrolmentApplicationsPage() {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
           const pool = allCandidates || [];
-          // Filter candidates with application data or in screening/review
+          // Filter candidates with application data or in screening/review/applied stages
           const appCandidates = pool.filter(c => 
+            Boolean(c.appliedAt) ||
+            Boolean(c.theoryAnswers) ||
+            Boolean(c.conversationHistory && c.conversationHistory.length > 0) ||
+            Boolean(c.applicationData) ||
             c.applicationStatus !== null || 
             c.lifecycleStatus === 'screening' || 
             c.lifecycleStatus === 'applied' || 
-            c.lifecycleStatus === 'human-review'
+            c.lifecycleStatus === 'human-review' ||
+            c.lifecycleStatus === 'rejected'
           );
-          setCandidates(appCandidates);
+
+          // Sort newest applications first
+          const sorted = [...appCandidates].sort((a, b) => {
+            const timeA = a.appliedAt ? new Date(a.appliedAt).getTime() : 0;
+            const timeB = b.appliedAt ? new Date(b.appliedAt).getTime() : 0;
+            return timeB - timeA;
+          });
+
+          setCandidates(sorted);
         },
         (err) => {
           console.warn('Enrolment applications fallback:', err);
@@ -65,8 +78,12 @@ export default function EnrolmentApplicationsPage() {
   };
 
   const filtered = candidates.filter(c => {
-    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || 
-                        c.location.toLowerCase().includes(search.toLowerCase());
+    const q = search.toLowerCase();
+    const matchSearch = !search || 
+                        c.name?.toLowerCase().includes(q) || 
+                        c.location?.toLowerCase().includes(q) ||
+                        c.phone?.toLowerCase().includes(q) ||
+                        c.email?.toLowerCase().includes(q);
     const matchStatus = statusFilter === 'all' || (c.applicationStatus || c.lifecycleStatus) === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -196,7 +213,7 @@ export default function EnrolmentApplicationsPage() {
                           </button>
                         )}
                         <Link
-                          href="/human-review-module"
+                          href={`/human-review-module?id=${c.id}`}
                           className="px-2.5 py-1 text-xs bg-primary text-primary-foreground hover:opacity-90 rounded font-semibold transition-opacity"
                         >
                           Review 360°

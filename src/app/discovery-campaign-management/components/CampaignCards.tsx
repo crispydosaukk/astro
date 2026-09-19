@@ -8,16 +8,13 @@ import { useDiscovery } from '../DiscoveryContext';
 export default function CampaignCards() {
   const { campaigns, runCampaign, isExecuting, pauseCampaign, resumeCampaign } = useDiscovery();
 
-  // Show running or top 3 campaigns
-  const activeCampaigns = campaigns.slice(0, 3);
-
-  if (activeCampaigns.length === 0) {
+  if (campaigns.length === 0) {
     return null;
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4">
-      {activeCampaigns.map(c => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+      {campaigns.map(c => (
         <div key={c.id} className="card-elevated p-5 hover:shadow-card-hover transition-all duration-150 relative group">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0 pr-3">

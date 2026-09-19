@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ReviewCandidateList from './ReviewCandidateList';
 import ReviewDetailPanel from './ReviewDetailPanel';
 import { subscribeToCandidates, initialCandidatesData, Candidate } from '@/lib/firebase/candidateService';
@@ -21,16 +22,58 @@ export interface ReviewCandidate {
   aiRecommendation: string;
   reviewerAssigned: string | null;
   priority: 'high' | 'medium' | 'low';
+  // Real candidate assessment data
+  chartCaseAnalysis?: string;
+  chartRemedy?: string;
+  chartEvaluation?: any;
+  chartCaseTitle?: string;
+  chartCaseLagna?: string;
+  chartCaseQuery?: string;
+  chartCasePlacements?: any[];
+  conversationHistory?: Array<{ role: 'ai' | 'user' | string; text: string; topic?: string; timestamp?: string }>;
+  aiInterviewEvaluation?: any;
+  interviewDurationSeconds?: number;
+  interviewDurationFormatted?: string;
+  assessmentDurationFormatted?: string;
+  theoryAnswers?: Record<string | number, number>;
+  theoryQuestionsList?: any[];
+  tabViolations?: number;
+  isDisqualified?: boolean;
+  // Candidate dossier & credentials
+  learningBackground?: string;
+  courseDetails?: string;
+  bio?: string;
+  languages?: string[];
+  phone?: string;
+  email?: string;
+  appliedAt?: string;
+  experience?: string;
+  idProofType?: string;
+  idProofNumber?: string;
+  idProofDocument?: string;
+  assessmentLanguage?: string;
 }
 
 function mapCandidateToReview(c: Candidate, index: number): ReviewCandidate {
-  const qScore = Math.min(99, Math.round(c.aiScore * 0.94));
-  const cScore = Math.min(99, Math.round(c.aiScore * 0.96));
-  const iScore = Math.min(99, Math.round(c.aiScore * 0.93));
-  const overall = Math.round((qScore + cScore + iScore) / 3);
+  const appData = c.applicationData || {};
+
+  // Preserve authentic zero scores
+  const qScore = typeof c.theoryScore === 'number' ? c.theoryScore 
+    : typeof appData.theoryScore === 'number' ? appData.theoryScore 
+    : (typeof c.aiScore === 'number' ? Math.min(99, Math.round(c.aiScore * 0.94)) : 0);
+
+  const cScore = typeof c.chartCaseScore === 'number' ? c.chartCaseScore 
+    : typeof appData.chartCaseScore === 'number' ? appData.chartCaseScore 
+    : (typeof c.aiScore === 'number' ? Math.min(99, Math.round(c.aiScore * 0.96)) : 0);
+
+  const iScore = typeof c.aiInterviewScore === 'number' ? c.aiInterviewScore 
+    : typeof appData.aiInterviewScore === 'number' ? appData.aiInterviewScore 
+    : (typeof c.aiScore === 'number' ? Math.min(99, Math.round(c.aiScore * 0.93)) : 0);
+
+  const overall = typeof c.aiScore === 'number' ? c.aiScore : Math.round((qScore + cScore + iScore) / 3);
   
-  const rec = c.aiScore >= 90 ? 'Strong Candidate' : c.aiScore >= 80 ? 'Suitable' : 'Needs Human Review';
-  const priority: 'high' | 'medium' | 'low' = c.aiScore >= 90 ? 'high' : c.aiScore >= 80 ? 'medium' : 'low';
+  const rec = overall >= 75 ? (overall >= 90 ? 'Strong Candidate' : 'Suitable') : 'Needs Human Review';
+  const priority: 'high' | 'medium' | 'low' = overall >= 90 ? 'high' : overall >= 75 ? 'medium' : 'low';
   const assigned = index % 3 === 0 ? 'Priya Nair' : index % 3 === 1 ? 'Suresh Menon' : null;
 
   return {
@@ -38,7 +81,7 @@ function mapCandidateToReview(c: Candidate, index: number): ReviewCandidate {
     name: c.name,
     location: c.location,
     specialisations: c.specialisations && c.specialisations.length > 0 ? c.specialisations : ['Vedic Jyotish'],
-    aiScore: c.aiScore,
+    aiScore: overall,
     appId: `AP-2026-${c.id.replace(/[^0-9]/g, '').padStart(4, '0').slice(-4) || '0101'}`,
     status: c.applicationStatus || (c.lifecycleStatus === 'probation' ? 'Approved' : 'Human Review'),
     questionsScore: qScore,
@@ -48,12 +91,43 @@ function mapCandidateToReview(c: Candidate, index: number): ReviewCandidate {
     aiRecommendation: rec,
     reviewerAssigned: assigned,
     priority,
+    chartCaseAnalysis: c.chartCaseAnalysis || appData.chartCaseAnalysis || '',
+    chartRemedy: c.chartRemedy || appData.chartRemedy || '',
+    chartEvaluation: c.chartEvaluation || appData.chartEvaluation || null,
+    chartCaseTitle: c.chartCaseTitle || appData.chartCaseTitle || '',
+    chartCaseLagna: c.chartCaseLagna || appData.chartCaseLagna || '',
+    chartCaseQuery: c.chartCaseQuery || appData.chartCaseQuery || '',
+    chartCasePlacements: c.chartCasePlacements || appData.chartCasePlacements || [],
+    conversationHistory: c.conversationHistory || appData.conversationHistory || [],
+    aiInterviewEvaluation: c.aiInterviewEvaluation || appData.aiInterviewEvaluation || null,
+    interviewDurationSeconds: c.interviewDurationSeconds || appData.interviewDurationSeconds || 0,
+    interviewDurationFormatted: c.interviewDurationFormatted || appData.interviewDurationFormatted || 'Not recorded',
+    assessmentDurationFormatted: c.assessmentDurationFormatted || appData.assessmentDurationFormatted || 'Completed',
+    theoryAnswers: c.theoryAnswers || appData.theoryAnswers || {},
+    theoryQuestionsList: c.theoryQuestionsList || appData.theoryQuestionsList || [],
+    tabViolations: c.tabViolations ?? appData.tabViolations ?? 0,
+    isDisqualified: c.isDisqualified ?? appData.isDisqualified ?? false,
+    learningBackground: c.learningBackground || appData.learningBackground || '',
+    courseDetails: c.courseDetails || appData.courseDetails || '',
+    bio: c.bio || c.profileSummary || appData.bio || '',
+    languages: c.languages || appData.languages || [],
+    phone: c.phone || '',
+    email: c.email || '',
+    appliedAt: c.appliedAt || (c.createdAt?.toDate ? c.createdAt.toDate().toISOString() : '') || '',
+    experience: c.experience || '10+ years',
+    idProofType: c.idProofType || appData.idProofType || '',
+    idProofNumber: c.idProofNumber || appData.idProofNumber || '',
+    idProofDocument: c.idProofDocument || appData.idProofDocument || '',
+    assessmentLanguage: c.assessmentLanguage || appData.assessmentLanguage || 'en',
   };
 }
 
 export default function ReviewWorkspace() {
+  const searchParams = useSearchParams();
+  const urlCandidateId = searchParams.get('id') || searchParams.get('candidateId');
+
   const [candidates, setCandidates] = useState<ReviewCandidate[]>([]);
-  const [selectedId, setSelectedId] = useState<string>('');
+  const [selectedId, setSelectedId] = useState<string>(urlCandidateId || '');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,17 +135,45 @@ export default function ReviewWorkspace() {
       const unsubscribe = subscribeToCandidates(
         (allCandidates) => {
           const pool = allCandidates || [];
-          // Prioritize candidates with application or in review stages
-          const reviewPool = pool.filter(c => 
+          // Filter candidates with application or in review stages
+          let reviewPool = pool.filter(c => 
+            Boolean(c.appliedAt) ||
+            Boolean(c.theoryAnswers) ||
+            Boolean(c.applicationData) ||
+            Boolean(c.conversationHistory && c.conversationHistory.length > 0) ||
             c.lifecycleStatus === 'human-review' || 
             c.lifecycleStatus === 'screening' || 
             c.lifecycleStatus === 'applied' ||
+            c.lifecycleStatus === 'rejected' ||
             c.applicationStatus !== null
           );
+
+          // If a specific candidate was requested by ID but wasn't caught by filter, include them at top
+          if (urlCandidateId && !reviewPool.some(c => c.id === urlCandidateId)) {
+            const requested = pool.find(c => c.id === urlCandidateId);
+            if (requested) {
+              reviewPool = [requested, ...reviewPool];
+            }
+          }
+
+          // Fallback if empty
+          if (reviewPool.length === 0 && initialCandidatesData.length > 0) {
+            reviewPool = initialCandidatesData;
+          }
+
           const mapped = reviewPool.map((c, i) => mapCandidateToReview(c, i));
-          setCandidates(mapped);
-          if (mapped.length > 0) {
-            setSelectedId(prev => (prev && mapped.some(m => m.id === prev) ? prev : mapped[0].id));
+          // Sort newest applications first
+          const sorted = [...mapped].sort((a, b) => {
+            const timeA = a.appliedAt ? new Date(a.appliedAt).getTime() : 0;
+            const timeB = b.appliedAt ? new Date(b.appliedAt).getTime() : 0;
+            return timeB - timeA;
+          });
+          setCandidates(sorted);
+          
+          if (urlCandidateId && sorted.some(m => m.id === urlCandidateId)) {
+            setSelectedId(urlCandidateId);
+          } else if (sorted.length > 0) {
+            setSelectedId(prev => (prev && sorted.some(m => m.id === prev) ? prev : sorted[0].id));
           } else {
             setSelectedId('');
           }
@@ -89,7 +191,14 @@ export default function ReviewWorkspace() {
       setSelectedId('');
       setLoading(false);
     }
-  }, []);
+  }, [urlCandidateId]);
+
+  // Sync if query param changes dynamically
+  useEffect(() => {
+    if (urlCandidateId && candidates.some(c => c.id === urlCandidateId)) {
+      setSelectedId(urlCandidateId);
+    }
+  }, [urlCandidateId, candidates]);
 
   const selected = candidates.find(c => c.id === selectedId) || candidates[0];
 

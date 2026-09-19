@@ -30,8 +30,20 @@ export async function POST(req: NextRequest) {
       aiInterviewScore = 0,
       aiInterviewEvaluation = null,
       theoryAnswers = {},
+      theoryQuestionsList = [],
       chartCaseAnalysis = '',
+      chartRemedy = '',
+      chartEvaluation = null,
+      chartCaseTitle = '',
+      chartCaseLagna = '',
+      chartCaseQuery = '',
+      chartCasePlacements = [],
       conversationHistory = [],
+      interviewDurationSeconds = 0,
+      interviewDurationFormatted = '',
+      assessmentDurationSeconds = 0,
+      assessmentDurationFormatted = '',
+      assessmentLanguage = 'en',
       // Dynamic AI Score & Assessment Settings
       passingThreshold = 75,
       theoryWeight = 35,
@@ -61,13 +73,23 @@ export async function POST(req: NextRequest) {
     const normalizedChartWeight = (Number(chartCaseWeight) || 25) / totalWeight;
     const normalizedInterviewWeight = (Number(aiInterviewWeight) || 40) / totalWeight;
 
-    const overallScore = Math.round(
-      (theoryScore * normalizedTheoryWeight) + 
-      (chartCaseScore * normalizedChartWeight) + 
-      (aiInterviewScore * normalizedInterviewWeight)
-    ) || theoryScore || 85;
+    const safeTheory = typeof theoryScore === 'number' && !isNaN(theoryScore) ? theoryScore : Number(theoryScore) || 0;
+    const safeChart = typeof chartCaseScore === 'number' && !isNaN(chartCaseScore) ? chartCaseScore : Number(chartCaseScore) || 0;
+    const safeInterview = typeof aiInterviewScore === 'number' && !isNaN(aiInterviewScore) ? aiInterviewScore : Number(aiInterviewScore) || 0;
+
+    const calculatedOverall = Math.round(
+      (safeTheory * normalizedTheoryWeight) + 
+      (safeChart * normalizedChartWeight) + 
+      (safeInterview * normalizedInterviewWeight)
+    );
+    const overallScore = (!isNaN(calculatedOverall) && calculatedOverall >= 0) ? calculatedOverall : 0;
 
     const isQualifiedByThreshold = !isDisqualified && (overallScore >= (Number(passingThreshold) || 75));
+
+    // Handle large base64 ID document to avoid exceeding Firestore 1MB limit
+    const safeIdProofDoc = (typeof idProofDocument === 'string' && idProofDocument.length > 500000)
+      ? idProofDocument.slice(0, 500000)
+      : idProofDocument;
 
     const applicationPayload = {
       id: effectiveId,
@@ -83,13 +105,30 @@ export async function POST(req: NextRequest) {
       courseDetails,
       idProofType,
       idProofNumber,
-      idProofDocument,
+      idProofDocument: safeIdProofDoc,
       languages,
       password: password || '', // For staging astrologer account
       aiScore: isDisqualified ? 0 : overallScore,
-      theoryScore,
-      chartCaseScore,
-      aiInterviewScore,
+      theoryScore: safeTheory,
+      chartCaseScore: safeChart,
+      aiInterviewScore: safeInterview,
+      // Top-level assessment & interview fields for immediate dashboard access
+      chartCaseAnalysis,
+      chartRemedy,
+      chartEvaluation,
+      chartCaseTitle,
+      chartCaseLagna,
+      chartCaseQuery,
+      chartCasePlacements,
+      conversationHistory,
+      aiInterviewEvaluation,
+      theoryAnswers,
+      theoryQuestionsList,
+      interviewDurationSeconds: Number(interviewDurationSeconds) || 0,
+      interviewDurationFormatted: interviewDurationFormatted || (interviewDurationSeconds ? `${Math.floor(interviewDurationSeconds / 60)}m ${interviewDurationSeconds % 60}s` : 'Not recorded'),
+      assessmentDurationSeconds: Number(assessmentDurationSeconds) || 0,
+      assessmentDurationFormatted: assessmentDurationFormatted || 'Completed',
+      assessmentLanguage,
       // Dynamic Score & Threshold Metadata
       passingThreshold: Number(passingThreshold) || 75,
       theoryWeight: Number(theoryWeight) || 35,
@@ -115,11 +154,25 @@ export async function POST(req: NextRequest) {
         courseDetails,
         idProofType,
         idProofNumber,
-        idProofDocument,
+        theoryScore: safeTheory,
+        chartCaseScore: safeChart,
+        aiInterviewScore: safeInterview,
         theoryAnswers,
+        theoryQuestionsList,
         chartCaseAnalysis,
+        chartRemedy,
+        chartEvaluation,
+        chartCaseTitle,
+        chartCaseLagna,
+        chartCaseQuery,
+        chartCasePlacements,
         aiInterviewEvaluation,
         conversationHistory,
+        interviewDurationSeconds: Number(interviewDurationSeconds) || 0,
+        interviewDurationFormatted: interviewDurationFormatted || (interviewDurationSeconds ? `${Math.floor(interviewDurationSeconds / 60)}m ${interviewDurationSeconds % 60}s` : 'Not recorded'),
+        assessmentDurationSeconds: Number(assessmentDurationSeconds) || 0,
+        assessmentDurationFormatted: assessmentDurationFormatted || 'Completed',
+        assessmentLanguage,
         proctoring: {
           tabViolations: Number(tabViolations) || 0,
           proctorLogs: Array.isArray(proctorLogs) ? proctorLogs : [],
@@ -141,7 +194,7 @@ export async function POST(req: NextRequest) {
           timestamp: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
           notes: isDisqualified
             ? `Candidate DISQUALIFIED during online exam. Reason: ${disqualificationReason || '3 Tab switches / unauthorized window loss detected'}. Total Violations: ${tabViolations}.`
-            : `Completed Vedic Theory Assessment (${theoryScore}/100, ${theoryWeight}% wt), Blind Kundali Case (${chartCaseScore}/100, ${chartCaseWeight}% wt), and AI Technical Interview (${aiInterviewScore}/100, ${aiInterviewWeight}% wt). Overall Score: ${overallScore}/100 (Threshold: ${passingThreshold}%, Status: ${isQualifiedByThreshold ? 'QUALIFIED' : 'NEEDS REVIEW'}). Proctoring Violations: ${tabViolations}. Question Mode: ${isAiDynamicQuestions ? 'AI Dynamic Random' : 'Curated Bank'} (${questionCount} questions).`,
+            : `Completed Vedic Theory Assessment (${safeTheory}/100, ${theoryWeight}% wt), Blind Kundali Case (${safeChart}/100, ${chartCaseWeight}% wt), and AI Technical Interview (${safeInterview}/100, ${aiInterviewWeight}% wt). Overall Score: ${overallScore}/100 (Threshold: ${passingThreshold}%, Status: ${isQualifiedByThreshold ? 'QUALIFIED' : 'NEEDS REVIEW'}). Proctoring Violations: ${tabViolations}. Question Mode: ${isAiDynamicQuestions ? 'AI Dynamic Random' : 'Curated Bank'} (${questionCount} questions).`,
           actor: isDisqualified ? 'AI Anti-Cheating Proctor Engine' : 'Candidate Self-Service & AI Examiner',
           status: isDisqualified ? 'error' : (isQualifiedByThreshold ? 'success' : 'info'),
         }
@@ -176,6 +229,16 @@ export async function POST(req: NextRequest) {
       }
     } catch (dbErr) {
       console.warn('Firestore candidate application save warning:', dbErr);
+      // Fallback: If document was too large due to base64 ID proof, retry without the attachment
+      try {
+        if (db && applicationPayload.idProofDocument) {
+          const strippedPayload = { ...applicationPayload, idProofDocument: '[Document Attached - Saved on Staging]' };
+          const candidateRef = doc(db, 'candidates', effectiveId);
+          await setDoc(candidateRef, strippedPayload, { merge: true });
+        }
+      } catch (retryErr) {
+        console.error('Firestore save retry error:', retryErr);
+      }
     }
 
     // If an email address is provided, dispatch confirmation email via Gmail SMTP

@@ -44,7 +44,7 @@ const defaultTemplates: Template[] = [
     id: 'TPL-003',
     name: 'WhatsApp Fast-Track Invite',
     channel: 'WhatsApp',
-    preview: 'Namaste {{candidate_name}} 🙏 AstroParihar invites you to join India\'s trusted verified astrologer network. Review your onboarding details: https://astroparihar.com/join',
+    preview: 'Namaste {{candidate_name}} 🙏 AstroParihar invites you to join India\'s trusted verified astrologer network. Review your onboarding details: https://astroparihar.com/apply',
     variables: ['candidate_name'],
     usageCount: 0,
     lastUsed: '—',

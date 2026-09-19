@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOpenAIClient } from '@/lib/openai';
+import { db } from '@/lib/firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
 
 export const dynamic = 'force-dynamic';
 
@@ -197,17 +199,103 @@ export async function POST(req: NextRequest) {
       specialisation = 'Vedic Jyotish',
       count = 5,
       isAiDynamic = true,
-      difficulty = 'Advanced'
+      difficulty = 'Advanced',
+      language = 'en'
     } = body;
 
     const targetCount = Math.min(Math.max(Number(count) || 5, 3), 10);
+    const langStr = String(language || 'en').toLowerCase();
+    const isHindi = langStr === 'hi' || langStr === 'hindi';
+    const isTelugu = langStr === 'te' || langStr === 'telugu';
+    const isTamil = langStr === 'ta' || langStr === 'tamil';
 
-    // If AI Dynamic Mode is ON, generate fresh questions via GPT-4o
-    if (isAiDynamic) {
+    // 1. Fetch Assessment Configuration from Firestore
+    let dbCustomQuestions: any[] = [];
+    let dbUseCustom = true;
+    let dbQuestionCount = 5;
+
+    try {
+      if (db) {
+        const docRef = doc(db, 'settings', 'assessment_config');
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          const cfg = snap.data();
+          if (cfg.useCustomQuestions !== undefined) dbUseCustom = Boolean(cfg.useCustomQuestions);
+          if (Array.isArray(cfg.customQuestions) && cfg.customQuestions.length > 0) {
+            dbCustomQuestions = cfg.customQuestions;
+          }
+          if (cfg.questionCount) dbQuestionCount = Number(cfg.questionCount);
+        }
+      }
+    } catch (dbErr) {
+      console.warn('Firestore load failed in generate-assignment-questions:', dbErr);
+    }
+
+    // Determine whether to use Custom Bank or AI Auto-generation
+    // If request body explicitly supplies isAiDynamic, respect it; otherwise default to dbUseCustom
+    const shouldUseAi = isAiDynamic !== undefined ? Boolean(isAiDynamic) : !dbUseCustom;
+
+    // IF CUSTOM QUESTIONS MODE IS SELECTED
+    if (!shouldUseAi) {
+      const sourcePool = dbCustomQuestions.length > 0 ? dbCustomQuestions : (FALLBACK_QUESTION_POOL[specialisation] || FALLBACK_QUESTION_POOL['Vedic Jyotish']);
+      const formatted = sourcePool.slice(0, targetCount).map((q: any, idx: number) => {
+        let question = q.question;
+        let options = q.options;
+        let explanation = q.explanation;
+        let topic = q.topic;
+
+        if (isTelugu) {
+          if (q.questionTe) question = q.questionTe;
+          if (Array.isArray(q.optionsTe) && q.optionsTe.length === q.options?.length) options = q.optionsTe;
+          if (q.explanationTe) explanation = q.explanationTe;
+          if (q.topicTe) topic = q.topicTe;
+        } else if (isTamil) {
+          if (q.questionTa) question = q.questionTa;
+          if (Array.isArray(q.optionsTa) && q.optionsTa.length === q.options?.length) options = q.optionsTa;
+          if (q.explanationTa) explanation = q.explanationTa;
+          if (q.topicTa) topic = q.topicTa;
+        } else if (isHindi) {
+          if (q.questionHi) question = q.questionHi;
+          if (Array.isArray(q.optionsHi) && q.optionsHi.length === q.options?.length) options = q.optionsHi;
+          if (q.explanationHi) explanation = q.explanationHi;
+          if (q.topicHi) topic = q.topicHi;
+        }
+
+        return {
+          id: idx + 1,
+          question,
+          options,
+          correctIndex: q.correctIndex ?? 0,
+          explanation: explanation || 'Classical Shastra verification.',
+          topic: topic || specialisation
+        };
+      });
+
+      return NextResponse.json({
+        success: true,
+        mode: 'custom_bank',
+        count: formatted.length,
+        questions: formatted,
+        generatedAt: new Date().toISOString()
+      });
+    }
+
+    // IF AI DYNAMIC MODE IS ON: Generate fresh questions via GPT-4o
+    if (shouldUseAi) {
       try {
         const openai = getOpenAIClient();
+        let langDirective = 'Language: English.';
+        if (isHindi) {
+          langDirective = 'CRITICAL REQUIREMENT: Generate all questions, options, and explanations in fluent, formal Hindi (हिन्दी) using traditional Vedic Jyotish terminology (e.g. भाव, लग्न, केंद्र, त्रिकोण, दशा, गोचर, उपाय, नवांश).';
+        } else if (isTelugu) {
+          langDirective = 'CRITICAL REQUIREMENT: Generate all questions, options, and explanations in fluent, authentic Telugu (తెలుగు) using traditional Vedic Jyotish terminology (e.g. భావం, లగ్నం, కేంద్రం, త్రికోణం, వింశోత్తరి దశ, గోచారం, నవాంశ, పరిహారాలు, రాశి).';
+        } else if (isTamil) {
+          langDirective = 'CRITICAL REQUIREMENT: Generate all questions, options, and explanations in fluent, authentic Tamil (தமிழ்) using traditional Vedic Jyotish terminology (e.g. பாவம், லக்னம், கேந்திரம், திரிகோணம், விம்சோத்தரி தசா, கோச்சாரம், நவாம்சம், பரிகாரங்கள், రాశి).';
+        }
+
         const prompt = `Generate exactly ${targetCount} high-quality, rigorous multiple-choice questions for technical assessment of a professional astrologer specializing in "${specialisation}".
 Difficulty level: ${difficulty}.
+${langDirective}
 Topics should cover: Core principles, chart calculations, yogas, dasha interpretation, remedies, and professional ethics.
 
 Return JSON in this EXACT schema:

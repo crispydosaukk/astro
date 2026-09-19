@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       experienceYears: typeof body?.experience === 'number' ? body.experience : parseInt(body?.experience || '10', 10) || 10,
       platformSource: body?.location ? `${body.location} Practitioner Network` : 'Verified Astrologer Network',
       channel: channelNormalized,
+      language: body?.language || 'English',
     });
 
     return NextResponse.json({

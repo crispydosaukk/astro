@@ -6,7 +6,8 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    if (!body || !body.name) {
+    const candidateName = body?.name || body?.candidateName;
+    if (!candidateName) {
       return NextResponse.json(
         { success: false, message: 'Candidate name is required for reviewer advisory.' },
         { status: 400 }
@@ -14,13 +15,17 @@ export async function POST(req: NextRequest) {
     }
 
     const advisory = await generateReviewerAdvisoryAI({
-      name: body.name,
+      name: candidateName,
       specialisations: body.specialisations || ['Vedic Astrology'],
       aiScore: body.aiScore || 85,
       questionsScore: body.questionsScore,
       chartScore: body.chartScore,
       interviewScore: body.interviewScore,
       experience: body.experience,
+      chartCaseAnalysis: body.chartCaseAnalysis,
+      chartRemedy: body.chartRemedy,
+      interviewDurationFormatted: body.interviewDurationFormatted,
+      conversationHistory: body.conversationHistory,
     });
 
     return NextResponse.json({

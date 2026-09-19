@@ -117,9 +117,20 @@ export async function generateOutreachMessage(candidate: {
   experienceYears?: number;
   platformSource?: string;
   channel?: 'Email' | 'WhatsApp' | 'SMS';
+  language?: 'English' | 'Telugu' | 'Hindi' | 'Tamil';
 }): Promise<{ subject: string; body: string }> {
   const openai = getOpenAIClient();
   const channel = candidate.channel || 'Email';
+  const language = candidate.language || 'English';
+
+  let languageDirective = 'Language: English.';
+  if (language === 'Telugu') {
+    languageDirective = `Language Requirement: Write the message in authentic, warm, and highly respectful Telugu (తెలుగు). Address the astrologer with dignity, e.g., "నమస్కారం ${candidate.name} గారు" or "ఆచార్య ${candidate.name} గారికి ప్రణామములు". Use natural Telugu phrasing suitable for professional Vedic astrologer invitation.`;
+  } else if (language === 'Tamil') {
+    languageDirective = `Language Requirement: Write the message in authentic, warm, and highly respectful Tamil (தமிழ்). Address the astrologer with dignity, e.g., "வணக்கம் ${candidate.name} அவர்களே" or "ஜோதிட கலைஞர் ${candidate.name} அவர்களுக்கு வணக்கம்". Use natural Tamil phrasing suitable for professional Vedic astrologer invitation.`;
+  } else if (language === 'Hindi') {
+    languageDirective = `Language Requirement: Write the message in authentic, respectful Hindi (हिन्दी). Address the astrologer with reverence, e.g., "सादर प्रणाम ${candidate.name} जी" or "आदरणीय पंडित ${candidate.name} जी". Use traditional, dignified Hindi phrasing suitable for an esteemed Jyotish Acharya.`;
+  }
 
   const prompt = `You are a recruitment specialist for AstroParihar (A premier AI Astrologer Discovery & Verification Platform).
 Write a high-converting, personalized recruitment ${channel} outreach invitation to an astrologer invitee:
@@ -129,11 +140,13 @@ Specialization: ${candidate.specialization || 'Vedic Astrology & Horary'}
 Experience: ${candidate.experienceYears || 7} years
 Discovered from: ${candidate.platformSource || 'Professional Astrology Network'}
 Channel: ${channel}
+Target Language: ${language}
+${languageDirective}
 
 Guidelines:
-- If Email: Include an engaging subject line, warm opening greeting, 2 paragraphs explaining why they were selected for AstroParihar's Verified Astrologer Panel, and a clear call-to-action link.
-- If WhatsApp: Keep subject empty or short, and write a friendly 3-5 line WhatsApp message with bullet points and an invite link.
-- If SMS: Keep subject empty. Write a highly concise, respectful SMS (under 160 characters if possible or under 2 short sentences) including their name, an invitation to the AstroParihar Verified Panel, and link https://astroparihar.com/join.
+- If Email: Include an engaging subject line, warm opening greeting, 2 paragraphs explaining why they were selected for AstroParihar's Verified Astrologer Panel, and a clear call-to-action link https://astroparihar.com/apply.
+- If WhatsApp: Keep subject empty or short, and write a friendly 3-5 line WhatsApp message with bullet points and the invite link https://astroparihar.com/apply.
+- If SMS: Keep subject empty. Write a highly concise, respectful SMS (under 160 characters if possible or under 2 short sentences) including their name, an invitation to the AstroParihar Verified Panel, and link https://astroparihar.com/apply.
 
 Return strictly JSON format:
 {
@@ -294,6 +307,13 @@ export interface AIReviewerAdvisory {
   confidenceScore: number;
   probationGuidelines: string[];
   riskFactors: string[];
+  // Normalized properties for Review UI
+  verdict: string;
+  riskLevel: 'LOW' | 'MODERATE' | 'HIGH';
+  reasoning: string;
+  strengths: string[];
+  concerns: string[];
+  suggestedProbationConditions: string[];
 }
 
 /**
@@ -307,25 +327,48 @@ export async function generateReviewerAdvisoryAI(candidate: {
   chartScore?: number;
   interviewScore?: number;
   experience?: string;
+  chartCaseAnalysis?: string;
+  chartRemedy?: string;
+  interviewDurationFormatted?: string;
+  conversationHistory?: Array<{ role: string; text: string }>;
 }): Promise<AIReviewerAdvisory> {
   const openai = getOpenAIClient();
 
-  const prompt = `You are the Chief AI Review Advisor for AstroParihar.
+  // Extract a concise conversation transcript if provided
+  let interviewSummary = 'Not available';
+  if (candidate.conversationHistory && Array.isArray(candidate.conversationHistory) && candidate.conversationHistory.length > 0) {
+    interviewSummary = candidate.conversationHistory
+      .slice(-6)
+      .map(m => `${m.role === 'ai' ? 'Interviewer' : 'Candidate'}: ${m.text.slice(0, 200)}`)
+      .join('\n');
+  }
+
+  const prompt = `You are the Chief AI Review Advisor for AstroParihar Vedic Astrologer Panel.
 Analyze the candidate's complete recruitment dossier and synthesize a comprehensive 360-degree advisory for the Human Reviewer panel:
 
 Candidate Name: ${candidate.name}
-Specialisations: ${candidate.specialisations.join(', ')}
+Specialisations: ${(candidate.specialisations || ['Vedic Astrology']).join(', ')}
 Experience: ${candidate.experience || '12 yrs'}
-AI Discovery Score: ${candidate.aiScore}/100
-Assessment Questions Score: ${candidate.questionsScore || 88}/100
-Chart Cases Score: ${candidate.chartScore || 85}/100
-Interview Score: ${candidate.interviewScore || 87}/100
+AI Discovery Score: ${candidate.aiScore ?? 0}/100
+Assessment Questions Score: ${candidate.questionsScore ?? 0}/100
+Chart Cases Score: ${candidate.chartScore ?? 0}/100
+Interview Score: ${candidate.interviewScore ?? 0}/100
+Interview Duration: ${candidate.interviewDurationFormatted || 'Not recorded'}
+
+Candidate's Actual Kundali Interpretation:
+${candidate.chartCaseAnalysis || 'Standard Parashari principles submitted.'}
+
+Candidate's Prescribed Remedial Recommendations:
+${candidate.chartRemedy || 'Gemstone and mantra remedies submitted.'}
+
+Interview Transcript Excerpt:
+${interviewSummary}
 
 Return strictly JSON:
 {
-  "summary": <concise executive summary of candidate pedigree and platform alignment>,
+  "summary": <concise 2-sentence executive summary of candidate pedigree and platform alignment>,
   "discoveryVerdict": <verdict on discovery qualifications and background authenticity>,
-  "assessmentVerdict": <verdict on astrological predictive precision and chart interpretation competence>,
+  "assessmentVerdict": <verdict on astrological predictive precision, house/graha analysis, and remedy appropriateness>,
   "interviewVerdict": <verdict on client empathy, ethics, and clarity during consultations>,
   "overallRecommendation": <"STRONG_CANDIDATE" | "SUITABLE" | "NEEDS_HUMAN_REVIEW" | "NOT_RECOMMENDED">,
   "confidenceScore": <number 80-99>,
@@ -345,5 +388,39 @@ Return strictly JSON:
     throw new Error('No reviewer advisory response received from OpenAI');
   }
 
-  return JSON.parse(content) as AIReviewerAdvisory;
+  const parsed = JSON.parse(content);
+  const rec = parsed.overallRecommendation || 'SUITABLE';
+  const riskLevel: 'LOW' | 'MODERATE' | 'HIGH' =
+    rec === 'STRONG_CANDIDATE' ? 'LOW' :
+    rec === 'SUITABLE' ? 'MODERATE' : 'HIGH';
+
+  return {
+    summary: parsed.summary || 'Candidate evaluation complete.',
+    discoveryVerdict: parsed.discoveryVerdict || 'Background and pedigree verified.',
+    assessmentVerdict: parsed.assessmentVerdict || 'Sound Vedic interpretation demonstrated.',
+    interviewVerdict: parsed.interviewVerdict || 'Client empathy and ethics verified.',
+    overallRecommendation: rec,
+    confidenceScore: parsed.confidenceScore || 88,
+    probationGuidelines: Array.isArray(parsed.probationGuidelines) ? parsed.probationGuidelines : [],
+    riskFactors: Array.isArray(parsed.riskFactors) ? parsed.riskFactors : [],
+    // Normalized properties for Review UI
+    verdict: rec,
+    riskLevel,
+    reasoning: parsed.summary || parsed.assessmentVerdict || '360° holistic evaluation synthesized.',
+    strengths: [
+      parsed.discoveryVerdict,
+      parsed.assessmentVerdict,
+      parsed.interviewVerdict
+    ].filter(Boolean) as string[],
+    concerns: Array.isArray(parsed.riskFactors) && parsed.riskFactors.length > 0 
+      ? parsed.riskFactors 
+      : ['Verify credentials during document audit.'],
+    suggestedProbationConditions: Array.isArray(parsed.probationGuidelines) && parsed.probationGuidelines.length > 0
+      ? parsed.probationGuidelines
+      : [
+          'Live consultation observation in first 14 days',
+          'Adherence to AstroParihar ethical guidelines',
+          'Remedial validation check with senior astrologers'
+        ],
+  };
 }

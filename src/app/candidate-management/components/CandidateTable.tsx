@@ -46,6 +46,7 @@ import {
   updateCandidateStatus,
   resolveCandidateContact
 } from '@/lib/firebase/candidateService';
+import { subscribeToCampaigns } from '@/lib/firebase/discoveryService';
 import { queueSmsViaMsg91, dispatchParallelOutreach } from '@/lib/firebase/smsService';
 import CandidateProfileModal from '@/components/candidates/CandidateProfileModal';
 import AddCandidateModal from '@/components/candidates/AddCandidateModal';
@@ -69,10 +70,16 @@ export default function CandidateTable() {
   const [filterSource, setFilterSource] = useState('All');
   const [filterScoreRange, setFilterScoreRange] = useState('All');
   const [channelFilter, setChannelFilter] = useState('all');
+  const [filterCampaign, setFilterCampaign] = useState('All');
+  const [campaignsList, setCampaignsList] = useState<string[]>([]);
+  const [filterLocation, setFilterLocation] = useState('All');
 
   // Column Visibility State
   const [columns, setColumns] = useState<ColumnVisibility>({
-    contact: true,
+    phone: true,
+    email: true,
+    location: true,
+    website: false,
     specialisations: true,
     rating: true,
     experience: true,
@@ -122,6 +129,19 @@ export default function CandidateTable() {
     }
   }, []);
 
+  // Subscribe to real-time discovery campaigns for filter list
+  useEffect(() => {
+    try {
+      const unsub = subscribeToCampaigns((camps) => {
+        const names = camps.map(c => c.name).filter(Boolean);
+        setCampaignsList(names);
+      });
+      return () => unsub();
+    } catch (e) {
+      console.warn('Unable to subscribe to campaigns:', e);
+    }
+  }, []);
+
   const searchParams = useSearchParams();
 
   // Sync state with URL search parameters on mount or navigation
@@ -133,6 +153,14 @@ export default function CandidateTable() {
     const statusParam = searchParams?.get('status');
     if (statusParam) {
       setFilterStatus(statusParam);
+    }
+    const campaignParam = searchParams?.get('campaign');
+    if (campaignParam) {
+      setFilterCampaign(campaignParam);
+    }
+    const locationParam = searchParams?.get('location');
+    if (locationParam) {
+      setFilterLocation(locationParam);
     }
   }, [searchParams]);
 
@@ -148,6 +176,58 @@ export default function CandidateTable() {
       window.history.replaceState({}, '', url.toString());
     }
   };
+
+  const handleCampaignFilterChange = (newCampaign: string) => {
+    setFilterCampaign(newCampaign);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (newCampaign === 'All') {
+        url.searchParams.delete('campaign');
+      } else {
+        url.searchParams.set('campaign', newCampaign);
+      }
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  const handleLocationFilterChange = (newLoc: string) => {
+    setFilterLocation(newLoc);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      if (newLoc === 'All') {
+        url.searchParams.delete('location');
+      } else {
+        url.searchParams.set('location', newLoc);
+      }
+      window.history.replaceState({}, '', url.toString());
+    }
+  };
+
+  // Derive unique campaign options from both active campaigns and candidate records
+  const campaignOptions = useMemo(() => {
+    const namesSet = new Set<string>();
+    campaignsList.forEach(name => {
+      if (name && name.trim()) namesSet.add(name.trim());
+    });
+    candidates.forEach(c => {
+      const name = c.campaignName || (c as any).campaign;
+      if (name && typeof name === 'string' && name.trim()) {
+        namesSet.add(name.trim());
+      }
+    });
+    return Array.from(namesSet).sort((a, b) => a.localeCompare(b));
+  }, [campaignsList, candidates]);
+
+  // Derive unique location options from candidate records
+  const locationOptions = useMemo(() => {
+    const locSet = new Set<string>();
+    candidates.forEach(c => {
+      if (c.location && typeof c.location === 'string' && c.location.trim()) {
+        locSet.add(c.location.trim());
+      }
+    });
+    return Array.from(locSet).sort((a, b) => a.localeCompare(b));
+  }, [candidates]);
 
   const handleDirectWhatsApp = async (candidate: Candidate, phoneNum: string) => {
     const cleanPhone = phoneNum.replace(/[^\d+]/g, '').replace(/^0+/, '');
@@ -580,9 +660,26 @@ export default function CandidateTable() {
         }
       }
 
+      // 7. Campaign Filter
+      if (filterCampaign !== 'All') {
+        const candCampaign = (c.campaignName || (c as any).campaign || '').toLowerCase().trim();
+        if (candCampaign !== filterCampaign.toLowerCase().trim()) {
+          return false;
+        }
+      }
+
+      // 8. Location Filter
+      if (filterLocation !== 'All') {
+        const queryLoc = filterLocation.toLowerCase().trim();
+        const candLoc = (c.location || '').toLowerCase().trim();
+        if (!candLoc.includes(queryLoc) && !queryLoc.includes(candLoc)) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [candidates, search, filterStatus, filterSpec, filterSource, filterScoreRange, channelFilter]);
+  }, [candidates, search, filterStatus, filterSpec, filterSource, filterScoreRange, channelFilter, filterCampaign, filterLocation]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -667,6 +764,12 @@ export default function CandidateTable() {
         onScoreRangeChange={setFilterScoreRange}
         channelFilter={channelFilter}
         onChannelFilterChange={handleChannelFilterChange}
+        campaign={filterCampaign}
+        onCampaignChange={handleCampaignFilterChange}
+        campaignOptions={campaignOptions}
+        location={filterLocation}
+        onLocationChange={handleLocationFilterChange}
+        locationOptions={locationOptions}
         counts={outreachCounts}
         onExportCsv={handleExportCsv}
         onAddCandidateClick={() => setIsAddCandidateOpen(true)}
@@ -678,7 +781,7 @@ export default function CandidateTable() {
       <div className="card-elevated overflow-hidden">
         {/* Pipeline & Quick Actions Secondary Bar */}
         <div className="bg-muted/30 border-b border-border px-5 py-2.5 flex items-center justify-between flex-wrap gap-2 text-xs">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Database size={14} className="text-primary" />
             <span className="font-semibold text-foreground">Pipeline Database:</span>
             {isFirestoreLive ? (
@@ -700,6 +803,30 @@ export default function CandidateTable() {
             {filteredCandidates.length !== candidates.length && (
               <span className="text-2xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                 Showing {filteredCandidates.length} of {candidates.length} filtered
+              </span>
+            )}
+            {filterCampaign !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 text-2xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                <span>🎯 Campaign: <strong>{filterCampaign}</strong></span>
+                <button
+                  onClick={() => handleCampaignFilterChange('All')}
+                  className="hover:text-primary-foreground hover:bg-primary/80 rounded-full p-0.5 transition-colors"
+                  title="Clear campaign filter"
+                >
+                  <X size={10} />
+                </button>
+              </span>
+            )}
+            {filterLocation !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 text-2xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-900/60 dark:text-emerald-100">
+                <span>📍 Location: <strong>{filterLocation}</strong></span>
+                <button
+                  onClick={() => handleLocationFilterChange('All')}
+                  className="hover:text-emerald-950 hover:bg-emerald-200 dark:hover:bg-emerald-800 rounded-full p-0.5 transition-colors"
+                  title="Clear location filter"
+                >
+                  <X size={10} />
+                </button>
               </span>
             )}
           </div>
@@ -796,9 +923,21 @@ export default function CandidateTable() {
                     aria-label="Select all candidates"
                   />
                 </th>
-                <th className="table-header-cell cursor-pointer min-w-64" onClick={() => handleSort('name')}>
+                <th className="table-header-cell cursor-pointer min-w-56" onClick={() => handleSort('name')}>
                   Astrologer & Identity <SortIcon col="name" />
                 </th>
+                {columns.phone && (
+                  <th className="table-header-cell whitespace-nowrap min-w-[160px]">Contact Number</th>
+                )}
+                {columns.email && (
+                  <th className="table-header-cell whitespace-nowrap min-w-[180px]">Email Address</th>
+                )}
+                {columns.location && (
+                  <th className="table-header-cell whitespace-nowrap min-w-[130px]">Location</th>
+                )}
+                {columns.website && (
+                  <th className="table-header-cell whitespace-nowrap min-w-[130px]">Website</th>
+                )}
                 {columns.specialisations && (
                   <th className="table-header-cell">Specialisations</th>
                 )}
@@ -832,7 +971,7 @@ export default function CandidateTable() {
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-16 text-muted-foreground text-sm">
+                  <td colSpan={14} className="text-center py-16 text-muted-foreground text-sm">
                     <div className="flex flex-col items-center justify-center space-y-3">
                       <Users size={36} className="opacity-30 text-muted-foreground" />
                       <p className="font-semibold text-foreground text-base">No candidates found in this view</p>
@@ -868,96 +1007,147 @@ export default function CandidateTable() {
                       />
                     </td>
 
-                    {/* Candidate name + contact info */}
+                    {/* Candidate name & identity */}
                     <td className="table-cell">
-                      {(() => {
-                        const contact = resolveCandidateContact(candidate);
-                        return (
-                          <div className="flex items-start gap-2.5">
+                      <div className="flex items-start gap-2.5">
+                        <button
+                          onClick={() => setProfileCandidate(candidate)}
+                          className="w-9 h-9 rounded-full terracotta-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5 hover:scale-105 transition-transform shadow-xs cursor-pointer"
+                          title="Click to view full astrologer profile"
+                        >
+                          {candidate.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                        </button>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => setProfileCandidate(candidate)}
-                              className="w-9 h-9 rounded-full terracotta-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5 hover:scale-105 transition-transform shadow-xs cursor-pointer"
-                              title="Click to view full astrologer profile"
+                              className="font-semibold text-sm text-foreground truncate max-w-[175px] text-left hover:text-primary hover:underline transition-colors cursor-pointer"
+                              title="Click to view complete profile and contact details"
                             >
-                              {candidate.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                              {candidate.name}
                             </button>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-1.5">
-                                <button
-                                  onClick={() => setProfileCandidate(candidate)}
-                                  className="font-semibold text-sm text-foreground truncate max-w-[175px] text-left hover:text-primary hover:underline transition-colors"
-                                  title="Click to view complete profile and contact details"
-                                >
-                                  {candidate.name}
-                                </button>
-                                {candidate.isDuplicate && (
-                                  <span className="tooltip-label" data-tooltip="Possible duplicate detected">
-                                    <AlertTriangle size={12} className="text-amber-600 flex-shrink-0" />
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-muted-foreground truncate">{candidate.businessName}</p>
-                              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                <MapPin size={10} className="text-muted-foreground/70" />
-                                <span className="truncate">{candidate.location}</span>
-                              </p>
-
-                              {/* Contact Details Quick Preview */}
-                              {columns.contact && (
-                                <>
-                                  {(contact.phone || contact.website || contact.email) ? (
-                                    <div className="flex flex-col gap-0.5 mt-1.5 pt-1 border-t border-border/40">
-                                      {contact.phone && (
-                                        <div className="flex items-center gap-1.5 text-2xs text-foreground font-medium">
-                                          <Phone size={10} className="text-primary flex-shrink-0" />
-                                          <a 
-                                            href={`tel:${contact.rawPhone || contact.phone}`}
-                                            className="tabular-nums font-mono truncate hover:text-primary hover:underline"
-                                            title="Call phone"
-                                          >
-                                            {contact.phone}
-                                          </a>
-                                        </div>
-                                      )}
-                                      {contact.email && (
-                                        <div className="flex items-center gap-1.5 text-2xs text-muted-foreground truncate" title={contact.email}>
-                                          <Mail size={10} className="text-primary flex-shrink-0" />
-                                          <a
-                                            href={`mailto:${contact.email}`}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="truncate hover:text-primary hover:underline"
-                                          >
-                                            {contact.email}
-                                          </a>
-                                        </div>
-                                      )}
-                                      {contact.website && (
-                                        <div className="flex items-center gap-1.5 text-2xs text-primary/90 truncate" title={contact.website}>
-                                          <Globe size={10} className="text-primary flex-shrink-0" />
-                                          <a
-                                            href={contact.website}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="truncate hover:underline"
-                                          >
-                                            {contact.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
-                                          </a>
-                                        </div>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <div className="mt-1 text-2xs text-muted-foreground/60 italic">
-                                      Direct phone not publicly listed
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                            </div>
+                            {candidate.isDuplicate && (
+                              <span className="tooltip-label" data-tooltip="Possible duplicate detected">
+                                <AlertTriangle size={12} className="text-amber-600 flex-shrink-0" />
+                              </span>
+                            )}
                           </div>
-                        );
-                      })()}
+                          <p className="text-xs text-muted-foreground truncate">{candidate.businessName}</p>
+                          {!columns.location && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <MapPin size={10} className="text-muted-foreground/70 flex-shrink-0" />
+                              <span className="truncate">{candidate.location}</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </td>
+
+                    {/* Contact Number (Dedicated Column) */}
+                    {columns.phone && (
+                      <td className="table-cell whitespace-nowrap">
+                        {(() => {
+                          const contact = resolveCandidateContact(candidate);
+                          const phoneNum = contact.phone || candidate.phone || candidate.whatsapp;
+                          if (!phoneNum) {
+                            return (
+                              <span className="text-2xs text-muted-foreground/60 italic font-mono">
+                                Not Listed
+                              </span>
+                            );
+                          }
+                          return (
+                            <div className="flex items-center gap-1.5">
+                              <a
+                                href={`tel:${contact.rawPhone || phoneNum}`}
+                                className="font-mono text-xs font-semibold tabular-nums text-foreground hover:text-primary hover:underline flex items-center gap-1.5"
+                                title="Click to call"
+                              >
+                                <Phone size={11} className="text-primary flex-shrink-0" />
+                                <span>{phoneNum}</span>
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => handleDirectWhatsApp(candidate, phoneNum)}
+                                className="p-1 rounded-md text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-950 transition-colors ml-0.5 cursor-pointer"
+                                title="Chat on WhatsApp"
+                              >
+                                <MessageCircle size={13} />
+                              </button>
+                            </div>
+                          );
+                        })()}
+                      </td>
+                    )}
+
+                    {/* Email Address (Dedicated Column) */}
+                    {columns.email && (
+                      <td className="table-cell whitespace-nowrap">
+                        {(() => {
+                          const contact = resolveCandidateContact(candidate);
+                          const emailAddr = contact.email || candidate.email;
+                          if (!emailAddr) {
+                            return (
+                              <span className="text-2xs text-muted-foreground/60 italic">
+                                Not Listed
+                              </span>
+                            );
+                          }
+                          return (
+                            <div className="flex items-center gap-1.5 max-w-[210px]">
+                              <Mail size={11} className="text-primary flex-shrink-0" />
+                              <a
+                                href={`mailto:${emailAddr}`}
+                                className="text-xs text-foreground truncate hover:text-primary hover:underline font-medium"
+                                title={emailAddr}
+                              >
+                                {emailAddr}
+                              </a>
+                            </div>
+                          );
+                        })()}
+                      </td>
+                    )}
+
+                    {/* Location (Dedicated Column) */}
+                    {columns.location && (
+                      <td className="table-cell whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleLocationFilterChange(candidate.location)}
+                          className="inline-flex items-center gap-1 text-xs text-foreground hover:text-primary hover:underline transition-colors truncate max-w-[160px] text-left cursor-pointer"
+                          title={`Filter by location: ${candidate.location}`}
+                        >
+                          <MapPin size={11} className="text-muted-foreground flex-shrink-0" />
+                          <span className="truncate">{candidate.location || 'India'}</span>
+                        </button>
+                      </td>
+                    )}
+
+                    {/* Website (Dedicated Column) */}
+                    {columns.website && (
+                      <td className="table-cell whitespace-nowrap">
+                        {(() => {
+                          const contact = resolveCandidateContact(candidate);
+                          const site = contact.website || candidate.website;
+                          if (!site) {
+                            return <span className="text-2xs text-muted-foreground/60 italic">—</span>;
+                          }
+                          return (
+                            <a
+                              href={site}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-primary hover:underline truncate max-w-[150px]"
+                              title={site}
+                            >
+                              <Globe size={11} className="shrink-0" />
+                              <span className="truncate">{site.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</span>
+                            </a>
+                          );
+                        })()}
+                      </td>
+                    )}
 
                     {/* Specialisations */}
                     {columns.specialisations && (
@@ -1003,13 +1193,29 @@ export default function CandidateTable() {
                     {/* Source */}
                     {columns.source && (
                       <td className="table-cell whitespace-nowrap">
-                        <span className={`inline-flex items-center justify-center whitespace-nowrap text-xs px-2.5 py-1 rounded-md font-bold tracking-normal ${
-                          candidate.source === 'Manual Entry' 
-                            ? 'bg-amber-100 text-amber-950 dark:bg-amber-900/60 dark:text-amber-100 border border-amber-300 dark:border-amber-600' 
-                            : 'bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-600'
-                        }`}>
-                          {candidate.source}
-                        </span>
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className={`inline-flex items-center justify-center whitespace-nowrap text-xs px-2.5 py-1 rounded-md font-bold tracking-normal ${
+                            candidate.source === 'Manual Entry' 
+                              ? 'bg-amber-100 text-amber-950 dark:bg-amber-900/60 dark:text-amber-100 border border-amber-300 dark:border-amber-600' 
+                              : 'bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-600'
+                          }`}>
+                            {candidate.source}
+                          </span>
+                          {(candidate.campaignName || (candidate as any).campaign) && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const camp = candidate.campaignName || (candidate as any).campaign;
+                                handleCampaignFilterChange(camp);
+                              }}
+                              className="inline-flex items-center gap-1 text-3xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 hover:underline cursor-pointer transition-colors max-w-[150px] truncate"
+                              title={`Filter by campaign: ${candidate.campaignName || (candidate as any).campaign}`}
+                            >
+                              🎯 {candidate.campaignName || (candidate as any).campaign}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     )}
 
@@ -1175,6 +1381,14 @@ export default function CandidateTable() {
                                     <Eye size={13} className="text-primary" />
                                     View Full Profile & History
                                   </button>
+                                  <Link 
+                                    href={`/human-review-module?id=${candidate.id}`}
+                                    onClick={() => setActionMenuOpen(null)}
+                                    className="w-full text-left px-3 py-2 hover:bg-muted flex items-center gap-2 text-foreground font-medium"
+                                  >
+                                    <Sparkles size={13} className="text-accent" />
+                                    Review 360° in Workspace
+                                  </Link>
                                   {hasBoth && (
                                     <button 
                                       onClick={() => { handleOpenQuickParallel(candidate); setActionMenuOpen(null); }}

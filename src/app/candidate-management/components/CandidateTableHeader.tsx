@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Filter, Download, Plus, SlidersHorizontal, X, MessageCircle, Mail, Phone, Users, CheckCircle2, Send } from 'lucide-react';
+import { Search, Filter, Download, Plus, SlidersHorizontal, X, MessageCircle, Mail, Phone, Users, CheckCircle2, Send, ChevronDown, GitBranch, MapPin } from 'lucide-react';
 
 const statusOptions = ['All', 'Discovered', 'AI Qualified', 'Ready for Outreach', 'Contacted', 'Applied', 'Screening', 'Human Review', 'Probation', 'Verified'];
 const specialisations = ['All', 'Vedic Jyotish', 'KP System', 'Nadi Astrology', 'Numerology', 'Vastu Shastra', 'Prashna', 'Muhurtha', 'Lal Kitab', 'Gemology', 'Palmistry'];
@@ -18,7 +18,11 @@ const channelFilterOptions = [
 ];
 
 export interface ColumnVisibility {
-  contact: boolean;
+  contact?: boolean;
+  phone: boolean;
+  email: boolean;
+  location: boolean;
+  website: boolean;
   specialisations: boolean;
   rating: boolean;
   experience: boolean;
@@ -50,6 +54,12 @@ interface CandidateTableHeaderProps {
   onScoreRangeChange: (value: string) => void;
   channelFilter: string;
   onChannelFilterChange: (value: string) => void;
+  campaign?: string;
+  onCampaignChange?: (value: string) => void;
+  campaignOptions?: string[];
+  location?: string;
+  onLocationChange?: (value: string) => void;
+  locationOptions?: string[];
   counts?: OutreachCounts;
   onExportCsv: () => void;
   onAddCandidateClick: () => void;
@@ -70,6 +80,12 @@ export default function CandidateTableHeader({
   onScoreRangeChange,
   channelFilter,
   onChannelFilterChange,
+  campaign = 'All',
+  onCampaignChange,
+  campaignOptions = [],
+  location = 'All',
+  onLocationChange,
+  locationOptions = [],
   counts,
   onExportCsv,
   onAddCandidateClick,
@@ -84,11 +100,15 @@ export default function CandidateTableHeader({
     spec !== 'All',
     source !== 'All',
     scoreRange !== 'All',
-    channelFilter !== 'all'
+    channelFilter !== 'all',
+    campaign !== 'All',
+    location !== 'All'
   ].filter(Boolean).length;
 
   const columnLabels: { key: keyof ColumnVisibility; label: string }[] = [
-    { key: 'contact', label: 'Contact Info' },
+    { key: 'phone', label: 'Contact Number' },
+    { key: 'email', label: 'Email Address' },
+    { key: 'location', label: 'Location' },
     { key: 'specialisations', label: 'Specialisations' },
     { key: 'rating', label: 'Rating & Reviews' },
     { key: 'experience', label: 'Experience' },
@@ -96,6 +116,7 @@ export default function CandidateTableHeader({
     { key: 'outreach', label: 'Outreach Status' },
     { key: 'lifecycle', label: 'Lifecycle Stage' },
     { key: 'discovered', label: 'Discovered Date' },
+    { key: 'website', label: 'Website Link' },
   ];
 
   return (
@@ -123,6 +144,56 @@ export default function CandidateTableHeader({
             </button>
           )}
         </div>
+
+        {/* Campaign Filter Dropdown */}
+        {onCampaignChange && (
+          <div className="relative min-w-[190px]">
+            <select
+              value={campaign}
+              onChange={e => onCampaignChange(e.target.value)}
+              className={`w-full appearance-none pl-8 pr-8 py-2 text-sm border rounded-lg font-semibold transition-all cursor-pointer shadow-2xs ${
+                campaign !== 'All'
+                  ? 'bg-primary/10 border-primary text-primary ring-1 ring-primary/30'
+                  : 'bg-white border-slate-300 text-slate-800 hover:border-slate-400'
+              }`}
+              title="Filter candidates by discovery campaign"
+            >
+              <option value="All">All Campaigns ({campaignOptions.length})</option>
+              {campaignOptions.map(camp => (
+                <option key={`quick-camp-${camp}`} value={camp}>
+                  🎯 {camp}
+                </option>
+              ))}
+            </select>
+            <GitBranch size={13} className={`absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${campaign !== 'All' ? 'text-primary' : 'text-slate-500'}`} />
+            <ChevronDown size={14} className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${campaign !== 'All' ? 'text-primary' : 'text-slate-600'}`} />
+          </div>
+        )}
+
+        {/* Location Filter Dropdown */}
+        {onLocationChange && (
+          <div className="relative min-w-[170px]">
+            <select
+              value={location}
+              onChange={e => onLocationChange(e.target.value)}
+              className={`w-full appearance-none pl-8 pr-8 py-2 text-sm border rounded-lg font-semibold transition-all cursor-pointer shadow-2xs ${
+                location !== 'All'
+                  ? 'bg-primary/10 border-primary text-primary ring-1 ring-primary/30'
+                  : 'bg-white border-slate-300 text-slate-800 hover:border-slate-400'
+              }`}
+              title="Filter candidates by location"
+            >
+              <option value="All">All Locations ({locationOptions.length})</option>
+              {locationOptions.map(loc => (
+                <option key={`quick-loc-${loc}`} value={loc}>
+                  📍 {loc}
+                </option>
+              ))}
+            </select>
+            <MapPin size={13} className={`absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${location !== 'All' ? 'text-primary' : 'text-slate-500'}`} />
+            <ChevronDown size={14} className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${location !== 'All' ? 'text-primary' : 'text-slate-600'}`} />
+          </div>
+        )}
 
         {/* Filters Toggle */}
         <button
@@ -282,7 +353,35 @@ export default function CandidateTableHeader({
       {/* Expanded Filter Panel */}
       {filtersOpen && (
         <div className="card-elevated p-4 animate-slide-up">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3.5">
+            <div>
+              <label className="label-field text-xs font-bold text-slate-800">Discovery Campaign</label>
+              <select
+                value={campaign}
+                onChange={e => onCampaignChange && onCampaignChange(e.target.value)}
+                className="input-field text-sm py-2 font-medium"
+              >
+                <option value="All">All Campaigns</option>
+                {campaignOptions.map(camp => (
+                  <option key={`panel-camp-${camp}`} value={camp}>{camp}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="label-field text-xs font-bold text-slate-800">Location / City</label>
+              <select
+                value={location}
+                onChange={e => onLocationChange && onLocationChange(e.target.value)}
+                className="input-field text-sm py-2 font-medium"
+              >
+                <option value="All">All Locations</option>
+                {locationOptions.map(loc => (
+                  <option key={`panel-loc-${loc}`} value={loc}>{loc}</option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="label-field text-xs">Outreach Channel</label>
               <select
@@ -356,6 +455,8 @@ export default function CandidateTableHeader({
                 onSourceChange('All'); 
                 onScoreRangeChange('All');
                 onChannelFilterChange('all');
+                onCampaignChange && onCampaignChange('All');
+                onLocationChange && onLocationChange('All');
               }}
               className="btn-ghost text-sm text-muted-foreground hover:text-foreground"
             >

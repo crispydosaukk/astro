@@ -29,11 +29,11 @@ interface Message {
 const initialMessages: Message[] = [];
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  delivered: { label: 'Delivered', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300', icon: <CheckCircle2 size={11} /> },
-  failed: { label: 'Failed', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300', icon: <XCircle size={11} /> },
-  pending: { label: 'Pending', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', icon: <Clock size={11} /> },
-  opened: { label: 'Opened', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300', icon: <Mail size={11} /> },
-  responded: { label: 'Responded', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300', icon: <CheckCircle2 size={11} /> },
+  delivered: { label: 'Delivered', color: 'bg-blue-100 text-blue-900 border border-blue-300 font-bold', icon: <CheckCircle2 size={12} className="text-blue-700 shrink-0" /> },
+  failed: { label: 'Failed', color: 'bg-red-100 text-red-900 border border-red-300 font-bold', icon: <XCircle size={12} className="text-red-700 shrink-0" /> },
+  pending: { label: 'Pending', color: 'bg-amber-100 text-amber-900 border border-amber-300 font-bold', icon: <Clock size={12} className="text-amber-700 shrink-0" /> },
+  opened: { label: 'Opened', color: 'bg-purple-100 text-purple-900 border border-purple-300 font-bold', icon: <Mail size={12} className="text-purple-700 shrink-0" /> },
+  responded: { label: 'Responded', color: 'bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold', icon: <CheckCircle2 size={12} className="text-emerald-700 shrink-0" /> },
 };
 
 export default function OutreachMessagesPage() {
@@ -52,6 +52,7 @@ export default function OutreachMessagesPage() {
   const [experience, setExperience] = useState('10+ years');
   const [channel, setChannel] = useState<'Email' | 'WhatsApp' | 'SMS' | 'Parallel'>('Email');
   const [tone, setTone] = useState<'respectful' | 'prestigious' | 'concise'>('respectful');
+  const [language, setLanguage] = useState<'English' | 'Telugu' | 'Hindi' | 'Tamil'>('English');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedSubject, setGeneratedSubject] = useState('');
   const [generatedBody, setGeneratedBody] = useState('');
@@ -120,6 +121,7 @@ export default function OutreachMessagesPage() {
               experience,
               channel: 'email',
               tone,
+              language,
             }),
           }).then(r => r.json()),
           fetch('/api/ai/generate-outreach', {
@@ -132,6 +134,7 @@ export default function OutreachMessagesPage() {
               experience,
               channel: 'sms',
               tone,
+              language,
             }),
           }).then(r => r.json()),
         ]);
@@ -141,7 +144,7 @@ export default function OutreachMessagesPage() {
           setGeneratedBody(emailRes.body);
         }
         if (smsRes.success) {
-          setGeneratedSmsBody(smsRes.body || `Namaste ${candidateName} ji, AstroParihar invites you to join our verified astrologer panel. Details: https://astroparihar.com/join`);
+          setGeneratedSmsBody(smsRes.body || `Namaste ${candidateName} ji, AstroParihar invites you to join our verified astrologer panel. Details: https://astroparihar.com/apply`);
         }
       } else {
         const res = await fetch('/api/ai/generate-outreach', {
@@ -154,6 +157,7 @@ export default function OutreachMessagesPage() {
             experience,
             channel: channel.toLowerCase(),
             tone,
+            language,
           }),
         });
 
@@ -416,9 +420,9 @@ export default function OutreachMessagesPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {Object.entries(statusConfig).map(([key, sc]) => (
-            <div key={key} className="bg-card border border-border rounded-xl p-3 text-center shadow-2xs">
-              <p className="text-xl font-bold text-foreground">{messages.filter(m => m.status === key).length}</p>
-              <span className={`inline-flex items-center gap-1 text-xs font-medium ${sc.color} px-2 py-0.5 rounded-full mt-1`}>
+            <div key={key} className="bg-white border border-border rounded-xl p-3.5 text-center shadow-xs">
+              <p className="text-2xl font-black text-foreground">{messages.filter(m => m.status === key).length}</p>
+              <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${sc.color} px-2.5 py-1 rounded-full mt-1.5 shadow-2xs`}>
                 {sc.icon} {sc.label}
               </span>
             </div>
@@ -428,9 +432,9 @@ export default function OutreachMessagesPage() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-xs">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
-              className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-500 font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-2xs"
               placeholder="Search candidate or campaign..."
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -438,7 +442,7 @@ export default function OutreachMessagesPage() {
           </div>
           <div className="relative">
             <select
-              className="appearance-none pl-3 pr-8 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium"
+              className="appearance-none pl-3.5 pr-8 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-2xs cursor-pointer"
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
             >
@@ -449,11 +453,11 @@ export default function OutreachMessagesPage() {
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
             </select>
-            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
           </div>
           <div className="relative">
             <select
-              className="appearance-none pl-3 pr-8 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium"
+              className="appearance-none pl-3.5 pr-8 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-2xs cursor-pointer"
               value={channelFilter}
               onChange={e => setChannelFilter(e.target.value)}
             >
@@ -463,7 +467,7 @@ export default function OutreachMessagesPage() {
               <option value="SMS">📱 SMS (MSG91)</option>
               <option value="WhatsApp">💬 WhatsApp</option>
             </select>
-            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
           </div>
         </div>
 
@@ -681,11 +685,11 @@ export default function OutreachMessagesPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Candidate Name *</label>
+                  <label className="text-xs font-bold text-slate-800 block mb-1">Candidate Name *</label>
                   <input
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background font-medium"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary shadow-2xs"
                     placeholder="e.g. Pandit Radhakrishnan"
                     value={candidateName}
                     onChange={e => setCandidateName(e.target.value)}
@@ -693,10 +697,10 @@ export default function OutreachMessagesPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Recipient Email</label>
+                  <label className="text-xs font-bold text-slate-800 block mb-1">Recipient Email</label>
                   <input
                     type="email"
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary shadow-2xs"
                     placeholder="e.g. astrologer@gmail.com"
                     value={recipientEmail}
                     onChange={e => setRecipientEmail(e.target.value)}
@@ -704,12 +708,12 @@ export default function OutreachMessagesPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">
+                  <label className="text-xs font-bold text-slate-800 block mb-1">
                     Recipient Mobile Number (for SMS / WhatsApp)
                   </label>
                   <input
                     type="tel"
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary shadow-2xs"
                     placeholder="+91 98765 43210"
                     value={recipientPhone}
                     onChange={e => setRecipientPhone(e.target.value)}
@@ -717,9 +721,9 @@ export default function OutreachMessagesPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Location</label>
+                  <label className="text-xs font-bold text-slate-800 block mb-1">Location</label>
                   <input
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary shadow-2xs"
                     placeholder="e.g. Chennai, Tamil Nadu"
                     value={location}
                     onChange={e => setLocation(e.target.value)}
@@ -727,9 +731,9 @@ export default function OutreachMessagesPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Specialisation</label>
+                  <label className="text-xs font-bold text-slate-800 block mb-1">Specialisation</label>
                   <select
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary shadow-2xs cursor-pointer"
                     value={specialisation}
                     onChange={e => setSpecialisation(e.target.value)}
                   >
@@ -743,9 +747,9 @@ export default function OutreachMessagesPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Tone & Voice</label>
+                  <label className="text-xs font-bold text-slate-800 block mb-1">Tone & Voice</label>
                   <select
-                    className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background"
+                    className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary shadow-2xs cursor-pointer"
                     value={tone}
                     onChange={e => setTone(e.target.value as any)}
                   >
@@ -754,21 +758,37 @@ export default function OutreachMessagesPage() {
                     <option value="concise">Direct & Action-Oriented</option>
                   </select>
                 </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-bold text-slate-800 block mb-1">
+                    Outreach Language · భాష / மொழி / भाषा
+                  </label>
+                  <select
+                    className="w-full px-3.5 py-2 text-sm border-2 border-primary/40 rounded-lg bg-white text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-2xs cursor-pointer"
+                    value={language}
+                    onChange={e => setLanguage(e.target.value as any)}
+                  >
+                    <option value="English">✦ English — Celestial Vedic Astrology Outreach</option>
+                    <option value="Telugu">✦ Telugu (తెలుగు) — శ్రీ వేద జ్యోతిషం ఆహ్వానం</option>
+                    <option value="Tamil">✦ Tamil (தமிழ்) — பாரம்பரிய வேத ஜோதிடம் அழைப்பு</option>
+                    <option value="Hindi">✦ Hindi (हिन्दी) — प्रामाणिक वैदिक ज्योतिष निमंत्रण</option>
+                  </select>
+                </div>
               </div>
 
               <div className="flex justify-end pt-1">
                 <button
                   onClick={handleGenerateAI}
                   disabled={isGenerating || !candidateName.trim()}
-                  className="btn-primary flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                  className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold shadow-xs transition disabled:opacity-50"
                 >
                   {isGenerating ? (
                     <>
-                      <RefreshCw size={14} className="animate-spin" /> Generating with GPT-4o...
+                      <RefreshCw size={14} className="animate-spin" /> Generating in {language} with GPT-4o...
                     </>
                   ) : (
                     <>
-                      <Sparkles size={14} /> Generate {channel === 'Parallel' ? 'Email & SMS' : channel} with GPT-4o
+                      <Sparkles size={14} /> Generate {channel === 'Parallel' ? 'Email & SMS' : channel} ({language}) with GPT-4o
                     </>
                   )}
                 </button>
@@ -776,24 +796,24 @@ export default function OutreachMessagesPage() {
 
               {/* Email Content Box (Shown for Email and Parallel) */}
               {(channel === 'Email' || channel === 'Parallel') && (
-                <div className="space-y-2 p-3.5 bg-blue-50/50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-900">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-blue-800 dark:text-blue-300">
-                    <Mail size={14} /> Email Outreach Letter
+                <div className="space-y-3 p-4 bg-blue-50/90 rounded-xl border-2 border-blue-200 shadow-xs">
+                  <div className="flex items-center gap-2 text-sm font-extrabold text-blue-950 uppercase tracking-wide">
+                    <Mail size={16} className="text-blue-700 shrink-0" /> Email Outreach Letter
                   </div>
                   <div>
-                    <label className="text-2xs font-semibold text-muted-foreground block mb-0.5">Subject Line:</label>
+                    <label className="text-xs font-bold text-slate-800 block mb-1">Subject Line:</label>
                     <input
-                      className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background font-medium"
+                      className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 font-semibold shadow-2xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
                       value={generatedSubject}
                       placeholder="e.g. Invitation to Join AstroParihar Astrologer Network"
                       onChange={e => setGeneratedSubject(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="text-2xs font-semibold text-muted-foreground block mb-0.5">Email Body:</label>
+                    <label className="text-xs font-bold text-slate-800 block mb-1">Email Body:</label>
                     <textarea
                       rows={5}
-                      className="w-full p-2.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 leading-relaxed font-sans"
+                      className="w-full p-3 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 font-normal leading-relaxed font-sans shadow-2xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
                       placeholder="Email invitation content..."
                       value={generatedBody}
                       onChange={e => setGeneratedBody(e.target.value)}
@@ -804,18 +824,18 @@ export default function OutreachMessagesPage() {
 
               {/* SMS Content Box (Shown for SMS and Parallel) */}
               {(channel === 'SMS' || channel === 'Parallel') && (
-                <div className="space-y-2 p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-900">
+                <div className="space-y-3 p-4 bg-indigo-50/90 rounded-xl border-2 border-indigo-200 shadow-xs">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-800 dark:text-indigo-300">
-                      <Smartphone size={14} /> SMS Outreach (MSG91 DLT)
+                    <div className="flex items-center gap-2 text-sm font-extrabold text-indigo-950 uppercase tracking-wide">
+                      <Smartphone size={16} className="text-indigo-700 shrink-0" /> SMS Outreach (MSG91 DLT)
                     </div>
-                    <span className="text-2xs text-muted-foreground font-mono">
+                    <span className="text-xs text-indigo-900 font-mono font-bold bg-indigo-100/80 px-2 py-0.5 rounded">
                       {(generatedSmsBody || generatedBody).length} chars · {Math.ceil(((generatedSmsBody || generatedBody).length) / 160) || 1} SMS
                     </span>
                   </div>
                   <textarea
                     rows={3}
-                    className="w-full p-2.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono text-xs leading-relaxed"
+                    className="w-full p-3 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 font-mono text-xs leading-relaxed shadow-2xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none"
                     placeholder="Short SMS invitation text with link..."
                     value={generatedSmsBody || (channel === 'SMS' ? generatedBody : '')}
                     onChange={e => {
@@ -828,11 +848,11 @@ export default function OutreachMessagesPage() {
 
               {/* WhatsApp Box */}
               {channel === 'WhatsApp' && (
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-muted-foreground">WhatsApp Message Body:</label>
+                <div className="space-y-2 p-4 bg-emerald-50/90 rounded-xl border-2 border-emerald-200 shadow-xs">
+                  <label className="text-xs font-bold text-emerald-950 uppercase tracking-wide block mb-1">WhatsApp Message Body:</label>
                   <textarea
                     rows={6}
-                    className="w-full p-3 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 leading-relaxed font-sans"
+                    className="w-full p-3 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 leading-relaxed font-sans shadow-2xs focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none"
                     value={generatedBody}
                     onChange={e => setGeneratedBody(e.target.value)}
                   />

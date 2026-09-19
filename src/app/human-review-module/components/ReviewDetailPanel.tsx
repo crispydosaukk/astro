@@ -48,12 +48,17 @@ export default function ReviewDetailPanel({ candidate }: ReviewDetailPanelProps)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           candidateName: candidate.name,
+          name: candidate.name,
           specialisations: candidate.specialisations,
           experience: '18 yrs',
           aiScore: candidate.aiScore,
           questionsScore: candidate.questionsScore,
           chartScore: candidate.chartScore,
           interviewScore: candidate.interviewScore,
+          chartCaseAnalysis: candidate.chartCaseAnalysis,
+          chartRemedy: candidate.chartRemedy,
+          interviewDurationFormatted: candidate.interviewDurationFormatted,
+          conversationHistory: candidate.conversationHistory,
         }),
       });
 
@@ -61,7 +66,7 @@ export default function ReviewDetailPanel({ candidate }: ReviewDetailPanelProps)
       if (data.success && data.advisory) {
         setAdvisory(data.advisory);
       } else {
-        alert(data.error || 'Failed to generate AI advisory');
+        alert(data.message || data.error || 'Failed to generate AI advisory');
       }
     } catch (err: any) {
       alert(`AI Advisory error: ${err.message}`);
@@ -147,14 +152,14 @@ export default function ReviewDetailPanel({ candidate }: ReviewDetailPanelProps)
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
-                  Verdict: {advisory.verdict.replace(/_/g, ' ')}
+                  Verdict: {advisory.verdict?.replace(/_/g, ' ') || 'SUITABLE'}
                 </span>
                 <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                   advisory.riskLevel === 'LOW' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' :
                   advisory.riskLevel === 'MODERATE' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300' :
                   'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300'
                 }`}>
-                  Risk: {advisory.riskLevel}
+                  Risk: {advisory.riskLevel || 'MODERATE'}
                 </span>
               </div>
             </div>
@@ -169,7 +174,7 @@ export default function ReviewDetailPanel({ candidate }: ReviewDetailPanelProps)
                   <CheckCircle2 size={12} /> Key Astrological Strengths:
                 </p>
                 <ul className="space-y-0.5 list-disc list-inside text-foreground">
-                  {advisory.strengths.slice(0, 3).map((s, idx) => (
+                  {(advisory.strengths || []).slice(0, 3).map((s, idx) => (
                     <li key={idx}>{s}</li>
                   ))}
                 </ul>
@@ -179,7 +184,7 @@ export default function ReviewDetailPanel({ candidate }: ReviewDetailPanelProps)
                   <AlertTriangle size={12} /> Suggested Probation Conditions:
                 </p>
                 <ul className="space-y-0.5 list-disc list-inside text-foreground">
-                  {advisory.suggestedProbationConditions.slice(0, 3).map((c, idx) => (
+                  {(advisory.suggestedProbationConditions || advisory.concerns || []).slice(0, 3).map((c, idx) => (
                     <li key={idx}>{c}</li>
                   ))}
                 </ul>

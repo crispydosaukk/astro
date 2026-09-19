@@ -287,6 +287,13 @@ export default function QualifiedCandidatesPage() {
                           >
                             <Eye size={14} />
                           </button>
+                          <Link
+                            href={`/human-review-module?id=${c.id}`}
+                            className="p-1.5 rounded hover:bg-primary/10 text-primary transition-colors"
+                            title="Open 360° Candidate Review Workspace"
+                          >
+                            <Sparkles size={14} />
+                          </Link>
                           {!isApproved && !isSent && (
                             <button 
                               onClick={() => handleApprove(c.id)}

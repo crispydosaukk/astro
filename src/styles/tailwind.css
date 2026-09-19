@@ -598,8 +598,11 @@
     box-shadow: 0 0 0 3px rgba(113, 59, 50, 0.1);
   }
 
-  .input-field::placeholder {
-    color: var(--muted-foreground);
+  .input-field::placeholder,
+  input::placeholder,
+  textarea::placeholder {
+    color: #4b5563 !important;
+    opacity: 0.85 !important;
   }
 
   .input-field.error {

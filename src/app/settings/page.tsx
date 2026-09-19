@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { firebaseConfig } from '@/lib/firebase';
 import { testFirestoreConnection, seedInitialCandidates } from '@/lib/firebase/candidateService';
+import AssessmentSettingsSection from './components/AssessmentSettingsSection';
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState('general');
@@ -626,26 +627,7 @@ export default function SettingsPage() {
             )}
 
             {activeSection === 'assessment' && (
-              <>
-                <h2 className="text-lg font-semibold text-foreground">Assessment Settings</h2>
-                <div className="space-y-4">
-                  {[
-                    { label: 'Number of Questions', value: '25', type: 'number' },
-                    { label: 'Number of Chart Cases', value: '5', type: 'number' },
-                    { label: 'Minimum Pass Score (%)', value: '70', type: 'number' },
-                    { label: 'Assessment Time Limit (minutes)', value: '120', type: 'number' },
-                  ]?.map(field => (
-                    <div key={field?.label}>
-                      <label className="block text-sm font-medium text-foreground mb-1">{field?.label}</label>
-                      <input
-                        type={field?.type}
-                        defaultValue={field?.value}
-                        className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </>
+              <AssessmentSettingsSection />
             )}
 
             {activeSection === 'probation' && (
