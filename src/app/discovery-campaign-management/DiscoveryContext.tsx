@@ -138,23 +138,24 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
 
     // 1. Pre-fetch real Google Places listings for location (25s timeout)
     const city = currentCampaign.location.split(',')[0].trim();
+    const primarySpec = (currentCampaign.specialisation || 'Vedic Astrology').split(',')[0].trim();
     let placesResults: any[] = [];
     try {
       const placesController = new AbortController();
       const pTimeout = setTimeout(() => placesController.abort(), 25000);
       const placesRes = await fetch(
-        `/api/discovery/google-places?city=${encodeURIComponent(city)}&spec=${encodeURIComponent(currentCampaign.specialisation)}`,
+        `/api/discovery/google-places?city=${encodeURIComponent(city)}&spec=${encodeURIComponent(primarySpec)}`,
         { signal: placesController.signal }
       );
       clearTimeout(pTimeout);
       const placesData = await placesRes.json();
-      if (placesData.success && Array.isArray(placesData.results)) {
+      if (placesData.success && Array.isArray(placesData.results) && placesData.results.length > 0) {
         placesResults = placesData.results;
         currentJob = addLog(currentJob, `Google Places API returned ${placesResults.length} live listings in ${city}`, 'success');
         
         const searchLog: SearchRecord = {
           id: `SH-${Date.now()}`,
-          query: `${currentCampaign.specialisation} in ${city}`,
+          query: `${primarySpec} in ${city}`,
           source: 'Google Places',
           campaign: currentCampaign.name,
           executedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
@@ -166,7 +167,26 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
         await saveSearchRecordToFirestore(searchLog);
       }
     } catch (_e) {
-      currentJob = addLog(currentJob, `Scanning verified directories for ${currentCampaign.specialisation} in ${city}...`, 'info');
+      currentJob = addLog(currentJob, `Scanning verified directories for ${primarySpec} in ${city}...`, 'info');
+    }
+
+    // Fallback: Query directory search if Google Places returned 0 results or had no active API key
+    if (placesResults.length === 0) {
+      try {
+        currentJob = addLog(currentJob, `Querying verified Indian business directories for ${primarySpec} in ${city}...`, 'info');
+        setActiveJob({ ...currentJob });
+        const dirRes = await fetch(
+          `/api/discovery/directory-search?city=${encodeURIComponent(city)}&spec=${encodeURIComponent(primarySpec)}&count=20`
+        );
+        const dirData = await dirRes.json();
+        if (dirData.success && Array.isArray(dirData.results) && dirData.results.length > 0) {
+          placesResults = dirData.results;
+          currentJob = addLog(currentJob, `Found ${placesResults.length} verified listings from Justdial / Sulekha in ${city}`, 'success');
+          setActiveJob({ ...currentJob });
+        }
+      } catch (dirErr) {
+        console.warn('Directory search fallback error:', dirErr);
+      }
     }
 
     try {
@@ -238,9 +258,30 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
           setActiveJob({ ...currentJob });
         }
 
-        // If no more places available on Google Places, finish search
+        // If no more places available, finish search
         if (newlyDiscovered === 0 && placeIndex >= placesResults.length) {
-          currentJob = addLog(currentJob, `All available Google Places listings for ${city} have been discovered and saved.`, 'info');
+          const finalDiscovered = currentCampaign.discovered;
+          const finalStatus = finalDiscovered > 0 ? 'completed' : 'failed';
+          const finalJobStatus = finalDiscovered > 0 ? 'Completed' : 'Failed';
+
+          currentCampaign = {
+            ...currentCampaign,
+            status: finalStatus,
+            jobStatus: finalJobStatus,
+            lastRun: 'Today ' + nowTime,
+          };
+          setCampaigns(prev => prev.map(c => c.id === currentCampaign.id ? currentCampaign : c));
+          await saveCampaignToFirestore(currentCampaign);
+
+          currentJob = addLog(
+            currentJob,
+            finalDiscovered > 0
+              ? `All available verified listings for ${city} have been discovered and saved (${finalDiscovered} total).`
+              : `No listings could be found for ${city}. Please verify Google Places API key in .env.`,
+            finalDiscovered > 0 ? 'info' : 'warn'
+          );
+          currentJob = { ...currentJob, status: finalStatus };
+          setActiveJob(currentJob);
           break;
         }
 

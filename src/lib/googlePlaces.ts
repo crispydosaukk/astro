@@ -156,10 +156,16 @@ export async function searchAstrologersGooglePlaces(
   specialization: string = 'Vedic Astrology'
 ): Promise<DiscoveredPlaceAstrologer[]> {
   try {
-    const cleanSpec = specialization.trim();
+    if (!GOOGLE_PLACES_KEY) {
+      console.warn('Google Places API key is missing. Set GOOGLE_PLACES_API_KEY in .env');
+    }
+
+    const specs = specialization.split(',').map(s => s.trim()).filter(Boolean);
+    const primarySpec = specs[0] || 'Vedic Astrology';
+    const cleanSpec = primarySpec;
     const queries = [
-      `${cleanSpec} astrologer in ${city}, India`,
-      `${cleanSpec} in ${city}, India`,
+      `${primarySpec} astrologer in ${city}, India`,
+      ...specs.slice(1, 4).map(s => `${s} astrologer in ${city}, India`),
       `astrologer in ${city}, India`,
       `best astrologer in ${city}, India`,
       `jyotish kendra in ${city}, India`,
