@@ -18,18 +18,70 @@ export async function sendSmtpEmail({
   const smtpUser = process.env.SMTP_USER || 'astropariharuk@gmail.com';
   const smtpPass = process.env.SMTP_PASS || 'yllpmnnrfdtvacan';
   const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const smtpPort = Number(process.env.SMTP_PORT) || 465;
+  const configuredPort = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : null;
   const smtpFrom = process.env.SMTP_FROM || `AstroParihar UK <${smtpUser}>`;
 
-  const transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465,
-    auth: {
-      user: smtpUser,
-      pass: smtpPass,
-    },
-  });
+  // 1. Check for HTTP-based Email API (Resend) which bypasses all hosting SMTP port restrictions
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || `AstroParihar <onboarding@astroparihar.com>`,
+          to: [to],
+          subject,
+          text: textBody,
+          html: customHtml || textBody.replace(/\n/g, '<br/>'),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.id) {
+        return {
+          success: true,
+          messageId: data.id,
+          deliveredTo: to,
+          dispatchedAt: new Date().toISOString(),
+        };
+      }
+    } catch (resendErr) {
+      console.warn('Resend HTTP dispatch attempt failed, falling back to SMTP:', resendErr);
+    }
+  }
+
+  // 2. Check for Brevo (Sendinblue) HTTP API
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'AstroParihar UK', email: smtpUser },
+          to: [{ email: to }],
+          subject,
+          textContent: textBody,
+          htmlContent: customHtml || textBody.replace(/\n/g, '<br/>'),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.messageId) {
+        return {
+          success: true,
+          messageId: data.messageId,
+          deliveredTo: to,
+          dispatchedAt: new Date().toISOString(),
+        };
+      }
+    } catch (brevoErr) {
+      console.warn('Brevo HTTP dispatch attempt failed, falling back to SMTP:', brevoErr);
+    }
+  }
 
   const defaultHtml = `
     <!DOCTYPE html>
@@ -63,23 +115,55 @@ export async function sendSmtpEmail({
     </html>
   `;
 
-  const info = await transporter.sendMail({
-    from: smtpFrom,
-    to,
-    subject,
-    text: textBody,
-    html: customHtml || defaultHtml,
-    headers: {
-      'X-Mailer': 'AstroParihar Verified Astrologer System',
-      'X-Auto-Response-Suppress': 'OOF, AutoReply',
-      'List-Unsubscribe': `<mailto:${smtpUser}?subject=unsubscribe>`,
-    },
-  });
+  // 3. Fallback to standard SMTP with port autodetection (try 587 STARTTLS first, then 465 SSL)
+  const portsToTry = configuredPort ? [configuredPort] : [587, 465];
+  let lastError: any = null;
 
-  return {
-    success: true,
-    messageId: info.messageId,
-    deliveredTo: to,
-    dispatchedAt: new Date().toISOString(),
-  };
+  for (const port of portsToTry) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port,
+        secure: port === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
+      });
+
+      const info = await transporter.sendMail({
+        from: smtpFrom,
+        to,
+        subject,
+        text: textBody,
+        html: customHtml || defaultHtml,
+        headers: {
+          'X-Mailer': 'AstroParihar Verified Astrologer System',
+          'X-Auto-Response-Suppress': 'OOF, AutoReply',
+          'List-Unsubscribe': `<mailto:${smtpUser}?subject=unsubscribe>`,
+        },
+      });
+
+      return {
+        success: true,
+        messageId: info.messageId,
+        deliveredTo: to,
+        dispatchedAt: new Date().toISOString(),
+      };
+    } catch (err: any) {
+      lastError = err;
+      console.warn(`SMTP dispatch attempt on ${smtpHost}:${port} failed:`, err.message);
+    }
+  }
+
+  // If all ports failed, format a clear explanation
+  let errorMsg = lastError?.message || 'Failed to dispatch email via SMTP';
+  if (errorMsg.includes('EACCES')) {
+    errorMsg = `Outgoing SMTP port blocked by hosting firewall (EACCES on ${smtpHost}). Your host (cPanel/GoDaddy) restricts outgoing SMTP socket connections to external mail servers. Switch to an HTTP Email API (e.g., Resend, Brevo) or disable SMTP Restrictions in cPanel.`;
+  }
+
+  throw new Error(errorMsg);
 }

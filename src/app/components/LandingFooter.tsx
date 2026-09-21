@@ -20,7 +20,7 @@ const footerLinks = {
   ],
   Astrologers: [
     { label: 'Astrologer Login', href: '/astrologer-login' },
-    { label: 'Astrologer Registration', href: '/astrologer-login?mode=signup' },
+    { label: 'Astrologer Registration', href: '/apply' },
   ],
   Legal: [
     { label: 'Privacy Policy', href: '/privacy' },
