@@ -4,19 +4,24 @@ export interface TheoryQuestion {
   questionHi?: string;
   questionTe?: string;
   questionTa?: string;
+  questionKn?: string;
   options: string[];
   optionsHi?: string[];
   optionsTe?: string[];
   optionsTa?: string[];
+  optionsKn?: string[];
   correctIndex: number;
   explanation: string;
   explanationHi?: string;
   explanationTe?: string;
   explanationTa?: string;
+  explanationKn?: string;
   topic?: string;
   topicHi?: string;
   topicTe?: string;
   topicTa?: string;
+  topicKn?: string;
+  enabled?: boolean;
 }
 
 export const THEORY_QUESTIONS: TheoryQuestion[] = [
@@ -35,10 +40,14 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     explanationHi: 'नवम भाव मुख्य धर्म एवं भाग्य भाव है जो ईश्वरीय कृपा, तीर्थाटन तथा गुरु के मार्गदर्शन का कारक है।',
     explanationTe: '9వ భావం ప్రధాన ధర్మ మరియు భాగ్య భావము. ఇది దైవ కృప, తీర్థయాత్రలు మరియు గురు అనుగ్రహాన్ని సూచిస్తుంది.',
     explanationTa: '9ஆம் பாவம் முதன்மையான தர்ம மற்றும் பாக்கிய ஸ்தானமாகும். இது குருவின் வழிகாட்டல் மற்றும் பூர்வ புண்ணியத்தை குறிக்கிறது.',
+    explanationKn: '9ನೇ ಭಾವವು ಪ್ರಮುಖ ಧರ್ಮ ಮತ್ತು ಭಾಗ್ಯ ಸ್ಥಾನವಾಗಿದ್ದು, ದೈವಿಕ ಕೃಪೆ, ತೀರ್ಥಯಾತ್ರೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಗುರು ಮಾರ್ಗದರ್ಶನವನ್ನು ಸೂಚಿಸುತ್ತದೆ.',
+    questionKn: 'ವೈದಿಕ ಜ್ಯೋತಿಷ್ಯದಲ್ಲಿ ಧರ್ಮ, ಉನ್ನತ ಜ್ಞಾನ, ದೈವಿಕ ಭಾಗ್ಯ ಮತ್ತು ಗುರುವನ್ನು ಪ್ರತಿನಿಧಿಸುವ ಭಾವ ಯಾವುದು?',
+    optionsKn: ['5ನೇ ಭಾವ (ತ್ರಿಕೋಣ)', '9ನೇ ಭಾವ (ಭಾಗ್ಯ ಸ್ಥಾನ)', '10ನೇ ಭಾವ (ಕರ್ಮ ಸ್ಥಾನ)', '1ನೇ ಭಾವ (ಲಗ್ನ)'],
     topic: 'Bhavas & Houses',
     topicHi: 'भाव एवं स्थान',
     topicTe: 'భావాలు & స్థానాలు',
-    topicTa: 'பாவங்கள் & ஸ்தானங்கள்'
+    topicTa: 'பாவங்கள் & ஸ்தானங்கள்',
+    topicKn: 'ಭಾವಗಳು & ಸ್ಥಾನಗಳು'
   },
   {
     id: 2,
@@ -46,6 +55,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'शास्त्रीय ज्योतिष के अनुसार शुभ फलदायी "गजकेसरी योग" का निर्माण किन ग्रहों की स्थिति से होता है?',
     questionTe: 'శాస్త్రీయ జ్యోతిషం ప్రకారం అత్యంత శుభప్రదమైన "గజకేసరి యోగం" ఏ గ్రహాల కలయికతో ఏర్పడుతుంది?',
     questionTa: 'சாஸ்திர ஜோதிட விதிகளின்படி நற்பலன் தரும் "கஜகேசரி யோகம்" எந்த கிரக அமைப்பால் உருவாகிறது?',
+    questionKn: 'ಶಾಸ್ತ್ರೀಯ ಜ್ಯೋತಿಷ್ಯದ ಪ್ರಕಾರ ಅತ್ಯಂತ ಶುಭ ಫಲದಾಯಕ "ಗಜಕೇಸರಿ ಯೋಗ" ಯಾವ ಗ್ರಹಗಳ ಸ್ಥಿತಿಯಿಂದ ನಿರ್ಮಾಣವಾಗುತ್ತದೆ?',
     options: [
       'Sun and Mercury in the same house (Budhaditya)',
       'Jupiter and Moon in Kendra (1, 4, 7, 10) from each other',
@@ -70,15 +80,23 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'சனி மற்றும் ராகு சேர்க்கை (சாப யோகம்)',
       'லக்னத்திலிருந்து 7ஆம் வீட்டில் செவ்வாய் இருப்பது'
     ],
+    optionsKn: [
+      'ಸೂರ್ಯ ಮತ್ತು ಬುಧ ಒಂದೇ ಭಾವದಲ್ಲಿ (ಬುಧಾದಿತ್ಯ ಯೋಗ)',
+      'ಗುರು ಮತ್ತು ಚಂದ್ರ ಪರಸ್ಪರ ಕೇಂದ್ರಗಳಲ್ಲಿ (1, 4, 7, 10) ನೆಲೆಸಿದಾಗ',
+      'ಶನಿ ಮತ್ತು ರಾಹು ಯುತಿ (ಶಾಪಿತ ಯೋಗ)',
+      'ಲಗ್ನದಿಂದ 7ನೇ ಭಾವದಲ್ಲಿ ಮಂಗಳ'
+    ],
     correctIndex: 1,
     explanation: 'Gajakesari Yoga is formed when Jupiter occupies a Kendra from the Moon or Lagna, conferring wisdom, respect, and enduring fame.',
     explanationHi: 'गजकेसरी योग तब बनता है जब देवगुरु बृहस्पति चन्द्रमा अथवा लग्न से केन्द्र में स्थित हों, जिससे ज्ञान, यश और दीर्घकालिक प्रतिष्ठा मिलती है।',
     explanationTe: 'గురువు చంద్రుని నుండి లేదా లగ్నం నుండి కేంద్రంలో ఉన్నప్పుడు గజకేసరి యోగం ఏర్పడుతుంది. ఇది జ్ఞానం, యశస్సు మరియు కీర్తిని ప్రసాదిస్తుంది.',
     explanationTa: 'சந்திரனிலிருந்தோ அல்லது லக்னத்திலிருந்தோ குரு கேந்திரத்தில் அமையும்போது கஜகேசரி யோகம் உருவாகி ஞானம், நற்பெயர் மற்றும் நிலைத்த புகழை அளிக்கிறது.',
+    explanationKn: 'ಗುರುವು ಚಂದ್ರನಿಂದ ಅಥವಾ ಲಗ್ನದಿಂದ ಕೇಂದ್ರದಲ್ಲಿ ನೆಲೆಸಿದಾಗ ಗಜಕೇಸರಿ ಯೋಗ ಉಂಟಾಗಿ ಜ್ಞಾನ, ಕೀರ್ತಿ ಮತ್ತು ದೀರ್ಘಕಾಲೀನ ಗೌರವವನ್ನು ನೀಡುತ್ತದೆ.',
     topic: 'Auspicious Yogas',
     topicHi: 'शुभ राजयोग',
     topicTe: 'శుభ రాజయోగాలు',
-    topicTa: 'சுப ராஜயோகங்கள்'
+    topicTa: 'சுப ராஜயோகங்கள்',
+    topicKn: 'ಶುಭ ರಾಜಯೋಗಗಳು'
   },
   {
     id: 3,
@@ -86,6 +104,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'नवांश चक्र (D9) का विश्लेषण लग्न कुंडली (D1) के सापेक्ष किस प्रकार किया जाता है?',
     questionTe: 'రాశి చక్రం (D1) ఆధారంగా నవాంశ చక్రం (D9) లోని గ్రహ బలాన్ని ఎలా విశ్లేషిస్తారు?',
     questionTa: 'ராசி கட்டம் (D1) மற்றும் நவாம்சம் (D9) ஆகியவற்றின் அடிப்படையில் ஒரு கிரகத்தின் பலம் எவ்வாறு கணிக்கப்படுகிறது?',
+    questionKn: 'ರಾಶಿ ಚಕ್ರ (D1) ಆಧಾರದ ಮೇಲೆ ನವಾಂಶ ಚಕ್ರ (D9) ದಲ್ಲಿ ಗ್ರಹಗಳ ಬಲವನ್ನು ಹೇಗೆ ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತದೆ?',
     options: [
       'D9 is only used for wealth calculations',
       'A debilitated planet in D1 gaining exaltation in D9 gains Neecha Bhanga and hidden inner strength (Vargottama/Pushkara)',
@@ -110,15 +129,23 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'அனைத்து சூழல்களிலும் D1-ஐ விட D9 முழுமையாக மேலோங்குகிறது',
       'கிரகங்களின் உண்மை பலத்திற்கு நவாம்சத்திற்கு தொடர்பில்லை'
     ],
+    optionsKn: [
+      'D9 ಕೇವಲ ಧನ ಸಂಪಾದನೆಯ ಲೆಕ್ಕಾಚಾರಕ್ಕೆ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ',
+      'D1 ನಲ್ಲಿ ನೀಚದಲ್ಲಿರುವ ಗ್ರಹವು D9 ನಲ್ಲಿ ಉಚ್ಛ ಸ್ಥಿತಿ ಪಡೆದರೆ ನೀಚಭಂಗ ಮತ್ತು ಆಂತರಿಕ ಶಕ್ತಿ (ವರ್ಗೋತ್ತಮ/ಪುಷ್ಕರ) ಲಭಿಸುತ್ತದೆ',
+      'D9 ಎಲ್ಲಾ ಸಂದರ್ಭಗಳಲ್ಲಿ D1 ಅನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ರದ್ದುಗೊಳಿಸುತ್ತದೆ',
+      'ಗ್ರಹಗಳ ನೈಜ ಬಲಕ್ಕೂ ನವಾಂಶಕ್ಕೂ ಯಾವುದೇ ಸಂಬಂಧವಿಲ್ಲ'
+    ],
     correctIndex: 1,
     explanation: 'Navamsha reveals the fruit (Phala) and underlying core potential of planetary placements in the natal chart.',
     explanationHi: 'नवांश चक्र ग्रहों के आंतरिक फल (फलित सामर्थ्य) और वास्तविक सूक्ष्म बल को प्रकट करता है।',
     explanationTe: 'నవాంశ చక్రం గ్రహాల అంతర్గత ఫలాన్ని మరియు లగ్న కుండలిలోని గ్రహ స్థానాల వాస్తవ శక్తిని వెల్లడిస్తుంది.',
     explanationTa: 'நவாம்சம் என்பது லக்ன கட்டத்தில் உள்ள கிரகங்களின் அந்தரங்க சூட்சும பலனையும் உண்மையான பலனையும் வெளிப்படுத்துகிறது.',
+    explanationKn: 'ನವಾಂಶ ಚಕ್ರವು ಗ್ರಹಗಳ ಆಂತರಿಕ ಫಲ (ಫಲಿತ ಸಾಮರ್ಥ್ಯ) ಮತ್ತು ಲಗ್ನ ಕುಂಡಲಿಯ ನಿಜವಾದ ಸೂಕ್ಷ್ಮ ಬಲವನ್ನು ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ.',
     topic: 'Divisional Charts (D9)',
     topicHi: 'वर्ग कुंडलियाँ (नवांश D9)',
     topicTe: 'వర్గ కుండలులు (నవాంశ D9)',
-    topicTa: 'வர்க்க சக்கரங்கள் (நவாம்சம் D9)'
+    topicTa: 'வர்க்க சக்கரங்கள் (நவாம்சம் D9)',
+    topicKn: 'ವರ್ಗ ಕುಂಡಲಿಗಳು (ನವಾಂಶ D9)'
   },
   {
     id: 4,
@@ -126,6 +153,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'केतु से प्रारम्भ होने वाली 120 वर्षीय विंशोत्तरी महादशा चक्र का प्रामाणिक शास्त्रीय क्रम क्या है?',
     questionTe: 'కేతువుతో ప్రారంభమయ్యే 120 సంవత్సరాల వింశోత్తరి మహాదశల ప్రామాణిక క్రమం ఏది?',
     questionTa: 'கேதுவில் துவங்கும் 120 வருட விம்சோத்தரி மகா தசா சுழற்சியின் சரியான பாரம்பரிய வரிசை எது?',
+    questionKn: 'ಕೇತುವಿನಿಂದ ಪ್ರಾರಂಭವಾಗುವ 120 ವರ್ಷಗಳ ವಿಂಶೋತ್ತರಿ ಮಹಾದಶೆಯ ಶಾಸ್ತ್ರೀಯ ಪ್ರಮಾಣಿತ ಕ್ರಮ ಯಾವುದು?',
     options: [
       'Ketu → Venus → Sun → Moon → Mars → Rahu → Jupiter → Saturn → Mercury',
       'Sun → Moon → Mars → Rahu → Jupiter → Saturn → Mercury → Ketu → Venus',
@@ -150,15 +178,23 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'குரு → சனி → புதன் → கேது → சுக்கிரன் → சூரியன் → சந்திரன் → செவ்வாய் → ராகு',
       'செவ்வாய் → ராகு → குரு → சனி → புதன் → கேது → சுக்கிரன் → சூரியன் → சந்திரன்'
     ],
+    optionsKn: [
+      'ಕೇತು → ಶುಕ್ರ → ಸೂರ್ಯ → ಚಂದ್ರ → ಮಂಗಳ → ರಾಹು → ಗುರು → ಶನಿ → ಬುಧ',
+      'ಸೂರ್ಯ → ಚಂದ್ರ → ಮಂಗಳ → ರಾಹು → ಗುರು → ಶನಿ → ಬುಧ → ಕೇತು → ಶುಕ್ರ',
+      'ಗುರು → ಶನಿ → ಬುಧ → ಕೇತು → ಶುಕ್ರ → ಸೂರ್ಯ → ಚಂದ್ರ → ಮಂಗಳ → ರಾಹು',
+      'ಮಂಗಳ → ರಾಹು → ಗುರು → ಶನಿ → ಬುಧ → ಕೇತು → ಶುಕ್ರ → ಸೂರ್ಯ → ಚಂದ್ರ'
+    ],
     correctIndex: 0,
     explanation: 'The standard 120-year Vimshottari dasha cycle begins with Ketu (7 yrs) followed by Venus (20 yrs), Sun (6 yrs), Moon (10 yrs), etc.',
     explanationHi: '120 वर्षीय विंशोत्तरी महादशा चक्र केतु (7 वर्ष) से आरम्भ होकर शुक्र (20 वर्ष), सूर्य (6 वर्ष), चन्द्र (10 वर्ष) आदि क्रम में चलता है।',
     explanationTe: '120 సంవత్సరాల వింశోత్తరి దశ చక్రం కేతువు (7 సం.), శుక్రుడు (20 సం.), సూర్యుడు (6 సం.), చంద్రుడు (10 సం.) క్రమంలో కొనసాగుతుంది.',
     explanationTa: 'விம்சோத்தரி தசா சுழற்சி கேது (7 ஆண்டுகள்), சுக்கிரன் (20 ஆண்டுகள்), சூரியன் (6 ஆண்டுகள்), சந்திரன் (10 ஆண்டுகள்) என்ற வரிசையில் அமைகிறது.',
+    explanationKn: '120 ವರ್ಷಗಳ ವಿಂಶೋತ್ತರಿ ದಶಾ ಚಕ್ರವು ಕೇತು (7 ವರ್ಷ), ಶುಕ್ರ (20 ವರ್ಷ), ಸೂರ್ಯ (6 ವರ್ಷ), ಚಂದ್ರ (10 ವರ್ಷ) ಇತ್ಯಾದಿ ಕ್ರಮದಲ್ಲಿ ಸಾಗುತ್ತದೆ.',
     topic: 'Dasha Systems',
     topicHi: 'दशा विचार (विंशोत्तरी)',
     topicTe: 'దశా విధానాలు (వింశోత్తరి)',
-    topicTa: 'தசா முறைகள் (விம்சோத்தரி)'
+    topicTa: 'தசா முறைகள் (விம்சோத்தரி)',
+    topicKn: 'ದಶಾ ಪದ್ಧತಿ (ವಿಂಶೋತ್ತರಿ)'
   },
   {
     id: 5,
@@ -166,6 +202,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'गंभीर दोषों (जैसे कालसर्प अथवा साढ़े साती) में जातक को परामर्श देते समय ज्योतिषी का सबसे सात्विक एवं नैतिक दृष्टिकोण क्या होना चाहिए?',
     questionTe: 'తీవ్ర దోషాలకు (ఉదా: కాలసర్ప లేదా ఏలినాటి శని) పరిహారాలు సూచించేటప్పుడు జ్యోతిష్కుని యొక్క అత్యంత నైతిక మరియు సాత్విక విధానం ఏది?',
     questionTa: 'கடுமையான தோஷங்களுக்கு (உதாரணமாக காலசர்ப்பம் அல்லது ஏழரை சனி) பரிகாரம் கூறும்போது ஜோதிடரின் மிக உன்னதமான நெறிமுறை அணுகுமுறை என்ன?',
+    questionKn: 'ತೀವ್ರ ದೋಷಗಳಿಗೆ (ಉದಾ. ಕಾಳಸರ್ಪ ಅಥವಾ ಸಾಡೇ ಸಾತಿ) ಪರಿಹಾರ ಸೂಚಿಸುವಾಗ ಜ್ಯೋತಿಷಿಯ ನೈತಿಕ ಮತ್ತು ಸಾತ್ವಿಕ ದೃಷ್ಟಿಕೋನ ಏನಾಗಿರಬೇಕು?',
     options: [
       'Guarantee 100% immediate results within 24 hours for expensive rituals',
       'Explain planetary energies calmly, recommend accessible japa/charity/mantras, and encourage constructive lifestyle action without fear-mongering',
@@ -190,15 +227,23 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'விலையுயர்ந்த ரத்தினங்கள் அணியாவிட்டால் எதிர்காலம் பாழாகிவிடும் என பயமுறுத்துவது',
       'எதிர்காலத்தில் எந்த ஜோதிட ஆலோசனையும் பெற வேண்டாம் என கூறுவது'
     ],
+    optionsKn: [
+      'ದುಬಾರಿ ತಾಂತ್ರಿಕ ಪೂಜೆಗಳಿಂದ 24 ಗಂಟೆಗಳಲ್ಲಿ 100% ಪವಾಡ ಸಂಭವಿಸುತ್ತದೆ ಎಂದು ಒತ್ತಾಯಿಸುವುದು',
+      'ಗ್ರಹಗಳ ಪ್ರಭಾವವನ್ನು ಶಾಂತವಾಗಿ ವಿವರಿಸಿ, ಭಯ ಹುಟ್ಟಿಸದೆ ಸುಲಭ ಜಪ, ದಾನ, ಮಂತ್ರ ಮತ್ತು ಸಾತ್ವಿಕ ಜೀವನಶೈಲಿಯ ಉಪಾಯಗಳನ್ನು ತಿಳಿಸುವುದು',
+      'ದುಬಾರಿ ರತ್ನಗಳಿಲ್ಲದೆ ಭವಿಷ್ಯ ಸಂಪೂರ್ಣವಾಗಿ ನಾಶವಾಗುತ್ತದೆ ಎಂದು ಕ್ಲೈಂಟ್‌ಗೆ ಭಯ ಹುಟ್ಟಿಸುವುದು',
+      'ಕ್ಲೈಂಟ್‌ಗೆ ಮುಂದಿನ ಎಲ್ಲಾ ಜ್ಯೋತಿಷ್ಯ ಸಮಾಲೋಚನೆಗಳಿಂದ ನಿರುತ್ಸಾಹಗೊಳಿಸುವುದು'
+    ],
     correctIndex: 1,
     explanation: 'Ethical Vedic guidance empowers clients with sattvic remedies, positive karma, and realistic guidance without creating anxiety.',
     explanationHi: 'प्रामाणिक वैदिक ज्योतिष का उद्देश्य जातक के मन को शांत करना तथा सात्विक उपाय, कर्म शुद्धि और सकारात्मक दिशा प्रदान करना है।',
     explanationTe: 'నైతిక వేద జ్యోతిష్యం క్లయింట్లలో భయాన్ని నివారించి, సాత్విక పరిహారాలు, కర్మ శుద్ధి మరియు ఆత్మవిశ్వాసాన్ని కలిగిస్తుంది.',
     explanationTa: 'பாரம்பரிய வேத ஜோதிடத்தின் முக்கிய நோக்கம் பயத்தை நீக்கி, சாத்விக பரிகாரங்கள் மற்றும் நல்வழியில் நேர்மறை தன்னம்பிக்கையை ஊட்டுவதே ஆகும்.',
+    explanationKn: 'ಪ್ರಾಮಾಣಿಕ ವೈದಿಕ ಜ್ಯೋತಿಷ್ಯದ ಉದ್ದೇಶವು ಕ್ಲೈಂಟ್‌ನಲ್ಲಿ ಭಯ ನಿವಾರಿಸಿ, ಸಾತ್ವಿಕ ಪರಿಹಾರಗಳು, ಕರ್ಮ ಶುದ್ಧಿ ಮತ್ತು ಸಕಾರಾತ್ಮಕ ಆತ್ಮವಿಶ್ವಾಸವನ್ನು ನೀಡುವುದಾಗಿದೆ.',
     topic: 'Consulting Ethics',
     topicHi: 'ज्योतिषीय नैतिकता एवं उपाय',
     topicTe: 'సంప్రదింపు నైతికత & పరిహారాలు',
-    topicTa: 'ஜோதிட நெறிமுறைகள் & பரிகாரங்கள்'
+    topicTa: 'ஜோதிட நெறிமுறைகள் & பரிகாரங்கள்',
+    topicKn: 'ಜ್ಯೋತಿಷ್ಯ ನೈತಿಕತೆ & ಪರಿಹಾರಗಳು'
   },
   {
     id: 6,
@@ -206,6 +251,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'शास्त्रीय नियमों के अनुसार कुज (मंगल) दोष का परिहार अथवा निरस्तीकरण किस स्थिति में माना जाता है?',
     questionTe: 'శాస్త్రీయ నియమాల ప్రకారం కుజ (మంగళ) దోష పరిహారం లేదా ఉపశమనం ఏ స్థితిలో పరిగణించబడుతుంది?',
     questionTa: 'சாஸ்திர விதிகளின்படி செவ்வாய் தோஷ நிவர்த்தி அல்லது தோஷ பங்கம் எந்த நிலையில் ஏற்படுகிறது?',
+    questionKn: 'ಶಾಸ್ತ್ರೀಯ ನಿಯಮಗಳ ಪ್ರಕಾರ ಕುಜ (ಮಂಗಳ) ದೋಷದ ಪರಿಹಾರ ಅಥವಾ ನಿವಾರಣೆ ಯಾವ ಸ್ಥಿತಿಯಲ್ಲಿ ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ?',
     options: [
       'When Mars is placed in the 8th house in an enemy sign',
       'When Mars is in its own sign (Aries/Scorpio), exalted (Capricorn), or aspected by powerful Jupiter',
@@ -230,15 +276,23 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'எந்தப் பார்வையும் இன்றி செவ்வாய் வக்ரமடையும்போது மட்டும்',
       'எந்தக் காரணத்தைக் கொண்டும் செவ்வாய் தோஷம் விலகாது'
     ],
+    optionsKn: [
+      'ಮಂಗಳನು 8ನೇ ಭಾವದಲ್ಲಿ ಶತ್ರು ರಾಶಿಯಲ್ಲಿದ್ದಾಗ',
+      'ಮಂಗಳನು ತನ್ನ ಸ್ವಕ್ಷೇತ್ರ (ಮೇಷ/ವೃಶ್ಚಿಕ), ಉಚ್ಛ ರಾಶಿ (ಮಕರ) ದಲ್ಲಿದ್ದಾಗ ಅಥವಾ ಶುಭ ಗುರುವಿನ ದೃಷ್ಟಿ/ಯುತಿ ಪಡೆದಾಗ',
+      'ಯಾವುದೇ ದೃಷ್ಟಿಯಿಲ್ಲದೆ ಮಂಗಳನು ಕೇವಲ ವಕ್ರಿಯಾಗಿದ್ದಾಗ',
+      'ಯಾವುದೇ ಪರಿಸ್ಥಿತಿಯಲ್ಲೂ ಕುಜ ದೋಷದ ಪರಿಹಾರ ಸಾಧ್ಯವಿಲ್ಲ'
+    ],
     correctIndex: 1,
     explanation: 'Kuja dosha is mitigated when Mars is in its own or exalted sign, or receives benefic aspects from Jupiter.',
     explanationHi: 'मंगल अपनी स्वराशि (मेष, वृश्चिक) अथवा उच्च राशि (मकर) में हो, या शुभ गुरु की पूर्ण दृष्टि प्राप्त हो, तो मंगल दोष का परिहार हो जाता है।',
     explanationTe: 'కుజుడు తన సొంత లేదా ఉచ్ఛ రాశిలో ఉన్నప్పుడు, లేదా దేవగురువైన బృహస్పతి యొక్క శుభ దృష్టి కలిగినప్పుడు కుజ దోషం రద్దవుతుంది లేదా నివృత్తి అవుతుంది.',
     explanationTa: 'செவ்வாய் ஆட்சி அல்லது உச்ச வீடுகளில் அமைந்தாலோ, சுப பலம் வாய்ந்த குருவின் பார்வை பெற்றாலோ செவ்வாய் தோஷம் பெருமளவு நிவர்த்தியாகிறது.',
+    explanationKn: 'ಮಂಗಳನು ತನ್ನ ಸ್ವಕ್ಷೇತ್ರ ಅಥವಾ ಉಚ್ಛ ರಾಶಿಯಲ್ಲಿದ್ದಾಗ, ಅಥವಾ ಬೃಹಸ್ಪತಿಯ ಶುಭ ಪೂರ್ಣ ದೃಷ್ಟಿ ಪಡೆದಾಗ ಕುಜ ದೋಷವು ನಿವಾರಣೆಯಾಗುತ್ತದೆ.',
     topic: 'Kuja Dosha',
     topicHi: 'कुज दोष परिहार',
     topicTe: 'కుజ దోష పరిహారం',
-    topicTa: 'செவ்வாய் தோஷ நிவர்த்தி'
+    topicTa: 'செவ்வாய் தோஷ நிவர்த்தி',
+    topicKn: 'ಕುಜ ದೋಷ ಪರಿಹಾರ'
   },
   {
     id: 7,
@@ -246,6 +300,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'पंच महापुरुष योगों में प्रतिष्ठित "हंस योग" की रचना किस ग्रह द्वारा होती है?',
     questionTe: 'పంచ మహాపురుష యోగాలలో ప్రతిష్టాత్మకమైన "హంస యోగం" ఏ గ్రహం ద్వారా ఏర్పడుతుంది?',
     questionTa: 'பஞ்ச மகாபுருஷ யோகங்களில் மேன்மைமிக்க "ஹம்ச யோகம்" எந்த கிரக அமைப்பினால் உண்டாகிறது?',
+    questionKn: 'ಪಂಚ ಮಹಾಪುರುಷ ಯೋಗಗಳಲ್ಲಿ ಪ್ರತಿಷ್ಠಿತ "ಹಂಸ ಯೋಗ" ಯಾವ ಗ್ರಹದ ಸ್ಥಿತಿಯಿಂದ ಉಂಟಾಗುತ್ತದೆ?',
     options: [
       'Venus exalted in Pisces in Kendra',
       'Jupiter in Kendra placed in own signs (Sagittarius/Pisces) or exalted in Cancer',
@@ -270,15 +325,23 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'கேந்திரத்தில் மிதுனம் அல்லது கன்னியில் புதன் (பத்ர யோகம்)',
       'கேந்திரத்தில் துலாம் ராசியில் சனி (சச யோகம்)'
     ],
+    optionsKn: [
+      'ಕೇಂದ್ರದಲ್ಲಿ ಮೀನ ರಾಶಿಯಲ್ಲಿ ಉಚ್ಛ ಶುಕ್ರ (ಮಾಳವ್ಯ ಯೋಗ)',
+      'ಕೇಂದ್ರದಲ್ಲಿ ಗುರುವು ಸ್ವಕ್ಷೇತ್ರ (ಧನು/ಮೀನ) ಅಥವಾ ಉಚ್ಛ ರಾಶಿ ಕರ್ಕಾಟಕದಲ್ಲಿದ್ದಾಗ (ಹಂಸ ಯೋಗ)',
+      'ಕೇಂದ್ರದಲ್ಲಿ ಮಿಥುನ ಅಥವಾ ಕನ್ಯಾದಲ್ಲಿ ಬುಧ (ಭದ್ರ ಯೋಗ)',
+      'ಕೇಂದ್ರದಲ್ಲಿ ತುಲಾ ರಾಶಿಯಲ್ಲಿ ಶನಿ (ಶಶ ಯೋಗ)'
+    ],
     correctIndex: 1,
     explanation: 'Hamsa Yoga is formed when Jupiter occupies a Kendra in Cancer, Sagittarius, or Pisces, bestowing wisdom, righteousness, and spiritual preeminence.',
     explanationHi: 'जब देवगुरु बृहस्पति केन्द्र (1, 4, 7, 10) में कर्क, धनु अथवा मीन राशि में स्थित होते हैं, तब हंस महापुरुष योग का निर्माण होता है।',
     explanationTe: 'గురువు కేంద్రాలలో (1, 4, 7, 10) కర్కాటక, ధనుస్సు లేదా మీన రాశులలో ఉన్నప్పుడు హంస యోగం ఏర్పడి ధర్మనిష్ట, జ్ఞానం మరియు ఉన్నత గౌరవాన్ని ఇస్తుంది.',
     explanationTa: 'குரு கேந்திர ஸ்தானங்களில் கடகம், தனுசு அல்லது மீனத்தில் அமையும்போது ஹம்ச யோகம் உருவாகி ஆன்மீக ஞானம், நீதி நேர்மை மற்றும் பெரும் புகழை அளிக்கிறது.',
+    explanationKn: 'ಗುರುವು ಕೇಂದ್ರಗಳಲ್ಲಿ (1, 4, 7, 10) ಕರ್ಕಾಟಕ, ಧನು ಅಥವಾ ಮೀನ ರಾಶಿಯಲ್ಲಿದ್ದಾಗ ಹಂಸ ಯೋಗ ಉಂಟಾಗಿ ಧರ್ಮನಿಷ್ಠೆ, ಜ್ಞಾನ ಮತ್ತು ಉನ್ನತ ಗೌರವ ನೀಡುತ್ತದೆ.',
     topic: 'Mahapurusha Yoga',
     topicHi: 'पंच महापुरुष योग',
     topicTe: 'పంచ మహాపురుష యోగాలు',
-    topicTa: 'பஞ்ச மகாபுருஷ யோகம்'
+    topicTa: 'பஞ்ச மகாபுருஷ யோகம்',
+    topicKn: 'ಪಂಚ ಮಹಾಪುರುಷ ಯೋಗ'
   },
   {
     id: 8,
@@ -286,6 +349,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'जातक की जन्म कुंडली के अनुसार शनि की साढ़े साती की 7.5 वर्ष की अवधि का सही गोचर क्रम क्या है?',
     questionTe: 'జాతకుని జన్మ కుండలి ప్రకారం శని యొక్క 7.5 సంవత్సరాల ఏలినాటి శని (సాడే సాతి) గోచార కాలం ఏది?',
     questionTa: 'ஜாதகரின் சந்திர ராசிப்படி 7.5 ஆண்டுகள் நீடிக்கும் ஏழரை சனி கோச்சார காலம் எவ்வாறு கணக்கிடப்படுகிறது?',
+    questionKn: 'ಜಾತಕನ ಜನ್ಮ ಕುಂಡಲಿಯ ಪ್ರಕಾರ ಶನಿಯ 7.5 ವರ್ಷಗಳ ಸಾಡೇ ಸಾತಿ (ಏಳೂವರೆ ಶನಿ) ಗೋಚಾರದ ಸರಿಯಾದ ಹಂತ ಯಾವುದು?',
     options: [
       'Saturn transiting the 6th, 8th, and 12th houses from natal Sun',
       'Saturn transiting the 12th, 1st (natal Moon sign), and 2nd houses from the natal Moon',
@@ -310,15 +374,23 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'லக்னத்திலிருந்து 4 மற்றும் 8ஆம் வீடுகளில் சனி சஞ்சரிக்கும்போது (அர்த்தாஷ்டம/அஷ்டம சனி)',
       '7ஆம் வீட்டில் உள்ள செவ்வாய்க்கு நேர் எதிரே சனி சஞ்சரிக்கும்போது'
     ],
+    optionsKn: [
+      'ಜನ್ಮ ಸೂರ್ಯನಿಂದ 6, 8, ಮತ್ತು 12ನೇ ಭಾವಗಳಲ್ಲಿ ಶನಿ ಗೋಚಾರ',
+      'ಜನ್ಮ ಚಂದ್ರ ರಾಶಿಯಿಂದ 12ನೇ, ಜನ್ಮ ರಾಶಿ (1ನೇ), ಮತ್ತು 2ನೇ ಭಾವಗಳಲ್ಲಿ ಶನಿ ಗೋಚಾರ',
+      'ಲಗ್ನದಿಂದ 4 ಮತ್ತು 8ನೇ ಭಾವಗಳಲ್ಲಿ ಶನಿ ಗೋಚಾರ (ಕಂಟಕ/ಅಷ್ಟಮ ಶನಿ)',
+      '7ನೇ ಭಾವದಲ್ಲಿರುವ ಜನ್ಮ ಮಂಗಳನಿಗೆ ಎದುರಾಗಿ ಶನಿ ಗೋಚಾರ'
+    ],
     correctIndex: 1,
     explanation: 'Sade Sati covers Saturn\'s transit over the sign preceding the natal Moon (12th), the Moon sign itself (1st), and the subsequent sign (2nd), each taking approx 2.5 years.',
     explanationHi: 'साढ़े साती जन्म चन्द्रमा से द्वादश भाव, जन्म राशि (प्रथम) और द्वितीय भाव में शनि के गोचर (प्रत्येक चरण लगभग 2.5 वर्ष) से बनती है।',
     explanationTe: 'ఏలినాటి శని జన్మ చంద్రునికి ముందరి రాశి (12వ), జన్మ రాశి (1వ), మరియు తర్వాతి రాశి (2వ) లలో శని సంచారం (ఒక్కో రాశిలో దాదాపు 2.5 సం.) వలన ఏర్పడుతుంది.',
     explanationTa: 'ஏழரை சனி என்பது பிறப்புச் சந்திரனுக்கு முந்தைய வீடு (12), ஜென்ம ராசி மற்றும் அடுத்த வீடு (2) ஆகிய மூன்றிலும் சனி தலா 2.5 ஆண்டுகள் சஞ்சரிக்கும் காலமாகும்.',
+    explanationKn: 'ಸಾಡೇ ಸಾತಿಯು ಜನ್ಮ ಚಂದ್ರನಿಗೆ ಹಿಂದಿನ ರಾಶಿ (12ನೇ), ಜನ್ಮ ರಾಶಿ (1ನೇ), ಮತ್ತು ಮುಂದಿನ ರಾಶಿ (2ನೇ) ಯಲ್ಲಿ ಶನಿಯ ಸಂಚಾರದಿಂದ (ಪ್ರತಿ ಹಂತ ಸುಮಾರು 2.5 ವರ್ಷ) ಉಂಟಾಗುತ್ತದೆ.',
     topic: 'Gochar & Sade Sati',
     topicHi: 'गोचर व साढ़े साती',
     topicTe: 'గోచారం & ఏలినాటి శని',
-    topicTa: 'கோச்சாரம் & ஏழரை சனி'
+    topicTa: 'கோச்சாரம் & ஏழரை சனி',
+    topicKn: 'ಗೋಚಾರ & ಸಾಡೇ ಸಾತಿ'
   },
   {
     id: 9,
@@ -326,6 +398,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'जैमिनी ज्योतिष के अनुसार जातक का "आत्मकारक" ग्रह किस आधार पर निर्धारित किया जाता है?',
     questionTe: 'జైమిని జ్యోతిష విధానం ప్రకారం జాతకుని "ఆత్మకారక" గ్రహాన్ని ఏ ప్రాతిపదికన గుర్తిస్తారు?',
     questionTa: 'ஜைமினி ஜோதிட சூத்திரங்களின்படி ஒருவரின் "ஆத்மகாரகன்" (ஆன்ம காரக கிரகம்) எவ்வாறு கண்டறியப்படுகிறது?',
+    questionKn: 'ಜೈಮಿನಿ ಚರದಶಾ ಜ್ಯೋತಿಷ್ಯದ ಪ್ರಕಾರ ಜಾತಕನ "ಆತ್ಮಕಾರಕ" ಗ್ರಹವನ್ನು ಯಾವ ಆಧಾರದ ಮೇಲೆ ಗುರುತಿಸಲಾಗುತ್ತದೆ?',
     options: [
       'Always the Sun in all horoscopes regardless of degrees',
       'The planet holding the highest degrees (excluding Rahu and Ketu in 7-Karaka scheme)',
@@ -350,15 +423,23 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'லக்னத்திற்கு 9ஆம் வீட்டு அதிபதி',
       'ஜாதகத்தில் மிகக் குறைந்த பாகை பெற்ற கிரகம் (தாராகாரகன்)'
     ],
+    optionsKn: [
+      'ಡಿಗ್ರಿಗಳನ್ನು ಲೆಕ್ಕಿಸದೆ ಎಲ್ಲಾ ಕುಂಡಲಿಗಳಲ್ಲಿ ಯಾವಾಗಲೂ ಸೂರ್ಯನೇ',
+      'ರಾಹು-ಕೇತುವನ್ನು ಹೊರತುಪಡಿಸಿ ಕುಂಡಲಿಯಲ್ಲಿ ಗರಿಷ್ಠ ಡಿಗ್ರಿ (ಭೋಗಾಂಶ) ಹೊಂದಿರುವ ಗ್ರಹ',
+      'ಲಗ್ನದಿಂದ 9ನೇ ಭಾವದ ಅಧಿಪತಿ ಗ್ರಹ',
+      'ಕುಂಡಲಿಯಲ್ಲಿ ಕನಿಷ್ಠ ಡಿಗ್ರಿ ಹೊಂದಿರುವ ಗ್ರಹ (ದಾರಕಾರಕ)'
+    ],
     correctIndex: 1,
     explanation: 'The Atmakaraka is the planet possessing the highest degree among the 7 planets (Sun to Saturn), representing the soul\'s primary lessons and evolution.',
     explanationHi: 'जैमिनी पद्धति में सूर्य से शनि तक जिस ग्रह के सर्वाधिक भोगांश (अंश) होते हैं, वह जातक का "आत्मकारक" बनता है, जो आत्मा के उद्देश्य को दर्शाता है।',
     explanationTe: 'జైమిని చరకారక పద్ధతిలో సూర్యుని నుండి శని వరకు అత్యధిక డిగ్రీలు గల గ్రహం "ఆత్మకారకుడు" అవుతుంది. ఇది ఆత్మ యొక్క ఉద్దేశాన్ని వెల్లడిస్తుంది.',
     explanationTa: 'ஜைமினி முறையில் சூரியன் முதல் சனி வரை அதிக பாகை பெற்ற கிரகம் "ஆத்மகாரகன்" ஆகி ஆன்மாவின் கடமையையும் வாழ்வின் நோக்கத்தையும் உணர்த்துகிறது.',
+    explanationKn: 'ಜೈಮಿನಿ ಪದ್ಧತಿಯಲ್ಲಿ ಸೂರ್ಯನಿಂದ ಶನಿಯವರೆಗೆ ಅತ್ಯಧಿಕ ಡಿಗ್ರಿ ಹೊಂದಿರುವ ಗ್ರಹವು "ಆತ್ಮಕಾರಕ" ಆಗಿ, ಆತ್ಮದ ಮುಖ್ಯ ಕರ್ತವ್ಯ ಮತ್ತು ಉದ್ದೇಶವನ್ನು ಸೂಚಿಸುತ್ತದೆ.',
     topic: 'Jaimini Sutras',
     topicHi: 'जैमिनी सूत्र',
     topicTe: 'జైమిని సూత్రాలు',
-    topicTa: 'ஜைமினி சூத்திரங்கள்'
+    topicTa: 'ஜைமினி சூத்திரங்கள்',
+    topicKn: 'ಜೈಮಿನಿ ಸೂತ್ರಗಳು'
   },
   {
     id: 10,
@@ -366,6 +447,7 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
     questionHi: 'अष्टकवर्ग पद्धति में किसी विशिष्ट भाव में कुल कितने रेखा/बिंदु (Bindus) सामान्यतः अत्यधिक शुभ और अनुकूल फल का संकेत देते हैं?',
     questionTe: 'అష్టకవర్గ పద్ధతిలో ఒక నిర్దిష్ట భావంలో మొత్తం ఎన్ని బిందువులు (Bindus) ఉంటే గోచార గ్రహాలకు అత్యంత శుభప్రదమైన ఫలితాలు లభిస్తాయి?',
     questionTa: 'அஷ்டகவர்க்க முறையில் ஒரு குறிப்பிட்ட பாவத்தில் எத்தனை பரல்கள் (Bindus) அமைந்தால் கோச்சார கிரகங்கள் மிகுந்த நற்பலன்களைத் தரும்?',
+    questionKn: 'ಅಷ್ಟಕವರ್ಗ ಪದ್ಧತಿಯಲ್ಲಿ ಒಂದು ನಿರ್ದಿಷ್ಟ ಭಾವದಲ್ಲಿ ಒಟ್ಟು ಎಷ್ಟು ಬಿಂದುಗಳು (Bindus) ಗೋಚಾರ ಗ್ರಹಗಳಿಗೆ ಅತ್ಯಂತ ಶುಭ ಫಲವನ್ನು ನೀಡುತ್ತವೆ?',
     options: [
       'Less than 18 points',
       '28 or more points (out of 56 Sarvashtakavarga total for that house)',
@@ -390,42 +472,309 @@ export const THEORY_QUESTIONS: TheoryQuestion[] = [
       'பூஜ்ஜியம் (0) பரல்கள்',
       'பரல்களின் எண்ணிக்கை கோச்சார அல்லது தசா பலன்களைப் பாதிக்காது'
     ],
+    optionsKn: [
+      '18ಕ್ಕಿಂತ ಕಡಿಮೆ ಬಿಂದುಗಳು',
+      '28 ಅಥವಾ ಅದಕ್ಕಿಂತ ಹೆಚ್ಚು ಬಿಂದುಗಳು (ಸರ್ವಾಷ್ಟಕವರ್ಗದ 56 ಬಿಂದುಗಳಲ್ಲಿ)',
+      'ಖಚಿತವಾಗಿ 0 ಬಿಂದುಗಳು',
+      'ಬಿಂದುಗಳ ಸಂಖ್ಯೆಯು ಗೋಚಾರ ಅಥವಾ ದಶಾ ಫಲಗಳ ಮೇಲೆ ಯಾವುದೇ ಪರಿಣಾಮ ಬೀರದು'
+    ],
     correctIndex: 1,
     explanation: 'An Ashtakavarga score of 28 or more bindus indicates a strong house capable of delivering benefic results during planetary transits.',
     explanationHi: 'सर्वअष्टकवर्ग में 28 या उससे अधिक बिंदु भाव की प्रबलता को दर्शाते हैं, जिससे गोचररत ग्रहों का शुभ प्रभाव निर्बाध रूप से प्राप्त होता है।',
     explanationTe: 'సర్వాష్టకవర్గంలో 28 లేదా అంతకంటే ఎక్కువ బిందువులు ఉన్న భావం బలంగా పరిగణించబడుతుంది మరియు గోచార శుభ ఫలాలను అందిస్తుంది.',
     explanationTa: 'சர்வாஷ்டகவர்க்கத்தில் ஒரு பாவத்தில் 28 அல்லது அதற்கு மேற்பட்ட பரல்கள் அமைந்தால், அப்பாவம் வலுவடைந்து கோச்சாரத்தில் நற்பலன்களைத் தரும்.',
+    explanationKn: 'ಸರ್ವಾಷ್ಟಕವರ್ಗದಲ್ಲಿ 28 ಅಥವಾ ಅದಕ್ಕಿಂತ ಹೆಚ್ಚು ಬಿಂದುಗಳು ಆ ಭಾವದ ಬಲವನ್ನು ಸೂಚಿಸುತ್ತವೆ, ಇದರಿಂದ ಗೋಚಾರ ಗ್ರಹಗಳು ಶುಭ ಫಲಗಳನ್ನು ನೀಡುತ್ತವೆ.',
     topic: 'Ashtakavarga',
     topicHi: 'अष्टकवर्ग',
     topicTe: 'అష్టకవర్గం',
-    topicTa: 'அஷ்டகவர்க்கம்'
+    topicTa: 'அஷ்டகவர்க்கம்',
+    topicKn: 'ಅಷ್ಟಕವರ್ಗ',
+    enabled: true
+  },
+  {
+    id: 11,
+    question: 'What astrological condition causes "Kendradhipati Dosha" according to Parashara Hora Shastra?',
+    questionHi: 'पाराशर होरा शास्त्र के अनुसार "केन्द्राधिपति दोष" किस ग्रह स्थिति से उत्पन्न होता है?',
+    questionTe: 'పరాశర హోరా శాస్త్రం ప్రకారం "కేంద్రాధిపతి దోషం" ఏ గ్రహ పరిస్థితి వల్ల కలుగుతుంది?',
+    questionTa: 'பராசர ஹோரா சாஸ்திரப்படி "கேந்திராதிபதி தோஷம்" எந்த கிரக அமைப்பால் ஏற்படுகிறது?',
+    questionKn: 'ಪರಾಶರ ಹೋರಾ ಶಾಸ್ತ್ರದ ಪ್ರಕಾರ "ಕೇಂದ್ರಾಧಿಪತಿ ದೋಷ" ಯಾವ ಗ್ರಹ ಸ್ಥಿತಿಯಿಂದ ಉಂಟಾಗುತ್ತದೆ?',
+    options: [
+      'Natural benefics (Jupiter, Venus, Mercury) owning Kendra houses (1, 4, 7, 10)',
+      'Natural malefics occupying the 1st house',
+      'Mars occupying the 7th house from Moon',
+      'Rahu and Ketu occupying the 5th and 9th houses'
+    ],
+    optionsHi: [
+      'नैसर्गिक शुभ ग्रह (गुरु, शुक्र, बुध) जब केन्द्र भावों (1, 4, 7, 10) के स्वामी हों',
+      'नैसर्गिक क्रूर ग्रहों का प्रथम भाव में बैठना',
+      'चन्द्रमा से सप्तम भाव में मंगल का होना',
+      'पंचम अथवा नवम भाव में राहु-केतु की स्थिति'
+    ],
+    optionsTe: [
+      'నైసర్గిక శుభ గ్రహాలు (గురువు, శుక్రుడు, బుధుడు) కేంద్ర భావాల (1, 4, 7, 10) ఆధిపత్యం వహించడం',
+      'లగ్నంలో పాప గ్రహాలు స్థితి పొందడం',
+      'చంద్రుని నుండి 7వ స్థానంలో కుజుడు ఉండటం',
+      '5 లేదా 9వ భావాలలో రాహు-కేతువులు ఉండటం'
+    ],
+    optionsTa: [
+      'இயற்கை சுப கிரகங்கள் (குரு, சுக்கிரன், புதன்) கேந்திர ஸ்தானங்களுக்கு (1, 4, 7, 10) அதிபதிகளாக அமைவது',
+      'லக்னத்தில் அசுப கிரகங்கள் அமர்வது',
+      'சந்திரனுக்கு 7ஆம் வீட்டில் செவ்வாய் அமைவது',
+      '5 அல்லது 9ஆம் பாவங்களில் ராகு-கேது அமர்வது'
+    ],
+    optionsKn: [
+      'ನೈಸರ್ಗಿಕ ಶುಭ ಗ್ರಹಗಳು (ಗುರು, ಶುಕ್ರ, ಬುಧ) ಕೇಂದ್ರ ಭಾವಗಳ (1, 4, 7, 10) ಅಧಿಪತಿಗಳಾದಾಗ',
+      'ನೈಸರ್ಗಿಕ ಪಾಪ ಗ್ರಹಗಳು 1ನೇ ಭಾವದಲ್ಲಿದ್ದಾಗ',
+      'ಚಂದ್ರನಿಂದ 7ನೇ ಭಾವದಲ್ಲಿ ಮಂಗಳನಿದ್ದಾಗ',
+      '5 ಅಥವಾ 9ನೇ ಭಾವಗಳಲ್ಲಿ ರಾಹು-ಕೇತುಗಳಿದ್ದಾಗ'
+    ],
+    correctIndex: 0,
+    explanation: 'According to Brihat Parashara Hora Shastra, when natural benefics become lords of Kendra houses (1, 4, 7, 10), they lose their innate capacity to confer benefic results and can acquire Kendradhipati Dosha.',
+    explanationHi: 'बृहत्पाराशर होरा शास्त्र के अनुसार जब नैसर्गिक शुभ ग्रह केन्द्र भावों (1, 4, 7, 10) के अधिपति बनते हैं, तो उनका नैसर्गिक शुभत्व क्षीण हो जाता है तथा केन्द्राधिपति दोष उत्पन्न होता है।',
+    explanationTe: 'బృహత్ పరాశర హోరా శాస్త్రం ప్రకారం నైసర్గిక శుభ గ్రహాలు కేంద్ర స్థానాధిపతులుగా మారినప్పుడు వాటి సహజ శుభ ఫలితాలు తగ్గి కేంద్రాధిపత్య దోషం కలుగుతుంది.',
+    explanationTa: 'பராசர ஹோரா சாஸ்திர விதிகளின்படி இயற்கை சுப கிரகங்கள் கேந்திர ஸ்தானங்களின் அதிபதிகளாக மாறும் போது, தங்களின் இயல்பான சுபத்தன்மையை இழந்து கேந்திராதிபதி தோஷம் பெறுகின்றன.',
+    explanationKn: 'ಬೃಹತ್ ಪರಾಶರ ಹೋರಾ ಶಾಸ್ತ್ರದ ಪ್ರಕಾರ ನೈಸರ್ಗಿಕ ಶುಭ ಗ್ರಹಗಳು ಕೇಂದ್ರ ಸ್ಥಾನಾಧಿಪತಿಗಳಾದಾಗ ತಮ್ಮ ನೈಸರ್ಗಿಕ ಶುಭತ್ವವನ್ನು ಕಳೆದುಕೊಂಡು ಕೇಂದ್ರಾಧಿಪತ್ಯ ದೋಷವನ್ನು ಪಡೆಯುತ್ತವೆ.',
+    topic: 'Parashari Principles',
+    topicHi: 'पाराशरीय सिद्धान्त',
+    topicTe: 'పరాశర సిద్ధాంతాలు',
+    topicTa: 'பராசர கோட்பாடுகள்',
+    topicKn: 'ಪರಾಶರ ಸಿದ್ಧಾಂತ',
+    enabled: true
+  },
+  {
+    id: 12,
+    question: 'How long do the lunar nodes (Rahu and Ketu) approximately spend transiting through a single Rashi (zodiac sign)?',
+    questionHi: 'राहु और केतु गोचर में लगभग कितने समय तक एक ही राशि में स्थित रहते हैं?',
+    questionTe: 'రాహువు మరియు కేతువులు గోచారంలో ఒకే రాశిలో సుమారుగా ఎంత కాలం సంచరిస్తారు?',
+    questionTa: 'ராகு மற்றும் கேது கோச்சாரத்தில் ஒரு ராசியில் சுமார் எத்தனை காலம் சஞ்சரிக்கின்றன?',
+    questionKn: 'ರಾಹು ಮತ್ತು ಕೇತುಗಳು ಗೋಚಾರದಲ್ಲಿ ಒಂದು ರಾಶಿಯಲ್ಲಿ ಸರಿಸುಮಾರು ಎಷ್ಟು ಸಮಯ ಸಂಚರಿಸುತ್ತವೆ?',
+    options: [
+      '6 Months',
+      '18 Months (1.5 Years)',
+      '2.5 Years',
+      '12 Years'
+    ],
+    optionsHi: [
+      '6 माह',
+      '18 माह (1.5 वर्ष)',
+      '2.5 वर्ष (ढैय्या)',
+      '12 वर्ष'
+    ],
+    optionsTe: [
+      '6 నెలలు',
+      '18 నెలలు (1.5 సంవత్సరాలు)',
+      '2.5 సంవత్సరాలు',
+      '12 సంవత్సరాలు'
+    ],
+    optionsTa: [
+      '6 மாதங்கள்',
+      '18 மாதங்கள் (1.5 ஆண்டுகள்)',
+      '2.5 ஆண்டுகள்',
+      '12 ஆண்டுகள்'
+    ],
+    optionsKn: [
+      '6 ತಿಂಗಳು',
+      '18 ತಿಂಗಳು (1.5 ವರ್ಷ)',
+      '2.5 ವರ್ಷ',
+      '12 ವರ್ಷ'
+    ],
+    correctIndex: 1,
+    explanation: 'Rahu and Ketu move in retrograde motion taking approximately 18 months (1.5 years) to transit each zodiac sign, completing a full nodal cycle in 18 years.',
+    explanationHi: 'राहु और केतु वक्री गति से चलते हुए प्रत्येक राशि में लगभग 18 माह (डेढ़ वर्ष) तक गोचर करते हैं और 18 वर्षों में सम्पूर्ण भचक्र का भ्रमण पूरा करते हैं।',
+    explanationTe: 'రాహువు మరియు కేతువులు వక్రగతితో ప్రతి రాశిలో సుమారు 18 నెలలు (1.5 సంవత్సరాలు) సంచరించి, 18 సంవత్సరాలలో పూర్తి రాశి చక్రాన్ని పూర్తి చేస్తాయి.',
+    explanationTa: 'ராகு-கேதுக்கள் வக்கிர கதியில் ஒரு ராசியை கடக்க சுமார் 18 மாதங்கள் (1.5 ஆண்டுகள்) எடுத்துக்கொண்டு, 18 ஆண்டுகளில் ஒரு முழு சுழற்சியை நிறைவு செய்கின்றன.',
+    explanationKn: 'ರಾಹು ಮತ್ತು ಕೇತುಗಳು ವಕ್ರಗತಿಯಲ್ಲಿ ಚಲಿಸುತ್ತಾ ಪ್ರತಿ ರಾಶಿಯಲ್ಲಿ ಸುಮಾರು 18 ತಿಂಗಳು (ಒಂದೂವರೆ ವರ್ಷ) ಗೋಚಾರ ಮಾಡುತ್ತವೆ ಮತ್ತು 18 ವರ್ಷಗಳಲ್ಲಿ ಪೂರ್ಣ ಭಚಕ್ರವನ್ನು ಸುತ್ತುತ್ತವೆ.',
+    topic: 'Transits (Gochara)',
+    topicHi: 'गोचर विचार',
+    topicTe: 'గోచార విశ్లేషణ',
+    topicTa: 'கோச்சார பலன்கள்',
+    topicKn: 'ಗೋಚಾರ ವಿಶ್ಲೇಷಣೆ',
+    enabled: true
+  },
+  {
+    id: 13,
+    question: 'What defines the period known as "Sade Sati" in Vedic Gochara analysis?',
+    questionHi: 'वैदिक गोचर विचार में "साढ़े साती" की शास्त्रीय परिभाषा क्या है?',
+    questionTe: 'వేద గోచార విశ్లేషణలో "ఏలినాటి శని" (సాడే సాతి) కాలం దేనిని సూచిస్తుంది?',
+    questionTa: 'வேத ஜோதிட கோச்சாரத்தில் "ஏழரை நாட்டுச் சனி" (சாடே சாதி) எவ்வாறு வரையறுக்கப்படுகிறது?',
+    questionKn: 'ವೈದಿಕ ಗೋಚಾರ ವಿಶ್ಲೇಷಣೆಯಲ್ಲಿ "ಸಾಡೇ ಸಾತಿ" ಕಾಲವನ್ನು ಹೇಗೆ ವ್ಯಾಖ್ಯಾನಿಸಲಾಗಿದೆ?',
+    options: [
+      'Saturn transiting 8th house from Lagna (Ashtama Shani)',
+      'Saturn transiting the 12th, 1st, and 2nd houses from the Natal Moon',
+      'Saturn in Kendra from the Sun during birth',
+      'Saturn aspecting the 10th house from Arudha Lagna'
+    ],
+    optionsHi: [
+      'लग्न से अष्टम भाव में शनि का गोचर (अष्टम शनि)',
+      'जन्मकालीन चन्द्रमा से 12वें, 1ले (जन्म राशि) और 2रे भाव में शनि का 7.5 वर्षीय गोचर',
+      'जन्म के समय सूर्य से केन्द्र में शनि का स्थित होना',
+      'आरूढ़ लग्न से दशम भाव पर शनि की दृष्टि'
+    ],
+    optionsTe: [
+      'లగ్నం నుండి 8వ స్థానంలో శని గోచారం (అష్టమ శని)',
+      'జన్మ రాశి (చంద్రుని) నుండి 12, 1, మరియు 2వ స్థానాలలో శని సంచరించే 7.5 సంవత్సరాల కాలం',
+      'జన్మ సమయంలో సూర్యుని నుండి కేంద్రంలో శని ఉండటం',
+      'ఆరూఢ లగ్నం నుండి 10వ స్థానంపై శని దృష్టి'
+    ],
+    optionsTa: [
+      'லக்னத்திற்கு 8ஆம் வீட்டில் சனி சஞ்சரிப்பது (அஷ்டமச் சனி)',
+      'பிறந்த ராசிக்கு (சந்திரனுக்கு) 12, 1 மற்றும் 2ஆம் வீடுகளில் சனி சஞ்சரிக்கும் 7.5 ஆண்டு காலம்',
+      'பிறப்பு ஜாதகத்தில் சூரியனுக்கு கேந்திரத்தில் சனி அமைவது',
+      'ஆரூட லக்னத்திற்கு 10ஆம் வீட்டை சனி பார்வை செய்வது'
+    ],
+    optionsKn: [
+      'ಲಗ್ನದಿಂದ 8ನೇ ಭಾವದಲ್ಲಿ ಶನಿ ಗೋಚಾರ (ಅಷ್ಟಮ ಶನಿ)',
+      'ಜನ್ಮ ಚಂದ್ರನಿಂದ 12, 1, ಮತ್ತು 2ನೇ ಭಾವಗಳಲ್ಲಿ ಶನಿ ಸಂಚರಿಸುವ 7.5 ವರ್ಷಗಳ ಕಾಲ',
+      'ಜನ್ಮ ಸಮಯದಲ್ಲಿ ಸೂರ್ಯನಿಂದ ಕೇಂದ್ರದಲ್ಲಿ ಶನಿ ಇರುವುದು',
+      'ಆರೂಢ ಲಗ್ನದಿಂದ 10ನೇ ಭಾವದ ಮೇಲೆ ಶನಿಯ ದೃಷ್ಟಿ'
+    ],
+    correctIndex: 1,
+    explanation: 'Sade Sati refers to the 7.5-year transit of Saturn through the 12th, 1st (Janma Rashi), and 2nd houses relative to the candidate\'s natal Moon, representing a period of deep karmic purifications.',
+    explanationHi: 'जन्म राशि (चन्द्रमा) से द्वादश, प्रथम तथा द्वितीय भाव में शनि के कुल साढ़े सात वर्ष के गोचर को "साढ़े साती" कहा जाता है, जो गहरे कार्मिक शोधन का काल माना जाता है।',
+    explanationTe: 'జన్మ రాశి నుండి 12వ, జన్మ మరియు 2వ స్థానాలలో శని వరుసగా సంచరించే ఏడున్నర సంవత్సరాల కాలాన్ని ఏలినాటి శని అంటారు. ఇది అంతర్గత ఆత్మపరిశీలన మరియు కర్మ ప్రక్షాళన కాలం.',
+    explanationTa: 'சந்திரனுக்கு 12, 1, 2 ஆகிய வீடுகளில் சனி சஞ்சரிக்கும் ஏழரை ஆண்டு காலம் "ஏழரை நாட்டுச் சனி" எனப்படும். இது ஆழ்ந்த கர்ம வினை சுத்திகரிப்பு காலமாகும்.',
+    explanationKn: 'ಜನ್ಮ ರಾಶಿ (ಚಂದ್ರ) ಯಿಂದ 12ನೇ, 1ನೇ ಮತ್ತು 2ನೇ ಭಾವಗಳಲ್ಲಿ ಶನಿಯ ಒಟ್ಟು ಏಳೂವರೆ ವರ್ಷಗಳ ಸಂಚಾರವನ್ನು ಸಾಡೇ ಸಾತಿ ಎನ್ನಲಾಗುತ್ತದೆ. ಇದು ಆಳವಾದ ಕರ್ಮ ಶುದ್ಧಿಯ ಕಾಲ.',
+    topic: 'Shani Gochara',
+    topicHi: 'शनि गोचर एवं साढ़े साती',
+    topicTe: 'శని గోచారం & ఏలినాటి శని',
+    topicTa: 'சனி கோச்சாரம் & ஏழரை சனி',
+    topicKn: 'ಶನಿ ಗೋಚಾರ & ಸಾಡೇ ಸಾತಿ',
+    enabled: true
+  },
+  {
+    id: 14,
+    question: 'What constitutes planetary combustion (Asta) in astronomical astrology?',
+    questionHi: 'वैदिक फलित ज्योतिष में किसी ग्रह का "अस्त" (Combustion) होना क्या कहलाता है?',
+    questionTe: 'ఖగోళ జ్యోతిషంలో ఒక గ్రహం "అస్తంగతం" (Combustion) కావడం అంటే ఏమిటి?',
+    questionTa: 'ஜோதிட சாஸ்திரத்தில் ஒரு கிரகம் "அஸ்தமனம்" (Combustion) அடைவது என்றால் என்ன?',
+    questionKn: 'ಖಗೋಳ ಜ್ಯೋತಿಷ್ಯದಲ್ಲಿ ಗ್ರಹವು "ಅಸ್ತಂಗತ" (Combustion) ಆಗುವುದು ಎಂದರೇನು?',
+    options: [
+      'When a planet enters the 8th house of death',
+      'When a planet comes within close longitudinal proximity to the Sun, obscuring its apparent radiance',
+      'When a planet aspects Saturn directly',
+      'When a planet is placed in its debilitation sign'
+    ],
+    optionsHi: [
+      'जब कोई ग्रह अष्टम भाव (मृत्यु स्थान) में प्रवेश करता है',
+      'जब कोई ग्रह सूर्य के अत्यंत निकट निश्चित अंशों के भीतर आ जाता है जिससे उसका प्रकाश लुप्त हो जाता है',
+      'जब कोई ग्रह सीधे शनि को पूर्ण दृष्टि से देखता है',
+      'जब कोई ग्रह अपनी नीच राशि में स्थित हो'
+    ],
+    optionsTe: [
+      'గ్రహం అష్టమ భావంలో ప్రవేశించినప్పుడు',
+      'గ్రహం సూర్యునికి నిర్దిష్ట డిగ్రీల సమీపంలోకి రావడం వల్ల దాని వెలుగు అదృశ్యమవడం',
+      'గ్రహం శనిని ప్రత్యక్షంగా వీక్షించినప్పుడు',
+      'గ్రహం తన నీచ రాశిలో ఉన్నప్పుడు'
+    ],
+    optionsTa: [
+      'ஒரு கிரகம் எட்டாம் பாவத்தில் நுழையும் போது',
+      'ஒரு கிரகம் சூரியனுக்கு மிக அருகில் குறிப்பிட்ட பாகைகளுக்குள் வந்து தன் ஒளியை இழக்கும் நிலை',
+      'ஒரு கிரகம் சனியை நேரடியாக பார்க்கும் போது',
+      'ஒரு கிரகம் தனது நீச ராசியில் அமையும் போது'
+    ],
+    optionsKn: [
+      'ಗ್ರಹವು 8ನೇ ಭಾವ (ಮೃತ್ಯು ಸ್ಥಾನ) ದಲ್ಲಿ ಪ್ರವೇಶಿಸಿದಾಗ',
+      'ಗ್ರಹವು ಸೂರ್ಯನಿಗೆ ಅತ್ಯಂತ ಸಮೀಪದ ನಿರ್ದಿಷ್ಟ ಡಿಗ್ರಿಗಳ ವ್ಯಾಪ್ತಿಯಲ್ಲಿ ಬಂದು ತನ್ನ ಬಾಹ್ಯ ತೇಜಸ್ಸನ್ನು ಕಳೆದುಕೊಂಡಾಗ',
+      'ಗ್ರಹವು ಶನಿಯನ್ನು ನೇರವಾಗಿ ನೋಡಿದಾಗ',
+      'ಗ್ರಹವು ತನ್ನ ನೀಚ ರಾಶಿಯಲ್ಲಿದ್ದಾಗ'
+    ],
+    correctIndex: 1,
+    explanation: 'A planet becomes combust (Asta) when its angular distance from the Sun falls within specific classical limits (e.g., Moon 12°, Mars 17°, Jupiter 11°, Venus 10°/8°, Saturn 15°), obscuring its outer expression.',
+    explanationHi: 'सूर्य के सान्निध्य में निश्चित अंशों (जैसे मंगल 17°, गुरु 11°, शनि 15°, शुक्र 10°) के भीतर आने पर ग्रह अस्त हो जाता है, जिससे उसका बाह्य भौतिक कारकत्व दुर्बल हो जाता है।',
+    explanationTe: 'సూర్యునికి నిర్దిష్ట డిగ్రీల లోపు (ఉదా. గురువు 11°, శని 15°, కుజుడు 17°) వచ్చినప్పుడు గ్రహం అస్తంగతం చెంది, తన బాహ్య కారకత్వాలను అంతర్గతం చేసుకుంటుంది.',
+    explanationTa: 'சூரியனுக்கு அருகில் குறிப்பிட்ட பாகைகளுக்குள் (எ.கா. குரு 11°, சனி 15°, செவ்வாய் 17°) வரும் போது கிரகம் அஸ்தமனமாகி தனது புற பலனை வெளிப்படுத்தும் திறனை குறைக்கிறது.',
+    explanationKn: 'ಸೂರ್ಯನ ಸಾನ್ನಿಧ್ಯದಲ್ಲಿ ನಿರ್ದಿಷ್ಟ ಡಿಗ್ರಿಗಳ ಒಳಗೆ ಬಂದಾಗ ಗ್ರಹವು ಅಸ್ತಂಗತಗೊಂಡು ತನ್ನ ಬಾಹ್ಯ ಭೌತಿಕ ಕಾರಕತ್ವವನ್ನು ದುರ್ಬಲಗೊಳಿಸಿಕೊಳ್ಳುತ್ತದೆ.',
+    topic: 'Planetary States (Avasthas)',
+    topicHi: 'ग्रहावस्था एवं अस्त विचार',
+    topicTe: 'గ్రహ అవస్థలు & అస్తంగతం',
+    topicTa: 'கிரக அவஸ்தைகள் & அஸ்தமனம்',
+    topicKn: 'ಗ್ರಹಾವಸ್ಥೆ & ಅಸ್ತಂಗತ',
+    enabled: true
+  },
+  {
+    id: 15,
+    question: 'Which houses from Lagna, Moon, or Venus determine the presence of Kuja (Manglik) Dosha in chart matching?',
+    questionHi: 'कुंडली मिलान में लग्न, चन्द्र अथवा शुक्र से किन भावों में मंगल की उपस्थिति "मांगलिक (भौम) दोष" बनाती है?',
+    questionTe: 'కుండలి మేళనంలో లగ్నం, చంద్రుడు లేదా శుక్రుని నుండి ఏ భావాలలో కుజుడు ఉండటం "కుజ దోషం" (మాంగ్లిక్) గా పరిగణింపబడుతుంది?',
+    questionTa: 'ஜாதக பொருத்தத்தில் லக்னம், சந்திரன் அல்லது சுக்கிரனிலிருந்து எந்த பாவங்களில் செவ்வாய் அமைந்தால் "செவ்வாய் தோஷம்" ஏற்படுகிறது?',
+    questionKn: 'ಕುಂಡಲಿ ಮಿಲನದಲ್ಲಿ ಲಗ್ನ, ಚಂದ್ರ ಅಥವಾ ಶುಕ್ರನಿಂದ ಯಾವ ಭಾವಗಳಲ್ಲಿ ಮಂಗಳನಿದ್ದರೆ "ಮಾಂಗ್ಲಿಕ್ (ಕುಜ) ದೋಷ" ಉಂಟಾಗುತ್ತದೆ?',
+    options: [
+      '3rd, 6th, 10th, and 11th houses (Upachaya Bhavas)',
+      '1st, 4th, 7th, 8th, and 12th houses (also 2nd in South Indian tradition)',
+      '5th and 9th houses (Trikona Bhavas)',
+      'Only when Mars is placed in the 2nd house alone'
+    ],
+    optionsHi: [
+      '3रे, 6ठे, 10वें और 11वें भाव (उपचय स्थान)',
+      '1ले, 4थे, 7वें, 8वें और 12वें भाव (तथा दक्षिण भारतीय परंपरानुसार 2रे भाव में भी)',
+      '5वें और 9वें भाव (त्रिकोण स्थान)',
+      'केवल जब मंगल द्वितीय भाव में अकेला बैठा हो'
+    ],
+    optionsTe: [
+      '3, 6, 10, మరియు 11వ భావాలు (ఉపచయ స్థానాలు)',
+      '1, 4, 7, 8, మరియు 12వ భావాలు (దక్షిణ భారత సంప్రదాయం ప్రకారం 2వ భావం కూడా)',
+      '5 మరియు 9వ భావాలు (త్రికోణ స్థానాలు)',
+      'కుజుడు 2వ భావంలో మాత్రమే ఒంటరిగా ఉన్నప్పుడు'
+    ],
+    optionsTa: [
+      '3, 6, 10, மற்றும் 11ஆம் வீடுகள் (உபஜெய ஸ்தானங்கள்)',
+      '1, 4, 7, 8, மற்றும் 12ஆம் வீடுகள் (தென்னிந்திய பாரம்பரியத்தில் 2ஆம் வீடும் சேர்த்து)',
+      '5 மற்றும் 9ஆம் வீடுகள் (திரிகோண ஸ்தானங்கள்)',
+      'செவ்வாய் 2ஆம் வீட்டில் மட்டும் தனியாக அமையும் போது'
+    ],
+    optionsKn: [
+      '3, 6, 10, ಮತ್ತು 11ನೇ ಭಾವಗಳು (ಉಪಚಯ ಸ್ಥಾನಗಳು)',
+      '1, 4, 7, 8, ಮತ್ತು 12ನೇ ಭಾವಗಳು (ಮತ್ತು ದಕ್ಷಿಣ ಭಾರತ ಸಂಪ್ರದಾಯದಂತೆ 2ನೇ ಭಾವವೂ ಸಹ)',
+      '5 ಮತ್ತು 9ನೇ ಭಾವಗಳು (ತ್ರಿಕೋಣ ಸ್ಥಾನಗಳು)',
+      'ಕೇವಲ 2ನೇ ಭಾವದಲ್ಲಿ ಮಂಗಳನೊಬ್ಬನೇ ಇದ್ದಾಗ'
+    ],
+    correctIndex: 1,
+    explanation: 'Brihat Parashara Hora Shastra establishes that Mars occupying the 1st, 4th, 7th, 8th, or 12th house (and 2nd house in South India) from Lagna, Moon, or Venus creates Kuja Dosha, impacting marital harmony if unmitigated.',
+    explanationHi: 'शास्त्रीय प्रमाणानुसार लग्न, चन्द्र अथवा शुक्र से 1, 4, 7, 8 अथवा 12वें भाव (तथा दक्षिण भारत में द्वितीय भाव) में मंगल की स्थिति मांगलिक दोष बनाती है, जिसका परिहार आवश्यक होता है।',
+    explanationTe: 'లగ్నం, చంద్రుడు లేదా శుక్రుని నుండి 1, 4, 7, 8, 12వ స్థానాలలో (మరియు 2వ స్థానంలో) కుజుడు స్థితి చెందడం కుజ దోషానికి దారితీస్తుంది. అనుకూల కుండలి మేళనం అవసరం.',
+    explanationTa: 'லக்னம், சந்திரன் அல்லது சுக்கிரனுக்கு 1, 4, 7, 8, 12 (மற்றும் 2ஆம்) வீடுகளில் செவ்வாய் அமைவது செவ்வாய் தோஷத்தை ஏற்படுத்துகிறது. பொருத்தமான ஜாதக இணைப்பால் தோஷ நிவர்த்தி செய்யப்படுகிறது.',
+    explanationKn: 'ಶಾಸ್ತ್ರೀಯ ಪ್ರಮಾಣದಂತೆ ಲಗ್ನ, ಚಂದ್ರ ಅಥವಾ ಶುಕ್ರನಿಂದ 1, 4, 7, 8 ಅಥವಾ 12ನೇ ಭಾವಗಳಲ್ಲಿ (ಮತ್ತು ದಕ್ಷಿಣ ಭಾರತದಲ್ಲಿ 2ನೇ ಭಾವದಲ್ಲಿ) ಮಂಗಳನ ಸ್ಥಿತಿಯು ಕುಜ ದೋಷವನ್ನುಂಟುಮಾಡುತ್ತದೆ.',
+    topic: 'Kundali Matching & Doshas',
+    topicHi: 'कुंडली मिलान एवं मांगलिक दोष',
+    topicTe: 'కుండలి మేళనం & కుజ దోషం',
+    topicTa: 'ஜாதக பொருத்தம் & செவ்வாய் தோஷம்',
+    topicKn: 'ಕುಂಡಲಿ ಮಿಲನ & ಕುಜ ದೋಷ',
+    enabled: true
   }
 ];
 
-export const getQuestionText = (q: any, lang: 'en' | 'hi' | 'te' | 'ta' = 'en') => {
-  if (lang === 'te' && q.questionTe) return q.questionTe;
-  if (lang === 'ta' && q.questionTa) return q.questionTa;
-  if (lang === 'hi' && q.questionHi) return q.questionHi;
-  return q.question;
+export const getQuestionText = (q: any, lang: string = 'en'): string => {
+  const l = (lang || 'en').toLowerCase();
+  if ((l === 'kn' || l === 'kannada') && q.questionKn) return q.questionKn;
+  if ((l === 'te' || l === 'telugu') && q.questionTe) return q.questionTe;
+  if ((l === 'ta' || l === 'tamil') && q.questionTa) return q.questionTa;
+  if ((l === 'hi' || l === 'hindi') && q.questionHi) return q.questionHi;
+  return q.question || '';
 };
 
-export const getOptionsList = (q: any, lang: 'en' | 'hi' | 'te' | 'ta' = 'en') => {
-  if (lang === 'te' && q.optionsTe && q.optionsTe.length === q.options?.length) return q.optionsTe;
-  if (lang === 'ta' && q.optionsTa && q.optionsTa.length === q.options?.length) return q.optionsTa;
-  if (lang === 'hi' && q.optionsHi && q.optionsHi.length === q.options?.length) return q.optionsHi;
+export const getOptionsList = (q: any, lang: string = 'en'): string[] => {
+  const l = (lang || 'en').toLowerCase();
+  if ((l === 'kn' || l === 'kannada') && q.optionsKn && q.optionsKn.length === q.options?.length) return q.optionsKn;
+  if ((l === 'te' || l === 'telugu') && q.optionsTe && q.optionsTe.length === q.options?.length) return q.optionsTe;
+  if ((l === 'ta' || l === 'tamil') && q.optionsTa && q.optionsTa.length === q.options?.length) return q.optionsTa;
+  if ((l === 'hi' || l === 'hindi') && q.optionsHi && q.optionsHi.length === q.options?.length) return q.optionsHi;
   return q.options || [];
 };
 
-export const getExplanationText = (q: any, lang: 'en' | 'hi' | 'te' | 'ta' = 'en') => {
-  if (lang === 'te' && q.explanationTe) return q.explanationTe;
-  if (lang === 'ta' && q.explanationTa) return q.explanationTa;
-  if (lang === 'hi' && q.explanationHi) return q.explanationHi;
+export const getExplanationText = (q: any, lang: string = 'en'): string => {
+  const l = (lang || 'en').toLowerCase();
+  if ((l === 'kn' || l === 'kannada') && q.explanationKn) return q.explanationKn;
+  if ((l === 'te' || l === 'telugu') && q.explanationTe) return q.explanationTe;
+  if ((l === 'ta' || l === 'tamil') && q.explanationTa) return q.explanationTa;
+  if ((l === 'hi' || l === 'hindi') && q.explanationHi) return q.explanationHi;
   return q.explanation || '';
 };
 
-export const getTopicText = (q: any, lang: 'en' | 'hi' | 'te' | 'ta' = 'en') => {
-  if (lang === 'te' && q.topicTe) return q.topicTe;
-  if (lang === 'ta' && q.topicTa) return q.topicTa;
-  if (lang === 'hi' && q.topicHi) return q.topicHi;
+export const getTopicText = (q: any, lang: string = 'en'): string => {
+  const l = (lang || 'en').toLowerCase();
+  if ((l === 'kn' || l === 'kannada') && q.topicKn) return q.topicKn;
+  if ((l === 'te' || l === 'telugu') && q.topicTe) return q.topicTe;
+  if ((l === 'ta' || l === 'tamil') && q.topicTa) return q.topicTa;
+  if ((l === 'hi' || l === 'hindi') && q.topicHi) return q.topicHi;
   return q.topic || 'Vedic Jyotish';
 };

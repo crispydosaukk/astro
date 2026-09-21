@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase/config';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { sendSmtpEmail } from '@/lib/emailSender';
+import { adminAuth } from '@/lib/firebase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,6 +155,7 @@ export async function POST(req: NextRequest) {
         courseDetails,
         idProofType,
         idProofNumber,
+        password: password || '',
         theoryScore: safeTheory,
         chartCaseScore: safeChart,
         aiInterviewScore: safeInterview,
@@ -201,19 +203,20 @@ export async function POST(req: NextRequest) {
       ]
     };
 
-    // Save to Firestore candidates collection
+    // Save to Firestore candidates collection and provision astrologer account
     try {
       if (db) {
         const candidateRef = doc(db, 'candidates', effectiveId);
         await setDoc(candidateRef, applicationPayload, { merge: true });
 
-        // Also create a pending/unverified entry in 'astrologers' collection so credentials exist
+        // Create or update entry in 'astrologers' collection so credentials exist
         if (email) {
           const astRef = doc(db, 'astrologers', effectiveId);
           await setDoc(astRef, {
             id: effectiveId,
             name,
             email,
+            password: password || '',
             phone,
             location: location || 'India',
             speciality: specialisations[0] || 'Vedic Astrology',
@@ -225,6 +228,47 @@ export async function POST(req: NextRequest) {
             aiScore: overallScore,
             appliedAt: new Date().toISOString(),
           }, { merge: true });
+        }
+
+        // Provision Firebase Auth account using candidate's email and password
+        if (email && password && password.length >= 6) {
+          try {
+            let authUser;
+            try {
+              authUser = await adminAuth.getUserByEmail(email.trim());
+              await adminAuth.updateUser(authUser.uid, {
+                password: password,
+                displayName: name,
+              });
+            } catch (authFindErr: any) {
+              if (authFindErr?.code === 'auth/user-not-found' || authFindErr?.message?.includes('no user')) {
+                authUser = await adminAuth.createUser({
+                  email: email.trim(),
+                  password: password,
+                  displayName: name,
+                });
+              }
+            }
+
+            if (authUser?.uid) {
+              // Also map authUser.uid in astrologers collection
+              const astAuthRef = doc(db, 'astrologers', authUser.uid);
+              await setDoc(astAuthRef, {
+                uid: authUser.uid,
+                id: authUser.uid,
+                candidateId: effectiveId,
+                name,
+                email: email.trim(),
+                password: password,
+                phone,
+                status: 'under_review',
+                isVerified: false,
+                appliedAt: new Date().toISOString(),
+              }, { merge: true });
+            }
+          } catch (provisionErr) {
+            console.warn('Firebase Auth user auto-provisioning notice:', provisionErr);
+          }
         }
       }
     } catch (dbErr) {

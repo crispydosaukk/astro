@@ -197,22 +197,23 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       specialisation = 'Vedic Jyotish',
-      count = 5,
+      count = 15,
       isAiDynamic = true,
       difficulty = 'Advanced',
       language = 'en'
     } = body;
 
-    const targetCount = Math.min(Math.max(Number(count) || 5, 3), 10);
+    const targetCount = Math.min(Math.max(Number(count) || 15, 1), 50);
     const langStr = String(language || 'en').toLowerCase();
     const isHindi = langStr === 'hi' || langStr === 'hindi';
     const isTelugu = langStr === 'te' || langStr === 'telugu';
     const isTamil = langStr === 'ta' || langStr === 'tamil';
+    const isKannada = langStr === 'kn' || langStr === 'kannada';
 
     // 1. Fetch Assessment Configuration from Firestore
     let dbCustomQuestions: any[] = [];
     let dbUseCustom = true;
-    let dbQuestionCount = 5;
+    let dbQuestionCount = 15;
 
     try {
       if (db) {
@@ -237,14 +238,21 @@ export async function POST(req: NextRequest) {
 
     // IF CUSTOM QUESTIONS MODE IS SELECTED
     if (!shouldUseAi) {
-      const sourcePool = dbCustomQuestions.length > 0 ? dbCustomQuestions : (FALLBACK_QUESTION_POOL[specialisation] || FALLBACK_QUESTION_POOL['Vedic Jyotish']);
+      const rawPool = dbCustomQuestions.length > 0 ? dbCustomQuestions : (FALLBACK_QUESTION_POOL[specialisation] || FALLBACK_QUESTION_POOL['Vedic Jyotish']);
+      const activePool = rawPool.filter((q: any) => q.enabled !== false && q.isActive !== false);
+      const sourcePool = activePool.length > 0 ? activePool : rawPool;
       const formatted = sourcePool.slice(0, targetCount).map((q: any, idx: number) => {
         let question = q.question;
         let options = q.options;
         let explanation = q.explanation;
         let topic = q.topic;
 
-        if (isTelugu) {
+        if (isKannada) {
+          if (q.questionKn) question = q.questionKn;
+          if (Array.isArray(q.optionsKn) && q.optionsKn.length === q.options?.length) options = q.optionsKn;
+          if (q.explanationKn) explanation = q.explanationKn;
+          if (q.topicKn) topic = q.topicKn;
+        } else if (isTelugu) {
           if (q.questionTe) question = q.questionTe;
           if (Array.isArray(q.optionsTe) && q.optionsTe.length === q.options?.length) options = q.optionsTe;
           if (q.explanationTe) explanation = q.explanationTe;
@@ -290,7 +298,9 @@ export async function POST(req: NextRequest) {
         } else if (isTelugu) {
           langDirective = 'CRITICAL REQUIREMENT: Generate all questions, options, and explanations in fluent, authentic Telugu (తెలుగు) using traditional Vedic Jyotish terminology (e.g. భావం, లగ్నం, కేంద్రం, త్రికోణం, వింశోత్తరి దశ, గోచారం, నవాంశ, పరిహారాలు, రాశి).';
         } else if (isTamil) {
-          langDirective = 'CRITICAL REQUIREMENT: Generate all questions, options, and explanations in fluent, authentic Tamil (தமிழ்) using traditional Vedic Jyotish terminology (e.g. பாவம், லக்னம், கேந்திரம், திரிகோணம், விம்சோத்தரி தசா, கோச்சாரம், நவாம்சம், பரிகாரங்கள், రాశి).';
+          langDirective = 'CRITICAL REQUIREMENT: Generate all questions, options, and explanations in fluent, authentic Tamil (தமிழ்) using traditional Vedic Jyotish terminology (e.g. பாவம், லக்னம், கேந்திரம், திரிகோணம், விம்சோத்தரி தசா, கோச்சாரம், நவாம்சம், பரிகாரங்கள், ராசி).';
+        } else if (isKannada) {
+          langDirective = 'CRITICAL REQUIREMENT: Generate all questions, options, and explanations in fluent, authentic Kannada (ಕನ್ನಡ) using traditional Vedic Jyotish terminology (e.g. ಭಾವ, ಲಗ್ನ, ಕೇಂದ್ರ, ತ್ರಿಕೋಣ, ವಿಂಶೋತ್ತರಿ ದಶಾ, ಗೋಚಾರ, ನವಾಂಶ, ಪರಿಹಾರಗಳು, ರಾಶಿ).';
         }
 
         const prompt = `Generate exactly ${targetCount} high-quality, rigorous multiple-choice questions for technical assessment of a professional astrologer specializing in "${specialisation}".

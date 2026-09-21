@@ -52,6 +52,7 @@ export interface ReviewCandidate {
   idProofNumber?: string;
   idProofDocument?: string;
   assessmentLanguage?: string;
+  businessName?: string;
 }
 
 function mapCandidateToReview(c: Candidate, index: number): ReviewCandidate {
@@ -119,6 +120,7 @@ function mapCandidateToReview(c: Candidate, index: number): ReviewCandidate {
     idProofNumber: c.idProofNumber || appData.idProofNumber || '',
     idProofDocument: c.idProofDocument || appData.idProofDocument || '',
     assessmentLanguage: c.assessmentLanguage || appData.assessmentLanguage || 'en',
+    businessName: c.businessName || appData.businessName || '',
   };
 }
 
@@ -206,6 +208,24 @@ export default function ReviewWorkspace() {
   const unassignedCount = candidates.filter(c => !c.reviewerAssigned).length;
   const approvedCount = candidates.filter(c => c.status === 'Approved').length;
 
+  const handleCandidateUpdated = (id: string, updates: Partial<ReviewCandidate>) => {
+    setCandidates(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+  };
+
+  useEffect(() => {
+    const handleStatusSync = (e: any) => {
+      const detail = e?.detail;
+      if (detail && detail.id) {
+        setCandidates(prev => prev.map(c => c.id === detail.id ? { 
+          ...c, 
+          status: detail.updates.applicationStatus || c.status,
+        } : c));
+      }
+    };
+    window.addEventListener('candidate_status_updated', handleStatusSync);
+    return () => window.removeEventListener('candidate_status_updated', handleStatusSync);
+  }, []);
+
   if (loading) {
     return (
       <div className="card-elevated p-12 text-center text-muted-foreground flex flex-col items-center justify-center gap-3">
@@ -254,7 +274,12 @@ export default function ReviewWorkspace() {
 
           {/* Detail panel */}
           <div className="xl:col-span-3">
-            {selected && <ReviewDetailPanel candidate={selected} />}
+            {selected && (
+              <ReviewDetailPanel 
+                candidate={selected} 
+                onUpdateCandidate={handleCandidateUpdated}
+              />
+            )}
           </div>
         </div>
       )}

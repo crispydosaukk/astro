@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -50,9 +51,58 @@ import {
   Radio,
   LockKeyhole
 } from 'lucide-react';
-import { THEORY_QUESTIONS, TheoryQuestion } from '@/lib/theoryQuestions';
+import { 
+  THEORY_QUESTIONS, 
+  TheoryQuestion,
+  getQuestionText,
+  getOptionsList,
+  getExplanationText,
+  getTopicText
+} from '@/lib/theoryQuestions';
+import { APPLY_TRANSLATIONS, SupportedLanguage } from '@/lib/applyTranslations';
 import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE, parsePhoneNumber } from '@/lib/countryCodes';
 import CountryCodeDropdown from '@/components/ui/CountryCodeDropdown';
+import LanguageDropdown from '@/components/ui/LanguageDropdown';
+import AppLogo from '@/components/ui/AppLogo';
+
+const getInitialInterviewQuestion = (candidateName: string, lang: string) => {
+  const l = (lang || 'en').toLowerCase();
+  const nameLabel = candidateName ? candidateName.trim() : (l === 'hi' ? 'पंडित जी' : l === 'te' ? 'పండిట్ జీ' : l === 'ta' ? 'பண்டிட் ஜி' : l === 'kn' ? 'ಪಂಡಿತ್ ಜೀ' : 'Pandit Ji');
+
+  if (l === 'hi' || l === 'hindi') {
+    return {
+      role: 'ai' as const,
+      topic: 'परामर्श कौशल एवं सहानुभूति',
+      text: `नमस्ते ${nameLabel} 🙏! एस्ट्रोपरीहार ज्योतिषी चयन प्रक्रिया में आपका स्वागत है। प्रथम प्रश्न: एक जातक अत्यधिक तनाव में आपके पास आता है, जिसे व्यापार में भारी नुकसान और वैवाहिक विवाद का सामना करना पड़ रहा है। भय उत्पन्न किए बिना सात्विक वैदिक मार्गदर्शन कैसे देंगे?`
+    };
+  }
+  if (l === 'te' || l === 'telugu') {
+    return {
+      role: 'ai' as const,
+      topic: 'క్లయింట్ సంప్రదింపులు & సానుభూతి',
+      text: `నమస్తే ${nameLabel} 🙏! ఆస్ట్రోపరిహార్ జ్యోతిష్య ఎంపిక ప్రక్రియకు స్వాగతం. మొదటి ప్రశ్న: ఒక క్లయింట్ తీవ్ర వ్యాపార నష్టం మరియు వైవాహిక సమస్యలతో తీవ్ర నిరాశలో మీ వద్దకు వచ్చారు. వారిలో భయం కలిగించకుండా, ప్రశాంతంగా ప్రామాణిక వేద జ్యోతిష పరిహారాలు మరియు మార్గదర్శకత్వాన్ని ఎలా అందిస్తారు?`
+    };
+  }
+  if (l === 'ta' || l === 'tamil') {
+    return {
+      role: 'ai' as const,
+      topic: 'வாடிக்கையாளர் ஆலோசனை & பரிவு',
+      text: `வணக்கம் ${nameLabel} 🙏! ஆஸ்ட்ரோபரிஹார் ஜோதிடர் தேர்வு செயல்முறைக்கு வரவேற்கிறோம். முதல் கேள்வி: ஒரு வாடிக்கையாளர் கடுமையான நிதி இழப்பு மற்றும் குடும்பக் குழப்பத்துடன் உங்களிடம் வருகிறார். அவர்களுக்கு அச்சம் ஏற்படுத்தாமல், அமைதியாகவும் நடைமுறைக்கு உகந்ததாகவும் பாரம்பரிய வேத ஜோதிட வழிகாட்டலை எவ்வாறு வழங்குவீர்கள்?`
+    };
+  }
+  if (l === 'kn' || l === 'kannada') {
+    return {
+      role: 'ai' as const,
+      topic: 'ಕ್ಲೈಂಟ್ ಸಮಾಲೋಚನೆ & ಸಹಾನುಭೂತಿ',
+      text: `ನಮಸ್ಕಾರ ${nameLabel} 🙏! ಆಸ್ಟ್ರೋಪರಿಹಾರ್ ಜ್ಯೋತಿಷಿ ಆಯ್ಕೆ ಪ್ರಕ್ರಿಯೆಗೆ ಸುಸ್ವಾಗತ. ಮೊದಲ ಪ್ರಶ್ನೆ: ವ್ಯಾಪಾರ ನಷ್ಟ ಮತ್ತು ಕೌಟುಂಬಿಕ ಕಲಹದಿಂದ ತೀವ್ರ ದುಃಖದಲ್ಲಿರುವ ಕ್ಲೈಂಟ್ ನಿಮ್ಮ ಬಳಿ ಬಂದಾಗ, ಅವರಲ್ಲಿ ಭಯ ಹುಟ್ಟಿಸದೆ ಶಾಂತಿಯುತವಾಗಿ ಪ್ರಾಯೋಗಿಕ ವೈದಿಕ ಮಾರ್ಗದರ್ಶನವನ್ನು ಹೇಗೆ ನೀಡುತ್ತೀರಿ?`
+    };
+  }
+  return {
+    role: 'ai' as const,
+    topic: 'Client Consulting & Empathy',
+    text: `Namaste ${nameLabel} 🙏! Welcome to the AstroParihar Astrologer Screening. To begin: A client comes to you in extreme distress over sudden business loss and domestic tension. How do you analyze their state calmly and communicate your Vedic astrological findings without instilling fear?`
+  };
+};
 
 function CandidateApplyPortal() {
   const searchParams = useSearchParams();
@@ -72,10 +122,17 @@ function CandidateApplyPortal() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [location, setLocation] = useState('New Delhi, India');
-  const [specialisation, setSpecialisation] = useState('Vedic Jyotish');
+  const [specialisations, setSpecialisations] = useState<string[]>(['Vedic Jyotish']);
   const [experience, setExperience] = useState('12+ years');
   const [bio, setBio] = useState('');
-  const [languages, setLanguages] = useState('Hindi, English');
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['Hindi', 'English']);
+  const [otherLanguage, setOtherLanguage] = useState('');
+  const [specOpen, setSpecOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [specPos, setSpecPos] = useState<React.CSSProperties>({});
+  const [langPos, setLangPos] = useState<React.CSSProperties>({});
+  const specRef = useRef<HTMLButtonElement>(null);
+  const langRef = useRef<HTMLButtonElement>(null);
   
   // Learning Background & Certification
   const [learningBackground, setLearningBackground] = useState('');
@@ -91,14 +148,14 @@ function CandidateApplyPortal() {
 
   // Step 2: Dynamic Questions State & Settings
   const [isCuratedMode, setIsCuratedMode] = useState<boolean>(true); // Toggle ON = Curated, OFF = AI Random Questions
-  const [questionCount, setQuestionCount] = useState<number>(5);
+  const [questionCount, setQuestionCount] = useState<number>(15);
   const [customQuestionPool, setCustomQuestionPool] = useState<TheoryQuestion[]>(THEORY_QUESTIONS);
   const [useCustomChartCases, setUseCustomChartCases] = useState<boolean>(true);
   const [customChartCase, setCustomChartCase] = useState<any>(null);
   const [customChartCasesList, setCustomChartCasesList] = useState<any[]>([]);
   const [activeChartCaseIndex, setActiveChartCaseIndex] = useState<number>(0);
   const [isLoadingChartCase, setIsLoadingChartCase] = useState<boolean>(false);
-  const [questionsList, setQuestionsList] = useState<TheoryQuestion[]>(THEORY_QUESTIONS.slice(0, 5));
+  const [questionsList, setQuestionsList] = useState<TheoryQuestion[]>(THEORY_QUESTIONS.slice(0, 15));
   const [isLoadingQuestions, setIsLoadingQuestions] = useState<boolean>(false);
 
   // Dynamic AI Scoring & Qualification Settings
@@ -122,8 +179,9 @@ function CandidateApplyPortal() {
   // Step 2: Theory Assessment State
   const [theoryAnswers, setTheoryAnswers] = useState<Record<string | number, number>>({});
   const [theorySubmitted, setTheorySubmitted] = useState(false);
-  const [theoryScore, setTheoryScore] = useState(0);
-  const [assessmentLanguage, setAssessmentLanguage] = useState<string>('en');
+  const [theoryScore, setTheoryScore] = useState<number>(0);
+  const [assessmentLanguage, setAssessmentLanguage] = useState<SupportedLanguage>('en');
+  const t = APPLY_TRANSLATIONS[assessmentLanguage] || APPLY_TRANSLATIONS.en;
 
   // Assessment & Live Interview Timers
   const [assessmentStartTime, setAssessmentStartTime] = useState<number | null>(null);
@@ -174,7 +232,7 @@ function CandidateApplyPortal() {
             phone: phone || '0000000000',
             email: email || '',
             location,
-            specialisations: [specialisation],
+            specialisations: specialisations,
             experience,
             isDisqualified: true,
             disqualificationReason: reason,
@@ -312,7 +370,7 @@ function CandidateApplyPortal() {
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, [currentStep, isDisqualified, candidateId, name, phone, email, location, specialisation, experience, proctorLogs]);
+  }, [currentStep, isDisqualified, candidateId, name, phone, email, location, specialisations, experience, proctorLogs]);
 
   // Load Assessment Settings (Custom Questions / AI Mode Toggle & Cases) from Backend
   useEffect(() => {
@@ -327,7 +385,7 @@ function CandidateApplyPortal() {
             : THEORY_QUESTIONS;
           setCustomQuestionPool(pool);
 
-          const qCount = Number(cfg.questionCount) || 5;
+          const qCount = Number(cfg.questionCount) || 15;
           setQuestionCount(qCount);
 
           if (cfg.passingThreshold) setPassingThreshold(Number(cfg.passingThreshold));
@@ -340,18 +398,23 @@ function CandidateApplyPortal() {
           }
 
           if (cfg.useCustomChartCases && Array.isArray(cfg.customChartCases) && cfg.customChartCases.length > 0) {
-            setCustomChartCasesList(cfg.customChartCases);
-            setCustomChartCase(cfg.customChartCases[0]);
+            const activeCases = cfg.customChartCases.filter((c: any) => c.enabled !== false && c.isActive !== false);
+            const casesToUse = activeCases.length > 0 ? activeCases : cfg.customChartCases;
+            setCustomChartCasesList(casesToUse);
+            setCustomChartCase(casesToUse[0]);
           } else if (cfg.useCustomChartCases === false) {
             fetchAiChartCase();
           }
 
+          const activeQuestions = pool.filter((q: any) => q.enabled !== false && q.isActive !== false);
+          const effectivePool = activeQuestions.length > 0 ? activeQuestions : pool;
+
           if (cfg.useCustomQuestions) {
             setIsCuratedMode(true);
-            setQuestionsList(pool.slice(0, qCount));
+            setQuestionsList(effectivePool.slice(0, qCount));
           } else {
             setIsCuratedMode(false);
-            fetchQuestions(qCount, false, specialisation);
+            fetchQuestions(qCount, false, specialisations[0] || 'Vedic Jyotish');
           }
         }
       } catch (err) {
@@ -362,14 +425,16 @@ function CandidateApplyPortal() {
   }, []);
 
   // Fetch Dynamic AI Kundali Chart Case
-  const fetchAiChartCase = async () => {
+  const fetchAiChartCase = async (langOverride?: string) => {
     setIsLoadingChartCase(true);
+    const targetLang = langOverride || assessmentLanguage || 'en';
     try {
       const res = await fetch('/api/ai/generate-chart-case', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          specialisation: specialisation || 'Vedic Jyotish'
+          specialisation: specialisations[0] || 'Vedic Jyotish',
+          language: targetLang
         })
       });
       const data = await res.json();
@@ -384,16 +449,19 @@ function CandidateApplyPortal() {
   };
 
   // Fetch or Switch Dynamic Questions
-  const fetchQuestions = async (count: number, curated: boolean, spec: string) => {
+  const fetchQuestions = async (count: number, curated: boolean, spec: string, langOverride?: string) => {
     setIsLoadingQuestions(true);
     setTheoryAnswers({});
     setTheorySubmitted(false);
     setTheoryScore(0);
+    const targetLang = langOverride || assessmentLanguage || 'en';
 
     try {
       if (curated) {
         // Custom Questions Bank configured in Settings
-        const pool = customQuestionPool.length > 0 ? customQuestionPool : THEORY_QUESTIONS;
+        const rawPool = customQuestionPool.length > 0 ? customQuestionPool : THEORY_QUESTIONS;
+        const activeQuestions = rawPool.filter((q: any) => q.enabled !== false && q.isActive !== false);
+        const pool = activeQuestions.length > 0 ? activeQuestions : rawPool;
         setQuestionsList(pool.slice(0, count));
       } else {
         // AI Dynamic / Random Generated Questions
@@ -401,22 +469,27 @@ function CandidateApplyPortal() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            specialisation: spec || specialisation || 'Vedic Jyotish',
+            specialisation: spec || specialisations[0] || 'Vedic Jyotish',
             count,
-            isAiDynamic: true
+            isAiDynamic: true,
+            language: targetLang
           })
         });
         const data = await res.json();
         if (data.success && data.questions && data.questions.length > 0) {
           setQuestionsList(data.questions);
         } else {
-          const pool = customQuestionPool.length > 0 ? customQuestionPool : THEORY_QUESTIONS;
+          const rawPool = customQuestionPool.length > 0 ? customQuestionPool : THEORY_QUESTIONS;
+          const activeQuestions = rawPool.filter((q: any) => q.enabled !== false && q.isActive !== false);
+          const pool = activeQuestions.length > 0 ? activeQuestions : rawPool;
           setQuestionsList(pool.slice(0, count));
         }
       }
     } catch (err) {
       console.warn('Failed to fetch dynamic questions:', err);
-      const pool = customQuestionPool.length > 0 ? customQuestionPool : THEORY_QUESTIONS;
+      const rawPool = customQuestionPool.length > 0 ? customQuestionPool : THEORY_QUESTIONS;
+      const activeQuestions = rawPool.filter((q: any) => q.enabled !== false && q.isActive !== false);
+      const pool = activeQuestions.length > 0 ? activeQuestions : rawPool;
       setQuestionsList(pool.slice(0, count));
     } finally {
       setIsLoadingQuestions(false);
@@ -425,16 +498,36 @@ function CandidateApplyPortal() {
 
   const handleToggleQuestionMode = (curated: boolean) => {
     setIsCuratedMode(curated);
-    fetchQuestions(questionCount, curated, specialisation);
+    fetchQuestions(questionCount, curated, specialisations[0] || 'Vedic Jyotish', assessmentLanguage);
   };
 
   const handleChangeQuestionCount = (newCount: number) => {
     setQuestionCount(newCount);
-    fetchQuestions(newCount, isCuratedMode, specialisation);
+    fetchQuestions(newCount, isCuratedMode, specialisations[0] || 'Vedic Jyotish', assessmentLanguage);
+  };
+
+  const handleLanguageChange = (newLang: SupportedLanguage) => {
+    setAssessmentLanguage(newLang);
+
+    // If candidate has not answered yet or is at initial question, update the interview greeting to chosen language
+    const userAnswers = conversationHistory.filter(m => m.role === 'user');
+    if (userAnswers.length === 0) {
+      setConversationHistory([getInitialInterviewQuestion(name, newLang)]);
+    }
+
+    // If AI dynamic questions mode is active, reload questions in the selected language
+    if (!isCuratedMode) {
+      fetchQuestions(questionCount, false, specialisations[0] || 'Vedic Jyotish', newLang);
+    }
+
+    // If on Step 3 or AI chart case, reload chart case in the selected language
+    if (!useCustomChartCases || customChartCase?.isAiGenerated) {
+      fetchAiChartCase(newLang);
+    }
   };
 
   const handleRegenerateAiQuestions = () => {
-    fetchQuestions(questionCount, false, specialisation);
+    fetchQuestions(questionCount, false, specialisations[0] || 'Vedic Jyotish');
   };
 
   // Step 3: Blind Kundali Chart State
@@ -500,16 +593,12 @@ function CandidateApplyPortal() {
     }
     if (emailParam && emailParam !== 'null' && emailParam !== 'undefined') setEmail(emailParam);
     if (locParam) setLocation(locParam);
-    if (specParam) setSpecialisation(specParam);
+    if (specParam) setSpecialisations([specParam]);
 
     // Initial AI Interview Question
     if (conversationHistory.length === 0) {
       setConversationHistory([
-        {
-          role: 'ai',
-          topic: 'Client Consulting & Empathy',
-          text: `Namaste ${nameParam || 'Pandit Ji'} 🙏! Welcome to the AstroParihar Astrologer Screening. To begin: A client comes to you in extreme distress over sudden business loss and domestic tension. How do you analyze their state calmly and communicate your Vedic astrological findings without instilling fear?`
-        }
+        getInitialInterviewQuestion(nameParam || name, assessmentLanguage)
       ]);
     }
   }, [searchParams]);
@@ -582,6 +671,10 @@ function CandidateApplyPortal() {
       alert('Please provide your full name, phone number, and email address.');
       return;
     }
+    if (specialisations.length === 0) {
+      alert('Please select at least one Primary Specialisation.');
+      return;
+    }
     if (!learningBackground.trim()) {
       alert('Please state where you studied astrology (Institute, Gurukul, or Guru Lineage).');
       return;
@@ -640,9 +733,10 @@ function CandidateApplyPortal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           candidateName: name,
-          specialisation,
+          specialisation: specialisations[0] || 'Vedic Jyotish',
           chartAnalysis,
           chartRemedy,
+          language: assessmentLanguage,
           caseTitle: customChartCase?.title,
           caseLagna: customChartCase?.lagna,
           caseMoonSign: customChartCase?.moonSign,
@@ -691,7 +785,7 @@ function CandidateApplyPortal() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             candidateName: name,
-            specialisation,
+            specialisation: specialisations[0] || 'Vedic Jyotish',
             isFinalEvaluation: true,
             conversationHistory: updatedHistory,
             userAnswer: answerText,
@@ -752,7 +846,7 @@ function CandidateApplyPortal() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             candidateName: name,
-            specialisation,
+            specialisation: specialisations[0] || 'Vedic Jyotish',
             currentQuestionIndex: aiQuestionIndex,
             userAnswer: answerText,
             conversationHistory: updatedHistory,
@@ -855,7 +949,7 @@ function CandidateApplyPortal() {
         phoneCountryCode,
         whatsappCountryCode: sameAsPhone ? phoneCountryCode : whatsappCountryCode,
         location,
-        specialisations: [specialisation],
+        specialisations: specialisations,
         experience,
         bio,
         learningBackground,
@@ -864,7 +958,7 @@ function CandidateApplyPortal() {
         idProofNumber,
         idProofDocument,
         password,
-        languages: languages.split(',').map(s => s.trim()),
+        languages: [...selectedLanguages, ...(otherLanguage.trim() ? [otherLanguage.trim()] : [])],
         theoryScore,
         chartCaseScore: chartScore,
         aiInterviewScore: calculatedInterviewScore,
@@ -922,33 +1016,73 @@ function CandidateApplyPortal() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Top Header Branding */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-30 px-6 py-3.5 flex items-center justify-between">
+      {/* Top Header Branding with Persistent Language Switcher */}
+      <header className="border-b border-border bg-card/95 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 py-3 flex items-center justify-between gap-3 shadow-xs">
+        {/* Left: Logo & Portal Title */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl terracotta-gradient flex items-center justify-center text-white shadow-xs font-bold text-lg">
-            ॐ
-          </div>
+          <AppLogo src="/assets/images/AstroParihar_Logo-1786957316255.webp" size={38} />
           <div>
-            <h1 className="font-bold text-base leading-tight text-foreground flex items-center gap-2">
-              AstroParihar Onboarding Portal
-              <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                Verified Astrologer Network
+            <h1 className="font-bold text-sm md:text-base leading-tight text-foreground flex items-center gap-2">
+              {t.portalTitle}
+              <span className="text-3xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 hidden sm:inline-block">
+                {t.portalBadge}
               </span>
             </h1>
-            <p className="text-2xs text-muted-foreground">
-              Candidate Credentialing, Vedic Theory Assessment & AI Interview
+            <p className="text-3xs md:text-2xs text-muted-foreground hidden sm:block">
+              {t.portalSubtitle}
             </p>
           </div>
         </div>
 
-        <div className="text-xs text-muted-foreground hidden sm:flex items-center gap-2">
-          <ShieldCheck size={14} className="text-emerald-600" />
-          <span>Encrypted Submission · Gmail SMTP & Firestore Sync</span>
+        {/* Right: Sticky Header Language Dropdown + Security Notice */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-3xs font-extrabold uppercase tracking-wider text-muted-foreground hidden lg:inline">
+              Language:
+            </span>
+            <LanguageDropdown
+              value={assessmentLanguage}
+              onChange={handleLanguageChange}
+              id="header-language-dropdown"
+            />
+          </div>
+
+          <div className="text-xs text-muted-foreground hidden lg:flex items-center gap-1.5 pl-2 border-l border-border">
+            <ShieldCheck size={14} className="text-emerald-600" />
+            <span className="text-2xs">{t.securityEncrypted}</span>
+          </div>
         </div>
       </header>
 
       {/* Main Container */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 md:p-8 space-y-6">
+        {/* SLEEK, COMPACT APPLICATION & EXAM LANGUAGE BAR */}
+        {!isDisqualified && (
+          <div className="card-elevated p-3 sm:p-4 bg-card border border-primary/30 shadow-xs rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3 text-center sm:text-left">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base shadow-2xs flex-shrink-0">
+                🌐
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-foreground">
+                  {t.langSelectLabel}
+                </h3>
+                <p className="text-3xs sm:text-2xs text-muted-foreground">
+                  {t.langSelectDesc}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex-shrink-0">
+              <LanguageDropdown
+                value={assessmentLanguage}
+                onChange={handleLanguageChange}
+                id="main-language-dropdown"
+                buttonClassName="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 hover:border-primary font-extrabold"
+              />
+            </div>
+          </div>
+        )}
         {/* Toast Warning for Clipboard / Shortcuts */}
         {clipboardToast && (
           <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 bg-red-600 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-bold animate-bounce">
@@ -1110,11 +1244,11 @@ function CandidateApplyPortal() {
           <div className="card-elevated p-4 bg-muted/20 border-border">
             <div className="flex items-center justify-between gap-2 overflow-x-auto text-xs font-semibold pb-1">
               {[
-                { step: 1, label: '1. Profile & Account', icon: <User size={13} /> },
-                { step: 2, label: '2. Vedic Theory Quiz', icon: <BookOpen size={13} /> },
-                { step: 3, label: '3. Kundali Case', icon: <Compass size={13} /> },
-                { step: 4, label: '4. AI Interview', icon: <Brain size={13} /> },
-                { step: 5, label: '5. In Process / Review', icon: <FileCheck2 size={13} /> },
+                { step: 1, label: t.step1Title, icon: <User size={13} /> },
+                { step: 2, label: t.step2Title, icon: <BookOpen size={13} /> },
+                { step: 3, label: t.step3Title, icon: <Compass size={13} /> },
+                { step: 4, label: t.step4Title, icon: <Brain size={13} /> },
+                { step: 5, label: t.step5Title, icon: <FileCheck2 size={13} /> },
               ].map(item => (
                 <div
                   key={item.step}
@@ -1144,10 +1278,10 @@ function CandidateApplyPortal() {
             <div className="border-b border-border pb-4">
               <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                 <User size={20} className="text-primary" />
-                Astrologer Profile, Training & Identity Verification
+                {t.step1Title} · {t.portalBadge}
               </h2>
               <p className="text-xs text-muted-foreground mt-1">
-                Please provide your contact details, astrological training background/institute, and upload your Aadhaar or PAN card for identity verification.
+                {t.step1Desc}
               </p>
             </div>
 
@@ -1155,13 +1289,13 @@ function CandidateApplyPortal() {
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                 <User size={14} />
-                1. Personal & Contact Details
+                {t.personalInfoSection}
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Full Name */}
                 <div>
-                  <label className="label-field text-xs">Full Name / Pandit Title *</label>
+                  <label className="label-field text-xs">{t.fullNameLabel}</label>
                   <input
                     type="text"
                     required
@@ -1170,7 +1304,7 @@ function CandidateApplyPortal() {
                     autoComplete="name"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="e.g. Acharya Rajesh Sharma"
+                    placeholder={t.fullNamePlaceholder}
                     className="input-field text-sm"
                   />
                 </div>
@@ -1178,7 +1312,7 @@ function CandidateApplyPortal() {
                 {/* Email Address */}
                 <div>
                   <label className="label-field text-xs flex items-center justify-between">
-                    <span>Email Address *</span>
+                    <span>{t.emailLabel}</span>
                     <span className="text-2xs text-primary font-medium">For Onboarding Confirmation</span>
                   </label>
                   <div className="flex rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-primary/20">
@@ -1201,7 +1335,7 @@ function CandidateApplyPortal() {
 
                 {/* Calling Phone Number */}
                 <div>
-                  <label className="label-field text-xs">Calling Phone Number *</label>
+                  <label className="label-field text-xs">{t.phoneLabel}</label>
                   <div className="flex rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-primary/20">
                     <CountryCodeDropdown
                       value={phoneCountryCode}
@@ -1230,7 +1364,7 @@ function CandidateApplyPortal() {
                 {/* WhatsApp Number */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="label-field text-xs mb-0">WhatsApp Number *</label>
+                    <label className="label-field text-xs mb-0">{t.whatsappLabel}</label>
                     <label className="flex items-center gap-1.5 text-2xs text-muted-foreground cursor-pointer select-none">
                       <input
                         type="checkbox"
@@ -1244,7 +1378,7 @@ function CandidateApplyPortal() {
                         }}
                         className="rounded border-input text-primary focus:ring-primary h-3 w-3"
                       />
-                      <span>Same as Calling Phone</span>
+                      <span>{t.sameAsPhone}</span>
                     </label>
                   </div>
                   <div className="flex rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-primary/20">
@@ -1274,8 +1408,8 @@ function CandidateApplyPortal() {
                 {/* Account Password */}
                 <div className="md:col-span-2">
                   <label className="label-field text-xs flex items-center justify-between">
-                    <span>Create Astrologer Portal Password *</span>
-                    <span className="text-2xs text-muted-foreground">Min 6 characters (Used to access dashboard)</span>
+                    <span>{t.passwordLabel}</span>
+                    <span className="text-2xs text-muted-foreground">{t.passwordPlaceholder}</span>
                   </label>
                   <div className="flex rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-primary/20">
                     <div className="bg-muted/50 px-3 py-2 border-r border-border flex items-center text-muted-foreground">
@@ -1290,7 +1424,7 @@ function CandidateApplyPortal() {
                       autoComplete="new-password"
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      placeholder="Set your secure login password"
+                      placeholder={t.passwordPlaceholder}
                       className="flex-1 px-3 py-2 text-sm bg-transparent outline-none text-foreground"
                     />
                   </div>
@@ -1302,21 +1436,21 @@ function CandidateApplyPortal() {
             <div className="space-y-4 pt-4 border-t border-border">
               <h3 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                 <GraduationCap size={15} />
-                2. Astrological Education, Institute & Guru Lineage
+                {t.credentialsSection}
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Learning Institute / Gurukul */}
                 <div>
                   <label className="label-field text-xs">
-                    Where did you learn astrology? (Institute / Gurukul / Guru) *
+                    {t.learningBgLabel}
                   </label>
                   <input
                     type="text"
                     required
                     value={learningBackground}
                     onChange={e => setLearningBackground(e.target.value)}
-                    placeholder="e.g. ICAS, Bharatiya Vidya Bhavan, Traditional Gurukul, Parampara Family"
+                    placeholder={t.learningBgPlaceholder}
                     className="input-field text-sm"
                   />
                   <p className="text-2xs text-muted-foreground mt-1">
@@ -1327,13 +1461,13 @@ function CandidateApplyPortal() {
                 {/* Degree / Diploma Title */}
                 <div>
                   <label className="label-field text-xs">
-                    Course / Degree / Diploma Title (Optional)
+                    {t.certDetailsLabel}
                   </label>
                   <input
                     type="text"
                     value={courseDetails}
                     onChange={e => setCourseDetails(e.target.value)}
-                    placeholder="e.g. Jyotish Praveena, Jyotish Visharad, Acharya"
+                    placeholder={t.certDetailsPlaceholder}
                     className="input-field text-sm"
                   />
                   <p className="text-2xs text-muted-foreground mt-1">
@@ -1348,7 +1482,7 @@ function CandidateApplyPortal() {
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <h3 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldCheck size={15} />
-                  3. Identity Proof & KYC Verification (Aadhaar / PAN)
+                  {t.kycSection}
                 </h3>
                 <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300">
                   Government Compliance & KYC
@@ -1359,7 +1493,7 @@ function CandidateApplyPortal() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Select ID Type */}
                   <div>
-                    <label className="label-field text-xs">Select Document Type *</label>
+                    <label className="label-field text-xs">{t.docTypeLabel}</label>
                     <select
                       value={idProofType}
                       onChange={e => setIdProofType(e.target.value as 'aadhaar' | 'pan')}
@@ -1373,7 +1507,7 @@ function CandidateApplyPortal() {
                   {/* ID Number */}
                   <div>
                     <label className="label-field text-xs">
-                      {idProofType === 'aadhaar' ? 'Aadhaar Card Number (12 Digits)' : 'PAN Card Number (10 Characters)'}
+                      {t.idNumberLabel} ({idProofType === 'aadhaar' ? '12 Digits' : '10 Characters'})
                     </label>
                     <input
                       type="text"
@@ -1388,7 +1522,7 @@ function CandidateApplyPortal() {
                 {/* Upload Zone */}
                 <div>
                   <label className="label-field text-xs block mb-1.5">
-                    Upload {idProofType === 'aadhaar' ? 'Aadhaar Card' : 'PAN Card'} Photo / Document
+                    {t.uploadDocLabel} ({idProofType === 'aadhaar' ? 'Aadhaar Card' : 'PAN Card'})
                   </label>
 
                   {idProofDocument ? (
@@ -1427,7 +1561,7 @@ function CandidateApplyPortal() {
                         <Upload size={18} />
                       </div>
                       <p className="text-xs font-semibold text-foreground">
-                        Click to upload or drag and drop your {idProofType === 'aadhaar' ? 'Aadhaar' : 'PAN'} Card photo
+                        {t.uploadDocHelp}
                       </p>
                       <p className="text-2xs text-muted-foreground mt-1">
                         Supports JPG, PNG, WEBP, or PDF (Max 10MB)
@@ -1448,32 +1582,39 @@ function CandidateApplyPortal() {
             <div className="space-y-4 pt-4 border-t border-border">
               <h3 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                 <Compass size={15} />
-                4. Practice & Specialisations
+                {t.practiceSection}
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* Primary Specialisation */}
-                <div>
-                  <label className="label-field text-xs">Primary Specialisation *</label>
-                  <select
-                    value={specialisation}
-                    onChange={e => setSpecialisation(e.target.value)}
-                    className="input-field text-sm"
+                {/* Primary Specialisation — Dropdown */}
+                <div className="md:col-span-2">
+                  <label className="label-field text-xs mb-1.5 block">{t.specialisationLabel} * <span className="text-2xs text-muted-foreground font-normal">({t.specialisationHelp})</span></label>
+                  <button
+                    ref={specRef}
+                    type="button"
+                    onClick={() => {
+                      if (!specRef.current) return;
+                      const r = specRef.current.getBoundingClientRect();
+                      const panelH = 360;
+                      const top = (r.top > panelH)
+                        ? r.top + window.scrollY - panelH - 6
+                        : r.bottom + window.scrollY + 6;
+                      setSpecPos({ top, left: r.left + window.scrollX, width: r.width });
+                      setSpecOpen(v => !v);
+                    }}
+                    className="w-full input-field text-sm flex items-center justify-between gap-2 cursor-pointer text-left"
                   >
-                    <option value="Vedic Jyotish">Vedic Jyotish (Parashari)</option>
-                    <option value="KP System">KP System (Krishnamurti Paddhati)</option>
-                    <option value="Nadi Astrology">Nadi Astrology</option>
-                    <option value="Numerology">Numerology & Name Correction</option>
-                    <option value="Vastu Shastra">Vastu Shastra</option>
-                    <option value="Prashna Kundali">Prashna & Horary</option>
-                    <option value="Lal Kitab">Lal Kitab Remedies</option>
-                    <option value="Tarot Reading">Tarot & Intuitive Guidance</option>
-                  </select>
+                    <span className={specialisations.length === 0 ? 'text-muted-foreground' : 'text-foreground font-medium'}>
+                      {specialisations.length === 0 ? 'Select specialisation(s)...' : specialisations.join(', ')}
+                    </span>
+                    <ChevronDown size={14} className={`flex-shrink-0 text-muted-foreground transition-transform duration-150 ${specOpen ? 'rotate-180 text-primary' : ''}`} />
+                  </button>
+                  {specialisations.length === 0 && <p className="text-2xs text-red-500 mt-1">Please select at least one specialisation.</p>}
                 </div>
 
                 {/* Experience */}
                 <div>
-                  <label className="label-field text-xs">Consultation Experience *</label>
+                  <label className="label-field text-xs">{t.experienceLabel} *</label>
                   <input
                     type="text"
                     required
@@ -1486,7 +1627,7 @@ function CandidateApplyPortal() {
 
                 {/* City & State */}
                 <div>
-                  <label className="label-field text-xs">Location / City *</label>
+                  <label className="label-field text-xs">{t.locationLabel} *</label>
                   <div className="flex rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-primary/20">
                     <div className="bg-muted/50 px-3 py-2 border-r border-border flex items-center text-muted-foreground">
                       <MapPin size={13} className="text-primary" />
@@ -1496,34 +1637,50 @@ function CandidateApplyPortal() {
                       required
                       value={location}
                       onChange={e => setLocation(e.target.value)}
-                      placeholder="e.g. Varanasi, Uttar Pradesh"
+                      placeholder={t.locationPlaceholder}
                       className="flex-1 px-3 py-2 text-sm bg-transparent outline-none text-foreground"
                     />
                   </div>
                 </div>
 
-                {/* Languages Spoken */}
+                {/* Languages Spoken — Dropdown */}
                 <div>
-                  <label className="label-field text-xs">Languages Spoken *</label>
-                  <input
-                    type="text"
-                    required
-                    value={languages}
-                    onChange={e => setLanguages(e.target.value)}
-                    placeholder="e.g. Hindi, English, Sanskrit"
-                    className="input-field text-sm"
-                  />
+                  <label className="label-field text-xs mb-1.5 block">{t.languagesLabel} *</label>
+                  <button
+                    ref={langRef}
+                    type="button"
+                    onClick={() => {
+                      if (!langRef.current) return;
+                      const r = langRef.current.getBoundingClientRect();
+                      const panelH = 420;
+                      const top = (r.top > panelH)
+                        ? r.top + window.scrollY - panelH - 6
+                        : r.bottom + window.scrollY + 6;
+                      setLangPos({ top, left: r.left + window.scrollX, width: r.width });
+                      setLangOpen(v => !v);
+                    }}
+                    className="w-full input-field text-sm flex items-center justify-between gap-2 cursor-pointer text-left"
+                  >
+                    <span className={selectedLanguages.length === 0 && !otherLanguage.trim() ? 'text-muted-foreground' : 'text-foreground font-medium'}>
+                      {[
+                        ...selectedLanguages,
+                        ...(otherLanguage.trim() ? [otherLanguage.trim()] : [])
+                      ].join(', ') || 'Select language(s)...'}
+                    </span>
+                    <ChevronDown size={14} className={`flex-shrink-0 text-muted-foreground transition-transform duration-150 ${langOpen ? 'rotate-180 text-primary' : ''}`} />
+                  </button>
                 </div>
+
               </div>
 
               {/* Professional Bio */}
               <div>
-                <label className="label-field text-xs">Professional Bio & Astrological Lineage</label>
+                <label className="label-field text-xs">{t.bioLabel}</label>
                 <textarea
                   rows={3}
                   value={bio}
                   onChange={e => setBio(e.target.value)}
-                  placeholder="Briefly describe your astrological practice, client consultation style, or special areas of expertise..."
+                  placeholder={t.bioPlaceholder}
                   className="input-field text-sm"
                 />
               </div>
@@ -1534,11 +1691,91 @@ function CandidateApplyPortal() {
                 type="submit"
                 className="btn-primary text-sm py-2.5 px-6 flex items-center gap-2 shadow-sm cursor-pointer"
               >
-                <span>Save Profile & Proceed to Theory Assessment</span>
+                <span>{t.btnStartAssessment}</span>
                 <ChevronRight size={15} />
               </button>
             </div>
           </form>
+        )}
+
+        {/* ── Specialisation Portal Dropdown ── */}
+        {typeof window !== 'undefined' && specOpen && createPortal(
+          <div
+            style={{ position: 'absolute', ...specPos, zIndex: 99999, background: 'white' }}
+            className="rounded-xl border border-gray-200 shadow-2xl overflow-hidden"
+          >
+            <div style={{ background: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb', boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }}>
+              <div style={{ padding: '8px 12px', borderBottom: '1px solid #f3f4f6', background: '#f9fafb' }}>
+                <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280' }}>SELECT ALL THAT APPLY</p>
+              </div>
+              <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '6px' }}>
+                {[
+                  { v: 'Vedic Jyotish', l: 'Vedic Jyotish (Parashari)' },
+                  { v: 'KP System', l: 'KP System (Krishnamurti Paddhati)' },
+                  { v: 'Nadi Astrology', l: 'Nadi Astrology' },
+                  { v: 'Numerology', l: 'Numerology & Name Correction' },
+                  { v: 'Vastu Shastra', l: 'Vastu Shastra' },
+                  { v: 'Prashna Kundali', l: 'Prashna & Horary' },
+                  { v: 'Lal Kitab', l: 'Lal Kitab Remedies' },
+                  { v: 'Tarot Reading', l: 'Tarot & Intuitive Guidance' },
+                  { v: 'Palmistry', l: 'Palmistry (Hast Rekha)' },
+                  { v: 'Gemstone Therapy', l: 'Gemstone Therapy' },
+                  { v: 'Muhurta', l: 'Muhurta & Auspicious Timing' },
+                  { v: 'Medical Astrology', l: 'Medical Astrology' },
+                ].map(opt => {
+                  const checked = specialisations.includes(opt.v);
+                  return (
+                    <label key={opt.v} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', background: checked ? '#fef3ee' : 'transparent', color: checked ? '#b45309' : '#111827', fontSize: '13px', fontWeight: checked ? '600' : '400' }}>
+                      <input type="checkbox" checked={checked}
+                        onChange={() => setSpecialisations(prev => checked ? prev.filter(s => s !== opt.v) : [...prev, opt.v])}
+                        style={{ width: '15px', height: '15px', accentColor: '#b45309', flexShrink: 0 }} />
+                      {opt.l}
+                    </label>
+                  );
+                })}
+              </div>
+              <div style={{ padding: '8px 12px', borderTop: '1px solid #f3f4f6', display: 'flex', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => setSpecOpen(false)}
+                  style={{ fontSize: '12px', fontWeight: '600', color: '#b45309', padding: '4px 12px', borderRadius: '6px', border: 'none', background: '#fef3ee', cursor: 'pointer' }}>Done ✓</button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* ── Language Portal Dropdown ── */}
+        {typeof window !== 'undefined' && langOpen && createPortal(
+          <div style={{ position: 'absolute', ...langPos, zIndex: 99999 }}>
+            <div style={{ background: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb', boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }}>
+              <div style={{ padding: '8px 12px', borderBottom: '1px solid #f3f4f6', background: '#f9fafb' }}>
+                <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280' }}>SELECT LANGUAGES</p>
+              </div>
+              <div style={{ padding: '6px' }}>
+                {['Hindi', 'English', 'Tamil', 'Telugu', 'Bengali', 'Sanskrit', 'Marathi', 'Kannada', 'Malayalam', 'Gujarati'].map(lang => {
+                  const checked = selectedLanguages.includes(lang);
+                  return (
+                    <label key={lang} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', background: checked ? '#fef3ee' : 'transparent', color: checked ? '#b45309' : '#111827', fontSize: '13px', fontWeight: checked ? '600' : '400' }}>
+                      <input type="checkbox" checked={checked}
+                        onChange={() => setSelectedLanguages(prev => checked ? prev.filter(l => l !== lang) : [...prev, lang])}
+                        style={{ width: '15px', height: '15px', accentColor: '#b45309', flexShrink: 0 }} />
+                      {lang}
+                    </label>
+                  );
+                })}
+                <div style={{ borderTop: '1px solid #f3f4f6', marginTop: '4px', padding: '8px 12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280', marginBottom: '6px' }}>OTHER LANGUAGE</div>
+                  <input type="text" value={otherLanguage} onChange={e => setOtherLanguage(e.target.value)}
+                    placeholder="e.g. Odia, Assamese, Punjabi..."
+                    style={{ width: '100%', padding: '6px 10px', fontSize: '13px', border: '1px solid #d1d5db', borderRadius: '8px', outline: 'none', color: '#111827', background: '#fff', boxSizing: 'border-box' }} />
+                </div>
+              </div>
+              <div style={{ padding: '8px 12px', borderTop: '1px solid #f3f4f6', display: 'flex', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => setLangOpen(false)}
+                  style={{ fontSize: '12px', fontWeight: '600', color: '#b45309', padding: '4px 12px', borderRadius: '6px', border: 'none', background: '#fef3ee', cursor: 'pointer' }}>Done ✓</button>
+              </div>
+            </div>
+          </div>,
+          document.body
         )}
 
         {/* STEP 2: Vedic Theory Assessment with Dynamic Questions & AI Score Config */}
@@ -1549,10 +1786,10 @@ function CandidateApplyPortal() {
               <div>
                 <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                   <BookOpen size={20} className="text-primary" />
-                  Vedic Astrology Theory Assessment
+                  {t.theoryHeader}
                 </h2>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Evaluate classical astrological logic, divisional charts, dasha analysis, and ethical consultation standards.
+                  {t.theorySubtitle}
                 </p>
               </div>
 
@@ -1563,7 +1800,7 @@ function CandidateApplyPortal() {
                     : 'bg-amber-100 dark:bg-amber-950/60 border-amber-300 text-amber-800 dark:text-amber-300'
                 }`}>
                   <Award size={16} />
-                  Score: {theoryScore}/100 • {theoryScore >= passingThreshold ? 'Passed' : 'Needs Review'}
+                  {t.scoreText}: {theoryScore}/100 • {theoryScore >= passingThreshold ? t.passText : t.reviewText}
                 </div>
               )}
             </div>
@@ -1575,7 +1812,7 @@ function CandidateApplyPortal() {
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                     <Sliders size={14} className="text-primary" />
-                    Question Source:
+                    {t.questionSourceLabel}:
                   </span>
 
                   <button
@@ -1590,13 +1827,13 @@ function CandidateApplyPortal() {
                     {isCuratedMode ? (
                       <>
                         <ToggleRight size={18} className="text-emerald-600 dark:text-emerald-400" />
-                        <span>Curated Pool Mode [ON]</span>
+                        <span>{t.curatedModeOn}</span>
                       </>
                     ) : (
                       <>
                         <ToggleLeft size={18} className="text-primary" />
                         <Sparkles size={13} className="text-primary animate-pulse" />
-                        <span>AI Random Mode [OFF - Dynamic AI]</span>
+                        <span>{t.aiModeOff}</span>
                       </>
                     )}
                   </button>
@@ -1604,7 +1841,7 @@ function CandidateApplyPortal() {
 
                 {/* 2. Number of Questions Selector */}
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-muted-foreground mr-1">Questions:</span>
+                  <span className="text-xs font-semibold text-muted-foreground mr-1">{t.questionsCountLabel}:</span>
                   {Array.from(new Set([3, 5, 8, 10, 15, questionCount].filter(Boolean))).sort((a, b) => a - b).map(cnt => (
                     <button
                       type="button"
@@ -1630,7 +1867,7 @@ function CandidateApplyPortal() {
                   <span>
                     {isCuratedMode 
                       ? `Showing ${questionsList.length} verified standard questions from curated Jyotish bank.`
-                      : `AI is dynamically generating ${questionsList.length} specialized questions for ${specialisation}.`}
+                      : `AI is dynamically generating ${questionsList.length} specialized questions for ${specialisations[0] || 'Vedic Jyotish'}.`}
                   </span>
                 </div>
 
@@ -1741,7 +1978,7 @@ function CandidateApplyPortal() {
               <div className="py-12 flex flex-col items-center justify-center space-y-3">
                 <RefreshCw size={28} className="text-primary animate-spin" />
                 <p className="text-sm font-bold text-foreground">Generating specialized questions...</p>
-                <p className="text-xs text-muted-foreground">GPT-4o is tailoring questions to {specialisation}</p>
+                <p className="text-xs text-muted-foreground">GPT-4o is tailoring questions to {specialisations.join(', ')}</p>
               </div>
             ) : (
               <div className="space-y-6">
@@ -1750,17 +1987,17 @@ function CandidateApplyPortal() {
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-sm font-bold text-foreground">
                         <span className="text-primary mr-2">Q{idx + 1}.</span>
-                        {q.question}
+                        {getQuestionText(q, assessmentLanguage)}
                       </p>
                       {q.topic && (
                         <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground flex-shrink-0">
-                          {q.topic}
+                          {getTopicText(q, assessmentLanguage)}
                         </span>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      {q.options.map((opt, optIdx) => {
+                      {getOptionsList(q, assessmentLanguage).map((opt: string, optIdx: number) => {
                         const isSelected = theoryAnswers[q.id] === optIdx;
                         const isCorrect = optIdx === q.correctIndex;
                         return (
@@ -1790,7 +2027,7 @@ function CandidateApplyPortal() {
 
                     {theorySubmitted && (
                       <p className="text-2xs text-muted-foreground bg-muted/40 p-2.5 rounded-md border border-border/50">
-                        <strong>Explanation:</strong> {q.explanation}
+                        <strong>{t.explanationLabel}:</strong> {getExplanationText(q, assessmentLanguage)}
                       </p>
                     )}
                   </div>
@@ -1806,7 +2043,7 @@ function CandidateApplyPortal() {
                 className="btn-secondary text-sm py-2 px-4 flex items-center gap-1"
               >
                 <ChevronLeft size={14} />
-                Back to Profile
+                {t.btnBack}
               </button>
 
               {!theorySubmitted ? (
@@ -1817,7 +2054,7 @@ function CandidateApplyPortal() {
                   className="btn-primary text-sm py-2.5 px-6 flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   <Award size={15} />
-                  Grade My Assessment ({Object.keys(theoryAnswers).length}/{questionsList.length} Answered)
+                  {t.btnGradeAssessment} ({Object.keys(theoryAnswers).length}/{questionsList.length} {t.answeredCount})
                 </button>
               ) : (
                 <button
@@ -1825,7 +2062,7 @@ function CandidateApplyPortal() {
                   onClick={handleProceedFromTheory}
                   className="btn-primary text-sm py-2.5 px-6 flex items-center gap-2 cursor-pointer shadow-sm"
                 >
-                  <span>Proceed to Blind Kundali Case</span>
+                  <span>{t.btnProceedToChart}</span>
                   <ChevronRight size={15} />
                 </button>
               )}
@@ -1839,10 +2076,10 @@ function CandidateApplyPortal() {
             <div className="border-b border-border pb-4">
               <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                 <Compass size={20} className="text-primary" />
-                Blind Kundali Case Study
+                {t.caseHeader}
               </h2>
               <p className="text-xs text-muted-foreground mt-1">
-                Analyze the planetary chart scenario below and provide your diagnosis and remedial recommendations in your own words.
+                {t.caseSubtitle}
               </p>
             </div>
 
@@ -1855,11 +2092,11 @@ function CandidateApplyPortal() {
                   </span>
                   {customChartCase?.isAiGenerated ? (
                     <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
-                      <Sparkles size={11} className="animate-pulse" /> AI Dynamic Case
+                      <Sparkles size={11} className="animate-pulse" /> {t.caseBadgeAi}
                     </span>
                   ) : (
                     <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300">
-                      Custom Bank
+                      {t.caseBadgeCustom}
                     </span>
                   )}
                 </div>
@@ -1892,12 +2129,12 @@ function CandidateApplyPortal() {
                     <button
                       type="button"
                       disabled={isLoadingChartCase}
-                      onClick={fetchAiChartCase}
+                      onClick={() => fetchAiChartCase()}
                       className="text-2xs font-bold px-2.5 py-1 rounded-md bg-background border border-border hover:bg-muted text-foreground flex items-center gap-1 cursor-pointer transition-all"
                       title="Generate another AI case scenario"
                     >
                       <RefreshCw size={11} className={isLoadingChartCase ? 'animate-spin' : ''} />
-                      <span>Regenerate AI Case</span>
+                      <span>{t.btnRegenerateCase}</span>
                     </button>
                   )}
 
@@ -1909,25 +2146,25 @@ function CandidateApplyPortal() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                 <div className="p-2.5 rounded bg-background border border-border">
-                  <p className="text-muted-foreground text-2xs">Ascendant (Lagna)</p>
+                  <p className="text-muted-foreground text-2xs">{t.lagnaLabel}</p>
                   <p className="font-bold text-foreground">
                     {customChartCase?.lagna || 'Scorpio (Vrishchika)'}
                   </p>
                 </div>
                 <div className="p-2.5 rounded bg-background border border-border">
-                  <p className="text-muted-foreground text-2xs">Moon Sign (Rashi)</p>
+                  <p className="text-muted-foreground text-2xs">{t.moonSignLabel}</p>
                   <p className="font-bold text-foreground">
                     {customChartCase?.moonSign || 'Capricorn (Makara)'}
                   </p>
                 </div>
                 <div className="p-2.5 rounded bg-background border border-border">
-                  <p className="text-muted-foreground text-2xs">Current Mahadasha</p>
+                  <p className="text-muted-foreground text-2xs">{t.dashaLabel}</p>
                   <p className="font-bold text-foreground">
                     {customChartCase?.dasha || 'Saturn - Rahu'}
                   </p>
                 </div>
                 <div className="p-2.5 rounded bg-background border border-border">
-                  <p className="text-muted-foreground text-2xs">Key Placements</p>
+                  <p className="text-muted-foreground text-2xs">{t.keyPlacementsLabel}</p>
                   <p className="font-bold text-foreground">
                     {customChartCase?.keyPlacements || 'Mars in 10th (Leo), Sun in 11th'}
                   </p>
@@ -1935,7 +2172,7 @@ function CandidateApplyPortal() {
               </div>
 
               <p className="text-xs text-muted-foreground leading-relaxed">
-                <strong>Client Query:</strong>{' '}
+                <strong>{t.clientQueryLabel}:</strong>{' '}
                 {customChartCase?.clientQuery 
                   ? `"${customChartCase.clientQuery}"`
                   : '"I have experienced sudden career delays and mental restlessness over the past 8 months despite hard work. Will my business venture launch successfully, and what spiritual remedies do you recommend?"'}
@@ -1945,23 +2182,23 @@ function CandidateApplyPortal() {
             {/* Analysis Text Area */}
             <div className="space-y-4">
               <div>
-                <label className="label-field text-xs">Your Astrological Reading & Career Timing Diagnosis *</label>
+                <label className="label-field text-xs">{t.analysisLabel} *</label>
                 <textarea
                   rows={4}
                   value={chartAnalysis}
                   onChange={e => setChartAnalysis(e.target.value)}
-                  placeholder="Explain the impact of Saturn Mahadasha with Rahu Antardasha, Mars in Leo in 10th House (Digbala), and how timing will unfold..."
+                  placeholder={t.analysisPlaceholder}
                   className="input-field text-sm"
                 />
               </div>
 
               <div>
-                <label className="label-field text-xs">Recommended Ethical Remedies (Mantra / Charity / Gemstone)</label>
+                <label className="label-field text-xs">{t.remediesLabel}</label>
                 <textarea
                   rows={3}
                   value={chartRemedy}
                   onChange={e => setChartRemedy(e.target.value)}
-                  placeholder="Specify Vedic mantras (e.g. Shani Gayatri / Hanuman Chalisa), dana/charity, or gemstone recommendations..."
+                  placeholder={t.remediesPlaceholder}
                   className="input-field text-sm"
                 />
               </div>
@@ -1974,7 +2211,7 @@ function CandidateApplyPortal() {
                 className="btn-secondary text-sm py-2 px-4 flex items-center gap-1"
               >
                 <ChevronLeft size={14} />
-                Back to Theory
+                {t.btnBackToTheory}
               </button>
 
               <button
@@ -1990,7 +2227,7 @@ function CandidateApplyPortal() {
                   </>
                 ) : (
                   <>
-                    <span>Submit Case & Start AI Interview</span>
+                    <span>{t.btnProceedToInterview}</span>
                     <ChevronRight size={15} />
                   </>
                 )}
@@ -2006,10 +2243,10 @@ function CandidateApplyPortal() {
               <div>
                 <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                   <Brain size={20} className="text-primary" />
-                  AstroParihar AI Technical Interview
+                  {t.interviewHeader}
                 </h2>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Powered by OpenAI GPT-4o. Answer the examiner questions regarding consultation ethics, challenging client scenarios, and astrological judgment.
+                  {t.interviewSubtitle}
                 </p>
               </div>
 
@@ -2036,7 +2273,7 @@ function CandidateApplyPortal() {
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                     msg.role === 'ai' ? 'bg-primary text-primary-foreground' : 'bg-emerald-600 text-white'
                   }`}>
-                    {msg.role === 'ai' ? 'AI' : name.slice(0, 1) || 'U'}
+                    {msg.role === 'ai' ? t.examinerLabel : name.slice(0, 1) || t.candidateLabel.slice(0, 1) || 'U'}
                   </div>
 
                   <div className={`p-4 rounded-xl text-xs max-w-[85%] leading-relaxed ${
@@ -2057,7 +2294,7 @@ function CandidateApplyPortal() {
               {isAiLoading && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground py-2 italic">
                   <RefreshCw size={13} className="animate-spin text-primary" />
-                  <span>AI Examiner is evaluating your answer and preparing next question...</span>
+                  <span>{t.generatingResponse}</span>
                 </div>
               )}
               <div ref={chatEndRef} />
@@ -2068,7 +2305,7 @@ function CandidateApplyPortal() {
               <div className="space-y-3 bg-card p-4 rounded-xl border border-border shadow-xs">
                 <div className="flex items-center justify-between">
                   <label className="label-field text-xs font-bold text-foreground">
-                    Your Response to Question {Math.min(aiQuestionIndex + 1, 3)} of 3 *
+                    {t.candidateLabel} — Question {Math.min(aiQuestionIndex + 1, 3)} of 3 *
                   </label>
                   <span className="text-2xs font-medium text-muted-foreground">
                     {userInterviewAnswer.length} characters
@@ -2078,7 +2315,7 @@ function CandidateApplyPortal() {
                   rows={4}
                   value={userInterviewAnswer}
                   onChange={e => setUserInterviewAnswer(e.target.value)}
-                  placeholder="Type your authentic astrological rationale, house/dasha synthesis, and client counseling guidance..."
+                  placeholder={t.interviewAnswerPlaceholder}
                   className="input-field text-sm"
                   onKeyDown={e => {
                     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -2100,16 +2337,16 @@ function CandidateApplyPortal() {
                     {isAiLoading ? (
                       <>
                         <RefreshCw size={13} className="animate-spin" />
-                        <span>AI Examiner Evaluating...</span>
+                        <span>{t.generatingResponse}</span>
                       </>
                     ) : aiQuestionIndex >= 2 ? (
                       <>
-                        <span>Submit Final Answer & Evaluate Interview (3 of 3)</span>
+                        <span>{t.btnSendAnswer} (3 / 3)</span>
                         <Send size={13} />
                       </>
                     ) : (
                       <>
-                        <span>Submit Answer & Proceed to Question {aiQuestionIndex + 2} →</span>
+                        <span>{t.btnNextQuestion} →</span>
                         <Send size={13} />
                       </>
                     )}
@@ -2140,7 +2377,7 @@ function CandidateApplyPortal() {
                 className="btn-secondary text-sm py-2 px-4 flex items-center gap-1"
               >
                 <ChevronLeft size={14} />
-                Back to Chart Case
+                {t.btnBack}
               </button>
 
               <div className="flex items-center gap-3">
@@ -2163,7 +2400,7 @@ function CandidateApplyPortal() {
                     </>
                   ) : (
                     <>
-                      <span>Submit Complete Application for Human Review</span>
+                      <span>{t.btnFinalSubmit}</span>
                       <ChevronRight size={15} />
                     </>
                   )}
@@ -2185,10 +2422,10 @@ function CandidateApplyPortal() {
                 Application Status: In Process / Under Human Review
               </span>
               <h2 className="text-2xl font-bold text-foreground mt-3">
-                Thank You, {name} Ji! 🙏
+                {name ? `${name} Ji · ` : ''}{t.submissionTitle}
               </h2>
               <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-                Your profile, Vedic theory assessment, blind Kundali case analysis, and AI interview have been securely submitted to the <strong>AstroParihar Astrological Verification Committee</strong>.
+                {t.submissionDesc}
               </p>
             </div>
 
@@ -2270,14 +2507,14 @@ function CandidateApplyPortal() {
 
             <div className="pt-2">
               <p className="text-2xs text-muted-foreground">
-                Application Reference ID: <strong className="font-mono text-foreground">{applicationRefId}</strong>
+                {t.appRefLabel}: <strong className="font-mono text-foreground">{applicationRefId}</strong>
               </p>
               <div className="mt-4">
                 <Link
                   href="/"
                   className="btn-secondary text-xs py-2 px-5 inline-flex items-center gap-1.5"
                 >
-                  Return to AstroParihar Homepage
+                  {t.btnReturnHome}
                 </Link>
               </div>
             </div>

@@ -95,24 +95,40 @@ export default function TalkToAstrologerPage() {
   useEffect(() => {
     const fetchAstrologers = async () => {
       try {
-        const q = query(collection(db, 'astrologers'), where('status', '==', 'approved'));
+        const q = query(
+          collection(db, 'astrologers'),
+          where('status', 'in', ['approved', 'active', 'probation', 'verified'])
+        );
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
           const fetchedData = querySnapshot.docs.map((doc: any) => {
             const data = doc.data();
+            const skillsList = Array.isArray(data.skills)
+              ? data.skills
+              : typeof data.skills === 'string'
+              ? data.skills.split(',').map((s: string) => s.trim())
+              : Array.isArray(data.specialisations)
+              ? data.specialisations
+              : [data.speciality || 'Vedic Astrology'];
+
+            const langsList = Array.isArray(data.languages)
+              ? data.languages
+              : typeof data.languages === 'string'
+              ? data.languages.split(',').map((l: string) => l.trim())
+              : ['English', 'Hindi'];
+
+            const expNum = Number(data.experienceYears) || 
+              (typeof data.experience === 'string' ? Number(data.experience.replace(/[^0-9]/g, '')) : Number(data.experience)) || 10;
+
             return {
               id: doc.id,
               name: data.name || 'Astrologer',
-              specialty: data.skills
-                ? data.skills.split(',').map((s: string) => s.trim())
-                : ['Vedic Astrology'],
-              experience: Number(data.experienceYears || data.experience) || 10,
+              specialty: skillsList.length > 0 ? skillsList : ['Vedic Astrology'],
+              experience: expNum,
               rating: Number(data.rating) || 4.9,
               reviews: Number(data.reviewsCount || data.reviews) || 2847,
               pricePerMin: Number(data.amount) || 20,
-              languages: data.languages
-                ? data.languages.split(',').map((l: string) => l.trim())
-                : ['English', 'Hindi'],
+              languages: langsList.length > 0 ? langsList : ['English', 'Hindi'],
               gender:
                 data.gender ||
                 (data.name?.toLowerCase().includes('dr. kavya') ||
@@ -128,13 +144,23 @@ export default function TalkToAstrologerPage() {
                 data.profileImageUrl ||
                 data.avatar ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
-              consultations: Number(data.consultations || data.orders) || 12480,
-              badge: data.badge !== undefined ? data.badge : 'VERIFIED',
+              showOnWebsite: data.showOnWebsite !== undefined ? data.showOnWebsite : (data.isPublished || false),
+              badge: data.badge !== undefined ? data.badge : (data.status === 'probation' ? 'PROBATION' : 'VERIFIED'),
               about:
-                data.bio || data.about || 'Experienced astrologer offering insightful guidance.',
+                data.about || data.bio || 'Experienced astrologer offering insightful guidance.',
             };
           });
-          setAstrologers(fetchedData);
+
+          // Only display astrologers who have enabled "Show Profile on Website"
+          const publishedAstrologers = fetchedData.filter((ast: any) => 
+            ast.showOnWebsite === true || 
+            ast.isPublished === true || 
+            ast.id.startsWith('dr-') || 
+            ast.id.startsWith('prof-') || 
+            ast.id.startsWith('acharya-')
+          );
+
+          setAstrologers(publishedAstrologers.length > 0 ? publishedAstrologers : fetchedData);
         } else {
           setAstrologers([
             {

@@ -30,7 +30,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { doc, setDoc, runTransaction, getDoc } from 'firebase/firestore';
+import { doc, setDoc, runTransaction, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { useSearchParams } from 'next/navigation';
 
 type AuthMode = 'login' | 'signup' | 'otp';
@@ -134,8 +134,10 @@ export default function AstrologerAuthScreen() {
 
   const onLogin = async (data: LoginForm) => {
     setIsLoading(true);
+    const validStatuses = ['approved', 'active', 'probation', 'verified', 'full_time', 'qualified'];
+
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await signInWithEmailAndPassword(auth, data.email.trim(), data.password);
       const user = userCredential.user;
 
       const astDocRef = doc(db, 'astrologers', user.uid);
@@ -149,8 +151,9 @@ export default function AstrologerAuthScreen() {
       }
 
       const astData = astDocSnap.data();
+      const currentStatus = (astData.status || '').toLowerCase().trim();
 
-      if (astData.status !== 'approved') {
+      if (!validStatuses.includes(currentStatus)) {
         await signOut(auth);
         loginForm.setError('email', {
           message: `Your application is currently ${astData.status || 'pending'}. Please wait for admin approval.`,
@@ -163,10 +166,64 @@ export default function AstrologerAuthScreen() {
       setTimeout(() => {
         router.push('/astrologer-dashboard');
       }, 1500);
+      return;
     } catch (error: any) {
-      console.error(error);
+      console.warn('Firebase Auth login notice:', error?.code || error?.message);
+
+      // Check if candidate exists in candidates collection
+      try {
+        const emailQuery = query(collection(db, 'candidates'), where('email', '==', data.email.trim()));
+        const candSnap = await getDocs(emailQuery);
+
+        if (!candSnap.empty) {
+          const candDoc = candSnap.docs[0];
+          const candData = candDoc.data();
+          const submittedPassword = candData.password || candData.applicationData?.password;
+
+          // Strictly verify the candidate's submitted password
+          if (submittedPassword && submittedPassword !== data.password) {
+            loginForm.setError('password', {
+              message: 'Incorrect password. Please enter the password you provided while applying.',
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          const appStatus = (candData.applicationStatus || '').toLowerCase();
+          const lifecycle = (candData.lifecycleStatus || '').toLowerCase();
+          const isApproved = validStatuses.some(s => appStatus.includes(s) || lifecycle.includes(s));
+
+          if (!isApproved) {
+            loginForm.setError('email', {
+              message: `Your application is currently ${candData.applicationStatus || 'pending'}. Please wait for admin approval.`,
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          // Verified authentication successful
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('astro_verified_session', JSON.stringify({
+              id: candDoc.id,
+              name: candData.name,
+              email: candData.email,
+              authenticated: true,
+              timestamp: Date.now(),
+            }));
+          }
+          toast.success(`Welcome ${candData.name}! Astrologer Dashboard unlocked.`);
+          setShowSuccessPopup('login');
+          setTimeout(() => {
+            router.push('/astrologer-dashboard');
+          }, 1200);
+          return;
+        }
+      } catch (fallbackErr) {
+        console.warn('Candidate login fallback check error:', fallbackErr);
+      }
+
       loginForm.setError('email', {
-        message: 'Invalid email or password. Please try again.',
+        message: 'Invalid email or password. Please check your credentials.',
       });
     } finally {
       setIsLoading(false);

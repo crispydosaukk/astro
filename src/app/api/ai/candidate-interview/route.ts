@@ -9,10 +9,12 @@ interface InterviewQuestion {
   topicHi: string;
   topicTe: string;
   topicTa: string;
+  topicKn: string;
   question: string;
   questionHi: string;
   questionTe: string;
   questionTa: string;
+  questionKn: string;
 }
 
 const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
@@ -22,10 +24,12 @@ const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicHi: 'परामर्श कौशल एवं सहानुभूति',
     topicTe: 'క్లయింట్ సంప్రదింపులు & సానుభూతి',
     topicTa: 'வாடிக்கையாளர் ஆலோசனை & பரிவு',
+    topicKn: 'ಕ್ಲೈಂಟ್ ಸಮಾಲೋಚನೆ & ಸಹಾನುಭೂತಿ',
     question: 'A client comes to you in extreme distress, having experienced severe financial loss and marriage conflict. How do you approach the consultation without instilling fear while providing practical Vedic guidance?',
     questionHi: 'एक जातक अत्यधिक तनाव में आपके पास आता है, जिसे व्यापार में भारी नुकसान और वैवाहिक विवाद का सामना करना पड़ रहा है। भय उत्पन्न किए बिना सात्विक वैदिक मार्गदर्शन कैसे देंगे?',
     questionTe: 'ఒక క్లయింట్ తీవ్ర వ్యాపార నష్టం మరియు వైవాహిక సమస్యలతో తీవ్ర నిరాశలో మీ వద్దకు వచ్చారు. వారిలో భయం కలిగించకుండా, ప్రశాంతంగా ప్రామాణిక వేద జ్యోతిష పరిహారాలు మరియు మార్గదర్శకత్వాన్ని ఎలా అందిస్తారు?',
     questionTa: 'ஒரு வாடிக்கையாளர் கடுமையான நிதி இழப்பு மற்றும் குடும்பக் குழப்பத்துடன் உங்களிடம் வருகிறார். அவர்களுக்கு அச்சம் ஏற்படுத்தாமல், அமைதியாகவும் நடைமுறைக்கு உகந்ததாகவும் பாரம்பரிய வேத ஜோதிட வழிகாட்டலை எவ்வாறு வழங்குவீர்கள்?',
+    questionKn: 'ವ್ಯಾಪಾರ ನಷ್ಟ ಮತ್ತು ಕೌಟುಂಬಿಕ ಕಲಹದಿಂದ ತೀವ್ರ ದುಃಖದಲ್ಲಿರುವ ಕ್ಲೈಂಟ್ ನಿಮ್ಮ ಬಳಿ ಬಂದಾಗ, ಅವರಲ್ಲಿ ಭಯ ಹುಟ್ಟಿಸದೆ ಶಾಂತಿಯುತವಾಗಿ ಪ್ರಾಯೋಗಿಕ ವೈದಿಕ ಮಾರ್ಗದರ್ಶನವನ್ನು ಹೇಗೆ ನೀಡುತ್ತೀರಿ?',
   },
   {
     id: 2,
@@ -33,10 +37,12 @@ const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicHi: 'सात्विक उपाय एवं नैतिकता',
     topicTe: 'పరిహార నైతికత & ఉపాయాలు',
     topicTa: 'பரிகார நெறிமுறைகள் & உபாயங்கள்',
+    topicKn: 'ಸಾತ್ವಿಕ ಪರಿಹಾರ & ನೈತಿಕತೆ',
     question: 'What is your philosophy regarding astrological remedies (gems, mantras, charity)? How do you respond if a client is unable to afford expensive gemstone remedies?',
     questionHi: 'ज्योतिषीय उपायों (रत्न, मंत्र, दान) को लेकर आपका क्या दृष्टिकोण है? यदि कोई जातक महंगे रत्न खरीदने में असमर्थ हो, तो आप उसे क्या विकल्प सुझाते हैं?',
-    questionTe: 'జ్యోతిష పరిహారాల (రత్నాలు, మంత్రాలు, దానాలు) పై మీ దృక్పథం ఏమిటి? ఒకవేళ క్లయింట్ ఖరీదైన రత్నాలు ధరించలేని స్థితిలో ఉంటే, మీరు వారికి ఎలాంటి సాత్విక ప్రత్యామ్నాయాలు సూచిస్తారు?',
+    questionTe: 'జ్యోతిష పరిహారాల (రత్నాలు, మంత్రాలు, దానాలు) పై మీ దృక్పథం ఏమిటి? ఒకవేళ క్లయింట్ ఖరీదైన రత్నాలు ధరించలేని స్థితిలో ఉంటే, మీరు వారికి ఎలాంటి సాత్విక ప్రత್ಯಾమ్నాయాలు సూచిస్తారు?',
     questionTa: 'ஜோதிட பரிகாரங்கள் (ரத்தினங்கள், மந்திரங்கள், தானங்கள்) குறித்த உங்கள் அணுகுமுறை என்ன? விலை உயர்ந்த ரத்தினங்களை வாங்க முடியாத நிலையில் ஒரு வாடிக்கையாளர் இருந்தால், அவர்களுக்கு என்ன சாத்விக மாற்று வழிகளை பரிந்துரைப்பீர்கள்?',
+    questionKn: 'ಜ್ಯೋತಿಷ್ಯ ಪರಿಹಾರಗಳ (ರತ್ನಗಳು, ಮಂತ್ರಗಳು, ದಾನ) ಕುರಿತು ನಿಮ್ಮ ಸಿದ್ಧಾಂತವೇನು? ಕ್ಲೈಂಟ್ ದುಬಾರಿ ರತ್ನಗಳನ್ನು ಖರೀದಿಸಲು ಅಸಮರ್ಥರಾಗಿದ್ದರೆ ಅವರಿಗೆ ಯಾವ ಪರ್ಯಾಯ ಸಾತ್ವಿಕ ಪರಿಹಾರ ನೀಡುತ್ತೀರಿ?',
   },
   {
     id: 3,
@@ -44,15 +50,20 @@ const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicHi: 'दशा व गोचर समन्वय',
     topicTe: 'దశా మరియు గోచార సమన్వయం',
     topicTa: 'தசா & கோச்சார பலன்கள்',
+    topicKn: 'ದಶಾ ಮತ್ತು ಗೋಚಾರ ಸಮನ್ವಯ',
     question: 'When analyzing a complex chart with contradictory indications (e.g. strong benefic transits during a difficult Sade Sati or Maraka dasha), how do you synthesize the outcome and explain timing to the client?',
     questionHi: 'परस्पर विरोधी संकेतों वाली कुंडली में (जैसे मारक दशा या साढ़े साती के समय शुभ गोचर), आप फलादेश का समन्वय कैसे करते हैं और समय-काल कैसे समझाते हैं?',
     questionTe: 'పరస్పర విరుద్ధ గ్రహ స్థితులు ఉన్నప్పుడు (ఉదాహరణకు మారక దశ లేదా ఏలినాటి శనిలో శుభ గ్రహాల గోచారం), మీరు ఫలితాలను ఎలా సమన్వయం చేసి సరైన సమయ కాలాన్ని వివరిస్తారు?',
     questionTa: 'முரண்பட்ட கிரக நிலைகள் காணப்படும் ஜாதகத்தில் (உதாரணமாக மாரக தசா அல்லது ஏழரை சனியின் போது சுப கிரகங்களின் கோச்சாரம்), பலன்களை எவ்வாறு ஒருங்கிணைத்து சரியான காலக்கட்டத்தை வாடிக்கையாளருக்கு விளக்குவீர்கள்?',
+    questionKn: 'ಒಂದು ಕುಂಡಲಿಯಲ್ಲಿ ವಿರುದ್ಧ ಫಲಗಳಿರುವಾಗ (ಉದಾ. ಸಾಡೇ ಸಾತಿ ಅಥವಾ ಮಾರಕ ದಶೆಯಲ್ಲಿ ಶುಭ ಗೋಚಾರ), ನೀವು ಫಲಿತಾಂಶಗಳನ್ನು ಹೇಗೆ ಸಮನ್ವಯಗೊಳಿಸಿ ಕಾಲ ನಿರ್ಣಯವನ್ನು ವಿವರಿಸುತ್ತೀರಿ?',
   },
 ];
 
 function getLocalizedInterviewQ(q: InterviewQuestion, lang: string) {
   const l = (lang || 'en').toLowerCase();
+  if (l === 'kn' || l === 'kannada') {
+    return { id: q.id, topic: q.topicKn, question: q.questionKn };
+  }
   if (l === 'te' || l === 'telugu') {
     return { id: q.id, topic: q.topicTe, question: q.questionTe };
   }
@@ -79,7 +90,8 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const langStr = String(language || 'en').toLowerCase();
-    const langLabel = (langStr === 'te' || langStr === 'telugu') ? 'Telugu (తెలుగు)'
+    const langLabel = (langStr === 'kn' || langStr === 'kannada') ? 'Kannada (ಕನ್ನಡ)'
+      : (langStr === 'te' || langStr === 'telugu') ? 'Telugu (తెలుగు)'
       : (langStr === 'ta' || langStr === 'tamil') ? 'Tamil (தமிழ்)'
       : (langStr === 'hi' || langStr === 'hindi') ? 'Hindi (हिन्दी)'
       : 'English';

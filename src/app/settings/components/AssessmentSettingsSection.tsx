@@ -34,6 +34,7 @@ export interface ChartCase {
   keyPlacements: string;
   expectedObservations: string;
   recommendedRemedies: string;
+  enabled?: boolean;
 }
 
 export default function AssessmentSettingsSection() {
@@ -43,7 +44,7 @@ export default function AssessmentSettingsSection() {
 
   // Configuration State
   const [useCustomQuestions, setUseCustomQuestions] = useState<boolean>(true);
-  const [questionCount, setQuestionCount] = useState<number>(5);
+  const [questionCount, setQuestionCount] = useState<number>(15);
   const [customQuestions, setCustomQuestions] = useState<TheoryQuestion[]>([]);
 
   const [useCustomChartCases, setUseCustomChartCases] = useState<boolean>(true);
@@ -99,8 +100,8 @@ export default function AssessmentSettingsSection() {
       if (data.success && data.config) {
         const c = data.config;
         setUseCustomQuestions(c.useCustomQuestions !== undefined ? c.useCustomQuestions : true);
-        setQuestionCount(c.questionCount || 5);
-        setCustomQuestions(c.customQuestions && c.customQuestions.length > 0 ? c.customQuestions : THEORY_QUESTIONS.slice(0, 10));
+        setQuestionCount(c.questionCount || 15);
+        setCustomQuestions(c.customQuestions && c.customQuestions.length > 0 ? c.customQuestions : THEORY_QUESTIONS);
         setUseCustomChartCases(c.useCustomChartCases !== undefined ? c.useCustomChartCases : true);
         setChartCasesCount(c.chartCasesCount || 1);
         setCustomChartCases(c.customChartCases || []);
@@ -111,10 +112,28 @@ export default function AssessmentSettingsSection() {
       }
     } catch (err: any) {
       console.warn('Failed to load assessment settings:', err);
-      setCustomQuestions(THEORY_QUESTIONS.slice(0, 10));
+      setCustomQuestions(THEORY_QUESTIONS);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleToggleQuestion = (id: number) => {
+    setCustomQuestions(prev => prev.map(q => {
+      if (q.id === id) {
+        return { ...q, enabled: q.enabled === false ? true : false };
+      }
+      return q;
+    }));
+  };
+
+  const handleToggleChartCase = (id: string) => {
+    setCustomChartCases(prev => prev.map(c => {
+      if (c.id === id) {
+        return { ...c, enabled: c.enabled === false ? true : false };
+      }
+      return c;
+    }));
   };
 
   const handleSaveAll = async () => {
@@ -228,6 +247,7 @@ export default function AssessmentSettingsSection() {
         questionHi: qQuestionHi.trim() || undefined,
         questionTe: qQuestionTe.trim() || undefined,
         questionTa: qQuestionTa.trim() || undefined,
+        enabled: true,
       };
       setCustomQuestions(prev => [newQuestion, ...prev]);
     }
@@ -300,6 +320,7 @@ export default function AssessmentSettingsSection() {
         keyPlacements: cPlacements.trim(),
         expectedObservations: cObservations.trim(),
         recommendedRemedies: cRemedies.trim(),
+        enabled: true,
       };
       setCustomChartCases(prev => [newChart, ...prev]);
     }
@@ -313,6 +334,9 @@ export default function AssessmentSettingsSection() {
       setCustomChartCases(prev => prev.filter(c => c.id !== id));
     }
   };
+
+  const activeQuestionsCount = customQuestions.filter(q => q.enabled !== false).length;
+  const activeChartCasesCount = customChartCases.filter(c => c.enabled !== false).length;
 
   const filteredQuestions = customQuestions.filter(q => {
     if (!questionSearch.trim()) return true;
@@ -458,7 +482,7 @@ export default function AssessmentSettingsSection() {
           </div>
 
           <p className="text-2xs text-muted-foreground italic">
-            Candidates will receive {questionCount} questions from your pool of {customQuestions.length} custom questions.
+            Candidates will receive {questionCount} questions from your pool of {activeQuestionsCount} active questions ({customQuestions.length} total in bank).
           </p>
         </div>
       </div>
@@ -469,10 +493,10 @@ export default function AssessmentSettingsSection() {
           <div>
             <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
               <FileQuestion size={16} className="text-primary" />
-              Stage 1: Vedic Theory Questions Bank ({customQuestions.length} in Pool)
+              Stage 1: Vedic Theory Questions Bank ({activeQuestionsCount} Active / {customQuestions.length} in Pool)
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Create, edit, or delete questions. Click on any question to modify its options or answer key.
+              Create, edit, delete, or toggle questions ON/OFF. Only active questions are assigned to applicants.
             </p>
           </div>
 
@@ -503,7 +527,11 @@ export default function AssessmentSettingsSection() {
             filteredQuestions.map((q, idx) => (
               <div 
                 key={q.id || idx} 
-                className="p-3.5 rounded-xl border border-border bg-card hover:border-primary/40 transition-colors space-y-2.5"
+                className={`p-3.5 rounded-xl border transition-all space-y-2.5 ${
+                  q.enabled !== false
+                    ? 'border-border bg-card hover:border-primary/40'
+                    : 'border-dashed border-border/80 bg-muted/20 opacity-70'
+                }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
@@ -514,6 +542,11 @@ export default function AssessmentSettingsSection() {
                           {q.topic}
                         </span>
                       )}
+                      {q.enabled === false && (
+                        <span className="text-3xs font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                          Disabled / Off
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs font-semibold text-foreground leading-relaxed">
                       {q.question}
@@ -521,6 +554,28 @@ export default function AssessmentSettingsSection() {
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleQuestion(q.id)}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer ${
+                        q.enabled !== false
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                          : 'bg-muted border-border text-muted-foreground hover:bg-muted/80'
+                      }`}
+                      title={q.enabled !== false ? 'Currently ACTIVE in candidate exam pool. Click to turn OFF.' : 'Currently TURNED OFF. Click to enable in candidate exam pool.'}
+                    >
+                      {q.enabled !== false ? (
+                        <>
+                          <ToggleRight size={15} className="text-emerald-600 dark:text-emerald-400" />
+                          <span>Active [ON]</span>
+                        </>
+                      ) : (
+                        <>
+                          <ToggleLeft size={15} className="text-muted-foreground" />
+                          <span>Off</span>
+                        </>
+                      )}
+                    </button>
                     <button
                       onClick={() => handleOpenEditQuestion(q)}
                       className="p-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors cursor-pointer"
@@ -582,10 +637,10 @@ export default function AssessmentSettingsSection() {
           <div>
             <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
               <BookOpen size={16} className="text-primary" />
-              Stage 2: Blind Kundali Case Studies ({customChartCases.length} Active)
+              Stage 2: Blind Kundali Case Studies ({activeChartCasesCount} Active / {customChartCases.length} in Pool)
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Configure real-life client cases presented to candidates for chart interpretation and remedial recommendations.
+              Configure real-life client cases presented to candidates. Toggle cases ON or OFF, or add new dynamic cases.
             </p>
           </div>
 
@@ -619,6 +674,50 @@ export default function AssessmentSettingsSection() {
           </div>
         </div>
 
+        {/* Number of Chart Cases Selector */}
+        <div className="p-4 border-b border-border bg-muted/10 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+                Case Study Allocation
+              </span>
+              <h4 className="text-sm font-bold text-foreground mt-0.5">
+                How Many Kundali Cases To Assign Each Candidate?
+              </h4>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {[1, 2, 3].map(cnt => (
+                <button
+                  type="button"
+                  key={cnt}
+                  onClick={() => setChartCasesCount(cnt)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    chartCasesCount === cnt 
+                      ? 'bg-primary text-primary-foreground shadow-xs' 
+                      : 'bg-muted/50 hover:bg-muted border border-border text-foreground'
+                  }`}
+                >
+                  {cnt} Case{cnt > 1 ? 's' : ''}
+                </button>
+              ))}
+              <div className="flex items-center gap-1.5 ml-2">
+                <span className="text-xs text-muted-foreground">Custom:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={chartCasesCount}
+                  onChange={e => setChartCasesCount(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-14 px-2 py-1 text-xs border border-border rounded-lg bg-background font-bold text-center"
+                />
+              </div>
+            </div>
+          </div>
+          <p className="text-2xs text-muted-foreground italic">
+            Candidates will solve {chartCasesCount} Kundali case{chartCasesCount > 1 ? 's' : ''} from your {activeChartCasesCount} active case{activeChartCasesCount !== 1 ? 's' : ''} ({customChartCases.length} total configured).
+          </p>
+        </div>
+
         <div className="p-4 space-y-4">
           {customChartCases.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground text-xs">
@@ -626,13 +725,49 @@ export default function AssessmentSettingsSection() {
             </div>
           ) : (
             customChartCases.map((c, idx) => (
-              <div key={c.id || idx} className="p-4 rounded-xl border border-border bg-card space-y-3">
+              <div 
+                key={c.id || idx} 
+                className={`p-4 rounded-xl border space-y-3 transition-all ${
+                  c.enabled !== false
+                    ? 'border-border bg-card'
+                    : 'border-dashed border-border/80 bg-muted/20 opacity-70'
+                }`}
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="text-2xs font-bold uppercase tracking-wider text-primary">Case Study #{idx + 1}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xs font-bold uppercase tracking-wider text-primary">Case Study #{idx + 1}</span>
+                      {c.enabled === false && (
+                        <span className="text-3xs font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                          Excluded / Off
+                        </span>
+                      )}
+                    </div>
                     <h4 className="text-sm font-bold text-foreground mt-0.5">{c.title}</h4>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleChartCase(c.id)}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs font-bold border transition-all cursor-pointer ${
+                        c.enabled !== false
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                          : 'bg-muted border-border text-muted-foreground hover:bg-muted/80'
+                      }`}
+                      title={c.enabled !== false ? 'Active case study - click to turn OFF' : 'Turned OFF - click to turn ON'}
+                    >
+                      {c.enabled !== false ? (
+                        <>
+                          <ToggleRight size={15} className="text-emerald-600 dark:text-emerald-400" />
+                          <span>Active [ON]</span>
+                        </>
+                      ) : (
+                        <>
+                          <ToggleLeft size={15} className="text-muted-foreground" />
+                          <span>Off</span>
+                        </>
+                      )}
+                    </button>
                     <button
                       onClick={() => handleOpenEditChart(c)}
                       className="p-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground transition-colors cursor-pointer"

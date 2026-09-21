@@ -3,38 +3,80 @@
 import React, { useState } from 'react';
 import type { ReviewCandidate } from './ReviewWorkspace';
 import Modal from '@/components/ui/Modal';
-import { CheckCircle2, XCircle, MessageSquare, PauseCircle, AlertTriangle, Shield } from 'lucide-react';
+import { CheckCircle2, XCircle, MessageSquare, PauseCircle, AlertTriangle, Shield, RotateCcw } from 'lucide-react';
 import { updateCandidateStatus } from '@/lib/firebase/candidateService';
 import { db } from '@/lib/firebase/config';
 import { doc, setDoc } from 'firebase/firestore';
+import { logAuditEvent } from '@/lib/auditLogService';
 
 interface ReviewDecisionBarProps {
   candidate: ReviewCandidate;
+  onUpdateCandidate?: (id: string, updates: Partial<ReviewCandidate>) => void;
 }
 
-type DecisionType = 'approve' | 'reject' | 'request-info' | 'hold' | null;
+type DecisionType = 'approve' | 'reject' | 'request-info' | 'hold' | 'reopen' | null;
 
-export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps) {
+export default function ReviewDecisionBar({ candidate, onUpdateCandidate }: ReviewDecisionBarProps) {
   const [confirmModal, setConfirmModal] = useState<DecisionType>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [decided, setDecided] = useState(false);
   const [decisionMade, setDecisionMade] = useState<string | null>(null);
 
+  const isAlreadyRejected = candidate.status?.toLowerCase().includes('reject');
+  const isAlreadyApproved = candidate.status?.toLowerCase().includes('approv') || candidate.status?.toLowerCase().includes('verif');
+
   const handleDecision = async () => {
     setIsSubmitting(true);
     try {
+      if (confirmModal === 'reopen') {
+        const newLifecycle = 'human-review';
+        const newAppStatus = 'Under Committee Review';
+
+        await updateCandidateStatus(candidate.id, {
+          lifecycleStatus: newLifecycle,
+          applicationStatus: newAppStatus,
+        });
+
+        onUpdateCandidate?.(candidate.id, {
+          status: 'Human Review',
+        });
+
+        logAuditEvent({
+          user: candidate.reviewerAssigned || 'Priya Nair (Reviewer)',
+          action: 'APPLICATION_REOPENED',
+          entity: `Candidate: ${candidate.name}`,
+          entityId: candidate.appId || candidate.id,
+          category: 'review',
+          details: `Application for ${candidate.name} was reopened for committee re-evaluation.`,
+        });
+
+        setDecided(false);
+        setDecisionMade(null);
+        return;
+      }
+
       // Map decision to lifecycle status
       let newLifecycle = candidate.status;
-      if (confirmModal === 'approve') newLifecycle = 'verified';
-      else if (confirmModal === 'reject') newLifecycle = 'rejected';
-      else if (confirmModal === 'request-info') newLifecycle = 'pending-info';
-      else if (confirmModal === 'hold') newLifecycle = 'on-hold';
+      let newAppStatus = 'Under Review';
+      if (confirmModal === 'approve') {
+        newLifecycle = 'verified';
+        newAppStatus = 'Approved';
+      } else if (confirmModal === 'reject') {
+        newLifecycle = 'rejected';
+        newAppStatus = 'Rejected';
+      } else if (confirmModal === 'request-info') {
+        newLifecycle = 'pending-info';
+        newAppStatus = 'Pending Info';
+      } else if (confirmModal === 'hold') {
+        newLifecycle = 'on-hold';
+        newAppStatus = 'On Hold';
+      }
 
-      // Update Firestore if candidate has a matching ID
+      // 1. Update Firestore & Broadcast
       try {
         await updateCandidateStatus(candidate.id, {
           lifecycleStatus: newLifecycle,
-          applicationStatus: confirmModal === 'approve' ? 'Approved' : confirmModal === 'reject' ? 'Rejected' : 'Under Review'
+          applicationStatus: newAppStatus
         });
 
         // If approved, activate astrologer account in 'astrologers' collection
@@ -101,11 +143,34 @@ export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps)
       } catch (e) {
         console.warn('Could not sync directly to Firestore (local record update):', e);
       }
-    } catch (err) {
-      console.error('Decision error:', err);
-    } finally {
-      setIsSubmitting(false);
-      setConfirmModal(null);
+
+      // 2. Propagate state update up to parent workspace
+      onUpdateCandidate?.(candidate.id, {
+        status: newAppStatus,
+      });
+
+      // 3. Log to Immutable Audit Trail
+      const actionName = 
+        confirmModal === 'approve' ? 'APPLICATION_APPROVED_PROBATION' :
+        confirmModal === 'reject' ? 'APPLICATION_REJECTED' :
+        confirmModal === 'request-info' ? 'ADDITIONAL_INFO_REQUESTED' :
+        'APPLICATION_PLACED_ON_HOLD';
+
+      const actionDetails = 
+        confirmModal === 'approve' ? `Application approved for 30-day live probation by ${candidate.reviewerAssigned || 'Priya Nair'}.` :
+        confirmModal === 'reject' ? `Application for ${candidate.name} officially rejected by review committee.` :
+        confirmModal === 'request-info' ? `Additional verification documentation requested from ${candidate.name}.` :
+        `Application for ${candidate.name} placed on hold.`;
+
+      logAuditEvent({
+        user: candidate.reviewerAssigned || 'Priya Nair (Reviewer)',
+        action: actionName,
+        entity: `Candidate: ${candidate.name}`,
+        entityId: candidate.appId || candidate.id,
+        category: 'review',
+        details: actionDetails,
+      });
+
       setDecided(true);
       setDecisionMade(
         confirmModal === 'approve' ? 'Approved & Account Activated' :
@@ -113,6 +178,11 @@ export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps)
         confirmModal === 'request-info' ? 'Additional Information Requested' :
         'Placed on Hold'
       );
+    } catch (err) {
+      console.error('Decision error:', err);
+    } finally {
+      setIsSubmitting(false);
+      setConfirmModal(null);
     }
   };
 
@@ -124,7 +194,8 @@ export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps)
       btnClass: 'btn-primary',
     },
     reject: {
-      title: 'Reject Application',body: `You are rejecting the application of ${candidate.name}. The candidate will be notified with your review notes. This decision will be recorded in the audit log.`,
+      title: 'Reject Application',
+      body: `You are rejecting the application of ${candidate.name}. The candidate will be notified with your review notes. This decision will be recorded in the audit log.`,
       btnLabel: 'Confirm Rejection',
       btnClass: 'bg-red-700 text-white rounded-lg font-semibold text-sm px-4 py-2 hover:bg-red-800 transition-colors',
     },
@@ -140,21 +211,93 @@ export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps)
       btnLabel: 'Confirm Hold',
       btnClass: 'bg-amber-600 text-white rounded-lg font-semibold text-sm px-4 py-2 hover:bg-amber-700 transition-colors',
     },
+    reopen: {
+      title: 'Reopen Application for Review',
+      body: `This will reset the decision status for ${candidate.name} and return the application to "Human Review" queue for re-evaluation.`,
+      btnLabel: 'Confirm Reopen',
+      btnClass: 'btn-primary',
+    },
   };
 
+  // If a new decision was just recorded in this session
   if (decided && decisionMade) {
+    const isRejection = decisionMade.toLowerCase().includes('reject');
     return (
-      <div className="card-elevated p-5 border-2 border-green-300 bg-green-50/50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle2 size={20} className="text-green-700" />
+      <div className={`card-elevated p-5 border-2 ${isRejection ? 'border-rose-300 bg-rose-50/50 dark:bg-rose-950/20' : 'border-green-300 bg-green-50/50 dark:bg-green-950/20'}`}>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isRejection ? 'bg-rose-100 text-rose-700' : 'bg-green-100 text-green-700'}`}>
+              {isRejection ? <XCircle size={20} /> : <CheckCircle2 size={20} />}
+            </div>
+            <div>
+              <p className={`font-bold text-md ${isRejection ? 'text-rose-900 dark:text-rose-200' : 'text-green-900 dark:text-green-200'}`}>
+                Decision Recorded: {decisionMade}
+              </p>
+              <p className={`text-xs mt-0.5 ${isRejection ? 'text-rose-700 dark:text-rose-300' : 'text-green-700 dark:text-green-300'}`}>
+                Decision saved to immutable audit log · Candidate notified · Application updated
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-bold text-md text-green-900">Decision Recorded: {decisionMade}</p>
-            <p className="text-xs text-green-700 mt-0.5">
-              Decision saved to audit log · Candidate notified · Workflow updated
-            </p>
+          <button
+            onClick={() => setConfirmModal('reopen')}
+            className="text-xs font-semibold px-3 py-1.5 border border-border rounded-lg hover:bg-background text-foreground transition"
+          >
+            Re-evaluate Application
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If candidate was already rejected previously
+  if (isAlreadyRejected) {
+    return (
+      <div className="card-elevated p-5 border-2 border-rose-300 bg-rose-50/60 dark:bg-rose-950/25">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/40 rounded-full flex items-center justify-center flex-shrink-0 text-rose-700 dark:text-rose-400">
+              <XCircle size={20} />
+            </div>
+            <div>
+              <p className="font-bold text-base text-rose-900 dark:text-rose-200">Current Status: Application Rejected</p>
+              <p className="text-xs text-rose-700 dark:text-rose-300 mt-0.5">
+                This candidate's application has been rejected by the review committee. Decision recorded in audit log.
+              </p>
+            </div>
           </div>
+          <button
+            onClick={() => setConfirmModal('reopen')}
+            className="text-xs font-semibold px-4 py-2 border border-rose-300 dark:border-rose-800 bg-background hover:bg-rose-100 text-rose-800 dark:text-rose-200 rounded-lg transition"
+          >
+            Re-evaluate / Reopen Application
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If candidate was already approved previously
+  if (isAlreadyApproved) {
+    return (
+      <div className="card-elevated p-5 border-2 border-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/25">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-700 dark:text-emerald-400">
+              <CheckCircle2 size={20} />
+            </div>
+            <div>
+              <p className="font-bold text-base text-emerald-900 dark:text-emerald-200">Current Status: Approved for Probation</p>
+              <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5">
+                Astrologer account is activated and active in 30-day live consultation probation.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setConfirmModal('reopen')}
+            className="text-xs font-semibold px-4 py-2 border border-emerald-300 dark:border-emerald-800 bg-background hover:bg-emerald-100 text-emerald-800 dark:text-emerald-200 rounded-lg transition"
+          >
+            Change Decision
+          </button>
         </div>
       </div>
     );
@@ -282,7 +425,15 @@ export default function ReviewDecisionBar({ candidate }: ReviewDecisionBarProps)
                 <p className="text-xs text-red-800 font-medium">
                   ⚠ This action will permanently close this application<br />
                   ⚠ Candidate will be notified with your review notes<br />
-                  ⚠ Candidate can reapply after 6 months
+                  ⚠ Recorded to immutable audit log with reviewer ID
+                </p>
+              </div>
+            )}
+            {confirmModal === 'reopen' && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800 font-medium">
+                  ✓ Application status will return to "Under Committee Review"<br />
+                  ✓ Committee reviewers can re-score and enter a new decision
                 </p>
               </div>
             )}

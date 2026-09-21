@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AIScoreBadge from '@/components/ui/AIScoreBadge';
-import { AlertCircle, Clock, User, Search, X, ShieldAlert } from 'lucide-react';
+import { AlertCircle, Clock, User, Search, X, ShieldAlert, XCircle, CheckCircle2 } from 'lucide-react';
 import type { ReviewCandidate } from './ReviewWorkspace';
 
 interface ReviewCandidateListProps {
@@ -11,7 +11,7 @@ interface ReviewCandidateListProps {
 
 export default function ReviewCandidateList({ candidates, selectedId, onSelect }: ReviewCandidateListProps) {
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'review' | 'disqualified'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'review' | 'rejected' | 'disqualified'>('all');
 
   const filtered = candidates.filter(c => {
     // 1. Text Search
@@ -32,8 +32,11 @@ export default function ReviewCandidateList({ candidates, selectedId, onSelect }
     if (statusFilter === 'disqualified') {
       return c.isDisqualified || (c.tabViolations && c.tabViolations >= 3);
     }
+    if (statusFilter === 'rejected') {
+      return Boolean(c.status && c.status.toLowerCase().includes('reject'));
+    }
     if (statusFilter === 'review') {
-      return !c.isDisqualified;
+      return !c.isDisqualified && !(c.status && c.status.toLowerCase().includes('reject'));
     }
 
     return true;
@@ -74,7 +77,7 @@ export default function ReviewCandidateList({ candidates, selectedId, onSelect }
         </div>
 
         {/* Status Filter Chips */}
-        <div className="flex items-center gap-1.5 pt-0.5">
+        <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
           <button
             onClick={() => setStatusFilter('all')}
             className={`text-2xs px-2 py-0.5 rounded-full font-semibold transition-colors ${
@@ -96,6 +99,16 @@ export default function ReviewCandidateList({ candidates, selectedId, onSelect }
             Under Review
           </button>
           <button
+            onClick={() => setStatusFilter('rejected')}
+            className={`text-2xs px-2 py-0.5 rounded-full font-semibold transition-colors flex items-center gap-1 ${
+              statusFilter === 'rejected'
+                ? 'bg-rose-600 text-white'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            }`}
+          >
+            <XCircle size={10} /> Rejected
+          </button>
+          <button
             onClick={() => setStatusFilter('disqualified')}
             className={`text-2xs px-2 py-0.5 rounded-full font-semibold transition-colors flex items-center gap-1 ${
               statusFilter === 'disqualified'
@@ -115,64 +128,79 @@ export default function ReviewCandidateList({ candidates, selectedId, onSelect }
             No applicants match "{search}".
           </div>
         ) : (
-          filtered.map(c => (
-            <button
-              key={c.id}
-              onClick={() => onSelect(c.id)}
-              className={`w-full text-left px-3.5 py-3 transition-colors duration-150 hover:bg-muted/40 ${
-                selectedId === c.id ? 'bg-primary/5 border-l-3 border-primary' : ''
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-full terracotta-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {c.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+          filtered.map(c => {
+            const isRejected = Boolean(c.status && c.status.toLowerCase().includes('reject'));
+            const isApproved = Boolean(c.status && c.status.toLowerCase().includes('approv'));
+
+            return (
+              <button
+                key={c.id}
+                onClick={() => onSelect(c.id)}
+                className={`w-full text-left px-3.5 py-3 transition-colors duration-150 hover:bg-muted/40 ${
+                  selectedId === c.id ? 'bg-primary/5 border-l-3 border-primary' : ''
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-full terracotta-gradient flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {c.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-xs text-foreground truncate">{c.name}</p>
+                      <p className="text-2xs text-muted-foreground truncate">{c.location}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-xs text-foreground truncate">{c.name}</p>
-                    <p className="text-2xs text-muted-foreground truncate">{c.location}</p>
-                  </div>
+                  <AIScoreBadge score={c.aiScore} size="sm" />
                 </div>
-                <AIScoreBadge score={c.aiScore} size="sm" />
-              </div>
 
-              <div className="flex items-center gap-1 flex-wrap">
-                {c.specialisations.slice(0, 2).map(s => (
-                  <span key={`rev-spec-${c.id}-${s}`} className="text-2xs font-semibold bg-accent/10 text-accent px-1.5 py-0.5 rounded-full truncate max-w-[120px]">
-                    {s}
-                  </span>
-                ))}
-                {c.isDisqualified && (
-                  <span className="text-2xs font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                    <ShieldAlert size={9} /> Disqualified
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between mt-2 pt-1 border-t border-border/40 text-2xs text-muted-foreground">
-                <span className="font-mono">{c.appId}</span>
-                <div className="flex items-center gap-1.5">
-                  {c.priority === 'high' && (
-                    <span className="flex items-center gap-0.5 text-red-700 dark:text-red-400 font-bold">
-                      <AlertCircle size={9} />
-                      High Priority
+                <div className="flex items-center gap-1 flex-wrap">
+                  {c.specialisations.slice(0, 2).map(s => (
+                    <span key={`rev-spec-${c.id}-${s}`} className="text-2xs font-semibold bg-accent/10 text-accent px-1.5 py-0.5 rounded-full truncate max-w-[120px]">
+                      {s}
+                    </span>
+                  ))}
+                  {c.isDisqualified && (
+                    <span className="text-2xs font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                      <ShieldAlert size={9} /> Disqualified
                     </span>
                   )}
-                  {c.reviewerAssigned ? (
-                    <span className="flex items-center gap-0.5 text-muted-foreground">
-                      <User size={9} />
-                      {c.reviewerAssigned.split(' ')[0]}
+                  {isRejected && (
+                    <span className="text-2xs font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                      <XCircle size={9} /> Rejected
                     </span>
-                  ) : (
-                    <span className="flex items-center gap-0.5 text-amber-700 dark:text-amber-400 font-semibold">
-                      <Clock size={9} />
-                      Unassigned
+                  )}
+                  {isApproved && (
+                    <span className="text-2xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                      <CheckCircle2 size={9} /> Approved
                     </span>
                   )}
                 </div>
-              </div>
-            </button>
-          ))
+
+                <div className="flex items-center justify-between mt-2 pt-1 border-t border-border/40 text-2xs text-muted-foreground">
+                  <span className="font-mono">{c.appId}</span>
+                  <div className="flex items-center gap-1.5">
+                    {c.priority === 'high' && (
+                      <span className="flex items-center gap-0.5 text-red-700 dark:text-red-400 font-bold">
+                        <AlertCircle size={9} />
+                        High Priority
+                      </span>
+                    )}
+                    {c.reviewerAssigned ? (
+                      <span className="flex items-center gap-0.5 text-muted-foreground">
+                        <User size={9} />
+                        {c.reviewerAssigned.split(' ')[0]}
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-0.5 text-amber-700 dark:text-amber-400 font-semibold">
+                        <Clock size={9} />
+                        Unassigned
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            );
+          })
         )}
       </div>
     </div>

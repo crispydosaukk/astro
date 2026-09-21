@@ -329,10 +329,53 @@ export async function updateCandidateStatus(
   const clean = Object.fromEntries(
     Object.entries(updates).filter(([_, v]) => v !== undefined)
   );
-  await updateDoc(docRef, {
-    ...clean,
-    updatedAt: serverTimestamp(),
-  });
+  try {
+    await setDoc(docRef, {
+      ...clean,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+
+    // When candidate is approved or placed on probation, sync to astrologers collection
+    const appStatus = (clean.applicationStatus || '').toString().toLowerCase();
+    const lifecycle = (clean.lifecycleStatus || '').toString().toLowerCase();
+    const isApprovedOrProbation = 
+      lifecycle === 'probation' || 
+      lifecycle === 'verified' || 
+      lifecycle === 'approved' ||
+      appStatus.includes('approv') ||
+      appStatus.includes('probation');
+
+    if (isApprovedOrProbation) {
+      try {
+        const candSnap = await getDoc(docRef);
+        if (candSnap.exists()) {
+          const cand = candSnap.data();
+          const astRef = doc(db, 'astrologers', id);
+          await setDoc(astRef, {
+            id,
+            name: cand.name,
+            email: cand.email,
+            phone: cand.phone,
+            status: 'approved',
+            isVerified: true,
+            probationEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+        }
+      } catch (syncErr) {
+        console.warn('Astrologers collection sync notice:', syncErr);
+      }
+    }
+  } catch (err) {
+    console.warn('Firestore setDoc status update error:', err);
+  }
+
+  // Broadcast event across active windows/components
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('candidate_status_updated', {
+      detail: { id, updates: clean }
+    }));
+  }
 }
 
 /**

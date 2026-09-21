@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    const langLabel = (langStr === 'te' || langStr === 'telugu') ? 'Telugu (తెలుగు)'
+    const langLabel = (langStr === 'kn' || langStr === 'kannada') ? 'Kannada (ಕನ್ನಡ)'
+      : (langStr === 'te' || langStr === 'telugu') ? 'Telugu (తెలుగు)'
       : (langStr === 'ta' || langStr === 'tamil') ? 'Tamil (தமிழ்)'
       : (langStr === 'hi' || langStr === 'hindi') ? 'Hindi (हिन्दी)'
       : 'English';

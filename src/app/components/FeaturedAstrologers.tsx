@@ -89,35 +89,58 @@ export default function FeaturedAstrologers() {
   useEffect(() => {
     const fetchAstrologers = async () => {
       try {
-        const q = query(collection(db, 'astrologers'), where('status', '==', 'approved'), limit(5));
+        const q = query(
+          collection(db, 'astrologers'),
+          where('status', 'in', ['approved', 'active', 'probation', 'verified']),
+          limit(8)
+        );
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
           const fetchedData = querySnapshot.docs.map((docSnap) => {
             const data = docSnap.data();
-            const skillsList = data.skills
+            const skillsList = Array.isArray(data.skills)
+              ? data.skills
+              : typeof data.skills === 'string'
               ? data.skills.split(',').map((s: string) => s.trim())
-              : ['Vedic Astrology'];
+              : Array.isArray(data.specialisations)
+              ? data.specialisations
+              : [data.speciality || 'Vedic Astrology'];
+
+            const langsList = Array.isArray(data.languages)
+              ? data.languages
+              : typeof data.languages === 'string'
+              ? data.languages.split(',').map((l: string) => l.trim())
+              : ['English', 'Hindi'];
+
             return {
               id: docSnap.id,
               name: data.name || 'Pt. Astrologer',
-              specialties: skillsList,
-              experience: `${data.experienceYears || data.experience || 12}+ Years Exp.`,
+              specialties: skillsList.length > 0 ? skillsList : ['Vedic Astrology'],
+              experience: `${data.experienceYears || data.experience || '10+'} Exp.`,
               rating: Number(data.rating) || 4.9,
               reviews: Number(data.reviewsCount || data.reviews) || 2847,
               price: Number(data.amount) || 20,
-              languages: data.languages
-                ? data.languages.split(',').map((l: string) => l.trim())
-                : ['English', 'Hindi'],
+              languages: langsList.length > 0 ? langsList : ['English', 'Hindi'],
               status:
                 data.isOnline !== undefined ? (data.isOnline ? 'online' : 'offline') : 'online',
+              showOnWebsite: data.showOnWebsite !== undefined ? data.showOnWebsite : (data.isPublished || false),
               image:
                 data.profileImageUrl ||
                 data.avatar ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'A')}&background=random`,
-              badge: data.badge || 'VERIFIED',
+              badge: data.badge || (data.status === 'probation' ? 'PROBATION' : 'VERIFIED'),
             };
           });
-          setAstrologers(fetchedData);
+
+          const published = fetchedData.filter((ast: any) => 
+            ast.showOnWebsite === true || 
+            ast.isPublished === true || 
+            ast.id.startsWith('dr-') || 
+            ast.id.startsWith('prof-') || 
+            ast.id.startsWith('acharya-')
+          );
+
+          setAstrologers(published.length > 0 ? published : fallbackFeaturedAstrologers);
         } else {
           setAstrologers(fallbackFeaturedAstrologers);
         }

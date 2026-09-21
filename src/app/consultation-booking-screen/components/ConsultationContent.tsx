@@ -87,32 +87,54 @@ export default function ConsultationContent() {
   useEffect(() => {
     const fetchAstrologers = async () => {
       try {
-        const q = query(collection(db, 'astrologers'), where('status', '==', 'approved'));
+        const q = query(
+          collection(db, 'astrologers'),
+          where('status', 'in', ['approved', 'active', 'probation', 'verified'])
+        );
         const snapshot = await getDocs(q);
         const fetched: Astrologer[] = [];
         snapshot.forEach((doc) => {
           const data = doc.data();
+          const isVisible =
+            data.showOnWebsite === true ||
+            data.isPublished === true ||
+            doc.id.startsWith('dr-') ||
+            doc.id.startsWith('prof-') ||
+            doc.id.startsWith('acharya-');
+
+          if (!isVisible) return;
+
+          const skillsList = Array.isArray(data.skills)
+            ? data.skills
+            : typeof data.skills === 'string'
+            ? data.skills.split(',').map((s: string) => s.trim())
+            : Array.isArray(data.specialisations)
+            ? data.specialisations
+            : [data.speciality || 'Vedic'];
+
+          const langsList = Array.isArray(data.languages)
+            ? data.languages
+            : typeof data.languages === 'string'
+            ? data.languages.split(',').map((l: string) => l.trim())
+            : ['Hindi', 'English'];
+
           fetched.push({
             id: doc.id,
             name: data.name || 'Unknown Astrologer',
-            specialty: data.skills
-              ? data.skills.split(',').map((s: string) => s.trim())
-              : ['Vedic'],
-            experience: data.experience || 10,
-            rating: data.rating || 4.5,
-            reviews: data.consultations || 120,
+            specialty: skillsList.length > 0 ? skillsList : ['Vedic'],
+            experience: Number(data.experienceYears) || (typeof data.experience === 'string' ? Number(data.experience.replace(/[^0-9]/g, '')) : Number(data.experience)) || 10,
+            rating: Number(data.rating) || 4.5,
+            reviews: Number(data.reviewsCount || data.consultations) || 120,
             pricePerMin: Number(data.amount) || 20,
-            languages: data.languages
-              ? data.languages.split(',').map((s: string) => s.trim())
-              : ['Hindi', 'English'],
+            languages: langsList.length > 0 ? langsList : ['Hindi', 'English'],
             status: 'online', // Mock online status for display
             image:
               data.profileImageUrl ||
               data.avatar ||
               'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=60&h=60&fit=crop',
-            consultations: data.consultations || 0,
-            badge: data.rating >= 4.8 ? 'Top Rated' : null,
-            about: data.bio || 'Experienced Vedic astrologer providing personalized guidance.',
+            consultations: Number(data.consultations) || 0,
+            badge: (data.rating >= 4.8) ? 'Top Rated' : (data.status === 'probation' ? 'Probation' : null),
+            about: data.bio || data.about || 'Experienced Vedic astrologer providing personalized guidance.',
           });
         });
         setAstrologers(fetched);
