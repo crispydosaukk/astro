@@ -211,6 +211,73 @@ export const COUNTRY_CODES: CountryCode[] = [
 ];
 
 export const DEFAULT_COUNTRY_CODE = '+91';
+export const DEFAULT_COUNTRY_ISO = 'in';
+
+/**
+ * Detects default 2-letter ISO country code from client timezone
+ */
+export function detectDefaultCountryIso(): string {
+  if (typeof window === 'undefined') return DEFAULT_COUNTRY_ISO;
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz) {
+      if (tz.includes('Kolkata') || tz.includes('Calcutta')) return 'in';
+      if (tz.includes('London')) return 'gb';
+      if (tz.startsWith('America/')) {
+        if (
+          tz.includes('Toronto') ||
+          tz.includes('Vancouver') ||
+          tz.includes('Edmonton') ||
+          tz.includes('Winnipeg') ||
+          tz.includes('Halifax') ||
+          tz.includes('Montreal')
+        )
+          return 'ca';
+        return 'us';
+      }
+      if (tz.startsWith('Australia/')) return 'au';
+      if (tz.includes('Dubai')) return 'ae';
+      if (tz.includes('Kathmandu')) return 'np';
+      if (tz.includes('Dhaka')) return 'bd';
+      if (tz.includes('Colombo')) return 'lk';
+      if (tz.includes('Karachi')) return 'pk';
+      if (tz.includes('Singapore')) return 'sg';
+      if (tz.includes('Kuala_Lumpur')) return 'my';
+      if (tz.includes('Bangkok')) return 'th';
+      if (tz.includes('Jakarta')) return 'id';
+      if (tz.includes('Auckland')) return 'nz';
+      if (tz.includes('Paris')) return 'fr';
+      if (tz.includes('Berlin')) return 'de';
+      if (tz.includes('Rome')) return 'it';
+      if (tz.includes('Madrid')) return 'es';
+      if (tz.includes('Amsterdam')) return 'nl';
+      if (tz.includes('Dublin')) return 'ie';
+      if (tz.includes('Zurich')) return 'ch';
+      if (tz.includes('Johannesburg')) return 'za';
+      if (tz.includes('Riyadh')) return 'sa';
+    }
+  } catch (e) {
+    console.error('Timezone detection error:', e);
+  }
+  return DEFAULT_COUNTRY_ISO;
+}
+
+/**
+ * Returns matching dial code (+91, +1, +44, etc.) for a 2-letter ISO code
+ */
+export function getDialCodeForIso(iso: string): string {
+  if (!iso) return DEFAULT_COUNTRY_CODE;
+  const match = COUNTRY_CODES.find(c => c.iso.toLowerCase() === iso.trim().toLowerCase());
+  return match ? match.code : DEFAULT_COUNTRY_CODE;
+}
+
+/**
+ * Returns full CountryCode item by 2-letter ISO code
+ */
+export function getCountryByIso(iso: string): CountryCode | undefined {
+  if (!iso) return undefined;
+  return COUNTRY_CODES.find(c => c.iso.toLowerCase() === iso.trim().toLowerCase());
+}
 
 /**
  * Parses an incoming phone string into country code and local number

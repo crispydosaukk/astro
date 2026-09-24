@@ -28,7 +28,6 @@ const navItems: NavItem[] = [
     icon: <Telescope size={16} />,
     children: [
       { id: 'nav-campaigns', label: 'Campaigns', icon: <GitBranch size={14} />, href: '/discovery-campaign-management' },
-      { id: 'nav-jobs', label: 'Discovery Jobs', icon: <Zap size={14} />, href: '/discovery-jobs' },
       { id: 'nav-sources', label: 'Search Sources', icon: <Database size={14} />, href: '/search-sources' },
       { id: 'nav-history', label: 'Search History', icon: <ScrollText size={14} />, href: '/search-history' },
     ],
@@ -39,7 +38,6 @@ const navItems: NavItem[] = [
     icon: <Users size={16} />,
     children: [
       { id: 'nav-all-candidates', label: 'All Candidates', icon: <Users size={14} />, href: '/candidate-management' },
-      { id: 'nav-qualified', label: 'Qualified', icon: <Star size={14} />, href: '/candidates/qualified' },
       { id: 'nav-outreach-pending', label: 'Outreach Pending', icon: <Send size={14} />, href: '/candidates/outreach-pending' },
       { id: 'nav-applications', label: 'Applications', icon: <FileText size={14} />, href: '/application-management' },
       { id: 'nav-duplicates', label: 'Duplicates', icon: <FolderOpen size={14} />, href: '/candidates/duplicates' },
@@ -63,9 +61,6 @@ const navItems: NavItem[] = [
     icon: <ClipboardList size={16} />,
     children: [
       { id: 'nav-app-mgmt', label: 'Applications', icon: <FileText size={14} />, href: '/enrolment/applications' },
-      { id: 'nav-assessments', label: 'Assessments', icon: <CheckSquare size={14} />, href: '/enrolment/assessments' },
-      { id: 'nav-chart-cases', label: 'Chart Cases', icon: <BarChart3 size={14} />, href: '/enrolment/chart-cases' },
-      { id: 'nav-ai-interviews', label: 'AI Interviews', icon: <Video size={14} />, href: '/enrolment/ai-interviews' },
       { id: 'nav-human-review', label: 'Human Review', icon: <UserCheck size={14} />, href: '/human-review-module' },
     ],
   },

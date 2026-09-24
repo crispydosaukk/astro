@@ -49,7 +49,8 @@ import {
   Ban,
   EyeOff,
   Radio,
-  LockKeyhole
+  LockKeyhole,
+  Plus
 } from 'lucide-react';
 import { 
   THEORY_QUESTIONS, 
@@ -60,7 +61,14 @@ import {
   getTopicText
 } from '@/lib/theoryQuestions';
 import { APPLY_TRANSLATIONS, SupportedLanguage } from '@/lib/applyTranslations';
-import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE, parsePhoneNumber } from '@/lib/countryCodes';
+import { 
+  COUNTRY_CODES, 
+  DEFAULT_COUNTRY_CODE, 
+  DEFAULT_COUNTRY_ISO, 
+  detectDefaultCountryIso, 
+  getDialCodeForIso, 
+  parsePhoneNumber 
+} from '@/lib/countryCodes';
 import CountryCodeDropdown from '@/components/ui/CountryCodeDropdown';
 import LanguageDropdown from '@/components/ui/LanguageDropdown';
 import AppLogo from '@/components/ui/AppLogo';
@@ -116,13 +124,87 @@ function CandidateApplyPortal() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [phoneCountryCode, setPhoneCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
+  const [phoneCountryIso, setPhoneCountryIso] = useState<string>(DEFAULT_COUNTRY_ISO);
   const [whatsapp, setWhatsapp] = useState('');
   const [whatsappCountryCode, setWhatsappCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
+  const [whatsappCountryIso, setWhatsappCountryIso] = useState<string>(DEFAULT_COUNTRY_ISO);
+  const [source, setSource] = useState<string>('Direct Intake');
+  const [campaignName, setCampaignName] = useState<string>('');
+
+  // Pre-fill profile and campaign tracking metadata from URL query parameters (e.g. from outreach links)
+  useEffect(() => {
+    if (!searchParams) return;
+    const qId = searchParams.get('id') || searchParams.get('candidateId');
+    const qName = searchParams.get('name');
+    const qPhone = searchParams.get('phone');
+    const qEmail = searchParams.get('email');
+    const qSource = searchParams.get('source');
+    const qCampaign = searchParams.get('campaign') || searchParams.get('campaignName');
+
+    if (qId) setCandidateId(qId);
+    if (qName) setName(decodeURIComponent(qName));
+    if (qPhone) {
+      const clean = decodeURIComponent(qPhone);
+      const parsed = parsePhoneNumber(clean);
+      setPhone(parsed.number || clean);
+      if (parsed.countryCode) {
+        setPhoneCountryCode(parsed.countryCode);
+        setWhatsappCountryCode(parsed.countryCode);
+      }
+    }
+    if (qEmail) setEmail(decodeURIComponent(qEmail));
+    if (qSource) setSource(decodeURIComponent(qSource));
+    if (qCampaign) setCampaignName(decodeURIComponent(qCampaign));
+  }, [searchParams]);
+
+  // Auto detect user country code via timezone and IP lookup (identical to user login flow)
+  useEffect(() => {
+    const tzIso = detectDefaultCountryIso();
+    const tzDial = getDialCodeForIso(tzIso);
+    setPhoneCountryCode(tzDial);
+    setPhoneCountryIso(tzIso);
+    setWhatsappCountryCode(tzDial);
+    setWhatsappCountryIso(tzIso);
+
+    let isMounted = true;
+    fetch('https://api.country.is')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data && data.country) {
+          const iso = data.country.toLowerCase();
+          const dial = getDialCodeForIso(iso);
+          setPhoneCountryCode(dial);
+          setPhoneCountryIso(iso);
+          setWhatsappCountryCode(dial);
+          setWhatsappCountryIso(iso);
+        }
+      })
+      .catch(() => {
+        fetch('https://ipapi.co/json/')
+          .then((res) => res.json())
+          .then((data) => {
+            if (isMounted && data && data.country_code) {
+              const iso = data.country_code.toLowerCase();
+              const dial = getDialCodeForIso(iso);
+              setPhoneCountryCode(dial);
+              setPhoneCountryIso(iso);
+              setWhatsappCountryCode(dial);
+              setWhatsappCountryIso(iso);
+            }
+          })
+          .catch(() => {});
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   const [sameAsPhone, setSameAsPhone] = useState(true);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [location, setLocation] = useState('New Delhi, India');
-  const [specialisations, setSpecialisations] = useState<string[]>(['Vedic Jyotish']);
+  const [specialisations, setSpecialisations] = useState<string[]>(['Vedic Astrology']);
+  const [otherSpecialisation, setOtherSpecialisation] = useState('');
+  const [strongestConsultationArea, setStrongestConsultationArea] = useState('Vedic Astrology');
   const [experience, setExperience] = useState('12+ years');
   const [bio, setBio] = useState('');
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['Hindi', 'English']);
@@ -138,7 +220,79 @@ function CandidateApplyPortal() {
   const [learningBackground, setLearningBackground] = useState('');
   const [courseDetails, setCourseDetails] = useState('');
 
-  // ID Proof Verification & Upload State (Aadhaar / PAN)
+  // Helper for responsive browser image compression before saving (keeps base64 lightweight for Firestore)
+  const compressImageFile = (file: File, maxWidth = 1200, quality = 0.75): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (!file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(e.target?.result as string);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(e.target?.result as string);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // 1. Mandatory Aadhaar Card Verification & Upload State
+  const [aadhaarNumber, setAadhaarNumber] = useState('');
+  const [aadhaarDocument, setAadhaarDocument] = useState('');
+  const [aadhaarFileName, setAadhaarFileName] = useState('');
+  const [aadhaarFileSize, setAadhaarFileSize] = useState('');
+  const [isUploadingAadhaar, setIsUploadingAadhaar] = useState(false);
+
+  // 2. Mandatory PAN Card Verification & Upload State
+  const [panNumber, setPanNumber] = useState('');
+  const [panDocument, setPanDocument] = useState('');
+  const [panFileName, setPanFileName] = useState('');
+  const [panFileSize, setPanFileSize] = useState('');
+  const [isUploadingPan, setIsUploadingPan] = useState(false);
+
+  // 3. Optional Supporting Documents (Astrology Certificates, Diplomas, Experience Letters, etc.)
+  interface SupportingDoc {
+    id: string;
+    title: string;
+    category: string;
+    document: string;
+    fileName: string;
+    fileSize: string;
+    uploadedAt: string;
+  }
+  const [otherDocuments, setOtherDocuments] = useState<SupportingDoc[]>([]);
+  const [isAddingOtherDoc, setIsAddingOtherDoc] = useState(false);
+  const [newDocTitle, setNewDocTitle] = useState('');
+  const [newDocCategory, setNewDocCategory] = useState('Astrology Certificate / Degree');
+  const [newDocFile, setNewDocFile] = useState<string>('');
+  const [newDocFileName, setNewDocFileName] = useState<string>('');
+  const [newDocFileSize, setNewDocFileSize] = useState<string>('');
+  const [isUploadingOther, setIsUploadingOther] = useState(false);
+
+  // Backward compatibility alias for single-id fields
   const [idProofType, setIdProofType] = useState<'aadhaar' | 'pan'>('aadhaar');
   const [idProofNumber, setIdProofNumber] = useState('');
   const [idProofDocument, setIdProofDocument] = useState('');
@@ -232,6 +386,9 @@ function CandidateApplyPortal() {
             phone: phone || '0000000000',
             email: email || '',
             location,
+            source: source || 'Direct Intake',
+            campaignName: campaignName || '',
+            campaign: campaignName || '',
             specialisations: specialisations,
             experience,
             isDisqualified: true,
@@ -633,8 +790,8 @@ function CandidateApplyPortal() {
     setWhatsapp(clean);
   };
 
-  // Handle Document / Photo Upload
-  const handleIdProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 1. Mandatory Aadhaar Card Upload Handler
+  const handleAadhaarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -643,25 +800,113 @@ function CandidateApplyPortal() {
       return;
     }
 
-    setIsUploadingDoc(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setIdProofDocument(reader.result as string);
+    setIsUploadingAadhaar(true);
+    try {
+      const dataUrl = await compressImageFile(file);
+      setAadhaarDocument(dataUrl);
+      setAadhaarFileName(file.name);
+      setAadhaarFileSize(`${(file.size / (1024 * 1024)).toFixed(2)} MB`);
+      // Backward compat
+      setIdProofDocument(dataUrl);
       setIdProofFileName(file.name);
-      setIdProofFileSize(`${(file.size / (1024 * 1024)).toFixed(2)} MB`);
-      setIsUploadingDoc(false);
-    };
-    reader.onerror = () => {
-      alert('Failed to process document file.');
-      setIsUploadingDoc(false);
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      alert('Failed to process Aadhaar document file.');
+    } finally {
+      setIsUploadingAadhaar(false);
+    }
   };
 
-  const handleRemoveIdProof = () => {
-    setIdProofDocument('');
-    setIdProofFileName('');
-    setIdProofFileSize('');
+  const handleRemoveAadhaar = () => {
+    setAadhaarDocument('');
+    setAadhaarFileName('');
+    setAadhaarFileSize('');
+    if (idProofType === 'aadhaar') {
+      setIdProofDocument('');
+      setIdProofFileName('');
+    }
+  };
+
+  // 2. Mandatory PAN Card Upload Handler
+  const handlePanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds 10MB limit. Please upload a smaller image or PDF document.');
+      return;
+    }
+
+    setIsUploadingPan(true);
+    try {
+      const dataUrl = await compressImageFile(file);
+      setPanDocument(dataUrl);
+      setPanFileName(file.name);
+      setPanFileSize(`${(file.size / (1024 * 1024)).toFixed(2)} MB`);
+    } catch {
+      alert('Failed to process PAN document file.');
+    } finally {
+      setIsUploadingPan(false);
+    }
+  };
+
+  const handleRemovePan = () => {
+    setPanDocument('');
+    setPanFileName('');
+    setPanFileSize('');
+  };
+
+  // 3. Optional Supporting Documents (Astrology Certificates, Experience Letters, Diplomas, etc.)
+  const handleOtherDocFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds 10MB limit.');
+      return;
+    }
+
+    setIsUploadingOther(true);
+    try {
+      const dataUrl = await compressImageFile(file);
+      setNewDocFile(dataUrl);
+      setNewDocFileName(file.name);
+      setNewDocFileSize(`${(file.size / (1024 * 1024)).toFixed(2)} MB`);
+      if (!newDocTitle.trim()) {
+        setNewDocTitle(file.name.replace(/\.[^/.]+$/, ''));
+      }
+    } catch {
+      alert('Failed to process document file.');
+    } finally {
+      setIsUploadingOther(false);
+    }
+  };
+
+  const handleAddOtherDoc = () => {
+    if (!newDocFile) {
+      alert('Please select a file to upload first.');
+      return;
+    }
+    const title = newDocTitle.trim() || newDocFileName || 'Supporting Document';
+    const newEntry: SupportingDoc = {
+      id: `doc-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title,
+      category: newDocCategory,
+      document: newDocFile,
+      fileName: newDocFileName,
+      fileSize: newDocFileSize || '1 MB',
+      uploadedAt: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+    };
+    setOtherDocuments(prev => [...prev, newEntry]);
+    setNewDocTitle('');
+    setNewDocCategory('Astrology Certificate / Degree');
+    setNewDocFile('');
+    setNewDocFileName('');
+    setNewDocFileSize('');
+    setIsAddingOtherDoc(false);
+  };
+
+  const handleRemoveOtherDoc = (id: string) => {
+    setOtherDocuments(prev => prev.filter(d => d.id !== id));
   };
 
   // Step 1: Validation
@@ -675,14 +920,35 @@ function CandidateApplyPortal() {
       alert('Please select at least one Primary Specialisation.');
       return;
     }
+    if (specialisations.includes('Other') && !otherSpecialisation.trim() && specialisations.length === 1) {
+      alert('Please specify your other specialisation.');
+      return;
+    }
     if (!learningBackground.trim()) {
       alert('Please state where you studied astrology (Institute, Gurukul, or Guru Lineage).');
       return;
     }
-    if (!password.trim() || password.length < 6) {
-      alert('Please set a secure password of at least 6 characters for your Astrologer Account.');
+
+    // MANDATORY KYC VALIDATIONS (Aadhaar & PAN)
+    if (!aadhaarNumber.trim()) {
+      alert('Aadhaar Number is required. Please enter your 12-digit Aadhaar number.');
       return;
     }
+    if (!aadhaarDocument) {
+      alert('Aadhaar Card document upload is mandatory for Government KYC identity verification. Please attach your Aadhaar card photo or document.');
+      return;
+    }
+    if (!panNumber.trim()) {
+      alert('PAN Card Number is required. Please enter your 10-character PAN number.');
+      return;
+    }
+    if (!panDocument) {
+      alert('PAN Card document upload is mandatory for regulatory compliance & payments. Please attach your PAN card photo or document.');
+      return;
+    }
+
+    const resolvedSpec = strongestConsultationArea || (specialisations[0] === 'Other' ? otherSpecialisation.trim() : specialisations[0]) || 'Vedic Astrology';
+    fetchQuestions(questionCount, isCuratedMode, resolvedSpec, assessmentLanguage);
     setCurrentStep(2);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -949,15 +1215,29 @@ function CandidateApplyPortal() {
         phoneCountryCode,
         whatsappCountryCode: sameAsPhone ? phoneCountryCode : whatsappCountryCode,
         location,
-        specialisations: specialisations,
+        source: source || 'Direct Intake',
+        campaignName: campaignName || '',
+        campaign: campaignName || '',
+        specialisations: [
+          ...specialisations.filter(s => s !== 'Other'),
+          ...(specialisations.includes('Other') && otherSpecialisation.trim() ? [otherSpecialisation.trim()] : [])
+        ],
+        strongestConsultationArea: strongestConsultationArea || (specialisations[0] === 'Other' ? otherSpecialisation.trim() : specialisations[0]) || 'Vedic Astrology',
+        primarySpecialisation: strongestConsultationArea || (specialisations[0] === 'Other' ? otherSpecialisation.trim() : specialisations[0]) || 'Vedic Astrology',
         experience,
         bio,
         learningBackground,
         courseDetails,
-        idProofType,
-        idProofNumber,
-        idProofDocument,
-        password,
+        aadhaarNumber: aadhaarNumber.trim(),
+        aadhaarDocument,
+        aadhaarFileName,
+        panNumber: panNumber.trim().toUpperCase(),
+        panDocument,
+        panFileName,
+        idProofType: 'aadhaar',
+        idProofNumber: aadhaarNumber.trim() || panNumber.trim(),
+        idProofDocument: aadhaarDocument || panDocument,
+        otherDocuments,
         languages: [...selectedLanguages, ...(otherLanguage.trim() ? [otherLanguage.trim()] : [])],
         theoryScore,
         chartCaseScore: chartScore,
@@ -1339,9 +1619,14 @@ function CandidateApplyPortal() {
                   <div className="flex rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-primary/20">
                     <CountryCodeDropdown
                       value={phoneCountryCode}
-                      onChange={code => {
+                      selectedIso={phoneCountryIso}
+                      onChange={(code, iso) => {
                         setPhoneCountryCode(code);
-                        if (sameAsPhone) setWhatsappCountryCode(code);
+                        if (iso) setPhoneCountryIso(iso);
+                        if (sameAsPhone) {
+                          setWhatsappCountryCode(code);
+                          if (iso) setWhatsappCountryIso(iso);
+                        }
                       }}
                       icon={<Phone size={12} className="text-primary mr-0.5" />}
                       ariaLabel="Calling phone country code"
@@ -1374,6 +1659,7 @@ function CandidateApplyPortal() {
                           if (e.target.checked) {
                             setWhatsapp(phone);
                             setWhatsappCountryCode(phoneCountryCode);
+                            setWhatsappCountryIso(phoneCountryIso);
                           }
                         }}
                         className="rounded border-input text-primary focus:ring-primary h-3 w-3"
@@ -1384,8 +1670,12 @@ function CandidateApplyPortal() {
                   <div className="flex rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-primary/20">
                     <CountryCodeDropdown
                       value={sameAsPhone ? phoneCountryCode : whatsappCountryCode}
+                      selectedIso={sameAsPhone ? phoneCountryIso : whatsappCountryIso}
                       disabled={sameAsPhone}
-                      onChange={code => setWhatsappCountryCode(code)}
+                      onChange={(code, iso) => {
+                        setWhatsappCountryCode(code);
+                        if (iso) setWhatsappCountryIso(iso);
+                      }}
                       icon={<MessageCircle size={12} className="text-emerald-600 dark:text-emerald-400 mr-0.5" />}
                       ariaLabel="WhatsApp country code"
                     />
@@ -1401,31 +1691,6 @@ function CandidateApplyPortal() {
                       onChange={e => handleWhatsappChange(e.target.value)}
                       placeholder="98765 43210"
                       className={`flex-1 px-3 py-2 text-sm bg-transparent outline-none text-foreground ${sameAsPhone ? 'opacity-70 bg-muted/20' : ''}`}
-                    />
-                  </div>
-                </div>
-
-                {/* Account Password */}
-                <div className="md:col-span-2">
-                  <label className="label-field text-xs flex items-center justify-between">
-                    <span>{t.passwordLabel}</span>
-                    <span className="text-2xs text-muted-foreground">{t.passwordPlaceholder}</span>
-                  </label>
-                  <div className="flex rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-primary/20">
-                    <div className="bg-muted/50 px-3 py-2 border-r border-border flex items-center text-muted-foreground">
-                      <Lock size={13} className="text-primary" />
-                    </div>
-                    <input
-                      type="password"
-                      required
-                      minLength={6}
-                      name="new_astrologer_password"
-                      id="new_astrologer_password"
-                      autoComplete="new-password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      placeholder={t.passwordPlaceholder}
-                      className="flex-1 px-3 py-2 text-sm bg-transparent outline-none text-foreground"
                     />
                   </div>
                 </div>
@@ -1477,105 +1742,344 @@ function CandidateApplyPortal() {
               </div>
             </div>
 
-            {/* Section 3: Identity Verification (Aadhaar / PAN Upload) */}
+            {/* Section 3: Mandatory KYC Documents (Aadhaar & PAN) */}
             <div className="space-y-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <h3 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldCheck size={15} />
-                  {t.kycSection}
+                  Identity & Compliance Verification (Aadhaar & PAN Mandatory)
                 </h3>
-                <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300">
-                  Government Compliance & KYC
+                <span className="text-2xs font-semibold px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-300 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                  Mandatory Uploads
                 </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-card border border-border space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Select ID Type */}
-                  <div>
-                    <label className="label-field text-xs">{t.docTypeLabel}</label>
-                    <select
-                      value={idProofType}
-                      onChange={e => setIdProofType(e.target.value as 'aadhaar' | 'pan')}
-                      className="input-field text-sm"
-                    >
-                      <option value="aadhaar">Aadhaar Card (Front/Back)</option>
-                      <option value="pan">PAN Card</option>
-                    </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* 1. Aadhaar Card (Mandatory) */}
+                <div className="p-4 rounded-xl bg-card border border-border space-y-3 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <label className="label-field text-xs font-bold text-foreground flex items-center gap-1">
+                      Aadhaar Card <span className="text-red-500 font-extrabold">*</span>
+                    </label>
+                    <span className="text-3xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Govt ID Verification
+                    </span>
                   </div>
 
-                  {/* ID Number */}
                   <div>
-                    <label className="label-field text-xs">
-                      {t.idNumberLabel} ({idProofType === 'aadhaar' ? '12 Digits' : '10 Characters'})
+                    <label className="text-2xs text-muted-foreground font-medium block mb-1">
+                      Aadhaar Number (12 Digits) <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      value={idProofNumber}
-                      onChange={e => setIdProofNumber(e.target.value)}
-                      placeholder={idProofType === 'aadhaar' ? 'e.g. 5432 1098 7654' : 'e.g. ABCDE1234F'}
-                      className="input-field text-sm uppercase"
+                      value={aadhaarNumber}
+                      onChange={e => setAadhaarNumber(e.target.value)}
+                      placeholder="e.g. 5432 1098 7654"
+                      className="input-field text-sm"
+                      required
                     />
+                  </div>
+
+                  <div>
+                    <label className="text-2xs text-muted-foreground font-medium block mb-1">
+                      Upload Aadhaar Document (Photo / PDF) <span className="text-red-500">*</span>
+                    </label>
+                    {aadhaarDocument ? (
+                      <div className="flex items-center justify-between p-3 rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-11 h-11 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {aadhaarDocument.startsWith('data:image') ? (
+                              <img src={aadhaarDocument} alt="Aadhaar Preview" className="w-full h-full object-cover" />
+                            ) : (
+                              <FileText size={20} className="text-emerald-700 dark:text-emerald-300" />
+                            )}
+                          </div>
+                          <div className="truncate">
+                            <p className="text-xs font-bold text-emerald-900 dark:text-emerald-200 truncate flex items-center gap-1">
+                              <CheckCircle2 size={13} className="text-emerald-600 flex-shrink-0" />
+                              {aadhaarFileName || 'Aadhaar Card Attached'}
+                            </p>
+                            <p className="text-3xs text-emerald-700 dark:text-emerald-400">
+                              {aadhaarFileSize ? `${aadhaarFileSize} • ` : ''}Ready for Review
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveAadhaar}
+                          className="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/60 rounded transition-colors flex items-center gap-1 cursor-pointer flex-shrink-0 ml-2"
+                        >
+                          <Trash2 size={12} />
+                          <span className="text-2xs">Remove</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="border-2 border-dashed border-input hover:border-primary/60 bg-muted/10 hover:bg-muted/20 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors group">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 group-hover:bg-primary/20 text-primary flex items-center justify-center mb-1.5 transition-colors">
+                          <Upload size={16} />
+                        </div>
+                        <p className="text-xs font-semibold text-foreground text-center">
+                          {isUploadingAadhaar ? 'Processing file...' : 'Upload Aadhaar Card (Front/Back)'}
+                        </p>
+                        <p className="text-3xs text-muted-foreground mt-0.5 text-center">
+                          JPG, PNG, WEBP, or PDF (Max 10MB)
+                        </p>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,application/pdf"
+                          onChange={handleAadhaarUpload}
+                          className="hidden"
+                          disabled={isUploadingAadhaar}
+                        />
+                      </label>
+                    )}
                   </div>
                 </div>
 
-                {/* Upload Zone */}
-                <div>
-                  <label className="label-field text-xs block mb-1.5">
-                    {t.uploadDocLabel} ({idProofType === 'aadhaar' ? 'Aadhaar Card' : 'PAN Card'})
-                  </label>
-
-                  {idProofDocument ? (
-                    <div className="flex items-center justify-between p-3.5 rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {idProofDocument.startsWith('data:image') ? (
-                            <img src={idProofDocument} alt="ID Document Preview" className="w-full h-full object-cover" />
-                          ) : (
-                            <FileText size={22} className="text-emerald-700 dark:text-emerald-300" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
-                            <CheckCircle2 size={14} className="text-emerald-600" />
-                            {idProofFileName || `${idProofType.toUpperCase()} Document Attached`}
-                          </p>
-                          <p className="text-2xs text-emerald-700 dark:text-emerald-400 mt-0.5">
-                            {idProofFileSize ? `Size: ${idProofFileSize} • ` : ''}Ready for verification review
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleRemoveIdProof}
-                        className="px-2.5 py-1.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/60 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
-                      >
-                        <Trash2 size={13} />
-                        <span>Remove</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="border-2 border-dashed border-input hover:border-primary/60 bg-muted/10 hover:bg-muted/20 rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition-colors group">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 group-hover:bg-primary/20 text-primary flex items-center justify-center mb-2 transition-colors">
-                        <Upload size={18} />
-                      </div>
-                      <p className="text-xs font-semibold text-foreground">
-                        {t.uploadDocHelp}
-                      </p>
-                      <p className="text-2xs text-muted-foreground mt-1">
-                        Supports JPG, PNG, WEBP, or PDF (Max 10MB)
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,application/pdf"
-                        onChange={handleIdProofUpload}
-                        className="hidden"
-                      />
+                {/* 2. PAN Card (Mandatory) */}
+                <div className="p-4 rounded-xl bg-card border border-border space-y-3 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <label className="label-field text-xs font-bold text-foreground flex items-center gap-1">
+                      PAN Card <span className="text-red-500 font-extrabold">*</span>
                     </label>
-                  )}
+                    <span className="text-3xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Tax & Compliance
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="text-2xs text-muted-foreground font-medium block mb-1">
+                      PAN Number (10 Characters) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={panNumber}
+                      onChange={e => setPanNumber(e.target.value.toUpperCase())}
+                      placeholder="e.g. ABCDE1234F"
+                      className="input-field text-sm uppercase"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-2xs text-muted-foreground font-medium block mb-1">
+                      Upload PAN Card Document (Photo / PDF) <span className="text-red-500">*</span>
+                    </label>
+                    {panDocument ? (
+                      <div className="flex items-center justify-between p-3 rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-11 h-11 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {panDocument.startsWith('data:image') ? (
+                              <img src={panDocument} alt="PAN Preview" className="w-full h-full object-cover" />
+                            ) : (
+                              <FileText size={20} className="text-emerald-700 dark:text-emerald-300" />
+                            )}
+                          </div>
+                          <div className="truncate">
+                            <p className="text-xs font-bold text-emerald-900 dark:text-emerald-200 truncate flex items-center gap-1">
+                              <CheckCircle2 size={13} className="text-emerald-600 flex-shrink-0" />
+                              {panFileName || 'PAN Card Attached'}
+                            </p>
+                            <p className="text-3xs text-emerald-700 dark:text-emerald-400">
+                              {panFileSize ? `${panFileSize} • ` : ''}Ready for Review
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemovePan}
+                          className="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/60 rounded transition-colors flex items-center gap-1 cursor-pointer flex-shrink-0 ml-2"
+                        >
+                          <Trash2 size={12} />
+                          <span className="text-2xs">Remove</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="border-2 border-dashed border-input hover:border-primary/60 bg-muted/10 hover:bg-muted/20 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors group">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 group-hover:bg-primary/20 text-primary flex items-center justify-center mb-1.5 transition-colors">
+                          <Upload size={16} />
+                        </div>
+                        <p className="text-xs font-semibold text-foreground text-center">
+                          {isUploadingPan ? 'Processing file...' : 'Upload PAN Card Photo'}
+                        </p>
+                        <p className="text-3xs text-muted-foreground mt-0.5 text-center">
+                          JPG, PNG, WEBP, or PDF (Max 10MB)
+                        </p>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,application/pdf"
+                          onChange={handlePanUpload}
+                          className="hidden"
+                          disabled={isUploadingPan}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Section 4: Optional Supporting Documents (Astro Certificates & Experience Letters) */}
+            <div className="space-y-4 pt-4 border-t border-border">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <Award size={15} />
+                  Astrology Certificates & Experience Letters (Optional)
+                </h3>
+                <span className="text-2xs font-semibold px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                  Optional Uploads
+                </span>
+              </div>
+              <p className="text-2xs text-muted-foreground">
+                If you have any formal astrology certificates (e.g. ICAS, university diplomas), experience recommendation letters, or Gurukul lineage certificates, you can upload them here for the review panel.
+              </p>
+
+              {/* Uploaded Supporting Documents List */}
+              {otherDocuments.length > 0 && (
+                <div className="space-y-2">
+                  {otherDocuments.map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:border-primary/30 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center overflow-hidden flex-shrink-0 text-primary">
+                          {doc.document.startsWith('data:image') ? (
+                            <img src={doc.document} alt={doc.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <FileCheck2 size={18} />
+                          )}
+                        </div>
+                        <div className="truncate">
+                          <p className="text-xs font-bold text-foreground truncate">{doc.title}</p>
+                          <p className="text-3xs text-muted-foreground">
+                            {doc.category} • {doc.fileSize} • Uploaded {doc.uploadedAt}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveOtherDoc(doc.id)}
+                        className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded transition-colors cursor-pointer flex-shrink-0 ml-2"
+                        title="Remove Document"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Document Box / Form */}
+              {isAddingOtherDoc ? (
+                <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 space-y-3 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-foreground">Attach Supporting Document</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingOtherDoc(false);
+                        setNewDocFile('');
+                        setNewDocFileName('');
+                        setNewDocTitle('');
+                      }}
+                      className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-2xs text-muted-foreground font-medium block mb-1">Document Title</label>
+                      <input
+                        type="text"
+                        value={newDocTitle}
+                        onChange={e => setNewDocTitle(e.target.value)}
+                        placeholder="e.g. ICAS Jyotish Visharada Certificate"
+                        className="input-field text-xs py-1.5"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-2xs text-muted-foreground font-medium block mb-1">Document Category</label>
+                      <select
+                        value={newDocCategory}
+                        onChange={e => setNewDocCategory(e.target.value)}
+                        className="input-field text-xs py-1.5"
+                      >
+                        <option value="Astrology Certificate / Degree">Astrology Certificate / Degree</option>
+                        <option value="Experience Letter">Experience Letter</option>
+                        <option value="Gurukul / Lineage Certificate">Gurukul / Lineage Certificate</option>
+                        <option value="Business / Registration Proof">Business / Registration Proof</option>
+                        <option value="Other Supporting Document">Other Supporting Document</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    {newDocFile ? (
+                      <div className="flex items-center justify-between p-2.5 rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30">
+                        <div className="flex items-center gap-2 truncate">
+                          <CheckCircle2 size={14} className="text-emerald-600 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-200 truncate">{newDocFileName}</span>
+                          <span className="text-3xs text-emerald-700 dark:text-emerald-400">({newDocFileSize})</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewDocFile('');
+                            setNewDocFileName('');
+                            setNewDocFileSize('');
+                          }}
+                          className="text-2xs text-red-600 hover:underline cursor-pointer"
+                        >
+                          Change
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="border border-dashed border-input hover:border-primary/60 bg-card rounded-lg p-3 flex items-center justify-center gap-2 cursor-pointer transition-colors">
+                        <Upload size={14} className="text-primary" />
+                        <span className="text-xs font-medium text-foreground">
+                          {isUploadingOther ? 'Processing file...' : 'Choose file (JPG, PNG, WEBP, PDF up to 10MB)'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,application/pdf"
+                          onChange={handleOtherDocFileChange}
+                          className="hidden"
+                          disabled={isUploadingOther}
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingOtherDoc(false)}
+                      className="px-3 py-1.5 text-xs border border-border rounded-lg text-muted-foreground hover:bg-muted cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddOtherDoc}
+                      disabled={!newDocFile}
+                      className="btn-primary text-xs py-1.5 px-3 rounded-lg flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                    >
+                      <Plus size={13} />
+                      Attach Document
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsAddingOtherDoc(true)}
+                  className="w-full py-2.5 px-3 border border-dashed border-primary/40 hover:border-primary rounded-xl text-xs font-semibold text-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Add Astrological Certificate, Degree or Experience Letter</span>
+                </button>
+              )}
             </div>
 
             {/* Section 4: Practice & Specialisation Details */}
@@ -1605,11 +2109,75 @@ function CandidateApplyPortal() {
                     className="w-full input-field text-sm flex items-center justify-between gap-2 cursor-pointer text-left"
                   >
                     <span className={specialisations.length === 0 ? 'text-muted-foreground' : 'text-foreground font-medium'}>
-                      {specialisations.length === 0 ? 'Select specialisation(s)...' : specialisations.join(', ')}
+                      {specialisations.length === 0 
+                        ? 'Select specialisation(s)...' 
+                        : [
+                            ...specialisations.filter(s => s !== 'Other'),
+                            ...(specialisations.includes('Other') && otherSpecialisation.trim() ? [`Other (${otherSpecialisation.trim()})`] : specialisations.includes('Other') ? ['Other'] : [])
+                          ].join(', ')}
                     </span>
                     <ChevronDown size={14} className={`flex-shrink-0 text-muted-foreground transition-transform duration-150 ${specOpen ? 'rotate-180 text-primary' : ''}`} />
                   </button>
                   {specialisations.length === 0 && <p className="text-2xs text-red-500 mt-1">Please select at least one specialisation.</p>}
+
+                  {specialisations.includes('Other') && (
+                    <div className="mt-2.5">
+                      <input
+                        type="text"
+                        value={otherSpecialisation}
+                        onChange={e => {
+                          setOtherSpecialisation(e.target.value);
+                          if (strongestConsultationArea.includes('(Other)') || strongestConsultationArea === 'Other') {
+                            setStrongestConsultationArea(e.target.value.trim() ? `${e.target.value.trim()} (Other)` : 'Other');
+                          }
+                        }}
+                        placeholder="Please specify other specialisation (e.g. Graphology, Western Astrology)..."
+                        className="input-field text-sm w-full"
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Which is your strongest consultation area? */}
+                <div className="md:col-span-2">
+                  <label className="label-field text-xs mb-1.5 block font-semibold text-foreground">
+                    Which is your strongest consultation area? *
+                  </label>
+                  <select
+                    value={strongestConsultationArea}
+                    onChange={e => setStrongestConsultationArea(e.target.value)}
+                    className="input-field text-sm w-full bg-background text-foreground"
+                    required
+                  >
+                    {[
+                      'Vedic Astrology',
+                      'KP Astrology',
+                      'Nadi Astrology',
+                      'Lal Kitab',
+                      'Tarot',
+                      'Numerology',
+                      'Palmistry',
+                      'Vastu',
+                      'Face Reading',
+                      'Reiki',
+                      'Angel Reading',
+                      'Prashna',
+                      'Psychic Reading',
+                      'Pendulum Dowsing',
+                    ].map(area => (
+                      <option key={area} value={area}>
+                        {area}
+                      </option>
+                    ))}
+                    {otherSpecialisation.trim() ? (
+                      <option value={`${otherSpecialisation.trim()} (Other)`}>
+                        {otherSpecialisation.trim()} (Other)
+                      </option>
+                    ) : specialisations.includes('Other') ? (
+                      <option value="Other">Other</option>
+                    ) : null}
+                  </select>
                 </div>
 
                 {/* Experience */}
@@ -1708,32 +2276,63 @@ function CandidateApplyPortal() {
               <div style={{ padding: '8px 12px', borderBottom: '1px solid #f3f4f6', background: '#f9fafb' }}>
                 <p style={{ fontSize: '11px', fontWeight: '600', color: '#6b7280' }}>SELECT ALL THAT APPLY</p>
               </div>
-              <div style={{ maxHeight: '300px', overflowY: 'auto', padding: '6px' }}>
+              <div style={{ maxHeight: '340px', overflowY: 'auto', padding: '6px' }}>
                 {[
-                  { v: 'Vedic Jyotish', l: 'Vedic Jyotish (Parashari)' },
-                  { v: 'KP System', l: 'KP System (Krishnamurti Paddhati)' },
+                  { v: 'Vedic Astrology', l: 'Vedic Astrology' },
+                  { v: 'KP Astrology', l: 'KP Astrology' },
                   { v: 'Nadi Astrology', l: 'Nadi Astrology' },
-                  { v: 'Numerology', l: 'Numerology & Name Correction' },
-                  { v: 'Vastu Shastra', l: 'Vastu Shastra' },
-                  { v: 'Prashna Kundali', l: 'Prashna & Horary' },
-                  { v: 'Lal Kitab', l: 'Lal Kitab Remedies' },
-                  { v: 'Tarot Reading', l: 'Tarot & Intuitive Guidance' },
-                  { v: 'Palmistry', l: 'Palmistry (Hast Rekha)' },
-                  { v: 'Gemstone Therapy', l: 'Gemstone Therapy' },
-                  { v: 'Muhurta', l: 'Muhurta & Auspicious Timing' },
-                  { v: 'Medical Astrology', l: 'Medical Astrology' },
+                  { v: 'Lal Kitab', l: 'Lal Kitab' },
+                  { v: 'Tarot', l: 'Tarot' },
+                  { v: 'Numerology', l: 'Numerology' },
+                  { v: 'Palmistry', l: 'Palmistry' },
+                  { v: 'Vastu', l: 'Vastu' },
+                  { v: 'Face Reading', l: 'Face Reading' },
+                  { v: 'Reiki', l: 'Reiki' },
+                  { v: 'Angel Reading', l: 'Angel Reading' },
+                  { v: 'Prashna', l: 'Prashna' },
+                  { v: 'Psychic Reading', l: 'Psychic Reading' },
+                  { v: 'Pendulum Dowsing', l: 'Pendulum Dowsing' },
+                  { v: 'Other', l: 'Other' },
                 ].map(opt => {
                   const checked = specialisations.includes(opt.v);
                   return (
                     <label key={opt.v} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', background: checked ? '#fef3ee' : 'transparent', color: checked ? '#b45309' : '#111827', fontSize: '13px', fontWeight: checked ? '600' : '400' }}>
                       <input type="checkbox" checked={checked}
-                        onChange={() => setSpecialisations(prev => checked ? prev.filter(s => s !== opt.v) : [...prev, opt.v])}
+                        onChange={() => {
+                          setSpecialisations(prev => {
+                            const next = checked ? prev.filter(s => s !== opt.v) : [...prev, opt.v];
+                            if (!checked && next.length === 1 && opt.v !== 'Other') {
+                              setStrongestConsultationArea(opt.v);
+                            }
+                            return next;
+                          });
+                        }}
                         style={{ width: '15px', height: '15px', accentColor: '#b45309', flexShrink: 0 }} />
                       {opt.l}
                     </label>
                   );
                 })}
               </div>
+              {specialisations.includes('Other') && (
+                <div style={{ padding: '8px 12px', borderTop: '1px solid #f3f4f6', background: '#fffbeb' }}>
+                  <label style={{ fontSize: '11px', fontWeight: '600', color: '#92400e', display: 'block', marginBottom: '4px' }}>
+                    Specify Other Specialisation:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Graphology, Western Astrology..."
+                    value={otherSpecialisation}
+                    onChange={e => {
+                      setOtherSpecialisation(e.target.value);
+                      if (strongestConsultationArea.includes('(Other)') || strongestConsultationArea === 'Other') {
+                        setStrongestConsultationArea(e.target.value.trim() ? `${e.target.value.trim()} (Other)` : 'Other');
+                      }
+                    }}
+                    onClick={e => e.stopPropagation()}
+                    style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }}
+                  />
+                </div>
+              )}
               <div style={{ padding: '8px 12px', borderTop: '1px solid #f3f4f6', display: 'flex', justifyContent: 'flex-end' }}>
                 <button type="button" onClick={() => setSpecOpen(false)}
                   style={{ fontSize: '12px', fontWeight: '600', color: '#b45309', padding: '4px 12px', borderRadius: '6px', border: 'none', background: '#fef3ee', cursor: 'pointer' }}>Done ✓</button>

@@ -104,7 +104,7 @@ export default function ApplicationHeader({
               </select>
             </div>
             <div>
-              <label className="label-field text-xs">Campaign Source</label>
+              <label className="label-field text-xs">Campaign / Source</label>
               <select 
                 value={campaign} 
                 onChange={e => setCampaign(e.target.value)} 

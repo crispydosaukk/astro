@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Wallet,
 } from 'lucide-react';
+import CityLocationInput from '@/components/CityLocationInput';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useUserData } from '@/lib/useUserData';
@@ -48,11 +49,7 @@ export default function VastuConsultationForm() {
   const [time, setTime] = useState('');
   const [place, setPlace] = useState('');
 
-  // Location Autocomplete
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   const [price, setPrice] = useState<number | null>(null);
   const [priceUSD, setPriceUSD] = useState<number | null>(null);
@@ -76,40 +73,7 @@ export default function VastuConsultationForm() {
   }, []);
 
   // Location search handler
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setPlace(query);
 
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-
-    if (query.trim().length < 3) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    searchTimeoutRef.current = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
-        );
-        const data = await res.json();
-        setSuggestions(data);
-        setShowSuggestions(true);
-      } catch (err) {
-        console.error('Location search failed:', err);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 450);
-  };
-
-  const handleSelectLocation = (locationName: string) => {
-    setPlace(locationName);
-    setSuggestions([]);
-    setShowSuggestions(false);
-  };
 
   const handleSubmit = async () => {
     if (!ownerName.trim()) {
@@ -203,7 +167,7 @@ export default function VastuConsultationForm() {
             Get Your Complete <span className="text-gradient-gold">Vastu Consultation Report</span>
           </h2>
           <p className="text-xs sm:text-sm text-[#6B5E55] font-medium max-w-xl mx-auto">
-            Enter your property layout and directional coordinates to generate an authentic
+            Enter your property layout and location details to generate an authentic
             8-direction energy audit with 100% non-demolition Vedic remedies.
           </p>
         </div>
@@ -438,7 +402,7 @@ export default function VastuConsultationForm() {
             <div className="flex items-center gap-2 border-b border-[#E5D9C8] pb-2">
               <Layers size={18} className="text-[#713B32]" />
               <h3 className="font-bold text-[#292522] text-sm uppercase tracking-wide">
-                3. Resident &amp; Property Coordinates
+                3. Resident &amp; Property Details
               </h3>
             </div>
 
@@ -488,43 +452,16 @@ export default function VastuConsultationForm() {
               </div>
 
               {/* Property City / Location */}
-              <div className="sm:col-span-2 relative">
+              <div className="sm:col-span-2">
                 <label className="block text-xs font-bold text-[#292522] uppercase mb-1.5">
                   Property City / Location <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <CityLocationInput
                   placeholder="e.g. Hyderabad, Telangana, India"
                   value={place}
-                  onChange={handleLocationChange}
-                  onFocus={() => place.length >= 3 && setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-xs sm:text-sm font-medium shadow-sm transition-all placeholder:text-[#6B5E55]/60"
+                  onChange={(val) => setPlace(val)}
+                  required
                 />
-
-                {/* Location Suggestions Dropdown */}
-                {showSuggestions && (
-                  <div className="absolute z-20 w-full mt-2 bg-[#FFFDFC] border border-[#E5D9C8] rounded-2xl shadow-2xl overflow-hidden">
-                    {isSearching ? (
-                      <div className="p-4 text-center text-xs text-[#6B5E55] flex items-center justify-center gap-2">
-                        <Loader2 className="animate-spin" size={14} /> Searching locations...
-                      </div>
-                    ) : suggestions.length > 0 ? (
-                      <ul className="max-h-60 overflow-y-auto">
-                        {suggestions.map((s, i) => (
-                          <li
-                            key={i}
-                            onMouseDown={() => handleSelectLocation(s.display_name)}
-                            className="px-4 py-3 text-xs hover:bg-[#F8F3EA] cursor-pointer text-[#292522] border-b border-[#E5D9C8]/60 flex items-start gap-2"
-                          >
-                            <MapPin size={14} className="text-[#713B32] shrink-0 mt-0.5" />
-                            <span>{s.display_name}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )}
               </div>
             </div>
           </div>

@@ -81,7 +81,9 @@ export default function ApplicationManagementPage() {
   };
 
   // Extract available campaigns/sources
-  const availableCampaigns = Array.from(new Set(candidates.map(c => c.source).filter(Boolean)));
+  const availableCampaigns = Array.from(new Set(
+    candidates.flatMap(c => [c.source, c.campaignName, (c as any).campaign].filter(Boolean) as string[])
+  ));
 
   // Filter candidates
   const filteredCandidates = candidates.filter(c => {
@@ -103,7 +105,10 @@ export default function ApplicationManagementPage() {
       return (c.applicationStatus || c.lifecycleStatus) === appStatus;
     };
 
-    const matchCampaign = campaign === 'All Campaigns' || c.source === campaign;
+    const matchCampaign = campaign === 'All Campaigns' || 
+      c.source === campaign || 
+      c.campaignName === campaign || 
+      (c as any).campaign === campaign;
 
     return matchSearch && statusMatches() && matchCampaign;
   });

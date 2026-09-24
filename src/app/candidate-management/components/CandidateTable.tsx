@@ -52,6 +52,7 @@ import CandidateProfileModal from '@/components/candidates/CandidateProfileModal
 import AddCandidateModal from '@/components/candidates/AddCandidateModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import CandidateTableHeader, { ColumnVisibility, OutreachCounts } from './CandidateTableHeader';
+import MultiChannelOutreachModal from '@/components/candidates/MultiChannelOutreachModal';
 
 type SortKey = 'name' | 'rating' | 'discoveredDate' | 'lifecycleStatus';
 
@@ -108,6 +109,7 @@ export default function CandidateTable() {
   const [quickParallelEmail, setQuickParallelEmail] = useState('');
   const [quickParallelPhone, setQuickParallelPhone] = useState('');
   const [isSendingQuickParallel, setIsSendingQuickParallel] = useState(false);
+  const [multiOutreachRecipients, setMultiOutreachRecipients] = useState<Candidate[] | null>(null);
 
   // Subscribe to real-time updates from Firestore
   useEffect(() => {
@@ -237,9 +239,11 @@ export default function CandidateTable() {
       ? `91${cleanPhone}` 
       : cleanPhone;
 
+    const camp = candidate.campaignName || (candidate as any).campaign || '';
+    const src = candidate.source || 'Discovery';
     const appUrl = typeof window !== 'undefined' 
-      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}&phone=${encodeURIComponent(cleanPhone)}`
-      : `/apply?id=${candidate.id}`;
+      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}&phone=${encodeURIComponent(cleanPhone)}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`
+      : `/apply?id=${candidate.id}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`;
 
     const text = `Namaste ${candidate.name} Ji 🙏,\n\nWe came across your esteemed astrology practice in ${candidate.location}. At AstroParihar, we are onboarding verified Astrologers for our global platform.\n\nWe would be honored to invite you to join our panel. You can review our invitation and complete your verification here:\n${appUrl}\n\nWarm regards,\nRecruitment Team, AstroParihar`;
 
@@ -252,9 +256,11 @@ export default function CandidateTable() {
 
   const handleDirectSms = async (candidate: Candidate, phoneNum: string) => {
     const cleanPhone = phoneNum.replace(/[^\d+]/g, '').replace(/^0+/, '');
+    const camp = candidate.campaignName || (candidate as any).campaign || '';
+    const src = candidate.source || 'Discovery';
     const appUrl = typeof window !== 'undefined' 
-      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}&phone=${encodeURIComponent(cleanPhone)}`
-      : `https://astroparihar.com/apply?id=${candidate.id}`;
+      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}&phone=${encodeURIComponent(cleanPhone)}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`
+      : `https://astroparihar.com/apply?id=${candidate.id}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`;
 
     const smsText = `Namaste ${candidate.name} Ji, AstroParihar invites you to join our verified panel of astrologers. Apply here: ${appUrl}`;
 
@@ -284,10 +290,7 @@ export default function CandidateTable() {
   };
 
   const handleOpenQuickParallel = (candidate: Candidate) => {
-    const contact = resolveCandidateContact(candidate);
-    setQuickParallelCandidate(candidate);
-    setQuickParallelEmail(contact.email || candidate.email || '');
-    setQuickParallelPhone(contact.phone || candidate.phone || '');
+    setMultiOutreachRecipients([candidate]);
   };
 
   const handleExecuteQuickParallel = async (candidate: Candidate, targetEmail: string, targetPhone: string) => {
@@ -295,9 +298,11 @@ export default function CandidateTable() {
     const cleanPhone = targetPhone.replace(/[^\d+]/g, '').replace(/^0+/, '');
     const cleanEmail = targetEmail.trim();
 
+    const camp = candidate.campaignName || (candidate as any).campaign || '';
+    const src = candidate.source || 'Discovery';
     const appUrl = typeof window !== 'undefined' 
-      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}`
-      : `https://astroparihar.com/apply?id=${candidate.id}`;
+      ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`
+      : `https://astroparihar.com/apply?id=${candidate.id}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`;
 
     const emailSubject = `Invitation to Join AstroParihar Astrologer Panel – ${candidate.name}`;
     const emailBody = `Namaste ${candidate.name} Ji,\n\nWe are delighted to invite you to join AstroParihar's premier network of verified astrologers. Having reviewed your esteemed practice in ${candidate.location} specializing in ${candidate.specialisations?.join(', ') || 'Vedic Astrology'}, we would be honored to partner with you.\n\nPlease review your verification dossier and onboarding details at:\n${appUrl}\n\nWarm regards,\nRecruitment Committee, AstroParihar UK`;
@@ -578,6 +583,45 @@ export default function CandidateTable() {
     };
   }, [candidates]);
 
+  // Candidate Lifecycle & Channel Stats for Dashboard
+  const candidateStats = useMemo(() => {
+    let ready = 0;
+    let contacted = 0;
+    let applied = 0;
+    let verified = 0;
+    let phoneCount = 0;
+    let emailCount = 0;
+
+    candidates.forEach(c => {
+      const contact = resolveCandidateContact(c);
+      if (c.phone || contact.phone) phoneCount++;
+      if (c.email || contact.email) emailCount++;
+
+      const st = (c.lifecycleStatus || '').toLowerCase();
+      const ost = (c.outreachStatus || '').toLowerCase();
+
+      if (st === 'verified') {
+        verified++;
+      } else if (st === 'applied' || st === 'screening' || st === 'human-review' || st === 'probation') {
+        applied++;
+      } else if (ost.includes('sent') || ost.includes('contacted') || st === 'contacted') {
+        contacted++;
+      } else if (st === 'ready-for-outreach' || ost === 'approved' || ost === 'pending approval' || ost === 'not sent') {
+        ready++;
+      }
+    });
+
+    return {
+      total: candidates.length,
+      ready,
+      contacted,
+      applied,
+      verified,
+      phoneCount,
+      emailCount,
+    };
+  }, [candidates]);
+
   // Filter candidates based on search, filter panel & outreach channel
   const filteredCandidates = useMemo(() => {
     return candidates.filter((c) => {
@@ -653,9 +697,16 @@ export default function CandidateTable() {
         } else if (channelFilter === 'email-sent') {
           const wasEmail = hasEmail && (c.outreachStatus?.toLowerCase().includes('email') || (isSent && hasEmail));
           if (!wasEmail) return false;
-        } else if (channelFilter === 'phone-only') {
+        } else if (channelFilter === 'sms-sent') {
+          const wasSms = c.outreachStatus?.toLowerCase().includes('sms');
+          if (!wasSms) return false;
+        } else if (channelFilter === 'only-whatsapp' || channelFilter === 'phone-only') {
           if (!hasPhone || hasEmail) return false;
-        } else if (channelFilter === 'both') {
+        } else if (channelFilter === 'only-email') {
+          if (!hasEmail || hasPhone) return false;
+        } else if (channelFilter === 'only-sms') {
+          if (!hasPhone) return false;
+        } else if (channelFilter === 'multi-channel' || channelFilter === 'both') {
           if (!hasPhone || !hasEmail) return false;
         }
       }
@@ -750,6 +801,115 @@ export default function CandidateTable() {
         </div>
       )}
 
+      {/* Top Candidate Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div 
+          onClick={() => { setFilterStatus('All'); setChannelFilter('all'); }}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'All' && channelFilter === 'all' 
+              ? 'border-primary ring-2 ring-primary/20 bg-primary/5' 
+              : 'border-border bg-card hover:border-primary/40'
+          }`}
+          title="Click to view all candidates"
+        >
+          <div className="flex items-center justify-between text-muted-foreground mb-1">
+            <span className="text-2xs font-bold uppercase tracking-wider">Total Pipeline</span>
+            <Users size={14} className="text-primary" />
+          </div>
+          <p className="text-2xl font-bold text-foreground">{candidateStats.total}</p>
+          <p className="text-3xs text-muted-foreground mt-0.5">All registered candidates</p>
+        </div>
+
+        <div 
+          onClick={() => { setFilterStatus('Ready for Outreach'); setChannelFilter('all'); }}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'Ready for Outreach' 
+              ? 'border-amber-500 ring-2 ring-amber-500/20 bg-amber-500/5' 
+              : 'border-border bg-card hover:border-amber-500/40'
+          }`}
+          title="Click to filter Ready for Outreach"
+        >
+          <div className="flex items-center justify-between text-muted-foreground mb-1">
+            <span className="text-2xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Ready for Outreach</span>
+            <Send size={14} className="text-amber-600" />
+          </div>
+          <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">{candidateStats.ready}</p>
+          <p className="text-3xs text-muted-foreground mt-0.5">Approved for communication</p>
+        </div>
+
+        <div 
+          onClick={() => { setFilterStatus('Contacted'); setChannelFilter('all'); }}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'Contacted' 
+              ? 'border-blue-500 ring-2 ring-blue-500/20 bg-blue-500/5' 
+              : 'border-border bg-card hover:border-blue-500/40'
+          }`}
+          title="Click to filter Outreach Sent"
+        >
+          <div className="flex items-center justify-between text-muted-foreground mb-1">
+            <span className="text-2xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Outreach Sent</span>
+            <CheckCircle2 size={14} className="text-blue-600" />
+          </div>
+          <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">{candidateStats.contacted}</p>
+          <p className="text-3xs text-muted-foreground mt-0.5">WhatsApp, Email or SMS</p>
+        </div>
+
+        <div 
+          onClick={() => { setFilterStatus('Applied'); setChannelFilter('all'); }}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'Applied' 
+              ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-500/5' 
+              : 'border-border bg-card hover:border-indigo-500/40'
+          }`}
+          title="Click to filter Applications"
+        >
+          <div className="flex items-center justify-between text-muted-foreground mb-1">
+            <span className="text-2xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">Applications</span>
+            <Layers size={14} className="text-indigo-600" />
+          </div>
+          <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-400">{candidateStats.applied}</p>
+          <p className="text-3xs text-muted-foreground mt-0.5">Applied & in screening</p>
+        </div>
+
+        <div 
+          onClick={() => { setFilterStatus('Verified'); setChannelFilter('all'); }}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'Verified' 
+              ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-500/5' 
+              : 'border-border bg-card hover:border-emerald-500/40'
+          }`}
+          title="Click to filter Verified Astrologers"
+        >
+          <div className="flex items-center justify-between text-muted-foreground mb-1">
+            <span className="text-2xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Verified</span>
+            <Sparkles size={14} className="text-emerald-600" />
+          </div>
+          <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{candidateStats.verified}</p>
+          <p className="text-3xs text-muted-foreground mt-0.5">Panel verified astrologers</p>
+        </div>
+
+        <div 
+          onClick={() => handleChannelFilterChange('phone-only')}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            channelFilter === 'phone-only' 
+              ? 'border-violet-500 ring-2 ring-violet-500/20 bg-violet-500/5' 
+              : 'border-border bg-card hover:border-violet-500/40'
+          }`}
+          title="Click to view candidates with phone numbers"
+        >
+          <div className="flex items-center justify-between text-muted-foreground mb-1">
+            <span className="text-2xs font-bold uppercase tracking-wider text-violet-700 dark:text-violet-400">Channels Ready</span>
+            <Phone size={14} className="text-violet-600" />
+          </div>
+          <div className="flex items-baseline gap-2 mt-0.5">
+            <span className="text-sm font-bold text-foreground">📱 {candidateStats.phoneCount}</span>
+            <span className="text-2xs text-muted-foreground">|</span>
+            <span className="text-sm font-bold text-foreground">📧 {candidateStats.emailCount}</span>
+          </div>
+          <p className="text-3xs text-muted-foreground mt-0.5">Mobile & Email listed</p>
+        </div>
+      </div>
+
       {/* Top Controls Header Bar with Outreach Chips & Counts */}
       <CandidateTableHeader
         search={search}
@@ -833,6 +993,20 @@ export default function CandidateTable() {
 
           <div className="flex items-center gap-2">
             <button
+              onClick={() => {
+                const targets = selectedRows.length > 0 
+                  ? candidates.filter(c => selectedRows.includes(c.id))
+                  : filteredCandidates;
+                setMultiOutreachRecipients(targets);
+              }}
+              className="px-3 py-1 text-2xs font-bold rounded-lg bg-gradient-to-r from-emerald-600 via-primary to-violet-600 text-white hover:opacity-95 shadow-xs flex items-center gap-1.5 cursor-pointer transition-all"
+              title="Send WhatsApp, Email, or SMS to multiple candidates at once"
+            >
+              <Send size={12} />
+              Send Outreach {selectedRows.length > 0 ? `(${selectedRows.length} selected)` : `(All ${filteredCandidates.length})`}
+            </button>
+
+            <button
               onClick={() => setIsAddCandidateOpen(true)}
               className="btn-primary text-2xs py-1 px-3 flex items-center gap-1 shadow-xs"
               title="Add single candidate manually with full details"
@@ -879,6 +1053,17 @@ export default function CandidateTable() {
               <span className="text-xs font-bold text-primary">
                 {selectedRows.length} candidate{selectedRows.length > 1 ? 's' : ''} selected
               </span>
+              <button
+                onClick={() => {
+                  const selectedCandidates = candidates.filter(c => selectedRows.includes(c.id));
+                  setMultiOutreachRecipients(selectedCandidates);
+                }}
+                className="text-xs bg-gradient-to-r from-emerald-600 via-primary to-violet-600 text-white font-bold px-3 py-1.5 rounded-md hover:opacity-95 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Send outreach via WhatsApp, Email, or SMS to all selected candidates"
+              >
+                <Send size={11} />
+                Send Outreach ({selectedRows.length} People)
+              </button>
               <button
                 onClick={() => {
                   selectedRows.forEach(id => handleStatusChange(id, 'ready-for-outreach', 'Approved'));
@@ -1195,7 +1380,15 @@ export default function CandidateTable() {
                       <td className="table-cell whitespace-nowrap">
                         <div className="flex flex-col gap-1 items-start">
                           <span className={`inline-flex items-center justify-center whitespace-nowrap text-xs px-2.5 py-1 rounded-md font-bold tracking-normal ${
-                            candidate.source === 'Manual Entry' 
+                            candidate.source === 'YouTube'
+                              ? 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200 dark:border-red-800'
+                              : candidate.source === 'LinkedIn'
+                              ? 'bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 border border-sky-200 dark:border-sky-800'
+                              : candidate.source === 'Instagram'
+                              ? 'bg-pink-50 text-pink-700 dark:bg-pink-950/50 dark:text-pink-300 border border-pink-200 dark:border-pink-800'
+                              : candidate.source === 'Google Places'
+                              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                              : candidate.source === 'Manual Entry' 
                               ? 'bg-amber-100 text-amber-950 dark:bg-amber-900/60 dark:text-amber-100 border border-amber-300 dark:border-amber-600' 
                               : 'bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-600'
                           }`}>
@@ -1754,6 +1947,23 @@ export default function CandidateTable() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Multi-Channel Outreach Dispatch Modal (WhatsApp, Email, SMS) */}
+      {multiOutreachRecipients && (
+        <MultiChannelOutreachModal
+          isOpen={Boolean(multiOutreachRecipients)}
+          recipients={multiOutreachRecipients}
+          onClose={() => setMultiOutreachRecipients(null)}
+          onComplete={(summary) => {
+            setSelectedRows([]);
+            showToast(
+              '🚀 Outreach Dispatch Complete!',
+              `Dispatched to ${summary.total} candidates (${summary.emailSent} Email, ${summary.smsSent} SMS, ${summary.whatsappQueued} WhatsApp queued/logged).`,
+              'success'
+            );
+          }}
+        />
       )}
     </div>
   );

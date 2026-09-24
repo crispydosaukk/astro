@@ -5,14 +5,19 @@ import { Search, Filter, Download, Plus, SlidersHorizontal, X, MessageCircle, Ma
 
 const statusOptions = ['All', 'Discovered', 'AI Qualified', 'Ready for Outreach', 'Contacted', 'Applied', 'Screening', 'Human Review', 'Probation', 'Verified'];
 const specialisations = ['All', 'Vedic Jyotish', 'KP System', 'Nadi Astrology', 'Numerology', 'Vastu Shastra', 'Prashna', 'Muhurtha', 'Lal Kitab', 'Gemology', 'Palmistry'];
-const sources = ['All', 'Google Places', 'Manual Entry', 'Web Search', 'CSV Upload', 'Referral', 'Directory'];
+const sources = ['All', 'Google Places', 'YouTube', 'LinkedIn', 'Instagram', 'Manual Entry', 'Web Search', 'CSV Upload', 'Referral', 'Directory'];
 const scoreRanges = ['All', '90–100', '80–89', '70–79', '60–69', 'Below 60'];
 const channelFilterOptions = [
   { value: 'all', label: 'All Channels' },
+  { value: 'only-whatsapp', label: '🟢 Only WhatsApp (Phone, No Email)' },
+  { value: 'only-email', label: '📧 Only Email (No Phone)' },
+  { value: 'only-sms', label: '📱 Only SMS (Has Phone)' },
+  { value: 'multi-channel', label: '⚡ Multi-Channel (Both Phone & Email)' },
   { value: 'need-whatsapp', label: '💬 Need WhatsApp Outreach' },
   { value: 'need-email', label: '📧 Need Email Outreach' },
   { value: 'whatsapp-sent', label: '✅ WhatsApp Sent' },
   { value: 'email-sent', label: '✅ Email Sent' },
+  { value: 'sms-sent', label: '✅ SMS Sent' },
   { value: 'phone-only', label: '📱 Phone Only (No Email)' },
   { value: 'both', label: '✨ Both Phone & Email' },
 ];

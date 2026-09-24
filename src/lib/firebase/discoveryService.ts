@@ -24,7 +24,7 @@ export interface Campaign {
   qualified: number;
   rejected: number;
   duplicates: number;
-  status: 'running' | 'completed' | 'paused' | 'queued' | 'draft' | 'failed';
+  status: 'running' | 'completed' | 'paused' | 'queued' | 'draft' | 'failed' | 'partially-completed';
   jobStatus?: string;
   minScore: number;
   progress: number;
@@ -45,7 +45,7 @@ export interface DiscoveryJob {
   id: string;
   campaignId: string;
   campaign: string;
-  status: 'running' | 'completed' | 'paused' | 'queued' | 'failed';
+  status: 'running' | 'completed' | 'paused' | 'queued' | 'failed' | 'partially-completed';
   startTime: string;
   elapsed: string;
   searched: number;

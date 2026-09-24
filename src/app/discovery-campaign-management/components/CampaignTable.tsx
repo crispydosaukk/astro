@@ -81,7 +81,10 @@ export default function CampaignTable() {
                     </span>
                   </td>
                   <td className="table-cell">
-                    <StatusBadge status={c.status} size="sm" />
+                    <StatusBadge 
+                      status={(c.status === 'completed' && c.discovered < c.target) ? 'partially-completed' : c.status} 
+                      size="sm" 
+                    />
                   </td>
                   <td className="table-cell">
                     <span className="text-xs text-muted-foreground tabular-nums">{c.lastRun}</span>
@@ -101,7 +104,7 @@ export default function CampaignTable() {
                           onClick={() => runCampaign(c)}
                           disabled={isExecuting}
                           className="tooltip-label btn-ghost p-1.5 text-emerald-600 hover:bg-emerald-50 rounded disabled:opacity-50" 
-                          title="Run live discovery (Google Places + GPT-4o)"
+                          title={c.discovered < c.target ? `Continue discovering to target (${c.discovered}/${c.target})` : "Run live discovery (Google Places + GPT-4o)"}
                         >
                           <Play size={14} />
                         </button>
@@ -191,9 +194,9 @@ export default function CampaignTable() {
               </div>
               <div>
                 <span className="text-xs font-semibold text-muted-foreground block mb-1">Active Sources:</span>
-                <div className="flex gap-2">
-                  {(queriesModalCampaign.sources || ['Google Places', 'Web Search']).map(s => (
-                    <span key={s} className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">
+                <div className="flex flex-wrap gap-1.5">
+                  {(queriesModalCampaign.sources || ['Google Places', 'YouTube', 'LinkedIn', 'Instagram']).map(s => (
+                    <span key={s} className="text-xs bg-primary/10 text-primary font-semibold px-2.5 py-0.5 rounded-full">
                       {s}
                     </span>
                   ))}

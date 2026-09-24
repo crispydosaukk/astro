@@ -135,14 +135,25 @@ function AstrologerDashboardContent() {
     };
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      let verifiedSession: any = null;
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('astro_verified_session');
+        if (stored) {
+          try {
+            verifiedSession = JSON.parse(stored);
+          } catch (e) {}
+        }
+      }
+
       if (user) {
         setIsAuthenticated(true);
-        loadProfileFromId(user.uid);
+        const targetId = verifiedSession?.id || user.uid;
+        loadProfileFromId(targetId);
 
         // Listen for incoming active calls
         const q = query(
           collection(db, 'consultations'),
-          where('astrologerId', '==', user.uid),
+          where('astrologerId', '==', targetId),
           where('status', '==', 'active')
         );
 
@@ -153,25 +164,14 @@ function AstrologerDashboardContent() {
           });
           setActiveCalls(calls);
         });
+      } else if (verifiedSession && verifiedSession.authenticated && verifiedSession.id) {
+        setIsAuthenticated(true);
+        loadProfileFromId(verifiedSession.id);
+        return;
       } else {
-        // Check verified session established through /astrologer-login
-        if (typeof window !== 'undefined') {
-          const stored = localStorage.getItem('astro_verified_session');
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              if (parsed && parsed.authenticated && parsed.id) {
-                setIsAuthenticated(true);
-                loadProfileFromId(parsed.id);
-                return;
-              }
-            } catch (e) {}
-          }
-        }
-
         // Unauthorized access - block and redirect
         setIsAuthenticated(false);
-        toast.error('Authentication required. Please log in with your email and password.');
+        toast.error('Authentication required. Please log in with your registered mobile number.');
         router.push('/astrologer-login');
       }
     });

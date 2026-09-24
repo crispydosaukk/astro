@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase/config';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { sendSmtpEmail } from '@/lib/emailSender';
-import { adminAuth } from '@/lib/firebase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +15,18 @@ export async function POST(req: NextRequest) {
       phone,
       whatsapp,
       location,
+      source,
+      campaignName,
+      campaign,
+      // Mandatory Documents
+      aadhaarNumber = '',
+      aadhaarDocument = '',
+      aadhaarFileName = '',
+      panNumber = '',
+      panDocument = '',
+      panFileName = '',
+      // Optional Supporting Documents (Astro certificates, experience letters, etc.)
+      otherDocuments = [],
       specialisations = ['Vedic Jyotish'],
       experience = '10+ years',
       bio = '',
@@ -24,7 +35,6 @@ export async function POST(req: NextRequest) {
       idProofType = 'aadhaar',
       idProofNumber = '',
       idProofDocument = '',
-      password = '',
       languages = ['Hindi', 'English'],
       theoryScore = 0,
       chartCaseScore = 0,
@@ -68,6 +78,27 @@ export async function POST(req: NextRequest) {
 
     const effectiveId = candidateId || `ast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     
+    // Check if candidate already exists in Firestore to retain existing source/campaign details
+    let resolvedSource = source || '';
+    let resolvedCampaignName = campaignName || campaign || '';
+
+    if (effectiveId && db) {
+      try {
+        const existingCandSnap = await getDoc(doc(db, 'candidates', effectiveId));
+        if (existingCandSnap.exists()) {
+          const existingData = existingCandSnap.data();
+          if (!resolvedSource && existingData.source) {
+            resolvedSource = existingData.source;
+          }
+          if (!resolvedCampaignName && (existingData.campaignName || existingData.campaign)) {
+            resolvedCampaignName = existingData.campaignName || existingData.campaign;
+          }
+        }
+      } catch (err) {
+        console.warn('Could not read existing candidate doc for campaign preservation:', err);
+      }
+    }
+
     // Dynamic Weighted Composite Score Calculation
     const totalWeight = (Number(theoryWeight) || 35) + (Number(chartCaseWeight) || 25) + (Number(aiInterviewWeight) || 40);
     const normalizedTheoryWeight = (Number(theoryWeight) || 35) / totalWeight;
@@ -92,6 +123,27 @@ export async function POST(req: NextRequest) {
       ? idProofDocument.slice(0, 500000)
       : idProofDocument;
 
+    const safeAadhaarDoc = (typeof aadhaarDocument === 'string' && aadhaarDocument.length > 500000)
+      ? aadhaarDocument.slice(0, 500000)
+      : aadhaarDocument || (idProofType === 'aadhaar' ? safeIdProofDoc : '');
+
+    const safePanDoc = (typeof panDocument === 'string' && panDocument.length > 500000)
+      ? panDocument.slice(0, 500000)
+      : panDocument || (idProofType === 'pan' ? safeIdProofDoc : '');
+
+    const safeOtherDocs = Array.isArray(otherDocuments)
+      ? otherDocuments.slice(0, 6).map((d: any, idx: number) => ({
+          id: d.id || `doc-${Date.now()}-${idx}`,
+          title: d.title || d.name || 'Supporting Document',
+          category: d.category || 'Professional Credential',
+          document: (typeof d.document === 'string' && d.document.length > 400000) ? d.document.slice(0, 400000) : (d.document || d.fileUrl || ''),
+          fileUrl: (typeof d.document === 'string' && d.document.length > 400000) ? d.document.slice(0, 400000) : (d.document || d.fileUrl || ''),
+          fileName: d.fileName || 'Document',
+          fileSize: d.fileSize || '1 MB',
+          uploadedAt: d.uploadedAt || new Date().toISOString(),
+        }))
+      : [];
+
     const applicationPayload = {
       id: effectiveId,
       name,
@@ -99,16 +151,26 @@ export async function POST(req: NextRequest) {
       phone: phone || '',
       whatsapp: whatsapp || phone || '',
       location: location || 'India',
+      source: resolvedSource || 'Direct Intake',
+      campaignName: resolvedCampaignName || '',
+      campaign: resolvedCampaignName || '',
       specialisations: Array.isArray(specialisations) ? specialisations : [specialisations],
       experience,
       bio,
       learningBackground,
       courseDetails,
-      idProofType,
-      idProofNumber,
-      idProofDocument: safeIdProofDoc,
+      // Government Identity & Compliance Documents
+      aadhaarNumber: aadhaarNumber || (idProofType === 'aadhaar' ? idProofNumber : '') || '',
+      aadhaarDocument: safeAadhaarDoc,
+      aadhaarFileName: aadhaarFileName || 'Aadhaar_Document',
+      panNumber: panNumber || (idProofType === 'pan' ? idProofNumber : '') || '',
+      panDocument: safePanDoc,
+      panFileName: panFileName || 'PAN_Document',
+      idProofType: idProofType || 'aadhaar',
+      idProofNumber: idProofNumber || aadhaarNumber || panNumber || '',
+      idProofDocument: safeIdProofDoc || safeAadhaarDoc || safePanDoc,
+      otherDocuments: safeOtherDocs,
       languages,
-      password: password || '', // For staging astrologer account
       aiScore: isDisqualified ? 0 : overallScore,
       theoryScore: safeTheory,
       chartCaseScore: safeChart,
@@ -154,8 +216,12 @@ export async function POST(req: NextRequest) {
         learningBackground,
         courseDetails,
         idProofType,
-        idProofNumber,
-        password: password || '',
+        idProofNumber: idProofNumber || aadhaarNumber || panNumber || '',
+        aadhaarNumber: aadhaarNumber || (idProofType === 'aadhaar' ? idProofNumber : '') || '',
+        aadhaarDocument: safeAadhaarDoc,
+        panNumber: panNumber || (idProofType === 'pan' ? idProofNumber : '') || '',
+        panDocument: safePanDoc,
+        otherDocuments: safeOtherDocs,
         theoryScore: safeTheory,
         chartCaseScore: safeChart,
         aiInterviewScore: safeInterview,
@@ -209,14 +275,13 @@ export async function POST(req: NextRequest) {
         const candidateRef = doc(db, 'candidates', effectiveId);
         await setDoc(candidateRef, applicationPayload, { merge: true });
 
-        // Create or update entry in 'astrologers' collection so credentials exist
-        if (email) {
+        // Create or update entry in 'astrologers' collection so candidate record exists
+        if (email || phone) {
           const astRef = doc(db, 'astrologers', effectiveId);
           await setDoc(astRef, {
             id: effectiveId,
             name,
-            email,
-            password: password || '',
+            email: email || '',
             phone,
             location: location || 'India',
             speciality: specialisations[0] || 'Vedic Astrology',
@@ -228,47 +293,6 @@ export async function POST(req: NextRequest) {
             aiScore: overallScore,
             appliedAt: new Date().toISOString(),
           }, { merge: true });
-        }
-
-        // Provision Firebase Auth account using candidate's email and password
-        if (email && password && password.length >= 6) {
-          try {
-            let authUser;
-            try {
-              authUser = await adminAuth.getUserByEmail(email.trim());
-              await adminAuth.updateUser(authUser.uid, {
-                password: password,
-                displayName: name,
-              });
-            } catch (authFindErr: any) {
-              if (authFindErr?.code === 'auth/user-not-found' || authFindErr?.message?.includes('no user')) {
-                authUser = await adminAuth.createUser({
-                  email: email.trim(),
-                  password: password,
-                  displayName: name,
-                });
-              }
-            }
-
-            if (authUser?.uid) {
-              // Also map authUser.uid in astrologers collection
-              const astAuthRef = doc(db, 'astrologers', authUser.uid);
-              await setDoc(astAuthRef, {
-                uid: authUser.uid,
-                id: authUser.uid,
-                candidateId: effectiveId,
-                name,
-                email: email.trim(),
-                password: password,
-                phone,
-                status: 'under_review',
-                isVerified: false,
-                appliedAt: new Date().toISOString(),
-              }, { merge: true });
-            }
-          } catch (provisionErr) {
-            console.warn('Firebase Auth user auto-provisioning notice:', provisionErr);
-          }
         }
       }
     } catch (dbErr) {

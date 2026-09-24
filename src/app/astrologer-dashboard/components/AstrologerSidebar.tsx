@@ -52,6 +52,9 @@ export default function AstrologerSidebar() {
   const confirmLogout = async () => {
     try {
       setIsLoggingOut(true);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('astro_verified_session');
+      }
       await signOut(auth);
       window.location.href = '/astrologer-login';
     } catch (error) {

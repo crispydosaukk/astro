@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Script from 'next/script';
 import Navbar from '@/components/Navbar';
+import RemediesFilterBar from '@/components/RemediesFilterBar';
 import AppImage from '@/components/ui/AppImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -440,6 +441,9 @@ function TalkToAIAstrologerContent() {
             })}
           </div>
         </div>
+
+        {/* Vedic Remedies Quick Redirect Filter Bar */}
+        <RemediesFilterBar />
 
         {/* Search & Filter Toolbar */}
         <div className="bg-card/70 border border-border/70 p-3.5 rounded-2xl backdrop-blur-sm space-y-3">

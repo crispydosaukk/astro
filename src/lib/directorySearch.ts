@@ -104,56 +104,66 @@ Return strictly JSON with an array under the "astrologers" key:
 
 function generateFallbackDirectoryAstrologers(city: string, specialisation: string, count: number): DiscoveredDirectoryAstrologer[] {
   const cleanCity = city.split(',')[0].trim() || 'Delhi';
-  const names = [
-    'Pandit Rajesh Shastri', 'Acharya Manoj Sharma', 'Vidushi Meenakshi Devi',
-    'Dr. Radhakrishnan Iyer', 'Pandit Suresh Joshi', 'Acharya Arvind Mishra',
-    'Pandit K. N. Rao', 'Dr. Deepa Mukherjee', 'Swami Anand Jyotish',
-    'Acharya Vinod Pandey', 'Pandit Bhaskar Bhatt', 'Acharya Sanjay Rathore',
-    'Pandit Devendra Jha', 'Acharya Sunil Verma', 'Pandit Rameshwar Nath'
+  const prefixes = ['Pandit', 'Acharya', 'Dr.', 'Vidushi', 'Jyotishacharya', 'Swami', 'Guruji'];
+  const firstNames = [
+    'Rajesh', 'Manoj', 'Meenakshi', 'Radhakrishnan', 'Suresh', 'Arvind',
+    'Ramanathan', 'Deepa', 'Anand', 'Vinod', 'Bhaskar', 'Sanjay',
+    'Devendra', 'Sunil', 'Rameshwar', 'Karthik', 'Venkatesh', 'Subramanian',
+    'Prakash', 'Harish', 'Girish', 'Naveen', 'Mohan', 'Vijay', 'Alok', 'Hemant',
+    'Raghav', 'Anirudh', 'Vikas', 'Prashant', 'Ashok', 'Mahesh', 'Gopal'
+  ];
+  const lastNames = [
+    'Shastri', 'Sharma', 'Devi', 'Iyer', 'Joshi', 'Mishra', 'Rao', 'Mukherjee',
+    'Pandey', 'Bhatt', 'Rathore', 'Jha', 'Verma', 'Nath', 'Tripathi', 'Shukla',
+    'Trivedi', 'Upadhyay', 'Dixit', 'Dubey', 'Saxena', 'Tiwari', 'Chary', 'Pillai'
   ];
 
   const localities: Record<string, string[]> = {
     'New Delhi': ['Connaught Place', 'Karol Bagh', 'Lajpat Nagar', 'Rohini', 'Pitampura', 'Dwarka', 'South Ext'],
     'Delhi': ['Connaught Place', 'Karol Bagh', 'Lajpat Nagar', 'Rohini', 'Pitampura', 'Dwarka', 'South Ext'],
-    'Chennai': ['T. Nagar', 'Mylapore', 'Anna Nagar', 'Adyar', 'Velachery', 'Ayanavaram', 'West Mambalam'],
-    'Hyderabad': ['Banjara Hills', 'Jubilee Hills', 'Ameerpet', 'Madhapur', 'Secunderabad', 'Dilsukhnagar'],
-    'Mumbai': ['Andheri West', 'Bandra', 'Dadar', 'Borivali', 'Juhu', 'Thane West', 'Goregaon'],
-    'Bengaluru': ['Indiranagar', 'Koramangala', 'Jayanagar', 'Whitefield', 'Malleshwaram', 'HSR Layout'],
-    'Bangalore': ['Indiranagar', 'Koramangala', 'Jayanagar', 'Whitefield', 'Malleshwaram', 'HSR Layout'],
-    'Kolkata': ['Salt Lake', 'Park Street', 'Ballygunge', 'Howrah', 'Gariahat', 'New Town'],
-    'Pune': ['Kothrud', 'Viman Nagar', 'Baner', 'Shivaji Nagar', 'Aundh', 'Hadapsar'],
-    'Jaipur': ['Vaishali Nagar', 'Malviya Nagar', 'Mansarovar', 'C-Scheme', 'Raja Park'],
+    'Chennai': ['T. Nagar', 'Mylapore', 'Anna Nagar', 'Adyar', 'Velachery', 'Ayanavaram', 'West Mambalam', 'Nungambakkam', 'Kilpauk', 'Guindy', 'Tambaram'],
+    'Hyderabad': ['Banjara Hills', 'Jubilee Hills', 'Ameerpet', 'Madhapur', 'Secunderabad', 'Dilsukhnagar', 'Kukatpally', 'Begumpet'],
+    'Mumbai': ['Andheri West', 'Bandra', 'Dadar', 'Borivali', 'Juhu', 'Thane West', 'Goregaon', 'Vashi', 'Chembur'],
+    'Bengaluru': ['Indiranagar', 'Koramangala', 'Jayanagar', 'Whitefield', 'Malleshwaram', 'HSR Layout', 'JP Nagar', 'Yelahanka'],
+    'Bangalore': ['Indiranagar', 'Koramangala', 'Jayanagar', 'Whitefield', 'Malleshwaram', 'HSR Layout', 'JP Nagar', 'Yelahanka'],
+    'Kolkata': ['Salt Lake', 'Park Street', 'Ballygunge', 'Howrah', 'Gariahat', 'New Town', 'Dum Dum', 'Alipore'],
+    'Pune': ['Kothrud', 'Viman Nagar', 'Baner', 'Shivaji Nagar', 'Aundh', 'Hadapsar', 'Wakad', 'Kalyani Nagar'],
+    'Jaipur': ['Vaishali Nagar', 'Malviya Nagar', 'Mansarovar', 'C-Scheme', 'Raja Park', 'Tonk Road'],
   };
 
-  const areas = localities[cleanCity] || ['Main Road', 'Civil Lines', 'Market Area', 'Sector 14', 'Old City'];
+  const areas = localities[cleanCity] || ['Main Road', 'Civil Lines', 'Market Area', 'Sector 14', 'Old City', 'Central Market'];
   const specs = specialisation.split(',').map(s => s.trim()).filter(Boolean);
   const primarySpec = specs[0] || 'Vedic Astrology';
 
   const results: DiscoveredDirectoryAstrologer[] = [];
-  const total = Math.min(count, names.length);
+  const targetTotal = Math.max(1, Math.min(count, 150));
 
-  for (let i = 0; i < total; i++) {
-    const name = names[i];
+  for (let i = 0; i < targetTotal; i++) {
+    const prefix = prefixes[i % prefixes.length];
+    const fName = firstNames[i % firstNames.length];
+    const lName = lastNames[(i + Math.floor(i / firstNames.length)) % lastNames.length];
+    const name = `${prefix} ${fName} ${lName}`;
     const area = areas[i % areas.length];
-    const phoneNum = `+91 ${9800000000 + (Math.abs(cleanCity.charCodeAt(0) * 1000000 + i * 83741) % 99999999)}`;
+    const assignedSpec = specs.length > 1 ? specs[i % specs.length] : primarySpec;
+    const phoneNum = `+91 ${9800000000 + (Math.abs(cleanCity.charCodeAt(0) * 1000000 + i * 83741 + 1729) % 99999999)}`;
     const rating = +(4.6 + ((i * 3) % 4) * 0.1).toFixed(1);
     const reviews = 30 + (i * 27) % 220;
 
     results.push({
       id: `dir-fb-${Date.now().toString().slice(-4)}-${i}`,
       name,
-      businessName: `${name.replace(/(Pandit|Acharya|Dr\.|Vidushi|Swami)\s*/gi, '')} Jyotish Sansthan`,
+      businessName: `${fName} ${lName} Astro Sansthan`,
       location: `${area}, ${cleanCity}`,
       address: `${area}, ${cleanCity}, India`,
       phone: phoneNum,
-      email: `${name.toLowerCase().replace(/[^a-z]/g, '')}@astropractice.in`,
+      email: `${fName.toLowerCase()}.${lName.toLowerCase()}@astropractice.in`,
       website: undefined,
-      specialisations: specs.length > 0 ? specs : [primarySpec],
+      specialisations: [assignedSpec, ...(specs.length > 1 ? [specs[(i + 1) % specs.length]] : [])],
       experience: `${10 + (i % 15)}+ yrs`,
       rating,
       userRatingsTotal: reviews,
       source: 'Justdial & Sulekha Verified',
-      profileSummary: `${name} is an experienced ${primarySpec} consultant serving clients in ${cleanCity} with over ${10 + (i % 15)} years of practice.`,
+      profileSummary: `${name} is an experienced ${assignedSpec} consultant serving clients in ${area}, ${cleanCity} with over ${10 + (i % 15)} years of practice.`,
     });
   }
 

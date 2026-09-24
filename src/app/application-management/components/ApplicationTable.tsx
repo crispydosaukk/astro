@@ -114,9 +114,46 @@ export default function ApplicationTable({ candidates, onUpdateStatus }: Applica
 
                     {/* Campaign / Source */}
                     <td className="table-cell">
-                      <span className="text-xs text-muted-foreground font-medium truncate max-w-[140px] block">
-                        {cand.source || 'Direct Intake'}
-                      </span>
+                      <div className="flex flex-col gap-1.5 min-w-[140px] max-w-[220px]">
+                        {/* Source Platform Badge */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`inline-flex items-center gap-1 text-3xs font-semibold px-2 py-0.5 rounded-full border w-fit shadow-2xs ${
+                            cand.source === 'Google Places'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-200'
+                              : cand.source === 'YouTube'
+                              ? 'bg-red-50 text-red-800 border-red-300 dark:bg-red-950/60 dark:text-red-200'
+                              : cand.source === 'LinkedIn'
+                              ? 'bg-sky-50 text-sky-800 border-sky-300 dark:bg-sky-950/60 dark:text-sky-200'
+                              : cand.source === 'Instagram'
+                              ? 'bg-pink-50 text-pink-800 border-pink-300 dark:bg-pink-950/60 dark:text-pink-200'
+                              : cand.source === 'Direct Intake'
+                              ? 'bg-purple-50 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-200'
+                              : 'bg-stone-100 text-stone-800 border-stone-300 dark:bg-stone-800 dark:text-stone-200'
+                          }`}>
+                            <span className="opacity-60 text-4xs uppercase tracking-wider font-semibold">Src:</span>
+                            {cand.source || 'Direct Intake'}
+                          </span>
+                        </div>
+
+                        {/* Campaign Name */}
+                        {(() => {
+                          const camp = cand.campaignName || (cand as any).campaign || (cand as any).applicationData?.campaignName;
+                          return camp ? (
+                            <span 
+                              className="inline-flex items-center gap-1 text-3xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20 truncate"
+                              title={`Campaign: ${camp}`}
+                            >
+                              <span className="opacity-70 text-4xs uppercase tracking-wider font-semibold">Camp:</span>
+                              🎯 {camp}
+                            </span>
+                          ) : (
+                            <span className="text-3xs text-muted-foreground/75 flex items-center gap-1 pl-0.5">
+                              <span className="opacity-60 text-4xs uppercase tracking-wider font-medium">Camp:</span>
+                              <span className="italic">Direct Intake / None</span>
+                            </span>
+                          );
+                        })()}
+                      </div>
                     </td>
 
                     {/* Submitted */}

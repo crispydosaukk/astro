@@ -190,11 +190,11 @@ export async function searchAstrologersGooglePlaces(
         console.warn(`Query failed for "${query}":`, qErr);
       }
 
-      // Stop once we have 25+ real places
-      if (rawPlacesMap.size >= 25) break;
+      // Stop once we have 60+ real places across queries
+      if (rawPlacesMap.size >= 60) break;
     }
 
-    const uniquePlaces = Array.from(rawPlacesMap.values()).slice(0, 25);
+    const uniquePlaces = Array.from(rawPlacesMap.values()).slice(0, 60);
     if (uniquePlaces.length === 0) {
       return [];
     }

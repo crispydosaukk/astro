@@ -266,10 +266,10 @@ export default function EnrolmentApplicationsPage() {
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-2">
                             <Link
-                              href="/enrolment/assessments"
+                              href="/human-review-module"
                               className="px-2.5 py-1 text-xs bg-muted hover:bg-muted/80 rounded font-semibold text-foreground transition-colors"
                             >
-                              Assessment
+                              Review
                             </Link>
 
                             {/* Show contextual action badge/button */}

@@ -22,11 +22,14 @@ interface SearchSource {
 
 const initialSources: SearchSource[] = [
   { id: 'src-001', name: 'Google Places API', type: 'Google Places', baseUrl: 'https://maps.googleapis.com/maps/api/place', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
+  { id: 'src-007', name: 'YouTube Astrologer Channels', type: 'Web Search', baseUrl: 'https://www.youtube.com', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
+  { id: 'src-008', name: 'LinkedIn Professional Profiles', type: 'Directory', baseUrl: 'https://www.linkedin.com', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
+  { id: 'src-009', name: 'Instagram Vedic Creators', type: 'Web Search', baseUrl: 'https://www.instagram.com', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
   { id: 'src-002', name: 'Web Search Engine', type: 'Web Search', baseUrl: 'https://api.search.provider', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
-  { id: 'src-003', name: 'Astrology Directory India', type: 'Directory', baseUrl: 'https://astrologydirectory.in', apiEnabled: false, apiConfigured: false, enabled: false, lastSearch: '—', totalSearches: 0, successRate: 0 },
-  { id: 'src-004', name: 'JustDial Business Listings', type: 'Directory', baseUrl: 'https://www.justdial.com', apiEnabled: false, apiConfigured: false, enabled: false, lastSearch: '—', totalSearches: 0, successRate: 0 },
-  { id: 'src-005', name: 'Sulekha Professional Listings', type: 'Directory', baseUrl: 'https://www.sulekha.com', apiEnabled: false, apiConfigured: false, enabled: false, lastSearch: '—', totalSearches: 0, successRate: 0 },
-  { id: 'src-006', name: 'Custom API Provider', type: 'API', baseUrl: 'https://api.custom-provider.com', apiEnabled: true, apiConfigured: false, enabled: false, errorStatus: 'API key not configured', totalSearches: 0, successRate: 0 },
+  { id: 'src-003', name: 'Astrology Directory India', type: 'Directory', baseUrl: 'https://astrologydirectory.in', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
+  { id: 'src-004', name: 'JustDial Business Listings', type: 'Directory', baseUrl: 'https://www.justdial.com', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
+  { id: 'src-005', name: 'Sulekha Professional Listings', type: 'Directory', baseUrl: 'https://www.sulekha.com', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
+  { id: 'src-006', name: 'Custom API Provider', type: 'API', baseUrl: 'https://api.custom-provider.com', apiEnabled: true, apiConfigured: true, enabled: true, lastSearch: '—', totalSearches: 0, successRate: 100 },
 ];
 
 const typeIcons: Record<string, React.ReactNode> = {
@@ -128,12 +131,20 @@ export default function SearchSourcesPage() {
             </h1>
             <p className="text-muted-foreground mt-1">Configure and manage approved discovery data sources (Google Places live)</p>
           </div>
-          <button 
-            onClick={() => setIsAddModalOpen(true)}
-            className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium shadow-sm"
-          >
-            <Plus size={14} /> Add Source
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setSourceList(prev => prev.map(s => ({ ...s, enabled: true })))}
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-border bg-card text-foreground hover:bg-muted shadow-xs transition-colors cursor-pointer"
+            >
+              Enable All
+            </button>
+            <button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium shadow-sm cursor-pointer"
+            >
+              <Plus size={14} /> Add Source
+            </button>
+          </div>
         </div>
 
         {/* Summary */}

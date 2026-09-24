@@ -51,6 +51,22 @@ export interface ReviewCandidate {
   idProofType?: string;
   idProofNumber?: string;
   idProofDocument?: string;
+  aadhaarNumber?: string;
+  aadhaarDocument?: string;
+  aadhaarFileName?: string;
+  panNumber?: string;
+  panDocument?: string;
+  panFileName?: string;
+  otherDocuments?: Array<{
+    id: string;
+    title: string;
+    category?: string;
+    document?: string;
+    fileUrl?: string;
+    fileName?: string;
+    fileSize?: string;
+    uploadedAt?: string;
+  }>;
   assessmentLanguage?: string;
   businessName?: string;
 }
@@ -119,6 +135,13 @@ function mapCandidateToReview(c: Candidate, index: number): ReviewCandidate {
     idProofType: c.idProofType || appData.idProofType || '',
     idProofNumber: c.idProofNumber || appData.idProofNumber || '',
     idProofDocument: c.idProofDocument || appData.idProofDocument || '',
+    aadhaarNumber: (c as any).aadhaarNumber || appData.aadhaarNumber || (c.idProofType === 'aadhaar' ? c.idProofNumber : ''),
+    aadhaarDocument: (c as any).aadhaarDocument || appData.aadhaarDocument || (c.idProofType === 'aadhaar' ? c.idProofDocument : ''),
+    aadhaarFileName: (c as any).aadhaarFileName || appData.aadhaarFileName || 'Aadhaar_Document',
+    panNumber: (c as any).panNumber || appData.panNumber || (c.idProofType === 'pan' ? c.idProofNumber : ''),
+    panDocument: (c as any).panDocument || appData.panDocument || (c.idProofType === 'pan' ? c.idProofDocument : ''),
+    panFileName: (c as any).panFileName || appData.panFileName || 'PAN_Document',
+    otherDocuments: (c as any).otherDocuments || appData.otherDocuments || [],
     assessmentLanguage: c.assessmentLanguage || appData.assessmentLanguage || 'en',
     businessName: c.businessName || appData.businessName || '',
   };

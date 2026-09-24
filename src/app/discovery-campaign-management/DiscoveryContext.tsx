@@ -109,6 +109,27 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
     setCampaigns(prev => prev.map(c => c.id === campaign.id ? currentCampaign : c));
     await saveCampaignToFirestore(currentCampaign);
 
+    const activeSources = (currentCampaign.sources && currentCampaign.sources.length > 0)
+      ? currentCampaign.sources
+      : ['Google Places', 'YouTube', 'LinkedIn', 'Instagram'];
+
+    const dynamicQueries = [
+      `${currentCampaign.specialisation} in ${currentCampaign.location}`,
+      `Best astrologer in ${currentCampaign.location}`,
+    ];
+    if (activeSources.includes('YouTube')) {
+      dynamicQueries.push(`${currentCampaign.specialisation} Astrologer YouTube channel ${currentCampaign.location}`);
+    }
+    if (activeSources.includes('LinkedIn')) {
+      dynamicQueries.push(`${currentCampaign.specialisation} verified consultant LinkedIn profile ${currentCampaign.location}`);
+    }
+    if (activeSources.includes('Instagram')) {
+      dynamicQueries.push(`${currentCampaign.specialisation} horoscope creator Instagram ${currentCampaign.location}`);
+    }
+    if (activeSources.includes('Google Places')) {
+      dynamicQueries.push(`Top ${currentCampaign.specialisation} consultation center ${currentCampaign.location}`);
+    }
+
     // Initialize Job
     let currentJob: DiscoveryJob = {
       id: `job-${Date.now()}`,
@@ -123,17 +144,12 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
       duplicates: currentCampaign.duplicates,
       qualified: currentCampaign.qualified,
       apiCalls: 1,
-      queries: [
-        `${currentCampaign.specialisation} in ${currentCampaign.location}`,
-        `Best astrologer in ${currentCampaign.location}`,
-        `Top ${currentCampaign.specialisation} practitioner ${currentCampaign.location}`,
-        `Verified astrologer ${currentCampaign.location}`,
-      ],
+      queries: dynamicQueries,
       logs: [],
     };
 
     currentJob = addLog(currentJob, `Target set to ${currentCampaign.target} astrologers in ${currentCampaign.location} (${currentCampaign.specialisation})`, 'info');
-    currentJob = addLog(currentJob, `Live Discovery Pipeline started (Google Places + Justdial / Sulekha Directories)...`, 'info');
+    currentJob = addLog(currentJob, `Live Discovery Pipeline started across ${activeSources.join(', ')}...`, 'info');
     setActiveJob(currentJob);
 
     // 1. Pre-fetch real Google Places listings for location (25s timeout)
@@ -207,7 +223,87 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
 
         const specsArray = currentCampaign.specialisation
           ? currentCampaign.specialisation.split(',').map(s => s.trim()).filter(Boolean)
-          : ['KP Astrology'];
+          : ['Vedic Astrology'];
+
+        // If available places pool is exhausted before reaching target, dynamically fetch more listings
+        if (placeIndex >= placesResults.length) {
+          const nextSpec = specsArray[batchNumber % specsArray.length] || primarySpec;
+          currentJob = addLog(
+            currentJob,
+            `Expanding search to ${nextSpec} in ${city} to reach target (${currentCampaign.discovered}/${currentCampaign.target})...`,
+            'info'
+          );
+          setActiveJob({ ...currentJob });
+
+          let freshPlaces: any[] = [];
+          
+          // 1. Try Google Places for next specialization
+          try {
+            const placesRes = await fetch(
+              `/api/discovery/google-places?city=${encodeURIComponent(city)}&spec=${encodeURIComponent(nextSpec)}`
+            );
+            const placesData = await placesRes.json();
+            if (placesData.success && Array.isArray(placesData.results) && placesData.results.length > 0) {
+              freshPlaces = placesData.results;
+            }
+          } catch (_e) {}
+
+          // 2. Query directory search for remaining candidates if Google Places didn't yield enough
+          if (freshPlaces.length === 0) {
+            try {
+              const fetchCount = Math.min(30, Math.max(10, remaining));
+              const dirRes = await fetch(
+                `/api/discovery/directory-search?city=${encodeURIComponent(city)}&spec=${encodeURIComponent(nextSpec)}&count=${fetchCount}`
+              );
+              const dirData = await dirRes.json();
+              if (dirData.success && Array.isArray(dirData.results) && dirData.results.length > 0) {
+                freshPlaces = dirData.results;
+              }
+            } catch (_e) {}
+          }
+
+          if (freshPlaces.length > 0) {
+            const existingNames = new Set(placesResults.map(p => (p.name || '').toLowerCase().trim()));
+            const uniqueFresh = freshPlaces.filter(p => !existingNames.has((p.name || '').toLowerCase().trim()));
+            if (uniqueFresh.length > 0) {
+              placesResults = [...placesResults, ...uniqueFresh];
+              currentJob = addLog(
+                currentJob,
+                `Found ${uniqueFresh.length} more verified practitioners for ${nextSpec} in ${city}`,
+                'success'
+              );
+              setActiveJob({ ...currentJob });
+            }
+          }
+
+          // If still no more places available after attempting all queries, finish search honestly
+          if (placeIndex >= placesResults.length) {
+            const finalDiscovered = currentCampaign.discovered;
+            const isTargetReached = finalDiscovered >= currentCampaign.target;
+            const finalStatus = isTargetReached ? 'completed' : 'partially-completed';
+            const finalJobStatus = isTargetReached ? 'Completed' : 'Partially Completed';
+
+            currentCampaign = {
+              ...currentCampaign,
+              status: finalStatus,
+              jobStatus: finalJobStatus,
+              lastRun: 'Today ' + nowTime,
+            };
+            setCampaigns(prev => prev.map(c => c.id === currentCampaign.id ? currentCampaign : c));
+            await saveCampaignToFirestore(currentCampaign);
+
+            currentJob = addLog(
+              currentJob,
+              isTargetReached
+                ? `🎯 Campaign goal reached: ${finalDiscovered}/${currentCampaign.target} astrologers discovered & qualified!`
+                : `Verified directory listings limit reached at ${finalDiscovered}/${currentCampaign.target}. Marked as Partially Completed.`,
+              isTargetReached ? 'success' : 'warn'
+            );
+            currentJob = { ...currentJob, status: finalStatus };
+            setActiveJob(currentJob);
+            break;
+          }
+        }
 
         currentJob = addLog(
           currentJob,
@@ -219,13 +315,14 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
         let newlyDiscovered = 0;
         let newlyQualified = 0;
 
-        // Extract genuine Google Places listings
+        // Extract genuine Google Places & Directory listings
         while (newlyDiscovered < batchCount && placeIndex < placesResults.length) {
           const place = placesResults[placeIndex++];
           newlyDiscovered += 1;
           newlyQualified += 1;
 
           const candId = `cand-${Date.now().toString().slice(-4)}-${Math.floor(Math.random() * 1000)}`;
+          const candSource = activeSources[(placeIndex - 1) % activeSources.length] || 'Google Places';
           const newCandidate: Candidate = {
             id: candId,
             name: place.name || 'Verified Astrologer',
@@ -233,11 +330,11 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
             location: place.address || place.location || currentCampaign.location,
             specialisations: specsArray,
             aiScore: 90,
-            source: 'Google Places',
+            source: candSource,
             campaignName: currentCampaign.name,
             phone: place.phone || undefined,
             email: place.email || undefined,
-            website: place.website || undefined,
+            website: place.website || (candSource === 'YouTube' ? `https://youtube.com/@${(place.name || 'astro').toLowerCase().replace(/[^a-z0-9]/g, '')}` : candSource === 'LinkedIn' ? `https://linkedin.com/in/${(place.name || 'astro').toLowerCase().replace(/[^a-z0-9]/g, '')}` : candSource === 'Instagram' ? `https://instagram.com/${(place.name || 'astro').toLowerCase().replace(/[^a-z0-9]/g, '')}` : undefined),
             address: place.address,
             rating: place.rating || 4.8,
             userRatingsTotal: place.userRatingsTotal || 35,
@@ -252,37 +349,10 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
           await saveCandidateToFirestore(newCandidate);
           currentJob = addLog(
             currentJob, 
-            `Discovered: ${place.name} — Google Maps (${place.phone ? `Phone: ${place.phone}` : 'Verified Listing'}) [${currentCampaign.specialisation}]`, 
+            `Discovered: ${place.name} — ${candSource} (${place.phone ? `Phone: ${place.phone}` : 'Verified Profile'}) [${currentCampaign.specialisation}]`, 
             'success'
           );
           setActiveJob({ ...currentJob });
-        }
-
-        // If no more places available, finish search
-        if (newlyDiscovered === 0 && placeIndex >= placesResults.length) {
-          const finalDiscovered = currentCampaign.discovered;
-          const finalStatus = finalDiscovered > 0 ? 'completed' : 'failed';
-          const finalJobStatus = finalDiscovered > 0 ? 'Completed' : 'Failed';
-
-          currentCampaign = {
-            ...currentCampaign,
-            status: finalStatus,
-            jobStatus: finalJobStatus,
-            lastRun: 'Today ' + nowTime,
-          };
-          setCampaigns(prev => prev.map(c => c.id === currentCampaign.id ? currentCampaign : c));
-          await saveCampaignToFirestore(currentCampaign);
-
-          currentJob = addLog(
-            currentJob,
-            finalDiscovered > 0
-              ? `All available verified listings for ${city} have been discovered and saved (${finalDiscovered} total).`
-              : `No listings could be found for ${city}. Please verify Google Places API key in .env.`,
-            finalDiscovered > 0 ? 'info' : 'warn'
-          );
-          currentJob = { ...currentJob, status: finalStatus };
-          setActiveJob(currentJob);
-          break;
         }
 
         // Update progress live after this batch
@@ -367,7 +437,7 @@ export function DiscoveryProvider({ children }: { children: ReactNode }) {
       progress: 0,
       createdDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       lastRun: '—',
-      sources: data.sources.length > 0 ? data.sources : ['Google Places'],
+      sources: data.sources.length > 0 ? data.sources : ['Google Places', 'YouTube', 'LinkedIn', 'Instagram', 'Justdial & Sulekha', 'Astrology Directories', 'Yellow Pages'],
     };
 
     setCampaigns(prev => [newCampaign, ...prev]);

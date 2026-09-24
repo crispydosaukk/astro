@@ -24,31 +24,25 @@ export default function CampaignCards() {
                 <span className="text-xs text-muted-foreground">{c.location}</span>
               </div>
             </div>
-            <StatusBadge status={c.status} size="sm" />
+            <StatusBadge 
+              status={(c.status === 'completed' && c.discovered < c.target) ? 'partially-completed' : c.status} 
+              size="sm" 
+            />
           </div>
 
           <div className="flex items-center justify-between gap-1.5 mb-4">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1 pr-2">
+              <span className="text-xs font-semibold bg-accent/10 text-accent px-2 py-0.5 rounded-full truncate" title={c.specialisation}>
                 {c.specialisation}
               </span>
             </div>
 
-            {c.status === 'completed' ? (
-              <span className="text-2xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+            {c.discovered >= c.target && c.status === 'completed' ? (
+              <span className="text-2xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 shrink-0">
                 <CheckCircle2 size={11} /> Target Reached
               </span>
-            ) : c.status === 'paused' ? (
-              <button
-                onClick={() => resumeCampaign(c.id)}
-                disabled={isExecuting}
-                className="text-2xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
-                title={`Resume discovering up to target ${c.target}`}
-              >
-                <Play size={10} /> Resume ({c.discovered}/{c.target})
-              </button>
             ) : isExecuting && c.status === 'running' ? (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <span className="text-2xs font-bold text-blue-600 flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
                   <Loader2 size={10} className="animate-spin" /> Discovering...
                 </span>
@@ -60,14 +54,23 @@ export default function CampaignCards() {
                   <Pause size={9} /> Pause
                 </button>
               </div>
+            ) : c.status === 'paused' ? (
+              <button
+                onClick={() => resumeCampaign(c.id)}
+                disabled={isExecuting}
+                className="text-2xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50 shrink-0"
+                title={`Resume discovering up to target ${c.target}`}
+              >
+                <Play size={10} /> Resume ({c.discovered}/{c.target})
+              </button>
             ) : (
               <button
                 onClick={() => runCampaign(c)}
                 disabled={isExecuting}
-                className="text-2xs font-bold text-primary hover:text-primary/80 flex items-center gap-1 bg-primary/10 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
+                className="text-2xs font-bold text-primary hover:text-primary/80 flex items-center gap-1 bg-primary/10 px-2.5 py-1 rounded-md transition-colors disabled:opacity-50 shrink-0"
                 title={`Continuously discover until target of ${c.target} is reached`}
               >
-                <Play size={10} /> {c.discovered > 0 ? `Continue to ${c.target}` : `Run to Target (${c.target})`}
+                <Play size={10} /> {c.discovered > 0 && c.discovered < c.target ? `Continue to ${c.target} (${c.discovered}/${c.target})` : c.discovered >= c.target ? `Re-run (${c.target})` : `Run to Target (${c.target})`}
               </button>
             )}
           </div>

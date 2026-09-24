@@ -23,8 +23,14 @@ export interface ParallelOutreachPayload {
   phone?: string;
   smsMessage?: string;
   smsTemplateId?: string;
+  whatsappMessage?: string;
   specialisation?: string;
   location?: string;
+  channels?: {
+    email: boolean;
+    sms: boolean;
+    whatsapp: boolean;
+  };
 }
 
 export interface ParallelOutreachResult {
@@ -39,6 +45,13 @@ export interface ParallelOutreachResult {
     success: boolean;
     target?: string;
     error?: string;
+  };
+  whatsapp: {
+    attempted: boolean;
+    success: boolean;
+    target?: string;
+    error?: string;
+    pendingApi?: boolean;
   };
 }
 
@@ -132,12 +145,18 @@ export async function dispatchParallelOutreach(
   const result: ParallelOutreachResult = {
     email: { attempted: false, success: false },
     sms: { attempted: false, success: false },
+    whatsapp: { attempted: false, success: false },
   };
 
   const tasks: Promise<any>[] = [];
+  const channels = payload.channels || {
+    email: Boolean(payload.email && payload.emailBody),
+    sms: Boolean(payload.phone && payload.smsMessage),
+    whatsapp: Boolean(payload.phone && payload.whatsappMessage),
+  };
 
   // 1. Email Task
-  if (payload.email && payload.emailBody) {
+  if (channels.email && payload.email && payload.emailBody) {
     result.email.attempted = true;
     result.email.target = payload.email;
     tasks.push(
@@ -160,7 +179,7 @@ export async function dispatchParallelOutreach(
   }
 
   // 2. SMS Task
-  if (payload.phone && payload.smsMessage) {
+  if (channels.sms && payload.phone && payload.smsMessage) {
     result.sms.attempted = true;
     result.sms.target = payload.phone;
     tasks.push(
@@ -185,6 +204,31 @@ export async function dispatchParallelOutreach(
           result.sms.error = err.message;
         })
     );
+  }
+
+  // 3. WhatsApp Task (Simulated / Queued until official WhatsApp API key is integrated)
+  if (channels.whatsapp && payload.phone) {
+    result.whatsapp.attempted = true;
+    result.whatsapp.target = payload.phone;
+    result.whatsapp.success = true;
+    result.whatsapp.pendingApi = true;
+    try {
+      const logsRef = collection(db, 'communication_logs');
+      tasks.push(
+        addDoc(logsRef, {
+          candidateId: payload.candidateId || '',
+          candidateName: payload.candidateName,
+          channel: 'WhatsApp',
+          target: payload.phone,
+          status: 'queued',
+          note: 'Queued (WhatsApp API integration pending)',
+          message: payload.whatsappMessage || payload.smsMessage || '',
+          createdAt: serverTimestamp(),
+        }).catch(err => console.warn('Could not write whatsapp log:', err))
+      );
+    } catch (e) {
+      // ignore
+    }
   }
 
   await Promise.allSettled(tasks);

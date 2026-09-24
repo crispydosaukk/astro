@@ -350,9 +350,17 @@ export default function VerificationPage() {
               </div>
 
               {/* Certificate Canvas */}
-              <div className="border-4 border-double border-amber-600/30 rounded-2xl p-8 bg-gradient-to-br from-amber-50/40 via-background to-orange-50/20 text-center space-y-4 relative overflow-hidden shadow-inner">
-                <div className="w-16 h-16 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center mx-auto text-amber-600">
-                  <Award size={36} />
+              <div className="border-4 border-double border-amber-600/35 rounded-2xl p-8 bg-gradient-to-br from-amber-50/45 via-background to-orange-50/25 text-center space-y-4 relative overflow-hidden shadow-inner">
+                {/* Official AstroParihar Logo */}
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <img 
+                    src="/assets/images/AstroParihar_Logo-1786957316255.webp" 
+                    alt="AstroParihar" 
+                    className="h-16 w-auto object-contain mx-auto drop-shadow-xs" 
+                  />
+                  <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-600 shadow-2xs">
+                    <Award size={22} />
+                  </div>
                 </div>
 
                 <div>

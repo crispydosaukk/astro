@@ -102,21 +102,49 @@ const CURATED_INDIAN_LOCATIONS: Array<{ mainText: string; state: string }> = [
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const placeId = searchParams.get('placeId');
+
+    // Handle Place Details lookup to resolve exact coordinates silently
+    if (placeId) {
+      if (GOOGLE_PLACES_KEY && !placeId.startsWith('curated-')) {
+        try {
+          const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(
+            placeId
+          )}&fields=geometry,formatted_address,name&key=${GOOGLE_PLACES_KEY}`;
+          const res = await fetch(detailsUrl);
+          const data = await res.json();
+          if (data.status === 'OK' && data.result?.geometry?.location) {
+            return NextResponse.json({
+              success: true,
+              lat: data.result.geometry.location.lat.toString(),
+              lon: data.result.geometry.location.lng.toString(),
+              formattedAddress: data.result.formatted_address || data.result.name,
+            });
+          }
+        } catch (err) {
+          console.warn('Google Place Details lookup error:', err);
+        }
+      }
+      return NextResponse.json({ success: true, placeId });
+    }
+
     const query = (searchParams.get('query') || searchParams.get('q') || '').trim();
 
     if (!query) {
       return NextResponse.json({ success: true, predictions: [] });
     }
 
+    const countryParam = searchParams.get('country');
     const predictions: LocationPrediction[] = [];
     const seenNames = new Set<string>();
 
-    // 1. Query Google Places Autocomplete API if key is present
+    // 1. Query Google Places Autocomplete API
     if (GOOGLE_PLACES_KEY) {
       try {
+        const countryFilter = countryParam ? `&components=country:${countryParam}` : '';
         const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
           query
-        )}&components=country:in&key=${GOOGLE_PLACES_KEY}`;
+        )}&types=geocode${countryFilter}&key=${GOOGLE_PLACES_KEY}`;
 
         const res = await fetch(url);
         const data = await res.json();
@@ -125,7 +153,7 @@ export async function GET(req: NextRequest) {
           for (const p of data.predictions) {
             const mainText = p.structured_formatting?.main_text || p.description.split(',')[0].trim();
             const secondaryText = p.structured_formatting?.secondary_text || '';
-            const key = mainText.toLowerCase();
+            const key = (mainText + ' ' + secondaryText).toLowerCase();
 
             if (!seenNames.has(key)) {
               seenNames.add(key);
@@ -149,7 +177,6 @@ export async function GET(req: NextRequest) {
     const curatedMatches = CURATED_INDIAN_LOCATIONS.filter(item =>
       item.mainText.toLowerCase().includes(qLower) || item.state.toLowerCase().includes(qLower)
     ).sort((a, b) => {
-      // Prioritize startsWith matches
       const aStarts = a.mainText.toLowerCase().startsWith(qLower);
       const bStarts = b.mainText.toLowerCase().startsWith(qLower);
       if (aStarts && !bStarts) return -1;
@@ -158,24 +185,24 @@ export async function GET(req: NextRequest) {
     });
 
     for (const item of curatedMatches) {
-      const key = item.mainText.toLowerCase();
+      const key = (item.mainText + ' ' + item.state).toLowerCase();
       if (!seenNames.has(key)) {
         seenNames.add(key);
         predictions.push({
-          placeId: `curated-${key}`,
+          placeId: `curated-${item.mainText.toLowerCase()}`,
           description: `${item.mainText}, ${item.state}`,
           mainText: item.mainText,
           secondaryText: item.state,
           source: 'curated',
         });
       }
-      if (predictions.length >= 8) break;
+      if (predictions.length >= 10) break;
     }
 
     return NextResponse.json({
       success: true,
       query,
-      predictions: predictions.slice(0, 8),
+      predictions: predictions.slice(0, 10),
     });
   } catch (err: any) {
     return NextResponse.json(

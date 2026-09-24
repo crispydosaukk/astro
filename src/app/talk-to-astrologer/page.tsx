@@ -25,6 +25,7 @@ import {
 import AppImage from '@/components/ui/AppImage';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
+import RemediesFilterBar from '@/components/RemediesFilterBar';
 import AstrologerFilterModal, {
   AstrologerFilterState,
   defaultFilterState,
@@ -620,13 +621,13 @@ export default function TalkToAstrologerPage() {
             </p>
 
             {/* Quick Switcher: Human vs AI */}
-            <div className="inline-flex items-center p-1.5 rounded-2xl glass-card border border-white/20 shadow-2xl mb-6">
+            <div className="inline-flex items-center p-1.5 rounded-2xl glass-card border border-[#C9952B]/30 shadow-2xl mb-6">
               <div className="px-5 py-2 rounded-xl text-xs font-bold bg-[#C9952B] text-white shadow-md flex items-center gap-1.5">
                 <Users size={14} /> Human Astrologers
               </div>
               <Link
                 href="/talk-to-ai-astrologer"
-                className="px-5 py-2 rounded-xl text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-1.5"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-[#292522] hover:text-[#C9952B] hover:bg-[#C9952B]/10 transition-all flex items-center gap-1.5"
               >
                 <Sparkles size={14} className="text-[#C9952B]" /> ✦ AI Expert Astrologers (Instant Voice)
               </Link>
@@ -868,8 +869,11 @@ export default function TalkToAstrologerPage() {
         </div>
       </div>
 
-      {/* Astrologer Grid */}
-      <div className="px-6 lg:px-8 py-8 max-w-screen-2xl mx-auto">
+      {/* Astrologer Grid & Remedies Bar */}
+      <div className="px-6 lg:px-8 py-8 max-w-screen-2xl mx-auto space-y-6">
+        {/* Vedic Remedies Quick Redirect Filter Bar */}
+        <RemediesFilterBar />
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-8">
           {filtered.map((ast, i) => (
             <motion.div

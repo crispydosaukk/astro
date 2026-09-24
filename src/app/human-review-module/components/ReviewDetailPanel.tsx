@@ -10,7 +10,7 @@ import type { ReviewCandidate } from './ReviewWorkspace';
 import { 
   MapPin, Briefcase, FileText, Star, Bot, Sparkles, RefreshCw, 
   ShieldCheck, AlertTriangle, CheckCircle2, ChevronRight,
-  X, Download, Eye, Award, ExternalLink, Shield, Check, FileCheck, ZoomIn, User
+  X, Download, Eye, Award, ExternalLink, Shield, Check, FileCheck, ZoomIn, ZoomOut, User, CreditCard
 } from 'lucide-react';
 
 type TabId = 'overview' | 'assessment' | 'interview' | 'documents' | 'timeline';
@@ -250,122 +250,381 @@ export default function ReviewDetailPanel({ candidate, onUpdateCandidate }: Revi
   );
 }
 
-interface ReviewDocItem {
+interface CandidateDocItem {
   id: string;
   name: string;
   category: string;
-  status: 'Verified' | 'Pending';
+  required: boolean;
+  docNumber?: string;
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: string;
   uploadedDate: string;
-  size: string;
-  type: 'aadhaar' | 'icas' | 'experience' | 'business' | 'photo';
+  status: 'Verified' | 'Pending';
+  type: 'aadhaar' | 'pan' | 'certificate' | 'experience' | 'other';
 }
 
 function ReviewDocumentsTab({ candidate }: { candidate: ReviewCandidate }) {
-  const [docs, setDocs] = useState<ReviewDocItem[]>([
-    { id: 'doc-001', name: 'Aadhaar Card', category: 'Identity', status: 'Verified', uploadedDate: '10 Aug 2026', size: '2.1 MB', type: 'aadhaar' },
-    { id: 'doc-002', name: 'Astrology Certification – ICAS', category: 'Professional Credential', status: 'Verified', uploadedDate: '10 Aug 2026', size: '1.4 MB', type: 'icas' },
-    { id: 'doc-003', name: 'Experience Letter – Jyotish Academy', category: 'Professional Credential', status: 'Verified', uploadedDate: '11 Aug 2026', size: '0.8 MB', type: 'experience' },
-    { id: 'doc-004', name: 'Business Registration Certificate', category: 'Supporting Document', status: 'Pending', uploadedDate: '12 Aug 2026', size: '3.2 MB', type: 'business' },
-    { id: 'doc-005', name: 'Profile Photo', category: 'Identity', status: 'Verified', uploadedDate: '10 Aug 2026', size: '0.5 MB', type: 'photo' },
-  ]);
+  // Directly build authentic document entries from candidate's actual uploads
+  const defaultDocs = React.useMemo<CandidateDocItem[]>(() => {
+    const list: CandidateDocItem[] = [];
 
-  const [previewDoc, setPreviewDoc] = useState<ReviewDocItem | null>(null);
+    // 1. Mandatory Aadhaar Card
+    const aadhaarDoc = candidate.aadhaarDocument || (candidate.idProofType === 'aadhaar' ? candidate.idProofDocument : '');
+    const aadhaarNo = candidate.aadhaarNumber || (candidate.idProofType === 'aadhaar' ? candidate.idProofNumber : '');
+    list.push({
+      id: 'doc-aadhaar',
+      name: 'Aadhaar Card',
+      category: 'Government Identity (UIDAI)',
+      required: true,
+      docNumber: aadhaarNo,
+      fileUrl: aadhaarDoc,
+      fileName: candidate.aadhaarFileName || (aadhaarDoc ? 'Aadhaar_Document' : undefined),
+      fileSize: aadhaarDoc ? 'Attached' : 'Not Uploaded',
+      uploadedDate: candidate.appliedAt 
+        ? new Date(candidate.appliedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) 
+        : 'On Registration',
+      status: aadhaarDoc ? 'Verified' : 'Pending',
+      type: 'aadhaar',
+    });
+
+    // 2. Mandatory PAN Card
+    const panDoc = candidate.panDocument || (candidate.idProofType === 'pan' ? candidate.idProofDocument : '');
+    const panNo = candidate.panNumber || (candidate.idProofType === 'pan' ? candidate.idProofNumber : '');
+    list.push({
+      id: 'doc-pan',
+      name: 'PAN Card',
+      category: 'Tax & Financial Identity (ITD)',
+      required: true,
+      docNumber: panNo,
+      fileUrl: panDoc,
+      fileName: candidate.panFileName || (panDoc ? 'PAN_Card' : undefined),
+      fileSize: panDoc ? 'Attached' : 'Not Uploaded',
+      uploadedDate: candidate.appliedAt 
+        ? new Date(candidate.appliedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) 
+        : 'On Registration',
+      status: panDoc ? 'Verified' : 'Pending',
+      type: 'pan',
+    });
+
+    // 3. Other Uploaded Documents (Astrology Certificates, Degrees, Experience Letters)
+    if (candidate.otherDocuments && Array.isArray(candidate.otherDocuments) && candidate.otherDocuments.length > 0) {
+      candidate.otherDocuments.forEach((doc, idx) => {
+        const fileUrl = doc.document || doc.fileUrl || '';
+        const cat = doc.category || 'Astrological Credential';
+        const isExp = cat.toLowerCase().includes('experience');
+        list.push({
+          id: doc.id || `other-doc-${idx}`,
+          name: doc.title || (isExp ? `Experience Letter #${idx + 1}` : `Astrology Certificate #${idx + 1}`),
+          category: cat,
+          required: false,
+          fileUrl: fileUrl,
+          fileName: doc.fileName || doc.title || `Document_${idx + 1}`,
+          fileSize: doc.fileSize || (fileUrl ? 'Attached' : 'Not Uploaded'),
+          uploadedDate: doc.uploadedAt 
+            ? new Date(doc.uploadedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+            : (candidate.appliedAt ? new Date(candidate.appliedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent'),
+          status: fileUrl ? 'Verified' : 'Pending',
+          type: isExp ? 'experience' : 'certificate',
+        });
+      });
+    }
+
+    // 4. Legacy fallback: if candidate has an idProofDocument not already captured
+    if (candidate.idProofDocument && !aadhaarDoc && !panDoc) {
+      list.push({
+        id: 'doc-legacy-id',
+        name: `${candidate.idProofType?.toUpperCase() || 'ID'} Proof Document`,
+        category: 'Identity Proof',
+        required: true,
+        docNumber: candidate.idProofNumber,
+        fileUrl: candidate.idProofDocument,
+        fileName: 'Candidate_ID_Proof',
+        fileSize: 'Attached',
+        uploadedDate: candidate.appliedAt 
+          ? new Date(candidate.appliedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) 
+          : 'On Registration',
+        status: 'Verified',
+        type: 'other',
+      });
+    }
+
+    return list;
+  }, [candidate]);
+
+  const [docStatuses, setDocStatuses] = useState<Record<string, 'Verified' | 'Pending'>>({});
+  const [previewDoc, setPreviewDoc] = useState<CandidateDocItem | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
 
+  const getDocStatus = (doc: CandidateDocItem) => {
+    return docStatuses[doc.id] || doc.status;
+  };
+
   const toggleDocStatus = (docId: string) => {
-    setDocs(prev => prev.map(d => {
-      if (d.id === docId) {
-        const nextStatus = d.status === 'Verified' ? 'Pending' : 'Verified';
-        return { ...d, status: nextStatus };
-      }
-      return d;
-    }));
-    if (previewDoc && previewDoc.id === docId) {
-      setPreviewDoc(prev => prev ? { ...prev, status: prev.status === 'Verified' ? 'Pending' : 'Verified' } : null);
+    setDocStatuses(prev => {
+      const current = prev[docId] || defaultDocs.find(d => d.id === docId)?.status || 'Pending';
+      return { ...prev, [docId]: current === 'Verified' ? 'Pending' : 'Verified' };
+    });
+  };
+
+  const handleDownload = (doc: CandidateDocItem) => {
+    if (doc.fileUrl) {
+      const a = document.createElement('a');
+      a.href = doc.fileUrl;
+      a.download = doc.fileName || `${candidate.name.replace(/\s+/g, '_')}_${doc.name.replace(/\s+/g, '_')}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      const blob = new Blob([
+        `Document: ${doc.name}\nCandidate: ${candidate.name}\nCategory: ${doc.category}\nDocument No: ${doc.docNumber || 'Not provided'}\nStatus: ${getDocStatus(doc)}\nNote: No digital file was uploaded by the candidate for this record.`
+      ], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${candidate.name.replace(/\s+/g, '_')}_${doc.name.replace(/\s+/g, '_')}_summary.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
   };
 
-  const handleDownload = (doc: ReviewDocItem) => {
-    // Generate a simple downloadable text/svg file for testing
-    const blob = new Blob([
-      `Document: ${doc.name}\nCandidate: ${candidate.name}\nCategory: ${doc.category}\nStatus: ${doc.status}\nUploaded: ${doc.uploadedDate}\nVerification ID: AP-DOC-${candidate.id}-${doc.id}`
-    ], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${candidate.name.replace(/\s+/g, '_')}_${doc.name.replace(/\s+/g, '_')}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const mandatoryDocs = defaultDocs.filter(d => d.required);
+  const optionalDocs = defaultDocs.filter(d => !d.required);
+
+  const isFilePdf = previewDoc?.fileUrl && (
+    previewDoc.fileUrl.startsWith('data:application/pdf') ||
+    previewDoc.fileName?.toLowerCase().endsWith('.pdf') ||
+    previewDoc.fileUrl.toLowerCase().endsWith('.pdf')
+  );
 
   return (
-    <div className="space-y-3">
-      {docs.map(doc => (
-        <div key={doc.id} className="flex items-center justify-between p-3.5 bg-muted/40 rounded-xl border border-border hover:border-primary/30 transition-colors">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center text-primary flex-shrink-0">
-              {doc.type === 'icas' ? <Award size={18} /> : doc.type === 'photo' ? <User size={18} /> : <FileText size={18} />}
-            </div>
-            <div>
-              <p className="font-semibold text-sm text-foreground">{doc.name}</p>
-              <p className="text-xs text-muted-foreground">{doc.category} · {doc.size} · Uploaded {doc.uploadedDate}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-              doc.status === 'Verified' ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
-            }`}>
-              {doc.status}
+    <div className="space-y-6">
+      {/* 1. Mandatory Identity Documents Section */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <h4 className="font-bold text-sm text-foreground">Mandatory Identity Documents</h4>
+            <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300">
+              Required for Verification
             </span>
-            <button 
-              onClick={() => {
-                setZoomLevel(1);
-                setPreviewDoc(doc);
-              }}
-              className="btn-ghost text-xs py-1.5 px-3 border border-border hover:border-primary/50 hover:bg-primary/5 text-foreground font-semibold rounded-lg flex items-center gap-1.5 transition"
-            >
-              <Eye size={13} />
-              Preview
-            </button>
           </div>
+          <span className="text-xs text-muted-foreground">Aadhaar & PAN</span>
         </div>
-      ))}
 
-      {/* Document Preview Modal */}
+        <div className="space-y-3">
+          {mandatoryDocs.map(doc => {
+            const hasFile = Boolean(doc.fileUrl);
+            const status = getDocStatus(doc);
+
+            return (
+              <div 
+                key={doc.id} 
+                className="flex items-center justify-between p-3.5 bg-muted/40 rounded-xl border border-border hover:border-primary/30 transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary flex-shrink-0">
+                    {doc.type === 'aadhaar' ? <ShieldCheck size={20} /> : <CreditCard size={20} />}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-sm text-foreground truncate">{doc.name}</p>
+                      {doc.docNumber && (
+                        <span className="font-mono text-2xs px-2 py-0.5 rounded bg-muted text-foreground/80 font-medium">
+                          {doc.docNumber}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {doc.category} · {doc.fileSize} · {doc.uploadedDate}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 flex-shrink-0">
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                    !hasFile 
+                      ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300'
+                      : status === 'Verified' 
+                        ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300' 
+                        : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                  }`}>
+                    {!hasFile ? 'File Missing' : status}
+                  </span>
+
+                  <button 
+                    onClick={() => {
+                      setZoomLevel(1);
+                      setPreviewDoc(doc);
+                    }}
+                    className="btn-ghost text-xs py-1.5 px-3 border border-border hover:border-primary/50 hover:bg-primary/5 text-foreground font-semibold rounded-lg flex items-center gap-1.5 transition"
+                  >
+                    <Eye size={13} />
+                    Preview
+                  </button>
+
+                  {hasFile && (
+                    <button
+                      onClick={() => handleDownload(doc)}
+                      className="p-1.5 text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition"
+                      title="Download uploaded file"
+                    >
+                      <Download size={13} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 2. Astrological Credentials & Other Documents Section */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <h4 className="font-bold text-sm text-foreground">Astrological Certificates & Experience Letters</h4>
+            <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+              Optional Uploads
+            </span>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {optionalDocs.length} {optionalDocs.length === 1 ? 'document' : 'documents'} attached
+          </span>
+        </div>
+
+        {optionalDocs.length > 0 ? (
+          <div className="space-y-3">
+            {optionalDocs.map(doc => {
+              const hasFile = Boolean(doc.fileUrl);
+              const status = getDocStatus(doc);
+
+              return (
+                <div 
+                  key={doc.id} 
+                  className="flex items-center justify-between p-3.5 bg-muted/40 rounded-xl border border-border hover:border-primary/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-amber-500/10 text-amber-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      {doc.type === 'experience' ? <Briefcase size={20} /> : <Award size={20} />}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-foreground truncate">{doc.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {doc.category} · {doc.fileSize} · Uploaded {doc.uploadedDate}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 flex-shrink-0">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                      !hasFile 
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                        : status === 'Verified' 
+                          ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300' 
+                          : 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                    }`}>
+                      {status}
+                    </span>
+
+                    <button 
+                      onClick={() => {
+                        setZoomLevel(1);
+                        setPreviewDoc(doc);
+                      }}
+                      className="btn-ghost text-xs py-1.5 px-3 border border-border hover:border-primary/50 hover:bg-primary/5 text-foreground font-semibold rounded-lg flex items-center gap-1.5 transition"
+                    >
+                      <Eye size={13} />
+                      Preview
+                    </button>
+
+                    {hasFile && (
+                      <button
+                        onClick={() => handleDownload(doc)}
+                        className="p-1.5 text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition"
+                        title="Download uploaded file"
+                      >
+                        <Download size={13} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-5 text-center bg-muted/20 border border-dashed border-border rounded-xl">
+            <p className="text-xs text-muted-foreground">
+              No optional astrological certificates or experience letters were uploaded by this applicant.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Document Direct Preview Modal */}
       {previewDoc && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-card border border-border rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-card border border-border rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
-                  {previewDoc.type === 'icas' ? <Award size={18} /> : previewDoc.type === 'photo' ? <User size={18} /> : <FileText size={18} />}
+                <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                  {previewDoc.type === 'aadhaar' ? (
+                    <ShieldCheck size={20} />
+                  ) : previewDoc.type === 'pan' ? (
+                    <CreditCard size={20} />
+                  ) : previewDoc.type === 'experience' ? (
+                    <Briefcase size={20} />
+                  ) : (
+                    <Award size={20} />
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-base text-foreground">{previewDoc.name}</h3>
                     <span className={`text-2xs font-bold px-2 py-0.5 rounded-full ${
-                      previewDoc.status === 'Verified' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                      getDocStatus(previewDoc) === 'Verified' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                     }`}>
-                      {previewDoc.status}
+                      {getDocStatus(previewDoc)}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Candidate: <span className="font-medium text-foreground">{candidate.name}</span> · {previewDoc.category} · {previewDoc.size}
+                    Candidate: <span className="font-medium text-foreground">{candidate.name}</span>
+                    {previewDoc.docNumber && <> · ID: <span className="font-mono text-foreground font-semibold">{previewDoc.docNumber}</span></>}
+                    {' · '}{previewDoc.category}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setZoomLevel(prev => (prev === 1 ? 1.25 : 1))}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
-                  title="Toggle Zoom"
-                >
-                  <ZoomIn size={16} />
-                </button>
+              <div className="flex items-center gap-1.5">
+                {previewDoc.fileUrl && !isFilePdf && (
+                  <>
+                    <button
+                      onClick={() => setZoomLevel(prev => Math.min(prev + 0.25, 2.5))}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+                      title="Zoom In"
+                    >
+                      <ZoomIn size={16} />
+                    </button>
+                    <button
+                      onClick={() => setZoomLevel(prev => Math.max(prev - 0.25, 0.5))}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+                      title="Zoom Out"
+                    >
+                      <ZoomOut size={16} />
+                    </button>
+                    <button
+                      onClick={() => setZoomLevel(1)}
+                      className="px-2 py-1 text-2xs font-mono rounded text-muted-foreground hover:text-foreground hover:bg-muted"
+                      title="Reset Zoom"
+                    >
+                      {Math.round(zoomLevel * 100)}%
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={() => setPreviewDoc(null)}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted ml-2"
                   title="Close preview"
                 >
                   <X size={18} />
@@ -373,263 +632,44 @@ function ReviewDocumentsTab({ candidate }: { candidate: ReviewCandidate }) {
               </div>
             </div>
 
-            {/* Document Canvas Body */}
-            <div className="p-6 overflow-y-auto flex-1 bg-muted/10 flex items-center justify-center">
-              <div 
-                className="w-full max-w-2xl bg-white text-slate-900 rounded-xl shadow-lg border border-slate-200 overflow-hidden transition-transform duration-200"
-                style={{ transform: `scale(${zoomLevel})` }}
-              >
-                {/* 1. AADHAAR CARD PREVIEW */}
-                {previewDoc.type === 'aadhaar' && (
-                  <div className="p-6 font-sans">
-                    {/* Top tricolour line */}
-                    <div className="h-1.5 w-full bg-gradient-to-r from-orange-500 via-white to-green-600 rounded-full mb-4" />
-                    
-                    {/* UIDAI Header */}
-                    <div className="flex items-center justify-between border-b pb-3 mb-4">
-                      <div className="text-left">
-                        <p className="text-xs font-bold text-slate-800 tracking-wide">भारत सरकार</p>
-                        <p className="text-xs font-bold text-slate-800 tracking-wide">GOVERNMENT OF INDIA</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-8 h-8 rounded-full border border-amber-600/50 flex items-center justify-center mx-auto text-amber-800 font-serif font-bold text-xs">
-                          🏛️
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs font-bold text-slate-800 tracking-wide">भारतीय विशिष्ट पहचान प्राधिकरण</p>
-                        <p className="text-2xs font-semibold text-slate-600">Unique Identification Authority of India</p>
-                      </div>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className="grid grid-cols-3 gap-4 items-center">
-                      <div className="col-span-1 flex flex-col items-center">
-                        <div className="w-28 h-32 bg-slate-100 border-2 border-slate-300 rounded-lg flex flex-col items-center justify-center text-slate-400 relative overflow-hidden">
-                          {candidate.idProofDocument && (candidate.idProofDocument.startsWith('data:') || candidate.idProofDocument.startsWith('http')) ? (
-                            <img src={candidate.idProofDocument} alt="Aadhaar Document" className="w-full h-full object-cover" />
-                          ) : (
-                            <>
-                              <div className="w-14 h-14 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-lg">
-                                {candidate.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                              </div>
-                              <span className="text-2xs font-bold text-slate-500 mt-2">PHOTO</span>
-                            </>
-                          )}
-                          <div className="absolute bottom-1 right-1 bg-green-600 text-white rounded-full p-0.5">
-                            <Check size={10} />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-span-2 space-y-1.5 text-xs">
-                        <div>
-                          <p className="text-slate-500 text-2xs font-semibold">नाम / Name</p>
-                          <p className="font-bold text-sm text-slate-900">{candidate.name}</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500 text-2xs font-semibold">जन्म तिथि / DOB</p>
-                          <p className="font-medium text-slate-800">15/07/1982</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500 text-2xs font-semibold">लिंग / Gender</p>
-                          <p className="font-medium text-slate-800">Male / Female</p>
-                        </div>
-                        <div>
-                          <p className="text-slate-500 text-2xs font-semibold">दस्तावेज़ संख्या / Document ID</p>
-                          <p className="font-mono font-bold text-slate-800 tracking-wider">
-                            XXXX XXXX {candidate.idProofNumber ? candidate.idProofNumber.slice(-4) : '7821'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Aadhaar Number & Slogan Footer */}
-                    <div className="mt-5 pt-3 border-t text-center space-y-1">
-                      <p className="font-mono font-extrabold text-base tracking-widest text-slate-900">
-                        XXXX  XXXX  {candidate.idProofNumber ? candidate.idProofNumber.slice(-4) : '7821'}
-                      </p>
-                      <p className="text-2xs font-bold text-red-700 tracking-wide">
-                        मेरा आधार, मेरी पहचान
-                      </p>
-                      <div className="flex items-center justify-center gap-1.5 text-2xs text-emerald-700 font-semibold pt-1">
-                        <ShieldCheck size={13} />
-                        <span>Digitally Verified via UIDAI Sandbox Gateway · AstroParihar Compliant</span>
-                      </div>
-                    </div>
+            {/* Document Canvas Body - Directly displays what the candidate uploaded */}
+            <div className="p-6 overflow-y-auto flex-1 bg-muted/15 flex items-center justify-center min-h-[380px]">
+              {previewDoc.fileUrl ? (
+                isFilePdf ? (
+                  <div className="w-full h-[70vh] rounded-xl overflow-hidden border border-border shadow-lg bg-background">
+                    <iframe
+                      src={previewDoc.fileUrl}
+                      className="w-full h-full"
+                      title={previewDoc.name}
+                    />
                   </div>
-                )}
-
-                {/* 2. ICAS ASTROLOGY CERTIFICATE PREVIEW */}
-                {previewDoc.type === 'icas' && (
-                  <div className="p-8 bg-[#fffdfa] border-8 border-double border-amber-700/40 relative font-serif text-center">
-                    <div className="border border-amber-600/30 p-6 rounded-lg space-y-3">
-                      <div className="w-12 h-12 rounded-full border-2 border-amber-700 text-amber-800 flex items-center justify-center mx-auto text-xl">
-                        ☀️
-                      </div>
-                      <h4 className="text-base font-extrabold tracking-widest text-amber-950 uppercase">
-                        Indian Council of Astrological Sciences
-                      </h4>
-                      <p className="text-2xs text-amber-800 italic">
-                        (Regd. Under Societies Registration Act XXI of 1860) · Founded by Dr. B. V. Raman
-                      </p>
-                      <div className="h-px bg-amber-300 w-3/4 mx-auto my-2" />
-                      <p className="text-xs text-slate-700 uppercase tracking-wider">This Diploma is Conferred Upon</p>
-                      <h3 className="text-2xl font-bold text-amber-900 tracking-wide font-serif">
-                        {candidate.name}
-                      </h3>
-                      <p className="text-xs text-slate-700 max-w-md mx-auto leading-relaxed">
-                        having completed the comprehensive post-graduate curriculum in Classical Vedic Parashari Principles, 
-                        Muhurtha calculations, and Horary Prashna Shastra with distinction.
-                      </p>
-                      <div className="py-2">
-                        <span className="inline-block bg-amber-100 text-amber-950 font-bold px-4 py-1.5 rounded-full border border-amber-300 text-xs tracking-widest uppercase">
-                          Jyotish Praveena & Jyotish Visharada
-                        </span>
-                      </div>
-                      <div className="flex items-end justify-between pt-6 text-2xs text-slate-600 border-t border-amber-200 mt-4">
-                        <div className="text-left">
-                          <p className="font-mono font-bold text-slate-800">ICAS/REG/2022/{candidate.id.replace(/[^0-9]/g, '').slice(-4) || '8841'}</p>
-                          <p>Issued: 10 August 2022</p>
-                        </div>
-                        <div className="w-12 h-12 rounded-full bg-amber-600/10 border-2 border-dashed border-amber-700 flex items-center justify-center text-amber-800 text-2xs font-bold">
-                          SEAL
-                        </div>
-                        <div className="text-right">
-                          <p className="font-serif italic font-bold text-slate-800">Justice S. N. Kapoor</p>
-                          <p>National President, ICAS</p>
-                        </div>
-                      </div>
-                    </div>
+                ) : (
+                  <div className="w-full max-h-[72vh] flex items-center justify-center p-3 bg-slate-950/80 rounded-xl overflow-auto border border-border/40 shadow-inner">
+                    <img
+                      src={previewDoc.fileUrl}
+                      alt={previewDoc.name}
+                      style={{ transform: `scale(${zoomLevel})`, transition: 'transform 0.15s ease' }}
+                      className="max-h-[68vh] max-w-full object-contain rounded shadow-2xl transition-transform"
+                    />
                   </div>
-                )}
-
-                {/* 3. EXPERIENCE LETTER PREVIEW */}
-                {previewDoc.type === 'experience' && (
-                  <div className="p-8 font-sans text-slate-800 space-y-4">
-                    <div className="border-b-2 border-slate-800 pb-3 flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-sm text-slate-900 tracking-wide uppercase">
-                          Jyotish Vigyan Research Academy & Sansthan
-                        </h4>
-                        <p className="text-2xs text-slate-600">Center for Vedic Studies & Applied Astrological Consultation</p>
-                      </div>
-                      <span className="text-2xs font-mono text-slate-500">Ref: JVRA/EXP/2026/04</span>
-                    </div>
-
-                    <div className="text-right text-xs text-slate-500">Date: 11 August 2026</div>
-
-                    <div className="text-center py-1">
-                      <h5 className="font-bold text-xs uppercase tracking-wider underline">TO WHOMSOEVER IT MAY CONCERN</h5>
-                    </div>
-
-                    <p className="text-xs leading-relaxed text-justify">
-                      This is to certify that <strong>{candidate.name}</strong> has been actively associated with our panel of 
-                      professional Vedic Astrological consultants for over <strong>{candidate.experience || '12+ years'}</strong>.
-                    </p>
-
-                    <p className="text-xs leading-relaxed text-justify">
-                      During this tenure, they have conducted rigorous natal horoscope evaluations, matchmaking assessments (Ashtakoota), 
-                      and predictive consultations. They uphold exemplary astrological ethics, depth of Shastric knowledge, 
-                      and client discretion.
-                    </p>
-
-                    <p className="text-xs leading-relaxed">
-                      We unconditionally recommend them for verified senior astrologer onboarding on the AstroParihar platform.
-                    </p>
-
-                    <div className="pt-8 flex items-end justify-between">
-                      <div className="text-left text-xs">
-                        <div className="w-16 h-16 rounded-full border border-blue-900/40 flex items-center justify-center text-blue-900 text-2xs font-bold">
-                          VERIFIED
-                        </div>
-                      </div>
-                      <div className="text-right text-xs">
-                        <p className="font-serif italic font-bold text-slate-900 text-sm">Dr. K. N. Somayaji</p>
-                        <p className="text-2xs text-slate-600">Director of Academic Affairs</p>
-                        <p className="text-2xs text-slate-600">Jyotish Vigyan Academy</p>
-                      </div>
-                    </div>
+                )
+              ) : (
+                <div className="p-10 text-center bg-card border-2 border-dashed border-border rounded-2xl max-w-md w-full shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto mb-3">
+                    <AlertTriangle size={28} />
                   </div>
-                )}
-
-                {/* 4. BUSINESS REGISTRATION PREVIEW */}
-                {previewDoc.type === 'business' && (
-                  <div className="p-8 font-sans text-slate-800 space-y-4 bg-slate-50/50">
-                    <div className="text-center border-b pb-3 space-y-1">
-                      <p className="text-2xs font-bold text-slate-600">GOVERNMENT OF INDIA</p>
-                      <h4 className="text-sm font-bold text-slate-900 uppercase">
-                        Ministry of Micro, Small and Medium Enterprises
-                      </h4>
-                      <p className="text-2xs font-semibold text-emerald-700">UDYAM REGISTRATION CERTIFICATE</p>
+                  <h4 className="font-bold text-base text-foreground">No Document File Attached</h4>
+                  <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                    The candidate did not attach an image or PDF file for this document during application submission.
+                  </p>
+                  {previewDoc.docNumber && (
+                    <div className="mt-4 p-3 bg-muted/60 rounded-xl border border-border inline-block">
+                      <p className="text-2xs text-muted-foreground uppercase font-bold tracking-wider">Submitted Document Number</p>
+                      <p className="font-mono font-bold text-sm text-foreground mt-0.5">{previewDoc.docNumber}</p>
                     </div>
-
-                    <div className="bg-white p-4 rounded-lg border text-xs space-y-2.5">
-                      <div className="grid grid-cols-3 gap-2">
-                        <span className="text-slate-500 font-medium">UDYAM REG. NO.</span>
-                        <span className="col-span-2 font-mono font-bold text-slate-900">
-                          UDYAM-DL-03-00{candidate.id.replace(/[^0-9]/g, '').slice(-4) || '9120'}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <span className="text-slate-500 font-medium">ENTERPRISE NAME</span>
-                        <span className="col-span-2 font-bold text-slate-900">
-                          {candidate.businessName || `${candidate.name} Vedic Jyotish & Vastu Solutions`}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <span className="text-slate-500 font-medium">CLASSIFICATION</span>
-                        <span className="col-span-2 text-slate-800 font-semibold">Micro Enterprise · Professional Services</span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <span className="text-slate-500 font-medium">NIC CODE (5 DIGIT)</span>
-                        <span className="col-span-2 text-slate-800 font-mono">96099 (Astrological and Spiritual Consultation Services)</span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <span className="text-slate-500 font-medium">LOCATION</span>
-                        <span className="col-span-2 text-slate-800">{candidate.location || 'New Delhi, India'}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-2xs text-slate-500 pt-2">
-                      <span>Digitally Generated via National MSME Portal</span>
-                      <span className="font-mono">Checksum: 8fa92b...verified</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 5. PROFILE PHOTO PREVIEW */}
-                {previewDoc.type === 'photo' && (
-                  <div className="p-8 text-center space-y-4">
-                    <div className="w-40 h-40 mx-auto rounded-full terracotta-gradient flex items-center justify-center text-white text-4xl font-bold shadow-xl border-4 border-white relative overflow-hidden">
-                      {candidate.idProofDocument && (candidate.idProofDocument.startsWith('data:') || candidate.idProofDocument.startsWith('http')) ? (
-                        <img src={candidate.idProofDocument} alt={candidate.name} className="w-full h-full object-cover" />
-                      ) : (
-                        candidate.name.split(' ').map(n => n[0]).slice(0, 2).join('')
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg text-slate-900">{candidate.name}</h4>
-                      <p className="text-xs text-slate-500">{candidate.location} · Vedic Astrology Practitioner</p>
-                    </div>
-
-                    <div className="bg-slate-50 p-4 rounded-xl border max-w-sm mx-auto text-xs space-y-1.5 text-left">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-500">Biometric Match Score:</span>
-                        <span className="font-bold text-emerald-700">99.4% Match</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-500">Image Resolution:</span>
-                        <span className="font-mono text-slate-800">1200 x 1200 px (300 DPI)</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-500">Lighting & Clarity:</span>
-                        <span className="font-semibold text-emerald-700">Pass (Studio Standard)</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Modal Footer Actions */}
@@ -638,21 +678,34 @@ function ReviewDocumentsTab({ candidate }: { candidate: ReviewCandidate }) {
                 <button
                   onClick={() => toggleDocStatus(previewDoc.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
-                    previewDoc.status === 'Verified'
-                      ? 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
-                      : 'bg-green-50 text-green-800 border border-green-200 hover:bg-green-100'
+                    getDocStatus(previewDoc) === 'Verified'
+                      ? 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-200'
+                      : 'bg-green-50 text-green-800 border border-green-200 hover:bg-green-100 dark:bg-green-950/50 dark:text-green-200'
                   }`}
                 >
                   <CheckCircle2 size={13} />
-                  {previewDoc.status === 'Verified' ? 'Mark as Pending' : 'Approve & Mark Verified'}
+                  {getDocStatus(previewDoc) === 'Verified' ? 'Mark as Under Review' : 'Approve & Mark Verified'}
                 </button>
-                <button
-                  onClick={() => handleDownload(previewDoc)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-background hover:bg-muted text-foreground flex items-center gap-1.5 transition"
-                >
-                  <Download size={13} /> Download Document
-                </button>
+
+                {previewDoc.fileUrl && (
+                  <>
+                    <button
+                      onClick={() => handleDownload(previewDoc)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-background hover:bg-muted text-foreground flex items-center gap-1.5 transition"
+                    >
+                      <Download size={13} /> Download File
+                    </button>
+
+                    <button
+                      onClick={() => window.open(previewDoc.fileUrl, '_blank')}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-background hover:bg-muted text-foreground flex items-center gap-1.5 transition"
+                    >
+                      <ExternalLink size={13} /> Open in New Tab
+                    </button>
+                  </>
+                )}
               </div>
+
               <button
                 onClick={() => setPreviewDoc(null)}
                 className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90 transition"

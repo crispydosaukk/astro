@@ -21,29 +21,119 @@ interface CampaignFormData {
 }
 
 const availableSpecialisations = [
-  'Vedic Jyotish', 
-  'KP Astrology', 
-  'Nadi Astrology', 
-  'Prashna Kundali', 
-  'Numerology', 
-  'Vastu Shastra', 
+  'Vedic Astrology',
+  'KP Astrology',
+  'Nadi Astrology',
   'Lal Kitab',
-  'Tarot Reading',
-  'Western Astrology', 
-  'Gemology'
+  'Tarot',
+  'Numerology',
+  'Palmistry',
+  'Vastu',
+  'Face Reading',
+  'Reiki',
+  'Angel Reading',
+  'Prashna',
+  'Psychic Reading',
+  'Pendulum Dowsing',
+  'Other'
 ];
 
-const searchSourcesList = [
-  'Google Places', 
-  'Justdial & Sulekha', 
-  'Astrology Directories', 
-  'Yellow Pages'
+export interface SearchSourceOption {
+  id: string;
+  label: string;
+  badge: string;
+  icon: React.ReactNode;
+}
+
+const searchSourcesList: SearchSourceOption[] = [
+  {
+    id: 'Google Places',
+    label: 'Google Places',
+    badge: 'Maps & Business',
+    icon: (
+      <svg className="w-4 h-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'YouTube',
+    label: 'YouTube',
+    badge: 'Video & Channels',
+    icon: (
+      <svg className="w-4 h-4 text-red-600 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'LinkedIn',
+    label: 'LinkedIn',
+    badge: 'Professional Network',
+    icon: (
+      <svg className="w-4 h-4 text-sky-600 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c-.92 0-1.66-.74-1.66-1.66a1.66 1.66 0 0 1 1.66-1.66c.92 0 1.66.74 1.66 1.66 0 .92-.74 1.66-1.66 1.66m1.39 9.74v-8.37H5.07v8.37h2.78z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'Instagram',
+    label: 'Instagram',
+    badge: 'Social & Creators',
+    icon: (
+      <svg className="w-4 h-4 text-pink-600 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'Justdial & Sulekha',
+    label: 'Justdial & Sulekha',
+    badge: 'Directories',
+    icon: (
+      <svg className="w-4 h-4 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'Astrology Directories',
+    label: 'Astrology Directories',
+    badge: 'Associations',
+    icon: (
+      <svg className="w-4 h-4 text-indigo-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'Yellow Pages',
+    label: 'Yellow Pages',
+    badge: 'Listings',
+    icon: (
+      <svg className="w-4 h-4 text-orange-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+    ),
+  },
 ];
+
+const allSpecialisations = availableSpecialisations.filter(s => s !== 'Other');
+const defaultCategories = ['Vedic Astrology'];
+const defaultSources = searchSourcesList.map(s => s.id);
 
 export default function CampaignHeader() {
   const { campaigns, createCampaign, isExecuting } = useDiscovery();
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedSpecs, setSelectedSpecs] = useState<string[]>(['Vedic Jyotish']);
+  const [selectedSpecs, setSelectedSpecs] = useState<string[]>(defaultCategories);
+  const [otherSpec, setOtherSpec] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPurgeConfirmOpen, setIsPurgeConfirmOpen] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
@@ -63,13 +153,23 @@ export default function CampaignHeader() {
       name: '',
       location: 'New Delhi, Delhi, India',
       country: 'India',
-      specialisations: ['Vedic Jyotish'],
+      specialisations: defaultCategories,
       minExperience: 5,
       targetCount: 50,
-      sources: ['Google Places', 'Justdial & Sulekha'],
+      sources: defaultSources,
       startImmediately: true,
     },
   });
+
+  // Auto-check all search sources/platforms below (Google Places, YouTube, LinkedIn, Instagram, Justdial, Directories, Yellow Pages)
+  React.useEffect(() => {
+    if (modalOpen) {
+      setSelectedSpecs(defaultCategories);
+      setValue('specialisations', defaultCategories);
+      setValue('sources', defaultSources);
+      setOtherSpec('');
+    }
+  }, [modalOpen, setValue]);
 
   const locationValue = watch('location') || '';
 
@@ -125,7 +225,15 @@ export default function CampaignHeader() {
   };
 
   const onSubmit = async (data: CampaignFormData) => {
-    if (selectedSpecs.length === 0) {
+    let finalSpecs = [...selectedSpecs];
+    if (finalSpecs.includes('Other')) {
+      finalSpecs = finalSpecs.filter(s => s !== 'Other');
+      if (otherSpec.trim()) {
+        finalSpecs.push(otherSpec.trim());
+      }
+    }
+
+    if (finalSpecs.length === 0) {
       alert('Please select at least one specialisation.');
       return;
     }
@@ -135,12 +243,12 @@ export default function CampaignHeader() {
       await createCampaign({
         name: data.name,
         location: data.location,
-        specialisation: selectedSpecs.join(', '),
-        specialisations: selectedSpecs,
+        specialisation: finalSpecs.join(', '),
+        specialisations: finalSpecs,
         targetCount: Number(data.targetCount),
         minAiScore: 0,
         minExperience: Number(data.minExperience),
-        sources: data.sources || ['Google Places', 'Justdial & Sulekha'],
+        sources: data.sources && data.sources.length > 0 ? data.sources : defaultSources,
         startImmediately: data.startImmediately,
       });
 
@@ -148,13 +256,17 @@ export default function CampaignHeader() {
       setTimeout(() => setToastMsg(null), 4000);
       setModalOpen(false);
       reset();
-      setSelectedSpecs(['KP Astrology']);
+      setSelectedSpecs(defaultCategories);
+      setValue('sources', defaultSources);
+      setOtherSpec('');
     } catch (err: any) {
       alert(`Failed to create campaign: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const selectedSources = watch('sources') || [];
 
   return (
     <>
@@ -169,7 +281,7 @@ export default function CampaignHeader() {
             {runningCount} Job{runningCount !== 1 ? 's' : ''} Active
           </div>
           <div className="flex items-center gap-1.5 bg-muted text-muted-foreground px-3 py-1.5 rounded-full text-xs font-semibold">
-            Google Places + Justdial / Sulekha
+            Google Places • YouTube • LinkedIn • Instagram
           </div>
           {toastMsg && (
             <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 animate-fadeIn flex items-center gap-1">
@@ -206,7 +318,7 @@ export default function CampaignHeader() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title="Create Discovery Campaign"
-        subtitle="Select multiple specialisations to discover real astrologers via Google Places & Directories"
+        subtitle="Select multiple specialisations to discover real astrologers via Google Places, YouTube, LinkedIn, Instagram & Directories"
         size="xl"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -265,7 +377,29 @@ export default function CampaignHeader() {
               <label className="text-xs font-semibold text-muted-foreground block">
                 Target Specialisations * ({selectedSpecs.length} selected)
               </label>
-              <span className="text-2xs text-primary font-medium">Select one or more branches</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedSpecs(allSpecialisations);
+                    setValue('specialisations', allSpecialisations);
+                  }}
+                  className="text-2xs font-semibold text-primary hover:underline cursor-pointer"
+                >
+                  Select All Categories
+                </button>
+                <span className="text-muted-foreground text-2xs">•</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedSpecs(['Vedic Astrology']);
+                    setValue('specialisations', ['Vedic Astrology']);
+                  }}
+                  className="text-2xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  Clear (Keep 1)
+                </button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2 p-3 bg-muted/20 border border-border rounded-xl">
               {availableSpecialisations.map(spec => {
@@ -287,23 +421,75 @@ export default function CampaignHeader() {
                 );
               })}
             </div>
+            {selectedSpecs.includes('Other') && (
+              <div className="mt-2.5">
+                <input
+                  type="text"
+                  value={otherSpec}
+                  onChange={e => setOtherSpec(e.target.value)}
+                  placeholder="Specify other specialisation (e.g. Gemology, Western Astrology, Graphology)..."
+                  className="input-field text-xs w-full py-2 px-3 border border-border rounded-lg bg-background text-foreground focus:ring-1 focus:ring-primary"
+                  required={selectedSpecs.length === 1 && selectedSpecs.includes('Other')}
+                />
+              </div>
+            )}
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-muted-foreground block mb-2">Search Sources</label>
-            <div className="grid grid-cols-2 gap-2">
-              {searchSourcesList.map(src => (
-                <label key={src} className="flex items-center gap-2 text-xs text-foreground cursor-pointer p-2 border border-border rounded-lg hover:bg-muted/50">
-                  <input
-                    type="checkbox"
-                    value={src}
-                    {...register('sources')}
-                    defaultChecked={src === 'Google Places' || src === 'Justdial & Sulekha'}
-                    className="rounded text-primary focus:ring-primary"
-                  />
-                  <span>{src}</span>
-                </label>
-              ))}
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-muted-foreground block">
+                Search Sources & Platforms ({selectedSources.length} active)
+              </label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue('sources', defaultSources);
+                  }}
+                  className="text-2xs font-semibold text-primary hover:underline cursor-pointer"
+                >
+                  Select All Sources
+                </button>
+                <span className="text-muted-foreground text-2xs">•</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue('sources', ['Google Places', 'YouTube', 'LinkedIn']);
+                  }}
+                  className="text-2xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {searchSourcesList.map(src => {
+                const isChecked = selectedSources.includes(src.id);
+                return (
+                  <label
+                    key={src.id}
+                    className={`flex items-center gap-2.5 text-xs text-foreground cursor-pointer p-2.5 border rounded-xl transition-all ${
+                      isChecked
+                        ? 'border-primary/50 bg-primary/5 shadow-2xs'
+                        : 'border-border hover:border-primary/30 hover:bg-muted/40'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      value={src.id}
+                      {...register('sources')}
+                      className="rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                    />
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      {src.icon}
+                      <div className="min-w-0">
+                        <p className="font-semibold truncate text-xs">{src.label}</p>
+                        <p className="text-3xs text-muted-foreground truncate">{src.badge}</p>
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
@@ -312,7 +498,7 @@ export default function CampaignHeader() {
               <p className="text-xs font-bold text-primary flex items-center gap-1">
                 <Sparkles size={13} /> Start Discovery Immediately
               </p>
-              <p className="text-2xs text-muted-foreground">Automatically query Google Places, Justdial & Sulekha upon creation</p>
+              <p className="text-2xs text-muted-foreground">Automatically query Google Places, YouTube, LinkedIn, Instagram & Directories upon creation</p>
             </div>
             <input
               type="checkbox"

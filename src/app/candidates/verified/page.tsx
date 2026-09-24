@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
-import { BadgeCheck, Search, Star, Calendar, MapPin, Eye, Download, ShieldCheck } from 'lucide-react';
+import { BadgeCheck, Search, Star, Calendar, MapPin, Eye, Download, ShieldCheck, X, Printer, Award } from 'lucide-react';
 import { 
   Candidate, 
   initialCandidatesData, 
@@ -13,6 +13,7 @@ import Link from 'next/link';
 export default function VerifiedAstrologersPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [search, setSearch] = useState('');
+  const [certificateCandidate, setCertificateCandidate] = useState<{ candidate: Candidate; index: number } | null>(null);
 
   useEffect(() => {
     try {
@@ -179,12 +180,13 @@ export default function VerifiedAstrologersPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <Link
-                        href="/verification"
-                        className="px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold rounded-md inline-flex items-center gap-1 transition-colors"
+                      <button
+                        type="button"
+                        onClick={() => setCertificateCandidate({ candidate: c, index: i })}
+                        className="px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold rounded-md inline-flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         <Eye size={12} /> Certificate
-                      </Link>
+                      </button>
                     </td>
                   </tr>
                 )))}
@@ -192,6 +194,88 @@ export default function VerifiedAstrologersPage() {
             </table>
           </div>
         </div>
+
+        {/* Digital Verification Certificate Modal with Official Logo */}
+        {certificateCandidate && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+            <div className="bg-card border border-border w-full max-w-2xl rounded-2xl p-6 shadow-2xl space-y-5">
+              <div className="flex items-start justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-primary" /> Official Astrologer Credential
+                </span>
+                <button 
+                  onClick={() => setCertificateCandidate(null)}
+                  className="p-1 rounded-lg text-muted-foreground hover:bg-muted cursor-pointer transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Certificate Canvas */}
+              <div className="border-4 border-double border-amber-600/35 rounded-2xl p-8 bg-gradient-to-br from-amber-50/45 via-background to-orange-50/25 text-center space-y-4 relative overflow-hidden shadow-inner">
+                {/* Official AstroParihar Logo */}
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <img 
+                    src="/assets/images/AstroParihar_Logo-1786957316255.webp" 
+                    alt="AstroParihar" 
+                    className="h-16 w-auto object-contain mx-auto drop-shadow-xs" 
+                  />
+                  <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-600 shadow-2xs">
+                    <Award size={22} />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-serif font-bold text-foreground tracking-wide">AstroParihar Verified Astrologer</h3>
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mt-1 font-medium">National Quality & Authenticity Seal</p>
+                </div>
+
+                <div className="py-2">
+                  <p className="text-xs text-muted-foreground">This is to officially certify that</p>
+                  <p className="text-2xl font-bold text-foreground font-serif mt-1">{certificateCandidate.candidate.name}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Specialisation: <strong className="text-foreground">{certificateCandidate.candidate.specialisations?.join(', ') || 'Vedic Astrology'}</strong>
+                    {certificateCandidate.candidate.location && ` · ${certificateCandidate.candidate.location}`}
+                  </p>
+                </div>
+
+                <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+                  Has satisfactorily cleared the multi-tier AstroParihar verification standard including classical theory assessment, blind Kundali case audit, and verified practitioner probation.
+                </p>
+
+                <div className="flex items-center justify-between border-t border-border/80 pt-4 mt-4 text-left">
+                  <div>
+                    <p className="text-2xs text-muted-foreground uppercase font-semibold">Verification ID</p>
+                    <p className="font-mono text-sm font-bold text-primary">AP-VER-2026-{String(certificateCandidate.index + 1).padStart(3, '0')}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xs text-muted-foreground uppercase font-semibold">Evaluation Score</p>
+                    <p className="text-sm font-bold text-emerald-600">{certificateCandidate.candidate.aiScore || 90}% Distinction</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xs text-muted-foreground uppercase font-semibold">Authorized Signatory</p>
+                    <p className="text-xs font-serif font-bold text-foreground">AstroParihar Council</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center pt-2">
+                <button
+                  onClick={() => window.print()}
+                  className="btn-secondary flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg cursor-pointer"
+                >
+                  <Printer size={13} /> Print Certificate
+                </button>
+                <button
+                  onClick={() => setCertificateCandidate(null)}
+                  className="px-4 py-2 border border-border rounded-lg text-xs font-medium hover:bg-muted cursor-pointer transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   );

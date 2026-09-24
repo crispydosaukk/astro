@@ -1,7 +1,7 @@
 import React from 'react';
 
 type StatusVariant =
-  | 'discovered' |'qualified' |'outreach' |'contacted' |'applied' |'screening' |'review' |'probation' |'verified' |'rejected' |'duplicate' |'hold' |'interested' |'not-interested' |'withdrawn' |'draft' |'queued' |'running' |'paused' |'completed' |'failed' |'cancelled';
+  | 'discovered' |'qualified' |'outreach' |'contacted' |'applied' |'screening' |'review' |'probation' |'verified' |'rejected' |'duplicate' |'hold' |'interested' |'not-interested' |'withdrawn' |'draft' |'queued' |'running' |'paused' |'completed' |'failed' |'cancelled' | 'partially-completed' | 'partial' | 'incomplete';
 
 const variantMap: Record<string, string> = {
   discovered: 'status-badge-discovered',
@@ -27,6 +27,9 @@ const variantMap: Record<string, string> = {
   queued: 'status-badge-discovered',
   running: 'status-badge-applied',
   paused: 'status-badge-hold',
+  'partially-completed': 'status-badge-outreach',
+  partial: 'status-badge-outreach',
+  incomplete: 'status-badge-outreach',
   completed: 'status-badge-verified',
   failed: 'status-badge-rejected',
   cancelled: 'status-badge-duplicate',
@@ -56,6 +59,9 @@ const labelMap: Record<string, string> = {
   queued: 'Queued',
   running: 'Running',
   paused: 'Paused',
+  'partially-completed': 'Partially Completed',
+  partial: 'Partially Completed',
+  incomplete: 'Incomplete',
   completed: 'Completed',
   failed: 'Failed',
   cancelled: 'Cancelled',

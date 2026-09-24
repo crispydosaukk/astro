@@ -471,9 +471,10 @@ export default function DiscoveryJobsPage() {
                       className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                     >
                       <option value="Google Places & Web Search">Google Places</option>
-                      <option value="Justdial & Local Directories">Justdial / Directories</option>
                       <option value="YouTube Astrologers Network">YouTube Channels</option>
+                      <option value="LinkedIn Astrologer Network">LinkedIn Network</option>
                       <option value="Instagram Vedic Network">Instagram Network</option>
+                      <option value="Justdial & Local Directories">Justdial / Directories</option>
                     </select>
                   </div>
 

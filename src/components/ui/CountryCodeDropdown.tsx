@@ -7,10 +7,11 @@ import { COUNTRY_CODES } from '@/lib/countryCodes';
 
 interface CountryCodeDropdownProps {
   value: string;
-  onChange: (code: string) => void;
+  onChange: (code: string, iso?: string) => void;
   disabled?: boolean;
   icon?: React.ReactNode;
   ariaLabel?: string;
+  selectedIso?: string;
 }
 
 export default function CountryCodeDropdown({
@@ -19,6 +20,7 @@ export default function CountryCodeDropdown({
   disabled = false,
   icon,
   ariaLabel = 'Select country code',
+  selectedIso,
 }: CountryCodeDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,7 +31,9 @@ export default function CountryCodeDropdown({
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const selected = COUNTRY_CODES.find(c => c.code === value) ?? COUNTRY_CODES[0];
+  const selected = (selectedIso ? COUNTRY_CODES.find(c => c.iso.toLowerCase() === selectedIso.toLowerCase()) : null)
+    ?? COUNTRY_CODES.find(c => c.code === value)
+    ?? COUNTRY_CODES[0];
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -105,7 +109,7 @@ export default function CountryCodeDropdown({
             <button
               key={c.code + c.iso}
               type="button"
-              onClick={() => { onChange(c.code); setIsOpen(false); setSearchQuery(''); }}
+              onClick={() => { onChange(c.code, c.iso.toLowerCase()); setIsOpen(false); setSearchQuery(''); }}
               className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer ${isSel ? 'bg-primary/15 text-primary font-bold' : 'text-foreground hover:bg-muted/60'}`}
             >
               <div className="flex items-center gap-2 min-w-0">

@@ -14,16 +14,33 @@ export default function AstrologerDashboardLayout({ children }: { children: Reac
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
+      let verifiedSession: any = null;
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('astro_verified_session');
+        if (stored) {
+          try {
+            verifiedSession = JSON.parse(stored);
+          } catch (e) {}
+        }
+      }
+
+      if (!currentUser && (!verifiedSession || !verifiedSession.authenticated)) {
         router.push('/astrologer-login');
         return;
       }
 
-      // Check if user is an approved astrologer
+      if (verifiedSession && verifiedSession.authenticated && verifiedSession.id) {
+        setUser((currentUser || { uid: verifiedSession.id, email: verifiedSession.email || '', phoneNumber: verifiedSession.phone || '' }) as any);
+        setLoading(false);
+        return;
+      }
+
+      // Check if user is an approved astrologer in Firestore
       try {
-        const docRef = doc(db, 'astrologers', currentUser.uid);
+        const docRef = doc(db, 'astrologers', currentUser!.uid);
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists() && docSnap.data().status === 'approved') {
+        const validStatuses = ['approved', 'active', 'full_time', 'probation', 'verified'];
+        if (docSnap.exists() && (validStatuses.includes(String(docSnap.data().status || '').toLowerCase()) || docSnap.data().isVerified)) {
           setUser(currentUser);
         } else {
           router.push('/astrologer-login');

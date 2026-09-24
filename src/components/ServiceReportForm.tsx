@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Lock, Loader2, MapPin, Bot, Wallet } from 'lucide-react';
+import { ArrowRight, Lock, Loader2, Bot, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import CityLocationInput from '@/components/CityLocationInput';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { db } from '@/lib/firebase/config';
@@ -37,11 +38,7 @@ export default function ServiceReportForm({
   const [time, setTime] = useState('');
   const [place, setPlace] = useState('');
 
-  // Location Autocomplete State
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -105,41 +102,6 @@ export default function ServiceReportForm({
     };
   }, [serviceId]);
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPlace(value);
-
-    if (value.length < 3) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-
-    setIsSearching(true);
-    setShowSuggestions(true);
-
-    searchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&limit=5`
-        );
-        const data = await res.json();
-        setSuggestions(data);
-      } catch (error) {
-        console.error('Error fetching locations:', error);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 500);
-  };
-
-  const handleSelectLocation = (locationName: string) => {
-    setPlace(locationName);
-    setSuggestions([]);
-    setShowSuggestions(false);
-  };
 
   const handleSubmit = async () => {
     if (!dob || !time || !place) {
@@ -246,50 +208,17 @@ export default function ServiceReportForm({
                 className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-sm transition-all cursor-pointer shadow-sm font-medium"
               />
             </div>
-            <div className="relative">
+            <div>
               <label className="block text-sm font-bold text-[#292522] mb-2">Place of Birth</label>
-              <input
-                type="text"
-                placeholder="e.g. Delhi, India"
+              <CityLocationInput
+                placeholder="e.g. New Delhi, Mumbai, Bengaluru..."
                 value={place}
-                onChange={(e) => {
-                  handleLocationChange(e);
-                  saveDraft(dob, time, e.target.value);
+                onChange={(val) => {
+                  setPlace(val);
+                  saveDraft(dob, time, val);
                 }}
-                onFocus={() => place.length >= 3 && setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="w-full px-4 py-3 rounded-xl bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] focus:border-[#B88A44] outline-none text-sm transition-all placeholder:text-[#6B5E55]/60 shadow-sm font-medium"
+                required
               />
-              {/* Location Suggestions Dropdown */}
-              {showSuggestions && (
-                <div className="absolute z-20 w-full mt-2 bg-[#FFFDFC] border border-[#E5D9C8] rounded-2xl shadow-2xl overflow-hidden">
-                  {isSearching ? (
-                    <div className="p-4 text-center text-sm text-[#6B5E55] flex items-center justify-center gap-2">
-                      <Loader2 className="animate-spin" size={14} /> Searching locations...
-                    </div>
-                  ) : suggestions.length > 0 ? (
-                    <ul className="max-h-60 overflow-y-auto">
-                      {suggestions.map((s, i) => (
-                        <li
-                          key={i}
-                          onMouseDown={() => {
-                            handleSelectLocation(s.display_name);
-                            saveDraft(dob, time, s.display_name);
-                          }}
-                          className="px-4 py-3 hover:bg-[#F8F3EA] cursor-pointer flex items-start gap-3 transition-colors border-b border-[#E5D9C8]/50 last:border-0"
-                        >
-                          <MapPin size={16} className="text-[#713B32] flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-[#292522] font-medium">
-                            {s.display_name}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : place.length >= 3 ? (
-                    <div className="p-4 text-center text-sm text-[#6B5E55]">No locations found</div>
-                  ) : null}
-                </div>
-              )}
             </div>
 
             {premiumInfo && (

@@ -49,6 +49,13 @@ export interface Candidate {
   idProofType?: 'aadhaar' | 'pan' | string;
   idProofNumber?: string;
   idProofDocument?: string;
+  aadhaarNumber?: string;
+  aadhaarDocument?: string;
+  aadhaarFileName?: string;
+  panNumber?: string;
+  panDocument?: string;
+  panFileName?: string;
+  otherDocuments?: any[];
   campaignName?: string;
   rating?: number;
   userRatingsTotal?: number;
