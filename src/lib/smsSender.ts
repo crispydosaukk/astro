@@ -47,8 +47,9 @@ export async function sendMsg91Sms({
   variables = {},
 }: Msg91SmsPayload): Promise<Msg91SmsResponse> {
   const authKey = process.env.MSG91_AUTH_KEY || '556810AQwSjcKL6a72bde6P1';
-  const defaultTemplateId = process.env.MSG91_OUTREACH_TEMPLATE_ID || process.env.MSG91_TEMPLATE_ID || '6a72130b9c56d8f88f079d52';
+  const defaultTemplateId = process.env.MSG91_OUTREACH_TEMPLATE_ID || '6ab4e155fe7c2c662905ac73';
   const effectiveTemplateId = templateId || defaultTemplateId;
+  const senderId = process.env.MSG91_SENDER_ID || 'astrop';
 
   if (!phone) {
     throw new Error('Recipient mobile number is required.');
@@ -63,9 +64,45 @@ export async function sendMsg91Sms({
 
   try {
     const appUrl = `https://astroparihar.com/apply?id=${candidateId || ''}`;
-    const defaultSmsMessage = message || `Namaste ${candidateName} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: ${appUrl}`;
+    const defaultSmsMessage = message || `Namaste ${candidateName} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: ${appUrl} - AstroParihar`;
 
-    // 1. Primary: Direct MSG91 SMS Template API (https://control.msg91.com/api/v5/sms/)
+    // 1. Primary: MSG91 Flow API (Recommended for templates with variables ##name## and ##link##)
+    const flowRes = await fetch('https://control.msg91.com/api/v5/flow/', {
+      method: 'POST',
+      headers: {
+        authkey: authKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        template_id: effectiveTemplateId,
+        sender: senderId,
+        short_url: '0',
+        recipients: [
+          {
+            mobiles: cleanPhone,
+            name: candidateName,
+            link: appUrl,
+            ...variables,
+          },
+        ],
+      }),
+    });
+
+    const flowData = await flowRes.json().catch(() => ({}));
+    console.log('MSG91 Flow API Response:', flowData);
+
+    if (flowRes.ok && (flowData.type === 'success' || flowData.message)) {
+      return {
+        success: true,
+        messageId: flowData.message || `msg91-${Date.now()}`,
+        message: 'SMS invitation dispatched successfully with verification link via MSG91 Flow.',
+        deliveredTo: cleanPhone,
+        dispatchedAt,
+        rawResponse: flowData,
+      };
+    }
+
+    // 2. Fallback: Direct MSG91 SMS API
     const smsRes = await fetch('https://control.msg91.com/api/v5/sms/', {
       method: 'POST',
       headers: {
@@ -74,6 +111,7 @@ export async function sendMsg91Sms({
       },
       body: JSON.stringify({
         template_id: effectiveTemplateId,
+        sender: senderId,
         message: defaultSmsMessage,
         mobiles: cleanPhone,
       }),
@@ -106,36 +144,13 @@ export async function sendMsg91Sms({
       };
     }
 
-    // 2. Fallback: Standard MSG91 OTP endpoint
-    const otpUrl = `https://control.msg91.com/api/v5/otp?template_id=${effectiveTemplateId}&mobile=${cleanPhone}&otp_length=4`;
-    const otpRes = await fetch(otpUrl, {
-      method: 'POST',
-      headers: {
-        authkey: authKey,
-        'Content-Type': 'application/json',
-      },
-    });
-    const otpData = await otpRes.json().catch(() => ({}));
-    console.log('MSG91 OTP/SMS API Response:', otpData);
-
-    if (otpData.type === 'success' && !otpData.hasError) {
-      return {
-        success: true,
-        messageId: otpData.request_id || otpData.message || `sms-otp-${Date.now()}`,
-        message: 'SMS dispatched successfully via MSG91.',
-        deliveredTo: cleanPhone,
-        dispatchedAt,
-        rawResponse: otpData,
-      };
-    }
-
-    // Return failure response if rejected
+    // Return failure response if both methods fail
     return {
       success: false,
-      error: rawText || otpData.message || 'Failed to dispatch SMS via MSG91.',
+      error: flowData.message || rawText || parsedData.message || 'Failed to dispatch SMS via MSG91.',
       deliveredTo: cleanPhone,
       dispatchedAt,
-      rawResponse: { rawText, otpData },
+      rawResponse: { flowData, rawText },
     };
   } catch (err: any) {
     console.error('MSG91 SMS dispatch exception:', err);

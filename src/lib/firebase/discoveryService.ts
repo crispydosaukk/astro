@@ -155,6 +155,13 @@ export async function deleteCampaignFromFirestore(id: string): Promise<void> {
  */
 export async function deleteAllCampaignsFromFirestore(): Promise<{ count: number; success: boolean }> {
   try {
+    if (typeof window !== 'undefined') {
+      const res = await fetch('/api/admin/purge-data', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        return { count: data.deletedCampaigns || 0, success: true };
+      }
+    }
     const colRef = collection(db, CAMPAIGNS_COLLECTION);
     const snap = await getDocs(colRef);
     let deleted = 0;

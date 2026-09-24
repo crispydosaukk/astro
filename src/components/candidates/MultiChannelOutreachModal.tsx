@@ -51,7 +51,7 @@ export default function MultiChannelOutreachModal({
     `Namaste {candidate_name} Ji,\n\nWe are delighted to invite you to join AstroParihar's premier network of verified astrologers. Having reviewed your esteemed practice in {location} specializing in {specialisation}, we would be honored to partner with you.\n\nPlease review your verification dossier and onboarding details at:\n{apply_link}\n\nWarm regards,\nRecruitment Committee, AstroParihar UK`
   );
   const [smsMessage, setSmsMessage] = useState(
-    `Namaste {candidate_name} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: {apply_link}`
+    `Namaste {candidate_name} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: {apply_link} - AstroParihar`
   );
   const [whatsappMessage, setWhatsappMessage] = useState(
     `Namaste {candidate_name} Ji 🙏\n\nWe came across your esteemed astrology practice in {location} specializing in {specialisation}. We would be thrilled to invite you to join our network of verified astrologers on AstroParihar.\n\nTap the secure link below to complete your onboarding & profile verification:\n{apply_link}\n\nWarm regards,\nAstroParihar Team`
@@ -205,6 +205,7 @@ export default function MultiChannelOutreachModal({
           emailBody: personalizedEmail,
           phone: cleanPhone || undefined,
           smsMessage: personalizedSms,
+          smsTemplateId: '6ab4e155fe7c2c662905ac73',
           whatsappMessage: personalizedWa,
           specialisation: candidate.specialisations?.[0] || 'Vedic Astrology',
           location: candidate.location || 'India',

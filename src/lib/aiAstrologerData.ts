@@ -1,5 +1,6 @@
 import { db } from './firebase/config';
 import { collection, doc, getDocs, getDoc } from 'firebase/firestore';
+import { DEFAULT_REMEDY_ASTROLOGERS } from './remedyAstrologersData';
 
 export interface AIDiscipline {
   id: string;
@@ -37,6 +38,7 @@ export interface AIAstrologer {
   sampleAudioUrl?: string;
   createdAt?: string;
   updatedAt?: string;
+  remedies?: string[];
 }
 
 export interface AIConsultationSession {
@@ -1733,7 +1735,10 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
     consultationStyle: 'Devout, Potent & Protective',
     systemPersonaPrompt: `You are Acharya Joshi, an authority on Vedic Dosh Nivaran and Navagraha Homas from Ujjain. You guide devotees toward potent, authentic Vedic rituals for protection and prosperity.`,
   },
+  ...DEFAULT_REMEDY_ASTROLOGERS,
 ];
+
+export { DEFAULT_REMEDY_ASTROLOGERS };
 
 const AVATAR_FALLBACK_MAP: Record<string, string> = {
   'ai-swami-ji': '/assets/images/ai-astrologers/swami-ji.png',

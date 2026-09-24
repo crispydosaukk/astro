@@ -104,13 +104,23 @@ interface RemediesFilterBarProps {
   className?: string;
   title?: string;
   subtitle?: string;
+  selectedRemedy?: string;
+  onSelectRemedy?: (remedyId: string) => void;
+  remedyCounts?: Record<string, number>;
+  showExploreLink?: boolean;
 }
 
 export default function RemediesFilterBar({
   className = '',
   title = 'Vedic Remedies & Parihar',
   subtitle = '8 Ashta-Digbandhana Sacred Solutions',
+  selectedRemedy = 'all',
+  onSelectRemedy,
+  remedyCounts,
+  showExploreLink = true,
 }: RemediesFilterBarProps) {
+  const isFilterMode = typeof onSelectRemedy === 'function';
+
   return (
     <div className={`space-y-2.5 ${className}`}>
       <div className="flex items-center justify-between">
@@ -120,18 +130,70 @@ export default function RemediesFilterBar({
             · {subtitle}
           </span>
         </h3>
-        <Link
-          href="/remedies"
-          className="text-xs text-[#C9952B] hover:text-[#966f33] font-semibold flex items-center gap-1 transition-colors group"
-        >
-          <span>Explore All Remedies</span>
-          <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-        </Link>
+        {showExploreLink && (
+          <Link
+            href="/remedies"
+            className="text-xs text-[#C9952B] hover:text-[#966f33] font-semibold flex items-center gap-1 transition-colors group"
+          >
+            <span>Explore All Remedies</span>
+            <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        )}
       </div>
 
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {REMEDIES_NAV_LIST.map((item) => {
           const Icon = item.icon;
+          const isSelected = isFilterMode
+            ? selectedRemedy === item.id || (item.id === 'all' && (!selectedRemedy || selectedRemedy === 'all'))
+            : false;
+          const count = remedyCounts?.[item.id];
+
+          if (isFilterMode) {
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectRemedy(item.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs whitespace-nowrap transition-all border shrink-0 flex items-center gap-1.5 group cursor-pointer ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-[#C9952B] to-[#b08022] text-white border-[#C9952B] shadow-md font-bold ring-2 ring-[#C9952B]/30'
+                    : 'bg-card border-border/80 text-foreground/80 hover:text-foreground hover:border-[#C9952B]/60 hover:bg-[#C9952B]/5 shadow-sm font-medium'
+                }`}
+              >
+                <Icon
+                  size={13}
+                  className={`${
+                    isSelected ? 'text-white scale-110' : 'text-[#C9952B] group-hover:scale-110'
+                  } transition-transform`}
+                />
+                <span>{item.name}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium transition-colors ${
+                    isSelected
+                      ? 'bg-white/20 text-white'
+                      : 'bg-muted text-muted-foreground group-hover:bg-[#C9952B]/15 group-hover:text-[#966f33] dark:group-hover:text-[#E5B54F]'
+                  }`}
+                >
+                  {item.sanskrit}
+                </span>
+                {typeof count === 'number' && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isSelected
+                        ? 'bg-white/30 text-white'
+                        : count > 0
+                        ? 'bg-[#C9952B]/15 text-[#966f33] dark:text-[#E5B54F]'
+                        : 'bg-muted text-muted-foreground/60'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          }
+
           if (item.highlight) {
             return (
               <Link

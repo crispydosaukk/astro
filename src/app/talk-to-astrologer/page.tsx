@@ -21,11 +21,12 @@ import {
   Sparkles,
   Award,
   Users,
+  Bot,
 } from 'lucide-react';
 import AppImage from '@/components/ui/AppImage';
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
-import RemediesFilterBar from '@/components/RemediesFilterBar';
+import RemediesFilterBar, { REMEDIES_NAV_LIST } from '@/components/RemediesFilterBar';
 import AstrologerFilterModal, {
   AstrologerFilterState,
   defaultFilterState,
@@ -69,6 +70,33 @@ const timeSlots = [
 ];
 const bookedSlots = ['10:00 AM', '11:30 AM', '3:00 PM', '6:00 PM'];
 
+const REMEDY_KEYWORDS: Record<string, string[]> = {
+  gemstone: ['gemstone', 'gemstones', 'ratna', 'gem therapy', 'gems', 'gemology'],
+  rudraksha: ['rudraksha', 'rudraksh', 'sacred bead'],
+  yantra: ['yantra', 'yantras', 'sacred yantra', 'sri yantra', 'meru'],
+  mantra: ['mantra', 'mantras', 'japa', 'vedic mantra', 'beej mantra', 'stotra', 'paath'],
+  homa: ['homa', 'homam', 'puja', 'pooja', 'havan', 'anushthan', 'yajna', 'shanti'],
+  vastu: ['vastu', 'vaastu', 'vastu shastra'],
+  'ishta-devata': ['ishta-devata', 'ishta devata', 'upasana', 'devata', 'deity', 'bhakti'],
+  fasting: ['fasting', 'vrat', 'vrata', 'upavasa', 'ekadashi'],
+  charity: ['charity', 'dana', 'daan', 'seva', 'gau seva', 'anna daan'],
+};
+
+function matchHumanRemedy(ast: any, remedyId: string): boolean {
+  if (!remedyId || remedyId === 'all') return true;
+  const keywords = REMEDY_KEYWORDS[remedyId] || [remedyId];
+  const specialties = Array.isArray(ast.specialty) ? ast.specialty : [ast.specialty || ''];
+  const skills = Array.isArray(ast.skills)
+    ? ast.skills
+    : typeof ast.skills === 'string'
+    ? ast.skills.split(',')
+    : [];
+  const about = (ast.about || ast.bio || '').toLowerCase();
+  const allText = [...specialties, ...skills, about].join(' ').toLowerCase();
+
+  return keywords.some((kw) => allText.includes(kw.toLowerCase()));
+}
+
 export default function TalkToAstrologerPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
@@ -82,6 +110,7 @@ export default function TalkToAstrologerPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [selectedRemedy, setSelectedRemedy] = useState<string>('all');
   const [filterModalState, setFilterModalState] =
     useState<AstrologerFilterState>(defaultFilterState);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -419,7 +448,21 @@ export default function TalkToAstrologerPage() {
     (filterModalState.gender !== 'all' ? 1 : 0) +
     filterModalState.countries.length +
     (filterModalState.topAstrologer !== 'all' ? 1 : 0) +
-    (activeCategory !== 'All' ? 1 : 0);
+    (activeCategory !== 'All' ? 1 : 0) +
+    (selectedRemedy !== 'all' ? 1 : 0);
+
+  // Dynamically compute counts for remedies
+  const remedyCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    REMEDIES_NAV_LIST.forEach((item) => {
+      if (item.id === 'all') {
+        counts['all'] = astrologers.length;
+      } else {
+        counts[item.id] = astrologers.filter((a: any) => matchHumanRemedy(a, item.id)).length;
+      }
+    });
+    return counts;
+  }, [astrologers]);
 
   // Filtering Engine
   const filtered = astrologers
@@ -489,6 +532,9 @@ export default function TalkToAstrologerPage() {
         matchTop = a.status === 'online';
       }
 
+      // 8. Remedy Filter
+      const matchRemedy = matchHumanRemedy(a, selectedRemedy);
+
       return (
         matchSearch &&
         matchCategory &&
@@ -496,7 +542,8 @@ export default function TalkToAstrologerPage() {
         matchLanguages &&
         matchGender &&
         matchCountry &&
-        matchTop
+        matchTop &&
+        matchRemedy
       );
     })
     .sort((a: any, b: any) => {
@@ -853,14 +900,28 @@ export default function TalkToAstrologerPage() {
                 </span>
               )}
 
+              {selectedRemedy !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C9952B]/15 text-[#966f33] dark:text-[#E5B54F] border border-[#C9952B]/30 font-medium">
+                  ✦ {REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy)?.name}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRemedy('all')}
+                    className="hover:text-rose-400 cursor-pointer"
+                  >
+                    <X size={11} />
+                  </button>
+                </span>
+              )}
+
               <button
                 type="button"
                 onClick={() => {
                   setFilterModalState(defaultFilterState);
                   setActiveCategory('All');
+                  setSelectedRemedy('all');
                   setSearch('');
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-rose-400 hover:bg-rose-500/10 transition-colors ml-auto"
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-rose-400 hover:bg-rose-500/10 transition-colors ml-auto cursor-pointer"
               >
                 <RotateCcw size={11} /> Clear All
               </button>
@@ -871,8 +932,40 @@ export default function TalkToAstrologerPage() {
 
       {/* Astrologer Grid & Remedies Bar */}
       <div className="px-6 lg:px-8 py-8 max-w-screen-2xl mx-auto space-y-6">
-        {/* Vedic Remedies Quick Redirect Filter Bar */}
-        <RemediesFilterBar />
+        {/* Vedic Remedies Filter Bar */}
+        <RemediesFilterBar
+          selectedRemedy={selectedRemedy}
+          onSelectRemedy={(remedyId) => {
+            setSelectedRemedy((prev) => (prev === remedyId ? 'all' : remedyId));
+          }}
+          remedyCounts={remedyCounts}
+        />
+
+        {selectedRemedy !== 'all' && (
+          <div className="flex items-center justify-between gap-2 bg-[#F8F3EA] border border-[#E5D9C8] px-4 py-2.5 rounded-xl text-xs text-foreground animate-in fade-in duration-200">
+            <div className="flex items-center gap-2">
+              <Sparkles size={14} className="text-[#B88A44]" />
+              <span>
+                Filtered by Remedy:{' '}
+                <strong className="text-[#713B32]">
+                  {REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy)?.name} (
+                  {REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy)?.sanskrit})
+                </strong>
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-muted-foreground text-[11px]">
+                {filtered.length === 0 ? '0 onboarded specialists' : `${filtered.length} specialist${filtered.length === 1 ? '' : 's'} available`}
+              </span>
+              <button
+                onClick={() => setSelectedRemedy('all')}
+                className="px-2.5 py-1 rounded-lg bg-[#E5D9C8]/60 hover:bg-[#E5D9C8] text-[#713B32] font-bold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                <X size={12} /> Clear Filter
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-8">
           {filtered.map((ast, i) => (
@@ -991,12 +1084,53 @@ export default function TalkToAstrologerPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="text-center py-20">
-            <Search size={40} className="text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No astrologers found</h3>
-            <p className="text-sm text-muted-foreground">
-              Try adjusting your filters or search term
-            </p>
+          <div className="bg-[#FFFDFC] rounded-2xl border border-[#E5D9C8] p-8 sm:p-12 text-center max-w-lg mx-auto shadow-sm space-y-4 my-8">
+            <div className="w-16 h-16 rounded-2xl bg-[#F8F3EA] text-[#B88A44] flex items-center justify-center mx-auto border border-[#E5D9C8]">
+              {selectedRemedy !== 'all' ? (
+                (() => {
+                  const CurrentIcon = REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy)?.icon || Sparkles;
+                  return <CurrentIcon size={28} />;
+                })()
+              ) : (
+                <Users size={28} />
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-base sm:text-lg font-bold text-[#713B32]">
+                {selectedRemedy !== 'all'
+                  ? `No Human Astrologers for ${REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy)?.name} Yet`
+                  : 'No Astrologers Match Your Search'}
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {selectedRemedy !== 'all'
+                  ? `Presently, there are no verified human astrologers onboarded specializing in ${REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy)?.name}. Astrologers with this specialization will automatically appear here once onboarded and verified.`
+                  : 'Try adjusting your search criteria, category, or filter options.'}
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              {selectedRemedy !== 'all' && (
+                <Link
+                  href={`/talk-to-ai-astrologer?remedy=${selectedRemedy}`}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#C9952B] to-[#b08022] hover:from-[#b08022] hover:to-[#966b1a] text-white shadow-md flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <Bot size={14} />
+                  <span>Consult 4 Verified AI Specialists (Instant Call)</span>
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedRemedy('all');
+                  setActiveCategory('All');
+                  setSearch('');
+                  setFilterModalState(defaultFilterState);
+                }}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-semibold bg-[#F8F3EA] hover:bg-[#E5D9C8] text-[#713B32] transition-colors cursor-pointer"
+              >
+                Clear Filters
+              </button>
+            </div>
           </div>
         )}
       </div>

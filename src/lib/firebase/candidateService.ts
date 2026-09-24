@@ -398,6 +398,13 @@ export async function deleteCandidateFromFirestore(id: string): Promise<void> {
  */
 export async function deleteAllCandidatesFromFirestore(): Promise<{ count: number; success: boolean }> {
   try {
+    if (typeof window !== 'undefined') {
+      const res = await fetch('/api/admin/purge-data', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        return { count: data.deletedCandidates || 0, success: true };
+      }
+    }
     const colRef = collection(db, CANDIDATES_COLLECTION);
     const snap = await getDocs(colRef);
     let deleted = 0;

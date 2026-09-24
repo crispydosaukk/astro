@@ -108,7 +108,7 @@ export async function queueSmsViaMsg91(data: {
         candidateId: data.candidateId || '',
         message: data.message,
         preview: data.message,
-        templateId: data.templateId || 'Default MSG91 Template',
+        templateId: data.templateId || '6ab4e155fe7c2c662905ac73',
         status: dispatchSuccess ? 'sent' : errorMessage ? 'failed' : 'queued',
         direction: 'outbound',
         metadata: {
@@ -188,7 +188,7 @@ export async function dispatchParallelOutreach(
         candidateName: payload.candidateName,
         candidateId: payload.candidateId,
         message: payload.smsMessage,
-        templateId: payload.smsTemplateId,
+        templateId: payload.smsTemplateId || '6ab4e155fe7c2c662905ac73',
         variables: {
           candidate_name: payload.candidateName,
           specialisation: payload.specialisation || 'Vedic Astrology',

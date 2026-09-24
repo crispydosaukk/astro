@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Script from 'next/script';
 import Navbar from '@/components/Navbar';
-import RemediesFilterBar from '@/components/RemediesFilterBar';
+import RemediesFilterBar, { REMEDIES_NAV_LIST } from '@/components/RemediesFilterBar';
 import AppImage from '@/components/ui/AppImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -84,11 +84,20 @@ function TalkToAIAstrologerContent() {
   // Filters
   const [search, setSearch] = useState('');
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('all');
+  const [selectedRemedy, setSelectedRemedy] = useState<string>('all');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
   const [selectedAvailability, setSelectedAvailability] = useState<'all' | 'online' | 'busy' | 'offline'>('all');
   const [sortBy, setSortBy] = useState<'rating' | 'popularity' | 'experience' | 'price-low' | 'price-high'>(
     'rating'
   );
+
+  // Sync remedy filter from URL parameter
+  useEffect(() => {
+    const remedyParam = searchParams.get('remedy');
+    if (remedyParam) {
+      setSelectedRemedy(remedyParam);
+    }
+  }, [searchParams]);
 
   // Modals & State
   const [selectedAstrologer, setSelectedAstrologer] = useState<AIAstrologer | null>(null);
@@ -187,6 +196,27 @@ function TalkToAIAstrologerContent() {
     };
   }, [astrologers]);
 
+  // Remedy Counts
+  const remedyCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    REMEDIES_NAV_LIST.forEach((item) => {
+      if (item.id === 'all') {
+        counts['all'] = astrologers.filter(
+          (a) => a.isActive !== false && a.remedies && a.remedies.length > 0
+        ).length;
+      } else {
+        counts[item.id] = astrologers.filter((a) => {
+          if (a.isActive === false) return false;
+          return (
+            a.remedies?.includes(item.id) ||
+            a.specialities?.some((s) => s.toLowerCase().includes(item.name.toLowerCase()))
+          );
+        }).length;
+      }
+    });
+    return counts;
+  }, [astrologers]);
+
   // Filtered Astrologers
   const filteredAstrologers = useMemo(() => {
     return astrologers
@@ -218,6 +248,15 @@ function TalkToAIAstrologerContent() {
           isDisciplineMatch(a.primaryDiscipline, selectedDiscipline) ||
           a.secondaryDisciplines?.some((d) => isDisciplineMatch(d, selectedDiscipline));
 
+        // Remedy Filter
+        const matchRemedy =
+          selectedRemedy === 'all' ||
+          a.remedies?.includes(selectedRemedy) ||
+          a.specialities?.some((s) => {
+            const targetRemedy = REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy);
+            return targetRemedy && s.toLowerCase().includes(targetRemedy.name.toLowerCase());
+          });
+
         // Language Filter
         const matchLang =
           selectedLanguage === 'all' ||
@@ -228,7 +267,7 @@ function TalkToAIAstrologerContent() {
         const matchAvail =
           selectedAvailability === 'all' || avail === selectedAvailability;
 
-        return matchSearch && matchDisc && matchLang && matchAvail;
+        return matchSearch && matchDisc && matchRemedy && matchLang && matchAvail;
       })
       .sort((a, b) => {
         if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
@@ -240,7 +279,7 @@ function TalkToAIAstrologerContent() {
         if (sortBy === 'price-high') return (b.pricePerMin || 0) - (a.pricePerMin || 0);
         return 0;
       });
-  }, [astrologers, search, selectedDiscipline, selectedLanguage, selectedAvailability, sortBy]);
+  }, [astrologers, search, selectedDiscipline, selectedRemedy, selectedLanguage, selectedAvailability, sortBy]);
 
   // Auto-open astrologer modal if redirecting back with ?astrologer=ID
   useEffect(() => {
@@ -442,8 +481,43 @@ function TalkToAIAstrologerContent() {
           </div>
         </div>
 
-        {/* Vedic Remedies Quick Redirect Filter Bar */}
-        <RemediesFilterBar />
+        {/* Vedic Remedies Filter Bar */}
+        <RemediesFilterBar
+          selectedRemedy={selectedRemedy}
+          onSelectRemedy={(remedyId) => {
+            setSelectedRemedy((prev) => (prev === remedyId ? 'all' : remedyId));
+            if (remedyId !== 'all') {
+              setSelectedDiscipline('all');
+            }
+          }}
+          remedyCounts={remedyCounts}
+        />
+
+        {selectedRemedy !== 'all' && (
+          <div className="flex items-center justify-between gap-2 bg-[#C9952B]/10 border border-[#C9952B]/30 px-3.5 py-2.5 rounded-xl text-xs text-foreground animate-in fade-in duration-200">
+            <div className="flex items-center gap-2">
+              <Sparkles size={14} className="text-[#C9952B]" />
+              <span>
+                Filtered by Remedy:{' '}
+                <strong className="text-[#C9952B]">
+                  {REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy)?.name} (
+                  {REMEDIES_NAV_LIST.find((r) => r.id === selectedRemedy)?.sanskrit})
+                </strong>
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-muted-foreground text-[11px]">
+                Showing <strong>{filteredAstrologers.length}</strong> specialized AI astrologers
+              </span>
+              <button
+                onClick={() => setSelectedRemedy('all')}
+                className="px-2.5 py-1 rounded-lg bg-[#C9952B]/20 hover:bg-[#C9952B]/30 text-[#966f33] dark:text-[#E5B54F] font-bold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                <X size={12} /> Clear Remedy Filter
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Search & Filter Toolbar */}
         <div className="bg-card/70 border border-border/70 p-3.5 rounded-2xl backdrop-blur-sm space-y-3">
@@ -549,15 +623,16 @@ function TalkToAIAstrologerContent() {
               </button>
             </div>
 
-            {(search || selectedDiscipline !== 'all' || selectedLanguage !== 'all' || selectedAvailability !== 'all') && (
+            {(search || selectedDiscipline !== 'all' || selectedRemedy !== 'all' || selectedLanguage !== 'all' || selectedAvailability !== 'all') && (
               <button
                 onClick={() => {
                   setSearch('');
                   setSelectedDiscipline('all');
+                  setSelectedRemedy('all');
                   setSelectedLanguage('all');
                   setSelectedAvailability('all');
                 }}
-                className="text-[#C9952B] hover:underline text-[11px] font-bold"
+                className="text-[#C9952B] hover:underline text-[11px] font-bold cursor-pointer"
               >
                 Clear All Filters
               </button>
@@ -569,23 +644,24 @@ function TalkToAIAstrologerContent() {
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center">
             <Loader2 className="animate-spin text-[#C9952B] mb-3" size={36} />
-            <p className="text-muted-foreground text-xs">Loading 50 authentic AI Astrologers...</p>
+            <p className="text-muted-foreground text-xs">Loading authentic AI Astrologers...</p>
           </div>
         ) : filteredAstrologers.length === 0 ? (
           <div className="py-16 text-center glass-card border border-border rounded-2xl p-6 max-w-md mx-auto">
             <Bot size={40} className="text-muted-foreground mx-auto mb-3 opacity-50" />
             <h3 className="text-base font-bold text-foreground mb-1">No Astrologers Match Your Search</h3>
             <p className="text-xs text-muted-foreground mb-4">
-              Try adjusting your search criteria, language selection, or discipline filter.
+              Try adjusting your search criteria, language selection, or remedies filter.
             </p>
             <button
               onClick={() => {
                 setSearch('');
                 setSelectedDiscipline('all');
+                setSelectedRemedy('all');
                 setSelectedLanguage('all');
                 setSelectedAvailability('all');
               }}
-              className="px-4 py-2 rounded-xl bg-[#C9952B] text-white text-xs font-semibold hover:bg-[#b08022] transition-all"
+              className="px-4 py-2 rounded-xl bg-[#C9952B] text-white text-xs font-semibold hover:bg-[#b08022] transition-all cursor-pointer"
             >
               Reset Filters
             </button>
@@ -643,11 +719,15 @@ function TalkToAIAstrologerContent() {
                           <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#C9952B]/15 text-[#C9952B] uppercase truncate max-w-[120px]">
                             {astro.primaryDiscipline}
                           </span>
-                          {astro.isFeatured && (
+                          {astro.remedies && astro.remedies.length > 0 ? (
+                            <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-[#C9952B]/20 text-[#966f33] dark:text-[#E5B54F] capitalize truncate max-w-[95px]">
+                              ✦ {REMEDIES_NAV_LIST.find((r) => r.id === astro.remedies![0])?.name.replace(/✦\s*/, '') || astro.remedies[0]}
+                            </span>
+                          ) : astro.isFeatured ? (
                             <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-[#C9952B]/20 text-[#C9952B] flex items-center gap-0.5 shrink-0">
                               <Sparkles size={9} /> FEATURED
                             </span>
-                          )}
+                          ) : null}
                         </div>
 
                         <h3 className="font-bold text-sm text-foreground truncate group-hover:text-[#C9952B] transition-colors">

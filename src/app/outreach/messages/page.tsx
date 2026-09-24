@@ -144,7 +144,7 @@ export default function OutreachMessagesPage() {
           setGeneratedBody(emailRes.body);
         }
         if (smsRes.success) {
-          setGeneratedSmsBody(smsRes.body || `Namaste ${candidateName} ji, AstroParihar invites you to join our verified astrologer panel. Details: https://astroparihar.com/apply`);
+          setGeneratedSmsBody(smsRes.body || `Namaste ${candidateName} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: https://astroparihar.com/apply - AstroParihar`);
         }
       } else {
         const res = await fetch('/api/ai/generate-outreach', {
@@ -227,6 +227,7 @@ export default function OutreachMessagesPage() {
           emailBody: effectiveEmailBody,
           phone: destPhone || undefined,
           smsMessage: effectiveSmsText,
+          smsTemplateId: '6ab4e155fe7c2c662905ac73',
           specialisation,
           location,
         });
@@ -256,8 +257,10 @@ export default function OutreachMessagesPage() {
           phone: destPhone || '919876543210',
           candidateName,
           message: effectiveSmsText,
+          templateId: '6ab4e155fe7c2c662905ac73',
           variables: {
             candidate_name: candidateName,
+            name: candidateName,
             specialisation,
             location,
           },

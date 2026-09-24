@@ -262,7 +262,7 @@ export default function CandidateTable() {
       ? `${window.location.origin}/apply?id=${candidate.id}&name=${encodeURIComponent(candidate.name)}&phone=${encodeURIComponent(cleanPhone)}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`
       : `https://astroparihar.com/apply?id=${candidate.id}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`;
 
-    const smsText = `Namaste ${candidate.name} Ji, AstroParihar invites you to join our verified panel of astrologers. Apply here: ${appUrl}`;
+    const smsText = `Namaste ${candidate.name} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: ${appUrl} - AstroParihar`;
 
     try {
       showToast('Dispatching SMS...', `Sending invitation to ${candidate.name} via MSG91 Gateway.`, 'info');
@@ -271,8 +271,11 @@ export default function CandidateTable() {
         candidateName: candidate.name,
         candidateId: candidate.id,
         message: smsText,
+        templateId: '6ab4e155fe7c2c662905ac73',
         variables: {
           candidate_name: candidate.name,
+          name: candidate.name,
+          link: appUrl,
           specialisation: candidate.specialisations?.[0] || 'Vedic Astrology',
           location: candidate.location || 'India',
         }
@@ -306,7 +309,7 @@ export default function CandidateTable() {
 
     const emailSubject = `Invitation to Join AstroParihar Astrologer Panel – ${candidate.name}`;
     const emailBody = `Namaste ${candidate.name} Ji,\n\nWe are delighted to invite you to join AstroParihar's premier network of verified astrologers. Having reviewed your esteemed practice in ${candidate.location} specializing in ${candidate.specialisations?.join(', ') || 'Vedic Astrology'}, we would be honored to partner with you.\n\nPlease review your verification dossier and onboarding details at:\n${appUrl}\n\nWarm regards,\nRecruitment Committee, AstroParihar UK`;
-    const smsText = `Namaste ${candidate.name} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: ${appUrl}`;
+    const smsText = `Namaste ${candidate.name} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: ${appUrl} - AstroParihar`;
 
     try {
       const res = await dispatchParallelOutreach({
@@ -317,6 +320,7 @@ export default function CandidateTable() {
         emailBody,
         phone: cleanPhone || undefined,
         smsMessage: smsText,
+        smsTemplateId: '6ab4e155fe7c2c662905ac73',
         specialisation: candidate.specialisations?.[0] || 'Vedic Astrology',
         location: candidate.location || 'India',
       });
