@@ -110,21 +110,34 @@ export default function CookiePolicyPage() {
           </section>
 
           {/* Operator Footer Box */}
-          <div className="mt-8 p-6 rounded-2xl bg-white/5 border border-white/10 space-y-2 text-xs">
-            <div className="flex items-center gap-2 font-bold text-foreground">
-              <Building2 size={16} className="text-[#C9952B]" /> VAYORIX PRIVATE LIMITED
+          <div className="mt-8 p-6 rounded-2xl bg-[#FAF6F0] border border-[#EFE5D8] space-y-3 text-xs">
+            <div>
+              <span className="text-[10px] font-bold text-[#713B32] uppercase tracking-wider block mb-0.5">
+                Head Office
+              </span>
+              <div className="flex items-center gap-2 font-bold text-[#292522]">
+                <Building2 size={16} className="text-[#713B32]" /> Vooty Ltd
+              </div>
+              <p className="text-[#6B5E55]">Company Number: 11632049</p>
+              <p className="text-[#6B5E55]">No 1 Sedgecombe Avenue, Kenton, Harrow, HA3 0HW</p>
             </div>
-            <p>B Ff1/1, KK road, V Puram, Chennai-53</p>
+            <div className="pt-2 border-t border-[#EFE5D8]">
+              <span className="text-[10px] font-bold text-[#8C7A6B] uppercase tracking-wider block mb-0.5">
+                India Office
+              </span>
+              <div className="font-bold text-[#292522]">VAYORIX PRIVATE LIMITED</div>
+              <p className="text-[#6B5E55]">B Ff1/1, KK road, V Puram, Chennai-53</p>
+            </div>
             <p className="flex flex-wrap gap-4 pt-1">
               <span>
                 Privacy:{' '}
-                <a href="mailto:astroparihar06@gmail.com" className="text-[#C9952B] underline">
+                <a href="mailto:astroparihar06@gmail.com" className="text-[#713B32] underline">
                   astroparihar06@gmail.com
                 </a>
               </span>
               <span>
                 Support:{' '}
-                <a href="mailto:astroparihar06@gmail.com" className="text-[#C9952B] underline">
+                <a href="mailto:astroparihar06@gmail.com" className="text-[#713B32] underline">
                   astroparihar06@gmail.com
                 </a>
               </span>

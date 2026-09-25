@@ -70,7 +70,11 @@ export async function queueEmailViaCloudFunction(data: {
     }
 
     // 2. Record to Firestore 'mail' collection
+    // If direct SMTP succeeded, save as 'sent'.
+    // If direct SMTP failed (e.g. GoDaddy port restriction), save as 'queued'
+    // so the Firebase Cloud Function automatically processes and delivers it.
     let docId = `mail-${Date.now()}`;
+    let isQueuedForCloudFunction = false;
     try {
       const docRef = await addDoc(collection(db, 'mail'), {
         to: [data.to],
@@ -86,16 +90,26 @@ export async function queueEmailViaCloudFunction(data: {
           dispatchedAt: new Date().toISOString(),
           messageId: messageId || null,
         },
-        status: dispatchSuccess ? 'sent' : 'failed',
-        delivery: dispatchSuccess ? { state: 'SUCCESS', sentAt: new Date().toISOString() } : { state: 'FAILED', error: errorMessage },
+        status: dispatchSuccess ? 'sent' : 'queued',
+        delivery: dispatchSuccess
+          ? { state: 'SUCCESS', sentAt: new Date().toISOString() }
+          : { state: 'QUEUED_FOR_CLOUD_FUNCTION', reason: errorMessage || 'Queued for Cloud Functions dispatch' },
         createdAt: serverTimestamp(),
       });
       docId = docRef.id;
+      if (!dispatchSuccess) {
+        isQueuedForCloudFunction = true;
+      }
     } catch (firestoreErr) {
       console.warn('Firestore mail logging warning:', firestoreErr);
     }
 
-    return { id: docId, success: dispatchSuccess, error: errorMessage || undefined };
+    const finalSuccess = dispatchSuccess || isQueuedForCloudFunction;
+    return {
+      id: docId,
+      success: finalSuccess,
+      error: finalSuccess ? undefined : (errorMessage || 'Failed to dispatch or queue email'),
+    };
   } catch (error: any) {
     console.error('Email queue error:', error);
     return { id: `err-${Date.now()}`, success: false, error: error.message };

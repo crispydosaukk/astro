@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import AppLogo from '@/components/ui/AppLogo';
-import { Mail, MapPin } from 'lucide-react';
+import { Mail, MapPin, Building2 } from 'lucide-react';
 
 const footerLinks = {
   Services: [
@@ -40,19 +40,52 @@ export default function LandingFooter() {
             <div className="flex items-center gap-2">
               <AppLogo src="/astrologo.png" size={68} />
             </div>
-            <p className="text-xs text-[#6B5E55] leading-relaxed max-w-xs">
+            <p className="text-xs text-[#6B5E55] leading-relaxed max-w-sm">
               India&apos;s most advanced premium Vedic astrology platform. Ancient wisdom, modern
               technology, personalized for you.
             </p>
 
-            <div className="space-y-1.5 text-xs text-[#6B5E55] pt-1">
-              <div className="font-bold text-[#292522]">VAYORIX PRIVATE LIMITED</div>
-              <div className="flex items-center gap-2">
-                <MapPin size={14} className="text-[#713B32] shrink-0" /> B Ff1/1, KK road, V Puram,
-                Chennai-53
+            <div className="space-y-3 pt-1 text-xs text-[#6B5E55]">
+              {/* Head Office */}
+              <div className="rounded-xl p-3 bg-[#FAF6F0] border border-[#EFE5D8] space-y-1.5 shadow-[0_2px_8px_rgba(41,37,34,0.02)]">
+                <div className="flex items-center gap-1.5 font-bold text-[#713B32] text-[11px] uppercase tracking-wider">
+                  <Building2 size={13} className="shrink-0 text-[#713B32]" />
+                  <span>Head Office</span>
+                </div>
+                <div>
+                  <div className="font-bold text-[#292522] text-[13px]">Vooty Ltd</div>
+                  <div className="text-[11px] text-[#6B5E55] mt-0.5">
+                    <span className="text-[#8C7A6B]">Company Number:</span>{' '}
+                    <span className="font-medium text-[#292522]">11632049</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-[11.5px] leading-relaxed text-[#6B5E55]">
+                  <MapPin size={13} className="text-[#713B32] shrink-0 mt-0.5" />
+                  <span>No 1 Sedgecombe Avenue, Kenton, Harrow, HA3 0HW</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail size={14} className="text-[#713B32] shrink-0" /> astroparihar06@gmail.com
+
+              {/* India Office */}
+              <div className="space-y-1 px-1">
+                <div className="text-[10.5px] font-semibold text-[#8C7A6B] uppercase tracking-wider">
+                  India Office
+                </div>
+                <div className="font-bold text-[#292522]">VAYORIX PRIVATE LIMITED</div>
+                <div className="flex items-start gap-2 text-[11.5px] leading-relaxed">
+                  <MapPin size={13} className="text-[#713B32] shrink-0 mt-0.5" />
+                  <span>B Ff1/1, KK road, V Puram, Chennai-53</span>
+                </div>
+              </div>
+
+              {/* Contact Email */}
+              <div className="flex items-center gap-2 px-1 pt-0.5 text-[11.5px]">
+                <Mail size={13} className="text-[#713B32] shrink-0" />
+                <a
+                  href="mailto:astroparihar06@gmail.com"
+                  className="hover:text-[#713B32] transition-colors"
+                >
+                  astroparihar06@gmail.com
+                </a>
               </div>
             </div>
           </div>
@@ -79,7 +112,9 @@ export default function LandingFooter() {
 
         <div className="border-t border-[#E5D9C8] pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#6B5E55]">
           <div>
-            <p>© 2026 AstroParihar. Operated by VAYORIX PRIVATE LIMITED. All rights reserved.</p>
+            <p>
+              © 2026 AstroParihar. Head Office: Vooty Ltd (Company No. 11632049) • Operated by VAYORIX PRIVATE LIMITED. All rights reserved.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-4">
             <Link href="/privacy" className="hover:text-[#713B32] transition-colors">

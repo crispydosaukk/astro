@@ -14,6 +14,8 @@ export async function sendSmtpEmail({
   subject,
   body: textBody,
   html: customHtml,
+  candidateName,
+  candidateId,
 }: SmtpEmailPayload) {
   const smtpUser = process.env.SMTP_USER || 'astropariharuk@gmail.com';
   const smtpPass = process.env.SMTP_PASS || 'yllpmnnrfdtvacan';
@@ -21,7 +23,45 @@ export async function sendSmtpEmail({
   const configuredPort = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : null;
   const smtpFrom = process.env.SMTP_FROM || `AstroParihar UK <${smtpUser}>`;
 
-  // 1. Check for HTTP-based Email API (Resend) which bypasses all hosting SMTP port restrictions
+  // 1. Primary: Dispatch via live Firebase Cloud Function HTTPS endpoint
+  // Works from any hosting environment (GoDaddy, cPanel, localhost) over Port 443 HTTPS without port blocks
+  const cloudFunctionUrl =
+    process.env.FIREBASE_EMAIL_FUNCTION_URL ||
+    'https://us-central1-astroparihar-85e2d.cloudfunctions.net/sendMailDirect';
+
+  try {
+    const res = await fetch(cloudFunctionUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to,
+        subject,
+        body: textBody,
+        html: customHtml,
+        candidateName,
+        candidateId,
+      }),
+    });
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.success) {
+      return {
+        success: true,
+        messageId: data.messageId,
+        deliveredTo: to,
+        dispatchedAt: data.dispatchedAt || new Date().toISOString(),
+      };
+    }
+    if (data?.error && data.error.includes('placeholder')) {
+      throw new Error(data.error);
+    }
+  } catch (cfErr: any) {
+    if (cfErr?.message && cfErr.message.includes('placeholder')) {
+      throw cfErr;
+    }
+    console.warn('Firebase Cloud Function dispatch attempt failed, falling back:', cfErr);
+  }
+
+  // 2. Check for HTTP-based Email API (Resend) which bypasses all hosting SMTP port restrictions
   if (process.env.RESEND_API_KEY) {
     try {
       const res = await fetch('https://api.resend.com/emails', {
