@@ -154,41 +154,65 @@ export default function ProbationActivePage() {
 
     try {
       const emailHtml = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1e293b; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;">
-          <div style="text-align: center; border-bottom: 2px solid #713B32; padding-bottom: 16px; margin-bottom: 20px;">
-            <h2 style="color: #713B32; margin: 0;">AstroParihar Astrologer Network</h2>
-            <p style="color: #16a34a; font-weight: bold; margin: 4px 0 0 0;">✓ Verified Astrologer · 30-Day Probation Active</p>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Welcome to AstroParihar: Astrologer Dashboard Access</title>
+        </head>
+        <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fcfaf8; color: #1e293b;">
+          <div style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8dfd8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <div style="background-color: #FFFDFC; padding: 22px 24px 16px 24px; border-bottom: 2px solid #713B32; text-align: center;">
+              <a href="https://astroparihar.com" target="_blank" style="text-decoration: none; display: inline-block;">
+                <img src="https://astroparihar.com/astrologo.png" alt="AstroParihar" width="220" style="max-width: 220px; width: 100%; height: auto; display: block; margin: 0 auto; border: 0;" />
+              </a>
+              <p style="margin: 10px 0 0 0; font-size: 12.5px; color: #16a34a; font-weight: 700; letter-spacing: 0.3px;">✓ Verified Astrologer · 30-Day Probation Active</p>
+            </div>
+
+            <div style="padding: 26px 28px; line-height: 1.6; color: #1e293b;">
+              <p style="font-size: 15px; margin-top: 0;">Namaste <strong>${credentialsRecord.candidate} Ji</strong> 🙏,</p>
+
+              <p>Congratulations! Your profile has been verified and approved by the AstroParihar Verification Panel. You are now active in our 30-Day Supervised Astrologer Probation program.</p>
+
+              <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px; margin: 20px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #713B32; font-size: 14px;">Your Astrologer Portal Login Credentials</h4>
+                <p style="margin: 4px 0; font-size: 13px;"><strong>Portal Login URL:</strong> <a href="${loginLink}" style="color: #713B32; font-weight: bold;">${loginLink}</a></p>
+                <p style="margin: 4px 0; font-size: 13px;"><strong>Registered Email / Username:</strong> ${recipient}</p>
+                <p style="margin: 4px 0; font-size: 13px;"><strong>Password:</strong> The password you set while submitting your application form</p>
+                <p style="margin: 4px 0; font-size: 13px;"><strong>Astrologer ID:</strong> ${credentialsRecord.id}</p>
+              </div>
+
+              <div style="text-align: center; margin: 26px 0;">
+                <a href="${loginLink}" style="background: #713B32; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 14px; display: inline-block;">
+                  Sign In to Astrologer Dashboard →
+                </a>
+              </div>
+
+              <p style="font-size: 12.5px; color: #64748b; line-height: 1.6;">
+                <strong>Next Steps:</strong><br/>
+                1. Log into your Astrologer Dashboard with your registered email and chosen password.<br/>
+                2. Toggle your status to <strong>Online</strong> to start accepting client trial consultations.<br/>
+                3. Complete your initial consultations before the Day 15 milestone audit.
+              </p>
+
+              <p style="font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 24px;">
+                Warm regards,<br/>
+                <strong>Astrologer Onboarding Committee</strong> · AstroParihar
+              </p>
+            </div>
+
+            <div style="background-color: #faf7f5; padding: 16px 24px; border-top: 1px solid #ede4dc; font-size: 11.5px; color: #786b63; line-height: 1.5; text-align: center;">
+              <p style="margin: 0 0 4px 0;">
+                Official Astrologer Verification & Onboarding Panel · <strong>AstroParihar</strong>
+              </p>
+              <p style="margin: 0; font-size: 11px; color: #9c8e85;">
+                © 2026 AstroParihar · All rights reserved.
+              </p>
+            </div>
           </div>
-
-          <p style="font-size: 15px;">Namaste <strong>${credentialsRecord.candidate} Ji</strong> 🙏,</p>
-
-          <p>Congratulations! Your profile has been verified and approved by the AstroParihar Verification Panel. You are now active in our 30-Day Supervised Astrologer Probation program.</p>
-
-          <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #713B32; font-size: 14px;">Your Astrologer Portal Login Credentials</h4>
-            <p style="margin: 4px 0; font-size: 13px;"><strong>Portal Login URL:</strong> <a href="${loginLink}" style="color: #713B32; font-weight: bold;">${loginLink}</a></p>
-            <p style="margin: 4px 0; font-size: 13px;"><strong>Registered Email / Username:</strong> ${recipient}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><strong>Password:</strong> The password you set while submitting your application form</p>
-            <p style="margin: 4px 0; font-size: 13px;"><strong>Astrologer ID:</strong> ${credentialsRecord.id}</p>
-          </div>
-
-          <div style="text-align: center; margin: 26px 0;">
-            <a href="${loginLink}" style="background: #713B32; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 14px; display: inline-block;">
-              Sign In to Astrologer Dashboard →
-            </a>
-          </div>
-
-          <p style="font-size: 12.5px; color: #64748b; line-height: 1.6;">
-            <strong>Next Steps:</strong><br/>
-            1. Log into your Astrologer Dashboard with your registered email and chosen password.<br/>
-            2. Toggle your status to <strong>Online</strong> to start accepting client trial consultations.<br/>
-            3. Complete your initial consultations before the Day 15 milestone audit.
-          </p>
-
-          <p style="font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 14px; margin-top: 24px;">
-            AstroParihar Astrologer Onboarding · astropariharuk@gmail.com
-          </p>
-        </div>
+        </body>
+        </html>
       `;
 
       const res = await fetch('/api/email/send', {

@@ -48,7 +48,7 @@ export default function MultiChannelOutreachModal({
     'Invitation to Join AstroParihar Astrologer Panel – {candidate_name}'
   );
   const [emailBody, setEmailBody] = useState(
-    `Namaste {candidate_name} Ji,\n\nWe are delighted to invite you to join AstroParihar's premier network of verified astrologers. Having reviewed your esteemed practice in {location} specializing in {specialisation}, we would be honored to partner with you.\n\nPlease review your verification dossier and onboarding details at:\n{apply_link}\n\nWarm regards,\nRecruitment Committee, AstroParihar UK`
+    `Namaste {candidate_name} Ji,\n\nWe are delighted to invite you to join AstroParihar's premier network of verified astrologers. Having reviewed your esteemed practice in {location} specializing in {specialisation}, we would be honored to partner with you.\n\nPlease review your verification dossier and onboarding details at:\n{apply_link}\n\nWarm regards,\nRecruitment Team, AstroParihar`
   );
   const [smsMessage, setSmsMessage] = useState(
     `Namaste {candidate_name} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: {apply_link} - AstroParihar`

@@ -308,7 +308,7 @@ export default function CandidateTable() {
       : `https://astroparihar.com/apply?id=${candidate.id}&source=${encodeURIComponent(src)}${camp ? `&campaign=${encodeURIComponent(camp)}` : ''}`;
 
     const emailSubject = `Invitation to Join AstroParihar Astrologer Panel – ${candidate.name}`;
-    const emailBody = `Namaste ${candidate.name} Ji,\n\nWe are delighted to invite you to join AstroParihar's premier network of verified astrologers. Having reviewed your esteemed practice in ${candidate.location} specializing in ${candidate.specialisations?.join(', ') || 'Vedic Astrology'}, we would be honored to partner with you.\n\nPlease review your verification dossier and onboarding details at:\n${appUrl}\n\nWarm regards,\nRecruitment Committee, AstroParihar UK`;
+    const emailBody = `Namaste ${candidate.name} Ji,\n\nWe are delighted to invite you to join AstroParihar's premier network of verified astrologers. Having reviewed your esteemed practice in ${candidate.location} specializing in ${candidate.specialisations?.join(', ') || 'Vedic Astrology'}, we would be honored to partner with you.\n\nPlease review your verification dossier and onboarding details at:\n${appUrl}\n\nWarm regards,\nRecruitment Team, AstroParihar`;
     const smsText = `Namaste ${candidate.name} Ji, AstroParihar invites you to join our verified astrologer panel. Apply: ${appUrl} - AstroParihar`;
 
     try {

@@ -97,30 +97,53 @@ export default function ReviewDecisionBar({ candidate, onUpdateCandidate }: Revi
           if (targetEmail && targetEmail.includes('@')) {
             try {
               const html = `
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1a1a1a; line-height: 1.6; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-                  <div style="text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #713B32;">
-                    <h2 style="color: #713B32; margin: 0; font-size: 22px;">AstroParihar Onboarding Approval</h2>
-                    <p style="color: #16a34a; margin: 4px 0 0 0; font-size: 14px; font-weight: bold;">✓ Profile Verified & Activated</p>
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Account Verified: Welcome to AstroParihar</title>
+                </head>
+                <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fcfaf8; color: #1e293b;">
+                  <div style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8dfd8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                    <div style="background-color: #FFFDFC; padding: 22px 24px 16px 24px; border-bottom: 2px solid #713B32; text-align: center;">
+                      <a href="https://astroparihar.com" target="_blank" style="text-decoration: none; display: inline-block;">
+                        <img src="https://astroparihar.com/astrologo.png" alt="AstroParihar" width="220" style="max-width: 220px; width: 100%; height: auto; display: block; margin: 0 auto; border: 0;" />
+                      </a>
+                      <p style="margin: 10px 0 0 0; font-size: 12.5px; color: #16a34a; font-weight: 700; letter-spacing: 0.3px;">✓ Profile Verified & Activated</p>
+                    </div>
+                    
+                    <div style="padding: 26px 28px; line-height: 1.6; color: #1a1a1a;">
+                      <p style="font-size: 16px; margin-top: 0;">Namaste <strong>${candidate.name} Ji</strong> 🙏,</p>
+                      
+                      <p>Congratulations! Your astrologer credentials, Vedic assessment, and AI screening interview have been approved by the <strong>AstroParihar Verification Committee</strong>.</p>
+                      
+                      <p>Your verified astrologer panel access is now active. You can log in to your Astrologer Dashboard to manage your schedule, accept consultations, and view client earnings.</p>
+                      
+                      <div style="text-align: center; margin: 28px 0;">
+                        <a href="https://astroparihar.com/astrologer-login" style="background: #713B32; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 15px; display: inline-block;">
+                          Login to Astrologer Dashboard →
+                        </a>
+                      </div>
+                      
+                      <p style="font-size: 13px; color: #718096; margin-top: 24px;">
+                        Warm regards,<br/>
+                        <strong>Recruitment & Astrological Compliance Panel</strong><br/>
+                        AstroParihar
+                      </p>
+                    </div>
+
+                    <div style="background-color: #faf7f5; padding: 16px 24px; border-top: 1px solid #ede4dc; font-size: 11.5px; color: #786b63; line-height: 1.5; text-align: center;">
+                      <p style="margin: 0 0 4px 0;">
+                        Official Astrologer Verification & Onboarding Panel · <strong>AstroParihar</strong>
+                      </p>
+                      <p style="margin: 0; font-size: 11px; color: #9c8e85;">
+                        © 2026 AstroParihar · All rights reserved.
+                      </p>
+                    </div>
                   </div>
-                  
-                  <p style="font-size: 16px;">Namaste <strong>${candidate.name} Ji</strong> 🙏,</p>
-                  
-                  <p>Congratulations! Your astrologer credentials, Vedic assessment, and AI screening interview have been approved by the <strong>AstroParihar Verification Committee</strong>.</p>
-                  
-                  <p>Your verified astrologer panel access is now active. You can log in to your Astrologer Dashboard to manage your schedule, accept consultations, and view client earnings.</p>
-                  
-                  <div style="text-align: center; margin: 28px 0;">
-                    <a href="https://astroparihar.com/astrologer-login" style="background: #713B32; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 28px; border-radius: 8px; font-size: 15px; display: inline-block;">
-                      Login to Astrologer Dashboard →
-                    </a>
-                  </div>
-                  
-                  <p style="font-size: 13px; color: #718096; margin-top: 24px;">
-                    Warm regards,<br/>
-                    <strong>Recruitment & Astrological Compliance Panel</strong><br/>
-                    AstroParihar (astropariharuk@gmail.com)
-                  </p>
-                </div>
+                </body>
+                </html>
               `;
 
               await fetch('/api/email/send', {

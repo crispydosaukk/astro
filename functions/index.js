@@ -27,6 +27,40 @@ function getTransporter() {
   });
 }
 
+function buildBrandedEmail(bodyText, subject) {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject || 'AstroParihar Notification'}</title>
+    </head>
+    <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fcfaf8; color: #1e293b;">
+      <div style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8dfd8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div style="background-color: #FFFDFC; padding: 22px 24px 16px 24px; border-bottom: 2px solid #713B32; text-align: center;">
+          <a href="https://astroparihar.com" target="_blank" style="text-decoration: none; display: inline-block;">
+            <img src="https://astroparihar.com/astrologo.png" alt="AstroParihar" width="220" style="max-width: 220px; width: 100%; height: auto; display: block; margin: 0 auto; border: 0;" />
+          </a>
+          <p style="margin: 10px 0 0 0; font-size: 12.5px; color: #713B32; font-weight: 600; letter-spacing: 0.3px;">Verified Astrologer Network & Onboarding</p>
+        </div>
+        <div style="padding: 26px 28px; line-height: 1.7; font-size: 14.5px; color: #334155;">
+          ${bodyText ? bodyText.replace(/\n/g, '<br/>') : ''}
+        </div>
+        <div style="background-color: #faf7f5; padding: 16px 24px; border-top: 1px solid #ede4dc; font-size: 11.5px; color: #786b63; line-height: 1.5; text-align: center;">
+          <p style="margin: 0 0 4px 0;">
+            Official Astrologer Verification & Onboarding Panel · <strong>AstroParihar</strong>
+          </p>
+          <p style="margin: 0; font-size: 11px; color: #9c8e85;">
+            © 2026 AstroParihar · All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
 /**
  * 1. Background Trigger: Automatically fires whenever a document is created in the 'mail' collection
  */
@@ -68,7 +102,7 @@ exports.processMailQueue = onDocumentCreated(
 
     const subject = data.message?.subject || data.subject || 'Notification from AstroParihar';
     const textBody = data.message?.text || data.body || '';
-    const htmlBody = data.message?.html || data.html || textBody.replace(/\n/g, '<br/>');
+    const htmlBody = data.message?.html || data.html || buildBrandedEmail(textBody, subject);
 
     try {
       console.log(`[Mail Queue] Dispatching email to: ${recipient}, Subject: "${subject}"`);
@@ -140,20 +174,21 @@ exports.sendMailDirect = onRequest(
         return;
       }
 
+      const effectiveHtml = customHtml || buildBrandedEmail(textBody, subject);
       const transporter = getTransporter();
       const info = await transporter.sendMail({
         from: SMTP_FROM,
         to,
         subject,
         text: textBody,
-        html: customHtml || textBody.replace(/\n/g, '<br/>'),
+        html: effectiveHtml,
       });
 
       // Also record to Firestore 'mail' collection
       try {
         await db.collection('mail').add({
           to: [to],
-          message: { subject, text: textBody, html: customHtml },
+          message: { subject, text: textBody, html: effectiveHtml },
           candidateName: candidateName || '',
           candidateId: candidateId || '',
           status: 'sent',

@@ -21,7 +21,43 @@ export async function sendSmtpEmail({
   const smtpPass = process.env.SMTP_PASS || 'yllpmnnrfdtvacan';
   const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
   const configuredPort = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : null;
-  const smtpFrom = process.env.SMTP_FROM || `AstroParihar UK <${smtpUser}>`;
+  const smtpFrom = process.env.SMTP_FROM || `AstroParihar <${smtpUser}>`;
+
+  const defaultHtml = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject}</title>
+    </head>
+    <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fcfaf8; color: #1e293b;">
+      <div style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8dfd8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div style="background-color: #FFFDFC; padding: 22px 24px 16px 24px; border-bottom: 2px solid #713B32; text-align: center;">
+          <a href="https://astroparihar.com" target="_blank" style="text-decoration: none; display: inline-block;">
+            <img src="https://astroparihar.com/astrologo.png" alt="AstroParihar" width="220" style="max-width: 220px; width: 100%; height: auto; display: block; margin: 0 auto; border: 0;" />
+          </a>
+          <p style="margin: 10px 0 0 0; font-size: 12.5px; color: #713B32; font-weight: 600; letter-spacing: 0.3px;">Verified Astrologer Network & Onboarding</p>
+        </div>
+        
+        <div style="padding: 26px 28px; line-height: 1.7; font-size: 14.5px; color: #334155;">
+          ${textBody.replace(/\n/g, '<br/>')}
+        </div>
+        
+        <div style="background-color: #faf7f5; padding: 16px 24px; border-top: 1px solid #ede4dc; font-size: 11.5px; color: #786b63; line-height: 1.5; text-align: center;">
+          <p style="margin: 0 0 4px 0;">
+            Official Astrologer Verification & Onboarding Panel · <strong>AstroParihar</strong>
+          </p>
+          <p style="margin: 0; font-size: 11px; color: #9c8e85;">
+            © 2026 AstroParihar · All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const effectiveHtml = customHtml || defaultHtml;
 
   // 1. Primary: Dispatch via live Firebase Cloud Function HTTPS endpoint
   // Works from any hosting environment (GoDaddy, cPanel, localhost) over Port 443 HTTPS without port blocks
@@ -37,7 +73,7 @@ export async function sendSmtpEmail({
         to,
         subject,
         body: textBody,
-        html: customHtml,
+        html: effectiveHtml,
         candidateName,
         candidateId,
       }),
@@ -75,7 +111,7 @@ export async function sendSmtpEmail({
           to: [to],
           subject,
           text: textBody,
-          html: customHtml || textBody.replace(/\n/g, '<br/>'),
+          html: effectiveHtml,
         }),
       });
       const data = await res.json();
@@ -102,11 +138,11 @@ export async function sendSmtpEmail({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sender: { name: 'AstroParihar UK', email: smtpUser },
+          sender: { name: 'AstroParihar', email: smtpUser },
           to: [{ email: to }],
           subject,
           textContent: textBody,
-          htmlContent: customHtml || textBody.replace(/\n/g, '<br/>'),
+          htmlContent: effectiveHtml,
         }),
       });
       const data = await res.json();
@@ -122,38 +158,6 @@ export async function sendSmtpEmail({
       console.warn('Brevo HTTP dispatch attempt failed, falling back to SMTP:', brevoErr);
     }
   }
-
-  const defaultHtml = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${subject}</title>
-    </head>
-    <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fcfaf8; color: #1e293b;">
-      <div style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8dfd8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-        <div style="background-color: #713B32; padding: 20px 24px; color: #ffffff;">
-          <h1 style="margin: 0; font-size: 19px; font-weight: 700; letter-spacing: 0.5px;">AstroParihar Astrologer Network</h1>
-          <p style="margin: 4px 0 0 0; font-size: 12px; opacity: 0.85;">Official Astrologer Verification & Onboarding</p>
-        </div>
-        
-        <div style="padding: 24px; line-height: 1.7; font-size: 14.5px; color: #334155;">
-          ${textBody.replace(/\n/g, '<br/>')}
-        </div>
-        
-        <div style="background-color: #f8fafc; padding: 18px 24px; border-top: 1px solid #f1f5f9; font-size: 11.5px; color: #64748b; line-height: 1.5;">
-          <p style="margin: 0 0 6px 0;">
-            This invitation was dispatched by the <strong>AstroParihar UK Recruitment Committee</strong> for verified astrology practitioners.
-          </p>
-          <p style="margin: 0;">
-            Sender: <a href="mailto:${smtpUser}" style="color: #713B32; text-decoration: none;">${smtpUser}</a> • AstroParihar Global Astrologer Verification System
-          </p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
 
   // 3. Fallback to standard SMTP with port autodetection (try 587 STARTTLS first, then 465 SSL)
   const portsToTry = configuredPort ? [configuredPort] : [587, 465];
@@ -179,7 +183,7 @@ export async function sendSmtpEmail({
         to,
         subject,
         text: textBody,
-        html: customHtml || defaultHtml,
+        html: effectiveHtml,
         headers: {
           'X-Mailer': 'AstroParihar Verified Astrologer System',
           'X-Auto-Response-Suppress': 'OOF, AutoReply',

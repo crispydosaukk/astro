@@ -313,34 +313,57 @@ export async function POST(req: NextRequest) {
     if (email && email.includes('@')) {
       try {
         const confirmationHtml = `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1a1a1a; line-height: 1.6; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
-            <div style="text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #713B32;">
-              <h2 style="color: #713B32; margin: 0; font-size: 22px;">AstroParihar Astrologer Onboarding</h2>
-              <p style="color: #718096; margin: 4px 0 0 0; font-size: 14px;">Application & Screening Submission Received</p>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Application Received</title>
+          </head>
+          <body style="margin: 0; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fcfaf8; color: #1e293b;">
+            <div style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e8dfd8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+              <div style="background-color: #FFFDFC; padding: 22px 24px 16px 24px; border-bottom: 2px solid #713B32; text-align: center;">
+                <a href="https://astroparihar.com" target="_blank" style="text-decoration: none; display: inline-block;">
+                  <img src="https://astroparihar.com/astrologo.png" alt="AstroParihar" width="220" style="max-width: 220px; width: 100%; height: auto; display: block; margin: 0 auto; border: 0;" />
+                </a>
+                <p style="margin: 10px 0 0 0; font-size: 12.5px; color: #713B32; font-weight: 600; letter-spacing: 0.3px;">Astrologer Verification & Onboarding</p>
+              </div>
+              
+              <div style="padding: 26px 28px; line-height: 1.6; color: #1a1a1a;">
+                <p style="font-size: 16px; margin-top: 0;">Namaste <strong>${name} Ji</strong> 🙏,</p>
+                
+                <p>Thank you for completing your self-service profile verification, Vedic knowledge assessment, and AI screening interview for <strong>AstroParihar</strong>.</p>
+                
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
+                  <h4 style="margin: 0 0 10px 0; color: #1e293b; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">Submission Summary</h4>
+                  <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 14px; line-height: 1.8;">
+                    <li><strong>Application ID:</strong> ${effectiveId}</li>
+                    <li><strong>Specialisation:</strong> ${Array.isArray(specialisations) ? specialisations.join(', ') : specialisations}</li>
+                    <li><strong>Theory Assessment:</strong> Completed (${theoryScore}/100)</li>
+                    <li><strong>Kundali Chart Case:</strong> Completed (${chartCaseScore}/100)</li>
+                    <li><strong>AI Screening Interview:</strong> Completed (${aiInterviewScore}/100)</li>
+                    <li><strong>Current Status:</strong> <span style="color: #d97706; font-weight: bold;">Under Human Review</span></li>
+                  </ul>
+                </div>
+                
+                <p>Our Astrological Verification Committee is currently reviewing your responses and credentials. Once approved by our team, your astrologer dashboard access will be activated, and you will receive an official welcome notification.</p>
+                
+                <p style="margin-top: 24px;">Warm regards,<br/>
+                <strong>Astrologer Verification & Onboarding Panel</strong><br/>
+                AstroParihar</p>
+              </div>
+
+              <div style="background-color: #faf7f5; padding: 16px 24px; border-top: 1px solid #ede4dc; font-size: 11.5px; color: #786b63; line-height: 1.5; text-align: center;">
+                <p style="margin: 0 0 4px 0;">
+                  Official Astrologer Verification & Onboarding Panel · <strong>AstroParihar</strong>
+                </p>
+                <p style="margin: 0; font-size: 11px; color: #9c8e85;">
+                  © 2026 AstroParihar · All rights reserved.
+                </p>
+              </div>
             </div>
-            
-            <p style="font-size: 16px;">Namaste <strong>${name} Ji</strong> 🙏,</p>
-            
-            <p>Thank you for completing your self-service profile verification, Vedic knowledge assessment, and AI screening interview for <strong>AstroParihar</strong>.</p>
-            
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0;">
-              <h4 style="margin: 0 0 10px 0; color: #1e293b; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">Submission Summary</h4>
-              <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 14px; line-height: 1.8;">
-                <li><strong>Application ID:</strong> ${effectiveId}</li>
-                <li><strong>Specialisation:</strong> ${Array.isArray(specialisations) ? specialisations.join(', ') : specialisations}</li>
-                <li><strong>Theory Assessment:</strong> Completed (${theoryScore}/100)</li>
-                <li><strong>Kundali Chart Case:</strong> Completed (${chartCaseScore}/100)</li>
-                <li><strong>AI Screening Interview:</strong> Completed (${aiInterviewScore}/100)</li>
-                <li><strong>Current Status:</strong> <span style="color: #d97706; font-weight: bold;">Under Human Review</span></li>
-              </ul>
-            </div>
-            
-            <p>Our Astrological Verification Committee is currently reviewing your responses and credentials. Once approved by our team, your astrologer dashboard access will be activated, and you will receive an official welcome notification.</p>
-            
-            <p style="margin-top: 24px;">Warm regards,<br/>
-            <strong>Astrologer Verification & Onboarding Panel</strong><br/>
-            AstroParihar (astropariharuk@gmail.com)</p>
-          </div>
+          </body>
+          </html>
         `;
 
         await sendSmtpEmail({
