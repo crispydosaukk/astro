@@ -237,7 +237,7 @@ export const SADHU_AVATAR_PRESETS = [
   { name: 'Rishi Anka Shastri', title: 'Chaldean Anka Vidya', url: '/assets/images/ai-astrologers/ai-anka-vidya-rishi.svg' },
 ];
 
-export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
+const RAW_DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
   // ==========================================
   // 1. VEDIC JYOTISH & KUNDLI DASHA GURU (1-6)
   // ==========================================
@@ -1735,8 +1735,22 @@ export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = [
     consultationStyle: 'Devout, Potent & Protective',
     systemPersonaPrompt: `You are Acharya Joshi, an authority on Vedic Dosh Nivaran and Navagraha Homas from Ujjain. You guide devotees toward potent, authentic Vedic rituals for protection and prosperity.`,
   },
-  ...DEFAULT_REMEDY_ASTROLOGERS,
 ];
+
+function deduplicateAstrologers(astros: AIAstrologer[]): AIAstrologer[] {
+  const map = new Map<string, AIAstrologer>();
+  for (const a of astros) {
+    if (a && a.id && !map.has(a.id)) {
+      map.set(a.id, a);
+    }
+  }
+  return Array.from(map.values());
+}
+
+export const DEFAULT_AI_ASTROLOGERS: AIAstrologer[] = deduplicateAstrologers([
+  ...RAW_DEFAULT_AI_ASTROLOGERS,
+  ...DEFAULT_REMEDY_ASTROLOGERS,
+]);
 
 export { DEFAULT_REMEDY_ASTROLOGERS };
 
@@ -1776,9 +1790,13 @@ export async function getAIAstrologers(): Promise<AIAstrologer[]> {
     const snap = await getDocs(colRef);
     if (!snap.empty) {
       const items: AIAstrologer[] = [];
+      const seen = new Set<string>();
       snap.forEach((docSnap) => {
-        const item = { id: docSnap.id, ...docSnap.data() } as AIAstrologer;
-        items.push(normalizeAIAstrologerAvatar(item));
+        if (!seen.has(docSnap.id)) {
+          seen.add(docSnap.id);
+          const item = { id: docSnap.id, ...docSnap.data() } as AIAstrologer;
+          items.push(normalizeAIAstrologerAvatar(item));
+        }
       });
       return items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }

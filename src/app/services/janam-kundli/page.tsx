@@ -107,23 +107,18 @@ export default function FreeJanamKundliPage() {
 
       const data = await res.json();
       if (data?.reportData) {
-        const verifiedLagna = computedHoroscope.ascendant;
-        const verifiedMoon = computedHoroscope.moonSign;
-        const verifiedNakshatra = computedHoroscope.nakshatra;
-        const verifiedDasha = computedHoroscope.dasha;
-        const lagnaName = (verifiedLagna || '').split(' ')[0];
-
-        let safeAnalysis = data.reportData.astrologicalAnalysis || computedHoroscope.astrologicalAnalysis;
-        if (verifiedLagna && lagnaName && !safeAnalysis.toLowerCase().includes(lagnaName.toLowerCase())) {
-          safeAnalysis = `${computedHoroscope.astrologicalAnalysis}\n\n${safeAnalysis}`;
-        }
+        const activeLagna = data.reportData.ascendant || computedHoroscope.ascendant;
+        const activeMoon = data.reportData.moonSign || computedHoroscope.moonSign;
+        const activeNakshatra = data.reportData.nakshatra || computedHoroscope.nakshatra;
+        const activeDasha = data.reportData.dasha || computedHoroscope.dasha;
+        const safeAnalysis = data.reportData.astrologicalAnalysis || computedHoroscope.astrologicalAnalysis;
 
         const safeReportData = {
           ...data.reportData,
-          ascendant: verifiedLagna,
-          moonSign: verifiedMoon,
-          nakshatra: verifiedNakshatra,
-          dasha: verifiedDasha,
+          ascendant: activeLagna,
+          moonSign: activeMoon,
+          nakshatra: activeNakshatra,
+          dasha: activeDasha,
           astrologicalAnalysis: safeAnalysis,
         };
 

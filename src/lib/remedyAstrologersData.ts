@@ -760,7 +760,7 @@ export const DEFAULT_REMEDY_ASTROLOGERS: AIAstrologer[] = [
     remedies: ['vastu'],
   },
   {
-    id: 'ai-vastu-meenakshi',
+    id: 'ai-remedy-vastu-meenakshi',
     name: 'Vastu Acharya Meenakshi Sundaram',
     avatar: '/assets/images/ai-astrologers/ai-vastu-meenakshi.svg',
     tagline: 'Residential Harmony & Color Therapy Vastu Expert',

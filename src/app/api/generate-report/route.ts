@@ -33,10 +33,10 @@ export async function POST(request: Request) {
     );
     const reportContent = JSON.stringify(reportJsonObj);
 
-    // Save to Firestore `service_requests` collection using adminDb
+    // Save to Firestore `service_requests` collection using adminDb (with 1500ms timeout guard)
     let docId = 'temp-' + Date.now();
     try {
-      const docRef = await adminDb.collection('service_requests').add({
+      const savePromise = adminDb.collection('service_requests').add({
         userId,
         userEmail,
         type,
@@ -46,9 +46,13 @@ export async function POST(request: Request) {
         reportData: reportJsonObj,
         createdAt: new Date().toISOString(),
       });
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Firestore timeout')), 1500)
+      );
+      const docRef: any = await Promise.race([savePromise, timeoutPromise]);
       docId = docRef.id;
-    } catch (dbErr) {
-      console.warn('Firestore write warning:', dbErr);
+    } catch (dbErr: any) {
+      console.warn('Firestore write warning (using fallback docId):', dbErr?.message || dbErr);
     }
 
     return NextResponse.json({

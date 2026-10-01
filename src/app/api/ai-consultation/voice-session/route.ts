@@ -3,7 +3,8 @@ import { adminDb } from '@/lib/firebase/admin';
 import { DEFAULT_AI_ASTROLOGERS, AIAstrologer } from '@/lib/aiAstrologerData';
 import { ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES, resolveVedicRemedies } from '@/lib/vedicRemediesEngine';
 import { calculateBirthChartData, formatChartSummaryForAI } from '@/lib/vedicAstrologyEngine';
-import { fetchWithOpenAIFallback } from '@/lib/aiConfig';
+import { fetchWithOpenAIFallback, getServerOpenAIApiKey } from '@/lib/aiConfig';
+import { queryVedikaAI, formatToVedikaDateTime } from '@/lib/vedikaClient';
 
 // Rashi Name Native Translators
 function getNativeRashi(sign: string, lang: 'telugu' | 'tamil' | 'hindi' | 'english'): string {
@@ -424,10 +425,6 @@ function generateDynamicVedicReply(
   return `${name}, your Vedic chart reveals immense latent strength under your ${lagna} and ${moonRashi}. Stay focused and purposeful during this ${dasha} period. Is there anything else you wish to consult about?`;
 }
 
-const FALLBACK_OPENAI_KEY = Buffer.from(
-  'c2stcHJvai1WRUFsc1d6ZEMxOTAwY1VVbmowei00VHAzaGJ3RUtjNzFGOGM2OVRwdFZWQllGUlkxbVF4TVdQbGdCMUNoOTVHc1FveEpTdFhOMVQzQmxia0ZKZ0FuQm1vQkZ0bTkzeGV0SmwxSzNMSTB5eER2Y1lDVThydGdhY3F0R00ycVdVeW9mNjVpQ0ZiLTk0aG5jSFBLQXo2ai1WZE9Wc0E=',
-  'base64'
-).toString('utf-8');
 
 function cleanTextForVedicVoice(text: string, language: string): string {
   let cleaned = text;
@@ -561,8 +558,9 @@ async function generateMultilingualAudioBase64(
   if (!cleanInput) return null;
 
   let activeKey = cleanApiKey(openaiApiKey);
+  // TTS requires a valid key — no fallback possible for voice
   if (!activeKey || activeKey.length < 20) {
-    activeKey = FALLBACK_OPENAI_KEY;
+    return null;
   }
 
   // 1. OpenAI TTS Engine (Multi-chunk processing so ANY number of lines are read completely to the end)
@@ -592,21 +590,9 @@ async function generateMultilingualAudioBase64(
           signal: controller.signal,
         });
 
-        if (ttsRes.status === 401 && activeKey !== FALLBACK_OPENAI_KEY) {
-          console.warn('OpenAI TTS 401 with primary key, retrying with fallback key');
-          ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
-            },
-            body: JSON.stringify({
-              model: 'tts-1',
-              voice: ttsVoice,
-              input: chunk,
-              response_format: 'mp3',
-            }),
-          });
+        if (ttsRes.status === 401) {
+          console.warn('OpenAI TTS 401: check OpenAI API key in Admin Settings.');
+          break;
         }
 
         clearTimeout(timeoutId);
@@ -707,22 +693,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing session ID' }, { status: 400 });
     }
 
-    // 1. Fetch OpenAI API Key
-    let openaiApiKey = cleanApiKey(process.env.OPENAI_API_KEY);
-    if (!openaiApiKey) {
-      try {
-        const settingsSnap = await adminDb.collection('settings').doc('general').get();
-        if (settingsSnap.exists) {
-          const sData = settingsSnap.data();
-          if (sData?.openaiApiKey) openaiApiKey = cleanApiKey(sData.openaiApiKey);
-        }
-      } catch (sErr) {
-        console.warn('Settings key fetch error:', sErr);
-      }
-    }
-    if (!openaiApiKey || openaiApiKey.length < 20) {
-      openaiApiKey = FALLBACK_OPENAI_KEY;
-    }
+    // 1. Fetch OpenAI API Key (env → Firestore admin settings → '')
+    let openaiApiKey = await getServerOpenAIApiKey();
 
     // 2. Whisper STT transcription if audio file was uploaded
     if (audioFile && !userMessage && openaiApiKey) {
@@ -840,10 +812,33 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4. Live AI Generation via OpenAI GPT-4o-mini
+    // 4a. PRIMARY: Vedika AI for spoken consultation content
     let replyText = '';
 
-    if (openaiApiKey) {
+    try {
+      const vDt = birthDetails?.dob
+        ? formatToVedikaDateTime(birthDetails.dob, birthDetails.tob || '12:00')
+        : undefined;
+      const vRes = await queryVedikaAI({
+        question: isInitial
+          ? `You are ${astrologer.name}, a revered Vedic Astrologer. Greet ${birthDetails.name || 'the devotee'} warmly in ${sessionLanguage} and open the consultation about their concern: ${birthDetails.primaryConcern || 'life guidance'}. Their Lagna is ${astroContext.lagna}, Moon Rashi is ${astroContext.moonRashi}, Nakshatra is ${astroContext.nakshatra}. Speak in 2-3 natural conversational sentences only. No markdown.`
+          : `You are ${astrologer.name}, a revered Vedic Astrologer speaking in ${sessionLanguage}. Devotee ${birthDetails.name || ''} (Lagna: ${astroContext.lagna}, Moon: ${astroContext.moonRashi}, Dasha: ${astroContext.currentDasha}) asks: "${userMessage}". Answer in 2-4 warm, concise spoken sentences. Give a direct Vedic insight and one actionable remedy. No markdown, no bullet points.`,
+        birthDetails: vDt ? {
+          datetime: vDt,
+          latitude: Number(birthDetails.lat) || 28.6139,
+          longitude: Number(birthDetails.lon) || 77.209,
+        } : undefined,
+      });
+
+      if (vRes.success && vRes.data?.answer) {
+        replyText = vRes.data.answer;
+      }
+    } catch (vErr) {
+      console.warn('[Vedika] AI astrologer voice query notice, using OpenAI fallback:', vErr);
+    }
+
+    // 4b. FALLBACK: OpenAI GPT-4o-mini if Vedika did not respond
+    if (!replyText && openaiApiKey) {
       try {
         const currentYear = new Date().getFullYear();
         const currentDateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -980,12 +975,15 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
 }
 
 export async function GET() {
-  let activeKey = cleanApiKey(process.env.OPENAI_API_KEY);
-  if (!activeKey || activeKey.length < 20) {
-    activeKey = FALLBACK_OPENAI_KEY;
+  const activeKey = await getServerOpenAIApiKey();
+  if (!activeKey) {
+    return NextResponse.json({
+      version: 'live-v4',
+      error: 'OpenAI API key not configured. Add it in Admin Settings \u2192 AI Engine.',
+    });
   }
   try {
-    let res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -998,31 +996,10 @@ export async function GET() {
       }),
     });
 
-    let fallbackTriggered = false;
-    let keyUsed = activeKey.substring(0, 10) + '...' + activeKey.slice(-4);
-
-    if (res.status === 401 && activeKey !== FALLBACK_OPENAI_KEY) {
-      fallbackTriggered = true;
-      res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${FALLBACK_OPENAI_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: 'Say hello in Telugu' }],
-          max_tokens: 30,
-        }),
-      });
-      keyUsed = FALLBACK_OPENAI_KEY.substring(0, 10) + '...' + FALLBACK_OPENAI_KEY.slice(-4);
-    }
-
     const data = await res.json();
     return NextResponse.json({
       version: 'live-v4',
-      fallbackTriggered,
-      keyUsed,
+      keyUsed: activeKey.substring(0, 10) + '...' + activeKey.slice(-4),
       openaiStatus: res.status,
       openaiResponse: data?.choices?.[0]?.message?.content || data,
     });

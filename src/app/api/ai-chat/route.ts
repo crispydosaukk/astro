@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
+import { queryVedikaAI, formatToVedikaDateTime } from '@/lib/vedikaClient';
 import { safeParseAIJson } from '@/lib/aiResponseParser';
 import { getSettings } from '@/lib/settings';
 import { adminDb } from '@/lib/firebase/admin';
@@ -519,6 +520,40 @@ You MUST respond STRICTLY in JSON format matching this schema:
       }),
     ];
 
+    // 8a. PRIMARY: Try Vedika AI first
+    let replyContent = '';
+    let recommendations: string[] = [];
+    let parsed: any = {};
+
+    try {
+      const vDt = birthInfo?.dob ? formatToVedikaDateTime(birthInfo.dob, birthInfo.tob || '12:00') : undefined;
+      const vRes = await queryVedikaAI({
+        question: `Devotee Question in ${language}: "${latestUserMessage}". Context: ${userContext || 'Astrological Consultation'}. Name: ${defaultUserProfile.name || 'Devotee'}, Moon Sign: ${chart?.moonSign || 'Vedic'}, Nakshatra: ${chart?.nakshatra || 'Vedic'}. Provide compassionate, authoritative Vedic Jyotish guidance with practical remedies.`,
+        birthDetails: vDt ? {
+          datetime: vDt,
+          latitude: Number(birthInfo?.lat) || 28.6139,
+          longitude: Number(birthInfo?.lon) || 77.209,
+        } : undefined,
+      });
+
+      if (vRes.success && vRes.data?.answer) {
+        replyContent = vRes.data.answer;
+        parsed = {
+          reply: replyContent,
+          whyAstroPariharSaysThis: [
+            'Direct live planetary alignment analysis via Vedika Intelligence Engine.',
+            `Evaluated under ${chart?.moonSign || 'Moon'} Rashi and ${chart?.nakshatra || 'Vedic'} Nakshatra coordinates.`,
+          ],
+          confidence: 'Strong',
+          status: 'verified_accurate',
+        };
+      }
+    } catch (vErr) {
+      console.warn('[Vedika] AI chat query notice, using OpenAI fallback:', vErr);
+    }
+
+    // 8b. FALLBACK: Use OpenAI if Vedika did not produce a reply
+    if (!replyContent) {
     const response = await fetchWithOpenAIFallback(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -540,7 +575,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
     if (!response.ok) {
       const errText = await response.text();
       console.error('OpenAI chat completion failed:', response.status, errText);
-      // Refund if OpenAI fails
+      // Refund if all AI engines fail
       if (deductedAmount > 0 && userRef) {
         await userRef.set({ walletBalance: initialBalance }, { merge: true });
       }
@@ -551,9 +586,6 @@ You MUST respond STRICTLY in JSON format matching this schema:
     }
 
     const data = await response.json();
-    let replyContent = '';
-    let recommendations: string[] = [];
-    let parsed: any = {};
 
     try {
       const rawText = data.choices?.[0]?.message?.content || '{}';
@@ -686,6 +718,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
         data.choices?.[0]?.message?.content ||
         'May Lord Ganesha bless you with clarity and peace. How else may I guide your chart today?';
     }
+    } // end if (!replyContent) — OpenAI fallback block
 
     // Ensure 5-6 recommendations are always present
     if (recommendations.length < 5) {

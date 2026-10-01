@@ -48,6 +48,7 @@ export default function FreePanchangPage() {
       if (res.ok) {
         const data = await res.json();
         if (data.aiSummary) setAiSummary(data.aiSummary);
+        if (data.panchang) setPanchang((prev) => ({ ...prev, ...data.panchang }));
       }
     } catch (err) {
       console.warn('AI Panchang fetch error:', err);

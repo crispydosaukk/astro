@@ -3,32 +3,102 @@ import { getAIPromptSettings } from '@/lib/aiPromptSettings';
 import { calculatePanchang } from '@/lib/panchangEngine';
 import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
 import { safeParseAIJson } from '@/lib/aiResponseParser';
+import { fetchVedikaPanchang, queryVedikaAI } from '@/lib/vedikaClient';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { date = new Date().toISOString().split('T')[0], location = 'New Delhi, Delhi, India' } =
-      body;
+    const {
+      date = new Date().toISOString().split('T')[0],
+      location = 'New Delhi, Delhi, India',
+      latitude,
+      longitude,
+    } = body;
 
-    // 1. Calculate Astronomical Panchang data
-    const panchang = calculatePanchang(date, location);
+    // 1. Calculate Astronomical Panchang data with local engine as baseline
+    let panchang = calculatePanchang(date, location);
+    let vedikaLive: any = null;
 
-    // 2. Fetch OpenAI key reliably
+    // 2. Fetch Primary Live Ephemeris from Vedika AI
+    try {
+      const vPanchangRes = await fetchVedikaPanchang({
+        date,
+        latitude: latitude || 28.6139,
+        longitude: longitude || 77.209,
+      });
+
+      if (vPanchangRes.success && vPanchangRes.data) {
+        vedikaLive = vPanchangRes.data;
+        if (vedikaLive.tithi?.name) panchang.tithi = vedikaLive.tithi.name;
+        if (vedikaLive.nakshatra?.name) panchang.nakshatra = vedikaLive.nakshatra.name;
+        if (vedikaLive.yoga?.name) panchang.yoga = vedikaLive.yoga.name;
+        if (vedikaLive.karana?.name) panchang.karana = vedikaLive.karana.name;
+        if (vedikaLive.sunrise) panchang.sunrise = vedikaLive.sunrise;
+        if (vedikaLive.sunset) panchang.sunset = vedikaLive.sunset;
+        if (vedikaLive.rahu_kaal?.start && vedikaLive.rahu_kaal?.end) {
+          panchang.rahuKaal = {
+            start: vedikaLive.rahu_kaal.start,
+            end: vedikaLive.rahu_kaal.end,
+          };
+        }
+      }
+    } catch (vErr) {
+      console.warn('Vedika Panchang live fetch notice:', vErr);
+    }
+
+    // 3. Query Vedika AI Intelligence for authentic Vedic synthesis
+    try {
+      const vQuery = await queryVedikaAI({
+        question: `Explain today's Panchang alignments for date ${date} in ${location}. Tithi is ${panchang.paksha} ${panchang.tithi}, Nakshatra is ${panchang.nakshatra}, Yoga is ${panchang.yoga}, Karana is ${panchang.karana}. Provide cosmic energy overview, auspicious activities, and inauspicious precautions during Rahu Kaal.`,
+        birthDetails: {
+          datetime: `${date}T12:00:00`,
+          latitude: latitude || 28.6139,
+          longitude: longitude || 77.209,
+        },
+      });
+
+      if (vQuery.success && vQuery.data?.answer) {
+        const text = vQuery.data.answer;
+        return NextResponse.json({
+          panchang,
+          vedikaLive,
+          engine: 'Vedika AI Intelligence (vedika.io)',
+          aiSummary: {
+            dailyVedicSummary: text,
+            favorableActivities: [
+              `Abhijit Muhurat (${panchang.abhijitMuhurat.start} – ${panchang.abhijitMuhurat.end}) for initiating contracts & travels`,
+              `Spiritual contemplation & mantra japa under ${panchang.nakshatra} Nakshatra`,
+              'Charity of food, sesame seeds, and water',
+            ],
+            inauspiciousPrecautions: [
+              `Avoid significant investments or commencing long journeys during Rahu Kaal (${panchang.rahuKaal.start} – ${panchang.rahuKaal.end})`,
+            ],
+            dailyMantra: 'ॐ नमो नारायणाय ॥ / ॐ नमः शिवाय ॥',
+            dailyBlessingShloka:
+              'शुभं करोति कल्याणमारोग्यं धनसंपदाम् । शत्रुबुद्धिविनाशाय दीपज्योतिर्नमोऽस्तुते ॥',
+          },
+        });
+      }
+    } catch (vAiErr) {
+      console.warn('Vedika AI summary notice:', vAiErr);
+    }
+
+    // 4. Fallback to OpenAI if configured
     const openaiApiKey = await getServerOpenAIApiKey();
 
     if (!openaiApiKey) {
-      // Return structured fallback based on pure mathematical Vedic calculations
       return NextResponse.json({
         panchang,
+        vedikaLive,
         aiSummary: {
-          dailyVedicSummary: `On ${panchang.formattedDate} in ${location}, the cosmic energies are ruled by ${panchang.paksha} Paksha ${panchang.tithi} and ${panchang.nakshatra} Nakshatra. The prevailing ${panchang.yoga} Yoga and ${panchang.karana} Karana foster focused endeavors and spiritual clarity.`,
+          dailyVedicSummary: `On ${panchang.formattedDate} in ${location}, cosmic energies are governed by ${panchang.paksha} Paksha ${panchang.tithi} and ${panchang.nakshatra} Nakshatra. The prevailing ${panchang.yoga} Yoga fosters focused endeavors and spiritual clarity.`,
           favorableActivities: [
             'Spiritual Sadhana and Meditation during Brahma Muhurta',
-            `Important commitments and signing deals during Abhijit Muhurat (${panchang.abhijitMuhurat.start} – ${panchang.abhijitMuhurat.end})`,
-            'Charity of water, food, and grains to the needy',
+            `Important commitments during Abhijit Muhurat (${panchang.abhijitMuhurat.start} – ${panchang.abhijitMuhurat.end})`,
+            'Charity of water and food grains to the needy',
           ],
           inauspiciousPrecautions: [
-            `Avoid commencing critical long journeys or taking heavy financial debt during Rahu Kaal (${panchang.rahuKaal.start} – ${panchang.rahuKaal.end})`,
+            `Avoid commencing critical long journeys during Rahu Kaal (${panchang.rahuKaal.start} – ${panchang.rahuKaal.end})`,
           ],
           dailyMantra: 'ॐ नमो नारायणाय ॥ / ॐ नमः शिवाय ॥',
           dailyBlessingShloka:
@@ -37,7 +107,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3. Load Admin Configured Panchang Prompt
     const aiPromptSettings = await getAIPromptSettings();
     const panchangPromptConfig = aiPromptSettings.prompts['panchang-daily'];
 
@@ -48,9 +117,6 @@ export async function POST(req: Request) {
     systemPrompt += `\n\nReal-Time Calendar Anchor:\n- Current Date: ${panchang.formattedDate} (Year: ${currentYear}). Compute and frame all panchang insights, muhurats, and wisdom for ${currentYear}. Never refer to 2024 as the active year.`;
     if (aiPromptSettings.config.globalExtraDirectives) {
       systemPrompt += `\n\nGlobal Directives:\n${aiPromptSettings.config.globalExtraDirectives}`;
-    }
-    if (panchangPromptConfig?.extraDirectives) {
-      systemPrompt += `\n\nSpecific Panchang Directives:\n${panchangPromptConfig.extraDirectives}`;
     }
 
     let userPrompt =
@@ -101,12 +167,14 @@ export async function POST(req: Request) {
       const parsedAi = safeParseAIJson(aiJson.choices?.[0]?.message?.content) || null;
       return NextResponse.json({
         panchang,
+        vedikaLive,
         aiSummary: parsedAi,
       });
     }
 
     return NextResponse.json({
       panchang,
+      vedikaLive,
       aiSummary: {
         dailyVedicSummary: `Daily Vedic Panchang calculations for ${location} on ${panchang.formattedDate}. Active ${panchang.paksha} Paksha ${panchang.tithi} with ${panchang.nakshatra} Nakshatra.`,
         favorableActivities: [

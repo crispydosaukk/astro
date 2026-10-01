@@ -16,6 +16,8 @@ import {
   ShieldCheck,
   Flame,
   Zap,
+  Moon,
+  Clock,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { auth } from '@/lib/firebase/config';
@@ -116,17 +118,78 @@ const servicesList = [
   },
 ];
 
-const panchangItems = [
-  { label: 'Today Panchang', href: '/panchang/today-panchang' },
-  { label: 'Rahu Kaal', href: '/panchang/rahu-kaal' },
-  { label: 'Choghadiya', href: '/panchang/choghadiya' },
-  { label: 'Tithi', href: '/panchang/tithi' },
-  { label: 'Vaar', href: '/panchang/vaar' },
-  { label: 'Hora', href: '/panchang/hora' },
-  { label: 'Karana', href: '/panchang/karana' },
-  { label: 'Tomorrow Panchang', href: '/panchang/tomorrow-panchang' },
-  { label: 'Shubh Muhurat', href: '/panchang/shubh-muhurat' },
+const panchangGroups = [
+  {
+    category: 'Daily Celestial Elements',
+    items: [
+      {
+        label: 'Today Panchang',
+        desc: 'Tithi, Nakshatra, Yoga & Shubh Muhurat',
+        icon: Calendar,
+        badge: 'Live',
+        href: '/panchang/today-panchang',
+      },
+      {
+        label: 'Tomorrow Panchang',
+        desc: 'Advance next-day celestial alignments',
+        icon: Calendar,
+        badge: 'Advance',
+        href: '/panchang/tomorrow-panchang',
+      },
+      {
+        label: 'Tithi',
+        desc: 'Lunar phases & paksha calculations',
+        icon: Moon,
+        href: '/panchang/tithi',
+      },
+      {
+        label: 'Vaar',
+        desc: 'Seven day lords & planetary deity',
+        icon: Sun,
+        href: '/panchang/vaar',
+      },
+      {
+        label: 'Karana',
+        desc: 'Half-tithi interval for action planning',
+        icon: Sparkles,
+        href: '/panchang/karana',
+      },
+    ],
+  },
+  {
+    category: 'Muhurats & Timing Windows',
+    items: [
+      {
+        label: 'Shubh Muhurat',
+        desc: 'Auspicious Abhijit & Amrit timing windows',
+        icon: Sparkles,
+        badge: 'Auspicious',
+        href: '/panchang/shubh-muhurat',
+      },
+      {
+        label: 'Rahu Kaal',
+        desc: 'Inauspicious Rahu periods & cautions',
+        icon: Flame,
+        badge: 'Caution',
+        href: '/panchang/rahu-kaal',
+      },
+      {
+        label: 'Choghadiya',
+        desc: 'Day & night 7-fold auspicious divisions',
+        icon: Compass,
+        href: '/panchang/choghadiya',
+      },
+      {
+        label: 'Hora',
+        desc: 'Hourly planetary ruler alignment & tasks',
+        icon: Clock,
+        href: '/panchang/hora',
+      },
+    ],
+  },
 ];
+
+const panchangItems = panchangGroups.flatMap((g) => g.items);
 
 const standardNavLinks = [
   { label: 'Home', href: '/' },
@@ -332,18 +395,56 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.98 }}
                       transition={{ duration: 0.18, ease: 'easeOut' }}
-                      className="absolute left-0 top-full pt-2 w-56 z-50"
+                      className="absolute left-0 top-full pt-2 w-[600px] z-50"
                     >
-                      <div className="bg-[#FFFDFC] rounded-2xl shadow-2xl border border-[#E5D9C8] p-2 space-y-0.5">
-                        {panchangItems.map((item) => (
-                          <Link
-                            key={item.label}
-                            href={item.href}
-                            onClick={() => setIsPanchangOpen(false)}
-                            className="block px-4 py-2.5 rounded-xl text-xs font-semibold text-[#292522] hover:bg-[#F8F3EA] hover:text-[#713B32] transition-colors"
-                          >
-                            {item.label}
-                          </Link>
+                      <div className="bg-[#FFFDFC] rounded-2xl shadow-2xl border border-[#E5D9C8] p-5 grid grid-cols-2 gap-5 backdrop-blur-xl">
+                        {panchangGroups.map((group) => (
+                          <div key={group.category} className="space-y-2">
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-[#6B5E55] px-2 flex items-center justify-between">
+                              <span>{group.category}</span>
+                              <span className="h-px bg-[#E5D9C8] flex-1 ml-2" />
+                            </div>
+                            <div className="space-y-1">
+                              {group.items.map((item) => {
+                                const IconComponent = item.icon;
+                                return (
+                                  <Link
+                                    key={item.label}
+                                    href={item.href}
+                                    onClick={() => setIsPanchangOpen(false)}
+                                    className="flex items-start gap-3 p-2 rounded-xl hover:bg-[#F8F3EA] transition-all group/item border border-transparent hover:border-[#E5D9C8]"
+                                  >
+                                    <div className="p-1.5 rounded-lg bg-[#EDE4D5] text-[#713B32] group-hover/item:bg-[#713B32] group-hover/item:text-white transition-colors mt-0.5 shrink-0">
+                                      <IconComponent size={15} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center justify-between gap-1">
+                                        <span className="text-xs font-bold text-[#292522] group-hover/item:text-[#713B32] transition-colors truncate">
+                                          {item.label}
+                                        </span>
+                                        {item.badge && (
+                                          <span
+                                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
+                                              item.badge === 'Live' || item.badge === 'Auspicious'
+                                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                                : item.badge === 'Caution'
+                                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                                : 'bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8]'
+                                            }`}
+                                          >
+                                            {item.badge}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[11px] text-[#6B5E55] line-clamp-1 mt-0.5">
+                                        {item.desc}
+                                      </p>
+                                    </div>
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </motion.div>

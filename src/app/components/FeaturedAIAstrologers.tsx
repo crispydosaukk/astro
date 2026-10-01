@@ -9,7 +9,9 @@ import { getAIAstrologers, AIAstrologer, DEFAULT_AI_ASTROLOGERS } from '@/lib/ai
 import { useCurrency } from '@/lib/CurrencyContext';
 
 export default function FeaturedAIAstrologers() {
-  const [astrologers, setAstrologers] = useState<AIAstrologer[]>(DEFAULT_AI_ASTROLOGERS);
+  const [astrologers, setAstrologers] = useState<AIAstrologer[]>(() =>
+    DEFAULT_AI_ASTROLOGERS.slice(0, 8)
+  );
   const [loading, setLoading] = useState(true);
   const { formatPrice } = useCurrency();
 
@@ -64,7 +66,7 @@ export default function FeaturedAIAstrologers() {
             const currentAvail = astro.availability || 'online';
             return (
               <motion.div
-                key={astro.id || idx}
+                key={`featured-ai-${astro.id || idx}`}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
