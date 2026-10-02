@@ -234,7 +234,7 @@ export default function VedicSquareChart({
                 <div
                   key={box.signName}
                   style={gridPosStyle}
-                  className={`relative p-2 sm:p-2.5 rounded-2xl flex flex-col justify-between transition-all border ${
+                  className={`relative p-2 sm:p-2.5 rounded-2xl flex flex-col justify-between transition-all border overflow-y-auto overflow-x-hidden no-scrollbar ${
                     isLagnaBox
                       ? 'bg-[#C9952B]/15 border-[#C9952B] shadow-[0_0_15px_rgba(201,149,43,0.25)]'
                       : 'bg-white/[0.03] border-white/10 hover:border-[#C9952B]/40'
@@ -261,9 +261,7 @@ export default function VedicSquareChart({
 
                   {/* Middle / Bottom: Occupying Planets */}
                   <div className="flex flex-wrap gap-1 mt-1 content-end">
-                    {planets.length === 0 ? (
-                      <span className="text-[10px] text-muted-foreground/30 italic">Empty</span>
-                    ) : (
+                    {planets.length === 0 ? null : (
                       planets.map((p, idx) => {
                         if (p.isLagna) {
                           return (
@@ -412,7 +410,7 @@ export default function VedicSquareChart({
                     {planets.map((p, idx) => (
                       <span
                         key={idx}
-                        className="text-[9px] sm:text-[10px] font-bold text-foreground px-1 py-0.2 rounded bg-white/10"
+                        className="text-[9px] sm:text-[10px] font-bold text-gray-100 px-1 py-0.2 rounded bg-white/10"
                       >
                         {p.name.slice(0, 2)}
                       </span>

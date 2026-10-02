@@ -1423,7 +1423,7 @@ export default function RecentReports() {
                                           <Sparkles size={15} className="text-[#C9952B] animate-pulse" /> Prescribed Sacred Ishta Devata (ఇష్ట దైవం / इष्ट देवता)
                                         </h4>
                                         {ishtaData.indicator && (
-                                          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#C9952B]/15 text-[#F6D075] font-semibold border border-[#C9952B]/30 print:text-black print:border-gray-400">
+                                          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#C9952B]/15 text-amber-800 dark:text-[#F6D075] font-semibold border border-[#C9952B]/30 print:text-black print:border-gray-400">
                                             Indicator: {renderSafeText(ishtaData.indicator)}
                                           </span>
                                         )}
@@ -1471,7 +1471,7 @@ export default function RecentReports() {
                                           <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider print:text-amber-800">
                                             Consecrated Ishta Devata Japa Mantra
                                           </span>
-                                          <p className="text-base sm:text-lg font-serif font-bold text-[#C9952B] print:text-black leading-relaxed">
+                                          <p className="text-base sm:text-lg font-serif font-bold text-amber-800 dark:text-[#C9952B] print:text-black leading-relaxed">
                                             {renderSafeText(ishtaData.mantra)}
                                           </p>
                                           <p className="text-[11px] text-muted-foreground print:text-gray-700">
@@ -1490,7 +1490,7 @@ export default function RecentReports() {
                                             {ishtaData.stotras.map((st: string, sIdx: number) => (
                                               <span
                                                 key={sIdx}
-                                                className="px-2.5 py-1 rounded-lg bg-[#C9952B]/15 border border-[#C9952B]/30 text-xs font-semibold text-[#F6D075] print:text-black print:border-gray-400"
+                                                className="px-2.5 py-1 rounded-lg bg-[#C9952B]/15 border border-[#C9952B]/30 text-xs font-semibold text-amber-800 dark:text-[#F6D075] print:text-black print:border-gray-400"
                                               >
                                                 📖 {renderSafeText(st)}
                                               </span>
@@ -1502,7 +1502,7 @@ export default function RecentReports() {
                                       {/* Daily Worship Protocol */}
                                       {ishtaData.worshipGuide && (
                                         <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-foreground/90 leading-relaxed print:border-gray-300 print:bg-transparent print:text-black">
-                                          <strong className="text-amber-400 print:text-black">Daily Upasana Sadhana Protocol:</strong>{' '}
+                                          <strong className="text-amber-800 dark:text-amber-400 print:text-black">Daily Upasana Sadhana Protocol:</strong>{' '}
                                           {renderSafeText(ishtaData.worshipGuide)}
                                         </div>
                                       )}
