@@ -812,8 +812,9 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4a. PRIMARY: Vedika AI for spoken consultation content
+    // 4. Generate AI Content: Vedika (Truth) -> OpenAI (Translation/Formatting)
     let replyText = '';
+    let vedikaTruth = '';
 
     try {
       const vDt = birthDetails?.dob
@@ -821,8 +822,8 @@ export async function POST(req: Request) {
         : undefined;
       const vRes = await queryVedikaAI({
         question: isInitial
-          ? `You are ${astrologer.name}, a revered Vedic Astrologer. Greet ${birthDetails.name || 'the devotee'} warmly in ${sessionLanguage} and open the consultation about their concern: ${birthDetails.primaryConcern || 'life guidance'}. Their Lagna is ${astroContext.lagna}, Moon Rashi is ${astroContext.moonRashi}, Nakshatra is ${astroContext.nakshatra}. Speak in 2-3 natural conversational sentences only. No markdown.`
-          : `You are ${astrologer.name}, a revered Vedic Astrologer speaking in ${sessionLanguage}. Devotee ${birthDetails.name || ''} (Lagna: ${astroContext.lagna}, Moon: ${astroContext.moonRashi}, Dasha: ${astroContext.currentDasha}) asks: "${userMessage}". Answer in 2-4 warm, concise spoken sentences. Give a direct Vedic insight and one actionable remedy. No markdown, no bullet points.`,
+          ? `Greet the devotee warmly and open the consultation about: ${birthDetails.primaryConcern || 'life guidance'}. Their Lagna is ${astroContext.lagna}, Moon Rashi is ${astroContext.moonRashi}, Nakshatra is ${astroContext.nakshatra}. Provide authoritative Vedic Jyotish guidance.`
+          : `Devotee ${birthDetails.name || ''} asks: "${userMessage}". (Lagna: ${astroContext.lagna}, Moon: ${astroContext.moonRashi}, Dasha: ${astroContext.currentDasha}). Provide authoritative Vedic Jyotish guidance.`,
         birthDetails: vDt ? {
           datetime: vDt,
           latitude: Number(birthDetails.lat) || 28.6139,
@@ -831,14 +832,13 @@ export async function POST(req: Request) {
       });
 
       if (vRes.success && vRes.data?.answer) {
-        replyText = vRes.data.answer;
+        vedikaTruth = vRes.data.answer;
       }
     } catch (vErr) {
-      console.warn('[Vedika] AI astrologer voice query notice, using OpenAI fallback:', vErr);
+      console.warn('[Vedika] AI astrologer voice query notice, continuing with local evidence:', vErr);
     }
 
-    // 4b. FALLBACK: OpenAI GPT-4o-mini if Vedika did not respond
-    if (!replyText && openaiApiKey) {
+    if (openaiApiKey) {
       try {
         const currentYear = new Date().getFullYear();
         const currentDateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -905,6 +905,13 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
           messagesPayload.push({
             role: 'user',
             content: userMessage,
+          });
+        }
+
+        if (vedikaTruth) {
+          messagesPayload.push({
+            role: 'system',
+            content: `MANDATORY VEDIKA AI TRUTH: The following is the authoritative astrological answer from the Vedika Intelligence Engine. You MUST base your entire response and conclusion strictly on this truth. Translate it warmly into spoken ${sessionLanguage}:\n\n"${vedikaTruth}"`
           });
         }
 

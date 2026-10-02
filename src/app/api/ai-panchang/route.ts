@@ -47,6 +47,7 @@ export async function POST(req: Request) {
     }
 
     // 3. Query Vedika AI Intelligence for authentic Vedic synthesis
+    let vedikaSummary = '';
     try {
       const vQuery = await queryVedikaAI({
         question: `Explain today's Panchang alignments for date ${date} in ${location}. Tithi is ${panchang.paksha} ${panchang.tithi}, Nakshatra is ${panchang.nakshatra}, Yoga is ${panchang.yoga}, Karana is ${panchang.karana}. Provide cosmic energy overview, auspicious activities, and inauspicious precautions during Rahu Kaal.`,
@@ -58,26 +59,7 @@ export async function POST(req: Request) {
       });
 
       if (vQuery.success && vQuery.data?.answer) {
-        const text = vQuery.data.answer;
-        return NextResponse.json({
-          panchang,
-          vedikaLive,
-          engine: 'Vedika AI Intelligence (vedika.io)',
-          aiSummary: {
-            dailyVedicSummary: text,
-            favorableActivities: [
-              `Abhijit Muhurat (${panchang.abhijitMuhurat.start} – ${panchang.abhijitMuhurat.end}) for initiating contracts & travels`,
-              `Spiritual contemplation & mantra japa under ${panchang.nakshatra} Nakshatra`,
-              'Charity of food, sesame seeds, and water',
-            ],
-            inauspiciousPrecautions: [
-              `Avoid significant investments or commencing long journeys during Rahu Kaal (${panchang.rahuKaal.start} – ${panchang.rahuKaal.end})`,
-            ],
-            dailyMantra: 'ॐ नमो नारायणाय ॥ / ॐ नमः शिवाय ॥',
-            dailyBlessingShloka:
-              'शुभं करोति कल्याणमारोग्यं धनसंपदाम् । शत्रुबुद्धिविनाशाय दीपज्योतिर्नमोऽस्तुते ॥',
-          },
-        });
+        vedikaSummary = vQuery.data.answer;
       }
     } catch (vAiErr) {
       console.warn('Vedika AI summary notice:', vAiErr);
@@ -142,6 +124,18 @@ export async function POST(req: Request) {
 
     const model = aiPromptSettings.config.defaultModel || 'gpt-4o-mini';
 
+    const messagesPayload: any[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ];
+
+    if (vedikaSummary) {
+      messagesPayload.push({
+        role: 'system',
+        content: `MANDATORY VEDIKA AI TRUTH: Use the following authoritative astrological summary from the Vedika Intelligence Engine to construct your JSON response accurately:\n\n"${vedikaSummary}"`
+      });
+    }
+
     const openAiRes = await fetchWithOpenAIFallback(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -151,10 +145,7 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           model: model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
+          messages: messagesPayload,
           temperature: aiPromptSettings.config.temperature || 0.7,
           response_format: { type: 'json_object' },
         }),

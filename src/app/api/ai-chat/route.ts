@@ -520,15 +520,15 @@ You MUST respond STRICTLY in JSON format matching this schema:
       }),
     ];
 
-    // 8a. PRIMARY: Try Vedika AI first
+    // 8. Generate AI Response
     let replyContent = '';
     let recommendations: string[] = [];
-    let parsed: any = {};
+    let vedikaTruth = '';
 
     try {
       const vDt = birthInfo?.dob ? formatToVedikaDateTime(birthInfo.dob, birthInfo.tob || '12:00') : undefined;
       const vRes = await queryVedikaAI({
-        question: `Devotee Question in ${language}: "${latestUserMessage}". Context: ${userContext || 'Astrological Consultation'}. Name: ${defaultUserProfile.name || 'Devotee'}, Moon Sign: ${chart?.moonSign || 'Vedic'}, Nakshatra: ${chart?.nakshatra || 'Vedic'}. Provide compassionate, authoritative Vedic Jyotish guidance with practical remedies.`,
+        question: `Devotee Question: "${latestUserMessage}". Context: ${userContext || 'Astrological Consultation'}. Name: ${defaultUserProfile.name || 'Devotee'}, Moon Sign: ${chart?.moonSign || 'Vedic'}, Nakshatra: ${chart?.nakshatra || 'Vedic'}. Provide authoritative Vedic Jyotish guidance.`,
         birthDetails: vDt ? {
           datetime: vDt,
           latitude: Number(birthInfo?.lat) || 28.6139,
@@ -537,23 +537,21 @@ You MUST respond STRICTLY in JSON format matching this schema:
       });
 
       if (vRes.success && vRes.data?.answer) {
-        replyContent = vRes.data.answer;
-        parsed = {
-          reply: replyContent,
-          whyAstroPariharSaysThis: [
-            'Direct live planetary alignment analysis via Vedika Intelligence Engine.',
-            `Evaluated under ${chart?.moonSign || 'Moon'} Rashi and ${chart?.nakshatra || 'Vedic'} Nakshatra coordinates.`,
-          ],
-          confidence: 'Strong',
-          status: 'verified_accurate',
-        };
+        vedikaTruth = vRes.data.answer;
       }
     } catch (vErr) {
-      console.warn('[Vedika] AI chat query notice, using OpenAI fallback:', vErr);
+      console.warn('[Vedika] AI chat query notice, continuing with local evidence fallback:', vErr);
     }
 
-    // 8b. FALLBACK: Use OpenAI if Vedika did not produce a reply
-    if (!replyContent) {
+    // Inject Vedika's Truth into the conversation if available, so OpenAI translates and formats it exactly
+    if (vedikaTruth) {
+      conversationMessages.push({
+        role: 'system',
+        content: `MANDATORY VEDIKA AI TRUTH: The following is the authoritative astrological answer from the Vedika Intelligence Engine. You MUST base your entire response, timing, and conclusion strictly on this truth. Translate and expand it warmly into ${language} (${scriptName}):\n\n"${vedikaTruth}"`
+      });
+    }
+
+    // 9. Format & Translate via OpenAI
     const response = await fetchWithOpenAIFallback(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -585,6 +583,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
       );
     }
 
+    let parsed: any = {};
     const data = await response.json();
 
     try {
@@ -718,8 +717,6 @@ You MUST respond STRICTLY in JSON format matching this schema:
         data.choices?.[0]?.message?.content ||
         'May Lord Ganesha bless you with clarity and peace. How else may I guide your chart today?';
     }
-    } // end if (!replyContent) — OpenAI fallback block
-
     // Ensure 5-6 recommendations are always present
     if (recommendations.length < 5) {
       if (language === 'Telugu') {

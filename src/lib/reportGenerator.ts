@@ -154,7 +154,7 @@ export async function generateReportDataInternal(
           vChart.nakshatra?.name ||
           (typeof vChart.nakshatra === 'string' ? vChart.nakshatra : chart.nakshatra);
 
-        chart = {
+        chart = ({
           ...chart,
           ascendant: ascSign,
           moonSign: moonSign,
@@ -162,7 +162,7 @@ export async function generateReportDataInternal(
           nakshatra: nakshatraName,
           tithi: vChart.tithi?.name || chart.tithi,
           chartSvg: vChart.svg || (chart as any).chartSvg,
-          dasha: vDasha
+          dasha: (vDasha
             ? {
                 ...chart.dasha,
                 currentMahadasha:
@@ -173,18 +173,18 @@ export async function generateReportDataInternal(
                   vDasha.current_dasha?.antar_dasha || chart.dasha?.currentAntardasha,
                 dashaBalance: vDasha.dasha_balance,
                 guidance: vDasha.guidance,
-                mahaDasha: vDasha.maha_dasha || chart.dasha?.mahaDasha,
+                mahaDasha: vDasha.maha_dasha || (chart.dasha as any)?.mahaDasha,
               }
-            : chart.dasha,
-          doshas: vDoshas
+            : chart.dasha) as any,
+          doshas: (vDoshas
             ? {
                 mangalDosha: vDoshas.mangal_dosha,
                 kaalSarpDosha: vDoshas.kaal_sarp_dosha,
                 pitruDosha: vDoshas.pitru_dosha,
               }
-            : chart.doshas,
+            : chart.doshas) as any,
           vedikaSource: true,
-        };
+        }) as any;
       }
     } catch (vErr) {
       console.warn('Vedika birth chart ephemeris notice:', vErr);
@@ -436,6 +436,18 @@ MANDATORY RULES:
 
       const modelToUse = globalConfig.defaultModel || 'gpt-4o-mini';
 
+      const messagesPayload: any[] = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ];
+
+      if (reportJsonObj?.vedikaAiExplanation) {
+        messagesPayload.push({
+          role: 'system',
+          content: `MANDATORY VEDIKA AI TRUTH: Use the following authoritative astrological analysis from the Vedika Intelligence Engine to construct your JSON response accurately:\n\n"${reportJsonObj.vedikaAiExplanation}"`
+        });
+      }
+
       const openAiRes = await fetchWithOpenAIFallback(
         'https://api.openai.com/v1/chat/completions',
         {
@@ -445,10 +457,7 @@ MANDATORY RULES:
           },
           body: JSON.stringify({
             model: modelToUse,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt },
-            ],
+            messages: messagesPayload,
             temperature: globalConfig.temperature || 0.7,
             max_tokens: globalConfig.maxTokens || 1800,
             response_format: { type: 'json_object' },
