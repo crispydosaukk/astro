@@ -586,6 +586,32 @@ export function calculateVimshottariDasha(
     antarEndDate: activeAntar?.endDateStr || '',
     pratyantarStartDate: activePratyantar?.startDateStr || '',
     pratyantarEndDate: activePratyantar?.endDateStr || '',
+    activeAntarLord: activeAntar?.lord || activeMaha.lord,
+    activePratyantarLord: activePratyantar?.lord || (activeAntar?.lord || activeMaha.lord),
+    activeAntardashas: (activeMaha?.antardashas || []).map((a) => ({
+      lord: a.lord,
+      antardasha: a.antardasha,
+      startDateStr: a.startDateStr,
+      endDateStr: a.endDateStr,
+      startMs: a.start.getTime(),
+      endMs: a.end.getTime(),
+      pratyantardashas: (a.pratyantardashas || []).map((p) => ({
+        lord: p.lord,
+        pratyantardasha: p.pratyantardasha,
+        startDateStr: p.startDateStr,
+        endDateStr: p.endDateStr,
+        startMs: p.start.getTime(),
+        endMs: p.end.getTime(),
+      })),
+    })),
+    activePratyantardashas: (activeAntar?.pratyantardashas || []).map((p) => ({
+      lord: p.lord,
+      pratyantardasha: p.pratyantardasha,
+      startDateStr: p.startDateStr,
+      endDateStr: p.endDateStr,
+      startMs: p.start.getTime(),
+      endMs: p.end.getTime(),
+    })),
     chronologicalSequence: fullSequence.slice(0, 9).map((t, idx) => ({
       sequenceNumber: idx + 1,
       lord: t.lord,
@@ -2411,7 +2437,11 @@ export function analyzeInquiryEvidence(
     q.includes('upasana') ||
     q.includes('jeevanmuktamsa') ||
     q.includes('atmakaraka') ||
-    (q.includes('my god') || q.includes('who is my god') || q.includes('which god'))
+    q.includes('ఇష్ట') ||
+    q.includes('దైవం') ||
+    q.includes('దేవుడు') ||
+    q.includes('కులదైవం') ||
+    (q.includes('my god') || q.includes('who is my god') || q.includes('which god') || q.includes('personal god'))
   ) {
     domain = 'ishta_devata';
     domainTitle = 'Ishta Devata & Atmakaraka Jeevanmuktamsa Upasana (12th from Karakamsa)';
@@ -2422,7 +2452,9 @@ export function analyzeInquiryEvidence(
     q.includes('hawan') ||
     q.includes('havan') ||
     q.includes('yajna') ||
-    q.includes('yaga')
+    q.includes('yaga') ||
+    q.includes('హోమం') ||
+    q.includes('హవన్')
   ) {
     domain = 'homam';
     domainTitle = 'Sacred Vedic Agni Homam & Hawan Ritual';
@@ -2433,7 +2465,10 @@ export function analyzeInquiryEvidence(
     q.includes('chant') ||
     q.includes('beej mantra') ||
     q.includes('stotra') ||
-    q.includes('sloka')
+    q.includes('sloka') ||
+    q.includes('మంత్రం') ||
+    q.includes('జపం') ||
+    q.includes('స్తోత్రం')
   ) {
     domain = 'mantra';
     domainTitle = 'Sacred Vedic Mantra Sadhana & Sound Vibration Japa';
@@ -2450,13 +2485,19 @@ export function analyzeInquiryEvidence(
     q.includes('boss') ||
     q.includes('startup') ||
     q.includes('company') ||
-    q.includes('office')
+    q.includes('office') ||
+    q.includes('employment') ||
+    q.includes('ఉద్యోగం') ||
+    q.includes('జాబ్') ||
+    q.includes('వ్యాపారం') ||
+    q.includes('ప్రమోషన్')
   ) {
     domain = 'career';
     domainTitle = 'Career & Professional Milestones (Karma Bhava)';
     targetHouses = [10, 6, 2, 1];
   } else if (
     q.includes('marry') ||
+    q.includes('married') ||
     q.includes('marriage') ||
     q.includes('spouse') ||
     q.includes('partner') ||
@@ -2467,6 +2508,7 @@ export function analyzeInquiryEvidence(
     q.includes('relationship') ||
     q.includes('divorce') ||
     q.includes('shadi') ||
+    q.includes('shaadi') ||
     q.includes('vivah') ||
     q.includes('matching') ||
     q.includes('match') ||
@@ -2477,7 +2519,11 @@ export function analyzeInquiryEvidence(
     q.includes('compatibility') ||
     q.includes('couple') ||
     q.includes('kundali match') ||
-    q.includes('kundli match')
+    q.includes('kundli match') ||
+    q.includes('పెళ్లి') ||
+    q.includes('వివాహం') ||
+    q.includes('లగ్నం') ||
+    q.includes('సంబంధం')
   ) {
     domain = 'marriage';
     domainTitle = 'Marriage, Kundli Matching & Relationship Harmony (Kalatra Bhava)';
@@ -2486,43 +2532,60 @@ export function analyzeInquiryEvidence(
     q.includes('money') ||
     q.includes('wealth') ||
     q.includes('finance') ||
+    q.includes('financial') ||
     q.includes('debt') ||
     q.includes('loan') ||
     q.includes('invest') ||
+    q.includes('investment') ||
     q.includes('stock') ||
     q.includes('property') ||
     q.includes('land') ||
     q.includes('asset') ||
     q.includes('dhana') ||
-    q.includes('profit')
+    q.includes('profit') ||
+    q.includes('డబ్బు') ||
+    q.includes('ధనం') ||
+    q.includes('సంపద') ||
+    q.includes('ఆర్థిక') ||
+    q.includes('అప్పు')
   ) {
     domain = 'finance';
     domainTitle = 'Wealth, Prosperity & Assets (Dhana & Labha Bhava)';
     targetHouses = [2, 11, 9, 5];
   } else if (
     q.includes('health') ||
-    q.includes('ill') ||
+    /\b(ill|illness|sick|sickness)\b/i.test(q) ||
     q.includes('disease') ||
-    q.includes('sick') ||
     q.includes('hospital') ||
     q.includes('surgery') ||
     q.includes('mental') ||
     q.includes('depress') ||
     q.includes('stress') ||
     q.includes('pain') ||
-    q.includes('recovery')
+    q.includes('recovery') ||
+    q.includes('ailment') ||
+    q.includes('medical') ||
+    q.includes('doctor') ||
+    q.includes('ఆరోగ్యం') ||
+    q.includes('రోగం') ||
+    q.includes('జబ్బు')
   ) {
     domain = 'health';
     domainTitle = 'Health, Longevity & Vitality (Tanu & Roga Bhava)';
     targetHouses = [1, 6, 8, 12];
   } else if (
     q.includes('study') ||
+    q.includes('studies') ||
     q.includes('exam') ||
+    q.includes('exams') ||
     q.includes('education') ||
     q.includes('college') ||
     q.includes('degree') ||
     q.includes('school') ||
-    q.includes('admission')
+    q.includes('admission') ||
+    q.includes('చదువు') ||
+    q.includes('పరీక్ష') ||
+    q.includes('విద్యా')
   ) {
     domain = 'education';
     domainTitle = 'Education & Intellect (Vidya & Buddhi Bhava)';
@@ -2685,10 +2748,168 @@ export function analyzeInquiryEvidence(
       'Favorable core foundation with moderate transit friction; progress follows steady, disciplined effort.';
   }
 
-  // 7. Calculate Timing Window
-  const timingWindow = chart.dasha.antarEndDate
-    ? `Highest potency period activates between now and ${chart.dasha.antarEndDate}, during the culmination of ${antarLord} Antardasha.`
-    : `Cosmic indicators peak favorably during the current planetary cycle throughout ${new Date().getFullYear()}.`;
+  // 7. Calculate Precision Domain-Specific Astrological Timing Window
+  let timingWindow = '';
+  const nowMs = Date.now();
+  const pratyantars: Array<{
+    lord: string;
+    pratyantardasha: string;
+    startDateStr: string;
+    endDateStr: string;
+    startMs: number;
+    endMs: number;
+  }> = (chart.dasha as any).activePratyantardashas || [];
+
+  const antardashas: Array<{
+    lord: string;
+    antardasha: string;
+    startDateStr: string;
+    endDateStr: string;
+    startMs: number;
+    endMs: number;
+  }> = (chart.dasha as any).activeAntardashas || [];
+
+  const findUpcomingPD = (lords: string[]) => {
+    // 1. Prioritize upcoming sub-periods starting in the future
+    const upcoming = pratyantars.find(
+      (p) =>
+        lords.some((l) => p.lord.toLowerCase().startsWith(l.toLowerCase().slice(0, 3))) &&
+        p.startMs >= nowMs
+    );
+    if (upcoming) return upcoming;
+
+    // 2. Fall back to actively running sub-period if currently active
+    return pratyantars.find(
+      (p) =>
+        lords.some((l) => p.lord.toLowerCase().startsWith(l.toLowerCase().slice(0, 3))) &&
+        p.endMs >= nowMs
+    );
+  };
+
+  const findAD = (lords: string[]) => {
+    return antardashas.find(
+      (a) =>
+        lords.some((l) => a.lord.toLowerCase().startsWith(l.toLowerCase().slice(0, 3))) &&
+        a.endMs >= nowMs
+    );
+  };
+
+  const getHouseLord = (hNum: number) => {
+    return relevantHouses.find((h) => h.houseNumber === hNum)?.lord || '';
+  };
+
+  switch (domain) {
+    case 'health': {
+      timingWindow = `Crucial vitality recuperation and health surveillance window is active until ${chart.dasha.pratyantarEndDate} under ${chart.dasha.currentPratyantardasha}. Physical vitality, immunity, and symptom relief stabilize with notable strength after ${chart.dasha.pratyantarEndDate}.`;
+      break;
+    }
+
+    case 'career': {
+      const tenthLord = getHouseLord(10);
+      const careerLords = [tenthLord, 'Sun', 'Mars', 'Jupiter', 'Saturn'].filter(Boolean);
+      const pdMatch = findUpcomingPD(careerLords);
+      if (pdMatch) {
+        timingWindow = `Professional elevation, career authority, and milestone breakthroughs peak between ${pdMatch.startDateStr} and ${pdMatch.endDateStr} under ${pdMatch.pratyantardasha}.`;
+      } else {
+        timingWindow = `Career momentum progressively accelerates from ${chart.dasha.pratyantarEndDate}, culminating into major professional expansion leading up to ${chart.dasha.antarEndDate} under ${antarLord} Antardasha.`;
+      }
+      break;
+    }
+
+    case 'marriage': {
+      const seventhLord = getHouseLord(7);
+      const marriageLords = [seventhLord, 'Venus', 'Jupiter'].filter(Boolean);
+      const pdMatch = findUpcomingPD(marriageLords);
+      if (pdMatch) {
+        timingWindow = `Auspicious matrimonial alignment, relationship harmony, and proposal breakthrough window opens between ${pdMatch.startDateStr} and ${pdMatch.endDateStr} under ${pdMatch.pratyantardasha}.`;
+      } else {
+        const adMatch = findAD(marriageLords);
+        if (adMatch && adMatch.startDateStr !== chart.dasha.antarStartDate) {
+          timingWindow = `Significant matrimonial milestone and relationship fruition period activates between ${adMatch.startDateStr} and ${adMatch.endDateStr} during ${adMatch.antardasha}.`;
+        } else {
+          timingWindow = `Auspicious relationship proposals and matrimonial discussions gain strong cosmic support from ${chart.dasha.pratyantarEndDate} through early ${new Date().getFullYear() + 1} under Kendra Jupiterian aspect.`;
+        }
+      }
+      break;
+    }
+
+    case 'finance': {
+      const secondLord = getHouseLord(2);
+      const eleventhLord = getHouseLord(11);
+      const financeLords = [secondLord, eleventhLord, 'Venus', 'Jupiter'].filter(Boolean);
+      const pdMatch = findUpcomingPD(financeLords);
+      if (pdMatch) {
+        timingWindow = `Financial liquidity stabilization and debt clearance gain progressive traction through ${chart.dasha.pratyantarEndDate}, followed by expansive wealth accumulation between ${pdMatch.startDateStr} and ${pdMatch.endDateStr} under ${pdMatch.pratyantardasha}.`;
+      } else {
+        timingWindow = `Financial recovery and steady wealth accumulation gain renewed acceleration from ${chart.dasha.pratyantarEndDate} through ${chart.dasha.antarEndDate} under Dhanakaraka transit support.`;
+      }
+      break;
+    }
+
+    case 'education': {
+      const fifthLord = getHouseLord(5);
+      const fourthLord = getHouseLord(4);
+      const eduLords = [fifthLord, fourthLord, 'Mercury', 'Jupiter'].filter(Boolean);
+      const activeMatch = eduLords.some((l) => chart.dasha.currentPratyantardasha.toLowerCase().startsWith(l.toLowerCase().slice(0, 3)));
+      const futureMatch = pratyantars.find(
+        (p) =>
+          eduLords.some((l) => p.lord.toLowerCase().startsWith(l.toLowerCase().slice(0, 3))) &&
+          p.startMs >= nowMs
+      );
+      if (activeMatch && futureMatch) {
+        timingWindow = `Academic focus and exam preparation are strongly active through ${chart.dasha.pratyantarEndDate} under ${chart.dasha.currentPratyantardasha}, culminating into major academic breakthroughs between ${futureMatch.startDateStr} and ${futureMatch.endDateStr} under ${futureMatch.pratyantardasha}.`;
+      } else if (futureMatch) {
+        timingWindow = `Academic retention, competitive exam breakthroughs, and intellectual focus peak between ${futureMatch.startDateStr} and ${futureMatch.endDateStr} under ${futureMatch.pratyantardasha}.`;
+      } else {
+        timingWindow = `Intellectual clarity and educational milestones gain strong planetary momentum from ${chart.dasha.pratyantarEndDate} onward under Mercury-Jupiter cognitive alignment.`;
+      }
+      break;
+    }
+
+    case 'children': {
+      const fifthLord = getHouseLord(5);
+      const progenyLords = [fifthLord, 'Jupiter'].filter(Boolean);
+      const pdMatch = findUpcomingPD(progenyLords);
+      if (pdMatch) {
+        timingWindow = `Auspicious progeny blessing and family expansion window aligns between ${pdMatch.startDateStr} and ${pdMatch.endDateStr} under ${pdMatch.pratyantardasha}.`;
+      } else {
+        timingWindow = `Auspicious progeny alignment and family expansion open from ${chart.dasha.pratyantarEndDate} through early ${new Date().getFullYear() + 1} under Putrakaraka Jupiter aspect.`;
+      }
+      break;
+    }
+
+    case 'ishta_devata': {
+      const day = chart.ishtaDevata?.auspiciousDay || 'Thursday';
+      timingWindow = `Initiate sacred Upasana immediately on the upcoming ${day} and complete the 48-Day Sadhana Mandala through Day 48 Purnahuti for full spiritual communion and divine grace.`;
+      break;
+    }
+
+    case 'homam': {
+      timingWindow = `Perform the consecrated Agni Homam on the upcoming auspicious weekday during Shukla Paksha to invoke immediate planetary pacification.`;
+      break;
+    }
+
+    case 'mantra': {
+      timingWindow = `Commence the 48-Day sacred Mantra Japa cycle immediately at tomorrow's Brahma Muhurta (4:30 AM – 6:00 AM) to establish uninterrupted divine protection.`;
+      break;
+    }
+
+    case 'spirituality': {
+      const spiritLords = ['Ketu', 'Jupiter'].filter(Boolean);
+      const pdMatch = findUpcomingPD(spiritLords);
+      if (pdMatch) {
+        timingWindow = `Deep spiritual awakening, mantra siddhi, and meditative insights peak between ${pdMatch.startDateStr} and ${pdMatch.endDateStr} under ${pdMatch.pratyantardasha}.`;
+      } else {
+        timingWindow = `Spiritual awakening and deep inner sadhana activate with heightened potency between ${chart.dasha.pratyantarStartDate} and ${chart.dasha.pratyantarEndDate}, reaching spiritual stabilization thereafter.`;
+      }
+      break;
+    }
+
+    default: {
+      timingWindow = `Pivotal life direction transition unfolds between ${chart.dasha.pratyantarEndDate} and ${chart.dasha.antarEndDate} as ${chart.dasha.currentAntardasha} completes its karmic delivery.`;
+      break;
+    }
+  }
 
   return {
     domain,
