@@ -209,16 +209,20 @@ export async function POST(req: Request) {
       lon: userInfo?.lon || userData?.lon || '77.2090',
     };
 
-    if (!birthInfo.dob && Array.isArray(messages) && messages.length > 0) {
+    if (Array.isArray(messages) && messages.length > 0) {
       const allUserTexts = messages
         .filter((m: any) => m.role === 'user')
         .map((m: any) => m.content)
-        .join(' ');
+        .join('\n');
       const extracted = extractBirthDetailsFromText(allUserTexts);
       if (extracted?.dob) {
         birthInfo.dob = extracted.dob;
         birthInfo.tob = extracted.tob || birthInfo.tob;
         birthInfo.pob = extracted.pob || birthInfo.pob;
+        if (extracted.lat && extracted.lon) {
+          birthInfo.lat = extracted.lat;
+          birthInfo.lon = extracted.lon;
+        }
       }
     }
 
@@ -499,7 +503,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
   "needsAstrologerReview": ${Boolean(evidence?.needsAstrologerReview)},
   "escalationReason": "${evidence?.escalationReason || ''}",
   "pariharSummary": "Concise summary of the 48-day sacred remedy protocol in ${language}",
-  "reply": "Your complete, warm, beautifully phrased Vedic consultation response in ${language} (${scriptName}). Speak directly to the devotee as Acharya Parihar. Begin with a traditional greeting. Deliver your astrological verdict and explain the active planetary influences with deep compassion and wisdom. Clearly specify the auspicious timing window. Do NOT output raw empty markdown headers, checklists, or English placeholder words.",
+  "reply": "Your complete, warm, beautifully phrased Vedic consultation response in ${language} (${scriptName}). Speak directly to the devotee as Acharya Parihar. Begin with a traditional greeting. Deliver your astrological verdict and explain the active planetary influences with deep compassion and wisdom. Clearly specify the auspicious timing window. SPECIAL DIRECTIVE: If the devotee is testing your astronomical calculation capability, requesting exact degrees/positions, or asking what chart data is available in the system, present the complete, exact data table directly inside this 'reply' field adhering strictly to their requested format, without refusing or outputting unsolicited remedies.",
   "recommendations": [
     "5 to 6 engaging follow-up inquiry questions written 100% in ${language} (${scriptName})"
   ]
@@ -543,11 +547,13 @@ You MUST respond STRICTLY in JSON format matching this schema:
       console.warn('[Vedika] AI chat query notice, continuing with local evidence fallback:', vErr);
     }
 
-    // Inject Vedika's Truth into the conversation if available, so OpenAI translates and formats it exactly
-    if (vedikaTruth) {
+    // Inject Vedika's advisory insights if available, but never allow conversational text to override deterministic ephemeris calculations or diagnostic queries
+    const isDirectCalculationQuery = /calculate|exact degree|planetary position|ayanamsa|birth-chart information|testing your astronomical|nakshatra lord|pada|available in your system/i.test(latestUserMessage);
+
+    if (vedikaTruth && !isDirectCalculationQuery) {
       conversationMessages.push({
         role: 'system',
-        content: `MANDATORY VEDIKA AI TRUTH: The following is the authoritative astrological answer from the Vedika Intelligence Engine. You MUST base your entire response, timing, and conclusion strictly on this truth. Translate and expand it warmly into ${language} (${scriptName}):\n\n"${vedikaTruth}"`
+        content: `SUPPLEMENTARY JYOTISH ADVISORY INSIGHT (VEDIKA ENGINE): The following provides additional spiritual nuance for the devotee's query. Incorporate its spiritual blessings, but ensure all planetary positions, degrees, nakshatras, nakshatra lords, and dasha dates strictly conform to the VERIFIED ASTRONOMICAL VEDIC JANAM KUNDLI provided in the system prompt:\n\n"${vedikaTruth}"`
       });
     }
 

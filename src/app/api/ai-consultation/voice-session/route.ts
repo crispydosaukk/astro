@@ -869,8 +869,6 @@ You MUST speak ONLY in ${sessionLanguage}.
 Spoken Call Style & Number Rules:
 - Keep your answers concise, direct, and conversational (2 to 4 spoken sentences).
 - Base your insights strictly on their verified Ascendant (${astroContext.lagna}) and active Dasha (${astroContext.currentDasha}).
-- NEVER use raw English digits or numbers (DO NOT write digits like 108, ${currentYear}, 7).
-- ALWAYS spell out numbers completely in words (e.g. in Telugu write 'నూట ఎనిమిది సార్లు', 'రెండు వేల ఇరవై ఆరు వరకు', 'ఏడవ భావం'; in Hindi write 'एक सौ आठ बार').
 - Give immediate Vedic astrological insights, auspicious time windows, and 1 actionable remedy (mantra, donation, or pooja) matching AstroParihar canonical guidelines.
 - Finish every explanation, astrological prediction, and remedy completely to the end. Never stop mid-sentence or leave any thought incomplete.
 - Do not use markdown bullet points, stars (*), hyphens (-), or hashes (#). Keep it pure natural speech suitable for voice conversation.
@@ -911,7 +909,7 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
         if (vedikaTruth) {
           messagesPayload.push({
             role: 'system',
-            content: `MANDATORY VEDIKA AI TRUTH: The following is the authoritative astrological answer from the Vedika Intelligence Engine. You MUST base your entire response and conclusion strictly on this truth. Translate it warmly into spoken ${sessionLanguage}:\n\n"${vedikaTruth}"`
+            content: `SUPPLEMENTARY JYOTISH ADVISORY INSIGHT (VEDIKA ENGINE): The following provides additional spiritual guidance. Incorporate its spiritual blessings, but ensure all planetary positions, degrees, nakshatras, nakshatra lords, and dasha dates strictly conform to the Astronomical Ground Truth provided above:\n\n"${vedikaTruth}"`
           });
         }
 

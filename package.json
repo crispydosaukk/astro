@@ -47,6 +47,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md,json}\"",
     "serve": "next start",
     "type-check": "tsc --noEmit",
+    "test:ap0001": "node scripts/benchmark-ap0001.js",
     "build:cpanel": "npm run build && node prepare_cpanel.js"
   },
   "dependencies": {

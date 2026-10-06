@@ -783,6 +783,7 @@ export default function AIChatSidebar() {
                   {user ? (
                     <Link
                       href="/wallet"
+                      onClick={() => setIsOpen(false)}
                       className="text-[11px] font-bold text-[#713B32] hover:text-[#C9952B] underline flex items-center gap-0.5"
                     >
                       Recharge <ArrowUpRight size={11} />
@@ -790,6 +791,7 @@ export default function AIChatSidebar() {
                   ) : (
                     <Link
                       href="/sign-up-login-screen"
+                      onClick={() => setIsOpen(false)}
                       className="text-[11px] font-bold text-[#713B32] hover:text-[#C9952B] underline flex items-center gap-0.5"
                     >
                       Sign In <LogIn size={11} />
@@ -1090,6 +1092,7 @@ export default function AIChatSidebar() {
                     </p>
                     <Link
                       href="/sign-up-login-screen"
+                      onClick={() => setIsOpen(false)}
                       className="w-full py-2.5 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
                     >
                       <LogIn size={14} /> Sign In to Chat
@@ -1111,6 +1114,7 @@ export default function AIChatSidebar() {
                     </div>
                     <Link
                       href="/wallet"
+                      onClick={() => setIsOpen(false)}
                       className="w-full py-2.5 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
                     >
                       <Wallet size={14} /> ⚡ Recharge Wallet Now

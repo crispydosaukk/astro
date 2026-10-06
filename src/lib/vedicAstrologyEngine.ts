@@ -9,6 +9,7 @@ export interface PlanetaryMoonData {
   rashiLord: string;
   nakshatraIndex: number; // 0 to 26
   nakshatraName: string;
+  nakshatraLord: string;
   pada: number; // 1 to 4
   varna: string;
   vashya: string;
@@ -387,6 +388,7 @@ export function calculateAstroPlacement(
     rashiLord: rashiObj.lord,
     nakshatraIndex,
     nakshatraName: `${nakshatraObj.name} (Pada ${pada})`,
+    nakshatraLord: nakshatraObj.ruler,
     pada,
     varna: rashiObj.varna,
     vashya: rashiObj.vashya,
@@ -403,22 +405,52 @@ export function calculateVimshottariDasha(
   moonSiderealDeg: number,
   targetDate: Date = new Date()
 ) {
-  const nakshatraSpan = 360 / 27;
+  const nakshatraSpan = 360 / 27; // 13° 20' = 13.333333°
   const nakIdx = Math.floor(moonSiderealDeg / nakshatraSpan) % 27;
   const elapsedInNak = moonSiderealDeg % nakshatraSpan;
+  const unelapsedInNak = nakshatraSpan - elapsedInNak;
   const fractionElapsed = elapsedInNak / nakshatraSpan;
+  const fractionRemaining = unelapsedInNak / nakshatraSpan;
 
   const startDashaIdx = nakIdx % 9;
   const startLord = DASHA_ORDER[startDashaIdx];
-  const balanceYears = (1 - fractionElapsed) * startLord.years;
+  const balanceYears = fractionRemaining * startLord.years;
+
+  const balanceYearsInt = Math.floor(balanceYears);
+  const balanceMonths = Math.floor((balanceYears - balanceYearsInt) * 12);
+  const balanceDays = Math.floor(((balanceYears - balanceYearsInt) * 12 - balanceMonths) * 30.4375);
+  const balanceText = `${balanceYearsInt}y ${balanceMonths}m ${balanceDays}d remaining in ${startLord.lord} Mahadasha at birth`;
+
+  const unelapsedD = Math.floor(unelapsedInNak);
+  const unelapsedM = Math.floor((unelapsedInNak - unelapsedD) * 60);
+  const unelapsedS = Math.floor(((unelapsedInNak - unelapsedD) * 60 - unelapsedM) * 60);
+  const unelapsedArcStr = `${unelapsedD}° ${unelapsedM}' ${unelapsedS}"`;
 
   let currentStart = new Date(birthUtcDate);
-  const timeline: Array<{
-    mahadasha: string;
+  const fullSequence: Array<{
     lord: string;
+    mahadasha: string;
     start: Date;
     end: Date;
-    antardashas: Array<{ antardasha: string; start: Date; end: Date }>;
+    startDateStr: string;
+    endDateStr: string;
+    durationYears: number;
+    antardashas: Array<{
+      lord: string;
+      antardasha: string;
+      start: Date;
+      end: Date;
+      startDateStr: string;
+      endDateStr: string;
+      pratyantardashas: Array<{
+        lord: string;
+        pratyantardasha: string;
+        start: Date;
+        end: Date;
+        startDateStr: string;
+        endDateStr: string;
+      }>;
+    }>;
   }> = [];
 
   for (let cycle = 0; cycle < 2; cycle++) {
@@ -431,7 +463,23 @@ export function calculateVimshottariDasha(
       const endMs = startMs + durationY * 365.25 * 24 * 3600 * 1000;
       const currentEnd = new Date(endMs);
 
-      const antardashas: Array<{ antardasha: string; start: Date; end: Date }> = [];
+      const antardashas: Array<{
+        lord: string;
+        antardasha: string;
+        start: Date;
+        end: Date;
+        startDateStr: string;
+        endDateStr: string;
+        pratyantardashas: Array<{
+          lord: string;
+          pratyantardasha: string;
+          start: Date;
+          end: Date;
+          startDateStr: string;
+          endDateStr: string;
+        }>;
+      }> = [];
+
       let subStart = new Date(startMs);
       for (let j = 0; j < 9; j++) {
         const subIdx = (idx + j) % 9;
@@ -442,19 +490,52 @@ export function calculateVimshottariDasha(
         const subEndMs = subStart.getTime() + actualSubDurY * 365.25 * 24 * 3600 * 1000;
         const subEnd = new Date(subEndMs);
 
+        const pratyantardashas: Array<{
+          lord: string;
+          pratyantardasha: string;
+          start: Date;
+          end: Date;
+          startDateStr: string;
+          endDateStr: string;
+        }> = [];
+        let pdStart = new Date(subStart);
+        for (let k = 0; k < 9; k++) {
+          const pdIdx = (subIdx + k) % 9;
+          const pdItem = DASHA_ORDER[pdIdx];
+          const pdDurY = (actualSubDurY * pdItem.years) / 120;
+          const pdEndMs = pdStart.getTime() + pdDurY * 365.25 * 24 * 3600 * 1000;
+          const pdEnd = new Date(pdEndMs);
+          pratyantardashas.push({
+            lord: pdItem.lord,
+            pratyantardasha: `${pdItem.lord} Pratyantardasha`,
+            start: new Date(pdStart),
+            end: new Date(pdEnd),
+            startDateStr: pdStart.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+            endDateStr: pdEnd.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+          });
+          pdStart = new Date(pdEndMs);
+        }
+
         antardashas.push({
-          antardasha: `${subItem.lord}`,
+          lord: subItem.lord,
+          antardasha: `${subItem.lord} Antardasha`,
           start: new Date(subStart),
           end: new Date(subEnd),
+          startDateStr: subStart.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+          endDateStr: subEnd.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+          pratyantardashas,
         });
         subStart = new Date(subEndMs);
       }
 
-      timeline.push({
-        mahadasha: `${dashaItem.lord} Mahadasha`,
+      fullSequence.push({
         lord: dashaItem.lord,
+        mahadasha: `${dashaItem.lord} Mahadasha`,
         start: new Date(startMs),
         end: new Date(endMs),
+        startDateStr: currentStart.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+        endDateStr: currentEnd.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
+        durationYears: durationY,
         antardashas,
       });
 
@@ -463,15 +544,22 @@ export function calculateVimshottariDasha(
   }
 
   const targetMs = targetDate.getTime();
-  let activeMaha = timeline[0];
+  let activeMaha = fullSequence[0];
   let activeAntar = activeMaha?.antardashas[0];
+  let activePratyantar = activeAntar?.pratyantardashas?.[0];
 
-  for (const item of timeline) {
+  for (const item of fullSequence) {
     if (targetMs >= item.start.getTime() && targetMs < item.end.getTime()) {
       activeMaha = item;
       for (const a of item.antardashas) {
         if (targetMs >= a.start.getTime() && targetMs < a.end.getTime()) {
           activeAntar = a;
+          for (const p of a.pratyantardashas) {
+            if (targetMs >= p.start.getTime() && targetMs < p.end.getTime()) {
+              activePratyantar = p;
+              break;
+            }
+          }
           break;
         }
       }
@@ -482,13 +570,32 @@ export function calculateVimshottariDasha(
   const currentYear = targetDate.getFullYear();
 
   return {
+    birthDashaLord: startLord.lord,
+    birthDashaSpan: startLord.years,
+    birthDashaBalanceYears: balanceYears,
+    birthDashaBalanceFormatted: balanceText,
+    birthDashaFractionRemaining: fractionRemaining,
+    unelapsedArc: unelapsedArcStr,
+    birthDashaFormula: `(Unelapsed Arc in ${NAKSHATRAS_DATA[nakIdx].name} [${unelapsedArcStr}] / 13°20') × ${startLord.lord} Full Span (${startLord.years}y) = ${balanceYears.toFixed(3)} years (${balanceText})`,
     currentMahadasha: activeMaha.mahadasha,
-    currentAntardasha: `${activeAntar?.antardasha || activeMaha.lord} Antardasha`,
-    endDate: activeMaha.end.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }),
-    antarEndDate: activeAntar?.end
-      ? activeAntar.end.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
-      : '',
-    timeline: timeline
+    currentAntardasha: activeAntar?.antardasha || `${activeMaha.lord} Antardasha`,
+    currentPratyantardasha: activePratyantar?.pratyantardasha || `${activeAntar?.lord || activeMaha.lord} Pratyantardasha`,
+    startDate: activeMaha.startDateStr,
+    endDate: activeMaha.endDateStr,
+    antarStartDate: activeAntar?.startDateStr || '',
+    antarEndDate: activeAntar?.endDateStr || '',
+    pratyantarStartDate: activePratyantar?.startDateStr || '',
+    pratyantarEndDate: activePratyantar?.endDateStr || '',
+    chronologicalSequence: fullSequence.slice(0, 9).map((t, idx) => ({
+      sequenceNumber: idx + 1,
+      lord: t.lord,
+      mahadasha: t.mahadasha,
+      period: `${t.startDateStr} — ${t.endDateStr}`,
+      durationYears: Number(t.durationYears.toFixed(2)),
+      startDate: t.startDateStr,
+      endDate: t.endDateStr,
+    })),
+    timeline: fullSequence
       .filter((t) => t.end.getFullYear() >= currentYear - 5 && t.start.getFullYear() <= currentYear + 25)
       .slice(0, 6)
       .map((t) => ({
@@ -863,6 +970,52 @@ export function calculateBirthChartData(
     return `${dPart.toString().padStart(2, '0')}° ${mPart.toString().padStart(2, '0')}'`;
   };
 
+  const formatDms = (deg: number) => {
+    const norm = ((deg % 30) + 30) % 30;
+    const d = Math.floor(norm);
+    const remMinutes = (norm - d) * 60;
+    const m = Math.floor(remMinutes);
+    const s = Math.floor((remMinutes - m) * 60);
+    return `${d.toString().padStart(2, '0')}° ${m.toString().padStart(2, '0')}' ${s.toString().padStart(2, '0')}"`;
+  };
+
+  const formatAbsoluteDms = (deg: number) => {
+    const norm = ((deg % 360) + 360) % 360;
+    const d = Math.floor(norm);
+    const remMinutes = (norm - d) * 60;
+    const m = Math.floor(remMinutes);
+    const s = Math.floor((remMinutes - m) * 60);
+    return `${d.toString().padStart(2, '0')}° ${m.toString().padStart(2, '0')}' ${s.toString().padStart(2, '0')}"`;
+  };
+
+  const getPlanetNakshatra = (siderealDeg: number) => {
+    const nakSpan = 360 / 27; // 13.3333333°
+    const norm = ((siderealDeg % 360) + 360) % 360;
+    const nIdx = Math.floor(norm / nakSpan) % 27;
+    const pada = Math.floor((norm % nakSpan) / (nakSpan / 4)) + 1;
+    const nObj = NAKSHATRAS_DATA[nIdx];
+    return {
+      nakshatraName: nObj.name,
+      nakshatraLord: nObj.ruler,
+      pada,
+      formatted: `${nObj.name} (Pada ${pada})`,
+    };
+  };
+
+  const isBodyRetrograde = (body: Astronomy.Body) => {
+    try {
+      const t2 = time.AddDays(0.04);
+      const v1 = Astronomy.Ecliptic(Astronomy.GeoVector(body, time, false)).elon;
+      const v2 = Astronomy.Ecliptic(Astronomy.GeoVector(body, t2, false)).elon;
+      let diff = v2 - v1;
+      if (diff > 180) diff -= 360;
+      if (diff < -180) diff += 360;
+      return diff < 0;
+    } catch {
+      return false;
+    }
+  };
+
   // 2. Precision Longitudes of all 9 Vedic Grahas
   // Sun
   const sunTropical = Astronomy.SunPosition(time).elon;
@@ -881,26 +1034,31 @@ export function calculateBirthChartData(
   const marsGeo = Astronomy.GeoVector(Astronomy.Body.Mars, time, false);
   const marsDeg = ((Astronomy.Ecliptic(marsGeo).elon - ayanamsha + 360) % 360);
   const marsSignIdx = Math.floor(marsDeg / 30) % 12;
+  const marsRetro = isBodyRetrograde(Astronomy.Body.Mars);
 
   // Mercury
   const mercuryGeo = Astronomy.GeoVector(Astronomy.Body.Mercury, time, false);
   const mercuryDeg = ((Astronomy.Ecliptic(mercuryGeo).elon - ayanamsha + 360) % 360);
   const mercurySignIdx = Math.floor(mercuryDeg / 30) % 12;
+  const mercuryRetro = isBodyRetrograde(Astronomy.Body.Mercury);
 
   // Jupiter
   const jupiterGeo = Astronomy.GeoVector(Astronomy.Body.Jupiter, time, false);
   const jupiterDeg = ((Astronomy.Ecliptic(jupiterGeo).elon - ayanamsha + 360) % 360);
   const jupiterSignIdx = Math.floor(jupiterDeg / 30) % 12;
+  const jupiterRetro = isBodyRetrograde(Astronomy.Body.Jupiter);
 
   // Venus
   const venusGeo = Astronomy.GeoVector(Astronomy.Body.Venus, time, false);
   const venusDeg = ((Astronomy.Ecliptic(venusGeo).elon - ayanamsha + 360) % 360);
   const venusSignIdx = Math.floor(venusDeg / 30) % 12;
+  const venusRetro = isBodyRetrograde(Astronomy.Body.Venus);
 
   // Saturn
   const saturnGeo = Astronomy.GeoVector(Astronomy.Body.Saturn, time, false);
   const saturnDeg = ((Astronomy.Ecliptic(saturnGeo).elon - ayanamsha + 360) % 360);
   const saturnSignIdx = Math.floor(saturnDeg / 30) % 12;
+  const saturnRetro = isBodyRetrograde(Astronomy.Body.Saturn);
 
   // Rahu (Mean/True Node)
   const rahuTropical = getRahuLongitude(time);
@@ -910,6 +1068,37 @@ export function calculateBirthChartData(
   // Ketu
   const ketuDeg = (rahuDeg + 180) % 360;
   const ketuSignIdx = Math.floor(ketuDeg / 30) % 12;
+
+  const isPlanetCombust = (planetName: string, planetDeg: number, isRetro: boolean) => {
+    if (planetName === 'Sun' || planetName === 'Rahu' || planetName === 'Ketu') return false;
+    let diff = Math.abs(planetDeg - sunDeg);
+    if (diff > 180) diff = 360 - diff;
+    const orbs: Record<string, number> = {
+      Moon: 12,
+      Mars: 17,
+      Mercury: isRetro ? 12 : 14,
+      Jupiter: 11,
+      Venus: isRetro ? 8 : 10,
+      Saturn: 15,
+    };
+    return diff <= (orbs[planetName] || 10);
+  };
+
+  const getRuledHouses = (planetName: string) => {
+    const ruledSignIndices: Record<string, number[]> = {
+      Sun: [4],
+      Moon: [3],
+      Mars: [0, 7],
+      Mercury: [2, 5],
+      Jupiter: [8, 11],
+      Venus: [1, 6],
+      Saturn: [9, 10],
+    };
+    const signs = ruledSignIndices[planetName];
+    if (!signs) return 'Shadow Axis (Chhaya Graha)';
+    const houses = signs.map((sIdx) => ((sIdx - lagnaIndex + 12) % 12) + 1);
+    return houses.map((h) => `${h}${h === 1 ? 'st' : h === 2 ? 'nd' : h === 3 ? 'rd' : 'th'} House`).join(' & ');
+  };
 
   // 3. Planetary Status & Dignity
   const getDignity = (planet: string, signIdx: number, houseNum: number) => {
@@ -960,87 +1149,205 @@ export function calculateBirthChartData(
   const isManglikFromMoon = [1, 4, 7, 8, 12].includes(((marsSignIdx - moonSignIdx + 12) % 12) + 1);
   const isManglik = isManglikFromLagna || isManglikFromMoon;
 
+  const sunNak = getPlanetNakshatra(sunDeg);
+  const moonNak = getPlanetNakshatra(moonDeg);
+  const marsNak = getPlanetNakshatra(marsDeg);
+  const mercuryNak = getPlanetNakshatra(mercuryDeg);
+  const jupiterNak = getPlanetNakshatra(jupiterDeg);
+  const venusNak = getPlanetNakshatra(venusDeg);
+  const saturnNak = getPlanetNakshatra(saturnDeg);
+  const rahuNak = getPlanetNakshatra(rahuDeg);
+  const ketuNak = getPlanetNakshatra(ketuDeg);
+
   const planetaryDegrees = [
     {
       planet: 'Sun (Surya)',
+      name: 'Sun',
       rashi: sunRashi.name,
+      signNumber: sunRashi.signNumber,
       degree: formatDeg(sunDeg),
+      dms: formatDms(sunDeg),
+      longitude: sunDeg,
       house: getHouseLabel(getHouseNumber(sunSignIdx)),
       status: getDignity('Sun', sunSignIdx, getHouseNumber(sunSignIdx)),
       signIdx: sunSignIdx,
       houseNum: getHouseNumber(sunSignIdx),
+      nakshatra: sunNak.formatted,
+      nakshatraLord: sunNak.nakshatraLord,
+      pada: sunNak.pada,
+      motion: 'Direct (Marga)',
+      isRetrograde: false,
+      isCombust: false,
+      combustionStatus: 'Non-Combust (Source of Light)',
+      rulesHouses: getRuledHouses('Sun'),
     },
     {
       planet: 'Moon (Chandra)',
+      name: 'Moon',
       rashi: moonAstro.rashiName,
+      signNumber: RASHIS[moonSignIdx].signNumber,
       degree: formatDeg(moonDeg),
+      dms: formatDms(moonDeg),
+      longitude: moonDeg,
       house: getHouseLabel(moonHouse),
       status: getDignity('Moon', moonSignIdx, moonHouse),
       signIdx: moonSignIdx,
       houseNum: moonHouse,
+      nakshatra: moonNak.formatted,
+      nakshatraLord: moonNak.nakshatraLord,
+      pada: moonNak.pada,
+      motion: 'Direct (Marga)',
+      isRetrograde: false,
+      isCombust: isPlanetCombust('Moon', moonDeg, false),
+      combustionStatus: isPlanetCombust('Moon', moonDeg, false) ? 'Combust (Asta / Amavasya Proximity)' : 'Non-Combust',
+      rulesHouses: getRuledHouses('Moon'),
     },
     {
       planet: 'Mars (Mangal)',
+      name: 'Mars',
       rashi: RASHIS[marsSignIdx].name,
+      signNumber: RASHIS[marsSignIdx].signNumber,
       degree: formatDeg(marsDeg),
+      dms: formatDms(marsDeg),
+      longitude: marsDeg,
       house: getHouseLabel(marsHouse),
       status: getDignity('Mars', marsSignIdx, marsHouse),
       signIdx: marsSignIdx,
       houseNum: marsHouse,
+      nakshatra: marsNak.formatted,
+      nakshatraLord: marsNak.nakshatraLord,
+      pada: marsNak.pada,
+      motion: marsRetro ? 'Retrograde (Vakri)' : 'Direct (Marga)',
+      isRetrograde: marsRetro,
+      isCombust: isPlanetCombust('Mars', marsDeg, marsRetro),
+      combustionStatus: isPlanetCombust('Mars', marsDeg, marsRetro) ? 'Combust (Asta)' : 'Non-Combust',
+      rulesHouses: getRuledHouses('Mars'),
     },
     {
       planet: 'Mercury (Budh)',
+      name: 'Mercury',
       rashi: RASHIS[mercurySignIdx].name,
+      signNumber: RASHIS[mercurySignIdx].signNumber,
       degree: formatDeg(mercuryDeg),
+      dms: formatDms(mercuryDeg),
+      longitude: mercuryDeg,
       house: getHouseLabel(getHouseNumber(mercurySignIdx)),
       status: getDignity('Mercury', mercurySignIdx, getHouseNumber(mercurySignIdx)),
       signIdx: mercurySignIdx,
       houseNum: getHouseNumber(mercurySignIdx),
+      nakshatra: mercuryNak.formatted,
+      nakshatraLord: mercuryNak.nakshatraLord,
+      pada: mercuryNak.pada,
+      motion: mercuryRetro ? 'Retrograde (Vakri)' : 'Direct (Marga)',
+      isRetrograde: mercuryRetro,
+      isCombust: isPlanetCombust('Mercury', mercuryDeg, mercuryRetro),
+      combustionStatus: isPlanetCombust('Mercury', mercuryDeg, mercuryRetro) ? 'Combust (Asta)' : 'Non-Combust',
+      rulesHouses: getRuledHouses('Mercury'),
     },
     {
       planet: 'Jupiter (Guru)',
+      name: 'Jupiter',
       rashi: RASHIS[jupiterSignIdx].name,
+      signNumber: RASHIS[jupiterSignIdx].signNumber,
       degree: formatDeg(jupiterDeg),
+      dms: formatDms(jupiterDeg),
+      longitude: jupiterDeg,
       house: getHouseLabel(getHouseNumber(jupiterSignIdx)),
       status: getDignity('Jupiter', jupiterSignIdx, getHouseNumber(jupiterSignIdx)),
       signIdx: jupiterSignIdx,
       houseNum: getHouseNumber(jupiterSignIdx),
+      nakshatra: jupiterNak.formatted,
+      nakshatraLord: jupiterNak.nakshatraLord,
+      pada: jupiterNak.pada,
+      motion: jupiterRetro ? 'Retrograde (Vakri)' : 'Direct (Marga)',
+      isRetrograde: jupiterRetro,
+      isCombust: isPlanetCombust('Jupiter', jupiterDeg, jupiterRetro),
+      combustionStatus: isPlanetCombust('Jupiter', jupiterDeg, jupiterRetro) ? 'Combust (Asta)' : 'Non-Combust',
+      rulesHouses: getRuledHouses('Jupiter'),
     },
     {
       planet: 'Venus (Shukra)',
+      name: 'Venus',
       rashi: RASHIS[venusSignIdx].name,
+      signNumber: RASHIS[venusSignIdx].signNumber,
       degree: formatDeg(venusDeg),
+      dms: formatDms(venusDeg),
+      longitude: venusDeg,
       house: getHouseLabel(getHouseNumber(venusSignIdx)),
       status: getDignity('Venus', venusSignIdx, getHouseNumber(venusSignIdx)),
       signIdx: venusSignIdx,
       houseNum: getHouseNumber(venusSignIdx),
+      nakshatra: venusNak.formatted,
+      nakshatraLord: venusNak.nakshatraLord,
+      pada: venusNak.pada,
+      motion: venusRetro ? 'Retrograde (Vakri)' : 'Direct (Marga)',
+      isRetrograde: venusRetro,
+      isCombust: isPlanetCombust('Venus', venusDeg, venusRetro),
+      combustionStatus: isPlanetCombust('Venus', venusDeg, venusRetro) ? 'Combust (Asta)' : 'Non-Combust',
+      rulesHouses: getRuledHouses('Venus'),
     },
     {
       planet: 'Saturn (Shani)',
+      name: 'Saturn',
       rashi: RASHIS[saturnSignIdx].name,
+      signNumber: RASHIS[saturnSignIdx].signNumber,
       degree: formatDeg(saturnDeg),
+      dms: formatDms(saturnDeg),
+      longitude: saturnDeg,
       house: getHouseLabel(getHouseNumber(saturnSignIdx)),
       status: getDignity('Saturn', saturnSignIdx, getHouseNumber(saturnSignIdx)),
       signIdx: saturnSignIdx,
       houseNum: getHouseNumber(saturnSignIdx),
+      nakshatra: saturnNak.formatted,
+      nakshatraLord: saturnNak.nakshatraLord,
+      pada: saturnNak.pada,
+      motion: saturnRetro ? 'Retrograde (Vakri)' : 'Direct (Marga)',
+      isRetrograde: saturnRetro,
+      isCombust: isPlanetCombust('Saturn', saturnDeg, saturnRetro),
+      combustionStatus: isPlanetCombust('Saturn', saturnDeg, saturnRetro) ? 'Combust (Asta)' : 'Non-Combust',
+      rulesHouses: getRuledHouses('Saturn'),
     },
     {
       planet: 'Rahu',
+      name: 'Rahu',
       rashi: RASHIS[rahuSignIdx].name,
+      signNumber: RASHIS[rahuSignIdx].signNumber,
       degree: formatDeg(rahuDeg),
+      dms: formatDms(rahuDeg),
+      longitude: rahuDeg,
       house: getHouseLabel(getHouseNumber(rahuSignIdx)),
       status: 'Karmic Rahu Axis',
       signIdx: rahuSignIdx,
       houseNum: getHouseNumber(rahuSignIdx),
+      nakshatra: rahuNak.formatted,
+      nakshatraLord: rahuNak.nakshatraLord,
+      pada: rahuNak.pada,
+      motion: 'Retrograde (Vakri)',
+      isRetrograde: true,
+      isCombust: false,
+      combustionStatus: 'Non-Combust (Shadow Node)',
+      rulesHouses: 'Shadow Axis (Chhaya Graha)',
     },
     {
       planet: 'Ketu',
+      name: 'Ketu',
       rashi: RASHIS[ketuSignIdx].name,
+      signNumber: RASHIS[ketuSignIdx].signNumber,
       degree: formatDeg(ketuDeg),
+      dms: formatDms(ketuDeg),
+      longitude: ketuDeg,
       house: getHouseLabel(getHouseNumber(ketuSignIdx)),
       status: 'Moksha Ketu Axis',
       signIdx: ketuSignIdx,
       houseNum: getHouseNumber(ketuSignIdx),
+      nakshatra: ketuNak.formatted,
+      nakshatraLord: ketuNak.nakshatraLord,
+      pada: ketuNak.pada,
+      motion: 'Retrograde (Vakri)',
+      isRetrograde: true,
+      isCombust: false,
+      combustionStatus: 'Non-Combust (Shadow Node)',
+      rulesHouses: 'Shadow Axis (Chhaya Graha)',
     },
   ];
 
@@ -1051,7 +1358,7 @@ export function calculateBirthChartData(
     const signObj = RASHIS[signIdx];
     const planetsInHouse = planetaryDegrees
       .filter((p) => p.houseNum === houseNum)
-      .map((p) => p.planet.split(' ')[0]);
+      .map((p) => p.name);
 
     const houseNames = [
       'H1 (Lagna)', 'H2 (Dhana)', 'H3 (Sahaj)', 'H4 (Sukha)',
@@ -1101,6 +1408,46 @@ export function calculateBirthChartData(
       fullSignName: signObj.name,
       signNumber: signObj.signNumber,
       planets: planetsInD9House.length > 0 ? planetsInD9House.join(', ') : 'Empty',
+    };
+  });
+
+  // 5b. Dynamic D10 Dasamsa Chart Houses (Career & Profession)
+  const getDasamsaSignIdx = (siderealDeg: number) => {
+    const sIdx = Math.floor(siderealDeg / 30) % 12;
+    const degInSign = siderealDeg % 30;
+    const partIdx = Math.floor(degInSign / 3);
+    const isOdd = sIdx % 2 === 0;
+    return isOdd ? (sIdx + partIdx) % 12 : ((sIdx + 8) + partIdx) % 12;
+  };
+
+  const d10LagnaSignIdx = getDasamsaSignIdx(lagnaDeg);
+  const d10Planets = [
+    { name: 'Sun', signIdx: getDasamsaSignIdx(sunDeg) },
+    { name: 'Moon', signIdx: getDasamsaSignIdx(moonDeg) },
+    { name: 'Mars', signIdx: getDasamsaSignIdx(marsDeg) },
+    { name: 'Mercury', signIdx: getDasamsaSignIdx(mercuryDeg) },
+    { name: 'Jupiter', signIdx: getDasamsaSignIdx(jupiterDeg) },
+    { name: 'Venus', signIdx: getDasamsaSignIdx(venusDeg) },
+    { name: 'Saturn', signIdx: getDasamsaSignIdx(saturnDeg) },
+    { name: 'Rahu', signIdx: getDasamsaSignIdx(rahuDeg) },
+    { name: 'Ketu', signIdx: getDasamsaSignIdx(ketuDeg) },
+  ];
+
+  const d10Houses = Array.from({ length: 12 }, (_, i) => {
+    const houseNum = i + 1;
+    const signIdx = (d10LagnaSignIdx + i) % 12;
+    const signObj = RASHIS[signIdx];
+    const planetsInD10House = d10Planets
+      .filter((p) => p.signIdx === signIdx)
+      .map((p) => p.name);
+
+    return {
+      house: `D10 H${houseNum}`,
+      houseNumber: houseNum,
+      sign: signObj.shortName,
+      fullSignName: signObj.name,
+      signNumber: signObj.signNumber,
+      planets: planetsInD10House.length > 0 ? planetsInD10House.join(', ') : 'Empty',
     };
   });
 
@@ -1412,9 +1759,19 @@ export function calculateBirthChartData(
     sunSign: sunRashi.name,
     moonSign: moonAstro.rashiName,
     ascendant: lagnaRashi.name,
+    ascendantDegree: formatDeg(lagnaDeg),
+    ascendantDms: formatDms(lagnaDeg % 30),
+    ascendantLongitude: lagnaDeg,
+    ascendantLord: lagnaRashi.lord,
     ascendantSignNumber: lagnaRashi.signNumber,
+    ayanamsa: {
+      name: 'Lahiri (Chitra Paksha)',
+      valueDeg: ayanamsha,
+      formatted: formatDms(ayanamsha),
+      dms: formatDms(ayanamsha),
+    },
     nakshatra: moonAstro.nakshatraName,
-    nakshatraLord: moonAstro.rashiLord,
+    nakshatraLord: moonAstro.nakshatraLord,
     tithi,
     yoga,
     karana,
@@ -1424,9 +1781,12 @@ export function calculateBirthChartData(
     planetaryDegrees,
     d1Houses,
     d9Houses,
+    d10Houses,
     lagnaIndex,
     d9LagnaSignIdx,
     d9Planets,
+    d10LagnaSignIdx,
+    d10Planets,
     dasha,
     yogas,
     doshas,
@@ -1442,71 +1802,200 @@ export function calculateBirthChartData(
       `Recite your protective deity mantra or Mahamrityunjaya Mantra 108 times daily.`,
       `Perform charitable giving of food, yellow lentils, or seasonal fruits on Thursdays or Saturdays.`,
     ],
-    astrologicalAnalysis: `Personalized Vedic Janam Kundli analysis for ${name} born on ${dob} at ${pob}.\n\n• Ascendant (Lagna): ${lagnaRashi.name} ruled by ${lagnaRashi.lord}, bestowing strategic determination, vitality, and natural intelligence.\n• Moon Sign: ${moonAstro.rashiName} (${moonAstro.nakshatraName}) cultivating intuitive depth and keen visionary insight.\n• Sun Sign: ${sunRashi.name} energizing professional confidence and executive authority.\n• Active Vimshottari Dasha: ${dasha.currentMahadasha} (${dasha.currentAntardasha}), unlocking active growth and pivotal opportunities throughout ${currentYear} and future years.`,
+    astrologicalAnalysis: `Personalized Vedic Janam Kundli analysis for ${name} born on ${dob} at ${pob}.\n\n• Ascendant (Lagna): ${lagnaRashi.name} at ${formatDms(lagnaDeg % 30)} ruled by ${lagnaRashi.lord}, bestowing strategic determination, vitality, and natural intelligence.\n• Moon Sign: ${moonAstro.rashiName} (${moonAstro.nakshatraName}) cultivating intuitive depth and keen visionary insight.\n• Sun Sign: ${sunRashi.name} energizing professional confidence and executive authority.\n• Active Vimshottari Dasha: ${dasha.currentMahadasha} (${dasha.currentAntardasha}), unlocking active growth and pivotal opportunities throughout ${currentYear} and future years.`,
   };
 }
 
 // ---------------- HELPER: FORMAT CHART FOR AI PROMPT INJECTION ----------------
 export function formatChartSummaryForAI(chart: ReturnType<typeof calculateBirthChartData>): string {
   const planetList = chart.planetaryDegrees
-    .map((p) => `* ${p.planet}: ${p.rashi} (${p.degree}) in ${p.house} [${p.status}]`)
+    .map(
+      (p: any) =>
+        `* ${p.planet}: ${p.rashi} | Exact DMS: ${p.dms} (${p.degree}) | Total Longitude: ${Number(p.longitude).toFixed(4)}° | House: ${p.house} | Nakshatra: ${p.nakshatra} (Nakshatra Lord: ${p.nakshatraLord}) | Motion: ${p.motion} | Dignity: ${p.status} | Combustion: ${p.combustionStatus} | Rules: ${p.rulesHouses}`
+    )
     .join('\n');
 
-  const yogaList = chart.yogas.map((y) => `${y.name} (${y.desc})`).join('; ');
+  const d1Summary = chart.d1Houses
+    .map((h: any) => `  * ${h.house} (${h.fullSignName}): Occupants: ${h.planets}`)
+    .join('\n');
 
-  return `VERIFIED ASTRONOMICAL VEDIC JANAM KUNDLI:
+  const d9Summary = chart.d9Houses
+    .map((h: any) => `  * ${h.house} (${h.fullSignName}): Occupants: ${h.planets}`)
+    .join('\n');
+
+  const d10Summary = (chart.d10Houses || [])
+    .map((h: any) => `  * ${h.house} (${h.fullSignName}): Occupants: ${h.planets}`)
+    .join('\n');
+
+  const dashaSeq = chart.dasha.chronologicalSequence
+    ? chart.dasha.chronologicalSequence
+        .map(
+          (s: any) =>
+            `  ${s.sequenceNumber}. ${s.mahadasha}: ${s.startDate} to ${s.endDate} (${s.durationYears} yrs)`
+        )
+        .join('\n')
+    : '';
+
+  const yogaList = chart.yogas.map((y: any) => `${y.name} (${y.desc})`).join('; ');
+
+  return `================================================================================
+VERIFIED ASTRONOMICAL VEDIC JANAM KUNDLI (DETERMINISTIC GROUND TRUTH):
+================================================================================
 - Devotee: ${chart.name} (${chart.gender}), Born: ${chart.dob} at ${chart.tob}, ${chart.pob}
-- Ascendant (Lagna): ${chart.ascendant}
+- Geocoordinates: Latitude ${chart.lat}, Longitude ${chart.lon}
+- Calculation Standard: Vedic Sidereal Zodiac (Nirayana)
+- Ayanamsa Used: ${chart.ayanamsa.name} — Exact Value: ${chart.ayanamsa.formatted} (${chart.ayanamsa.valueDeg.toFixed(4)}°)
+- Ascendant (Lagna): ${chart.ascendant} at ${chart.ascendantDms} (${chart.ascendantDegree}) | Lagna Lord: ${chart.ascendantLord} | Total Longitude: ${chart.ascendantLongitude.toFixed(4)}°
 - Moon Sign (Chandra Rashi): ${chart.moonSign}
-- Nakshatra & Pada: ${chart.nakshatra} (Nakshatra Lord: ${chart.nakshatraLord})
+- Moon Nakshatra & Pada: ${chart.nakshatra} (Nakshatra Lord: ${chart.nakshatraLord})
+  [CRITICAL CANONICAL VEDIC TRUTH: Rohini nakshatra is strictly ruled by the MOON, NOT Venus.]
 - Sun Sign: ${chart.sunSign}
 - Vedic Tithi: ${chart.tithi}
 - Vedic Yoga: ${chart.yoga}
 - Vedic Karana: ${chart.karana}
-- Current Vimshottari Mahadasha: ${chart.dasha.currentMahadasha}
-- Current Antardasha: ${chart.dasha.currentAntardasha} (Ends: ${chart.dasha.antarEndDate || chart.dasha.endDate})
-- Planetary Placements:
+
+PLANETARY POSITIONS (EXACT SIDEREAL DEGREES, HOUSES & NAKSHATRAS):
 ${planetList}
-- Active Classical Yogas: ${yogaList}
-- Manglik Status: ${chart.doshas[0]?.status}`;
+
+DIVISIONAL CHARTS (VARGAS AVAILABLE):
+* D1 Rashi Chart (Physical Body, Life Foundation):
+${d1Summary}
+* D9 Navamsha Chart (Spouse, Marriage, Dharma, Inner Planetary Strength):
+${d9Summary}
+* D10 Dasamsa Chart (Career, Professional Karma, Public Standing):
+${d10Summary}
+
+VIMSHOTTARI DASHA TIMELINE & MATHEMATICAL DERIVATION:
+- Birth Nakshatra: ${chart.nakshatra} (Ruler: ${chart.nakshatraLord}, Standard Span: ${chart.dasha.birthDashaSpan || 10} Years)
+- Unelapsed Arc in Birth Nakshatra: ${chart.dasha.unelapsedArc}
+- Birth Dasha Balance Formula: ${chart.dasha.birthDashaFormula}
+- Starting Mahadasha at Birth: ${chart.dasha.birthDashaLord} Mahadasha (${chart.dasha.birthDashaBalanceFormatted})
+- Complete Chronological Mahadasha Sequence from Birth:
+${dashaSeq}
+- Active Vimshottari Cycle:
+  * Current Mahadasha: ${chart.dasha.currentMahadasha} (${chart.dasha.startDate} to ${chart.dasha.endDate})
+  * Current Antardasha: ${chart.dasha.currentAntardasha} (${chart.dasha.antarStartDate} to ${chart.dasha.antarEndDate})
+  * Current Pratyantardasha: ${chart.dasha.currentPratyantardasha} (${chart.dasha.pratyantarStartDate} to ${chart.dasha.pratyantarEndDate})
+
+ACTIVE CLASSICAL YOGAS:
+${yogaList}
+
+MANGAL DOSHA / KAAL SARP STATUS:
+- Manglik Status: ${chart.doshas[0]?.status}
+- Kaal Sarp Status: ${chart.doshas[1]?.status}
+
+CRITICAL DIRECTIVES FOR ACHARYA PARIHAR REGARDING ASTRONOMICAL & CHART QUERIES:
+1. TEST & CALCULATION INQUIRIES: If the devotee asks to test your astronomical calculation capability, or requests exact degrees, Lagna, Ayanamsa, planetary positions, or nakshatras without predictions/remedies:
+   - YOU MUST OUTPUT THE EXACT VALUES FROM THE VERIFIED ASTRONOMICAL VEDIC JANAM KUNDLI ABOVE DIRECTLY IN YOUR "reply".
+   - NEVER reply with "I cannot calculate the requested planetary positions" because all exact positions have been pre-calculated deterministically above.
+   - Format the response with the exact requested parameters: Ayanamsa, Ascendant, Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu, and Moon Nakshatra & Pada.
+2. ZERO-HALLUCINATION JYOTISH INTEGRITY:
+   - Never say Rohini is ruled by Venus. Rohini is ruled by the MOON.
+   - Standard Vimshottari Dasha durations are: Ketu (7y), Venus (20y), Sun (6y), Moon (10y), Mars (7y), Rahu (18y), Jupiter (16y), Saturn (19y), Mercury (17y). Never state Venus is 5 years.
+   - If asked how Saturn Mahadasha started in 2011 (or why it is active), explain the exact chronological sequence from birth: Birth in Moon Mahadasha balance -> Mars (7y) -> Rahu (18y) -> Jupiter (16y) -> Saturn (19y).
+   - If asked what chart data you have access to, list the complete available data including D1, D9 Navamsha, D10 Dasamsa, all 9 planets with exact degrees, Lagna degree, Ayanamsa, and Vimshottari Mahadasha/Antardasha/Pratyantardasha. Never say "Divisional charts: NOT AVAILABLE".`;
 }
 
-// Helper to extract birth details from devotee chat text if not provided in profile
+// Helper to extract birth details from devotee chat text if provided in query
 export function extractBirthDetailsFromText(text: string): {
   dob?: string;
   tob?: string;
   pob?: string;
+  lat?: string;
+  lon?: string;
 } | null {
   if (!text) return null;
 
-  // Check for YYYY-MM-DD or DD/MM/YYYY or DD-MM-YYYY
+  const monthMap: Record<string, string> = {
+    jan: '01', january: '01',
+    feb: '02', february: '02',
+    mar: '03', march: '03',
+    apr: '04', april: '04',
+    may: '05',
+    jun: '06', june: '06',
+    jul: '07', july: '07',
+    aug: '08', august: '08',
+    sep: '09', september: '09',
+    oct: '10', october: '10',
+    nov: '11', november: '11',
+    dec: '12', december: '12',
+  };
+
   let dob: string | undefined;
-  const isoMatch = text.match(/\b(19\d\d|20\d\d)[-/](0?[1-9]|1[0-2])[-/](0?[1-9]|[12]\d|3[01])\b/);
-  if (isoMatch) {
-    dob = `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
-  } else {
+
+  // 1. Check for "28 May 1968" or "28th May 1968" or "28-May-1968"
+  const textMonthMatch = text.match(/\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?[\s\-]+([a-zA-Z]{3,9})[\s,]+(19\d\d|20\d\d)\b/i);
+  if (textMonthMatch) {
+    const d = textMonthMatch[1].padStart(2, '0');
+    const mStr = textMonthMatch[2].toLowerCase();
+    const m = monthMap[mStr] || monthMap[mStr.slice(0, 3)];
+    const y = textMonthMatch[3];
+    if (m) {
+      dob = `${y}-${m}-${d}`;
+    }
+  }
+
+  // 2. Check for "May 28, 1968" or "May 28 1968"
+  if (!dob) {
+    const monthFirstMatch = text.match(/\b([a-zA-Z]{3,9})[\s\-]+(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?[\s,]+(19\d\d|20\d\d)\b/i);
+    if (monthFirstMatch) {
+      const mStr = monthFirstMatch[1].toLowerCase();
+      const m = monthMap[mStr] || monthMap[mStr.slice(0, 3)];
+      const d = monthFirstMatch[2].padStart(2, '0');
+      const y = monthFirstMatch[3];
+      if (m) {
+        dob = `${y}-${m}-${d}`;
+      }
+    }
+  }
+
+  // 3. Check for YYYY-MM-DD
+  if (!dob) {
+    const isoMatch = text.match(/\b(19\d\d|20\d\d)[-/](0?[1-9]|1[0-2])[-/](0?[1-9]|[12]\d|3[01])\b/);
+    if (isoMatch) {
+      dob = `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+    }
+  }
+
+  // 4. Check for DD/MM/YYYY or DD-MM-YYYY
+  if (!dob) {
     const dmyMatch = text.match(/\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](19\d\d|20\d\d)\b/);
     if (dmyMatch) {
       dob = `${dmyMatch[3]}-${dmyMatch[2].padStart(2, '0')}-${dmyMatch[1].padStart(2, '0')}`;
     }
   }
 
-  // Check for time (e.g. 10:30 AM, 14:45, 6:00 pm)
+  // 5. Time match (e.g. "04:44 AM IST", "04:44 AM", "16:30", "4:44 am")
   let tob: string | undefined;
-  const timeMatch = text.match(/\b([01]?\d|2[0-3]):([0-5]\d)(?:\s*([ap]m))?\b/i);
+  const timeMatch = text.match(/(?:time(?:\s+of\s+birth)?|tob)?\s*[:\-]?\s*\b([01]?\d|2[0-3]):([0-5]\d)(?:\s*([ap]m))?\b/i);
   if (timeMatch) {
-    tob = timeMatch[0];
+    tob = `${timeMatch[1]}:${timeMatch[2]}${timeMatch[3] ? ` ${timeMatch[3].toUpperCase()}` : ''}`;
   }
 
-  // Check for city / place
+  // 6. Place match (e.g. "Place of birth: Chennai, Tamil Nadu, India", "POB: Chennai", "born in Chennai")
   let pob: string | undefined;
-  const placeMatch = text.match(/(?:at|in|place:?|born in:?)\s+([A-Z][a-zA-Z\s]{2,20})/i);
+  const placeMatch = text.match(/(?:place(?:\s+of\s+birth)?|pob|birth\s+place|born\s+in|born\s+at)\s*[:\-]?\s*([a-zA-Z\s]{2,40})/i);
   if (placeMatch) {
-    pob = placeMatch[1].trim();
+    pob = placeMatch[1].split(',')[0].trim();
+  } else {
+    for (const city of Object.keys(CANONICAL_CITY_COORDINATES)) {
+      const regex = new RegExp(`\\b${city}\\b`, 'i');
+      if (regex.test(text)) {
+        pob = city.charAt(0).toUpperCase() + city.slice(1);
+        break;
+      }
+    }
   }
 
   if (dob) {
-    return { dob, tob: tob || '12:00 PM', pob: pob || 'India' };
+    const coords = resolveCityCoordinates(pob);
+    return {
+      dob,
+      tob: tob || '12:00 PM',
+      pob: pob || 'India',
+      lat: coords.lat,
+      lon: coords.lon,
+    };
   }
   return null;
 }
