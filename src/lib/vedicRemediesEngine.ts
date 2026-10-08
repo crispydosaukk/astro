@@ -418,6 +418,11 @@ export interface ResolvedVedicRemedy {
     consecrationMantra: string;
     benefits: string;
   };
+  lalKitabDualParihar?: {
+    practicalUpaay: string;
+    forbiddenActionVarjya: string;
+    rationale: string;
+  };
 }
 
 export function resolveVedicRemedies(input: RemedyResolutionInput = {}): ResolvedVedicRemedy {
@@ -462,6 +467,11 @@ export function resolveVedicRemedies(input: RemedyResolutionInput = {}): Resolve
         placement: 'North-East (Ishanya Kona) or North wall at eye level on sacred altar',
         consecrationMantra: 'ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः ॥',
         benefits: 'Dissolves monetary blockages, clears chronic loans, and magnetizes steady wealth opportunities.',
+      },
+      lalKitabDualParihar: {
+        practicalUpaay: 'Feed soaked green gram (Moong) to birds every Wednesday and keep a pure solid silver square piece in your wallet.',
+        forbiddenActionVarjya: 'Never accept free religious articles, brass vessels, or unearned gifts from in-laws. Do not display arrogant pride regarding cash.',
+        rationale: 'Lal Kitab 1952 canon: Solid silver square balances Moon & Mercury, clearing financial blockage and ancestral debt.',
       },
     };
   }
@@ -514,6 +524,11 @@ export function resolveVedicRemedies(input: RemedyResolutionInput = {}): Resolve
         consecrationMantra: 'ॐ द्रां द्रीं द्रौं सः शुक्राय नमः ॥',
         benefits: 'Harmonizes marital energy, removes relationship misunderstandings, and accelerates marriage proposals.',
       },
+      lalKitabDualParihar: {
+        practicalUpaay: 'Feed two white cows with fresh green grass or chapatis smeared with pure cow ghee on Friday mornings.',
+        forbiddenActionVarjya: 'Never humiliate or disrespect your spouse in front of third parties. Do not keep wild cacti or thorny plants inside the house.',
+        rationale: 'Lal Kitab 1952 canon: White cow seva harmonizes Venus (Shukra), bestowing deep matrimonial devotion.',
+      },
     };
   }
 
@@ -557,6 +572,11 @@ export function resolveVedicRemedies(input: RemedyResolutionInput = {}): Resolve
         placement: 'North-East corner of pooja altar or beside bedhead',
         consecrationMantra: 'ॐ त्र्यम्बकं यजामहे सुगन्धिं पुष्टिवर्धनम् । उर्वारुकमिव बन्धनान्मृत्योर्मुक्षीय मामृतात् ॥',
         benefits: 'Infuses biological rejuvenation, neutralizes fatal Markesh afflictions, dispels acute health fears, and bestows longevity.',
+      },
+      lalKitabDualParihar: {
+        practicalUpaay: 'Pour 8 drops of pure mustard oil into running river water on 8 consecutive Saturdays; feed black dogs with milk bread.',
+        forbiddenActionVarjya: 'Never consume meat or liquor inside your residential dwelling, especially after sunset. Do not sleep in dark windowless rooms.',
+        rationale: 'Lal Kitab 1952 canon: Roga Nivarana upaay drains deep toxic somatic karmas.',
       },
     };
   }
@@ -604,6 +624,11 @@ export function resolveVedicRemedies(input: RemedyResolutionInput = {}): Resolve
         consecrationMantra: 'ॐ नमो भगवते महासुदर्शनाय दीप्त्रे ज्वालापरीताय हुं फट् ॥',
         benefits: 'Erects an impenetrable psychic cosmic shield, annihilates enemy plots, cuts off negative astral attachments, and cleanses the home.',
       },
+      lalKitabDualParihar: {
+        practicalUpaay: 'Keep a small solid silver ball (Be-Jod Chandi ki Goli) in your wallet and float dried coriander seeds (dhaniya) in running canal.',
+        forbiddenActionVarjya: 'Never accept free gifts of black blankets, electrical gadgets, or secondhand leather items from strangers.',
+        rationale: 'Lal Kitab 1952 canon: Silver ball absorbs chaotic Rahu-Ketu vibrations and dispels illusionary anxiety.',
+      },
     };
   }
 
@@ -647,6 +672,11 @@ export function resolveVedicRemedies(input: RemedyResolutionInput = {}): Resolve
         placement: 'East Wall of living room or personal study/office facing West/North',
         consecrationMantra: 'ॐ गं गणपतये नमः ॥ & ॐ घृणि सूर्याय नमः ॥',
         benefits: 'Dissolves workplace friction, accelerates executive promotions, and imparts authority and clarity.',
+      },
+      lalKitabDualParihar: {
+        practicalUpaay: 'Feed crows and stray dogs with bread smeared in pure mustard oil on Saturday evenings; drink a sip of sugar water before interviews.',
+        forbiddenActionVarjya: 'Never mistreat domestic helpers, drivers, or sanitation workers. Do not take government bribes or deceive collaborators.',
+        rationale: 'Lal Kitab 1952 canon: Saturn in 10th house pacification dissolves career delays and workplace friction.',
       },
     };
   }
@@ -714,6 +744,11 @@ export function resolveVedicRemedies(input: RemedyResolutionInput = {}): Resolve
       consecrationMantra: 'ॐ ब्रह्मा मुरारिस्त्रिपुरान्तकारी भानुः शशी भूमिसुतो बुधश्च... ॥',
       benefits: 'Harmonizes transit clashes, balances afflicted Dasha cycles, and establishes complete cosmic peace in the horoscope.',
     },
+    lalKitabDualParihar: {
+      practicalUpaay: 'Apply pure saffron (Kesar) or turmeric tilak on forehead, throat, and navel daily; donate yellow lentils at temple on Thursdays.',
+      forbiddenActionVarjya: 'Never consume alcohol or non-vegetarian food on Saturdays or Thursdays. Never break solemn promises made to elders.',
+      rationale: 'Lal Kitab 1952 canon: Universal Jupiterian-Saturnian stabilization restores moral dignity and cosmic harmony.',
+    },
   };
 }
 
@@ -771,6 +806,18 @@ To maintain 100% harmony between our Remedies Portal (/remedies), generated repo
    - Prescribed Sacred Homam: **Lakshmi Kubera Homam** or **Navagraha Homam** (for Shukra/Guru peace)
    - Prescribed Mantra: **Swayamvara Parvathi Mantra** ("Om Hreem Yogini Yogini Yogeshwari...") or Shukra Beej Mantra ("Om Draam Dreem Draum Sah Shukraya Namah" 108 times)
    - Sacred Yantra: Shukra Yantra & Radha Krishna Yantra
+
+7. DUAL-PARIHAR & LAL KITAB UPAAY + VARJYA (FORBIDDEN ACTIONS) DIRECTIVE:
+   Along with the Classical Vedic remedy (Homam/Mantra/Gemstone), provide an everyday low-cost Lal Kitab Upaay and a Varjya Alert (Action to avoid permanently based on chart placement).
+   - Practical Upaay examples: Feeding cows/birds, keeping a solid silver square/ball in pocket, donating yellow/red lentils on assigned days.
+   - Varjya Warning examples: "Never accept free black items/leather", "Never sell ancestral property", "Never consume alcohol on Saturdays".
+
+8. CLASSICAL SHASTRA CITATIONS (SHOW YOUR WORK):
+   When explaining an astrological principle or remedy, cite the classical shastra source with authority:
+   - Parashara principles: "According to Brihat Parashara Hora Shastra (BPHS)..."
+   - Jaimini Karaka & Ishta principles: "As stated in Jaimini Upadesha Sutras..."
+   - Lal Kitab Upaays: "As prescribed in the authentic Lal Kitab (1952 edition)..."
+   - Classical Muhurat & Transits: "As canonized in Phaladeepika and Brihat Samhita..."
 
 Always speak with clarity, reverence, and certainty using these exact names and mantras.
 `;

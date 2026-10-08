@@ -395,19 +395,41 @@ export default function AIChatSidebar() {
     }
   }, [userData]);
 
-  // Derive Personal Profile, Year Comparison, and Timeline
+  // Derive Personal Profile, Year Comparison, and Timeline (with persistent localStorage Kundli cache)
   useEffect(() => {
-    const dob = userData?.dob || (user ? '1995-05-15' : null);
+    let dob = userData?.dob;
+    let tob = userData?.tob;
+    let pob = userData?.pob;
+    let name = userData?.name || user?.displayName;
+    let gender = userData?.gender;
+
+    if (typeof window !== 'undefined' && (!dob || !pob)) {
+      try {
+        const cached = localStorage.getItem('astroparihar_active_kundli') || localStorage.getItem('draft_report');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          dob = dob || parsed.dob || parsed.dateOfBirth;
+          tob = tob || parsed.tob || parsed.time || parsed.timeOfBirth;
+          pob = pob || parsed.pob || parsed.place || parsed.birthPlace;
+          name = name || parsed.name;
+          gender = gender || parsed.gender;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    dob = dob || (user ? '1995-05-15' : null);
     if (dob) {
       try {
         const chart = calculateBirthChartData(
           dob,
-          userData?.tob || '12:00 PM',
-          userData?.pob || 'New Delhi, India',
+          tob || '12:00 PM',
+          pob || 'New Delhi, India',
           userData?.lat,
           userData?.lon,
-          userData?.name || user?.displayName || 'Devotee',
-          userData?.gender || 'Devotee'
+          name || 'Devotee',
+          gender || 'Devotee'
         );
         setUserProfile(generatePersonalAstrologyProfile(chart));
         setYearComparison(generateYearComparison(chart, new Date().getFullYear(), 4));
@@ -562,13 +584,37 @@ export default function AIChatSidebar() {
     setLoading(true);
 
     try {
-      const userInfo = {
+      let userInfo = {
         name: userData?.name || user?.displayName || 'Devotee',
         gender: userData?.gender || '',
         dob: userData?.dob || '',
         tob: userData?.tob || '',
         pob: userData?.pob || '',
       };
+
+      // Persistent Kundli cache fallback from localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          if (!userInfo.dob || !userInfo.pob) {
+            const cached = localStorage.getItem('astroparihar_active_kundli') || localStorage.getItem('draft_report');
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              userInfo = {
+                name: userInfo.name !== 'Devotee' ? userInfo.name : (parsed.name || userInfo.name),
+                gender: userInfo.gender || parsed.gender || '',
+                dob: userInfo.dob || parsed.dob || parsed.dateOfBirth || '',
+                tob: userInfo.tob || parsed.tob || parsed.time || parsed.timeOfBirth || '',
+                pob: userInfo.pob || parsed.pob || parsed.place || parsed.birthPlace || '',
+              };
+            }
+          }
+          if (userInfo.dob && userInfo.pob) {
+            localStorage.setItem('astroparihar_active_kundli', JSON.stringify(userInfo));
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
 
       const response = await fetch('/api/ai-chat', {
         method: 'POST',

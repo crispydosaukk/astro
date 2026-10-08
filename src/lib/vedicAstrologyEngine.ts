@@ -68,11 +68,34 @@ export interface KundliMatchingResult {
     cancelled: boolean;
     summary: string;
   };
+  tamil10Poruthams?: {
+    totalMatched: number;
+    maxPoruthams: number;
+    overallStatus: string;
+    rajjuStatus: string;
+    items: {
+      name: string;
+      tamilName: string;
+      significance: string;
+      isCompatible: boolean;
+      status: string;
+      explanation: string;
+    }[];
+  };
   astrologicalAnalysis: string;
   recommendationTitle: string;
   recommendationName: string;
   timing: string;
   duration: string;
+}
+
+export interface TamilPoruthamItem {
+  name: string;
+  tamilName: string;
+  significance: string;
+  isCompatible: boolean;
+  status: string;
+  explanation: string;
 }
 
 // 12 Rashis (Zodiac Signs)
@@ -127,6 +150,8 @@ export const NAKSHATRAS_DATA: Array<{
   { name: 'Uttara Bhadrapada', ruler: 'Saturn', gana: 'Manushya', yoni: 'Gau (Cow)', nadi: 'Madhya' },
   { name: 'Revati', ruler: 'Mercury', gana: 'Deva', yoni: 'Gaja (Elephant)', nadi: 'Antya' },
 ];
+
+export const NAKSHATRAS = NAKSHATRAS_DATA.map((n) => n.name);
 
 export const VEDIC_YOGAS = [
   'Vishkambha', 'Priti', 'Ayushman', 'Saubhagya', 'Shobhana',
@@ -632,6 +657,194 @@ export function calculateVimshottariDasha(
   };
 }
 
+// ---------------- TAMIL / SOUTH INDIAN 10-PORUTHAMS (பத்துப் பொருத்தம்) ----------------
+export function calculateTamil10Poruthams(
+  groomNakshatraIdx: number,
+  brideNakshatraIdx: number,
+  groomRashiIdx: number,
+  brideRashiIdx: number
+) {
+  const distance = (groomNakshatraIdx - brideNakshatraIdx + 27) % 27 + 1;
+  const items: TamilPoruthamItem[] = [];
+
+  // 1. Dinam Porutham (தினப் பொருத்தம்) - Health & Longevity
+  const dinamRem = distance % 9;
+  const dinamCompatible = [2, 4, 6, 8, 9, 0].includes(dinamRem);
+  items.push({
+    name: 'Dinam Porutham',
+    tamilName: 'தினப் பொருத்தம்',
+    significance: 'Longevity, freedom from illnesses, and day-to-day physical vitality.',
+    isCompatible: dinamCompatible,
+    status: dinamCompatible ? 'Uthama (Best)' : 'Adhama (Not Compatible)',
+    explanation: dinamCompatible
+      ? 'Auspicious Tara distance ensures enduring vitality and sound bodily harmony.'
+      : 'Distance suggests periodic physical exhaustion; worshipping Lord Dhanvantari recommended.',
+  });
+
+  // 2. Ganam Porutham (கணப் பொருத்தம்) - Temperament
+  const devaStars = [0, 4, 6, 7, 12, 14, 16, 21, 26];
+  const manushyaStars = [1, 3, 5, 10, 11, 19, 20, 24, 25];
+  const getGana = (idx: number) => devaStars.includes(idx) ? 'Deva' : manushyaStars.includes(idx) ? 'Manushya' : 'Rakshasa';
+  const gGana = getGana(groomNakshatraIdx);
+  const bGana = getGana(brideNakshatraIdx);
+  const ganaCompatible = gGana === bGana || (gGana === 'Deva' && bGana === 'Manushya') || (gGana === 'Manushya' && bGana === 'Deva');
+  items.push({
+    name: 'Ganam Porutham',
+    tamilName: 'கணப் பொருத்தம்',
+    significance: 'Temperamental harmony and mental wavelength.',
+    isCompatible: ganaCompatible,
+    status: ganaCompatible ? 'Uthama (Best)' : 'Madhyama (Acceptable)',
+    explanation: ganaCompatible
+      ? `Harmonious Gana disposition (${gGana} & ${bGana}) ensures peaceful domestic atmosphere.`
+      : `Distinct temperaments (${gGana} & ${bGana}); cultivating shared patience harmonizes life rhythm.`,
+  });
+
+  // 3. Mahendram Porutham (மகேந்திரப் பொருத்தம்) - Progeny & Family Lineage
+  const mahendraDistances = [4, 7, 10, 13, 16, 19, 22, 25];
+  const mahendraCompatible = mahendraDistances.includes(distance);
+  items.push({
+    name: 'Mahendram Porutham',
+    tamilName: 'மகேந்திரப் பொருத்தம்',
+    significance: 'Progeny, continuation of noble family lineage, and deep attachment to children.',
+    isCompatible: mahendraCompatible,
+    status: mahendraCompatible ? 'Uthama (Best)' : 'Madhyama (Acceptable)',
+    explanation: mahendraCompatible
+      ? 'Auspicious distance blesses couple with virtuous progeny and familial prosperity.'
+      : 'Acceptable; invoking Santana Gopala Krishna blesses children and family lineage.',
+  });
+
+  // 4. Sthree Dheergam (ஸ்திரீ தீர்க்கப் பொருத்தம்) - Wealth & Bride Longevity
+  const sthreeCompatible = distance > 13;
+  items.push({
+    name: 'Sthree Dheergam',
+    tamilName: 'ஸ்திரீ தீர்க்கப் பொருத்தம்',
+    significance: 'Longevity of marriage, uninterrupted Mangalya bhagya, and cumulative wealth.',
+    isCompatible: sthreeCompatible,
+    status: sthreeCompatible ? 'Uthama (Best)' : distance >= 7 ? 'Madhyama (Acceptable)' : 'Adhama (Not Compatible)',
+    explanation: sthreeCompatible
+      ? 'Groom nakshatra is well-placed over 13 stars ahead, bestowing longevity and prosperity.'
+      : 'Distance is under 13 stars; regular Lakshmi worship and Friday lamp lighting stabilizes prosperity.',
+  });
+
+  // 5. Yoni Porutham (யோனிப் பொருத்தம்) - Biological & Intimate Harmony
+  const yoniCompatible = Math.abs(groomNakshatraIdx - brideNakshatraIdx) % 2 === 0;
+  items.push({
+    name: 'Yoni Porutham',
+    tamilName: 'யோனிப் பொருத்தம்',
+    significance: 'Mutual biological compatibility, affectionate attraction, and sexual bliss.',
+    isCompatible: yoniCompatible,
+    status: yoniCompatible ? 'Uthama (Best)' : 'Madhyama (Acceptable)',
+    explanation: yoniCompatible
+      ? 'Favorable Yoni alignment grants harmonious physical attraction and warm intimacy.'
+      : 'Neutral Yoni alignment; understanding emotional cues nurtures deep marital bonding.',
+  });
+
+  // 6. Rasi Porutham (ராசிப் பொருத்தம்) - Lineage & Family Welfare
+  const rasiDiff = (groomRashiIdx - brideRashiIdx + 12) % 12 + 1;
+  const rasiCompatible = [7, 1, 3, 4, 10, 11].includes(rasiDiff);
+  items.push({
+    name: 'Rasi Porutham',
+    tamilName: 'ராசிப் பொருத்தம்',
+    significance: 'Family peace, prosperity, and harmony between two ancestral clans.',
+    isCompatible: rasiCompatible,
+    status: rasiCompatible ? 'Uthama (Best)' : 'Madhyama (Acceptable)',
+    explanation: rasiCompatible
+      ? 'Janma Rasis are placed in auspicious mutual angles, promoting joint success.'
+      : 'Rasi difference requires mutual financial clarity; observing joint vows deepens affection.',
+  });
+
+  // 7. Rasiyadhipathi (ராசியாதிபதி பொருத்தம்) - Friendship of Rashi Lords
+  const rasiLordCompatible = [0, 1, 4, 5, 7, 8, 11].includes(rasiDiff);
+  items.push({
+    name: 'Rasiyadhipathi Porutham',
+    tamilName: 'ராசியாதிபதி பொருத்தம்',
+    significance: 'Intellectual comradeship and psychological respect between mind-rulers.',
+    isCompatible: rasiLordCompatible,
+    status: rasiLordCompatible ? 'Uthama (Best)' : 'Madhyama (Acceptable)',
+    explanation: rasiLordCompatible
+      ? 'Rashi lords share friendship, encouraging mutual confidence and lifelong partnership.'
+      : 'Rashi lords have neutral dynamic; practicing active listening overcomes differences.',
+  });
+
+  // 8. Vasiyam Porutham (வசியப் பொருத்தம்) - Magnetic Fascination
+  const vasiyaCompatible = [1, 5, 7, 9].includes(rasiDiff);
+  items.push({
+    name: 'Vasiyam Porutham',
+    tamilName: 'வசியப் பொருத்தம்',
+    significance: 'Mutual magnetic attraction, lifelong fascination, and fidelity.',
+    isCompatible: vasiyaCompatible,
+    status: vasiyaCompatible ? 'Uthama (Best)' : 'Madhyama (Acceptable)',
+    explanation: vasiyaCompatible
+      ? 'Natural magnetic attraction exists, fostering enduring devotion and affectionate warmth.'
+      : 'Normal affection; celebrating anniversaries and sharing pilgrimages strengthens the bond.',
+  });
+
+  // 9. Rajju Porutham (ரஜ்ஜுப் பொருத்தம்) - CRITICAL: Mangalya Longevity
+  const getRajju = (idx: number) => {
+    const shiro = [4, 13, 22]; // Mrigashirsha, Chitra, Dhanishta
+    const kantha = [3, 5, 12, 14, 21, 23]; // Rohini, Ardra, Hasta, Swati, Shravana, Shatabhisha
+    const udara = [2, 6, 11, 15, 20, 24]; // Krittika, Punarvasu, U.Phalguni, Vishakha, U.Ashadha, P.Bhadra
+    const ooru = [1, 7, 10, 16, 19, 25]; // Bharani, Pushya, P.Phalguni, Anuradha, P.Ashadha, U.Bhadra
+    if (shiro.includes(idx)) return 'Shiro (Head)';
+    if (kantha.includes(idx)) return 'Kantha (Neck)';
+    if (udara.includes(idx)) return 'Udara (Stomach)';
+    if (ooru.includes(idx)) return 'Ooru (Thigh)';
+    return 'Pada (Foot)';
+  };
+  const gRajju = getRajju(groomNakshatraIdx);
+  const bRajju = getRajju(brideNakshatraIdx);
+  const rajjuCompatible = gRajju !== bRajju;
+  items.push({
+    name: 'Rajju Porutham',
+    tamilName: 'ரஜ்ஜுப் பொருத்தம்',
+    significance: 'MOST CRITICAL: Mangalya longevity, health of spouse, and lifelong safety.',
+    isCompatible: rajjuCompatible,
+    status: rajjuCompatible ? 'Uthama (Best)' : 'Adhama (Not Compatible)',
+    explanation: rajjuCompatible
+      ? `Distinct Rajjus (${gRajju} & ${bRajju}) confirm pristine Mangalya longevity and protection.`
+      : `Same Rajju (${gRajju}) detected. Maha Mrityunjaya Japa and Mangala Gauri Puja recommended.`,
+  });
+
+  // 10. Vedhai Porutham (வேதைப் பொருத்தம்) - Affliction Cancellation
+  const vedhaiPairs: [number, number][] = [
+    [0, 17], [1, 16], [2, 15], [3, 14], [4, 13], [5, 12], [6, 11], [7, 18], [8, 19]
+  ];
+  const hasVedhai = vedhaiPairs.some(([a, b]) => 
+    (groomNakshatraIdx === a && brideNakshatraIdx === b) || 
+    (groomNakshatraIdx === b && brideNakshatraIdx === a)
+  );
+  const vedhaiCompatible = !hasVedhai;
+  items.push({
+    name: 'Vedhai Porutham',
+    tamilName: 'வேதைப் பொருத்தம்',
+    significance: 'Shield against sudden planetary animosity and unexpected friction.',
+    isCompatible: vedhaiCompatible,
+    status: vedhaiCompatible ? 'Uthama (Best)' : 'Adhama (Not Compatible)',
+    explanation: vedhaiCompatible
+      ? 'Birth stars do not possess Vedhai affliction, ensuring unhindered auspiciousness.'
+      : 'Vedhai friction detected; Shiva-Parvati archana and offering white flowers pacifies affliction.',
+  });
+
+  const totalMatched = items.filter(i => i.isCompatible).length;
+  const overallStatus = totalMatched >= 7 && rajjuCompatible
+    ? 'Uthama Porutham (Highly Compatible & Auspicious)'
+    : totalMatched >= 5
+    ? 'Madhyama Porutham (Acceptable with Remedies)'
+    : 'Adhama Porutham (Requires Astrological Remedies)';
+
+  const rajjuStatus = rajjuCompatible
+    ? 'Auspicious (No Rajju Dosha)'
+    : `Rajju Dosha Present (${gRajju})`;
+
+  return {
+    totalMatched,
+    maxPoruthams: 10,
+    items,
+    overallStatus,
+    rajjuStatus,
+  };
+}
+
 // ---------------- 36-POINT ASHTAKOOT GUN MILAN ----------------
 export function calculateAshtakootGunMilan(
   groomDob: string,
@@ -913,6 +1126,12 @@ export function calculateAshtakootGunMilan(
     status,
     verdict,
     ashtakoot,
+    tamil10Poruthams: calculateTamil10Poruthams(
+      groomAstro.nakshatraIndex,
+      brideAstro.nakshatraIndex,
+      groomAstro.rashiIndex,
+      brideAstro.rashiIndex
+    ),
     manglikStatus: {
       groomManglik: isGroomManglik,
       brideManglik: isBrideManglik,

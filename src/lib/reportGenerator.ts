@@ -3,6 +3,7 @@ import { getAIPromptSettings, AIPromptItem } from '@/lib/aiPromptSettings';
 import { getServerOpenAIApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
 import { safeParseAIJson } from '@/lib/aiResponseParser';
 import { resolveVedicRemedies, ASTROPARIHAR_HOMAMS } from '@/lib/vedicRemediesEngine';
+import { resolveLalKitabRemedies } from '@/lib/lalKitabEngine';
 import {
   fetchVedikaBirthChart,
   fetchVedikaKundliMatching,
@@ -211,6 +212,7 @@ export async function generateReportDataInternal(
       ishtaDevata: chart.ishtaDevata,
       doshas: (chart as any).doshas || reportJsonObj?.doshas,
       vedikaSource: (chart as any).vedikaSource || reportJsonObj?.vedikaSource,
+      lalKitabRemedies: resolveLalKitabRemedies(chart),
       engine: 'Vedika AI Intelligence (vedika.io)',
     };
   }
