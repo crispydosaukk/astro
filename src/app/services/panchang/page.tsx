@@ -24,11 +24,20 @@ import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
 import { useUserData } from '@/lib/useUserData';
 import { calculatePanchang, PanchangData } from '@/lib/panchangEngine';
+import { getActiveCustomerProfile } from '@/lib/customerProfile';
 
 export default function FreePanchangPage() {
-  const { user } = useUserData();
+  const { user, userData } = useUserData();
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [location, setLocation] = useState('New Delhi, Delhi, India');
+
+  // Auto-fetch customer city/location if available
+  useEffect(() => {
+    const profile = getActiveCustomerProfile(userData);
+    if (profile.pob) {
+      setLocation((prev) => (prev === 'New Delhi, Delhi, India' ? profile.pob : prev));
+    }
+  }, [userData]);
   const [panchang, setPanchang] = useState<PanchangData>(() =>
     calculatePanchang(new Date().toISOString().split('T')[0], 'New Delhi, Delhi, India')
   );

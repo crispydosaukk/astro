@@ -12,6 +12,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useUserData } from '@/lib/useUserData';
 import { getHomepageContent } from '@/lib/cms';
 import { useCurrency } from '@/lib/CurrencyContext';
+import { getActiveCustomerProfile, saveActiveCustomerProfile } from '@/lib/customerProfile';
 
 interface ServiceReportFormProps {
   titleText: string;
@@ -49,8 +50,13 @@ export default function ServiceReportForm({
   const [price, setPrice] = useState<number | null>(null);
   const [priceUSD, setPriceUSD] = useState<number | null>(null);
 
-  // Restore draft form data if returning after login
+  // Restore customer profile and draft form data automatically upon login
   useEffect(() => {
+    const profile = getActiveCustomerProfile(userData);
+    if (profile.dob) setDob((prev) => prev || profile.dob);
+    if (profile.tob) setTime((prev) => prev || profile.tob);
+    if (profile.pob) setPlace((prev) => prev || profile.pob);
+
     try {
       const key = serviceId ? `draft_report_${serviceId}` : 'draft_report';
       const saved = localStorage.getItem(key) || localStorage.getItem('draft_report');
@@ -63,7 +69,7 @@ export default function ServiceReportForm({
     } catch (e) {
       console.error('Error loading draft form:', e);
     }
-  }, [serviceId]);
+  }, [serviceId, userData]);
 
   const saveDraft = (newDob: string, newTime: string, newPlace: string) => {
     try {
@@ -72,6 +78,7 @@ export default function ServiceReportForm({
         localStorage.setItem(`draft_report_${serviceId}`, JSON.stringify(data));
       }
       localStorage.setItem('draft_report', JSON.stringify(data));
+      saveActiveCustomerProfile({ dob: newDob, tob: newTime, pob: newPlace });
     } catch (e) {
       console.error('Error saving draft form:', e);
     }

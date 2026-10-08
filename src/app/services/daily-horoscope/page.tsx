@@ -27,9 +27,12 @@ import DynamicPageContent from '@/components/DynamicPageContent';
 import CityLocationInput from '@/components/CityLocationInput';
 import { auth } from '@/lib/firebase/config';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { useUserData } from '@/lib/useUserData';
+import { getActiveCustomerProfile } from '@/lib/customerProfile';
 
 export default function FreeDailyHoroscopePage() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const { userData } = useUserData();
   const [selectedZodiac, setSelectedZodiac] = useState('Aries');
   const [isCalculating, setIsCalculating] = useState(false);
   const [dailyReport, setDailyReport] = useState<any>(null);
@@ -49,6 +52,21 @@ export default function FreeDailyHoroscopePage() {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsub();
   }, []);
+
+  // Auto-fetch customer profile upon login
+  useEffect(() => {
+    const profile = getActiveCustomerProfile(userData);
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || profile.name,
+      gender: prev.gender || profile.gender || 'Male',
+      dob: prev.dob || profile.dob,
+      tob: prev.tob || profile.tob,
+      pob: prev.pob || profile.pob || 'India',
+      lat: prev.lat || profile.lat || '20.59',
+      lon: prev.lon || profile.lon || '78.96',
+    }));
+  }, [userData]);
 
   const zodiacSigns = [
     { name: 'Aries', dates: 'Mar 21 - Apr 19', symbol: '♈' },

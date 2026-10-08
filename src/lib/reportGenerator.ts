@@ -96,17 +96,26 @@ export async function generateReportDataInternal(
       console.warn('Vedika Kundli Matching notice:', vMatchErr);
     }
 
-    if (!reportJsonObj) {
-      reportJsonObj = calculateAshtakootGunMilan(
-        gDob || '1995-01-01',
-        gTob || '12:00',
-        gPob || 'India',
-        bDob || '1996-01-01',
-        bTob || '12:00',
-        bPob || 'India',
-        groomName,
-        brideName
-      );
+    // Always compute deterministic Vedic Ashtakoot & Tamil 10-Poruthams to enrich report
+    const localMatch = calculateAshtakootGunMilan(
+      gDob || '1995-01-01',
+      gTob || '12:00',
+      gPob || 'India',
+      bDob || '1996-01-01',
+      bTob || '12:00',
+      bPob || 'India',
+      groomName,
+      brideName
+    );
+
+    if (reportJsonObj) {
+      reportJsonObj.tamil10Poruthams = localMatch.tamil10Poruthams;
+      if (!reportJsonObj.ashtakoot || reportJsonObj.ashtakoot.length === 0) {
+        reportJsonObj.ashtakoot = localMatch.ashtakoot;
+      }
+      reportJsonObj.manglikStatus = reportJsonObj.manglikStatus || localMatch.manglikStatus;
+    } else {
+      reportJsonObj = localMatch;
     }
   }
 
@@ -213,6 +222,14 @@ export async function generateReportDataInternal(
       doshas: (chart as any).doshas || reportJsonObj?.doshas,
       vedikaSource: (chart as any).vedikaSource || reportJsonObj?.vedikaSource,
       lalKitabRemedies: resolveLalKitabRemedies(chart),
+      unifiedRemedies: [
+        resolveVedicRemedies({
+          domain: details.primaryConcern || type,
+          planet: chart.dasha?.currentMahadasha,
+          dasha: chart.dasha?.currentMahadasha,
+          concern: details.primaryConcern || type,
+        }),
+      ],
       engine: 'Vedika AI Intelligence (vedika.io)',
     };
   }

@@ -241,6 +241,19 @@ export default function AuthScreen() {
         if (!docData.phone) {
           await setDoc(userDocRef, { phone: '+' + phone.replace(/\D/g, '') }, { merge: true });
         }
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('astroparihar_active_kundli', JSON.stringify({
+              name: docData.name || '',
+              dob: docData.dob || '',
+              tob: docData.tob || '',
+              pob: docData.pob || '',
+              phone: docData.phone || ('+' + phone.replace(/\D/g, '')),
+            }));
+          } catch (e) {
+            // ignore
+          }
+        }
         setShowSuccessPopup(true);
         setTimeout(() => {
           router.push(getTargetRedirect());
@@ -273,6 +286,18 @@ export default function AuthScreen() {
         phone: '+' + phone.replace(/\D/g, ''),
         createdAt: new Date().toISOString(),
       });
+
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('astroparihar_active_kundli', JSON.stringify({
+            name,
+            dob,
+            phone: '+' + phone.replace(/\D/g, ''),
+          }));
+        } catch (e) {
+          // ignore
+        }
+      }
 
       setShowSuccessPopup(true);
       setTimeout(() => {

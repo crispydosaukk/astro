@@ -53,6 +53,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import CompletePariharaPlanModal from '@/components/CompletePariharaPlanModal';
+import { getActiveCustomerProfile } from '@/lib/customerProfile';
 
 // Icon Map for disciplines
 const disciplineIconMap: Record<string, any> = {
@@ -149,6 +150,19 @@ function TalkToAIAstrologerContent() {
     place: 'New Delhi, India',
     primaryConcern: 'Career Growth & Promotion',
   });
+
+  // Auto-fetch customer profile upon login
+  useEffect(() => {
+    const profile = getActiveCustomerProfile(userData);
+    setBirthForm((prev) => ({
+      ...prev,
+      name: prev.name || profile.name,
+      gender: prev.gender || profile.gender || 'Male',
+      dob: profile.dob || prev.dob,
+      time: profile.tob || prev.time,
+      place: profile.pob || prev.place,
+    }));
+  }, [userData]);
 
   // Google Places Autocomplete for Birth City / Place
   useEffect(() => {

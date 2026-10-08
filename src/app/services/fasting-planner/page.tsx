@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,8 +22,10 @@ import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
 import { useUserData } from '@/lib/useUserData';
 
+import { getActiveCustomerProfile } from '@/lib/customerProfile';
+
 export default function FreeFastingPlannerPage() {
-  const { user } = useUserData();
+  const { user, userData } = useUserData();
   const [formData, setFormData] = useState({
     fullName: '',
     dob: '',
@@ -32,6 +34,19 @@ export default function FreeFastingPlannerPage() {
     rashi: 'Aries',
     gender: 'Male',
   });
+
+  // Auto-fetch customer profile upon login
+  useEffect(() => {
+    const profile = getActiveCustomerProfile(userData);
+    setFormData((prev) => ({
+      ...prev,
+      fullName: prev.fullName || profile.name,
+      gender: prev.gender || profile.gender || 'Male',
+      dob: prev.dob || profile.dob,
+      tob: prev.tob || profile.tob,
+      pob: prev.pob || profile.pob,
+    }));
+  }, [userData]);
 
   const [generatedResult, setGeneratedResult] = useState<any | null>(null);
   const [apiReportData, setApiReportData] = useState<any | null>(null);

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,9 +22,10 @@ import AstrologerCtaBanner from '@/components/AstrologerCtaBanner';
 import DynamicPageContent from '@/components/DynamicPageContent';
 import { useUserData } from '@/lib/useUserData';
 import { calculateAshtakootGunMilan } from '@/lib/vedicAstrologyEngine';
+import { getActiveCustomerProfile } from '@/lib/customerProfile';
 
 export default function FreeKundliMatchingPage() {
-  const { user } = useUserData();
+  const { user, userData } = useUserData();
   const [groomData, setGroomData] = useState({
     name: '',
     dob: '',
@@ -41,6 +42,33 @@ export default function FreeKundliMatchingPage() {
     lat: '',
     lon: '',
   });
+
+  // Auto-fetch logged-in customer's details
+  useEffect(() => {
+    const profile = getActiveCustomerProfile(userData);
+    if (profile.gender === 'Female') {
+      setBrideData((prev) => ({
+        ...prev,
+        name: prev.name || profile.name,
+        dob: prev.dob || profile.dob,
+        tob: prev.tob || profile.tob,
+        pob: prev.pob || profile.pob,
+        lat: prev.lat || profile.lat || '',
+        lon: prev.lon || profile.lon || '',
+      }));
+    } else {
+      setGroomData((prev) => ({
+        ...prev,
+        name: prev.name || profile.name,
+        dob: prev.dob || profile.dob,
+        tob: prev.tob || profile.tob,
+        pob: prev.pob || profile.pob,
+        lat: prev.lat || profile.lat || '',
+        lon: prev.lon || profile.lon || '',
+      }));
+    }
+  }, [userData]);
+
   const [matchResult, setMatchResult] = useState<any | null>(null);
   const [apiReportData, setApiReportData] = useState<any | null>(null);
   const [isMatching, setIsMatching] = useState(false);

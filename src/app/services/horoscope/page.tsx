@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,9 +31,10 @@ import DynamicPageContent from '@/components/DynamicPageContent';
 import { useUserData } from '@/lib/useUserData';
 import { calculateBirthChartData } from '@/lib/vedicAstrologyEngine';
 import VedicSquareChart from '@/components/VedicSquareChart';
+import { getActiveCustomerProfile, saveActiveCustomerProfile } from '@/lib/customerProfile';
 
 export default function FreeHoroscopePage() {
-  const { user } = useUserData();
+  const { user, userData } = useUserData();
   const [formData, setFormData] = useState({
     name: '',
     gender: 'Male',
@@ -43,6 +44,21 @@ export default function FreeHoroscopePage() {
     lat: '',
     lon: '',
   });
+
+  // Auto-fetch customer profile upon login
+  useEffect(() => {
+    const profile = getActiveCustomerProfile(userData);
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || profile.name,
+      gender: prev.gender || profile.gender || 'Male',
+      dob: prev.dob || profile.dob,
+      tob: prev.tob || profile.tob,
+      pob: prev.pob || profile.pob,
+      lat: prev.lat || profile.lat || '',
+      lon: prev.lon || profile.lon || '',
+    }));
+  }, [userData]);
 
   const [activeTab, setActiveTab] = useState<
     'overview' | 'd1' | 'd9' | 'planets' | 'dasha' | 'yogas' | 'predictions' | 'remedies'
@@ -63,6 +79,17 @@ export default function FreeHoroscopePage() {
 
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsCalculating(true);
+
+    saveActiveCustomerProfile({
+      name: formData.name,
+      dob: formData.dob,
+      tob: formData.tob,
+      pob: formData.pob,
+      gender: formData.gender,
+      lat: formData.lat,
+      lon: formData.lon,
+    });
     setIsCalculating(true);
 
     const calculatedBase = calculateBirthChartData(
