@@ -49,6 +49,13 @@ export default function CompletePariharaPlanModal({
   const [planTitle, setPlanTitle] = useState('Generate My Complete Parihara Plan');
   const [loadingPricing, setLoadingPricing] = useState(true);
 
+  // Close AI Chat drawer when Parihara Plan modal opens
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('close-ai-chat-sidebar'));
+    }
+  }, [isOpen]);
+
   // Form State
   const [formData, setFormData] = useState({
     name: '',

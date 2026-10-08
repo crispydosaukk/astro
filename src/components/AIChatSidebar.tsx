@@ -37,6 +37,7 @@ import { toast } from 'sonner';
 import { useUserData } from '@/lib/useUserData';
 import AppImage from '@/components/ui/AppImage';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import { AIAstrologer } from '@/lib/aiAstrologerData';
 import {
   calculateBirthChartData,
   generatePersonalAstrologyProfile,
@@ -285,6 +286,7 @@ export default function AIChatSidebar() {
 
   // Active Navigation Tab: 'chat' | 'profile' | 'compare' | 'timeline'
   const [activeTab, setActiveTab] = useState<'chat' | 'profile' | 'compare' | 'timeline'>('chat');
+  const [activeAstrologer, setActiveAstrologer] = useState<AIAstrologer | null>(null);
   const [userProfile, setUserProfile] = useState<PersonalAstrologyProfile | null>(null);
   const [yearComparison, setYearComparison] = useState<YearComparisonOutlook[]>([]);
   const [selectedCompareYear, setSelectedCompareYear] = useState<number>(new Date().getFullYear());
@@ -337,6 +339,54 @@ export default function AIChatSidebar() {
     pathname?.startsWith('/settings') ||
     pathname?.startsWith('/users-roles') ||
     pathname?.startsWith('/verification');
+
+  // Close chat drawer on route change so it never lingers over newly opened pages
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Broadcast when chat drawer opens so conflicting modals hide
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ai-chat-opened'));
+    }
+  }, [isOpen]);
+
+  // Global event listeners to close or open with dedicated astrologer
+  useEffect(() => {
+    const handleClose = () => {
+      setIsOpen(false);
+    };
+
+    const handleOpen = (e?: any) => {
+      const targetAstro = e?.detail?.astrologer;
+      if (targetAstro) {
+        setActiveAstrologer(targetAstro);
+        // Start fresh consultation with target astrologer, hiding previous astrologer's chat
+        const welcomeName = userData?.name || user?.displayName || 'Devotee';
+        setMessages([
+          {
+            id: `welcome-${targetAstro.id}-${Date.now()}`,
+            role: 'assistant',
+            content: `**Namaste and blessings, ${welcomeName}!** 🙏\n\nI am **${targetAstro.name}**, your specialized ${targetAstro.primaryDiscipline} guide. How may I assist your questions today?`,
+            timestamp: new Date().toISOString(),
+            recommendations: targetAstro.specialities?.slice(0, 4) || DEFAULT_RECOMMENDATIONS,
+          },
+        ]);
+      }
+      setIsOpen(true);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('ai-chat-opened'));
+      }
+    };
+
+    window.addEventListener('close-ai-chat-sidebar', handleClose);
+    window.addEventListener('open-ai-chat-sidebar', handleOpen);
+    return () => {
+      window.removeEventListener('close-ai-chat-sidebar', handleClose);
+      window.removeEventListener('open-ai-chat-sidebar', handleOpen);
+    };
+  }, [user, userData]);
 
   // Sync wallet balance
   useEffect(() => {
@@ -528,6 +578,8 @@ export default function AIChatSidebar() {
           userId: user.uid,
           userInfo,
           language,
+          astrologerId: activeAstrologer?.id,
+          persona: activeAstrologer?.name,
         }),
       });
 
@@ -730,8 +782,8 @@ export default function AIChatSidebar() {
                 <div className="flex items-center gap-3">
                   <div className="relative w-11 h-11 rounded-2xl overflow-hidden border-2 border-[#C9952B] shadow-md flex-shrink-0">
                     <AppImage
-                      src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=300"
-                      alt="Acharya Parihar"
+                      src={activeAstrologer?.avatar || "https://images.unsplash.com/photo-1544717305-2782549b5136?w=300"}
+                      alt={activeAstrologer?.name || "Acharya Parihar"}
                       fill
                       className="object-cover"
                     />
@@ -739,12 +791,16 @@ export default function AIChatSidebar() {
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <h3 className="font-bold text-sm text-[#FFFDFC]">Acharya Parihar</h3>
+                      <h3 className="font-bold text-sm text-[#FFFDFC]">
+                        {activeAstrologer?.name || "Acharya Parihar"}
+                      </h3>
                       <ShieldCheck size={14} className="text-[#FFEBB3]" />
                     </div>
                     <p className="text-[10px] text-[#F3EBDD] font-medium flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Vedic AI Astrologer • 24/7 Active
+                      {activeAstrologer?.primaryDiscipline
+                        ? `${activeAstrologer.primaryDiscipline} AI Astrologer • 24/7 Active`
+                        : "Vedic AI Astrologer • 24/7 Active"}
                     </p>
                   </div>
                 </div>
@@ -1169,7 +1225,7 @@ export default function AIChatSidebar() {
                       <Sparkles size={12} className="animate-spin" />
                     </div>
                     <span className="font-semibold text-[#713B32]">
-                      Acharya Parihar is examining your cosmic alignments...
+                      {activeAstrologer?.name || 'Acharya Parihar'} is examining your cosmic alignments...
                     </span>
                   </motion.div>
                 )}

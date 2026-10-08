@@ -325,10 +325,33 @@ function TalkToAIAstrologerContent() {
         if (target.languages?.length) {
           setCallLanguage(target.languages[0]);
         }
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('close-ai-chat-sidebar'));
+        }
         setShowBookingModal(true);
       }
     }
   }, [searchParams, astrologers]);
+
+  // Mutual exclusion: Close AI Chat drawer when consultation or profile modal is opened
+  useEffect(() => {
+    if (showBookingModal || showProfileModal) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('close-ai-chat-sidebar'));
+      }
+    }
+  }, [showBookingModal, showProfileModal]);
+
+  // Mutual exclusion: Close consultation & profile modals when AI Chat drawer is opened
+  useEffect(() => {
+    const handleAiChatOpened = () => {
+      setShowBookingModal(false);
+      setShowProfileModal(false);
+    };
+
+    window.addEventListener('ai-chat-opened', handleAiChatOpened);
+    return () => window.removeEventListener('ai-chat-opened', handleAiChatOpened);
+  }, []);
 
   // Open consultation booking
   const handleInitiateConsultation = (astro: AIAstrologer) => {
@@ -347,7 +370,23 @@ function TalkToAIAstrologerContent() {
     } else {
       setCallLanguage('English');
     }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('close-ai-chat-sidebar'));
+    }
     setShowBookingModal(true);
+  };
+
+  // Open AI text chat with dedicated astrologer persona (closes modal and starts chat)
+  const handleOpenChat = (astro: AIAstrologer) => {
+    setShowBookingModal(false);
+    setShowProfileModal(false);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('open-ai-chat-sidebar', {
+          detail: { astrologer: astro },
+        })
+      );
+    }
   };
 
   // Start Consultation
@@ -890,14 +929,23 @@ function TalkToAIAstrologerContent() {
                           setSelectedAstrologer(astro);
                           setShowProfileModal(true);
                         }}
-                        className="p-2 rounded-xl border border-border hover:border-[#C9952B] text-muted-foreground hover:text-foreground transition-all"
+                        className="p-2 rounded-xl border border-border hover:border-[#C9952B] text-muted-foreground hover:text-foreground transition-all cursor-pointer"
                         title="View Profile Details"
                       >
                         <User size={13} />
                       </button>
                       <button
+                        type="button"
+                        onClick={() => handleOpenChat(astro)}
+                        className="px-2.5 py-2 rounded-xl border border-[#C9952B]/40 hover:bg-[#C9952B]/10 text-[#C9952B] font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                        title={`Chat with ${astro.name}`}
+                      >
+                        <Bot size={13} />
+                        <span>Chat</span>
+                      </button>
+                      <button
                         onClick={() => handleInitiateConsultation(astro)}
-                        className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#713B32] text-white font-bold text-xs flex items-center gap-1.5 shadow-md hover:opacity-95 active:scale-95 transition-all"
+                        className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#713B32] text-white font-bold text-xs flex items-center gap-1.5 shadow-md hover:opacity-95 active:scale-95 transition-all cursor-pointer"
                       >
                         <Phone size={12} className="fill-white" />
                         <span>Instant Call</span>
@@ -1029,16 +1077,26 @@ function TalkToAIAstrologerContent() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => {
-                    setShowProfileModal(false);
-                    handleInitiateConsultation(selectedAstrologer);
-                  }}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#713B32] text-white font-bold text-xs shadow-lg shadow-[#C9952B]/20 flex items-center gap-2"
-                >
-                  <Phone size={14} className="fill-white" />
-                  ✦ Start Voice Consultation
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenChat(selectedAstrologer)}
+                    className="px-4 py-2.5 rounded-xl border border-[#C9952B] text-[#C9952B] hover:bg-[#C9952B]/10 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Bot size={14} />
+                    <span>Chat Online</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowProfileModal(false);
+                      handleInitiateConsultation(selectedAstrologer);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#C9952B] to-[#713B32] text-white font-bold text-xs shadow-lg shadow-[#C9952B]/20 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Phone size={14} className="fill-white" />
+                    <span>Instant Call</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -1075,12 +1133,23 @@ function TalkToAIAstrologerContent() {
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setShowBookingModal(false)}
-                  className="p-2 rounded-full hover:bg-white/15 text-[#E5D5BA] hover:text-[#FFFDFC] transition-colors"
-                >
-                  <X size={18} />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenChat(selectedAstrologer)}
+                    className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#FFFDFC] text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer border border-[#C9952B]/40"
+                    title="Switch to AI Text Chat"
+                  >
+                    <Bot size={13} className="text-[#E5B54F]" />
+                    <span>AI Chat</span>
+                  </button>
+                  <button
+                    onClick={() => setShowBookingModal(false)}
+                    className="p-2 rounded-full hover:bg-white/15 text-[#E5D5BA] hover:text-[#FFFDFC] transition-colors cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
               </div>
 
               {/* Form Body */}
