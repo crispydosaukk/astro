@@ -171,7 +171,7 @@ Respond ONLY with a valid JSON object matching this schema:
   "panditJiFinalBlessing": "A compassionate and uplifting closing spiritual blessing"
 }`;
 
-        const openAiRes = await fetchWithOpenAIFallback(
+        let openAiRes = await fetchWithOpenAIFallback(
           'https://api.openai.com/v1/chat/completions',
           {
             method: 'POST',
@@ -179,7 +179,7 @@ Respond ONLY with a valid JSON object matching this schema:
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'gpt-4o-mini',
+              model: 'gpt-4o',
               messages: [
                 { role: 'system', content: systemPrompt },
                 {
@@ -188,12 +188,38 @@ Respond ONLY with a valid JSON object matching this schema:
                 },
               ],
               temperature: 0.7,
-              max_tokens: 1500,
+              max_tokens: 2000,
               response_format: { type: 'json_object' },
             }),
           },
           openaiApiKey
         );
+
+        if (!openAiRes.ok) {
+          openAiRes = await fetchWithOpenAIFallback(
+            'https://api.openai.com/v1/chat/completions',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                  { role: 'system', content: systemPrompt },
+                  {
+                    role: 'user',
+                    content: `Consultation Transcript Context:\n${transcriptText || 'General consultation on ' + primaryConcern}`,
+                  },
+                ],
+                temperature: 0.7,
+                max_tokens: 1500,
+                response_format: { type: 'json_object' },
+              }),
+            },
+            openaiApiKey
+          );
+        }
 
         if (openAiRes.ok) {
           const aiJson = await openAiRes.json();

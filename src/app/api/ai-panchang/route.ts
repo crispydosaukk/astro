@@ -58,8 +58,8 @@ export async function POST(req: Request) {
         },
       });
 
-      if (vQuery.success && vQuery.data?.answer) {
-        vedikaSummary = vQuery.data.answer;
+      if (vQuery.success && (vQuery.data?.response || vQuery.data?.answer)) {
+        vedikaSummary = (vQuery.data.response || vQuery.data.answer) || '';
       }
     } catch (vAiErr) {
       console.warn('Vedika AI summary notice:', vAiErr);
@@ -136,7 +136,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const openAiRes = await fetchWithOpenAIFallback(
+    let openAiRes = await fetchWithOpenAIFallback(
       'https://api.openai.com/v1/chat/completions',
       {
         method: 'POST',
@@ -144,7 +144,7 @@ export async function POST(req: Request) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: model,
+          model: 'gpt-4o',
           messages: messagesPayload,
           temperature: aiPromptSettings.config.temperature || 0.7,
           response_format: { type: 'json_object' },
@@ -153,9 +153,41 @@ export async function POST(req: Request) {
       openaiApiKey
     );
 
+    if (!openAiRes.ok) {
+      console.warn('gpt-4o panchang completion failed, falling back to gpt-4o-mini...');
+      openAiRes = await fetchWithOpenAIFallback(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: messagesPayload,
+            temperature: aiPromptSettings.config.temperature || 0.7,
+            response_format: { type: 'json_object' },
+          }),
+        },
+        openaiApiKey
+      );
+    }
+
     if (openAiRes.ok) {
       const aiJson = await openAiRes.json();
-      const parsedAi = safeParseAIJson(aiJson.choices?.[0]?.message?.content) || null;
+      const parsedAi = safeParseAIJson(aiJson.choices?.[0]?.message?.content) || {};
+
+      // Enrich with live Vedika guidance if present
+      if (vedikaLive?.guidance?.summary && !parsedAi.dailyVedicSummary) {
+        parsedAi.dailyVedicSummary = vedikaLive.guidance.summary;
+      }
+      if (Array.isArray(vedikaLive?.guidance?.bestActivities) && (!parsedAi.favorableActivities || parsedAi.favorableActivities.length === 0)) {
+        parsedAi.favorableActivities = vedikaLive.guidance.bestActivities;
+      }
+      if (Array.isArray(vedikaLive?.guidance?.activitiesToAvoid) && (!parsedAi.inauspiciousPrecautions || parsedAi.inauspiciousPrecautions.length === 0)) {
+        parsedAi.inauspiciousPrecautions = vedikaLive.guidance.activitiesToAvoid;
+      }
+
       return NextResponse.json({
         panchang,
         vedikaLive,

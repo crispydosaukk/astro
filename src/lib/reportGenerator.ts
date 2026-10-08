@@ -282,8 +282,8 @@ export async function generateReportDataInternal(
       },
     });
 
-    if (vQueryRes.success && vQueryRes.data?.answer) {
-      const vAnswer = vQueryRes.data.answer;
+    const vAnswer = vQueryRes.success ? (vQueryRes.data?.response || vQueryRes.data?.answer) : undefined;
+    if (vAnswer && typeof vAnswer === 'string') {
       if (!reportJsonObj) reportJsonObj = {};
       reportJsonObj.astrologicalAnalysis = vAnswer;
       reportJsonObj.summary = vAnswer.slice(0, 320);
@@ -434,7 +434,10 @@ MANDATORY RULES:
         userPrompt = userPrompt.replaceAll(`{${key}}`, val);
       });
 
-      const modelToUse = globalConfig.defaultModel || 'gpt-4o-mini';
+      const preferredModel =
+        globalConfig.defaultModel && globalConfig.defaultModel !== 'gpt-4o-mini'
+          ? globalConfig.defaultModel
+          : 'gpt-4o';
 
       const messagesPayload: any[] = [
         { role: 'system', content: systemPrompt },
@@ -448,7 +451,7 @@ MANDATORY RULES:
         });
       }
 
-      const openAiRes = await fetchWithOpenAIFallback(
+      let openAiRes = await fetchWithOpenAIFallback(
         'https://api.openai.com/v1/chat/completions',
         {
           method: 'POST',
@@ -456,15 +459,36 @@ MANDATORY RULES:
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: modelToUse,
+            model: preferredModel,
             messages: messagesPayload,
             temperature: globalConfig.temperature || 0.7,
-            max_tokens: globalConfig.maxTokens || 1800,
+            max_tokens: Math.max(globalConfig.maxTokens || 1800, 2500),
             response_format: { type: 'json_object' },
           }),
         },
         openaiApiKey
       );
+
+      if (!openAiRes.ok) {
+        console.warn(`${preferredModel} report formatting failed, falling back to gpt-4o-mini...`);
+        openAiRes = await fetchWithOpenAIFallback(
+          'https://api.openai.com/v1/chat/completions',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: messagesPayload,
+              temperature: globalConfig.temperature || 0.7,
+              max_tokens: globalConfig.maxTokens || 1800,
+              response_format: { type: 'json_object' },
+            }),
+          },
+          openaiApiKey
+        );
+      }
 
       if (openAiRes.ok) {
         const aiJson = await openAiRes.json();
@@ -503,8 +527,13 @@ MANDATORY RULES:
           if (IMMUTABLE_ASTRONOMICAL_KEYS.has(k) && reportJsonObj[k]) {
             return;
           }
-          if (k === 'astrologicalAnalysis' && reportJsonObj.astrologicalAnalysis) {
-            // Keep Vedika's authentic analysis if already set, or append
+          if (k === 'astrologicalAnalysis') {
+            if (!reportJsonObj.astrologicalAnalysis) {
+              reportJsonObj.astrologicalAnalysis = parsed[k];
+            } else if (parsed[k] && parsed[k].length > (reportJsonObj.astrologicalAnalysis?.length || 0)) {
+              // gpt-4o synthesis incorporating Vedika truth is richer
+              reportJsonObj.astrologicalAnalysis = parsed[k];
+            }
             return;
           }
           if (k === 'predictions' && reportJsonObj.predictions) {

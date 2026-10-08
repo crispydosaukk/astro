@@ -861,8 +861,8 @@ export async function POST(req: Request) {
         } : undefined,
       });
 
-      if (vRes.success && vRes.data?.answer) {
-        vedikaTruth = vRes.data.answer;
+      if (vRes.success && (vRes.data?.response || vRes.data?.answer)) {
+        vedikaTruth = (vRes.data.response || vRes.data.answer) || '';
       }
     } catch (vErr) {
       console.warn('[Vedika] AI astrologer voice query notice, continuing with local evidence:', vErr);
@@ -948,7 +948,7 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
           });
         }
 
-        const chatRes = await fetchWithOpenAIFallback(
+        let chatRes = await fetchWithOpenAIFallback(
           'https://api.openai.com/v1/chat/completions',
           {
             method: 'POST',
@@ -956,7 +956,7 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'gpt-4o-mini',
+              model: 'gpt-4o',
               messages: messagesPayload,
               temperature: 0.7,
               max_tokens: 1200,
@@ -965,12 +965,32 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
           openaiApiKey
         );
 
+        if (!chatRes.ok) {
+          console.warn('gpt-4o voice completion failed, attempting gpt-4o-mini fallback...');
+          chatRes = await fetchWithOpenAIFallback(
+            'https://api.openai.com/v1/chat/completions',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: messagesPayload,
+                temperature: 0.7,
+                max_tokens: 1200,
+              }),
+            },
+            openaiApiKey
+          );
+        }
+
         if (chatRes.ok) {
           const chatData = await chatRes.json();
           replyText = chatData.choices?.[0]?.message?.content?.trim() || '';
         } else {
           const errText = await chatRes.text();
-          console.error('OpenAI GPT-4o-mini non-ok response:', chatRes.status, errText);
+          console.error('OpenAI voice consultation non-ok response:', chatRes.status, errText);
         }
       } catch (aiErr) {
         console.warn('OpenAI GPT-4o-mini generation warning:', aiErr);

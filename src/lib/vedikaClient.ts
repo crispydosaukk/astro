@@ -254,10 +254,34 @@ export async function queryVedikaAI(params: {
     payload.conversationContext = params.conversationContext;
   }
 
-  return vedikaFetch<{ answer: string; birthChart?: any; conversationContext?: any }>(
+  const res = await vedikaFetch<{
+    response?: string;
+    answer?: string;
+    text?: string;
+    content?: string;
+    birthChart?: any;
+    conversationContext?: any;
+    dasha?: any;
+    followUpSuggestions?: string[];
+    followUps?: string[];
+  }>(
     '/api/v1/astrology/query',
     payload
   );
+
+  // Normalize response properties so callers accessing either .answer or .response succeed
+  if (res.success && res.data) {
+    const rawText =
+      res.data.response ||
+      res.data.answer ||
+      res.data.text ||
+      res.data.content ||
+      (typeof res.data === 'string' ? res.data : '');
+    res.data.answer = rawText;
+    res.data.response = rawText;
+  }
+
+  return res;
 }
 
 /**

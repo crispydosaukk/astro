@@ -474,8 +474,9 @@ CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
 2. Ground your reasoning in the above verified supporting and contradictory factors. Never contradict this evidence.
 3. DOMAIN-SPECIFIC TIMING MANDATE (ZERO DATE REPETITION):
    - You MUST communicate the exact, specific astrological timing window calculated above: "${evidence.timingWindow}".
+   - When the devotee asks a direct or factual verification question (such as verifying whether they have Shani Sade Sati, asking about their current Dasha, or inquiring about 2026 transits), give a decisive, clear answer to their direct question first, and explain the planetary timeline accurately based on the evidence.
    - Translate and express this exact timing naturally in ${language}.
-   - NEVER invent or repeat the same static date span (such as "October 28 to December 15") across different questions. Each domain (Health, Career, Marriage, Finance, Education, Ishta Devata) has its own distinct astrological timeline calculated above.`;
+   - NEVER invent or repeat the same static date span across different questions. Each domain (Health, Career, Marriage, Finance, Transits, Sade Sati, Education, Ishta Devata) has its own distinct astrological timeline calculated above.`;
       } catch (err) {
         console.warn('Error calculating birth chart or evidence:', err);
       }
@@ -511,7 +512,7 @@ Real-Time Calendar Anchor:
 - Today's Date: ${currentDate}.
 - Current Year: STRICTLY ${currentYear}.
 - You are practicing in ${currentYear}. All transit predictions (Saturn/Shani, Jupiter/Brihaspati, Rahu, Ketu), Mahadashas, and advice must reference ${currentYear} and future years (${currentYear + 1}, ${currentYear + 2}).
-- TIMING DIVERSITY MANDATE: Every inquiry domain (Health, Marriage, Career, Finance, etc.) is governed by different Grahas, Bhavas, and Pratyantardashas. Never copy-paste or hallucinate identical date windows for different questions. You MUST adhere strictly to the calculated Potent Timing Window provided in the Jyotish Evidence.
+- TIMING DIVERSITY MANDATE: Every inquiry domain (Health, Marriage, Career, Finance, Transits, Sade Sati, etc.) is governed by different Grahas, Bhavas, and Pratyantardashas. Never copy-paste or hallucinate identical date windows for different questions. You MUST adhere strictly to the calculated Potent Timing Window provided in the Jyotish Evidence.
 
 MANDATORY LANGUAGE REQUIREMENT (CRITICAL):
 - Selected Language: **${language.toUpperCase()}** (${scriptName}).
@@ -542,7 +543,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
   "needsAstrologerReview": ${Boolean(evidence?.needsAstrologerReview)},
   "escalationReason": "${evidence?.escalationReason || ''}",
   "pariharSummary": "Concise summary of the 48-day sacred remedy protocol in ${language}",
-  "reply": "Your complete, warm, beautifully phrased Vedic consultation response in ${language} (${scriptName}). Speak directly to the devotee as Acharya Parihar. Begin with a traditional greeting. Deliver your astrological verdict and explain the active planetary influences with deep compassion and wisdom. Clearly specify the exact auspicious timing window matching the calculated Potent Timing Window (do NOT repeat identical dates across different inquiries). SPECIAL DIRECTIVE: If the devotee is testing your astronomical calculation capability, requesting exact degrees/positions, or asking what chart data is available in the system, present the complete, exact data table directly inside this 'reply' field adhering strictly to their requested format, without refusing or outputting unsolicited remedies.",
+  "reply": "Your complete, warm, richly detailed Vedic consultation response in ${language} (${scriptName}). Speak directly to the devotee as ${astrologerName}. Provide a comprehensive, multi-paragraph consultation that rivals the deepest, highest quality Jyotish reading: 1) Traditional Vedic greeting and empathetic acknowledgment of their situation, 2) In-depth astrological diagnosis explaining their key Bhavas, ruling Grahas, Mahadasha/Antardasha effects, and active transits, 3) Decisive, clear answer to their question with practical wisdom, 4) Specific auspicious timing window matching the calculated Potent Timing Window, 5) 48-day sacred remedy guidance (prescribed canonical Homam, daily Mantra with count, and Saturday/auspicious day charity), and 6) Uplifting spiritual blessing. Never output terse 2-sentence replies; provide genuine astrological depth and warmth. SPECIAL DIRECTIVE: If the devotee is testing your astronomical calculation capability, requesting exact degrees/positions, or asking what chart data is available in the system, present the complete, exact data table directly inside this 'reply' field adhering strictly to their requested format, without refusing or outputting unsolicited remedies.",
   "recommendations": [
     "5 to 6 engaging follow-up inquiry questions written 100% in ${language} (${scriptName})"
   ]
@@ -579,8 +580,8 @@ You MUST respond STRICTLY in JSON format matching this schema:
         } : undefined,
       });
 
-      if (vRes.success && vRes.data?.answer) {
-        vedikaTruth = vRes.data.answer;
+      if (vRes.success && (vRes.data?.response || vRes.data?.answer)) {
+        vedikaTruth = (vRes.data.response || vRes.data.answer) || '';
       }
     } catch (vErr) {
       console.warn('[Vedika] AI chat query notice, continuing with local evidence fallback:', vErr);
@@ -592,12 +593,12 @@ You MUST respond STRICTLY in JSON format matching this schema:
     if (vedikaTruth && !isDirectCalculationQuery) {
       conversationMessages.push({
         role: 'system',
-        content: `SUPPLEMENTARY JYOTISH ADVISORY INSIGHT (VEDIKA ENGINE): The following provides additional spiritual nuance for the devotee's query. Incorporate its spiritual blessings, but ensure all planetary positions, degrees, nakshatras, nakshatra lords, and dasha dates strictly conform to the VERIFIED ASTRONOMICAL VEDIC JANAM KUNDLI provided in the system prompt:\n\n"${vedikaTruth}"`
+        content: `SUPPLEMENTARY JYOTISH ADVISORY INSIGHT (VEDIKA ENGINE): The following provides additional spiritual nuance for the devotee's query from Vedika AI ephemeris. Incorporate its rich spiritual blessings, but ensure all planetary positions, degrees, nakshatras, nakshatra lords, and dasha dates strictly conform to the VERIFIED ASTRONOMICAL VEDIC JANAM KUNDLI provided in the system prompt:\n\n"${vedikaTruth}"`
       });
     }
 
-    // 9. Format & Translate via OpenAI
-    const response = await fetchWithOpenAIFallback(
+    // 9. Format & Translate via OpenAI (Primary: gpt-4o for rich, deep Vedic intelligence matching/exceeding ChatGPT, with gpt-4o-mini fallback)
+    let response = await fetchWithOpenAIFallback(
       'https://api.openai.com/v1/chat/completions',
       {
         method: 'POST',
@@ -605,15 +606,36 @@ You MUST respond STRICTLY in JSON format matching this schema:
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'gpt-4o',
           messages: conversationMessages,
-          temperature: 0.6,
-          max_tokens: 1500,
+          temperature: 0.7,
+          max_tokens: 2500,
           response_format: { type: 'json_object' },
         }),
       },
       openaiApiKey
     );
+
+    if (!response.ok) {
+      console.warn('gpt-4o completion failed, attempting gpt-4o-mini fallback...');
+      response = await fetchWithOpenAIFallback(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: conversationMessages,
+            temperature: 0.6,
+            max_tokens: 2000,
+            response_format: { type: 'json_object' },
+          }),
+        },
+        openaiApiKey
+      );
+    }
 
     if (!response.ok) {
       const errText = await response.text();

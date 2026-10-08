@@ -2388,6 +2388,8 @@ export interface JyotishEvidencePack {
     | 'education'
     | 'children'
     | 'spirituality'
+    | 'transits'
+    | 'sade_sati'
     | 'ishta_devata'
     | 'homam'
     | 'mantra'
@@ -2454,7 +2456,9 @@ export function analyzeInquiryEvidence(
     q.includes('yajna') ||
     q.includes('yaga') ||
     q.includes('హోమం') ||
-    q.includes('హవన్')
+    q.includes('హవన్') ||
+    q.includes('हवन') ||
+    q.includes('यज्ञ')
   ) {
     domain = 'homam';
     domainTitle = 'Sacred Vedic Agni Homam & Hawan Ritual';
@@ -2468,11 +2472,69 @@ export function analyzeInquiryEvidence(
     q.includes('sloka') ||
     q.includes('మంత్రం') ||
     q.includes('జపం') ||
-    q.includes('స్తోత్రం')
+    q.includes('స్తోత్రం') ||
+    q.includes('मंत्र') ||
+    q.includes('जप') ||
+    q.includes('स्तोत्र')
   ) {
     domain = 'mantra';
     domainTitle = 'Sacred Vedic Mantra Sadhana & Sound Vibration Japa';
     targetHouses = [5, 9, 1, 12];
+  } else if (
+    q.includes('sade sati') ||
+    q.includes('sadesati') ||
+    q.includes('saade sati') ||
+    q.includes('shani') ||
+    q.includes('sani') ||
+    q.includes('saturn') ||
+    q.includes('శని') ||
+    q.includes('సాడే సతి') ||
+    q.includes('ఏలినాటి') ||
+    q.includes('అష్టమ శని') ||
+    q.includes('అర్ధాష్టమ') ||
+    q.includes('kantaka shani') ||
+    q.includes('ashtama shani') ||
+    q.includes('dhaiya') ||
+    q.includes('dhaya') ||
+    q.includes('साढ़े साती') ||
+    q.includes('साढे साती') ||
+    q.includes('शनि') ||
+    q.includes('ढैय्या') ||
+    (q.includes('dasha') && (q.includes('running') || q.includes('mahadasha') || q.includes('which dasha') || q.includes('what dasha') || q.includes('current dasha'))) ||
+    (q.includes('దశ') && (q.includes('మహాదశ') || q.includes('ఏ దశ') || q.includes('నా దశ') || q.includes('నడుస్తు'))) ||
+    (q.includes('दशा') && (q.includes('महादशा') || q.includes('कौन सी दशा')))
+  ) {
+    domain = 'sade_sati';
+    domainTitle = 'Shani Sade Sati, Saturn Influence & Vimshottari Dasha Analysis';
+    targetHouses = [12, 1, 2, 8, 4];
+  } else if (
+    q.includes('transit') ||
+    q.includes('transits') ||
+    q.includes('gochar') ||
+    q.includes('gochara') ||
+    q.includes('gocharam') ||
+    q.includes('సంచార') ||
+    q.includes('సంచారం') ||
+    q.includes('సంచారాలు') ||
+    q.includes('గ్రహ సంచార') ||
+    q.includes('గోచార') ||
+    q.includes('గోచారం') ||
+    q.includes('గోచారాలు') ||
+    q.includes('గోచార ఫలితాలు') ||
+    q.includes('కదలిక') ||
+    q.includes('2025') ||
+    q.includes('2026') ||
+    q.includes('2027') ||
+    q.includes('year transit') ||
+    q.includes('annual transit') ||
+    q.includes('planetary movement') ||
+    q.includes('गोचर') ||
+    q.includes('ग्रह गोचर') ||
+    q.includes('गोचर फल')
+  ) {
+    domain = 'transits';
+    domainTitle = 'Planetary Transits & Gochara Movements (Graha Gochara)';
+    targetHouses = [1, 9, 10, 11, 7];
   } else if (
     q.includes('job') ||
     q.includes('career') ||
@@ -2488,9 +2550,25 @@ export function analyzeInquiryEvidence(
     q.includes('office') ||
     q.includes('employment') ||
     q.includes('ఉద్యోగం') ||
+    q.includes('ఉద్యోగాలు') ||
+    q.includes('ఉద్యోగ') ||
     q.includes('జాబ్') ||
+    q.includes('జాబ్స్') ||
+    q.includes('కెరీర్') ||
     q.includes('వ్యాపారం') ||
-    q.includes('ప్రమోషన్')
+    q.includes('బిజినెస్') ||
+    q.includes('ప్రమోషన్') ||
+    q.includes('ఇంటర్వ్యూ') ||
+    q.includes('పని') ||
+    q.includes('కార్యాలయం') ||
+    q.includes('नौकरी') ||
+    q.includes('रोजगार') ||
+    q.includes('व्यापार') ||
+    q.includes('बिजनेस') ||
+    q.includes('पदोन्नति') ||
+    q.includes('प्रमोशन') ||
+    q.includes('करियर') ||
+    q.includes('दफ्तर')
   ) {
     domain = 'career';
     domainTitle = 'Career & Professional Milestones (Karma Bhava)';
@@ -2506,6 +2584,7 @@ export function analyzeInquiryEvidence(
     q.includes('love') ||
     q.includes('wedding') ||
     q.includes('relationship') ||
+    q.includes('relationships') ||
     q.includes('divorce') ||
     q.includes('shadi') ||
     q.includes('shaadi') ||
@@ -2522,8 +2601,36 @@ export function analyzeInquiryEvidence(
     q.includes('kundli match') ||
     q.includes('పెళ్లి') ||
     q.includes('వివాహం') ||
+    q.includes('వివాహ') ||
     q.includes('లగ్నం') ||
-    q.includes('సంబంధం')
+    q.includes('సంబంధం') ||
+    q.includes('సంబంధాల') ||
+    q.includes('సంబంధాలు') ||
+    q.includes('సంబంధ') ||
+    q.includes('రిలేషన్') ||
+    q.includes('రిలేషన్‌షిప్') ||
+    q.includes('భార్య') ||
+    q.includes('భర్త') ||
+    q.includes('భాగస్వామి') ||
+    q.includes('జీవిత భాగస్వామి') ||
+    q.includes('పార్టనర్') ||
+    q.includes('ప్రేమ') ||
+    q.includes('లవ్') ||
+    q.includes('మ్యారేజ్') ||
+    q.includes('మ్యాచింగ్') ||
+    q.includes('కుండలి మ్యాచింగ్') ||
+    q.includes('గుణ మిలన్') ||
+    q.includes('संबंध') ||
+    q.includes('रिश्ते') ||
+    q.includes('रिश्ता') ||
+    q.includes('विवाह') ||
+    q.includes('शादी') ||
+    q.includes('पति') ||
+    q.includes('पत्नी') ||
+    q.includes('जीवनसाथी') ||
+    q.includes('प्रेम') ||
+    q.includes('प्यार') ||
+    q.includes('गुण मिलान')
   ) {
     domain = 'marriage';
     domainTitle = 'Marriage, Kundli Matching & Relationship Harmony (Kalatra Bhava)';
@@ -2545,9 +2652,25 @@ export function analyzeInquiryEvidence(
     q.includes('profit') ||
     q.includes('డబ్బు') ||
     q.includes('ధనం') ||
+    q.includes('ధన') ||
     q.includes('సంపద') ||
     q.includes('ఆర్థిక') ||
-    q.includes('అప్పు')
+    q.includes('ఆర్థిక పరిస్థితి') ||
+    q.includes('అప్పు') ||
+    q.includes('అప్పులు') ||
+    q.includes('ఖర్చులు') ||
+    q.includes('లాభం') ||
+    q.includes('పెట్టుబడి') ||
+    q.includes('షేర్') ||
+    q.includes('धन') ||
+    q.includes('पैसे') ||
+    q.includes('रुपये') ||
+    q.includes('संपत्ति') ||
+    q.includes('कर्ज') ||
+    q.includes('ऋण') ||
+    q.includes('आर्थिक') ||
+    q.includes('निवेश') ||
+    q.includes('मुनाफा')
   ) {
     domain = 'finance';
     domainTitle = 'Wealth, Prosperity & Assets (Dhana & Labha Bhava)';
@@ -2567,8 +2690,23 @@ export function analyzeInquiryEvidence(
     q.includes('medical') ||
     q.includes('doctor') ||
     q.includes('ఆరోగ్యం') ||
+    q.includes('ఆరోగ్య') ||
     q.includes('రోగం') ||
-    q.includes('జబ్బు')
+    q.includes('రోగాలు') ||
+    q.includes('జబ్బు') ||
+    q.includes('జబ్బులు') ||
+    q.includes('అనారోగ్యం') ||
+    q.includes('మానసిక') ||
+    q.includes('ఒత్తిడి') ||
+    q.includes('బాధ') ||
+    q.includes('చికిత్స') ||
+    q.includes('स्वास्थ्य') ||
+    q.includes('सेहत') ||
+    q.includes('रोग') ||
+    q.includes('बीमारी') ||
+    q.includes('तनाव') ||
+    q.includes('मानसिक') ||
+    q.includes('इलाज')
   ) {
     domain = 'health';
     domainTitle = 'Health, Longevity & Vitality (Tanu & Roga Bhava)';
@@ -2584,8 +2722,19 @@ export function analyzeInquiryEvidence(
     q.includes('school') ||
     q.includes('admission') ||
     q.includes('చదువు') ||
+    q.includes('చదువులు') ||
     q.includes('పరీక్ష') ||
-    q.includes('విద్యా')
+    q.includes('పరీక్షలు') ||
+    q.includes('విద్యా') ||
+    q.includes('కాలేజీ') ||
+    q.includes('స్కూలు') ||
+    q.includes('మార్కులు') ||
+    q.includes('शिक्षा') ||
+    q.includes('पढ़ाई') ||
+    q.includes('परीक्षा') ||
+    q.includes('विद्या') ||
+    q.includes('कॉलेज') ||
+    q.includes('स्कूल')
   ) {
     domain = 'education';
     domainTitle = 'Education & Intellect (Vidya & Buddhi Bhava)';
@@ -2596,7 +2745,18 @@ export function analyzeInquiryEvidence(
     q.includes('pregnant') ||
     q.includes('pregnancy') ||
     q.includes('progeny') ||
-    q.includes('santana')
+    q.includes('santana') ||
+    q.includes('సంతానం') ||
+    q.includes('పిల్లలు') ||
+    q.includes('పాప') ||
+    q.includes('బాబు') ||
+    q.includes('గర్భం') ||
+    q.includes('ప్రెగ్నెన్సీ') ||
+    q.includes('संतान') ||
+    q.includes('बच्चे') ||
+    q.includes('पुत्र') ||
+    q.includes('पुत्री') ||
+    q.includes('गर्भ')
   ) {
     domain = 'children';
     domainTitle = 'Progeny & Family Blessings (Putra Bhava)';
@@ -2608,7 +2768,19 @@ export function analyzeInquiryEvidence(
     q.includes('meditation') ||
     q.includes('temple') ||
     q.includes('guru') ||
-    q.includes('karma')
+    q.includes('karma') ||
+    q.includes('ఆధ్యాత్మిక') ||
+    q.includes('మోక్షం') ||
+    q.includes('పూజ') ||
+    q.includes('ధ్యానం') ||
+    q.includes('గురువు') ||
+    q.includes('పుణ్యం') ||
+    q.includes('आध्यात्मिक') ||
+    q.includes('मोक्ष') ||
+    q.includes('पूजा') ||
+    q.includes('ध्यान') ||
+    q.includes('गुरु') ||
+    q.includes('पुण्य')
   ) {
     domain = 'spirituality';
     domainTitle = 'Spiritual Evolution & Dharma (Bhagya & Moksha Bhava)';
@@ -2704,6 +2876,50 @@ export function analyzeInquiryEvidence(
     primaryAfflictedPlanet = antarLord;
   }
 
+  // 4b. Evaluate Shani Sade Sati and Planetary Transits
+  const moonRashiIdx = RASHIS.findIndex((r) =>
+    chart.moonSign.toLowerCase().includes(r.shortName.toLowerCase())
+  );
+  // Saturn currently transiting Pisces (Meena) = index 11
+  const saturnTransitSignIdx = 11;
+  const isSadeSatiActive =
+    moonRashiIdx === 10 || // Aquarius (Setting phase)
+    moonRashiIdx === 11 || // Pisces (Peak / Janma Shani)
+    moonRashiIdx === 0;    // Aries (Rising phase)
+
+  let sadeSatiPhaseDesc = '';
+  if (moonRashiIdx === 10) sadeSatiPhaseDesc = 'Setting Phase (3rd Phase - Saturn in 2nd from natal Moon)';
+  else if (moonRashiIdx === 11) sadeSatiPhaseDesc = 'Peak Janma Shani (2nd Phase - Saturn over natal Moon)';
+  else if (moonRashiIdx === 0) sadeSatiPhaseDesc = 'Rising Phase (1st Phase - Saturn in 12th from natal Moon)';
+
+  if (domain === 'sade_sati') {
+    primaryAfflictedPlanet = 'Saturn';
+    if (isSadeSatiActive) {
+      contradictoryFactors.push(
+        `Active Shani Sade Sati (${sadeSatiPhaseDesc}) is operating as Saturn transits Pisces over your natal Moon sign (${chart.moonSign}), calling for steady patience and Saturday Saturn upayas.`
+      );
+    } else {
+      const houseFromMoon = moonRashiIdx >= 0 ? ((saturnTransitSignIdx - moonRashiIdx + 12) % 12) + 1 : 0;
+      supportingFactors.push(
+        `You are NOT in Shani Sade Sati. Transiting Saturn in Pisces is placed in House ${houseFromMoon} from your Janma Rashi (${chart.moonSign}), giving structural growth without direct Sade Sati pressure.`
+      );
+    }
+    supportingFactors.push(
+      `Your active Vimshottari Mahadasha is ${chart.dasha.currentMahadasha} (${chart.dasha.startDate} to ${chart.dasha.endDate}) with ${chart.dasha.currentAntardasha} operating until ${chart.dasha.antarEndDate}.`
+    );
+  } else if (domain === 'transits') {
+    primaryAfflictedPlanet = 'Jupiter';
+    supportingFactors.push(
+      `Major 2026 Gochara Transit: Devaguru Brihaspati (Jupiter) shifts into Gemini (Mithuna) on June 2, 2026, delivering expansive 5th, 7th, and 9th drishtis across the chart.`
+    );
+    supportingFactors.push(
+      `Saturn (Shani) transits Pisces (Meena), driving karmic restructuring and maturity throughout 2026-2027 with a retrograde phase between July and November 2026.`
+    );
+    supportingFactors.push(
+      `Rahu in Kumbha and Ketu in Simha activate pivotal transformative karmic axes across natal houses.`
+    );
+  }
+
   // 5. Check Yogas & Doshas
   if (chart.yogas && chart.yogas.length > 0) {
     chart.yogas.slice(0, 2).forEach((y) => {
@@ -2767,11 +2983,44 @@ export function analyzeInquiryEvidence(
     endDateStr: string;
     startMs: number;
     endMs: number;
+    pratyantardashas?: Array<{
+      lord: string;
+      pratyantardasha: string;
+      startDateStr: string;
+      endDateStr: string;
+      startMs: number;
+      endMs: number;
+    }>;
   }> = (chart.dasha as any).activeAntardashas || [];
+
+  const allUpcomingPratyantars: Array<{
+    lord: string;
+    pratyantardasha: string;
+    startDateStr: string;
+    endDateStr: string;
+    startMs: number;
+    endMs: number;
+  }> = [];
+
+  antardashas.forEach((a) => {
+    (a.pratyantardashas || []).forEach((p) => {
+      if (p.endMs >= nowMs) {
+        allUpcomingPratyantars.push(p);
+      }
+    });
+  });
+
+  if (allUpcomingPratyantars.length === 0) {
+    pratyantars.forEach((p) => {
+      if (p.endMs >= nowMs) {
+        allUpcomingPratyantars.push(p);
+      }
+    });
+  }
 
   const findUpcomingPD = (lords: string[]) => {
     // 1. Prioritize upcoming sub-periods starting in the future
-    const upcoming = pratyantars.find(
+    const upcoming = allUpcomingPratyantars.find(
       (p) =>
         lords.some((l) => p.lord.toLowerCase().startsWith(l.toLowerCase().slice(0, 3))) &&
         p.startMs >= nowMs
@@ -2779,7 +3028,7 @@ export function analyzeInquiryEvidence(
     if (upcoming) return upcoming;
 
     // 2. Fall back to actively running sub-period if currently active
-    return pratyantars.find(
+    return allUpcomingPratyantars.find(
       (p) =>
         lords.some((l) => p.lord.toLowerCase().startsWith(l.toLowerCase().slice(0, 3))) &&
         p.endMs >= nowMs
@@ -2806,12 +3055,12 @@ export function analyzeInquiryEvidence(
 
     case 'career': {
       const tenthLord = getHouseLord(10);
-      const careerLords = [tenthLord, 'Sun', 'Mars', 'Jupiter', 'Saturn'].filter(Boolean);
+      const careerLords = [tenthLord, 'Sun', 'Mars', 'Jupiter', 'Saturn', 'Mercury'].filter(Boolean);
       const pdMatch = findUpcomingPD(careerLords);
       if (pdMatch) {
         timingWindow = `Professional elevation, career authority, and milestone breakthroughs peak between ${pdMatch.startDateStr} and ${pdMatch.endDateStr} under ${pdMatch.pratyantardasha}.`;
       } else {
-        timingWindow = `Career momentum progressively accelerates from ${chart.dasha.pratyantarEndDate}, culminating into major professional expansion leading up to ${chart.dasha.antarEndDate} under ${antarLord} Antardasha.`;
+        timingWindow = `Career momentum progressively accelerates from ${chart.dasha.pratyantarEndDate}, consolidating into long-term professional expansion under ${antarLord} Antardasha.`;
       }
       break;
     }
@@ -2836,7 +3085,7 @@ export function analyzeInquiryEvidence(
     case 'finance': {
       const secondLord = getHouseLord(2);
       const eleventhLord = getHouseLord(11);
-      const financeLords = [secondLord, eleventhLord, 'Venus', 'Jupiter'].filter(Boolean);
+      const financeLords = [secondLord, eleventhLord, 'Venus', 'Jupiter', 'Mercury'].filter(Boolean);
       const pdMatch = findUpcomingPD(financeLords);
       if (pdMatch) {
         timingWindow = `Financial liquidity stabilization and debt clearance gain progressive traction through ${chart.dasha.pratyantarEndDate}, followed by expansive wealth accumulation between ${pdMatch.startDateStr} and ${pdMatch.endDateStr} under ${pdMatch.pratyantardasha}.`;
@@ -2851,7 +3100,7 @@ export function analyzeInquiryEvidence(
       const fourthLord = getHouseLord(4);
       const eduLords = [fifthLord, fourthLord, 'Mercury', 'Jupiter'].filter(Boolean);
       const activeMatch = eduLords.some((l) => chart.dasha.currentPratyantardasha.toLowerCase().startsWith(l.toLowerCase().slice(0, 3)));
-      const futureMatch = pratyantars.find(
+      const futureMatch = allUpcomingPratyantars.find(
         (p) =>
           eduLords.some((l) => p.lord.toLowerCase().startsWith(l.toLowerCase().slice(0, 3))) &&
           p.startMs >= nowMs
@@ -2905,8 +3154,27 @@ export function analyzeInquiryEvidence(
       break;
     }
 
+    case 'sade_sati': {
+      if (isSadeSatiActive) {
+        timingWindow = `Active Shani Sade Sati (${sadeSatiPhaseDesc}) runs through Saturn's Meena transit until early 2028. Key supportive alleviation window opens during your upcoming benefic sub-period from ${chart.dasha.pratyantarEndDate} onward.`;
+      } else {
+        timingWindow = `You are currently NOT experiencing Shani Sade Sati (Saturn is in Pisces, away from your Moon sign ${chart.moonSign}). Your active planetary period is ${chart.dasha.currentMahadasha} with ${chart.dasha.currentAntardasha} active until ${chart.dasha.antarEndDate}.`;
+      }
+      break;
+    }
+
+    case 'transits': {
+      timingWindow = `Key 2026-2027 Gochara Transit Timeline: Devaguru Brihaspati (Jupiter) ingresses into Gemini (Mithuna) on June 2, 2026, delivering expansive Kendra/Trikona aspects through mid-2027, while Saturn's Meena retrograde restructuring phase operates between July and November 2026.`;
+      break;
+    }
+
     default: {
-      timingWindow = `Pivotal life direction transition unfolds between ${chart.dasha.pratyantarEndDate} and ${chart.dasha.antarEndDate} as ${chart.dasha.currentAntardasha} completes its karmic delivery.`;
+      const nextPD = allUpcomingPratyantars.find((p) => p.startMs > nowMs);
+      if (nextPD) {
+        timingWindow = `Current developmental phase is grounded under ${chart.dasha.currentPratyantardasha} through ${chart.dasha.pratyantarEndDate}, transitioning into an active directional shift between ${nextPD.startDateStr} and ${nextPD.endDateStr} under ${nextPD.pratyantardasha}.`;
+      } else {
+        timingWindow = `Pivotal life direction phase unfolds under ${chart.dasha.currentAntardasha} through ${chart.dasha.antarEndDate}, completing foundational karmic lessons.`;
+      }
       break;
     }
   }

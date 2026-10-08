@@ -106,6 +106,15 @@ function runAllBenchmarks() {
   assert(evCareer.timingWindow !== evFinance.timingWindow || evCareer.timingWindow !== evHealth.timingWindow, 'AP-0003.2: Career & Finance timing windows are dynamic', 'True', 'Dynamic');
   assert(!evMarriage.timingWindow.includes('static'), 'AP-0003.3: Timing window is calculated deterministically', 'Dynamic string', evMarriage.timingWindow);
 
+  const evTeluguMarriage = analyzeInquiryEvidence(nativeChart, 'మీ వ్యక్తిగత సంబంధాల గురించి మరింత సమాచారం కావాలనుకుంటున్నారా?');
+  const evTeluguTransit = analyzeInquiryEvidence(nativeChart, '2026లో నా గ్రహ సంచారాల ఫలితాలు ఎలా ఉన్నాయి?');
+  const evSadeSati = analyzeInquiryEvidence(nativeChart, 'Am I currently running Shani Sade Sati or Rahu Mahadasha?');
+
+  assert(evTeluguMarriage.domain === 'marriage', 'AP-0003.4: Telugu relationship inquiry correctly resolves to marriage domain', 'marriage', evTeluguMarriage.domain);
+  assert(evTeluguTransit.domain === 'transits', 'AP-0003.5: Telugu 2026 transit inquiry correctly resolves to transits domain', 'transits', evTeluguTransit.domain);
+  assert(evSadeSati.domain === 'sade_sati', 'AP-0003.6: Sade Sati inquiry correctly resolves to sade_sati domain', 'sade_sati', evSadeSati.domain);
+  assert(evTeluguTransit.timingWindow !== evSadeSati.timingWindow, 'AP-0003.7: Transit timing window differs from Sade Sati evaluation window', 'Non-identical', `${evTeluguTransit.timingWindow} vs ${evSadeSati.timingWindow}`);
+
   // -------------------------------------------------------------------------
   // AP-0004: Jaimini Karakamsa & Canonical Ishta Devata Derivation
   // -------------------------------------------------------------------------

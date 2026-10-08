@@ -31,9 +31,9 @@ export interface AIPromptSettingsData {
 }
 
 export const DEFAULT_GLOBAL_AI_CONFIG: GlobalAIConfig = {
-  defaultModel: 'gpt-4o-mini',
+  defaultModel: 'gpt-4o',
   temperature: 0.7,
-  maxTokens: 1800,
+  maxTokens: 2500,
   systemPersona:
     'You are a revered grandmaster Vedic Astrologer, Vastu Acharya, and Jyotish Scholar at AstroParihar. Your readings are authentic, compassionate, strictly non-fatalistic, empowering, and grounded in Parashara and Jaimini Vedic classics.',
   globalExtraDirectives:
