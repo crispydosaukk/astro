@@ -38,40 +38,64 @@ export async function POST(req: Request) {
 
       const userData = userDoc.data();
       const currentBalance = userData?.walletBalance || 0;
+      const trialAllowed = Number(sessionData.trialMinutesAllowed) || 5;
+      const isStillInTrial = sessionData.isTrialActive && (sessionData.billedMinutes || 1) < trialAllowed;
 
-      if (currentBalance < pricePerMin) {
-        // Insufficient funds for the next minute: Mark session as terminated due to low balance
-        transaction.update(sessionRef, {
-          status: 'terminated_low_balance',
-          endTime: new Date().toISOString(),
-        });
-        throw new Error('Insufficient balance');
-      }
-
-      // Deduct balance for this minute
-      remainingBalance = currentBalance - pricePerMin;
       newBilledMinutes = (sessionData.billedMinutes || 1) + 1;
-      newTotalAmount = (sessionData.totalBilledAmount || pricePerMin) + pricePerMin;
 
-      transaction.update(userRef, {
-        walletBalance: remainingBalance,
-      });
+      if (isStillInTrial) {
+        // This is a complimentary trial minute! No wallet deduction.
+        remainingBalance = currentBalance;
+        newTotalAmount = sessionData.totalBilledAmount || 0;
 
-      // Update Session Stats
-      transaction.update(sessionRef, {
-        billedMinutes: newBilledMinutes,
-        durationSeconds: newBilledMinutes * 60,
-        totalBilledAmount: newTotalAmount,
-        lastHeartbeat: new Date().toISOString(),
-      });
-
-      // Update Wallet Transaction Record if present
-      if (txId) {
-        const walletTxRef = userRef.collection('wallet_transactions').doc(txId);
-        transaction.update(walletTxRef, {
-          amount: newTotalAmount,
-          description: `AI Consultation (${newBilledMinutes} mins) with ${sessionData.astrologerName}`,
+        transaction.update(userRef, {
+          trialMinutesUsed: (Number(userData?.trialMinutesUsed) || 0) + 1,
         });
+
+        // Update Session Stats with trial flag
+        transaction.update(sessionRef, {
+          billedMinutes: newBilledMinutes,
+          durationSeconds: newBilledMinutes * 60,
+          totalBilledAmount: newTotalAmount,
+          lastHeartbeat: new Date().toISOString(),
+          isTrialActive: newBilledMinutes < trialAllowed,
+        });
+      } else {
+        // Standard billed minute
+        if (currentBalance < pricePerMin) {
+          // Insufficient funds for the next minute: Mark session as terminated due to low balance
+          transaction.update(sessionRef, {
+            status: 'terminated_low_balance',
+            endTime: new Date().toISOString(),
+          });
+          throw new Error('Insufficient balance');
+        }
+
+        // Deduct balance for this minute
+        remainingBalance = currentBalance - pricePerMin;
+        newTotalAmount = (sessionData.totalBilledAmount || 0) + pricePerMin;
+
+        transaction.update(userRef, {
+          walletBalance: remainingBalance,
+        });
+
+        // Update Session Stats
+        transaction.update(sessionRef, {
+          billedMinutes: newBilledMinutes,
+          durationSeconds: newBilledMinutes * 60,
+          totalBilledAmount: newTotalAmount,
+          lastHeartbeat: new Date().toISOString(),
+          isTrialActive: false,
+        });
+
+        // Update or create Wallet Transaction Record if present
+        if (txId) {
+          const walletTxRef = userRef.collection('wallet_transactions').doc(txId);
+          transaction.update(walletTxRef, {
+            amount: newTotalAmount,
+            description: `AI Consultation (${newBilledMinutes} mins) with ${sessionData.astrologerName}`,
+          });
+        }
       }
     });
 

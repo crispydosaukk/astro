@@ -206,8 +206,8 @@ export default function AdminAIPrompts() {
     setErrorMessage(null);
     try {
       const { updateSettings } = await import('@/lib/settings');
-      await updateSettings({ aiChatPricePerPrompt: chatPrice });
-      setSuccessMessage(`AI Chat Price successfully updated to ₹${chatPrice} per prompt!`);
+      await updateSettings({ aiChatPricePerPrompt: chatPrice, aiChatPricePerMinute: chatPrice });
+      setSuccessMessage(`AI Chat Price successfully updated to ₹${chatPrice} per prompt / minute!`);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to update AI chat price');
     } finally {

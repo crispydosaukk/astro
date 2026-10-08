@@ -125,7 +125,7 @@ export default function ConsultationContent() {
             experience: Number(data.experienceYears) || (typeof data.experience === 'string' ? Number(data.experience.replace(/[^0-9]/g, '')) : Number(data.experience)) || 10,
             rating: Number(data.rating) || 4.5,
             reviews: Number(data.reviewsCount || data.consultations) || 120,
-            pricePerMin: Number(data.amount) || 20,
+            pricePerMin: Number(data.amount) || 25,
             languages: langsList.length > 0 ? langsList : ['Hindi', 'English'],
             status: 'online', // Mock online status for display
             image:

@@ -20,12 +20,19 @@ import {
   calculateAshtakootGunMilan,
   normalizeRashi,
   JyotishEvidencePack,
+  generatePersonalAstrologyProfile,
+  generateYearComparison,
+  generateInteractiveTimeline,
 } from '@/lib/vedicAstrologyEngine';
+import { DEFAULT_AI_ASTROLOGERS } from '@/lib/aiAstrologerData';
 
 export async function GET(req: Request) {
   try {
     const settings = await getSettings();
-    const pricePerPrompt = Number(settings.aiChatPricePerPrompt) >= 0 ? Number(settings.aiChatPricePerPrompt) : 5;
+    const pricePerPrompt =
+      Number(settings.aiChatPricePerMinute ?? settings.aiChatPricePerPrompt) >= 0
+        ? Number(settings.aiChatPricePerMinute ?? settings.aiChatPricePerPrompt)
+        : 5;
     
     // Ensure document has price persisted
     try {
@@ -113,6 +120,11 @@ export async function POST(req: Request) {
       userId,
       userInfo = null,
       language = 'English',
+      astrologerId,
+      persona,
+      includeProfile,
+      includeYearComparison,
+      includeTimeline,
     } = body;
 
     // 1. Check Authentication
@@ -126,9 +138,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Fetch Pricing Setting
+    // 2. Fetch Dynamic Pricing Setting & Trial
     const settings = await getSettings();
-    const pricePerPrompt = Number(settings.aiChatPricePerPrompt) >= 0 ? Number(settings.aiChatPricePerPrompt) : 5;
+    const pricePerPrompt =
+      Number(settings.aiChatPricePerMinute ?? settings.aiChatPricePerPrompt) >= 0
+        ? Number(settings.aiChatPricePerMinute ?? settings.aiChatPricePerPrompt)
+        : 5;
+    const trialAllowed = Number(settings.newUserTrialMinutes ?? 5);
 
     // 3. Check & Deduct Wallet Balance
     userRef = adminDb.collection('users').doc(userId);
@@ -143,8 +159,14 @@ export async function POST(req: Request) {
 
     const userData = userSnap.data();
     initialBalance = Number(userData?.walletBalance) || 0;
+    const usedTrialPrompts = Number(userData?.trialChatPromptsUsed) || 0;
+    const isTrialFreePrompt = trialAllowed > 0 && usedTrialPrompts < trialAllowed;
 
-    if (pricePerPrompt > 0) {
+    if (isTrialFreePrompt) {
+      // Complimentary New-User Trial Message!
+      await userRef.set({ trialChatPromptsUsed: usedTrialPrompts + 1 }, { merge: true });
+      deductedAmount = 0;
+    } else if (pricePerPrompt > 0) {
       if (initialBalance < pricePerPrompt) {
         return NextResponse.json(
           {
@@ -471,7 +493,19 @@ CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
         ? 'Tamil script (தமிழ்)'
         : 'English';
 
-    const systemPrompt = `You are "Acharya Parihar", the master Vedic Astrologer, Jyotishacharya, and spiritual guide at AstroParihar. You possess profound mastery over Parashari Jyotish, Jaimini Sutras, Ashtakavarga, Nakshatra analysis, and Vedic Upayas.
+    const selectedAstrologer = astrologerId
+      ? DEFAULT_AI_ASTROLOGERS.find((a) => a.id === astrologerId || a.name === astrologerId)
+      : null;
+    const astrologerName = selectedAstrologer?.name || 'Acharya Parihar';
+    const astrologerDiscipline = selectedAstrologer?.primaryDiscipline || 'Vedic Jyotish';
+    const astrologerStyle = selectedAstrologer?.consultationStyle || 'Vedic & Remedial';
+    const astrologerPersona = selectedAstrologer?.systemPersonaPrompt || persona || '';
+
+    const systemPrompt = `You are "${astrologerName}", the master Vedic Astrologer, Jyotishacharya, and practitioner of ${astrologerDiscipline} at AstroParihar.${
+      astrologerPersona
+        ? `\n\nSPECIALIZED ASTROLOGER PERSONA & METHODOLOGY:\n${astrologerPersona}\nConsultation Style: ${astrologerStyle}`
+        : '\nYou possess profound mastery over Parashari Jyotish, Jaimini Sutras, Ashtakavarga, Nakshatra analysis, and Vedic Upayas.'
+    }
 
 Real-Time Calendar Anchor:
 - Today's Date: ${currentDate}.
@@ -823,6 +857,19 @@ You MUST respond STRICTLY in JSON format matching this schema:
       pariharProtocol: pariharProtocol || null,
     };
 
+    let personalProfile = null;
+    let yearComparison = null;
+    let interactiveTimeline = null;
+    if (chart) {
+      try {
+        personalProfile = generatePersonalAstrologyProfile(chart);
+        yearComparison = generateYearComparison(chart, currentYear, 4);
+        interactiveTimeline = generateInteractiveTimeline(chart);
+      } catch (genErr) {
+        console.warn('Profile/Year/Timeline generation notice:', genErr);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: {
@@ -833,6 +880,9 @@ You MUST respond STRICTLY in JSON format matching this schema:
         structured: structuredPayload,
       },
       structured: structuredPayload,
+      profile: personalProfile,
+      yearComparison: yearComparison,
+      timeline: interactiveTimeline,
       pendingVerification: pastPendingPrediction,
       recommendations: recommendations.slice(0, 6),
       deducted: deductedAmount,

@@ -1,6 +1,16 @@
 import { db } from './firebase/config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
+export interface AISessionPackage {
+  id: string;
+  minutes: number;
+  price: number;
+  label: string;
+  description?: string;
+  popular?: boolean;
+  enabled?: boolean;
+}
+
 export interface GlobalSettings {
   razorpayKeyId?: string;
   razorpayKeySecret?: string;
@@ -10,12 +20,56 @@ export interface GlobalSettings {
   zegoServerSecret?: string;
   vedikaApiKey?: string;
   openaiApiKey?: string;
-  aiChatPricePerPrompt?: number;
+
+  // Fully Dynamic Pricing Configuration
+  newUserTrialMinutes?: number; // Default 5 minutes FREE
+  aiChatPricePerMinute?: number; // Default ₹5/min
+  aiChatPricePerPrompt?: number; // Default ₹5 per prompt (compatible)
+  aiVoicePricePerMinute?: number; // Default ₹7/min
+  aiSessionPackages?: AISessionPackage[]; // 15m @ ₹69, 30m @ ₹129, 60m @ ₹249
+  humanAstrologerMinRate?: number; // Default ₹15/min
+  humanAstrologerMaxRate?: number; // Default ₹100/min
+  humanAstrologerDefaultRate?: number; // Default ₹25/min
+  pariharaPlanPrice?: number; // Default ₹499
+  pariharaPlanTitle?: string;
+  pariharaPlanDescription?: string;
+  pariharaPlanEnabled?: boolean;
+
   probationDurationMonths?: number;
   autoLockAfterProbation?: boolean;
   minRatingForFullTime?: number;
   minConsultationsForFullTime?: number;
 }
+
+export const DEFAULT_AI_SESSION_PACKAGES: AISessionPackage[] = [
+  {
+    id: 'session-15',
+    minutes: 15,
+    price: 69,
+    label: '15-minute AI session',
+    description: 'Quick focused astrological clarity & single query resolution',
+    popular: false,
+    enabled: true,
+  },
+  {
+    id: 'session-30',
+    minutes: 30,
+    price: 129,
+    label: '30-minute AI session',
+    description: 'Comprehensive Kundli, Vimshottari Dasha & career/relationship deep-dive',
+    popular: true,
+    enabled: true,
+  },
+  {
+    id: 'session-60',
+    minutes: 60,
+    price: 249,
+    label: '60-minute AI session',
+    description: 'Complete life roadmap, year ahead timeline & personalized Vedic remedies',
+    popular: false,
+    enabled: true,
+  },
+];
 
 const defaultSettings: GlobalSettings = {
   razorpayKeyId: 'rzp_test_TRAxs3TPMmg5AY',
@@ -26,7 +80,22 @@ const defaultSettings: GlobalSettings = {
   zegoServerSecret: 'd68c140051b7d8f2404c2b2b9b586886',
   vedikaApiKey: '',
   openaiApiKey: '',
+
+  // Pricing defaults
+  newUserTrialMinutes: 5,
+  aiChatPricePerMinute: 5,
   aiChatPricePerPrompt: 5,
+  aiVoicePricePerMinute: 7,
+  aiSessionPackages: DEFAULT_AI_SESSION_PACKAGES,
+  humanAstrologerMinRate: 15,
+  humanAstrologerMaxRate: 100,
+  humanAstrologerDefaultRate: 25,
+  pariharaPlanPrice: 499,
+  pariharaPlanTitle: 'Generate My Complete Parihara Plan',
+  pariharaPlanDescription:
+    'Comprehensive 8-fold Vedic remedial blueprint with personalized Mantras, Yantras, Homas, Gemstones, Rudraksha, Vastu and Temple remedies based on your Janam Kundli.',
+  pariharaPlanEnabled: true,
+
   probationDurationMonths: 3,
   autoLockAfterProbation: true,
   minRatingForFullTime: 4.5,
@@ -82,3 +151,26 @@ export async function updateSettings(data: GlobalSettings): Promise<void> {
     throw error;
   }
 }
+
+export async function getPricingSettings() {
+  const settings = await getSettings();
+  return {
+    newUserTrialMinutes: settings.newUserTrialMinutes ?? 5,
+    aiChatPricePerMinute: settings.aiChatPricePerMinute ?? settings.aiChatPricePerPrompt ?? 5,
+    aiChatPricePerPrompt: settings.aiChatPricePerPrompt ?? settings.aiChatPricePerMinute ?? 5,
+    aiVoicePricePerMinute: settings.aiVoicePricePerMinute ?? 7,
+    aiSessionPackages: settings.aiSessionPackages && settings.aiSessionPackages.length > 0 
+      ? settings.aiSessionPackages 
+      : DEFAULT_AI_SESSION_PACKAGES,
+    humanAstrologerMinRate: settings.humanAstrologerMinRate ?? 15,
+    humanAstrologerMaxRate: settings.humanAstrologerMaxRate ?? 100,
+    humanAstrologerDefaultRate: settings.humanAstrologerDefaultRate ?? 25,
+    pariharaPlanPrice: settings.pariharaPlanPrice ?? 499,
+    pariharaPlanTitle: settings.pariharaPlanTitle || 'Generate My Complete Parihara Plan',
+    pariharaPlanDescription:
+      settings.pariharaPlanDescription ||
+      'Comprehensive 8-fold Vedic remedial blueprint with personalized Mantras, Yantras, Homas, Gemstones, Rudraksha, Vastu and Temple remedies based on your Janam Kundli.',
+    pariharaPlanEnabled: settings.pariharaPlanEnabled !== false,
+  };
+}
+

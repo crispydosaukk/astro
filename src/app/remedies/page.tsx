@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import LandingFooter from '@/app/components/LandingFooter';
+import PariharaPlanPromoBanner from '@/components/PariharaPlanPromoBanner';
 
 import RotatingRemediesWheel from '@/components/RotatingRemediesWheel';
 import DynamicPageContent from '@/components/DynamicPageContent';
@@ -476,6 +477,9 @@ export default function RemediesPage() {
       {/* 8 Remedies Grid Section */}
       <section id="remedies-grid" className="py-16 lg:py-24 bg-[#F8F3EA] relative z-10">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-10 space-y-12">
+          {/* Flagship Complete Parihara Plan Banner */}
+          <PariharaPlanPromoBanner source="remedies_page" />
+
           <div className="text-center space-y-3 max-w-2xl mx-auto">
             <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-[#EDE4D5] text-[#713B32] border border-[#E5D9C8] shadow-sm">
               ASHTA-DIGBANDHAN MANDALA

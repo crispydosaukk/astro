@@ -48,6 +48,7 @@
     "serve": "next start",
     "type-check": "tsc --noEmit",
     "test:ap0001": "node scripts/benchmark-ap0001.js",
+    "test:benchmarks": "node scripts/benchmark-suite.js",
     "build:cpanel": "npm run build && node prepare_cpanel.js"
   },
   "dependencies": {

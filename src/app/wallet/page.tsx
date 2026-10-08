@@ -67,7 +67,7 @@ function WalletContent() {
   }, [user, userLoading]);
 
   const isUSD = currencyCode === 'USD';
-  const presets = isUSD ? [5, 10, 25, 50, 100, 250] : [100, 200, 500, 1000, 2000, 5000];
+  const presets = isUSD ? [5, 10, 25, 50, 100, 250] : [69, 129, 249, 499, 1000, 2000];
   const minAllowed = isUSD ? 0.5 : 10;
   const numAmount = parseFloat(amount);
   const isTooLow = amount !== '' && !isNaN(numAmount) && numAmount < minAllowed;

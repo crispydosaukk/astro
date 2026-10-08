@@ -441,6 +441,9 @@ export default function AdminAstrologersTable() {
                           onChange={(e) => setEditingAmount(e.target.value)}
                           className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground font-bold text-sm outline-none focus:border-[#C9952B]"
                         />
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Standard: ₹15–₹100+/min (astrologer-dependent)
+                        </p>
                       </div>
 
                       <div>

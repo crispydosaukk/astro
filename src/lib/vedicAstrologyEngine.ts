@@ -2927,3 +2927,428 @@ export function analyzeInquiryEvidence(
     escalationReason,
   };
 }
+
+// ---------------- PERSONAL ASTROLOGY PROFILE (ROADMAP ITEM 4) ----------------
+export interface PersonalAstrologyProfile {
+  personality: {
+    ascendant: string;
+    ascendantLord: string;
+    moonSign: string;
+    moonNakshatra: string;
+    nakshatraLord: string;
+    sunSign: string;
+    dominantPlanets: string[];
+    coreStrengths: string[];
+    karmicChallenges: string[];
+  };
+  career: {
+    tenthHouseSign: string;
+    tenthHouseLord: string;
+    occupyingPlanets: string;
+    d10LagnaSign: string;
+    careerYogas: string[];
+    professionalPotential: string;
+  };
+  finance: {
+    secondHouseLord: string;
+    eleventhHouseLord: string;
+    wealthCombinations: string[];
+    dhanaStrength: string;
+  };
+  marriage: {
+    seventhHouseSign: string;
+    seventhHouseLord: string;
+    occupyingPlanets: string;
+    d9LagnaSign: string;
+    venusPlacement: string;
+    jupiterPlacement: string;
+    maritalDisposition: string;
+  };
+  health: {
+    lagnaLordPlacement: string;
+    sixthHouseSign: string;
+    sixthHouseLord: string;
+    vitalityLevel: string;
+  };
+  spirituality: {
+    atmakaraka: string;
+    karakamsaRashi: string;
+    ishtaDevataName: string;
+    primaryMantra: string;
+    auspiciousDay: string;
+  };
+  activeDasha: {
+    mahadasha: string;
+    antardasha: string;
+    pratyantardasha: string;
+    currentPeriod: string;
+  };
+}
+
+export function generatePersonalAstrologyProfile(
+  chart: ReturnType<typeof calculateBirthChartData>
+): PersonalAstrologyProfile {
+  const d1 = chart.d1Houses || [];
+  const pList = chart.planetaryDegrees || [];
+
+  const h10 = d1.find((h) => h.houseNumber === 10);
+  const h7 = d1.find((h) => h.houseNumber === 7);
+  const h2 = d1.find((h) => h.houseNumber === 2);
+  const h11 = d1.find((h) => h.houseNumber === 11);
+  const h6 = d1.find((h) => h.houseNumber === 6);
+
+  const getLordOfSign = (shortName?: string) => {
+    const found = RASHIS.find(
+      (r) => r.shortName === shortName || r.name.toLowerCase().includes((shortName || '').toLowerCase())
+    );
+    return found?.lord || 'Unknown';
+  };
+
+  const tenthLord = getLordOfSign(h10?.sign);
+  const seventhLord = getLordOfSign(h7?.sign);
+  const secondLord = getLordOfSign(h2?.sign);
+  const eleventhLord = getLordOfSign(h11?.sign);
+  const sixthLord = getLordOfSign(h6?.sign);
+
+  const venus = pList.find((p) => p.name === 'Venus');
+  const jupiter = pList.find((p) => p.name === 'Jupiter');
+
+  const dominant = pList
+    .filter(
+      (p) =>
+        p.status.includes('Exalted') ||
+        p.status.includes('Own') ||
+        p.status.includes('Kendra') ||
+        p.status.includes('Trikona')
+    )
+    .map((p) => p.name)
+    .slice(0, 3);
+
+  const careerYogas = (chart.yogas || [])
+    .filter((y) => y.name.includes('Raja') || y.name.includes('Budhaditya') || y.name.includes('Mahapurusha') || y.name.includes('Gaja'))
+    .map((y) => y.name);
+
+  const dhanaYogas = (chart.yogas || [])
+    .filter((y) => y.name.includes('Dhana') || y.name.includes('Chandra-Mangal') || y.name.includes('Gaja'))
+    .map((y) => y.name);
+
+  return {
+    personality: {
+      ascendant: chart.ascendant,
+      ascendantLord: chart.ascendantLord,
+      moonSign: chart.moonSign,
+      moonNakshatra: chart.nakshatra,
+      nakshatraLord: chart.nakshatraLord,
+      sunSign: chart.sunSign,
+      dominantPlanets: dominant.length > 0 ? dominant : [chart.ascendantLord, 'Jupiter'],
+      coreStrengths: [
+        `Ascendant Lord ${chart.ascendantLord} grants inherent resilience and executive purpose.`,
+        `Moon in ${chart.moonSign} under ${chart.nakshatra} confers emotional depth and intuitive discernment.`,
+        dominant.length > 0
+          ? `Dignified ${dominant.join(' & ')} bolster personal magnetism and dharmic clarity.`
+          : 'Strong Kendra foundation supports consistent life growth.',
+      ],
+      karmicChallenges: [
+        `Active ${chart.dasha.currentAntardasha} requires disciplined focus against periodic distraction.`,
+        'Patience is required during Rahu and Saturn transit shifts to balance material aspirations with emotional peace.',
+      ],
+    },
+    career: {
+      tenthHouseSign: h10?.sign || 'Capricorn',
+      tenthHouseLord: tenthLord,
+      occupyingPlanets: h10?.planets || 'Empty',
+      d10LagnaSign: (chart as any).d10Houses?.[0]?.sign || 'Aries',
+      careerYogas: careerYogas.length > 0 ? careerYogas : ['Raja Yoga Leadership Potential'],
+      professionalPotential: `10th House governed by ${tenthLord} indicates structured professional ascent, organizational responsibility, and executive achievement through disciplined persistence.`,
+    },
+    finance: {
+      secondHouseLord: secondLord,
+      eleventhHouseLord: eleventhLord,
+      wealthCombinations: dhanaYogas.length > 0 ? dhanaYogas : ['2nd/11th Dhana Yoga Continuity'],
+      dhanaStrength: `2nd Lord (${secondLord}) and 11th Lord (${eleventhLord}) establish sustainable income streams with capital growth accelerating during supportive sub-periods.`,
+    },
+    marriage: {
+      seventhHouseSign: h7?.sign || 'Libra',
+      seventhHouseLord: seventhLord,
+      occupyingPlanets: h7?.planets || 'Empty',
+      d9LagnaSign: (chart as any).d9Houses?.[0]?.sign || 'Taurus',
+      venusPlacement: venus ? `${venus.rashi} (${venus.house})` : 'Dignified',
+      jupiterPlacement: jupiter ? `${jupiter.rashi} (${jupiter.house})` : 'Dignified',
+      maritalDisposition: `7th House under ${seventhLord} with Venus in ${venus?.rashi || 'favorable sign'} promises supportive companionship; open communication and patience nurture lifelong harmony.`,
+    },
+    health: {
+      lagnaLordPlacement: `${chart.ascendantLord} ruling 1st House`,
+      sixthHouseSign: h6?.sign || 'Virgo',
+      sixthHouseLord: sixthLord,
+      vitalityLevel: `Good inherent constitutional vitality anchored by ${chart.ascendantLord}; maintaining regular lifestyle rhythms and stress moderation safeguards digestive and nervous balance.`,
+    },
+    spirituality: {
+      atmakaraka: chart.ishtaDevata?.atmakarakaPlanet || 'Jupiter',
+      karakamsaRashi: chart.ishtaDevata?.karakamsaRashi || 'Pisces',
+      ishtaDevataName: chart.ishtaDevata?.deityName || 'Lord Shiva',
+      primaryMantra: chart.ishtaDevata?.primaryMantra || 'Om Namah Shivaya',
+      auspiciousDay: chart.ishtaDevata?.auspiciousDay || 'Thursday',
+    },
+    activeDasha: {
+      mahadasha: chart.dasha.currentMahadasha,
+      antardasha: chart.dasha.currentAntardasha,
+      pratyantardasha: chart.dasha.currentPratyantardasha,
+      currentPeriod: `${chart.dasha.antarStartDate} — ${chart.dasha.antarEndDate}`,
+    },
+  };
+}
+
+// ---------------- COMPARE YEARS ENGINE (ROADMAP ITEM 11) ----------------
+export interface YearComparisonOutlook {
+  year: number;
+  dashaCycle: string;
+  opportunity: 'High' | 'Medium' | 'Steady';
+  stability: 'High' | 'Moderate' | 'Testing';
+  careerScore: number;
+  careerOpportunity: 'High' | 'Medium' | 'Steady';
+  careerStability: 'High' | 'Medium' | 'Low';
+  careerSummary: string;
+  financeScore: number;
+  financeTrend: 'High Growth' | 'Stable Gains' | 'Consolidation';
+  financeSummary: string;
+  relationshipScore: number;
+  relationshipStatus: 'Harmonious' | 'Active Alignment' | 'Requires Patience';
+  relationshipSummary: string;
+  healthScore: number;
+  healthStatus: 'Robust' | 'Moderate / Balanced' | 'Care Advised';
+  healthSummary: string;
+  focalRecommendation: string;
+  whyThisYear: string;
+}
+
+export function generateYearComparison(
+  chart: ReturnType<typeof calculateBirthChartData>,
+  startYear: number = new Date().getFullYear(),
+  count: number = 3
+): YearComparisonOutlook[] {
+  const antardashas = (chart.dasha as any).activeAntardashas || [];
+  const results: YearComparisonOutlook[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const yr = startYear + i;
+    const midYearDate = new Date(`${yr}-07-01T12:00:00Z`);
+    const midMs = midYearDate.getTime();
+
+    const matchedAD = antardashas.find((a: any) => midMs >= a.startMs && midMs <= a.endMs) || antardashas[0];
+    const adLord = matchedAD?.lord || chart.dasha.currentAntardasha.split(' ')[0] || 'Mercury';
+    const mahaLord = chart.dasha.currentMahadasha.split(' ')[0] || 'Saturn';
+
+    const isPowerGraha = ['Sun', 'Mars'].includes(adLord);
+
+    let careerScore = 75;
+    let financeScore = 72;
+    let relScore = 70;
+    let healthScore = 78;
+
+    if (isPowerGraha || adLord === 'Saturn') {
+      careerScore += 12;
+      financeScore += 6;
+      healthScore -= 4;
+    } else if (adLord === 'Venus') {
+      relScore += 18;
+      financeScore += 14;
+      careerScore += 5;
+    } else if (adLord === 'Jupiter') {
+      financeScore += 15;
+      careerScore += 10;
+      relScore += 12;
+      healthScore += 8;
+    } else if (adLord === 'Mercury') {
+      careerScore += 8;
+      financeScore += 10;
+      healthScore += 6;
+    } else if (['Rahu', 'Ketu'].includes(adLord)) {
+      careerScore += 4;
+      relScore -= 8;
+      healthScore -= 6;
+      financeScore += 2;
+    }
+
+    careerScore = Math.min(95, Math.max(55, careerScore));
+    financeScore = Math.min(95, Math.max(52, financeScore));
+    relScore = Math.min(95, Math.max(50, relScore));
+    healthScore = Math.min(95, Math.max(55, healthScore));
+
+    const opportunity: 'High' | 'Medium' | 'Steady' =
+      careerScore >= 82 || financeScore >= 82 ? 'High' : careerScore >= 70 ? 'Medium' : 'Steady';
+    const stability: 'High' | 'Moderate' | 'Testing' =
+      healthScore >= 78 && relScore >= 70 ? 'High' : healthScore >= 65 ? 'Moderate' : 'Testing';
+
+    results.push({
+      year: yr,
+      dashaCycle: `${mahaLord} MD / ${adLord} AD`,
+      opportunity,
+      stability,
+      careerScore,
+      careerOpportunity: careerScore >= 80 ? 'High' : careerScore >= 70 ? 'Medium' : 'Steady',
+      careerStability: stability === 'High' ? 'High' : stability === 'Moderate' ? 'Medium' : 'Low',
+      careerSummary:
+        careerScore >= 80
+          ? `Exceptional advancement year under ${adLord} influence; high potential for promotion, leadership recognition, and major executive milestones.`
+          : `Steady career progression with consistent effort; excellent foundation-building under ${adLord} sub-period.`,
+      financeScore,
+      financeTrend: financeScore >= 80 ? 'High Growth' : financeScore >= 70 ? 'Stable Gains' : 'Consolidation',
+      financeSummary:
+        financeScore >= 80
+          ? `Strong wealth expansion cycle activating 2nd/11th house gains; favorable for strategic investments and debt reduction.`
+          : `Balanced financial liquidity with steady capital accumulation; prioritize planned budget over impulsive speculation.`,
+      relationshipScore: relScore,
+      relationshipStatus: relScore >= 80 ? 'Harmonious' : relScore >= 68 ? 'Active Alignment' : 'Requires Patience',
+      relationshipSummary:
+        relScore >= 80
+          ? `Highly auspicious matrimonial and domestic harmony window influenced by ${adLord}; ideal for matrimonial proposals and deepening bonds.`
+          : `Moderate relationship equilibrium; practice patience and mutual understanding to navigate planetary transit friction.`,
+      healthScore,
+      healthStatus: healthScore >= 80 ? 'Robust' : healthScore >= 70 ? 'Moderate / Balanced' : 'Care Advised',
+      healthSummary:
+        healthScore >= 80
+          ? 'High constitutional vitality, robust physical immunity, and swift recovery from minor fatigue.'
+          : 'Sustained endurance with periodic need for rest; maintain disciplined diet and stress moderation.',
+      focalRecommendation:
+        yr === startYear
+          ? 'Consolidate ongoing projects, begin the 48-Day Sadhana Mandala, and align daily discipline.'
+          : yr === startYear + 1
+          ? 'Seize expansion opportunities in career and personal milestones as favorable planetary alignments open.'
+          : 'Reap harvest of disciplined groundwork, solidify long-term assets, and focus on higher spiritual growth.',
+      whyThisYear: `In ${yr}, the chart activates the planetary energies of ${mahaLord} Mahadasha and ${adLord} Antardasha, shifting focus to ${
+        adLord === 'Venus'
+          ? 'matrimonial harmony and prosperity'
+          : adLord === 'Sun' || adLord === 'Saturn'
+          ? 'professional authority and career elevation'
+          : 'intellectual expansion and financial stability'
+      }.`,
+    });
+  }
+
+  return results;
+}
+
+// ---------------- INTERACTIVE ASTROLOGY TIMELINE (ROADMAP ITEM 12) ----------------
+export interface TimelineMilestone {
+  id: string;
+  periodName: string;
+  startDate: string;
+  endDate: string;
+  lord: string;
+  nature: 'Auspicious' | 'Mixed' | 'Transformational' | 'Testing';
+  category: 'Career' | 'Relationships' | 'Spirituality' | 'Health' | 'Wealth' | 'Life Path';
+  astrologicalSignificance: string;
+  recommendedAction: string;
+  suggestedQuestion: string;
+}
+
+export function generateInteractiveTimeline(
+  chart: ReturnType<typeof calculateBirthChartData>
+): TimelineMilestone[] {
+  const pratyantars = (chart.dasha as any).activePratyantardashas || [];
+  const antardashas = (chart.dasha as any).activeAntardashas || [];
+  const nowMs = Date.now();
+  const milestones: TimelineMilestone[] = [];
+
+  const relevantPDs = pratyantars.filter((p: any) => p.endMs >= nowMs).slice(0, 5);
+
+  relevantPDs.forEach((pd: any, idx: number) => {
+    const l = pd.lord;
+    let nature: TimelineMilestone['nature'] = 'Auspicious';
+    let category: TimelineMilestone['category'] = 'Life Path';
+    let significance = '';
+    let action = '';
+    let question = '';
+
+    if (['Venus'].includes(l)) {
+      nature = 'Auspicious';
+      category = 'Relationships';
+      significance = 'Venus Pratyantardasha radiates marital grace, creative inspiration, and luxury asset attraction.';
+      action = 'Engage in matrimonial discussions, perform Friday Devi worship, and cultivate artistic endeavors.';
+      question = `What does ${l} Pratyantardasha bring for my marriage and love life?`;
+    } else if (['Sun'].includes(l)) {
+      nature = 'Auspicious';
+      category = 'Career';
+      significance = 'Surya Pratyantardasha activates authority, recognition from superiors, and executive promotions.';
+      action = 'Pursue career elevations, offer morning Arghya to Surya, and assume leadership responsibilities.';
+      question = `How will ${l} Pratyantardasha impact my job promotion and career?`;
+    } else if (['Mercury'].includes(l)) {
+      nature = 'Auspicious';
+      category = 'Wealth';
+      significance = 'Budha sub-period sharpens intellect, business negotiations, and financial liquidity.';
+      action = 'Sign contracts, invest in learning/certifications, and practice Vishnu Sahasranama.';
+      question = `What business and financial opportunities unfold during ${l} Pratyantardasha?`;
+    } else if (['Jupiter'].includes(l)) {
+      nature = 'Auspicious';
+      category = 'Spirituality';
+      significance = 'Guru Pratyantardasha bestows wisdom, spiritual protection, progeny blessings, and auspicious dharma.';
+      action = 'Engage in sacred learning, seek Guru blessings, and support charitable education.';
+      question = `How will Jupiter sub-period bless my family and spiritual growth?`;
+    } else if (['Ketu'].includes(l)) {
+      nature = 'Transformational';
+      category = 'Spirituality';
+      significance = 'Ketu sub-period triggers inner detachment, intuitive awakening, and karmic obstacle dissolution.';
+      action = 'Focus on deep meditation, Ganesha Japa, and pilgrimage to sacred Shiva/Ganesha shrines.';
+      question = `What spiritual lessons and karmic shifts occur during ${l} Pratyantardasha?`;
+    } else if (['Rahu'].includes(l)) {
+      nature = 'Mixed';
+      category = 'Career';
+      significance = 'Rahu sub-period fuels ambitious desires and unconventional expansion requiring grounded ethics.';
+      action = 'Practice daily Hanuman Chalisa, avoid hasty speculation, and channel focus into technology/research.';
+      question = `How can I balance Rahu sub-period energies for maximum success?`;
+    } else if (['Mars'].includes(l)) {
+      nature = 'Mixed';
+      category = 'Career';
+      significance = 'Mangal sub-period injects high energy, dynamic initiative, and property acquisitions.';
+      action = 'Engage in physical workouts, channel anger constructively, and chant Kartikeya/Hanuman stotrams.';
+      question = `How does Mars sub-period influence my property and vitality?`;
+    } else if (['Moon'].includes(l)) {
+      nature = 'Auspicious';
+      category = 'Health';
+      significance = 'Chandra sub-period highlights emotional peace, domestic travel, and motherly blessings.';
+      action = 'Drink water from silver vessels, respect elders, and practice calm breathing pranayama.';
+      question = `How will Moon sub-period affect my mental peace and family life?`;
+    } else {
+      nature = 'Testing';
+      category = 'Life Path';
+      significance = 'Shani sub-period rewards patient discipline, perseverance, and long-term structural stability.';
+      action = 'Engage in Saturday seva to workers/elders, light sesame oil deepam, and practice steadfast focus.';
+      question = `What are the key karmic lessons during ${l} Pratyantardasha?`;
+    }
+
+    milestones.push({
+      id: `pd-${idx}-${l.toLowerCase()}`,
+      periodName: pd.pratyantardasha,
+      startDate: pd.startDateStr,
+      endDate: pd.endDateStr,
+      lord: l,
+      nature,
+      category,
+      astrologicalSignificance: significance,
+      recommendedAction: action,
+      suggestedQuestion: question,
+    });
+  });
+
+  const upcomingADs = antardashas.filter((a: any) => a.endMs >= nowMs).slice(1, 3);
+  upcomingADs.forEach((ad: any, idx: number) => {
+    milestones.push({
+      id: `ad-${idx}-${ad.lord.toLowerCase()}`,
+      periodName: `Major Dasha Shift: ${ad.antardasha}`,
+      startDate: ad.startDateStr,
+      endDate: ad.endDateStr,
+      lord: ad.lord,
+      nature: ['Jupiter', 'Venus', 'Mercury'].includes(ad.lord) ? 'Auspicious' : 'Mixed',
+      category: ['Venus', 'Moon'].includes(ad.lord)
+        ? 'Relationships'
+        : ['Sun', 'Mars', 'Saturn'].includes(ad.lord)
+        ? 'Career'
+        : 'Wealth',
+      astrologicalSignificance: `Major Vimshottari Antardasha phase transition governed by ${ad.lord}, re-orienting long-term life trajectory.`,
+      recommendedAction: `Prepare for significant planetary chapter transition; review personal goals and initiate 48-day remedial shanti.`,
+      suggestedQuestion: `What major life changes will happen when ${ad.antardasha} begins in ${ad.startDateStr}?`,
+    });
+  });
+
+  return milestones;
+}

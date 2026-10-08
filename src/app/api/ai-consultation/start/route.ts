@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { DEFAULT_AI_ASTROLOGERS, AIAstrologer } from '@/lib/aiAstrologerData';
+import { getPricingSettings } from '@/lib/settings';
 import {
   calculateBirthChartData,
   calculateAstroPlacement,
@@ -27,6 +28,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
+    // Dynamic Pricing & Trial settings
+    const pricing = await getPricingSettings();
+    const defaultVoiceRate = pricing.aiVoicePricePerMinute || 7;
+    const trialAllowedMinutes = pricing.newUserTrialMinutes ?? 5;
+
     // 1. Fetch Astrologer Data (From Firestore or fallback defaults)
     let astrologer: AIAstrologer | null = null;
     try {
@@ -43,8 +49,10 @@ export async function POST(req: Request) {
         DEFAULT_AI_ASTROLOGERS.find((a) => a.id === astrologerId) || DEFAULT_AI_ASTROLOGERS[0];
     }
 
-    const pricePerMin = astrologer.pricePerMin || 20;
-    const minRequired = pricePerMin * 5; // Minimum 5 minutes required
+    // Rate: use dynamic platform voice rate (default ₹7/min) or custom astrologer override if set and != 20
+    const pricePerMin = (astrologer.pricePerMin && astrologer.pricePerMin !== 20) 
+      ? astrologer.pricePerMin 
+      : defaultVoiceRate;
 
     // 2. Validate Customer Wallet Balance via Transaction
     const sessionId = `ai_sess_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
@@ -125,29 +133,42 @@ export async function POST(req: Request) {
 
       const userData = userDoc.data();
       const currentBalance = userData?.walletBalance || 0;
+      const trialMinutesUsed = Number(userData?.trialMinutesUsed) || 0;
+      const isTrialEligible = trialAllowedMinutes > 0 && trialMinutesUsed < trialAllowedMinutes;
 
-      if (currentBalance < minRequired) {
-        throw new Error(
-          `Insufficient wallet balance. Minimum ₹${minRequired} (5 mins) required to start.`
-        );
+      let initialCharged = 0;
+
+      if (isTrialEligible) {
+        // Devotee is using their complimentary new-user trial!
+        remainingBalance = currentBalance;
+        transaction.update(userRef, {
+          trialMinutesUsed: trialMinutesUsed + 1,
+        });
+      } else {
+        if (currentBalance < pricePerMin) {
+          throw new Error(
+            `Insufficient wallet balance. Minimum ₹${pricePerMin} required to start consultation.`
+          );
+        }
+
+        // Deduct Minute 1
+        remainingBalance = currentBalance - pricePerMin;
+        initialCharged = pricePerMin;
+        transaction.update(userRef, {
+          walletBalance: remainingBalance,
+        });
+
+        // Create Initial Debit Transaction
+        transaction.set(walletTxRef, {
+          amount: pricePerMin,
+          type: 'debit',
+          status: 'completed',
+          date: new Date().toISOString(),
+          description: `AI Consultation (1 min) with ${astrologer?.name}`,
+          sessionId: sessionId,
+          astrologerId: astrologer?.id,
+        });
       }
-
-      // Deduct Minute 1
-      remainingBalance = currentBalance - pricePerMin;
-      transaction.update(userRef, {
-        walletBalance: remainingBalance,
-      });
-
-      // Create Initial Debit Transaction
-      transaction.set(walletTxRef, {
-        amount: pricePerMin,
-        type: 'debit',
-        status: 'completed',
-        date: new Date().toISOString(),
-        description: `AI Consultation (1 min) with ${astrologer?.name}`,
-        sessionId: sessionId,
-        astrologerId: astrologer?.id,
-      });
 
       // Create Active AI Consultation Record
       transaction.set(sessionRef, {
@@ -171,8 +192,10 @@ export async function POST(req: Request) {
         startTime: new Date().toISOString(),
         durationSeconds: 60,
         billedMinutes: 1,
-        totalBilledAmount: pricePerMin,
-        walletTransactionId: walletTxRef.id,
+        totalBilledAmount: initialCharged,
+        isTrialActive: isTrialEligible,
+        trialMinutesAllowed: trialAllowedMinutes,
+        walletTransactionId: isTrialEligible ? null : walletTxRef.id,
         status: 'active',
         createdAt: new Date().toISOString(),
       });
@@ -185,6 +208,8 @@ export async function POST(req: Request) {
       remainingBalance,
       astroContext,
       astrologer,
+      pricePerMin,
+      trialMinutesAllowed: trialAllowedMinutes,
     });
   } catch (error: any) {
     console.error('Error starting AI consultation:', error);

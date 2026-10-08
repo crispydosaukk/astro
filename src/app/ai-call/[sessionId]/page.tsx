@@ -76,7 +76,7 @@ export default function AICallRoomPage() {
   const isAiSpeakingRef = useRef<boolean>(false);
   const isSpeakerMutedRef = useRef<boolean>(false);
   const isGeneratingReplyRef = useRef<boolean>(false);
-  const handleSendMessageRef = useRef<((textToSend?: string) => void) | null>(null);
+  const handleSendMessageRef = useRef<((textToSend?: string, wasInterrupted?: boolean) => void) | null>(null);
 
   // Keep refs in sync
   useEffect(() => {
@@ -429,7 +429,7 @@ export default function AICallRoomPage() {
 
   // 2. AI Voice / Speech Exchange Handler
   const triggerAiVoiceExchange = useCallback(
-    async (userText: string, historyOverride: any[]) => {
+    async (userText: string, historyOverride: any[], wasInterrupted = false) => {
       if (isGeneratingReplyRef.current) return;
       isGeneratingReplyRef.current = true;
       setIsGeneratingReply(true);
@@ -446,6 +446,7 @@ export default function AICallRoomPage() {
             conversationHistory: historyOverride,
             language: activeLanguageRef.current,
             isInitial: false,
+            isInterrupted: wasInterrupted,
           }),
         });
 
@@ -484,7 +485,7 @@ export default function AICallRoomPage() {
 
   // Send User Message - Guaranteed Immediate Execution
   const handleSendMessage = useCallback(
-    (textToSend?: string) => {
+    (textToSend?: string, wasInterrupted = false) => {
       const text = textToSend !== undefined ? textToSend : inputTextRef.current;
       if (!text || !text.trim() || isGeneratingReplyRef.current) return;
 
@@ -513,8 +514,12 @@ export default function AICallRoomPage() {
         return updatedHistory;
       });
 
-      // Trigger AI consultation
-      triggerAiVoiceExchange(cleanedText, updatedHistory.length ? updatedHistory : [...latestMessagesRef.current, userMsg]);
+      // Trigger AI consultation with interruption flag
+      triggerAiVoiceExchange(
+        cleanedText,
+        updatedHistory.length ? updatedHistory : [...latestMessagesRef.current, userMsg],
+        wasInterrupted
+      );
     },
     [triggerAiVoiceExchange]
   );
@@ -599,16 +604,36 @@ export default function AICallRoomPage() {
       };
 
       rec.onresult = (event: any) => {
-        // If AI is currently reading guidance, ignore mic input so audio playback is never cut off
-        if (isAiSpeakingRef.current || (activeAudioInstanceRef.current && !activeAudioInstanceRef.current.paused)) {
-          return;
-        }
-
         let transcript = '';
         for (let i = 0; i < event.results.length; ++i) {
           transcript += event.results[i][0].transcript;
         }
         transcript = transcript.trim();
+
+        // Barge-in & Interruption detection: silence AI speech if user interrupts
+        const isAiPlaying =
+          isAiSpeakingRef.current ||
+          Boolean(activeAudioInstanceRef.current && !activeAudioInstanceRef.current.paused);
+        let interruptedNow = false;
+
+        if (isAiPlaying) {
+          if (transcript.length >= 3) {
+            interruptedNow = true;
+            if (activeAudioInstanceRef.current) {
+              try {
+                activeAudioInstanceRef.current.pause();
+                activeAudioInstanceRef.current.src = '';
+              } catch (e) {}
+            }
+            if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+              window.speechSynthesis.cancel();
+            }
+            setIsAiSpeaking(false);
+            isAiSpeakingRef.current = false;
+          } else {
+            return;
+          }
+        }
 
         if (transcript) {
           accumulatedSpeechRef.current = transcript;
@@ -629,7 +654,7 @@ export default function AICallRoomPage() {
             } catch (e) {}
             setIsListening(false);
             if (handleSendMessageRef.current) {
-              handleSendMessageRef.current(text);
+              handleSendMessageRef.current(text, interruptedNow);
             }
           }
         }, 800);

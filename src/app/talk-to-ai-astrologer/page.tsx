@@ -52,6 +52,7 @@ import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import CompletePariharaPlanModal from '@/components/CompletePariharaPlanModal';
 
 // Icon Map for disciplines
 const disciplineIconMap: Record<string, any> = {
@@ -98,6 +99,39 @@ function TalkToAIAstrologerContent() {
       setSelectedRemedy(remedyParam);
     }
   }, [searchParams]);
+
+  // Dynamic Platform Pricing & Plans
+  const [pricing, setPricing] = useState({
+    newUserTrialMinutes: 5,
+    aiChatPricePerMinute: 5,
+    aiVoicePricePerMinute: 7,
+    aiSessionPackages: [
+      { id: 'session-15', minutes: 15, price: 69, label: '15-minute AI session', popular: false },
+      { id: 'session-30', minutes: 30, price: 129, label: '30-minute AI session', popular: true },
+      { id: 'session-60', minutes: 60, price: 249, label: '60-minute AI session', popular: false },
+    ],
+    pariharaPlanPrice: 499,
+    pariharaPlanTitle: 'Generate My Complete Parihara Plan',
+  });
+  const [showPariharaModal, setShowPariharaModal] = useState(false);
+
+  useEffect(() => {
+    async function fetchPricing() {
+      try {
+        const res = await fetch('/api/settings/pricing');
+        const data = await res.json();
+        if (data.pricing) {
+          setPricing((prev) => ({
+            ...prev,
+            ...data.pricing,
+          }));
+        }
+      } catch (err) {
+        console.warn('Failed to load dynamic pricing:', err);
+      }
+    }
+    fetchPricing();
+  }, []);
 
   // Modals & State
   const [selectedAstrologer, setSelectedAstrologer] = useState<AIAstrologer | null>(null);
@@ -328,13 +362,19 @@ function TalkToAIAstrologerContent() {
       return;
     }
 
-    const currentBalance = userData?.walletBalance || 0;
-    const pricePerMin = selectedAstrologer.pricePerMin || 20;
-    const minRequired = pricePerMin * 5;
+    const trialAllowed = pricing.newUserTrialMinutes ?? 5;
+    const trialUsed = Number(userData?.trialMinutesUsed) || 0;
+    const isTrialEligible = trialAllowed > 0 && trialUsed < trialAllowed;
 
-    if (currentBalance < minRequired) {
+    const currentBalance = userData?.walletBalance || 0;
+    const pricePerMin =
+      selectedAstrologer.pricePerMin && selectedAstrologer.pricePerMin !== 20
+        ? selectedAstrologer.pricePerMin
+        : pricing.aiVoicePricePerMinute || 7;
+
+    if (!isTrialEligible && currentBalance < pricePerMin) {
       toast.error(
-        `Insufficient balance in wallet (${formatPrice(currentBalance)} available, ${formatPrice(minRequired)} for 5 mins required). Redirecting to recharge...`
+        `Insufficient balance in wallet (${formatPrice(currentBalance)} available, ${formatPrice(pricePerMin)} required). Redirecting to recharge...`
       );
       const returnUrl = `/talk-to-ai-astrologer?astrologer=${selectedAstrologer.id}`;
       router.push(`/wallet?redirect=${encodeURIComponent(returnUrl)}`);
@@ -426,6 +466,71 @@ function TalkToAIAstrologerContent() {
       {/* Main Marketplace Section */}
       <section className="py-8 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 space-y-6">
         
+        {/* Dynamic Consultation Pricing & Plans Showcase Banner */}
+        <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-[#2B1408] via-[#43200D] to-[#2B1408] border border-[#D4AF37]/40 shadow-xl text-white">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#D4AF37]/20 text-[#F6D075] border border-[#D4AF37]/40 flex items-center gap-1.5 shadow-sm">
+                  <Sparkles size={13} className="text-[#F6D075]" />
+                  TRANSPARENT VEDIC PRICING
+                </span>
+                <span className="text-xs text-white/70">· Pay per minute or choose session bundles</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                Vedic AI Astrologer Consultation & Parihara Plans
+              </h2>
+              <p className="text-xs sm:text-sm text-white/80 max-w-2xl leading-relaxed">
+                Connect instantly with certified AI Astrologers. First 5 minutes complimentary for new devotees.
+              </p>
+            </div>
+
+            {/* Quick Pricing Badges Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 shrink-0 text-center">
+              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-[#D4AF37]/30">
+                <span className="text-[10px] uppercase font-bold text-green-400 block tracking-wider">New Users</span>
+                <span className="text-sm sm:text-base font-black text-white">{pricing.newUserTrialMinutes ?? 5} Mins FREE</span>
+                <span className="text-[10px] text-white/60 block">Complimentary</span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-[#D4AF37]/30">
+                <span className="text-[10px] uppercase font-bold text-[#F6D075] block tracking-wider">AI Chat</span>
+                <span className="text-sm sm:text-base font-black text-white">₹{pricing.aiChatPricePerMinute ?? 5}/min</span>
+                <span className="text-[10px] text-white/60 block">Live Chat</span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-[#D4AF37]/30">
+                <span className="text-[10px] uppercase font-bold text-[#F6D075] block tracking-wider">AI Voice Call</span>
+                <span className="text-sm sm:text-base font-black text-white">₹{pricing.aiVoicePricePerMinute ?? 7}/min</span>
+                <span className="text-[10px] text-white/60 block">1-on-1 Voice</span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-accent/20 backdrop-blur-md border border-accent/50">
+                <span className="text-[10px] uppercase font-bold text-[#F6D075] block tracking-wider">Session Bundles</span>
+                <span className="text-xs sm:text-sm font-black text-[#F6D075]">₹69 · ₹129 · ₹249</span>
+                <span className="text-[10px] text-white/70 block">15m / 30m / 60m</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar with Parihara Plan CTA */}
+          <div className="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs text-[#F6D075]">
+              <Flame size={15} className="text-[#F6D075] shrink-0" />
+              <span>
+                Want a complete life remedy blueprint? Get your <strong>8-Fold Complete Parihara Plan</strong> with personalized Mantras, Yantras, Gemstones & Homas.
+              </span>
+            </div>
+            <button
+              onClick={() => setShowPariharaModal(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] text-[#2C3E50] font-black text-xs hover:shadow-lg transition-all shrink-0 flex items-center gap-1.5 cursor-pointer"
+            >
+              <Sparkles size={13} />
+              <span>Generate My Complete Parihara Plan (₹{pricing.pariharaPlanPrice ?? 499})</span>
+            </button>
+          </div>
+        </div>
+
         {/* Disciplines Horizontal Carousel */}
         <div>
           <div className="flex items-center justify-between mb-2.5">
@@ -769,9 +874,12 @@ function TalkToAIAstrologerContent() {
                   {/* Clean Bottom Rate & Action Bar */}
                   <div className="pt-2.5 border-t border-border/60 flex items-center justify-between gap-2">
                     <div>
-                      <span className="text-[9px] text-muted-foreground block leading-none">Rate</span>
                       <div className="text-sm font-bold text-[#C9952B]">
-                        {formatPrice(astro.pricePerMin)}
+                        {formatPrice(
+                          astro.pricePerMin && astro.pricePerMin !== 20
+                            ? astro.pricePerMin
+                            : pricing.aiVoicePricePerMinute || 7
+                        )}
                         <span className="text-[10px] font-normal text-muted-foreground">/min</span>
                       </div>
                     </div>
@@ -963,7 +1071,7 @@ function TalkToAIAstrologerContent() {
                       Voice Consultation with {selectedAstrologer.name}
                     </h3>
                     <p className="text-xs text-[#E5D5BA] font-medium">
-                      Rate: <span className="text-[#E5B54F] font-bold">{formatPrice(selectedAstrologer.pricePerMin)}/min</span> · 24x7 Instant Voice Call
+                      Rate: <span className="text-[#E5B54F] font-bold">{formatPrice(selectedAstrologer.pricePerMin && selectedAstrologer.pricePerMin !== 20 ? selectedAstrologer.pricePerMin : pricing.aiVoicePricePerMinute || 7)}/min</span> · 24x7 Instant Voice Call
                     </p>
                   </div>
                 </div>
@@ -1003,31 +1111,63 @@ function TalkToAIAstrologerContent() {
                     <span className="text-xs font-bold text-emerald-500">
                       ~
                       {Math.floor(
-                        (userData?.walletBalance || 0) / (selectedAstrologer.pricePerMin || 20)
+                        (userData?.walletBalance || 0) /
+                          (selectedAstrologer.pricePerMin && selectedAstrologer.pricePerMin !== 20
+                            ? selectedAstrologer.pricePerMin
+                            : pricing.aiVoicePricePerMinute || 7)
                       )}{' '}
                       mins
                     </span>
                   </div>
                 </div>
 
-                {/* Low Balance Alert if < 5 mins */}
-                {(userData?.walletBalance || 0) < (selectedAstrologer.pricePerMin || 20) * 5 && (
-                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle size={15} className="shrink-0" />
-                      <span>
-                        Min {formatPrice((selectedAstrologer.pricePerMin || 20) * 5)} (5 mins)
-                        required.
-                      </span>
-                    </div>
-                    <Link
-                      href={`/wallet?redirect=${encodeURIComponent('/talk-to-ai-astrologer')}`}
-                      className="px-3 py-1 rounded-lg bg-amber-500 text-white font-bold text-[11px] hover:bg-amber-600 transition-colors"
-                    >
-                      Recharge
-                    </Link>
-                  </div>
-                )}
+                {/* Free Trial Status or Low Balance Alert */}
+                {(() => {
+                  const trialAllowed = pricing.newUserTrialMinutes ?? 5;
+                  const trialUsed = Number(userData?.trialMinutesUsed) || 0;
+                  const isTrial = trialAllowed > 0 && trialUsed < trialAllowed;
+                  const effectiveRate =
+                    selectedAstrologer.pricePerMin && selectedAstrologer.pricePerMin !== 20
+                      ? selectedAstrologer.pricePerMin
+                      : pricing.aiVoicePricePerMinute || 7;
+
+                  if (isTrial) {
+                    return (
+                      <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400 text-xs flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Sparkles size={15} className="shrink-0 text-green-500" />
+                          <span>
+                            <strong>🎁 Free Trial Active!</strong> First {trialAllowed} minutes are 100% free with no wallet balance required.
+                          </span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-600 dark:text-green-400 font-bold text-[10px]">
+                          FREE
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  if ((userData?.walletBalance || 0) < effectiveRate) {
+                    return (
+                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle size={15} className="shrink-0" />
+                          <span>
+                            Min {formatPrice(effectiveRate)} (1 min) required to start.
+                          </span>
+                        </div>
+                        <Link
+                          href={`/wallet?redirect=${encodeURIComponent('/talk-to-ai-astrologer')}`}
+                          className="px-3 py-1 rounded-lg bg-amber-500 text-white font-bold text-[11px] hover:bg-amber-600 transition-colors"
+                        >
+                          Recharge
+                        </Link>
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })()}
 
                 {/* Birth Details Intake Form */}
                 <div className="space-y-2.5 pt-1">
@@ -1166,6 +1306,11 @@ function TalkToAIAstrologerContent() {
           </div>
         )}
       </AnimatePresence>
+
+      <CompletePariharaPlanModal
+        isOpen={showPariharaModal}
+        onClose={() => setShowPariharaModal(false)}
+      />
 
       <Script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-CXsyKpvFtpidpOkhOiIQGfXFO3O5lKA&libraries=places"

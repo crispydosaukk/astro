@@ -145,7 +145,7 @@ export default function FeaturedAIAstrologers() {
                   <div>
                     <span className="text-[10px] text-[#6B5E55] font-semibold block leading-none">Rate</span>
                     <span className="text-sm font-bold text-[#713B32]">
-                      {formatPrice(astro.pricePerMin)}<span className="text-[11px] font-normal text-[#6B5E55]">/min</span>
+                      {formatPrice(astro.pricePerMin && astro.pricePerMin !== 20 ? astro.pricePerMin : 7)}<span className="text-[11px] font-normal text-[#6B5E55]">/min</span>
                     </span>
                   </div>
 

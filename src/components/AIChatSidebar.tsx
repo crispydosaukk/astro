@@ -25,11 +25,27 @@ import {
   AlertTriangle,
   Calendar,
   Flame,
+  Briefcase,
+  Heart,
+  Activity,
+  TrendingUp,
+  BarChart3,
+  ArrowRight,
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserData } from '@/lib/useUserData';
 import AppImage from '@/components/ui/AppImage';
 import ConfirmModal from '@/components/ui/ConfirmModal';
+import {
+  calculateBirthChartData,
+  generatePersonalAstrologyProfile,
+  generateYearComparison,
+  generateInteractiveTimeline,
+  PersonalAstrologyProfile,
+  YearComparisonOutlook,
+  TimelineMilestone,
+} from '@/lib/vedicAstrologyEngine';
 
 interface ChatMessage {
   id: string;
@@ -267,6 +283,13 @@ export default function AIChatSidebar() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
+  // Active Navigation Tab: 'chat' | 'profile' | 'compare' | 'timeline'
+  const [activeTab, setActiveTab] = useState<'chat' | 'profile' | 'compare' | 'timeline'>('chat');
+  const [userProfile, setUserProfile] = useState<PersonalAstrologyProfile | null>(null);
+  const [yearComparison, setYearComparison] = useState<YearComparisonOutlook[]>([]);
+  const [selectedCompareYear, setSelectedCompareYear] = useState<number>(new Date().getFullYear());
+  const [timelineMilestones, setTimelineMilestones] = useState<TimelineMilestone[]>([]);
+
   // Dynamic Pricing & Wallet
   const [pricePerPrompt, setPricePerPrompt] = useState<number>(5);
   const [currentWallet, setCurrentWallet] = useState<number>(0);
@@ -321,6 +344,29 @@ export default function AIChatSidebar() {
       setCurrentWallet(Number(userData.walletBalance) || 0);
     }
   }, [userData]);
+
+  // Derive Personal Profile, Year Comparison, and Timeline
+  useEffect(() => {
+    const dob = userData?.dob || (user ? '1995-05-15' : null);
+    if (dob) {
+      try {
+        const chart = calculateBirthChartData(
+          dob,
+          userData?.tob || '12:00 PM',
+          userData?.pob || 'New Delhi, India',
+          userData?.lat,
+          userData?.lon,
+          userData?.name || user?.displayName || 'Devotee',
+          userData?.gender || 'Devotee'
+        );
+        setUserProfile(generatePersonalAstrologyProfile(chart));
+        setYearComparison(generateYearComparison(chart, new Date().getFullYear(), 4));
+        setTimelineMilestones(generateInteractiveTimeline(chart));
+      } catch (err) {
+        console.warn('Sidebar chart derivation error:', err);
+      }
+    }
+  }, [userData, user]);
 
   // Fetch dynamic price and pending predictions from backend
   useEffect(() => {
@@ -517,6 +563,16 @@ export default function AIChatSidebar() {
         setPendingVerification(data.pendingVerification);
       }
 
+      if (data.profile) {
+        setUserProfile(data.profile);
+      }
+      if (data.yearComparison) {
+        setYearComparison(data.yearComparison);
+      }
+      if (data.timeline) {
+        setTimelineMilestones(data.timeline);
+      }
+
       if (data.message) {
         const assistantMessage: ChatMessage = {
           id: `ai-${Date.now()}`,
@@ -560,6 +616,11 @@ export default function AIChatSidebar() {
     setMessages(initial);
     localStorage.removeItem('astroparihar_floating_chat');
     setShowClearConfirm(false);
+  };
+
+  const handleAskQuestionFromWidget = (questionText: string) => {
+    setActiveTab('chat');
+    handleSendMessage(questionText);
   };
 
   const speakText = (text: string) => {
@@ -845,8 +906,61 @@ export default function AIChatSidebar() {
                 </div>
               )}
 
+              {/* Tab Navigation: Chat | Profile | Compare Years | Timeline */}
+              <div className="flex items-center border-b border-[#E5D9C8] bg-[#FDFBF7] text-xs font-semibold px-2 py-1.5 gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('chat')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    activeTab === 'chat'
+                      ? 'bg-[#713B32] text-white shadow-xs font-bold'
+                      : 'text-[#6B5E55] hover:bg-[#E5D9C8]/40'
+                  }`}
+                >
+                  <Bot size={13} />
+                  <span>Chat</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('profile')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    activeTab === 'profile'
+                      ? 'bg-[#713B32] text-white shadow-xs font-bold'
+                      : 'text-[#6B5E55] hover:bg-[#E5D9C8]/40'
+                  }`}
+                >
+                  <Sparkles size={13} />
+                  <span>Profile</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('compare')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    activeTab === 'compare'
+                      ? 'bg-[#713B32] text-white shadow-xs font-bold'
+                      : 'text-[#6B5E55] hover:bg-[#E5D9C8]/40'
+                  }`}
+                >
+                  <Calendar size={13} />
+                  <span>Compare</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('timeline')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    activeTab === 'timeline'
+                      ? 'bg-[#713B32] text-white shadow-xs font-bold'
+                      : 'text-[#6B5E55] hover:bg-[#E5D9C8]/40'
+                  }`}
+                >
+                  <Compass size={13} />
+                  <span>Timeline</span>
+                </button>
+              </div>
+
               {/* Messages Scroll Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#FDFBF7]">
+              {activeTab === 'chat' && (
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#FDFBF7]">
                 {messages.map((m) => {
                   const isUser = m.role === 'user';
                   return (
@@ -1062,6 +1176,434 @@ export default function AIChatSidebar() {
 
                 <div ref={messagesEndRef} />
               </div>
+              )}
+
+              {/* 2. PERSONAL ASTROLOGY PROFILE VIEW (ITEM 4) */}
+              {activeTab === 'profile' && (
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#FDFBF7]">
+                  {userProfile ? (
+                    <div className="space-y-3.5">
+                      {/* Identity Card */}
+                      <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#713B32] to-[#8E4C41] text-white shadow-md space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-extrabold text-sm flex items-center gap-1.5 text-[#FFEBB3]">
+                            <Sparkles size={15} /> {userData?.name || user?.displayName || 'Devotee'}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">
+                            Lagna: {userProfile.personality.ascendant}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                          <div className="bg-black/20 p-2 rounded-xl">
+                            <span className="text-white/70 block text-[9px] uppercase font-semibold">Chandra Rashi</span>
+                            <strong className="text-[#FFEBB3]">{userProfile.personality.moonSign}</strong>
+                          </div>
+                          <div className="bg-black/20 p-2 rounded-xl">
+                            <span className="text-white/70 block text-[9px] uppercase font-semibold">Nakshatra</span>
+                            <strong className="text-[#FFEBB3]">{userProfile.personality.moonNakshatra}</strong>
+                          </div>
+                        </div>
+                        {userProfile.spirituality && (
+                          <div className="bg-black/30 p-2.5 rounded-xl text-[10px] flex items-center justify-between">
+                            <div>
+                              <span className="text-white/70 block text-[9px]">Verified Ishta Devata:</span>
+                              <strong className="text-emerald-300 font-bold">{userProfile.spirituality.ishtaDevataName}</strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleAskQuestionFromWidget(`Who is my Ishta Devata and what is my sacred mantra?`)}
+                              className="px-2.5 py-1 rounded-lg bg-[#C9952B] hover:bg-[#B28224] text-white font-bold text-[9px] transition-all cursor-pointer"
+                            >
+                              Ask Deity
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 10th House: Career & Karma */}
+                      <div className="p-3.5 rounded-2xl bg-white border border-[#E5D9C8] shadow-xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-[#713B32] flex items-center gap-1.5 text-xs">
+                            <Briefcase size={14} className="text-[#C9952B]" /> 10th House: Career & Karma Sthana
+                          </h4>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#F8F3EA] text-[#713B32]">
+                            Lord: {userProfile.career.tenthHouseLord}
+                          </span>
+                        </div>
+                        <p className="text-[#292522] text-[11px] leading-relaxed">
+                          {userProfile.career.professionalPotential}
+                        </p>
+                        <div className="pt-1 flex flex-wrap gap-1 text-[10px]">
+                          {userProfile.career.careerYogas.map((yoga, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-md bg-[#EDE4D5]/60 text-[#713B32] font-semibold">
+                              {yoga}
+                            </span>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleAskQuestionFromWidget(`What are the key career milestones and promotion timing indicated by my 10th house?`)}
+                          className="w-full mt-1.5 py-1.5 rounded-xl bg-[#F8F3EA] hover:bg-[#EDE4D5] text-[#713B32] font-bold text-[11px] flex items-center justify-center gap-1 transition-all cursor-pointer"
+                        >
+                          <span>Ask About My Career</span>
+                          <ArrowRight size={12} />
+                        </button>
+                      </div>
+
+                      {/* 2nd & 11th House: Wealth & Finance */}
+                      <div className="p-3.5 rounded-2xl bg-white border border-[#E5D9C8] shadow-xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-[#713B32] flex items-center gap-1.5 text-xs">
+                            <TrendingUp size={14} className="text-[#C9952B]" /> 2nd & 11th House: Wealth & Gains
+                          </h4>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            Dhana Bhavas
+                          </span>
+                        </div>
+                        <p className="text-[#292522] text-[11px] leading-relaxed">
+                          {userProfile.finance.dhanaStrength}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleAskQuestionFromWidget(`What does my birth chart say about wealth accumulation, investments, and debt clearance?`)}
+                          className="w-full mt-1.5 py-1.5 rounded-xl bg-[#F8F3EA] hover:bg-[#EDE4D5] text-[#713B32] font-bold text-[11px] flex items-center justify-center gap-1 transition-all cursor-pointer"
+                        >
+                          <span>Ask About My Finances</span>
+                          <ArrowRight size={12} />
+                        </button>
+                      </div>
+
+                      {/* 7th House & D9: Marriage & Partnerships */}
+                      <div className="p-3.5 rounded-2xl bg-white border border-[#E5D9C8] shadow-xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-[#713B32] flex items-center gap-1.5 text-xs">
+                            <Heart size={14} className="text-rose-500" /> 7th House & D9 Navamsha: Marriage
+                          </h4>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200">
+                            Kalatra Sthana
+                          </span>
+                        </div>
+                        <p className="text-[#292522] text-[11px] leading-relaxed">
+                          {userProfile.marriage.maritalDisposition}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleAskQuestionFromWidget(`When is my favorable marriage timing window and partner compatibility alignment?`)}
+                          className="w-full mt-1.5 py-1.5 rounded-xl bg-[#F8F3EA] hover:bg-[#EDE4D5] text-[#713B32] font-bold text-[11px] flex items-center justify-center gap-1 transition-all cursor-pointer"
+                        >
+                          <span>Ask About Marriage</span>
+                          <ArrowRight size={12} />
+                        </button>
+                      </div>
+
+                      {/* 6th House: Health & Vitality */}
+                      <div className="p-3.5 rounded-2xl bg-white border border-[#E5D9C8] shadow-xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-[#713B32] flex items-center gap-1.5 text-xs">
+                            <Activity size={14} className="text-emerald-600" /> 6th House: Health & Immunity
+                          </h4>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            Roga Sthana
+                          </span>
+                        </div>
+                        <p className="text-[#292522] text-[11px] leading-relaxed">
+                          {userProfile.health.vitalityLevel}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleAskQuestionFromWidget(`What planetary remedies or Ayurvedic upayas are recommended for my health in ${new Date().getFullYear()}?`)}
+                          className="w-full mt-1.5 py-1.5 rounded-xl bg-[#F8F3EA] hover:bg-[#EDE4D5] text-[#713B32] font-bold text-[11px] flex items-center justify-center gap-1 transition-all cursor-pointer"
+                        >
+                          <span>Ask About Health</span>
+                          <ArrowRight size={12} />
+                        </button>
+                      </div>
+
+                      {/* Active Vimshottari Dasha */}
+                      <div className="p-3.5 rounded-2xl bg-[#EDE4D5]/40 border border-[#C9952B]/40 space-y-2 text-xs">
+                        <h4 className="font-bold text-[#713B32] flex items-center gap-1.5 text-xs">
+                          <Clock size={14} className="text-[#C9952B]" /> Active Vimshottari Dasha Cycle
+                        </h4>
+                        <div className="p-2 rounded-xl bg-white border border-[#E5D9C8] text-[11px] space-y-1">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Mahadasha:</span>
+                            <strong className="text-[#713B32]">{userProfile.activeDasha.mahadasha}</strong>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Antardasha:</span>
+                            <strong className="text-[#C9952B]">{userProfile.activeDasha.antardasha}</strong>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Pratyantardasha:</span>
+                            <strong className="text-emerald-700">{userProfile.activeDasha.pratyantardasha}</strong>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-[#6B5E55]">
+                          Active Window: {userProfile.activeDasha.currentPeriod}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center space-y-3 bg-white rounded-2xl border border-[#E5D9C8]">
+                      <Sparkles size={28} className="text-[#C9952B] mx-auto" />
+                      <h4 className="font-bold text-sm text-[#713B32]">Complete Your Birth Details</h4>
+                      <p className="text-xs text-[#6B5E55]">
+                        To generate your full personal astrology profile with 10th house career, wealth, and marriage timings, tell Acharya Parihar your birth date, time, and place in chat!
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('chat')}
+                        className="px-4 py-2 rounded-xl bg-[#713B32] text-white font-bold text-xs"
+                      >
+                        Go to Chat
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 3. INTERACTIVE COMPARE YEARS MATRIX (ITEM 11) */}
+              {activeTab === 'compare' && (
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#FDFBF7]">
+                  {yearComparison && yearComparison.length > 0 ? (
+                    <div className="space-y-3.5">
+                      <div className="text-center space-y-1">
+                        <h3 className="font-extrabold text-sm text-[#713B32] flex items-center justify-center gap-1.5">
+                          <BarChart3 size={15} className="text-[#C9952B]" /> Multi-Year Astrological Matrix
+                        </h3>
+                        <p className="text-[11px] text-[#6B5E55]">
+                          Year-by-year planetary ratings & Vimshottari Dasha trajectory
+                        </p>
+                      </div>
+
+                      {/* Year Selector Tabs */}
+                      <div className="grid grid-cols-4 gap-1.5 bg-[#EDE4D5]/60 p-1.5 rounded-2xl border border-[#E5D9C8]">
+                        {yearComparison.map((item) => (
+                          <button
+                            key={item.year}
+                            type="button"
+                            onClick={() => setSelectedCompareYear(item.year)}
+                            className={`py-2 rounded-xl text-center transition-all cursor-pointer ${
+                              selectedCompareYear === item.year
+                                ? 'bg-[#713B32] text-white font-extrabold shadow-sm scale-102'
+                                : 'text-[#6B5E55] hover:bg-white/60 font-semibold'
+                            }`}
+                          >
+                            <div className="text-xs">{item.year}</div>
+                            <div className="text-[10px] opacity-80">
+                              {Math.round((item.careerScore + item.financeScore + item.relationshipScore + item.healthScore) / 4)}%
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Detail for Selected Year */}
+                      {(() => {
+                        const curr = yearComparison.find((y) => y.year === selectedCompareYear) || yearComparison[0];
+                        const overall = Math.round((curr.careerScore + curr.financeScore + curr.relationshipScore + curr.healthScore) / 4);
+                        return (
+                          <div className="p-4 rounded-2xl bg-white border border-[#E5D9C8] shadow-sm space-y-3">
+                            <div className="flex items-center justify-between pb-2 border-b border-[#E5D9C8]">
+                              <div>
+                                <h4 className="font-extrabold text-sm text-[#713B32]">
+                                  Outlook for {curr.year}
+                                </h4>
+                                <span className="text-[10px] text-muted-foreground">
+                                  Dasha: {curr.dashaCycle}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-extrabold">
+                                  {overall}/100 • {curr.opportunity}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* 4 Score Breakdown Cards */}
+                            <div className="space-y-2.5">
+                              {/* Career */}
+                              <div className="p-2.5 rounded-xl bg-[#F8F3EA] border border-[#E5D9C8]/80 space-y-1">
+                                <div className="flex items-center justify-between text-[11px]">
+                                  <span className="font-bold text-[#713B32] flex items-center gap-1">
+                                    <Briefcase size={12} className="text-[#C9952B]" /> Career & Authority
+                                  </span>
+                                  <strong className="text-[#713B32]">{curr.careerScore}/100 ({curr.careerOpportunity})</strong>
+                                </div>
+                                <div className="w-full bg-[#E5D9C8]/60 h-1.5 rounded-full overflow-hidden">
+                                  <div className="bg-[#713B32] h-full rounded-full transition-all" style={{ width: `${curr.careerScore}%` }} />
+                                </div>
+                                <p className="text-[10px] text-[#292522] leading-tight pt-0.5">{curr.careerSummary}</p>
+                              </div>
+
+                              {/* Finance */}
+                              <div className="p-2.5 rounded-xl bg-[#F8F3EA] border border-[#E5D9C8]/80 space-y-1">
+                                <div className="flex items-center justify-between text-[11px]">
+                                  <span className="font-bold text-emerald-800 flex items-center gap-1">
+                                    <TrendingUp size={12} className="text-emerald-600" /> Wealth & Cash Flow
+                                  </span>
+                                  <strong className="text-emerald-800">{curr.financeScore}/100 ({curr.financeTrend})</strong>
+                                </div>
+                                <div className="w-full bg-[#E5D9C8]/60 h-1.5 rounded-full overflow-hidden">
+                                  <div className="bg-emerald-600 h-full rounded-full transition-all" style={{ width: `${curr.financeScore}%` }} />
+                                </div>
+                                <p className="text-[10px] text-[#292522] leading-tight pt-0.5">{curr.financeSummary}</p>
+                              </div>
+
+                              {/* Relationship */}
+                              <div className="p-2.5 rounded-xl bg-[#F8F3EA] border border-[#E5D9C8]/80 space-y-1">
+                                <div className="flex items-center justify-between text-[11px]">
+                                  <span className="font-bold text-rose-800 flex items-center gap-1">
+                                    <Heart size={12} className="text-rose-500" /> Love & Marriage
+                                  </span>
+                                  <strong className="text-rose-800">{curr.relationshipScore}/100 ({curr.relationshipStatus})</strong>
+                                </div>
+                                <div className="w-full bg-[#E5D9C8]/60 h-1.5 rounded-full overflow-hidden">
+                                  <div className="bg-rose-500 h-full rounded-full transition-all" style={{ width: `${curr.relationshipScore}%` }} />
+                                </div>
+                                <p className="text-[10px] text-[#292522] leading-tight pt-0.5">{curr.relationshipSummary}</p>
+                              </div>
+
+                              {/* Health */}
+                              <div className="p-2.5 rounded-xl bg-[#F8F3EA] border border-[#E5D9C8]/80 space-y-1">
+                                <div className="flex items-center justify-between text-[11px]">
+                                  <span className="font-bold text-[#6B5E55] flex items-center gap-1">
+                                    <Activity size={12} className="text-emerald-600" /> Health & Vitality
+                                  </span>
+                                  <strong className="text-[#6B5E55]">{curr.healthScore}/100 ({curr.healthStatus})</strong>
+                                </div>
+                                <div className="w-full bg-[#E5D9C8]/60 h-1.5 rounded-full overflow-hidden">
+                                  <div className="bg-teal-600 h-full rounded-full transition-all" style={{ width: `${curr.healthScore}%` }} />
+                                </div>
+                                <p className="text-[10px] text-[#292522] leading-tight pt-0.5">{curr.healthSummary}</p>
+                              </div>
+                            </div>
+
+                            {/* Rationale & Action */}
+                            <div className="pt-2 border-t border-[#E5D9C8] space-y-1.5 text-[10px]">
+                              <p className="text-[#6B5E55]">
+                                <strong className="text-[#713B32]">Astrological Reason:</strong> {curr.whyThisYear}
+                              </p>
+                              <p className="text-[#6B5E55]">
+                                <strong className="text-[#C9952B]">Focal Action:</strong> {curr.focalRecommendation}
+                              </p>
+                            </div>
+
+                            {/* Tap to Ask */}
+                            <button
+                              type="button"
+                              onClick={() => handleAskQuestionFromWidget(`What specific transits and dasha alignments will shape my life in ${curr.year}?`)}
+                              className="w-full mt-2 py-2 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                            >
+                              <Bot size={13} />
+                              <span>Ask Acharya Parihar About {curr.year}</span>
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center space-y-3 bg-white rounded-2xl border border-[#E5D9C8]">
+                      <Calendar size={28} className="text-[#C9952B] mx-auto" />
+                      <h4 className="font-bold text-sm text-[#713B32]">Multi-Year Outlook Ready</h4>
+                      <p className="text-xs text-[#6B5E55]">
+                        Ask any question in chat with your birth details to generate the complete 2026–2029 comparison matrix!
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('chat')}
+                        className="px-4 py-2 rounded-xl bg-[#713B32] text-white font-bold text-xs"
+                      >
+                        Go to Chat
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 4. VISUAL ASTROLOGY TIMELINE (ITEM 12) */}
+              {activeTab === 'timeline' && (
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#FDFBF7]">
+                  {timelineMilestones && timelineMilestones.length > 0 ? (
+                    <div className="space-y-3.5">
+                      <div className="text-center space-y-1">
+                        <h3 className="font-extrabold text-sm text-[#713B32] flex items-center justify-center gap-1.5">
+                          <Compass size={15} className="text-[#C9952B]" /> Dasha & Transit Timeline
+                        </h3>
+                        <p className="text-[11px] text-[#6B5E55]">
+                          Chronological milestones & upcoming planetary transitions
+                        </p>
+                      </div>
+
+                      <div className="space-y-3 relative pl-4 before:content-[''] before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#C9952B]/40">
+                        {timelineMilestones.map((m) => (
+                          <div
+                            key={m.id}
+                            className="relative p-3.5 rounded-2xl bg-white border border-[#E5D9C8] shadow-xs space-y-2 hover:border-[#C9952B] transition-all"
+                          >
+                            {/* Dot on Timeline */}
+                            <span className="absolute -left-[19px] top-4 w-2.5 h-2.5 rounded-full bg-[#C9952B] border-2 border-white shadow-xs" />
+
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="font-bold text-xs text-[#713B32]">{m.periodName}</span>
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                  m.nature === 'Auspicious'
+                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                    : m.nature === 'Transformational'
+                                    ? 'bg-purple-50 text-purple-800 border border-purple-200'
+                                    : m.nature === 'Mixed'
+                                    ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                    : 'bg-rose-50 text-rose-800 border border-rose-200'
+                                }`}
+                              >
+                                {m.nature} • {m.category}
+                              </span>
+                            </div>
+
+                            <div className="text-[10px] text-muted-foreground flex items-center gap-1 font-semibold">
+                              <Calendar size={11} className="text-[#C9952B]" />
+                              <span>{m.startDate} – {m.endDate}</span>
+                              <span className="ml-auto font-bold text-[#713B32]">Lord: {m.lord}</span>
+                            </div>
+
+                            <p className="text-[11px] text-[#292522] leading-snug">
+                              {m.astrologicalSignificance}
+                            </p>
+
+                            <div className="p-2 rounded-xl bg-[#F8F3EA] border border-[#E5D9C8]/60 text-[10px] text-[#6B5E55]">
+                              <strong className="text-[#713B32]">Recommended Upaya:</strong> {m.recommendedAction}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleAskQuestionFromWidget(m.suggestedQuestion)}
+                              className="w-full py-1.5 rounded-xl bg-[#EDE4D5]/60 hover:bg-[#EDE4D5] text-[#713B32] font-bold text-[10px] flex items-center justify-center gap-1 transition-all cursor-pointer"
+                            >
+                              <span>{m.suggestedQuestion}</span>
+                              <ArrowRight size={11} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center space-y-3 bg-white rounded-2xl border border-[#E5D9C8]">
+                      <Compass size={28} className="text-[#C9952B] mx-auto" />
+                      <h4 className="font-bold text-sm text-[#713B32]">Timeline Ready</h4>
+                      <p className="text-xs text-[#6B5E55]">
+                        Start a conversation with your birth date to unlock your chronological Dasha timeline milestones!
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('chat')}
+                        className="px-4 py-2 rounded-xl bg-[#713B32] text-white font-bold text-xs"
+                      >
+                        Go to Chat
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Pre-filled Quick Suggestions Bar */}
               <div className="p-2.5 bg-[#F8F3EA] border-t border-[#E5D9C8] overflow-x-auto flex items-center gap-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">

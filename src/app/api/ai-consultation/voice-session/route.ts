@@ -665,6 +665,7 @@ export async function POST(req: Request) {
     let conversationHistory: any[] = [];
     let reqLanguage: string | null = null;
     let isInitial = false;
+    let isInterrupted = false;
     let audioFile: Blob | null = null;
 
     if (contentType.includes('multipart/form-data')) {
@@ -673,6 +674,7 @@ export async function POST(req: Request) {
       userMessage = formData.get('userMessage') as string;
       reqLanguage = formData.get('language') as string;
       isInitial = formData.get('isInitial') === 'true';
+      isInterrupted = formData.get('isInterrupted') === 'true';
       const historyStr = formData.get('conversationHistory') as string;
       if (historyStr) {
         try {
@@ -687,7 +689,35 @@ export async function POST(req: Request) {
       conversationHistory = body.conversationHistory || [];
       reqLanguage = body.language;
       isInitial = body.isInitial === true;
+      isInterrupted = body.isInterrupted === true;
     }
+
+    // Conversational Interruption & Barge-in Detection
+    const INTERRUPT_PATTERNS = [
+      /\bwait\b/i,
+      /\bhold on\b/i,
+      /\bstop\b/i,
+      /\blisten\b/i,
+      /\bone second\b/i,
+      /\bone question\b/i,
+      /\baagandi\b/i,
+      /\brukiye\b/i,
+      /\broko\b/i,
+      /\bnillungal\b/i,
+      /\bwhat about\b/i,
+      /\binstead\b/i,
+      /\bgo back\b/i,
+      /\bcompare\b/i,
+      /ఆగండి/,
+      /ఒక్క నిమిషం/,
+      /మరి/,
+      /రుకియే/,
+      /रुको/,
+      /सुनिए/,
+    ];
+    const detectedInterruption =
+      isInterrupted ||
+      Boolean(userMessage && INTERRUPT_PATTERNS.some((pattern) => pattern.test(userMessage!)));
 
     if (!sessionId) {
       return NextResponse.json({ error: 'Missing session ID' }, { status: 400 });
@@ -877,6 +907,11 @@ CRITICAL CANONICAL REMEDIES & ISHTA DEVATA GROUND TRUTH:
 ${ishtaDevata ? `- Verified Ishta Devata: ${ishtaDevata.deityName} (Soul Atmakaraka: ${ishtaDevata.atmakarakaPlanet}, 12th from Karakamsa: ${ishtaDevata.twelfthSignFromKarakamsa} governed by ${ishtaDevata.governingPlanet}). Prescribed Ishta Mantra: "${ishtaDevata.primaryMantra}". If the devotee asks who their Ishta Devata, Kuladevata, or personal God is, you MUST state ONLY "${ishtaDevata.deityName}". NEVER name any other deity.` : ''}
 ${canonicalRemedies ? `- Prescribed Canonical Homam for their concern (${birthDetails.primaryConcern || 'Life Guidance'}): ${canonicalRemedies.primaryHomam.name} (${canonicalRemedies.primaryHomam.day})
 - Prescribed Canonical Daily Mantra: ${canonicalRemedies.primaryMantra.title} ("${canonicalRemedies.primaryMantra.transliteration}")` : ''}
+${detectedInterruption ? `
+CONVERSATIONAL BARGE-IN & TURN INTERRUPTION INTELLIGENCE:
+- The devotee has actively interrupted / redirected the conversation with this specific inquiry: "${userMessage}".
+- CRITICAL: DO NOT restart with formal greetings ("Namaste", "నమస్కారం", introductory welcome) or repeat previous statements.
+- Immediately acknowledge the intervention smoothly and succinctly in ${sessionLanguage} (e.g. "Understood, coming directly to...", "తప్పకుండా, మీ సందేహానికి వస్తే...", "बिल्कुल, सीधे...") and deliver a focused, crisp answer in 2-3 spoken sentences directly addressing their redirect.` : ''}
 
 ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
 
@@ -969,6 +1004,12 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
       audioBase64,
       astrologerName: astrologer.name,
       language: sessionLanguage,
+      interrupted: Boolean(detectedInterruption),
+      conversationTurnState: {
+        lastTurn: 'assistant',
+        timestamp: new Date().toISOString(),
+        acknowledgedInterruption: Boolean(detectedInterruption),
+      },
     });
   } catch (error: any) {
     console.error('AI voice-session error:', error);

@@ -157,7 +157,7 @@ export default function TalkToAstrologerPage() {
               experience: expNum,
               rating: Number(data.rating) || 4.9,
               reviews: Number(data.reviewsCount || data.reviews) || 2847,
-              pricePerMin: Number(data.amount) || 20,
+              pricePerMin: Number(data.amount) || 25,
               languages: langsList.length > 0 ? langsList : ['English', 'Hindi'],
               gender:
                 data.gender ||
