@@ -865,7 +865,13 @@ export function generate48DayRemedyProtocol(params: {
   domain?: string;
   planet?: string;
   concern?: string;
+  language?: string;
 }): RemedyProtocol48Day {
+  const lang = params.language || 'English';
+  const isTelugu = lang === 'Telugu';
+  const isHindi = lang === 'Hindi';
+  const isTamil = lang === 'Tamil';
+
   const remedies = resolveVedicRemedies({
     domain: params.domain,
     planet: params.planet,
@@ -877,65 +883,242 @@ export function generate48DayRemedyProtocol(params: {
   const day48 = new Date(now.getTime() + 48 * 24 * 60 * 60 * 1000);
 
   const formatDate = (d: Date) =>
-    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    d.toLocaleDateString(isTelugu ? 'te-IN' : isHindi ? 'hi-IN' : isTamil ? 'ta-IN' : 'en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
 
-  // Customized Daana by Domain / Planet
-  let charityDaana = 'Feed green grass to cows (Gau Seva) or donate whole grains to temple kitchen.';
   const dLow = (params.domain || '').toLowerCase();
   const pLow = (params.planet || '').toLowerCase();
+  const isSaturnRahu = pLow.includes('shani') || pLow.includes('saturn') || pLow.includes('rahu');
 
-  if (dLow.includes('career') || pLow.includes('ketu') || pLow.includes('sun')) {
-    charityDaana = 'Offer fresh bananas, jaggery sweets, or warm food to elderly sadhus/laborers at a temple.';
-  } else if (dLow.includes('wealth') || dLow.includes('finance') || pLow.includes('venus') || pLow.includes('jupiter')) {
-    charityDaana = 'Donate yellow lentils (Chana Dal), pure honey, or financial support to Vedic scholars or impoverished students.';
-  } else if (dLow.includes('health') || pLow.includes('shani') || pLow.includes('saturn') || pLow.includes('rahu')) {
-    charityDaana = 'Donate black sesame seeds, mustard oil, or sponsor medicine for needy hospital patients on Saturday.';
-  } else if (dLow.includes('marriage') || pLow.includes('mars')) {
-    charityDaana = 'Offer red flowers, sweet jaggery roti, or clothing to young married women or Devi temple.';
+  // Localized Homam Name
+  const homamName = isTelugu
+    ? remedies.primaryHomam.teluguName || remedies.primaryHomam.name
+    : isHindi
+    ? remedies.primaryHomam.hindiName || remedies.primaryHomam.name
+    : isTamil
+    ? remedies.primaryHomam.tamilName || remedies.primaryHomam.name
+    : remedies.primaryHomam.name;
+
+  // Localized Auspicious Day of the Week
+  let auspiciousDay = remedies.primaryHomam.day;
+  if (isTelugu) {
+    if (remedies.primaryHomam.id === 'navagraha') auspiciousDay = 'శనివారం లేదా ఆదివారం';
+    else if (remedies.primaryHomam.id === 'ganapathi') auspiciousDay = 'బుధవారం లేదా శుక్ల చతుర్థి';
+    else if (remedies.primaryHomam.id === 'lakshmi_kubera') auspiciousDay = 'శుక్రవారం లేదా పూర్ణిమ';
+    else if (remedies.primaryHomam.id === 'mrityunjaya') auspiciousDay = 'సోమవారం లేదా ప్రదోషం';
+    else if (remedies.primaryHomam.id === 'sudarshana') auspiciousDay = 'ఆదివారం, బుధవారం లేదా ఏకాదశి';
+  } else if (isHindi) {
+    if (remedies.primaryHomam.id === 'navagraha') auspiciousDay = 'शनिवार या रविवार';
+    else if (remedies.primaryHomam.id === 'ganapathi') auspiciousDay = 'बुधवार या शुक्ल चतुर्थी';
+    else if (remedies.primaryHomam.id === 'lakshmi_kubera') auspiciousDay = 'शुक्रवार या पूर्णिमा';
+    else if (remedies.primaryHomam.id === 'mrityunjaya') auspiciousDay = 'सोमवार या प्रदोष';
+    else if (remedies.primaryHomam.id === 'sudarshana') auspiciousDay = 'रविवार, बुधवार या एकादशी';
+  } else if (isTamil) {
+    if (remedies.primaryHomam.id === 'navagraha') auspiciousDay = 'சனிக்கிழமை அல்லது ஞாயிற்றுக்கிழமை';
+    else if (remedies.primaryHomam.id === 'ganapathi') auspiciousDay = 'புதன்கிழமை அல்லது சுக்ல சதுர்த்தி';
+    else if (remedies.primaryHomam.id === 'lakshmi_kubera') auspiciousDay = 'வெள்ளிக்கிழமை அல்லது பௌர்ணமி';
+    else if (remedies.primaryHomam.id === 'mrityunjaya') auspiciousDay = 'திங்கட்கிழமை அல்லது பிரதோஷம்';
+    else if (remedies.primaryHomam.id === 'sudarshana') auspiciousDay = 'ஞாயிற்றுக்கிழமை, புதன்கிழமை அல்லது ஏகாதசி';
   }
 
-  const lampOffering = pLow.includes('shani') || pLow.includes('saturn') || pLow.includes('rahu')
+  // Localized Lamp Offering
+  let lampOffering = isSaturnRahu
     ? 'Pure Sesame (Til) oil deepam facing East or North'
     : 'Pure Cow Ghee deepam facing East or North';
+  if (isTelugu) {
+    lampOffering = isSaturnRahu
+      ? 'స్వచ్ఛమైన నువ్వుల నూనె దీపం'
+      : 'స్వచ్ఛమైన ఆవు నెయ్యి దీపం';
+  } else if (isHindi) {
+    lampOffering = isSaturnRahu
+      ? 'शुद्ध तिल के तेल का दीपक'
+      : 'शुद्ध गाय के घी का दीपक';
+  } else if (isTamil) {
+    lampOffering = isSaturnRahu
+      ? 'தூய நல்லெண்ணெய் தீபம்'
+      : 'தூய பசு நெய் தீபம்';
+  }
+
+  // Localized Charity Daana (Day 24)
+  let charityDaana = 'Feed green grass to cows (Gau Seva) or donate whole grains to temple kitchen.';
+  if (dLow.includes('career') || pLow.includes('ketu') || pLow.includes('sun')) {
+    charityDaana = isTelugu
+      ? 'తాజా అరటిపండ్లు, బెల్లం మిఠాయిలు లేదా ఆలయం వద్ద వృద్ధులకు/శ్రామికులకు అన్నదానం చేయండి.'
+      : isHindi
+      ? 'केले, गुड़ की मिठाई या मंदिर में वृद्धों/श्रमिकों को भोजन कराएं।'
+      : isTamil
+      ? 'வாழைப்பழங்கள், வெல்ல இனிப்பு அல்லது முதியவர்களுக்கு/தொழிலாளர்களுக்கு அன்னதானம் செய்யுங்கள்.'
+      : 'Offer fresh bananas, jaggery sweets, or warm food to elderly sadhus/laborers at a temple.';
+  } else if (dLow.includes('wealth') || dLow.includes('finance') || pLow.includes('venus') || pLow.includes('jupiter')) {
+    charityDaana = isTelugu
+      ? 'శనగపప్పు, స్వచ్ఛమైన తేనె లేదా నిరుపేద విద్యార్థులకు/వేద పండితులకు యథాశక్తి దానం చేయండి.'
+      : isHindi
+      ? 'चने की दाल, शुद्ध शहद या निर्धन छात्रों/वैदिक विद्वानों को आर्थिक सहायता दान करें।'
+      : isTamil
+      ? 'கடலைப்பருப்பு, தூய தேன் அல்லது ஏழை மாணவர்களுக்கு/வேத விற்பன்னர்களுக்கு தானம் செய்யுங்கள்.'
+      : 'Donate yellow lentils (Chana Dal), pure honey, or financial support to Vedic scholars or impoverished students.';
+  } else if (dLow.includes('health') || isSaturnRahu) {
+    charityDaana = isTelugu
+      ? 'నల్ల నువ్వులు, ఆవనూనె దానం చేయండి లేదా శనివారం నాడు పేద రోగులకు మందుల సహాయం చేయండి.'
+      : isHindi
+      ? 'काले तिल, सरसों का तेल दान करें या शनिवार को जरूरतमंद मरीजों की दवा में मदद करें।'
+      : isTamil
+      ? 'கருப்பு எள், நல்லெண்ணெய் தானம் செய்யுங்கள் அல்லது ஏழை நோயாளிகளுக்கு மருந்து உதவி செய்யுங்கள்.'
+      : 'Donate black sesame seeds, mustard oil, or sponsor medicine for needy hospital patients on Saturday.';
+  } else if (dLow.includes('marriage') || pLow.includes('mars')) {
+    charityDaana = isTelugu
+      ? 'ఎర్రని పువ్వులు, బెల్లం రొట్టెలు లేదా ముత్తైదువులకు/దేవి ఆలయానికి వస్త్రాలు సమర్పించండి.'
+      : isHindi
+      ? 'लाल फूल, गुड़ की रोटी या सुहागिन महिलाओं अथवा देवी मंदिर में वस्त्र अर्पित करें।'
+      : isTamil
+      ? 'சிவப்பு மலர்கள், வெல்ல ரொட்டி அல்லது சுமங்கலி பெண்களுக்கு/அம்மன் கோவிலுக்கு வஸ்திரம் தானம் செய்யுங்கள்.'
+      : 'Offer red flowers, sweet jaggery roti, or clothing to young married women or Devi temple.';
+  } else {
+    charityDaana = isTelugu
+      ? 'గోవులకు పచ్చిగడ్డి (గోసేవ) తినిపించండి లేదా ఆలయ అన్నదాన సత్రానికి ధాన్యాలను దానం చేయండి.'
+      : isHindi
+      ? 'गायों को हरा चारा (गौ सेवा) खिलाएं या मंदिर रसोई में साबुत अनाज दान करें।'
+      : isTamil
+      ? 'பசுக்களுக்கு பசுந்தீவனம் அளியுங்கள் (கோபூஜை) அல்லது கோவில் மடப்பள்ளிக்கு தானியம் வழங்குங்கள்.'
+      : 'Feed green grass to cows (Gau Seva) or donate whole grains to temple kitchen.';
+  }
+
+  // Localized Titles & Actions
+  const title = isTelugu
+    ? `48 రోజుల పవిత్ర మండల పరిహార విధానం (${homamName.split(' (')[0]})`
+    : isHindi
+    ? `48 दिवसीय पवित्र मंडल परिहार विधान (${homamName.split(' (')[0]})`
+    : isTamil
+    ? `48 நாட்கள் புனித மண்டல பரிகார முறை (${homamName.split(' (')[0]})`
+    : `48-Day Sacred Mandala Parihar Protocol (${remedies.primaryHomam.name.split(' (')[0]})`;
+
+  const dailyJapaCount = isTelugu
+    ? 'రుద్రాక్ష / తులసి / స్పటిక మాలతో నిత్యం 108 సార్లు జపం'
+    : isHindi
+    ? 'रुद्राक्ष / तुलसी / स्फटिक माला से प्रतिदिन 108 बार जप'
+    : isTamil
+    ? 'ருத்ராட்சம் / துளசி மாலையுடன் தினமும் 108 முறை ஜெபம்'
+    : '108 recitations daily with Rudraksha / Tulsi / Spatika Mala';
+
+  const day1Title = isTelugu
+    ? '1వ రోజు: ప్రథమ సంకల్పం & పవిత్ర ప్రారంభం'
+    : isHindi
+    ? 'पहला दिन: प्रथम संकल्प एवं पवित्र शुभारंभ'
+    : isTamil
+    ? 'நாள் 1: முதல் சங்கல்பம் & புனித தொடக்கம்'
+    : 'Day 1: Prathama Sankalpa & Sacred Beginning';
+
+  const day1Action = isTelugu
+    ? `సూర్యోదయానికి ముందే (బ్రహ్మ ముహూర్తంలో) మేల్కొనండి. శుచిగా స్నానం చేసి, తూర్పు లేదా ఉత్తర దిశగా ${lampOffering} వెలిగించి, తూర్పు ముఖంగా కూర్చుని 48 రోజుల క్రమశిక్షణతో కూడిన మండల దీక్షా సంకల్పం తీసుకోండి.`
+    : isHindi
+    ? `सूर्योदय से पूर्व (ब्रह्म मुहूर्त) में उठें। पवित्र स्नान कर पूर्व या उत्तर दिशा में ${lampOffering} प्रज्वलित करें, पूर्व दिशा में बैठकर 48 दिवसीय अनुशासित भक्ति का संकल्प लें।`
+    : isTamil
+    ? `சூரிய உதயத்திற்கு முன் (பிரம்ம முகூர்த்தம்) எழுந்து நீராடி, கிழக்கு அல்லது வடக்கு நோக்கி ${lampOffering} ஏற்றி, கிழக்கு நோக்கி அமர்ந்து 48 நாட்கள் மண்டல பக்தி சங்கல்பம் செய்யுங்கள்.`
+    : `Awake before sunrise (Brahma Muhurtha). Take a holy bath, light the ${lampOffering}, sit facing East, and take a personal Sankalpa pledging 48 days of disciplined devotion.`;
+
+  const day24Title = isTelugu
+    ? '24వ రోజు: మధ్యమ శాంతి & పవిత్ర దాన సంకల్పం'
+    : isHindi
+    ? '24वां दिन: मध्यम शांति एवं पवित्र दान संकल्प'
+    : isTamil
+    ? 'நாள் 24: மத்திய சாந்தி & புனித தானம்'
+    : 'Day 24: Madhyama Shanti & Sacred Daana Milestone';
+
+  const day24Action = isTelugu
+    ? 'మండల మధ్యంతర శుద్ధి: మీ పూజా స్థలాన్ని శుభ్రం చేయండి, తియ్యని ప్రసాదం నివేదించండి మరియు నిర్దేశించిన దానాన్ని నెరవేర్చండి.'
+    : isHindi
+    ? 'मध्य-मंडल शुद्धि: पूजा स्थल को स्वच्छ करें, मीठा प्रसाद अर्पित करें और निर्धारित दान संपन्न करें।'
+    : isTamil
+    ? 'மண்டல தூய்மை: பூஜை அறையை சுத்தம் செய்து, பிரசாதம் படைத்து, பரிந்துரைக்கப்பட்ட தானத்தை செய்யுங்கள்.'
+    : 'Perform mid-mandala cleansing: deep clean your altar, offer sweet Prasad, and execute the prescribed charity.';
+
+  const day48Title = isTelugu
+    ? '48వ రోజు: పూర్ణాహుతి, హోమం / కొబ్బరికాయ సమర్పణ & పరిసమాప్తి'
+    : isHindi
+    ? '48वां दिन: पूर्णाहुति, होम / नारियल अर्पण एवं पूर्णता'
+    : isTamil
+    ? 'நாள் 48: பூர்ணாஹுதி, ஹோமம் / தேங்காய் சமர்ப்பணம் & நிறைவு'
+    : 'Day 48: Purnahuti, Homam / Coconut Offering & Completion';
+
+  const day48Action = isTelugu
+    ? `చివరి 108 మంత్ర జపాన్ని పూర్తి చేయండి. ఆలయంలో లేదా ఆస్ట్రోపరిహార్ ద్వారా ${homamName} జరిపించండి, లేదా గణపతి/దేవి సన్నిధిలో కొబ్బరికాయ కొట్టి కర్పూర హారతి ఇవ్వండి.`
+    : isHindi
+    ? `अपना अंतिम 108 मंत्र जप पूर्ण करें। मंदिर में या एस्ट्रोपरीहार के माध्यम से ${homamName} कराएं, अथवा गणेश जी/देवी मंदिर में नारियल व कपूर अर्पित करें।`
+    : isTamil
+    ? `கடைசி 108 மந்திர ஜெபத்தை நிறைவு செய்யுங்கள். கோவிலில் அல்லது ஆஸ்ட்ரோபரிகார் மூலம் ${homamName} நடத்துங்கள், அல்லது பிள்ளையார்/அம்மன் சன்னதியில் தேங்காய் உடைத்து கற்பூர ஆரத்தி காட்டுங்கள்.`
+    : `Complete your final 108 mantra japa. Book or perform ${remedies.primaryHomam.name} at a consecrated temple or via AstroParihar, or offer a sacred peeled dry coconut with camphor at Lord Ganesha / Devi sanctum.`;
 
   return {
-    title: `48-Day Sacred Mandala Parihar Protocol (${remedies.primaryHomam.name.split(' (')[0]})`,
+    title,
     totalDays: 48,
     mandalaPurpose: remedies.primaryHomam.purpose,
     presidingDeity: remedies.primaryHomam.deity,
-    recommendedHomam: remedies.primaryHomam.name,
-    homamAuspiciousDay: remedies.primaryHomam.day,
+    recommendedHomam: homamName,
+    homamAuspiciousDay: auspiciousDay,
     dailyMantra: remedies.primaryMantra.sanskrit || remedies.primaryMantra.transliteration,
-    dailyJapaCount: '108 recitations daily with Rudraksha / Tulsi / Spatika Mala',
+    dailyJapaCount,
     direction: 'East',
     lampOffering,
     initiationDay1: {
-      title: 'Day 1: Prathama Sankalpa & Sacred Beginning',
-      action: `Awake before sunrise (Brahma Muhurtha). Take a holy bath, light the ${lampOffering}, sit facing East, and take a personal Sankalpa pledging 48 days of disciplined devotion.`,
+      title: day1Title,
+      action: day1Action,
       sankalpaText: `Mama janma-kundali dosha shamanaartham, ${remedies.primaryHomam.deity} preetyartham, 48-dina parihara sankalpam aham karishye.`,
     },
     dailyDiscipline: {
       morningRitual: `Chant "${remedies.primaryMantra.transliteration}" 108 times before the altar. Offer clean water and fresh flowers.`,
       lifestyleGuidelines: [
-        'Maintain a sattvic vegetarian diet; abstain from alcohol and non-vegetarian food during the 48-day Mandala.',
-        'Practice truthfulness, calm speech, and refrain from anger or heated arguments.',
-        'Apply sacred kumkum / vibhuti from the altar upon your forehead every morning.',
+        isTelugu
+          ? '48 రోజుల మండలంలో సాత్విక ఆహారం పాటించండి; మద్యపానం, మాంసాహారం విసర్జించండి.'
+          : isHindi
+          ? '48 दिनों के मंडल के दौरान सात्विक शाकाहारी भोजन करें; मदिरा एवं मांसाहार का पूर्ण त्याग करें।'
+          : isTamil
+          ? '48 நாட்கள் மண்டல காலத்தில் தூய சைவ உணவை கடைபிடிக்கவும்; மது, அசைவம் தவிர்க்கவும்.'
+          : 'Maintain a sattvic vegetarian diet; abstain from alcohol and non-vegetarian food during the 48-day Mandala.',
+        isTelugu
+          ? 'శాంతమైన సంభాషణ పాటించండి, కోపతాపాలు మరియు వాదనలకు దూరంగా ఉండండి.'
+          : isHindi
+          ? 'शांत वाणी और सत्य का आचरण करें; क्रोध व वाद-विवाद से बचें।'
+          : isTamil
+          ? 'சாந்தமாக பேசுங்கள்; கோபம், வாக்குவாதங்களை தவிர்க்கவும்.'
+          : 'Practice truthfulness, calm speech, and refrain from anger or heated arguments.',
+        isTelugu
+          ? 'రోజూ ఉదయం పూజ అనంతరం కుంకుమ లేదా విభూతిని నుదుట ధరించండి.'
+          : isHindi
+          ? 'प्रतिदिन सुबह पूजा के बाद मस्तक पर कुमकुम या भस्म का तिलक लगाएं।'
+          : isTamil
+          ? 'தினமும் காலையில் குங்குமம் அல்லது விபூதி திலகம் இட்டுக் கொள்ளவும்.'
+          : 'Apply sacred kumkum / vibhuti from the altar upon your forehead every morning.',
       ],
     },
     midMandalaMilestoneDay24: {
-      title: 'Day 24: Madhyama Shanti & Sacred Daana Milestone',
-      action: 'Perform mid-mandala cleansing: deep clean your altar, offer sweet Prasad, and execute the prescribed charity.',
+      title: day24Title,
+      action: day24Action,
       charityDaana,
     },
     culminationDay48: {
-      title: 'Day 48: Purnahuti, Homam / Coconut Offering & Completion',
-      action: `Complete your final 108 mantra japa. Book or perform ${remedies.primaryHomam.name} at a consecrated temple or via AstroParihar, or offer a sacred peeled dry coconut with camphor at Lord Ganesha / Devi sanctum.`,
-      completionRitual: 'Distribute sweets to 5 individuals or family members, seek elders blessings, and wear energized protective Raksha.',
+      title: day48Title,
+      action: day48Action,
+      completionRitual: isTelugu
+        ? '5 మందికి లేదా కుటుంబ సభ్యులకు తీపి పదార్థాలను పంచిపెట్టండి, పెద్దల ఆశీర్వాదం తీసుకోండి, రక్షా ధారణ చేయండి.'
+        : isHindi
+        ? '5 लोगों या परिवारजनों में मिठाई बांटें, बड़ों का आशीर्वाद लें और रक्षा सूत्र धारण करें।'
+        : isTamil
+        ? '5 நபர்களுக்கு இனிப்பு வழங்கி, பெரியவர்களின் ஆசீர்வாதம் பெற்று, ரக்ஷை கட்டிக் கொள்ளவும்.'
+        : 'Distribute sweets to 5 individuals or family members, seek elders blessings, and wear energized protective Raksha.',
     },
     startDate: formatDate(now),
     midDate: formatDate(day24),
     completionDate: formatDate(day48),
-    astrologerCheckupCTA: 'Schedule a post-mandalam progress review with an AstroParihar Senior Astrologer on Day 48.',
+    astrologerCheckupCTA: isTelugu
+      ? '48వ రోజున ఆస్ట్రోపరిహార్ సీనియర్ జ్యోతిష్యులతో పురోగతి సమీక్షను షెడ్యూల్ చేయండి.'
+      : isHindi
+      ? '48वें दिन एस्ट्रोपरीहार के वरिष्ठ ज्योतिषी से परामर्श कर प्रगति की समीक्षा करें।'
+      : isTamil
+      ? '48வது நாளில் ஆஸ்ட்ரோபரிகார் மூத்த ஜோதிடரிடம் ஆலோசனை பெற்று முன்னேற்றத்தை சரிபார்க்கவும்.'
+      : 'Schedule a post-mandalam progress review with an AstroParihar Senior Astrologer on Day 48.',
   };
 }
 

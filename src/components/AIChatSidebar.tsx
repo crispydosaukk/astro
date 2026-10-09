@@ -21,6 +21,7 @@ import {
   ArrowUpRight,
   LogIn,
   CheckCircle2,
+  CheckCheck,
   Compass,
   AlertTriangle,
   Calendar,
@@ -106,6 +107,14 @@ const QUICK_PROMPTS_BY_LANG: Record<string, string[]> = {
     '🪐 எனக்கு ஏழரை சனி அல்லது ராகு தசை நடக்கிறதா?',
     '🙏 கிரக தோஷ நிவர்த்திக்கு என்ன பரிகாரம் அல்லது தானம் செய்ய வேண்டும்?',
   ],
+  Kannada: [
+    '🔮 2026ರಲ್ಲಿ ನನ್ನ ಗ್ರಹ ಸಂಚಾರದ ಫಲಗಳು ಹೇಗಿವೆ?',
+    '❤️ ನನ್ನ ವಿವಾಹ ಯೋಗ ಮತ್ತು ಹೊಂದಾಣಿಕೆ ಯಾವಾಗ ಬರುತ್ತದೆ?',
+    '💼 ವೃತ್ತಿ ಬೆಳವಣಿಗೆ ಅಥವಾ ಉದ್ಯೋಗ ಬದಲಾವಣೆಗೆ ಶುಭ ಸಮಯ ಯಾವುದು?',
+    '✨ ನನ್ನ ಅದೃಷ್ಟ ರತ್ನ, ರುದ್ರಾಕ್ಷಿ ಮತ್ತು ನಿತ್ಯ ಮಂತ್ರ ಯಾವುದು?',
+    '🪐 ನನಗೆ ಸಾಡೇ ಸಾತಿ ಅಥವಾ ರಾಹು ಮಹಾದಶ ನಡೆಯುತ್ತಿದೆಯೇ?',
+    '🙏 ಗ್ರಹ ಶಾಂತಿ ಮತ್ತು ದೋಷ ನಿವಾರಣೆಗೆ ಯಾವ ಪರಿಹಾರ ಮಾಡಬೇಕು?',
+  ],
   English: [
     '🔮 What do planetary transits say for me in 2026?',
     '❤️ When will I meet my compatible life partner?',
@@ -120,15 +129,151 @@ const PLACEHOLDERS_BY_LANG: Record<string, string> = {
   Telugu: 'మీ కుండలి, ప్రేమ, కెరీర్ లేదా పరిహారాల గురించి అడగండి...',
   Hindi: 'अपनी कुंडली, प्रेम, करियर या उपायों के बारे में पूछें...',
   Tamil: 'உங்கள் ஜாதகம், தொழில், திருமணம் அல்லது பரிகாரங்கள் பற்றி கேளுங்கள்...',
+  Kannada: 'ನಿಮ್ಮ ಕುಂಡಲಿ, ಪ್ರೀತಿ, ವೃತ್ತಿ ಅಥವಾ ಪರಿಹಾರಗಳ ಬಗ್ಗೆ ಕೇಳಿ...',
   English: 'Ask about your Kundli, love, career, or remedies...',
 };
 
 const LANGUAGES = [
   { code: 'Telugu', label: 'తెలుగు (Telugu)', short: 'తె' },
   { code: 'Hindi', label: 'हिन्दी (Hindi)', short: 'हि' },
-  { code: 'English', label: 'English', short: 'Eng' },
   { code: 'Tamil', label: 'தமிழ் (Tamil)', short: 'த' },
+  { code: 'Kannada', label: 'ಕನ್ನಡ (Kannada)', short: 'ಕ' },
+  { code: 'English', label: 'English', short: 'Eng' },
 ];
+
+export interface AstrologerSessionProfile {
+  id: string;
+  name: string;
+  avatar: string;
+  discipline: string;
+  greetingTitle?: string;
+}
+
+export const ASTROLOGER_AVATAR_POOL: AstrologerSessionProfile[] = [
+  {
+    id: 'acharya-devavrat',
+    name: 'Acharya Devavrat',
+    avatar: '/assets/images/ai-astrologers/acharya-devavrat.png',
+    discipline: 'Vedic Jyotish & Dasha Guru',
+    greetingTitle: 'Vedic Grandmaster',
+  },
+  {
+    id: 'swami-ji',
+    name: 'Swami Shankarananda',
+    avatar: '/assets/images/ai-astrologers/swami-ji.png',
+    discipline: 'Himalayan Parashari Sage',
+    greetingTitle: 'Himalayan Sage',
+  },
+  {
+    id: 'astro-ananya',
+    name: 'Astro Ananya',
+    avatar: '/assets/images/ai-astrologers/astro-ananya.png',
+    discipline: 'Nadi & Kundli Seer',
+    greetingTitle: 'Nadi Seer',
+  },
+  {
+    id: 'arjun-pandit',
+    name: 'Arjun Pandit',
+    avatar: '/assets/images/ai-astrologers/arjun-pandit.png',
+    discipline: 'Vedic Kundli Prodigy',
+    greetingTitle: 'Kundli Scholar',
+  },
+  {
+    id: 'dr-raman',
+    name: 'Dr. K. N. Raman',
+    avatar: '/assets/images/ai-astrologers/dr-raman.png',
+    discipline: 'Corporate Timing & Mahadasha',
+    greetingTitle: 'Senior Jyotish Vidwan',
+  },
+  {
+    id: 'pandit-raghav',
+    name: 'Pandit Raghavendra',
+    avatar: '/assets/images/ai-astrologers/pandit-raghav.png',
+    discipline: 'Lal Kitab & Parihar Master',
+    greetingTitle: 'Lal Kitab Specialist',
+  },
+  {
+    id: 'acharya-vikram',
+    name: 'Acharya Vikramaditya',
+    avatar: '/assets/images/ai-astrologers/acharya-vikram.png',
+    discipline: 'Vedic Kundli & Vastu Master',
+    greetingTitle: 'Vedic & Vastu Master',
+  },
+  {
+    id: 'acharya-joshi',
+    name: 'Acharya Joshi',
+    avatar: '/assets/images/ai-astrologers/acharya-joshi.png',
+    discipline: 'Dosha Parihar & Graha Shanti',
+    greetingTitle: 'Dosha Parihar Master',
+  },
+  {
+    id: 'guru-anil',
+    name: 'Guru Anil Shastri',
+    avatar: '/assets/images/ai-astrologers/guru-anil.png',
+    discipline: 'Dhana Bhava & Gemstone Timing',
+    greetingTitle: 'Wealth Astrologer',
+  },
+  {
+    id: 'mr-rao',
+    name: 'Swami Sadasiva Rao',
+    avatar: '/assets/images/ai-astrologers/mr-rao.png',
+    discipline: 'Venerable Rishi & Parashara',
+    greetingTitle: 'Elder Rishi',
+  },
+  {
+    id: 'meera-devi',
+    name: 'Yogini Meera Devi',
+    avatar: '/assets/images/ai-astrologers/meera-devi.png',
+    discipline: 'Vivaha & Relationship Jyotish',
+    greetingTitle: 'Divine Shakti Counselor',
+  },
+  {
+    id: 'mr-krishnam',
+    name: 'Acharya Krishnamurti',
+    avatar: '/assets/images/ai-astrologers/mr-krishnam.png',
+    discipline: 'KP Sub-Lord Specialist',
+    greetingTitle: 'KP Master',
+  },
+  {
+    id: 'priya-sharma',
+    name: 'Priya Sharma',
+    avatar: '/assets/images/ai-astrologers/priya-sharma.png',
+    discipline: 'Anka Vidya & Numerology',
+    greetingTitle: 'Numerologist & Astrologer',
+  },
+];
+
+function getWelcomeMessage(lang: string, name: string, astroName: string = 'Acharya Parihar') {
+  const currentYear = new Date().getFullYear();
+  if (lang === 'Telugu') {
+    return {
+      content: `**నమస్కారం మరియు శుభాశీస్సులు, ${name}!** 🙏\n\nనేను **${astroName}**, మీ వ్యక్తిగత వేద జ్యోతిష్య మరియు ఆధ్యాత్మిక మార్గదర్శకుడిని. ${currentYear} సంవత్సరానికి సంబంధించి మీ **కుండలి, కెరీర్, వివాహం, ఆర్థిక స్థితి, గ్రహ దశలు లేదా నిత్య పరిహారాల** గురించి ఏదైనా అడగండి. ఈరోజు మీకు ఎలా సహాయపడగలను?`,
+      recommendations: QUICK_PROMPTS_BY_LANG.Telugu,
+    };
+  }
+  if (lang === 'Hindi') {
+    return {
+      content: `**नमस्ते एवं आशीर्वाद, ${name}!** 🙏\n\nमैं **${astroName}** हूँ, आपका व्यक्तिगत वैदिक ज्योतिषी एवं आध्यात्मिक मार्गदर्शक। वर्ष ${currentYear} के लिए अपनी **कुंडली, करियर, विवाह, धन, ग्रह दशा या दैनिक उपायों** के बारे में कोई भी प्रश्न पूछें। आज मैं आपका किस प्रकार मार्गदर्शन करूँ?`,
+      recommendations: QUICK_PROMPTS_BY_LANG.Hindi,
+    };
+  }
+  if (lang === 'Tamil') {
+    return {
+      content: `**வணக்கம் மற்றும் ஆசிகள், ${name}!** 🙏\n\nநான் **${astroName}**, உங்கள் தனிப்பட்ட வேத ஜோதிடர் மற்றும் ஆன்மீக வழிகாட்டி. ${currentYear} ஆம் ஆண்டிற்கான உங்கள் **ஜாதகம், தொழில், திருமணம், நிதி நிலை, கிரக தசா அல்லது தினசரி பரிகாரங்கள்** பற்றி என்னிடம் கேளுங்கள். இன்று உங்களுக்கு எவ்வாறு உதவ முடியும்?`,
+      recommendations: QUICK_PROMPTS_BY_LANG.Tamil,
+    };
+  }
+  if (lang === 'Kannada') {
+    return {
+      content: `**ನಮಸ್ಕಾರ ಮತ್ತು ಶುಭಾಶೀರ್ವಾದಗಳು, ${name}!** 🙏\n\nನಾನು **${astroName}**, ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ವೈದಿಕ ಜ್ಯೋತಿಷಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಮಾರ್ಗದರ್ಶಕ. ${currentYear} ವರ್ಷಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ನಿಮ್ಮ **ಕುಂಡಲಿ, ವೃತ್ತಿ, ವಿವಾಹ, ಆರ್ಥಿಕ ಸ್ಥಿತಿ, ಗ್ರಹ ದಶೆ ಅಥವಾ ನಿತ್ಯ ಪರಿಹಾರಗಳ** ಬಗ್ಗೆ ಕೇಳಿ. ಇಂದು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?`,
+      recommendations: QUICK_PROMPTS_BY_LANG.Kannada,
+    };
+  }
+  return {
+    content: `**Namaste and blessings, ${name}!** 🙏\n\nI am **${astroName}**, your personal Vedic Astrologer & spiritual guide. Ask me any question about your **Kundli, career, marriage, finances, planetary dashas, or daily remedies** for ${currentYear}. How may I guide your chart today?`,
+    recommendations: DEFAULT_RECOMMENDATIONS,
+  };
+}
 
 function renderFormattedMessageContent(rawContent: string, isUser: boolean) {
   if (!rawContent) return null;
@@ -205,7 +350,9 @@ function renderFormattedMessageContent(rawContent: string, isUser: boolean) {
           return (
             <h4
               key={idx}
-              className="text-xs font-bold text-[#713B32] mt-3 pt-2 border-t border-[#E5D9C8]/60 first:mt-0 first:border-0 first:pt-0"
+              className={`text-xs font-bold mt-3 pt-2 border-t first:mt-0 first:border-0 first:pt-0 ${
+                isUser ? 'text-[#075E54] border-[#075E54]/20' : 'text-[#075E54] border-[#E9EDEF]'
+              }`}
             >
               {headingText}
             </h4>
@@ -227,13 +374,13 @@ function renderFormattedMessageContent(rawContent: string, isUser: boolean) {
                 const cleanLine = line.replace(/^[•\-\d\.\)]\s*/, '').trim();
                 return (
                   <li key={lIdx} className="flex items-start gap-1.5 text-xs leading-relaxed">
-                    <span className="text-[#C9952B] font-bold shrink-0">•</span>
+                    <span className={isUser ? 'text-[#075E54] font-bold shrink-0' : 'text-[#25D366] font-bold shrink-0'}>•</span>
                     <span>
                       {cleanLine.split('**').map((chunk, j) =>
                         j % 2 === 1 ? (
                           <strong
                             key={j}
-                            className={isUser ? 'text-[#FFEBB3]' : 'text-[#713B32]'}
+                            className={isUser ? 'text-[#111B21] font-bold' : 'text-[#075E54] font-bold'}
                           >
                             {chunk}
                           </strong>
@@ -256,7 +403,7 @@ function renderFormattedMessageContent(rawContent: string, isUser: boolean) {
               j % 2 === 1 ? (
                 <strong
                   key={j}
-                  className={isUser ? 'text-[#FFEBB3]' : 'text-[#713B32]'}
+                  className={isUser ? 'text-[#111B21] font-bold' : 'text-[#075E54] font-bold'}
                 >
                   {chunk}
                 </strong>
@@ -280,9 +427,16 @@ export default function AIChatSidebar() {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState('English');
+  const isTelugu = language === 'Telugu';
+  const isHindi = language === 'Hindi';
+  const isTamil = language === 'Tamil';
+  const isKannada = language === 'Kannada';
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+
+  // Dynamic Astrologer Session Profile (changes per new session)
+  const [sessionAstrologer, setSessionAstrologer] = useState<AstrologerSessionProfile>(ASTROLOGER_AVATAR_POOL[0]);
 
   // Active Navigation Tab: 'chat' | 'profile' | 'compare' | 'timeline'
   const [activeTab, setActiveTab] = useState<'chat' | 'profile' | 'compare' | 'timeline'>('chat');
@@ -363,7 +517,8 @@ export default function AIChatSidebar() {
       if (targetAstro) {
         setActiveAstrologer(targetAstro);
         // Start fresh consultation with target astrologer, hiding previous astrologer's chat
-        const welcomeName = userData?.name || user?.displayName || 'Devotee';
+        const rawName = userData?.name || user?.displayName || 'Devotee';
+        const welcomeName = rawName.toLowerCase().includes('admin') ? 'Devotee' : rawName;
         setMessages([
           {
             id: `welcome-${targetAstro.id}-${Date.now()}`,
@@ -387,6 +542,38 @@ export default function AIChatSidebar() {
       window.removeEventListener('open-ai-chat-sidebar', handleOpen);
     };
   }, [user, userData]);
+
+  // Initialize dynamic session astrologer (restores or randomly picks a fresh astrologer for new chat session)
+  useEffect(() => {
+    try {
+      const savedAstroId = sessionStorage.getItem('astroparihar_session_astro_id');
+      if (savedAstroId) {
+        const found = ASTROLOGER_AVATAR_POOL.find((a) => a.id === savedAstroId);
+        if (found) {
+          setSessionAstrologer(found);
+          return;
+        }
+      }
+      const randomAstro = ASTROLOGER_AVATAR_POOL[Math.floor(Math.random() * ASTROLOGER_AVATAR_POOL.length)];
+      setSessionAstrologer(randomAstro);
+      sessionStorage.setItem('astroparihar_session_astro_id', randomAstro.id);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Current effective astrologer profile
+  const currentAstrologer = activeAstrologer
+    ? {
+        name: activeAstrologer.name,
+        avatar: activeAstrologer.avatar,
+        discipline: activeAstrologer.primaryDiscipline,
+      }
+    : {
+        name: sessionAstrologer.name,
+        avatar: sessionAstrologer.avatar,
+        discipline: sessionAstrologer.discipline,
+      };
 
   // Sync wallet balance
   useEffect(() => {
@@ -499,17 +686,19 @@ export default function AIChatSidebar() {
     }
 
     // Default welcome message with 6 recommendations
-    const welcomeName = userData?.name || user?.displayName || 'Devotee';
+    const rawName = userData?.name || user?.displayName || 'Devotee';
+    const welcomeName = rawName.toLowerCase().includes('admin') ? 'Devotee' : rawName;
+    const welcome = getWelcomeMessage(language, welcomeName, sessionAstrologer.name);
     setMessages([
       {
         id: 'welcome-msg',
         role: 'assistant',
-        content: `**Namaste and blessings, ${welcomeName}!** 🙏\n\nI am **Acharya Parihar**, your personal Vedic Astrologer & spiritual guide. Ask me any question about your **Kundli, career, marriage, finances, planetary dashas, or daily remedies** for ${new Date().getFullYear()}. How may I guide your chart today?`,
+        content: welcome.content,
         timestamp: new Date().toISOString(),
-        recommendations: DEFAULT_RECOMMENDATIONS,
+        recommendations: welcome.recommendations,
       },
     ]);
-  }, [user, userData]);
+  }, [user, userData, language, sessionAstrologer]);
 
   // Save messages to storage
   useEffect(() => {
@@ -561,9 +750,27 @@ export default function AIChatSidebar() {
     if (currentWallet < pricePerPrompt) {
       setAlertModal({
         isOpen: true,
-        title: 'Insufficient Wallet Balance',
-        description: `Each prompt costs ₹${pricePerPrompt}, but your available wallet balance is ₹${currentWallet.toFixed(2)}. Please recharge your wallet to continue.`,
-        confirmText: 'Recharge Wallet',
+        title: isTelugu
+          ? 'తక్కువ వాలెట్ బ్యాలెన్స్'
+          : isHindi
+          ? 'अपर्याप्त वॉलेट बैलेंस'
+          : isTamil
+          ? 'போதிய வாலட் இருப்பு இல்லை'
+          : 'Insufficient Wallet Balance',
+        description: isTelugu
+          ? `ప్రతి ప్రశ్నకు ₹${pricePerPrompt} అవుతుంది, కానీ మీ అందుబాటులో ఉన్న బ్యాలెన్స్ ₹${currentWallet.toFixed(2)}. సంభాషణ కొనసాగించడానికి దయచేసి రీఛార్జ్ చేయండి.`
+          : isHindi
+          ? `प्रत्येक प्रश्न की लागत ₹${pricePerPrompt} है, लेकिन आपका उपलब्ध बैलेंस ₹${currentWallet.toFixed(2)} है। बातचीत जारी रखने के लिए कृपया रीचार्ज करें।`
+          : isTamil
+          ? `ஒவ்வொரு கேள்விக்கும் ₹${pricePerPrompt} தேவை, ஆனால் உங்கள் இருப்பு ₹${currentWallet.toFixed(2)}. தொடர்ந்து பேச தயவுசெய்து ரீசார்ஜ் செய்யவும்.`
+          : `Each prompt costs ₹${pricePerPrompt}, but your available wallet balance is ₹${currentWallet.toFixed(2)}. Please recharge your wallet to continue.`,
+        confirmText: isTelugu
+          ? 'వాలెట్ రీఛార్జ్ చేయండి'
+          : isHindi
+          ? 'वॉलेट रीचार्ज करें'
+          : isTamil
+          ? 'ரீசார்ஜ் செய்யவும்'
+          : 'Recharge Wallet',
         variant: 'warning',
         action: () => {
           window.location.href = '/wallet';
@@ -624,8 +831,8 @@ export default function AIChatSidebar() {
           userId: user.uid,
           userInfo,
           language,
-          astrologerId: activeAstrologer?.id,
-          persona: activeAstrologer?.name,
+          astrologerId: activeAstrologer?.id || sessionAstrologer.id,
+          persona: activeAstrologer?.name || sessionAstrologer.name,
         }),
       });
 
@@ -678,7 +885,10 @@ export default function AIChatSidebar() {
           content: data.message.content,
           timestamp: data.message.timestamp || new Date().toISOString(),
           recommendations:
-            data.recommendations || data.message.recommendations || DEFAULT_RECOMMENDATIONS,
+            data.recommendations ||
+            data.message.recommendations ||
+            QUICK_PROMPTS_BY_LANG[language] ||
+            DEFAULT_RECOMMENDATIONS,
           structured: data.message.structured || data.structured || undefined,
         };
         setMessages((prev) => [...prev, assistantMessage]);
@@ -701,14 +911,23 @@ export default function AIChatSidebar() {
   };
 
   const executeClearChat = () => {
-    const welcomeName = userData?.name || user?.displayName || 'Devotee';
+    // Dynamically pick a different astrologer for the new chat session
+    const remaining = ASTROLOGER_AVATAR_POOL.filter((a) => a.id !== sessionAstrologer.id);
+    const nextAstro = remaining[Math.floor(Math.random() * remaining.length)] || ASTROLOGER_AVATAR_POOL[0];
+    setSessionAstrologer(nextAstro);
+    try {
+      sessionStorage.setItem('astroparihar_session_astro_id', nextAstro.id);
+    } catch {}
+    const rawName = userData?.name || user?.displayName || 'Devotee';
+    const welcomeName = rawName.toLowerCase().includes('admin') ? 'Devotee' : rawName;
+    const welcome = getWelcomeMessage(language, welcomeName, nextAstro.name);
     const initial: ChatMessage[] = [
       {
         id: `welcome-${Date.now()}`,
         role: 'assistant',
-        content: `**Namaste, ${welcomeName}!** 🙏\n\nYour consultation session has been refreshed. What astrological inquiry would you like to explore?`,
+        content: welcome.content,
         timestamp: new Date().toISOString(),
-        recommendations: DEFAULT_RECOMMENDATIONS,
+        recommendations: welcome.recommendations,
       },
     ];
     setMessages(initial);
@@ -765,9 +984,9 @@ export default function AIChatSidebar() {
               exit={{ opacity: 0, x: 10, scale: 0.9 }}
               className="hidden md:flex items-center gap-2 bg-[#FFFDFC] text-[#292522] px-3.5 py-2 rounded-2xl border border-[#E5D9C8] shadow-xl text-xs font-bold pointer-events-none"
             >
-              <Sparkles size={13} className="text-[#C9952B]" />
-              <span>Ask AI Astrologer • ₹{pricePerPrompt}/prompt</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <Sparkles size={13} className="text-[#25D366]" />
+              <span>Ask AI Jyotish • ₹{pricePerPrompt}/prompt</span>
+              <span className="w-2 h-2 rounded-full bg-[#25D366] animate-ping" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -780,28 +999,28 @@ export default function AIChatSidebar() {
           onMouseLeave={() => setShowTooltip(false)}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
-          className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-tr from-[#713B32] via-[#8E4C41] to-[#C9952B] text-white flex items-center justify-center shadow-[0_8px_30px_rgba(113,59,50,0.45)] border-2 border-[#E5D9C8]/40 hover:shadow-[0_12px_36px_rgba(201,149,43,0.55)] transition-all cursor-pointer group"
-          aria-label="Open AI Astrology Chat"
+          className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-tr from-[#075E54] via-[#128C7E] to-[#25D366] text-white flex items-center justify-center shadow-[0_8px_30px_rgba(7,94,84,0.45)] border-2 border-white/40 hover:shadow-[0_12px_36px_rgba(37,211,102,0.55)] transition-all cursor-pointer group"
+          aria-label="Ask AI Jyotish"
         >
           {/* Subtle Ambient Pulse Ring */}
-          <span className="absolute -inset-1 rounded-full bg-[#C9952B]/30 animate-pulse -z-10 group-hover:bg-[#C9952B]/45" />
+          <span className="absolute -inset-1 rounded-full bg-[#25D366]/30 animate-pulse -z-10 group-hover:bg-[#25D366]/45" />
 
           {/* Active Online Indicator Dot */}
-          <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#FFFDFC] shadow-sm flex items-center justify-center">
+          <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-[#25D366] border-2 border-[#FFFDFC] shadow-sm flex items-center justify-center">
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
           </span>
 
           {/* Inner Icon */}
           <div className="relative flex flex-col items-center justify-center">
-            <Bot size={26} className="text-white drop-shadow group-hover:rotate-6 transition-transform" />
-            <span className="text-[8px] font-black uppercase tracking-tighter text-[#FFEBB3] -mt-0.5">
-              AI CHAT
+            <Bot size={24} className="text-white drop-shadow group-hover:rotate-6 transition-transform" />
+            <span className="text-[7.5px] font-black uppercase tracking-tighter text-[#E7FFDB] -mt-0.5 text-center leading-none">
+              AI JYOTISH
             </span>
           </div>
         </motion.button>
       </div>
 
-      {/* 2. SLIDE-IN AI CHAT DRAWER / SIDEBAR */}
+      {/* 2. SLIDE-IN AI CHAT DRAWER / SIDEBAR (WhatsApp / AstroTalk UI) */}
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-[99999] flex justify-end">
@@ -822,43 +1041,51 @@ export default function AIChatSidebar() {
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
               className="relative w-full sm:w-[420px] h-full bg-[#FFFDFC] text-[#292522] shadow-2xl flex flex-col border-l border-[#E5D9C8] z-10"
             >
-              {/* Drawer Header */}
-              <div className="p-4 bg-gradient-to-r from-[#713B32] via-[#8E4C41] to-[#552B24] text-[#FFFDFC] flex items-center justify-between border-b border-[#E5D9C8] shadow-sm">
+              {/* Drawer Header (WhatsApp Dark Teal #075E54) */}
+              <div className="px-4 py-3 bg-[#075E54] text-white flex items-center justify-between border-b border-[#054C44] shadow-sm shrink-0">
                 {/* Astrologer Identity */}
-                <div className="flex items-center gap-3">
-                  <div className="relative w-11 h-11 rounded-2xl overflow-hidden border-2 border-[#C9952B] shadow-md flex-shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-white/30 shadow-sm shrink-0 bg-white/10">
                     <AppImage
-                      src={activeAstrologer?.avatar || "https://images.unsplash.com/photo-1544717305-2782549b5136?w=300"}
-                      alt={activeAstrologer?.name || "Acharya Parihar"}
+                      src={currentAstrologer.avatar}
+                      alt={currentAstrologer.name}
                       fill
                       className="object-cover"
                     />
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-white" />
+                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#25D366] border-2 border-[#075E54]" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <h3 className="font-bold text-sm text-[#FFFDFC]">
-                        {activeAstrologer?.name || "Acharya Parihar"}
+                      <h3 className="font-bold text-sm text-white truncate">
+                        {currentAstrologer.name}
                       </h3>
-                      <ShieldCheck size={14} className="text-[#FFEBB3]" />
+                      <ShieldCheck size={14} className="text-[#25D366] shrink-0" />
                     </div>
-                    <p className="text-[10px] text-[#F3EBDD] font-medium flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      {activeAstrologer?.primaryDiscipline
-                        ? `${activeAstrologer.primaryDiscipline} AI Astrologer • 24/7 Active`
-                        : "Vedic AI Astrologer • 24/7 Active"}
+                    <p className="text-[11px] text-[#A6D4CE] font-normal flex items-center gap-1.5 truncate">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse shrink-0" />
+                      <span className="truncate">
+                        {isTelugu
+                          ? 'ఆన్‌లైన్ • తక్షణ సమాధానం'
+                          : isHindi
+                          ? 'ऑनलाइन • तुरंत उत्तर'
+                          : isTamil
+                          ? 'ஆன்லைன் • உடனடி பதில்'
+                          : isKannada
+                          ? 'ಆನ್‌ಲೈನ್ • ತಕ್ಷಣದ ಉತ್ತರ'
+                          : 'online • typically replies in seconds'}
+                      </span>
                     </p>
                   </div>
                 </div>
 
-                {/* Header Actions: Language, Clear, Close */}
-                <div className="flex items-center gap-1">
+                {/* Header Actions: Language, Refresh/New Session, Close */}
+                <div className="flex items-center gap-1 shrink-0">
                   {/* Language Selector Dropdown */}
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setLangDropdownOpen((prev) => !prev)}
-                      className="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-[#FFFDFC] text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer border border-white/15"
                       title="Select Language"
                     >
                       <Languages size={13} />
@@ -881,13 +1108,28 @@ export default function AIChatSidebar() {
                               onClick={() => {
                                 setLanguage(l.code);
                                 setLangDropdownOpen(false);
+                                setMessages((prev) => {
+                                  if (prev.length === 1 && prev[0].id.startsWith('welcome')) {
+                                    const rawName = userData?.name || user?.displayName || 'Devotee';
+                                    const welcomeName = rawName.toLowerCase().includes('admin') ? 'Devotee' : rawName;
+                                    const welcome = getWelcomeMessage(l.code, welcomeName, currentAstrologer.name);
+                                    return [
+                                      {
+                                        ...prev[0],
+                                        content: welcome.content,
+                                        recommendations: welcome.recommendations,
+                                      },
+                                    ];
+                                  }
+                                  return prev;
+                                });
                               }}
                               className={`w-full px-3 py-2 text-left text-xs font-semibold flex items-center justify-between hover:bg-[#F8F3EA] transition-colors ${
-                                language === l.code ? 'text-[#713B32] bg-[#EDE4D5]/40 font-bold' : ''
+                                language === l.code ? 'text-[#075E54] bg-[#E7FFDB] font-bold' : ''
                               }`}
                             >
                               <span>{l.label}</span>
-                              {language === l.code && <span className="text-[#C9952B]">✓</span>}
+                              {language === l.code && <span className="text-[#25D366]">✓</span>}
                             </button>
                           ))}
                         </motion.div>
@@ -895,12 +1137,12 @@ export default function AIChatSidebar() {
                     </AnimatePresence>
                   </div>
 
-                  {/* Refresh / Clear Chat */}
+                  {/* Refresh / New Chat Session */}
                   <button
                     type="button"
                     onClick={handleClearChat}
-                    className="p-2 rounded-xl hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
-                    title="Clear Chat History"
+                    className="p-2 rounded-lg hover:bg-white/15 text-white/90 hover:text-white transition-colors cursor-pointer"
+                    title="Start New Session / Clear Chat"
                   >
                     <RotateCcw size={15} />
                   </button>
@@ -909,7 +1151,7 @@ export default function AIChatSidebar() {
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="p-2 rounded-xl hover:bg-white/15 text-white/80 hover:text-white transition-colors cursor-pointer"
+                    className="p-2 rounded-lg hover:bg-white/15 text-white/90 hover:text-white transition-colors cursor-pointer"
                     title="Close Sidebar"
                   >
                     <X size={18} />
@@ -925,7 +1167,9 @@ export default function AIChatSidebar() {
                   </div>
                   {user ? (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[#6B5E55] font-medium">Balance:</span>
+                      <span className="text-[#6B5E55] font-medium">
+                        {isTelugu ? 'బ్యాలెన్స్:' : isHindi ? 'बैलेंस:' : isTamil ? 'மீதி:' : 'Balance:'}
+                      </span>
                       <span
                         className={`font-extrabold ${
                           isLowBalance ? 'text-rose-600' : 'text-[#713B32]'
@@ -935,13 +1179,15 @@ export default function AIChatSidebar() {
                       </span>
                     </div>
                   ) : (
-                    <span className="text-[#6B5E55] font-medium">Guest Devotee</span>
+                    <span className="text-[#6B5E55] font-medium">
+                      {isTelugu ? 'అతిథి భక్తులు' : isHindi ? 'अतिथि भक्त' : isTamil ? 'பக்தர்' : 'Guest Devotee'}
+                    </span>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2.5">
                   <span className="px-2 py-0.5 rounded-md bg-[#FFFDFC] border border-[#E5D9C8] text-[11px] font-bold text-[#C9952B]">
-                    ⚡ ₹{pricePerPrompt} / prompt
+                    ⚡ ₹{pricePerPrompt} / {isTelugu ? 'ప్రశ్న' : isHindi ? 'प्रश्न' : isTamil ? 'கேள்வி' : 'prompt'}
                   </span>
                   {user ? (
                     <Link
@@ -949,7 +1195,7 @@ export default function AIChatSidebar() {
                       onClick={() => setIsOpen(false)}
                       className="text-[11px] font-bold text-[#713B32] hover:text-[#C9952B] underline flex items-center gap-0.5"
                     >
-                      Recharge <ArrowUpRight size={11} />
+                      {isTelugu ? 'రీఛార్జ్' : isHindi ? 'रिचार्ज' : isTamil ? 'ரீசார்ஜ்' : 'Recharge'} <ArrowUpRight size={11} />
                     </Link>
                   ) : (
                     <Link
@@ -957,7 +1203,7 @@ export default function AIChatSidebar() {
                       onClick={() => setIsOpen(false)}
                       className="text-[11px] font-bold text-[#713B32] hover:text-[#C9952B] underline flex items-center gap-0.5"
                     >
-                      Sign In <LogIn size={11} />
+                      {isTelugu ? 'లాగిన్' : isHindi ? 'साइन इन' : isTamil ? 'உள்நுழைக' : 'Sign In'} <LogIn size={11} />
                     </Link>
                   )}
                 </div>
@@ -969,7 +1215,13 @@ export default function AIChatSidebar() {
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-[#713B32] flex items-center gap-1.5 text-[11px]">
                       <Sparkles size={13} className="text-[#C9952B]" />
-                      Astrological Outcome Verification
+                      {isTelugu
+                        ? 'జ్యోతిష్య ఫలితాల ధృవీకరణ'
+                        : isHindi
+                        ? 'ज्योतिष परिणाम सत्यापन'
+                        : isTamil
+                        ? 'ஜோதிட பலன் சரிபார்ப்பு'
+                        : 'Astrological Outcome Verification'}
                     </span>
                     <button
                       type="button"
@@ -980,7 +1232,13 @@ export default function AIChatSidebar() {
                     </button>
                   </div>
                   <p className="text-[#292522] text-[11px] leading-snug">
-                    Acharya Parihar previously indicated a milestone for <strong>{pendingVerification.topic}</strong> around <em>{pendingVerification.targetPeriod}</em>. Did this event manifest in your life?
+                    {isTelugu
+                      ? <>ఆచార్య పరిహార్ గతంలో <strong>{pendingVerification.topic}</strong> గురించి <em>{pendingVerification.targetPeriod}</em> కాలంలో ఒక ముఖ్య ఘట్టాన్ని సూచించారు. ఇది మీ జీవితంలో సంభవించిందా?</>
+                      : isHindi
+                      ? <>आचार्य परिहार ने पूर्व में <strong>{pendingVerification.topic}</strong> के संबंध में <em>{pendingVerification.targetPeriod}</em> के आसपास एक महत्वपूर्ण घटना का संकेत दिया था। क्या यह घटित हुआ?</>
+                      : isTamil
+                      ? <>ஆச்சார்ய பரிகார் முன்பு <strong>{pendingVerification.topic}</strong> பற்றி <em>{pendingVerification.targetPeriod}</em> காலத்தில் ஒரு மைல்கல்லைக் குறிப்பிட்டார். அது நிகழ்ந்ததா?</>
+                      : <>Acharya Parihar previously indicated a milestone for <strong>{pendingVerification.topic}</strong> around <em>{pendingVerification.targetPeriod}</em>. Did this event manifest in your life?</>}
                   </p>
                   <div className="flex items-center gap-2 pt-0.5">
                     <button
@@ -988,21 +1246,21 @@ export default function AIChatSidebar() {
                       onClick={() => handleVerifyOutcome(pendingVerification.id, 'verified_accurate')}
                       className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] transition-colors cursor-pointer"
                     >
-                      ✓ Yes, Accurately
+                      {isTelugu ? '✓ అవును, ఖచ్చితంగా' : isHindi ? '✓ हाँ, सटीक' : isTamil ? '✓ ஆம், சரியாக' : '✓ Yes, Accurately'}
                     </button>
                     <button
                       type="button"
                       onClick={() => handleVerifyOutcome(pendingVerification.id, 'partially_accurate')}
                       className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] transition-colors cursor-pointer"
                     >
-                      ⚡ Partially
+                      {isTelugu ? '⚡ పాక్షికంగా' : isHindi ? '⚡ आंशिक' : isTamil ? '⚡ பகுதியளவு' : '⚡ Partially'}
                     </button>
                     <button
                       type="button"
                       onClick={() => handleVerifyOutcome(pendingVerification.id, 'inaccurate')}
                       className="px-2.5 py-1 rounded-lg bg-slate-500 hover:bg-slate-600 text-white font-bold text-[10px] transition-colors cursor-pointer"
                     >
-                      ✕ Not Yet
+                      {isTelugu ? '✕ ఇంకా లేదు' : isHindi ? '✕ अभी नहीं' : isTamil ? '✕ இன்னும் இல்லை' : '✕ Not Yet'}
                     </button>
                   </div>
                 </div>
@@ -1020,7 +1278,7 @@ export default function AIChatSidebar() {
                   }`}
                 >
                   <Bot size={13} />
-                  <span>Chat</span>
+                  <span>{isTelugu ? 'చాట్' : isHindi ? 'चैट' : isTamil ? 'அரட்டை' : 'Chat'}</span>
                 </button>
                 <button
                   type="button"
@@ -1032,7 +1290,7 @@ export default function AIChatSidebar() {
                   }`}
                 >
                   <Sparkles size={13} />
-                  <span>Profile</span>
+                  <span>{isTelugu ? 'ప్రొఫైల్' : isHindi ? 'प्रोफ़ाइल' : isTamil ? 'சுயவிவரம்' : 'Profile'}</span>
                 </button>
                 <button
                   type="button"
@@ -1044,7 +1302,7 @@ export default function AIChatSidebar() {
                   }`}
                 >
                   <Calendar size={13} />
-                  <span>Compare</span>
+                  <span>{isTelugu ? 'పోలిక' : isHindi ? 'तुलना' : isTamil ? 'ஒப்பீடு' : 'Compare'}</span>
                 </button>
                 <button
                   type="button"
@@ -1056,13 +1314,13 @@ export default function AIChatSidebar() {
                   }`}
                 >
                   <Compass size={13} />
-                  <span>Timeline</span>
+                  <span>{isTelugu ? 'టైమ్‌లైన్' : isHindi ? 'समयरेखा' : isTamil ? 'காலவரிசை' : 'Timeline'}</span>
                 </button>
               </div>
 
               {/* Messages Scroll Area */}
               {activeTab === 'chat' && (
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#FDFBF7]">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-[#EFEAE2]">
                 {messages.map((m) => {
                   const isUser = m.role === 'user';
                   return (
@@ -1074,7 +1332,7 @@ export default function AIChatSidebar() {
                     >
                       {/* Avatar for AI */}
                       {!isUser && (
-                        <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-[#713B32] to-[#C9952B] text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                        <div className="w-7 h-7 rounded-xl bg-[#075E54] text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
                           <Bot size={14} />
                         </div>
                       )}
@@ -1083,8 +1341,8 @@ export default function AIChatSidebar() {
                       <div
                         className={`relative max-w-[88%] rounded-2xl p-3.5 leading-relaxed shadow-sm ${
                           isUser
-                            ? 'bg-[#713B32] text-white rounded-tr-xs font-medium'
-                            : 'bg-[#FFFDFC] border border-[#E5D9C8] text-[#292522] rounded-tl-xs'
+                            ? 'bg-[#DCF8C6] text-[#111B21] rounded-tr-xs font-medium'
+                            : 'bg-[#FFFFFF] border border-[#E9EDEF] text-[#111B21] rounded-tl-xs'
                         }`}
                       >
                         {/* Astrological Confidence Badge for AI Responses */}
@@ -1094,17 +1352,35 @@ export default function AIChatSidebar() {
                               {m.structured.confidence === 'Strong' ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 font-extrabold text-[10px]">
                                   <CheckCircle2 size={11} className="text-emerald-600" />
-                                  Astrology Confidence: Strong
+                                  {isTelugu
+                                    ? 'జ్యోతిష్య ఖచ్చితత్వం: ఉత్తమం'
+                                    : isHindi
+                                    ? 'ज्योतिष सटीकता: सटीक'
+                                    : isTamil
+                                    ? 'ஜோதிட துல்லியம்: உறுதியானது'
+                                    : 'Astrology Confidence: Strong'}
                                 </span>
                               ) : m.structured.confidence === 'Moderate' ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-800 font-extrabold text-[10px]">
                                   <Compass size={11} className="text-amber-600" />
-                                  Astrology Confidence: Moderate
+                                  {isTelugu
+                                    ? 'జ్యోతిష్య ఖచ్చితత్వం: మధ్యమం'
+                                    : isHindi
+                                    ? 'ज्योतिष सटीकता: मध्यम'
+                                    : isTamil
+                                    ? 'ஜோதிட துல்லியம்: மிதமானது'
+                                    : 'Astrology Confidence: Moderate'}
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-800 font-extrabold text-[10px]">
                                   <AlertTriangle size={11} className="text-rose-600" />
-                                  Astrology Confidence: Mixed
+                                  {isTelugu
+                                    ? 'జ్యోతిష్య ఖచ్చితత్వం: మిశ్రమం'
+                                    : isHindi
+                                    ? 'ज्योतिष सटीकता: मिश्रित'
+                                    : isTamil
+                                    ? 'ஜோதிட துல்லியம்: கலவை'
+                                    : 'Astrology Confidence: Mixed'}
                                 </span>
                               )}
                             </div>
@@ -1127,10 +1403,22 @@ export default function AIChatSidebar() {
                             <div className="flex items-center justify-between gap-1.5 text-xs font-bold text-[#713B32]">
                               <span className="flex items-center gap-1.5">
                                 <Flame size={13} className="text-[#C9952B]" />
-                                48-Day Sacred Mandala Protocol
+                                {isTelugu
+                                  ? '48 రోజుల పవిత్ర మండల పరిహార విధానం'
+                                  : isHindi
+                                  ? '48 दिवसीय पवित्र मंडल परिहार विधान'
+                                  : isTamil
+                                  ? '48 நாட்கள் புனித மண்டல பரிகார முறை'
+                                  : '48-Day Sacred Mandala Protocol'}
                               </span>
                               <span className="text-[10px] font-bold text-[#C9952B] px-1.5 py-0.5 rounded bg-white/70 border border-[#C9952B]/30">
-                                48 Days (మండలం)
+                                {isTelugu
+                                  ? '48 రోజులు (మండలం)'
+                                  : isHindi
+                                  ? '48 दिन (मंडल)'
+                                  : isTamil
+                                  ? '48 நாட்கள் (மண்டலம்)'
+                                  : '48 Days (Mandala)'}
                               </span>
                             </div>
 
@@ -1140,31 +1428,74 @@ export default function AIChatSidebar() {
 
                             <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
                               <div className="p-1.5 rounded-lg bg-white/80 border border-[#E5D9C8]">
-                                <span className="text-muted-foreground block text-[9px]">Prescribed Homam:</span>
-                                <strong className="text-[#713B32] truncate block">{m.structured.pariharProtocol.recommendedHomam}</strong>
-                                <span className="text-[9px] text-[#C9952B] block">Day: {m.structured.pariharProtocol.homamAuspiciousDay}</span>
+                                <span className="text-muted-foreground block text-[9px]">
+                                  {isTelugu
+                                    ? 'సూచించిన హోమం:'
+                                    : isHindi
+                                    ? 'सुझाया गया होम:'
+                                    : isTamil
+                                    ? 'பரிந்துரைக்கப்பட்ட ஹோமம்:'
+                                    : 'Prescribed Homam:'}
+                                </span>
+                                <strong className="text-[#713B32] truncate block">
+                                  {m.structured.pariharProtocol.recommendedHomam}
+                                </strong>
+                                <span className="text-[9px] text-[#C9952B] block">
+                                  {isTelugu
+                                    ? `శుభ దినం: ${m.structured.pariharProtocol.homamAuspiciousDay}`
+                                    : isHindi
+                                    ? `शुभ दिन: ${m.structured.pariharProtocol.homamAuspiciousDay}`
+                                    : isTamil
+                                    ? `சுப நாள்: ${m.structured.pariharProtocol.homamAuspiciousDay}`
+                                    : `Day: ${m.structured.pariharProtocol.homamAuspiciousDay}`}
+                                </span>
                               </div>
                               <div className="p-1.5 rounded-lg bg-white/80 border border-[#E5D9C8]">
-                                <span className="text-muted-foreground block text-[9px]">Daily Mantra Japa:</span>
-                                <strong className="text-[#713B32] truncate block" title={m.structured.pariharProtocol.dailyMantra}>
+                                <span className="text-muted-foreground block text-[9px]">
+                                  {isTelugu
+                                    ? 'రోజువారీ మంత్ర జపం:'
+                                    : isHindi
+                                    ? 'दैनिक मंत्र जप:'
+                                    : isTamil
+                                    ? 'தினசரி மந்திர ஜெபம்:'
+                                    : 'Daily Mantra Japa:'}
+                                </span>
+                                <strong
+                                  className="text-[#713B32] truncate block"
+                                  title={m.structured.pariharProtocol.dailyMantra}
+                                >
                                   {m.structured.pariharProtocol.dailyMantra}
                                 </strong>
-                                <span className="text-[9px] text-emerald-700 block">108 recitations at Sunrise</span>
+                                <span className="text-[9px] text-emerald-700 block">
+                                  {isTelugu
+                                    ? 'సూర్యోదయ వేళలో 108 సార్లు జపం'
+                                    : isHindi
+                                    ? 'सूर्योदय के समय 108 बार जप'
+                                    : isTamil
+                                    ? 'சூரியோதய வேளையில் 108 முறை ஜெபம்'
+                                    : '108 recitations at Sunrise'}
+                                </span>
                               </div>
                             </div>
 
                             {/* 3 Milestones */}
                             <div className="pt-1.5 border-t border-[#E5D9C8] space-y-1 text-[10px] text-[#6B5E55]">
                               <div className="flex items-start gap-1.5">
-                                <span className="font-bold text-[#713B32] shrink-0">Day 1:</span>
+                                <span className="font-bold text-[#713B32] shrink-0">
+                                  {isTelugu ? '1వ రోజు:' : isHindi ? 'पहला दिन:' : isTamil ? 'நாள் 1:' : 'Day 1:'}
+                                </span>
                                 <span>{m.structured.pariharProtocol.initiationDay1?.action}</span>
                               </div>
                               <div className="flex items-start gap-1.5">
-                                <span className="font-bold text-[#C9952B] shrink-0">Day 24:</span>
+                                <span className="font-bold text-[#C9952B] shrink-0">
+                                  {isTelugu ? '24వ రోజు:' : isHindi ? '24वां दिन:' : isTamil ? 'நாள் 24:' : 'Day 24:'}
+                                </span>
                                 <span>{m.structured.pariharProtocol.midMandalaMilestoneDay24?.charityDaana}</span>
                               </div>
                               <div className="flex items-start gap-1.5">
-                                <span className="font-bold text-emerald-700 shrink-0">Day 48:</span>
+                                <span className="font-bold text-emerald-700 shrink-0">
+                                  {isTelugu ? '48వ రోజు:' : isHindi ? '48वां दिन:' : isTamil ? 'நாள் 48:' : 'Day 48:'}
+                                </span>
                                 <span>{m.structured.pariharProtocol.culminationDay48?.action}</span>
                               </div>
                             </div>
@@ -1176,17 +1507,39 @@ export default function AIChatSidebar() {
                           <div className="mt-3 p-3 rounded-xl bg-gradient-to-br from-[#713B32]/10 via-[#C9952B]/10 to-transparent border border-[#C9952B]/50 shadow-sm space-y-2">
                             <div className="flex items-center gap-2 text-xs font-bold text-[#713B32]">
                               <ShieldCheck size={14} className="text-[#C9952B]" />
-                              <span>Senior Astrologer Review Recommended</span>
+                              <span>
+                                {isTelugu
+                                  ? 'సీనియర్ జ్యోతిష్యుల సమీక్ష సూచించబడింది'
+                                  : isHindi
+                                  ? 'वरिष्ठ ज्योतिषी परामर्श अनुशंसित'
+                                  : isTamil
+                                  ? 'மூத்த ஜோதிடர் ஆலோசனை பரிந்துரைக்கப்படுகிறது'
+                                  : 'Senior Astrologer Review Recommended'}
+                              </span>
                             </div>
                             <p className="text-[11px] text-[#292522] leading-snug">
                               {m.structured?.escalationReason ||
-                                'This inquiry involves intricate planetary tensions between your active Dasha period and key houses. Direct verification with an AstroParihar Senior Astrologer is recommended.'}
+                                (isTelugu
+                                  ? 'ఈ ప్రశ్న మీ జన్మ నక్షత్రం, గోచారం మరియు దశల మధ్య లోతైన అంశాలను కలిగి ఉంది. ఆస్ట్రోపరిహార్ సీనియర్ జ్యోతిష్యులతో ప్రత్యక్ష పరిశీలన సిఫార్సు చేయబడింది.'
+                                  : isHindi
+                                  ? 'यह प्रश्न आपकी सक्रिय दशा और भावों के बीच जटिल ग्रहों के संबंधों से जुड़ा है। एस्ट्रोपरीहार के वरिष्ठ ज्योतिषी से प्रत्यक्ष सत्यापन अनुशंसित है।'
+                                  : isTamil
+                                  ? 'இந்த கேள்வி உங்கள் நடப்பு தசா மற்றும் கிரக நிலைகளுக்கு இடையே நுட்பமான தொடர்புகளைக் கொண்டுள்ளது. மூத்த ஜோதிடரின் நேரடி ஆலோசனை பரிந்துரைக்கப்படுகிறது.'
+                                  : 'This inquiry involves intricate planetary tensions between your active Dasha period and key houses. Direct verification with an AstroParihar Senior Astrologer is recommended.')}
                             </p>
                             <Link
                               href="/talk-to-astrologer"
                               className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl gold-gradient-bg text-white font-bold text-xs shadow-md hover:brightness-105 transition-all cursor-pointer"
                             >
-                              <span>Consult Senior Vedic Astrologer</span>
+                              <span>
+                                {isTelugu
+                                  ? 'సీనియర్ వేద జ్యోతిష్యులను సంప్రదించండి'
+                                  : isHindi
+                                  ? 'वरिष्ठ वैदिक ज्योतिषी से परामर्श लें'
+                                  : isTamil
+                                  ? 'மூத்த வேத ஜோதிடரை அணுகவும்'
+                                  : 'Consult Senior Vedic Astrologer'}
+                              </span>
                               <ArrowUpRight size={13} />
                             </Link>
                           </div>
@@ -1210,10 +1563,34 @@ export default function AIChatSidebar() {
                               type="button"
                               onClick={() => speakText(m.content)}
                               className="inline-flex items-center gap-1 hover:text-[#713B32] transition-colors cursor-pointer"
-                              title="Listen to Astrologer Voice"
+                              title={
+                                isTelugu
+                                  ? 'జ్యోతిష్యుల స్వరం వినండి'
+                                  : isHindi
+                                  ? 'ज्योतिषी की वाणी सुनें'
+                                  : isTamil
+                                  ? 'ஜோதிடர் குரலைக் கேளுங்கள்'
+                                  : 'Listen to Astrologer Voice'
+                              }
                             >
                               {isSpeaking ? <VolumeX size={12} /> : <Volume2 size={12} />}
-                              <span>{isSpeaking ? 'Stop' : 'Listen'}</span>
+                              <span>
+                                {isSpeaking
+                                  ? isTelugu
+                                    ? 'ఆపండి'
+                                    : isHindi
+                                    ? 'रोकें'
+                                    : isTamil
+                                    ? 'நிறுத்து'
+                                    : 'Stop'
+                                  : isTelugu
+                                  ? 'వినండి'
+                                  : isHindi
+                                  ? 'सुनें'
+                                  : isTamil
+                                  ? 'கேளுங்கள்'
+                                  : 'Listen'}
+                              </span>
                             </button>
                           )}
                         </div>
@@ -1223,12 +1600,20 @@ export default function AIChatSidebar() {
                           <div className="mt-3 pt-2.5 border-t border-[#E5D9C8] space-y-2">
                             <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#713B32]">
                               <Sparkles size={11} className="text-[#C9952B]" />
-                              <span>Recommended Inquiries:</span>
+                              <span>
+                                {isTelugu
+                                  ? 'సంబంధిత ప్రశ్నలు:'
+                                  : isHindi
+                                  ? 'सुझाए गए प्रश्न:'
+                                  : isTamil
+                                  ? 'பரிந்துரைக்கப்பட்ட கேள்விகள்:'
+                                  : 'Recommended Inquiries:'}
+                              </span>
                             </div>
                             <div className="grid grid-cols-1 gap-1.5">
                               {(m.recommendations && m.recommendations.length > 0
                                 ? m.recommendations
-                                : DEFAULT_RECOMMENDATIONS
+                                : (QUICK_PROMPTS_BY_LANG[language] || DEFAULT_RECOMMENDATIONS)
                               )
                                 .slice(0, 6)
                                 .map((rec, rIdx) => (
@@ -1271,7 +1656,14 @@ export default function AIChatSidebar() {
                       <Sparkles size={12} className="animate-spin" />
                     </div>
                     <span className="font-semibold text-[#713B32]">
-                      {activeAstrologer?.name || 'Acharya Parihar'} is examining your cosmic alignments...
+                      {activeAstrologer?.name || (isTelugu ? 'ఆచార్య పరిహార్' : isHindi ? 'आचार्य परिहार' : isTamil ? 'ஆச்சார்ய பரிகார்' : 'Acharya Parihar')}{' '}
+                      {isTelugu
+                        ? 'మీ జాతక గ్రహ స్థితులను పరిశీలిస్తున్నారు...'
+                        : isHindi
+                        ? 'आपकी जन्म कुंडली और ग्रह स्थितियों का विश्लेषण कर रहे हैं...'
+                        : isTamil
+                        ? 'உங்கள் ஜாதக கிரக நிலைகளை ஆய்வு செய்கிறார்...'
+                        : 'is examining your cosmic alignments...'}
                     </span>
                   </motion.div>
                 )}
@@ -1708,9 +2100,9 @@ export default function AIChatSidebar() {
               )}
 
               {/* Pre-filled Quick Suggestions Bar */}
-              <div className="p-2.5 bg-[#F8F3EA] border-t border-[#E5D9C8] overflow-x-auto flex items-center gap-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                <span className="text-[10px] uppercase font-bold text-[#713B32] shrink-0 pl-1">
-                  Suggestions:
+              <div className="p-2.5 bg-[#F0F2F5] border-t border-[#D1D7DB] overflow-x-auto flex items-center gap-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <span className="text-[10px] uppercase font-bold text-[#075E54] shrink-0 pl-1">
+                  {isTelugu ? 'సూచనలు:' : isHindi ? 'सुझाव:' : isTamil ? 'பரிந்துரைகள்:' : isKannada ? 'ಸಲಹೆಗಳು:' : 'Suggestions:'}
                 </span>
                 {(QUICK_PROMPTS_BY_LANG[language] || QUICK_PROMPTS_BY_LANG.English).map((prompt, i) => (
                   <button
@@ -1718,28 +2110,37 @@ export default function AIChatSidebar() {
                     type="button"
                     onClick={() => handleSendMessage(prompt)}
                     disabled={loading || !user || isLowBalance}
-                    className="px-2.5 py-1 rounded-full bg-[#FFFDFC] hover:bg-[#EDE4D5] border border-[#E5D9C8] text-[11px] font-semibold text-[#292522] whitespace-nowrap shadow-xs transition-all hover:scale-102 active:scale-98 disabled:opacity-50 cursor-pointer"
+                    className="px-2.5 py-1 rounded-full bg-white hover:bg-[#E9EDEF] border border-[#D1D7DB] text-[11px] font-semibold text-[#111B21] whitespace-nowrap shadow-xs transition-all hover:scale-102 active:scale-98 disabled:opacity-50 cursor-pointer"
                   >
                     {prompt}
                   </button>
                 ))}
               </div>
 
-              {/* Input Area / Low Balance Alert / Sign In Prompt */}
-              <div className="border-t border-[#E5D9C8] bg-[#FFFDFC]">
+              {/* Input Area / Low Balance Alert / Sign In Prompt (WhatsApp Dock #F0F2F5) */}
+              <div className="border-t border-[#D1D7DB] bg-[#F0F2F5]">
                 {!user ? (
                   /* 1. Guest User Prompt */
-                  <div className="p-4 bg-[#F8F3EA] text-center space-y-2">
-                    <p className="text-xs text-[#6B5E55] font-medium">
-                      Please sign in to ask Acharya Parihar. Each prompt costs{' '}
-                      <strong className="text-[#713B32]">₹{pricePerPrompt}</strong> from your wallet.
+                  <div className="p-4 bg-[#F0F2F5] text-center space-y-2">
+                    <p className="text-xs text-[#54656F] font-medium">
+                      {isTelugu ? (
+                        <>దయచేసి {currentAstrologer.name}తో మాట్లాడటానికి సైన్ ఇన్ చేయండి. ప్రతి ప్రశ్నకు మీ వాలెట్ నుండి <strong className="text-[#075E54]">₹{pricePerPrompt}</strong> ఖర్చు అవుతుంది.</>
+                      ) : isHindi ? (
+                        <>कृपया {currentAstrologer.name} से मार्गदर्शन हेतु साइन इन करें। प्रति प्रश्न आपके वॉलेट से <strong className="text-[#075E54]">₹{pricePerPrompt}</strong> लिए जाएंगे।</>
+                      ) : isTamil ? (
+                        <>{currentAstrologer.name} இடம் கேட்க தயவுசெய்து உள்நுழையவும். ஒவ்வொரு கேள்விக்கும் உங்கள் வாலட்டிலிருந்து <strong className="text-[#075E54]">₹{pricePerPrompt}</strong> கழிக்கப்படும்.</>
+                      ) : isKannada ? (
+                        <>{currentAstrologer.name} ಅವರೊಂದಿಗೆ ಮಾತನಾಡಲು ದಯವಿಟ್ಟು ಸೈನ್ ಇನ್ ಮಾಡಿ. ಪ್ರತಿ ಪ್ರಶ್ನೆಗೆ ನಿಮ್ಮ ವಾಲೆಟ್‌ನಿಂದ <strong className="text-[#075E54]">₹{pricePerPrompt}</strong> ಕಡಿತಗೊಳ್ಳುತ್ತದೆ.</>
+                      ) : (
+                        <>Please sign in to ask {currentAstrologer.name}. Each prompt costs <strong className="text-[#075E54]">₹{pricePerPrompt}</strong> from your wallet.</>
+                      )}
                     </p>
                     <Link
                       href="/sign-up-login-screen"
                       onClick={() => setIsOpen(false)}
-                      className="w-full py-2.5 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                      className="w-full py-2.5 rounded-full bg-[#075E54] hover:bg-[#054C44] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
                     >
-                      <LogIn size={14} /> Sign In to Chat
+                      <LogIn size={14} /> {isTelugu ? 'చాట్ చేయడానికి సైన్ ఇన్ చేయండి' : isHindi ? 'चैट के लिए साइन इन करें' : isTamil ? 'உள்நுழையவும்' : 'Sign In to Chat'}
                     </Link>
                   </div>
                 ) : isLowBalance ? (
@@ -1749,24 +2150,38 @@ export default function AIChatSidebar() {
                       <AlertCircle size={16} className="text-rose-600 shrink-0 mt-0.5" />
                       <div>
                         <p className="font-bold text-rose-800">
-                          Low Wallet Balance (Available: ₹{currentWallet.toFixed(2)})
+                          {isTelugu
+                            ? `తక్కువ వాలెట్ బ్యాలెన్స్ (లభ్యత: ₹${currentWallet.toFixed(2)})`
+                            : isHindi
+                            ? `कम वॉलेट बैलेंस (उपलब्ध: ₹${currentWallet.toFixed(2)})`
+                            : isTamil
+                            ? `குறைந்த வாலட் இருப்பு (இருப்பு: ₹${currentWallet.toFixed(2)})`
+                            : `Low Wallet Balance (Available: ₹${currentWallet.toFixed(2)})`}
                         </p>
                         <p className="text-[11px] text-rose-700 mt-0.5">
-                          Each prompt requires <strong>₹{pricePerPrompt}</strong>. Please recharge your wallet to continue chatting.
+                          {isTelugu ? (
+                            <>ప్రతి ప్రశ్నకు <strong>₹{pricePerPrompt}</strong> అవసరం. చాట్ కొనసాగించడానికి దయచేసి రీఛార్జ్ చేయండి.</>
+                          ) : isHindi ? (
+                            <>प्रत्येक प्रश्न के लिए <strong>₹{pricePerPrompt}</strong> आवश्यक है। चैट जारी रखने के लिए कृपया रीचार्ज करें।</>
+                          ) : isTamil ? (
+                            <>ஒவ்வொரு கேள்விக்கும் <strong>₹{pricePerPrompt}</strong> தேவை. தொடர்ந்து உரையாட தயவுசெய்து ரீசார்ஜ் செய்யவும்.</>
+                          ) : (
+                            <>Each prompt requires <strong>₹{pricePerPrompt}</strong>. Please recharge your wallet to continue chatting.</>
+                          )}
                         </p>
                       </div>
                     </div>
                     <Link
                       href="/wallet"
                       onClick={() => setIsOpen(false)}
-                      className="w-full py-2.5 rounded-xl bg-[#713B32] hover:bg-[#552B24] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
+                      className="w-full py-2.5 rounded-full bg-[#075E54] hover:bg-[#054C44] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
                     >
-                      <Wallet size={14} /> ⚡ Recharge Wallet Now
+                      <Wallet size={14} /> {isTelugu ? '⚡ వాలెట్ రీఛార్జ్ చేయండి' : isHindi ? '⚡ अभी वॉलेट रीचार्ज करें' : isTamil ? '⚡ இப்போது ரீசார்ஜ் செய்யவும்' : '⚡ Recharge Wallet Now'}
                     </Link>
                   </div>
                 ) : (
-                  /* 3. Normal Active Input Form */
-                  <div className="p-3.5">
+                  /* 3. Normal Active Input Form (WhatsApp Pill Style) */
+                  <div className="p-3">
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
@@ -1781,23 +2196,39 @@ export default function AIChatSidebar() {
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder={PLACEHOLDERS_BY_LANG[language] || PLACEHOLDERS_BY_LANG.English}
                         disabled={loading}
-                        className="flex-1 px-4 py-2.5 rounded-2xl bg-[#F8F3EA] border border-[#E5D9C8] text-xs text-[#292522] placeholder:text-[#6B5E55] outline-none focus:ring-2 focus:ring-[#C9952B]/60 transition-all font-medium"
+                        className="flex-1 px-4 py-2.5 rounded-full bg-white border border-[#E9EDEF] text-xs text-[#111B21] placeholder:text-[#667781] outline-none focus:ring-2 focus:ring-[#25D366]/50 shadow-xs font-medium"
                       />
                       <button
                         type="submit"
                         disabled={!inputText.trim() || loading}
-                        className="w-10 h-10 rounded-2xl bg-[#713B32] hover:bg-[#552B24] disabled:opacity-40 text-white flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+                        className="w-10 h-10 rounded-full bg-[#25D366] hover:bg-[#1EBE5D] disabled:opacity-40 text-white flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
                         aria-label="Send Question"
                       >
-                        <Send size={16} />
+                        <Send size={16} className="translate-x-0.5" />
                       </button>
                     </form>
 
-                    <div className="flex items-center justify-between text-[10px] text-[#6B5E55] mt-2 px-1">
-                      <span className="font-semibold text-[#713B32]">
-                        ⚡ ₹{pricePerPrompt} deducted per prompt
+                    <div className="flex items-center justify-between text-[10px] text-[#667781] mt-2 px-1">
+                      <span className="font-semibold text-[#075E54]">
+                        {isTelugu
+                          ? `⚡ ప్రతి ప్రశ్నకు ₹${pricePerPrompt} తీసివేయబడుతుంది`
+                          : isHindi
+                          ? `⚡ प्रति प्रश्न ₹${pricePerPrompt} काटा जाएगा`
+                          : isTamil
+                          ? `⚡ ஒரு கேள்விக்கு ₹${pricePerPrompt} கழிக்கப்படும்`
+                          : isKannada
+                          ? `⚡ ಪ್ರತಿ ಪ್ರಶ್ನೆಗೆ ₹${pricePerPrompt} ಕಡಿತಗೊಳಿಸಲಾಗುತ್ತದೆ`
+                          : `⚡ ₹${pricePerPrompt} deducted per prompt`}
                       </span>
-                      <span>Calendar: {new Date().getFullYear()}</span>
+                      <span>
+                        {isTelugu
+                          ? `క్యాలెండర్: ${new Date().getFullYear()}`
+                          : isHindi
+                          ? `कैलेंडर: ${new Date().getFullYear()}`
+                          : isTamil
+                          ? `நாட்காட்டி: ${new Date().getFullYear()}`
+                          : `Calendar: ${new Date().getFullYear()}`}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -1812,12 +2243,42 @@ export default function AIChatSidebar() {
         isOpen={showClearConfirm}
         onClose={() => setShowClearConfirm(false)}
         onConfirm={executeClearChat}
-        title="Clear Conversation History?"
-        description="Are you sure you want to reset your conversation with Acharya Parihar? All messages from this session will be cleared."
-        confirmText="Yes, Clear Chat"
-        cancelText="Keep Chat"
+        title={
+          isTelugu
+            ? 'కొత్త సెషన్ ప్రారంభించాలా?'
+            : isHindi
+            ? 'नया सत्र प्रारंभ करें?'
+            : isTamil
+            ? 'புதிய அமர்வைத் தொடங்கவா?'
+            : isKannada
+            ? 'ಹೊಸ ಸೆಷನ್ ಪ್ರಾರಂಭಿಸಬೇಕೆ?'
+            : 'Start New Consultation Session?'
+        }
+        description={
+          isTelugu
+            ? `${currentAstrologer.name}తో కొత్త సెషన్‌ను ప్రారంభించాలనుకుంటున్నారా? తాజా జ్యోతిష్యులతో సంభాషణ రీసెట్ అవుతుంది.`
+            : isHindi
+            ? `क्या आप ${currentAstrologer.name} के साथ नया सत्र शुरू करना चाहते हैं? बातचीत रीसेट होगी और नया ज्योतिषी प्रोफाइल सक्रिय होगा।`
+            : isTamil
+            ? `${currentAstrologer.name} உடனுடனான புதிய அமர்வைத் தொடங்க வேண்டுமா? உரையாடல் மீட்டமைக்கப்படும்.`
+            : isKannada
+            ? `${currentAstrologer.name} ಅವರೊಂದಿಗೆ ಹೊಸ ಸೆಷನ್ ಪ್ರಾರಂಭಿಸಲು ಬಯಸುವಿರಾ? ಸಂಭಾಷಣೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ.`
+            : `Would you like to start a fresh consultation with ${currentAstrologer.name}? A new session with dynamic Jyotish guidance will begin.`
+        }
+        confirmText={
+          isTelugu
+            ? 'అవును, కొత్త సెషన్'
+            : isHindi
+            ? 'हाँ, नया सत्र'
+            : isTamil
+            ? 'ஆம், புதிய அமர்வு'
+            : isKannada
+            ? 'ಹೌದು, ಹೊಸ ಸೆಷನ್'
+            : 'Yes, New Session'
+        }
+        cancelText={isTelugu ? 'ఉంచండి' : isHindi ? 'रखें' : isTamil ? 'வைக்கவும்' : isKannada ? 'ಇರಿಸಿ' : 'Keep Chat'}
         variant="primary"
-        icon={<RotateCcw size={24} className="text-[#713B32]" />}
+        icon={<RotateCcw size={24} className="text-[#075E54]" />}
       />
 
       <ConfirmModal

@@ -547,7 +547,7 @@ function TalkToAIAstrologerContent() {
               </div>
 
               <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-[#D4AF37]/30">
-                <span className="text-[10px] uppercase font-bold text-[#F6D075] block tracking-wider">AI Chat</span>
+                <span className="text-[10px] uppercase font-bold text-[#F6D075] block tracking-wider">Ask AI Jyotish</span>
                 <span className="text-sm sm:text-base font-black text-white">₹{pricing.aiChatPricePerMinute ?? 5}/min</span>
                 <span className="text-[10px] text-white/60 block">Live Chat</span>
               </div>
@@ -1155,7 +1155,7 @@ function TalkToAIAstrologerContent() {
                     title="Switch to AI Text Chat"
                   >
                     <Bot size={13} className="text-[#E5B54F]" />
-                    <span>AI Chat</span>
+                    <span>Ask AI Jyotish</span>
                   </button>
                   <button
                     onClick={() => setShowBookingModal(false)}

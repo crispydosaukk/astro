@@ -1696,6 +1696,46 @@ export function calculateBirthChartData(
     };
   });
 
+  // 5c. Dynamic D7 Saptamsha Chart Houses (Children, Progeny, Creative Fruits)
+  const getSaptamshaSignIdx = (siderealDeg: number) => {
+    const sIdx = Math.floor(siderealDeg / 30) % 12;
+    const degInSign = siderealDeg % 30;
+    const partIdx = Math.floor(degInSign / (30 / 7));
+    const isOdd = sIdx % 2 === 0;
+    return isOdd ? (sIdx + partIdx) % 12 : ((sIdx + 6) + partIdx) % 12;
+  };
+
+  const d7LagnaSignIdx = getSaptamshaSignIdx(lagnaDeg);
+  const d7Planets = [
+    { name: 'Sun', signIdx: getSaptamshaSignIdx(sunDeg) },
+    { name: 'Moon', signIdx: getSaptamshaSignIdx(moonDeg) },
+    { name: 'Mars', signIdx: getSaptamshaSignIdx(marsDeg) },
+    { name: 'Mercury', signIdx: getSaptamshaSignIdx(mercuryDeg) },
+    { name: 'Jupiter', signIdx: getSaptamshaSignIdx(jupiterDeg) },
+    { name: 'Venus', signIdx: getSaptamshaSignIdx(venusDeg) },
+    { name: 'Saturn', signIdx: getSaptamshaSignIdx(saturnDeg) },
+    { name: 'Rahu', signIdx: getSaptamshaSignIdx(rahuDeg) },
+    { name: 'Ketu', signIdx: getSaptamshaSignIdx(ketuDeg) },
+  ];
+
+  const d7Houses = Array.from({ length: 12 }, (_, i) => {
+    const houseNum = i + 1;
+    const signIdx = (d7LagnaSignIdx + i) % 12;
+    const signObj = RASHIS[signIdx];
+    const planetsInD7House = d7Planets
+      .filter((p) => p.signIdx === signIdx)
+      .map((p) => p.name);
+
+    return {
+      house: `D7 H${houseNum}`,
+      houseNumber: houseNum,
+      sign: signObj.shortName,
+      fullSignName: signObj.name,
+      signNumber: signObj.signNumber,
+      planets: planetsInD7House.length > 0 ? planetsInD7House.join(', ') : 'Empty',
+    };
+  });
+
   // 6. Panchang Details at Birth
   // Tithi
   const moonSunSeparation = ((moonDeg - sunDeg + 360) % 360);
@@ -2027,11 +2067,14 @@ export function calculateBirthChartData(
     d1Houses,
     d9Houses,
     d10Houses,
+    d7Houses,
     lagnaIndex,
     d9LagnaSignIdx,
     d9Planets,
     d10LagnaSignIdx,
     d10Planets,
+    d7LagnaSignIdx,
+    d7Planets,
     dasha,
     yogas,
     doshas,
@@ -2072,6 +2115,10 @@ export function formatChartSummaryForAI(chart: ReturnType<typeof calculateBirthC
     .map((h: any) => `  * ${h.house} (${h.fullSignName}): Occupants: ${h.planets}`)
     .join('\n');
 
+  const d7Summary = ((chart as any).d7Houses || [])
+    .map((h: any) => `  * ${h.house} (${h.fullSignName}): Occupants: ${h.planets}`)
+    .join('\n');
+
   const dashaSeq = chart.dasha.chronologicalSequence
     ? chart.dasha.chronologicalSequence
         .map(
@@ -2109,6 +2156,8 @@ ${d1Summary}
 ${d9Summary}
 * D10 Dasamsa Chart (Career, Professional Karma, Public Standing):
 ${d10Summary}
+* D7 Saptamsha Chart (Progeny, Children, Creative Lineage):
+${d7Summary}
 
 VIMSHOTTARI DASHA TIMELINE & MATHEMATICAL DERIVATION:
 - Birth Nakshatra: ${chart.nakshatra} (Ruler: ${chart.nakshatraLord}, Standard Span: ${chart.dasha.birthDashaSpan || 10} Years)
@@ -2138,7 +2187,7 @@ CRITICAL DIRECTIVES FOR ACHARYA PARIHAR REGARDING ASTRONOMICAL & CHART QUERIES:
    - Never say Rohini is ruled by Venus. Rohini is ruled by the MOON.
    - Standard Vimshottari Dasha durations are: Ketu (7y), Venus (20y), Sun (6y), Moon (10y), Mars (7y), Rahu (18y), Jupiter (16y), Saturn (19y), Mercury (17y). Never state Venus is 5 years.
    - If asked how Saturn Mahadasha started in 2011 (or why it is active), explain the exact chronological sequence from birth: Birth in Moon Mahadasha balance -> Mars (7y) -> Rahu (18y) -> Jupiter (16y) -> Saturn (19y).
-   - If asked what chart data you have access to, list the complete available data including D1, D9 Navamsha, D10 Dasamsa, all 9 planets with exact degrees, Lagna degree, Ayanamsa, and Vimshottari Mahadasha/Antardasha/Pratyantardasha. Never say "Divisional charts: NOT AVAILABLE".`;
+   - If asked what chart data you have access to, list the complete available data including D1, D9 Navamsha, D10 Dasamsa, D7 Saptamsha, all 9 planets with exact degrees, Lagna degree, Ayanamsa, and Vimshottari Mahadasha/Antardasha/Pratyantardasha. Never say "Divisional charts: NOT AVAILABLE".`;
 }
 
 // Helper to extract birth details from devotee chat text if provided in query

@@ -28,6 +28,95 @@ import { DEFAULT_AI_ASTROLOGERS } from '@/lib/aiAstrologerData';
 import { resolveLalKitabRemedies } from '@/lib/lalKitabEngine';
 import { findAuspiciousMuhurats } from '@/lib/muhuratEngine';
 
+function isRemedyExplicitlyRequested(query: string): boolean {
+  if (!query || typeof query !== 'string') return false;
+  const q = query.trim().toLowerCase();
+
+  // Explicit English remedy keywords & intent phrases
+  const englishKeywords = [
+    /\bremed(y|ies)\b/i,
+    /\bparihar(am|ams)?\b/i,
+    /\bupa?ay(s|am|alu)?\b/i,
+    /\bsolution(s)?\b/i,
+    /\bcure(s)?\b/i,
+    /\bpooj?a(s)?\b/i,
+    /\bhomam?(s)?\b/i,
+    /\bhavan\b/i,
+    /\bshanti\b/i,
+    /\b(dosha|dosham)\s*(nivarana?|shanti|parihar|remedy)\b/i,
+    /\bdaana?m?\b/i,
+    /\bcharit(y|ies)\b/i,
+    /\bvrata?m?\b/i,
+    /\bfasting\b/i,
+    /\bhow to (fix|solve|cure|overcome|mitigate|pacify|remedy|neutralize)\b/i,
+    /\bwhat (should|can|to) (i|we) do\b/i,
+    /\bwhat (is|are) the (remedy|remedies|upay|parihar)\b/i,
+    /\bwhich (puja|pooja|homam|mantra|gemstone|stone|rudraksha) should\b/i,
+    /\bmandala\b/i,
+  ];
+
+  // Telugu remedy keywords
+  const teluguKeywords = [
+    /పరిహార/,       // parihara / pariharam / pariharalu
+    /పరిష్కార/,     // parishkara / parishkaram
+    /ఉపాయ/,         // upaya / upayam / upayalu
+    /దోష నివారణ/,    // dosha nivarana
+    /శాంతి/,         // shanti
+    /పూజ/,           // puja / pooja
+    /హోమం/,          // homam
+    /హోమాలు/,        // homalu
+    /దానం/,          // daanam
+    /దీక్ష/,          // deeksha
+    /వ్రతం/,          // vratam
+    /ఏం చేయాలి/,     // what to do
+    /ఎలా చేయాలి/,    // how to do
+    /ఎలా అధిగమించాలి/, // how to overcome
+    /నివారణ/,        // nivarana
+  ];
+
+  // Hindi remedy keywords
+  const hindiKeywords = [
+    /उपाय/,
+    /परिहार/,
+    /समाधान/,
+    /दोष निवारण/,
+    /ग्रह शांति/,
+    /शांति पूजा/,
+    /पूजा/,
+    /हवन/,
+    /होम/,
+    /अनुष्ठान/,
+    /दान/,
+    /व्रत/,
+    /क्या करूं/,
+    /क्या करना चाहिए/,
+    /निवारण/,
+    /कैसे ठीक करें/,
+  ];
+
+  // Tamil remedy keywords
+  const tamilKeywords = [
+    /பரிகார/,
+    /தீர்வு/,
+    /தோஷ நிவர்த்தி/,
+    /சாந்தி/,
+    /பூஜை/,
+    /ஹோமம்/,
+    /தானம்/,
+    /விரதம்/,
+    /என்ன செய்ய வேண்டும்/,
+    /எப்படி சரி செய்வது/,
+    /வழிபாடு/,
+  ];
+
+  return (
+    englishKeywords.some((r) => r.test(q)) ||
+    teluguKeywords.some((r) => r.test(query)) ||
+    hindiKeywords.some((r) => r.test(query)) ||
+    tamilKeywords.some((r) => r.test(query))
+  );
+}
+
 export async function GET(req: Request) {
   try {
     const settings = await getSettings();
@@ -335,6 +424,14 @@ export async function POST(req: Request) {
     let pariharProtocol: RemedyProtocol48Day | null = null;
     let evidencePrompt = '';
 
+    const yearRangeMatch = latestUserMessage.match(/\b(19\d\d|20\d\d)\s*(?:to|-|–|and|నుండి|నుంచి|వరకు|से|तक)\s*(19\d\d|20\d\d)\b/i);
+    const pastYearMatch = latestUserMessage.match(/\b(19\d\d|200\d|201\d|202[0-5])\b/);
+    const isPastYearInquiry =
+      Boolean(yearRangeMatch && (parseInt(yearRangeMatch[2]) <= currentYear || parseInt(yearRangeMatch[1]) < currentYear)) ||
+      Boolean(pastYearMatch) ||
+      /\b(past|earlier|back then|in the past|history|historical|dasha from|గతంలో|గత సంవత్సరం|పూర్వం|గతం|భూతకాలం|भूतकाल|पहले)\b/i.test(latestUserMessage);
+    const isRemedyRequested = !isPastYearInquiry && isRemedyExplicitlyRequested(latestUserMessage);
+
     if (isCoupleInquiry && coupleMatch) {
       const p1 = coupleMatch.partner1;
       const p2 = coupleMatch.partner2;
@@ -346,12 +443,15 @@ export async function POST(req: Request) {
 
       const isMissingPartnerDetails = !p2.rashi && !p2.dob && !coupleMatch.compatibility && !coupleMatch.ashtakootResult;
 
-      // Generate couple-specific marriage & harmony parihar protocol
-      pariharProtocol = generate48DayRemedyProtocol({
-        domain: 'marriage',
-        planet: 'Venus',
-        concern: `Kundli Matching & Marriage Harmony for ${groom.name} and ${bride.name}`,
-      });
+      // Generate couple-specific marriage & harmony parihar protocol ONLY if remedy is requested
+      if (isRemedyRequested) {
+        pariharProtocol = generate48DayRemedyProtocol({
+          domain: 'marriage',
+          planet: 'Venus',
+          concern: `Kundli Matching & Marriage Harmony for ${groom.name} and ${bride.name}`,
+          language,
+        });
+      }
 
       if (isMissingPartnerDetails) {
         evidencePrompt = `
@@ -361,10 +461,10 @@ KUNDLI MATCHING (ASHTAKOOT GUN MILAN) INQUIRY:
 - Devotee: ${defaultUserProfile.name} (${defaultUserProfile.rashi ? `Rashi: ${defaultUserProfile.rashi.name}, Lord: ${defaultUserProfile.rashi.lord}` : `DOB: ${defaultUserProfile.dob || 'Recorded'}`})
 - Prospective Partner: ${p2.name} (NOTE: "${p2.name}" is one single individual's full name)
 - Relationship Context: Devotee is seeking Kundli Matching / Marriage compatibility with ${p2.name}.
-- Status: Partner's birth date/time or Moon Rashi have not been provided yet.
+- Status: Partner's birth date/time or Moon Rashi have not been provided yet.${pariharProtocol ? `
 - Prescribed 48-Day Couple Blessing Protocol: ${pariharProtocol.title}
   * Recommended Homam: ${pariharProtocol.recommendedHomam} (${pariharProtocol.homamAuspiciousDay})
-  * Daily Mantra: ${pariharProtocol.dailyMantra} (${pariharProtocol.dailyJapaCount})
+  * Daily Mantra: ${pariharProtocol.dailyMantra} (${pariharProtocol.dailyJapaCount})` : ''}
 
 CRITICAL DIRECTIVES FOR ACHARYA PARIHAR:
 1. Warmly acknowledge the devotee's inquiry regarding compatibility with ${p2.name} (treat "${p2.name}" as one single individual's full name, never separate it into two people).
@@ -405,12 +505,12 @@ DETERMINISTIC KUNDLI MATCHING (ASHTAKOOT GUN MILAN) EVALUATION:
 - Calculated Ashtakoot Gun Milan Score: ${scoreText} (${matchStatus})
 - Key Ashtakoot Dimensions:
 ${breakdownLines.join('\n')}
-- Astrological Verdict: ${matchVerdict}
+- Astrological Verdict: ${matchVerdict}${pariharProtocol ? `
 - Prescribed 48-Day Couple Blessing Protocol: ${pariharProtocol.title}
   * Recommended Homam: ${pariharProtocol.recommendedHomam} (${pariharProtocol.homamAuspiciousDay})
   * Daily Mantra: ${pariharProtocol.dailyMantra} (${pariharProtocol.dailyJapaCount})
   * Day 24 Sacred Daana: ${pariharProtocol.midMandalaMilestoneDay24.charityDaana}
-  * Day 48 Purnahuti: ${pariharProtocol.culminationDay48.action}
+  * Day 48 Purnahuti: ${pariharProtocol.culminationDay48.action}` : ''}
 
 CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
 1. You are providing an authentic, warm, and authoritative Vedic Kundli Matching consultation for ${groom.name} and ${bride.name}.
@@ -426,20 +526,35 @@ CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
         // Run Deterministic Jyotish Evidence Analysis
         evidence = analyzeInquiryEvidence(chart, latestUserMessage);
 
-        // Generate 48-Day Executable Parihar Protocol
-        pariharProtocol = generate48DayRemedyProtocol({
-          domain: evidence.domain,
-          planet: evidence.primaryAfflictedPlanet,
-          concern: latestUserMessage,
-        });
+        // Generate 48-Day Executable Parihar Protocol ONLY if remedy is requested
+        if (isRemedyRequested) {
+          pariharProtocol = generate48DayRemedyProtocol({
+            domain: evidence.domain,
+            planet: evidence.primaryAfflictedPlanet,
+            concern: latestUserMessage,
+            language,
+          });
 
-        if (evidence.domain === 'ishta_devata' && chart.ishtaDevata) {
-          pariharProtocol.presidingDeity = chart.ishtaDevata.deityName;
-          pariharProtocol.dailyMantra = chart.ishtaDevata.primaryMantra;
-          pariharProtocol.dailyJapaCount = chart.ishtaDevata.dailyJapaCount;
-          pariharProtocol.homamAuspiciousDay = chart.ishtaDevata.auspiciousDay;
-          pariharProtocol.title = `48-Day Sacred Ishta Devata Upasana Mandala (${chart.ishtaDevata.deityName})`;
-          pariharProtocol.mandalaPurpose = `Consecrated soul communion, obstacle dissolution, and spiritual enlightenment under ${chart.ishtaDevata.deityName}`;
+          if (evidence.domain === 'ishta_devata' && chart.ishtaDevata) {
+            pariharProtocol.presidingDeity = chart.ishtaDevata.deityName;
+            pariharProtocol.dailyMantra = chart.ishtaDevata.primaryMantra;
+            pariharProtocol.dailyJapaCount = chart.ishtaDevata.dailyJapaCount;
+            pariharProtocol.homamAuspiciousDay = chart.ishtaDevata.auspiciousDay;
+            pariharProtocol.title = language === 'Telugu'
+              ? `48 రోజుల పవిత్ర ఇష్ట దైవ ఉపాసనా మండలం (${chart.ishtaDevata.deityName})`
+              : language === 'Hindi'
+              ? `48 दिवसीय पवित्र इष्ट देवता उपासना मंडल (${chart.ishtaDevata.deityName})`
+              : language === 'Tamil'
+              ? `48 நாட்கள் புனித இஷ்ட தெய்வ உபாசனா மண்டலம் (${chart.ishtaDevata.deityName})`
+              : `48-Day Sacred Ishta Devata Upasana Mandala (${chart.ishtaDevata.deityName})`;
+            pariharProtocol.mandalaPurpose = language === 'Telugu'
+              ? `${chart.ishtaDevata.deityName} అనుగ్రహం, విఘ్న నివారణ మరియు ఆధ్యాత్మిక సాఫల్యం`
+              : language === 'Hindi'
+              ? `${chart.ishtaDevata.deityName} की कृपा, विघ्न निवारण और आध्यात्मिक शांति`
+              : language === 'Tamil'
+              ? `${chart.ishtaDevata.deityName} அருள், தடைகள் நீங்குதல் மற்றும் ஆன்மீக அமைதி`
+              : `Consecrated soul communion, obstacle dissolution, and spiritual enlightenment under ${chart.ishtaDevata.deityName}`;
+          }
         }
 
         // Resolve Lal Kitab Everyday Upaays & Varjya Prohibitions (1952 Canon)
@@ -457,12 +572,43 @@ CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
             })
           : null;
 
+        let historicalDashaSection = '';
+        if (isPastYearInquiry) {
+          let startY = pastYearMatch ? parseInt(pastYearMatch[0]) : 2000;
+          let endY = startY;
+          if (yearRangeMatch) {
+            startY = parseInt(yearRangeMatch[1]);
+            endY = parseInt(yearRangeMatch[2]);
+          }
+
+          const matchedDashas = (chart.dasha.chronologicalSequence || []).filter((s: any) => {
+            const sY = parseInt(String(s.startDate).match(/\d{4}/)?.[0] || '0');
+            const eY = parseInt(String(s.endDate).match(/\d{4}/)?.[0] || '9999');
+            return sY <= endY && eY >= startY;
+          });
+
+          if (matchedDashas.length > 0) {
+            historicalDashaSection = `
+================================================================================
+VERIFIED HISTORICAL DASHA TIMELINE FOR REQUESTED PERIOD (${startY} TO ${endY}):
+================================================================================
+${matchedDashas.map((d: any) => `* ${d.mahadasha} Mahadasha (Duration: ${d.durationYears} years): Active from ${d.startDate} to ${d.endDate}`).join('\n')}
+
+CRITICAL MANDATE FOR HISTORICAL PERIOD / PAST-YEAR ANALYSIS (${startY} TO ${endY}):
+1. The devotee is asking for retrospective astrological analysis of their past life and Dashas between ${startY} and ${endY}.
+2. Methodically explain each Mahadasha that operated during those years in chronological order in the PAST TENSE.
+3. Detail how the governing Graha of each Dasha influenced their career, family, finances, mindset, tests, and evolution back then.
+4. STRICT REMEDY RESTRICTION: ABSOLUTELY NEVER prescribe any remedies, 48-day sacred mandala protocols, mantras, or charity donations for past events or past years. State clearly that remedies cannot alter the past, and deliver a grounded, insightful historical reading.`;
+          }
+        }
+
         evidencePrompt = `
 ================================================================================
 DETERMINISTIC JYOTISH EVIDENCE GENERATED BY ASTROPARIHAR ENGINE:
 ================================================================================
 - Domain Identified: ${evidence.domainTitle}
 - Target Houses: Houses ${evidence.relevantHouseNumbers.join(', ')}
+${historicalDashaSection}
 - Relevant House Alignments in D1:
 ${evidence.relevantHouses.map((h: any) => `  * House ${h.houseNumber} (${h.sign}) ruled by ${h.lord}: Occupying Grahas = ${h.planets}`).join('\n')}
 - Active Vimshottari Cycle: ${evidence.activeDashaSummary}
@@ -471,14 +617,14 @@ ${evidence.supportingFactors.map((f: any) => `  * ${f}`).join('\n')}
 - Contradictory / Karmic Resistance Factors:
 ${evidence.contradictoryFactors.map((f: any) => `  * ${f}`).join('\n')}
 - Astrological Confidence Score: ${evidence.confidence} (${evidence.confidenceRationale})
-- Potent Timing Window: ${evidence.timingWindow}
+- Potent Timing Window: ${evidence.timingWindow}${pariharProtocol ? `
 - Prescribed 48-Day Sacred Protocol: ${pariharProtocol.title}
   * Recommended Homam: ${pariharProtocol.recommendedHomam} (${pariharProtocol.homamAuspiciousDay})
   * Daily Mantra: ${pariharProtocol.dailyMantra} (${pariharProtocol.dailyJapaCount})
   * Day 24 Sacred Daana: ${pariharProtocol.midMandalaMilestoneDay24.charityDaana}
-  * Day 48 Purnahuti: ${pariharProtocol.culminationDay48.action}
+  * Day 48 Purnahuti: ${pariharProtocol.culminationDay48.action}` : ''}
 - Needs Astrologer Escalation: ${evidence.needsAstrologerReview ? 'YES - ' + evidence.escalationReason : 'NO'}
-
+${isRemedyRequested && !isPastYearInquiry ? `
 ================================================================================
 LAL KITAB 108 UPAAY & VARJYA (FORBIDDEN ACTION) DIRECTIVES:
 ================================================================================
@@ -486,7 +632,7 @@ LAL KITAB 108 UPAAY & VARJYA (FORBIDDEN ACTION) DIRECTIVES:
 ${lalKitabData.primaryUpaays.map((u: any) => `  * [${u.planet} in House ${u.house}]: ${u.upaay} (${u.procedure})`).join('\n')}
 - Strict Varjya Warnings (Forbidden Actions Native MUST Avoid):
 ${lalKitabData.varjyaAlerts.map((v: any) => `  * [${v.planet} in House ${v.house}]: NEVER DO THIS -> ${v.actionToAvoid} (${v.consequence})`).join('\n')}
-- Ancestral Balance: ${lalKitabData.ancestralDebt?.debtType || 'Pitra Rina'} -> ${lalKitabData.ancestralDebt?.remedy || 'Feed cows and crows on Amavasya.'}
+- Ancestral Balance: ${lalKitabData.ancestralDebt?.debtType || 'Pitra Rina'} -> ${lalKitabData.ancestralDebt?.remedy || 'Feed cows and crows on Amavasya.'}` : ''}
 ${muhuratData ? `
 ================================================================================
 VERIFIED REAL-TIME AUSPICIOUS MUHURAT WINDOWS (${muhuratData.targetMonth}):
@@ -522,10 +668,18 @@ CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
    - When the devotee asks a direct or factual verification question (such as verifying whether they have Shani Sade Sati, asking about their current Dasha, or inquiring about 2026 transits), give a decisive, clear answer to their direct question first, and explain the planetary timeline accurately based on the evidence.
    - Translate and express this exact timing naturally in ${language}.
    - NEVER invent or repeat the same static date span across different questions. Each domain (Health, Career, Marriage, Finance, Transits, Sade Sati, Education, Ishta Devata) has its own distinct astrological timeline calculated above.
-4. DUAL-PARIHAR & VARJYA MANDATE:
+${isPastYearInquiry ? `4. RETROSPECTIVE / HISTORICAL ANALYSIS MANDATE:
+   - The devotee is inquiring about a historical period in the past (Year ${pastYearMatch ? pastYearMatch[0] : 'in the past'}).
+   - Retrospectively analyze what Mahadasha, Antardasha, and planetary transits were active DURING THAT PAST YEAR in the past tense.
+   - Analyze the karmic lessons, life events, tests, and accomplishments experienced during that time.
+   - CRITICAL: ABSOLUTELY NEVER prescribe any remedies, mantras, japa, rituals, or charity donations for a past year — remedies cannot change the past! Do NOT tell the devotee to chant or donate for a year that has already passed.` : isRemedyRequested ? `4. DUAL-PARIHAR & VARJYA MANDATE:
    - Deliver both classical Parashari remedy (mantra, homam) and actionable low-cost Lal Kitab upaay (e.g. keeping solid silver ball, feeding crows/cows, copper coin).
    - Warn the devotee about their specific "Varjya" (forbidden actions they must strictly avoid).
-   - If they asked about auspicious timing or muhurat, quote the calculated dates and Abhijit windows provided above.`;
+   - Detail the 48-day sacred remedy protocol in ${language}.
+   - If they asked about auspicious timing or muhurat, quote the calculated dates and Abhijit windows provided above.` : `4. ASTROLOGICAL GUIDANCE MANDATE:
+   - Directly answer the devotee's specific inquiry in ${language}.
+   - Do NOT output ANY unsolicited remedies, mantras, japa, or 48-day mandala protocols.
+   - If they asked about auspicious timing or muhurat, quote the calculated dates and Abhijit windows provided above.`}`;
       } catch (err) {
         console.warn('Error calculating birth chart or evidence:', err);
       }
@@ -533,7 +687,7 @@ CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
       userContext = `\nDevotee Profile:\n- Name: ${birthInfo.name}\n- Birth Details: Not provided yet. Kindly invite them to share their Date, Time, and Place of Birth to calculate their authentic Vedic Janam Kundli.`;
     }
 
-    const isIndic = ['Telugu', 'Hindi', 'Tamil'].includes(language);
+    const isIndic = ['Telugu', 'Hindi', 'Tamil', 'Kannada'].includes(language);
     const scriptName =
       language === 'Telugu'
         ? 'Telugu script (తెలుగు లిపి)'
@@ -541,6 +695,8 @@ CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
         ? 'Hindi Devanagari script (हिन्दी)'
         : language === 'Tamil'
         ? 'Tamil script (தமிழ்)'
+        : language === 'Kannada'
+        ? 'Kannada script (ಕನ್ನಡ ಲಿಪಿ)'
         : 'English';
 
     const selectedAstrologer = astrologerId
@@ -559,21 +715,20 @@ CRITICAL DIRECTIVE FOR ACHARYA PARIHAR:
 
 Real-Time Calendar Anchor:
 - Today's Date: ${currentDate}.
-- Current Year: STRICTLY ${currentYear}.
-- You are practicing in ${currentYear}. All transit predictions (Saturn/Shani, Jupiter/Brihaspati, Rahu, Ketu), Mahadashas, and advice must reference ${currentYear} and future years (${currentYear + 1}, ${currentYear + 2}).
+- Current Year: STRICTLY ${currentYear}.${isPastYearInquiry ? `\n- HISTORICAL PAST INQUIRY EXCEPTION: The devotee is asking specifically about Year ${pastYearMatch ? pastYearMatch[0] : 'in the past'}. Evaluate their past astrological period in the past tense without forcing current year ${currentYear} predictions.` : `\n- You are practicing in ${currentYear}. All transit predictions (Saturn/Shani, Jupiter/Brihaspati, Rahu, Ketu), Mahadashas, and advice must reference ${currentYear} and future years (${currentYear + 1}, ${currentYear + 2}).`}
 - TIMING DIVERSITY MANDATE: Every inquiry domain (Health, Marriage, Career, Finance, Transits, Sade Sati, etc.) is governed by different Grahas, Bhavas, and Pratyantardashas. Never copy-paste or hallucinate identical date windows for different questions. You MUST adhere strictly to the calculated Potent Timing Window provided in the Jyotish Evidence.
 
 MANDATORY LANGUAGE REQUIREMENT (CRITICAL):
 - Selected Language: **${language.toUpperCase()}** (${scriptName}).
 - You MUST generate your entire consultation response 100% in ${language} using ${scriptName}.
 ${isIndic ? `- Even if the devotee asks in English or Roman script, translate and answer 100% in ${language} (${scriptName}).` : ''}
-- Tone: Warm, compassionate, spiritually uplifting (start with a warm Vedic greeting in ${language}: ${language === 'Telugu' ? '"నమస్కారం"' : language === 'Hindi' ? '"नमस्ते / प्रणाम"' : language === 'Tamil' ? '"வணக்கம்"' : '"Namaste / Hari Om"'}).${userContext}${userMemoryContext}${birthChartSummary}${evidencePrompt}
+- Tone: Warm, compassionate, spiritually uplifting (start with a warm Vedic greeting in ${language}: ${language === 'Telugu' ? '"నమస్కారం"' : language === 'Hindi' ? '"नमस्ते / प्रणाम"' : language === 'Tamil' ? '"வணக்கம்"' : language === 'Kannada' ? '"ನಮಸ್ಕಾರ"' : '"Namaste / Hari Om"'}).${userContext}${userMemoryContext}${birthChartSummary}${evidencePrompt}
 
-${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}
+${isRemedyRequested ? ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES : ''}
 
-================================================================================
+===============================================================================
 STRUCTURED CONSULTATION FORMAT REQUIREMENT (MANDATORY & ZERO-DEVIATION):
-================================================================================
+===============================================================================
 You MUST respond STRICTLY in JSON format matching this schema:
 {
   "diagnosis": {
@@ -591,8 +746,8 @@ You MUST respond STRICTLY in JSON format matching this schema:
   "confidenceRationale": "${evidence?.confidenceRationale || 'Evaluated across natal chart factors.'}",
   "needsAstrologerReview": ${Boolean(evidence?.needsAstrologerReview)},
   "escalationReason": "${evidence?.escalationReason || ''}",
-  "pariharSummary": "Concise summary of the 48-day sacred remedy protocol in ${language}",
-  "reply": "Your complete, warm, richly detailed Vedic consultation response in ${language} (${scriptName}). Speak directly to the devotee as ${astrologerName}. Provide a comprehensive, multi-paragraph consultation that rivals the deepest, highest quality Jyotish reading: 1) Traditional Vedic greeting and empathetic acknowledgment of their situation, 2) In-depth astrological diagnosis explaining their key Bhavas, ruling Grahas, Mahadasha/Antardasha effects, and active transits, 3) Decisive, clear answer to their question with practical wisdom, 4) Specific auspicious timing window matching the calculated Potent Timing Window, 5) 48-day sacred remedy guidance (prescribed canonical Homam, daily Mantra with count, and Saturday/auspicious day charity), and 6) Uplifting spiritual blessing. Never output terse 2-sentence replies; provide genuine astrological depth and warmth. SPECIAL DIRECTIVE: If the devotee is testing your astronomical calculation capability, requesting exact degrees/positions, or asking what chart data is available in the system, present the complete, exact data table directly inside this 'reply' field adhering strictly to their requested format, without refusing or outputting unsolicited remedies.",
+  "pariharSummary": "${isRemedyRequested ? `Concise summary of the 48-day sacred remedy protocol in ${language}` : ''}",
+  "reply": "Your complete, warm, richly detailed Vedic consultation response in ${language} (${scriptName}). Speak directly to the devotee as ${astrologerName}. Provide a comprehensive, multi-paragraph consultation that rivals the deepest, highest quality Jyotish reading: 1) Traditional Vedic greeting in ${language} and empathetic acknowledgment of their situation, 2) In-depth astrological diagnosis explaining their key Bhavas, ruling Grahas, Mahadasha/Antardasha effects, and active transits, 3) Decisive, clear answer to their question with practical wisdom, 4) Specific timing window matching the calculated evidence (expressed in the past tense if inquiring about a past year), ${isRemedyRequested && !isPastYearInquiry ? '5) 48-day sacred remedy guidance matching the prescribed protocol (canonical Homam, daily Mantra with count, and Saturday/auspicious day charity), ' : '5) Practical astrological guidance addressing their question (STRICTLY do NOT prescribe any mantras, japas, rituals, or charity donations unless remedies were explicitly requested for a current/future challenge), '}and 6) Uplifting spiritual blessing in ${language}. Never output terse 2-sentence replies; provide genuine astrological depth and warmth. SPECIAL DIRECTIVE: If the devotee is testing your astronomical calculation capability, requesting exact degrees/positions, or asking what chart data is available in the system, present the complete, exact data table directly inside this 'reply' field adhering strictly to their requested format, without refusing or outputting unsolicited remedies.",
   "recommendations": [
     "5 to 6 engaging follow-up inquiry questions written 100% in ${language} (${scriptName})"
   ]
@@ -888,7 +1043,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
         inquiry: latestUserMessage.slice(0, 150),
         conclusion: parsed.conclusion || replyContent.slice(0, 200),
         prediction: parsed.timingWindow || evidence?.timingWindow || '',
-        prescribedHomam: pariharProtocol?.recommendedHomam || '',
+        prescribedHomam: isRemedyRequested && pariharProtocol ? pariharProtocol.recommendedHomam : '',
         confidence: evidence?.confidence || parsed.confidence || 'Moderate',
         createdAt: new Date().toISOString(),
       });
@@ -900,7 +1055,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
           predictedEvent: parsed.conclusion || 'Key Astrological Shift',
           targetPeriod: parsed.timingWindow || evidence?.timingWindow || '',
           confidence: evidence?.confidence || parsed.confidence || 'Moderate',
-          remedyPrescribed: pariharProtocol?.recommendedHomam || '',
+          remedyPrescribed: isRemedyRequested && pariharProtocol ? pariharProtocol.recommendedHomam : '',
           status: 'pending',
           createdAt: new Date().toISOString(),
         });
