@@ -54,6 +54,14 @@ const QUICK_PROMPTS_BY_LANG: Record<string, string[]> = {
     '🪐 ನನಗೆ ಸಾಡೇ ಸಾತಿ ಅಥವಾ ರಾಹು ಮಹಾದಶ ನಡೆಯುತ್ತಿದೆಯೇ?',
     '🙏 ಗ್ರಹ ಶಾಂತಿ ಮತ್ತು ದೋಷ ನಿವಾರಣೆಗೆ ಯಾವ ಪರಿಹಾರ ಮಾಡಬೇಕು?',
   ],
+  Malayalam: [
+    '🔮 2026-ൽ എന്റെ ഗ്രഹ സഞ്ചാര ഫലങ്ങൾ എങ്ങനെയാണ്?',
+    '❤️ എന്റെ ജാതകത്തിൽ വിവാഹ യോഗം എപ്പോഴാണ്?',
+    '💼 കരിയർ മാറ്റത്തിനോ പ്രമോഷനോ അനുയോജ്യമായ സമയം എപ്പോഴാണ്?',
+    '✨ എന്റെ ഭാഗ്യ രത്നം, രുദ്രാക്ഷം, നിത്യ മന്ത്രം എന്നിവ ഏതാണ്?',
+    '🪐 എനിക്ക് ഇപ്പോൾ ഏഴര ശനിയോ രാഹു മഹാദശയോ നടക്കുന്നുണ്ടോ?',
+    '🙏 ഗ്രഹ ദോഷ പരിഹാരത്തിനായി എന്തെല്ലാം പൂജകളും ദാനവുമാണ് ചെയ്യേണ്ടത്?',
+  ],
   English: [
     '🔮 What do planetary transits say for me in 2026?',
     '❤️ When will I meet my compatible life partner?',
@@ -76,6 +84,7 @@ export async function GET(req: NextRequest) {
       { code: 'Hindi', label: 'हिन्दी (Hindi)', short: 'हि' },
       { code: 'Tamil', label: 'தமிழ் (Tamil)', short: 'த' },
       { code: 'Kannada', label: 'ಕನ್ನಡ (Kannada)', short: 'ಕ' },
+      { code: 'Malayalam', label: 'മലയാളം (Malayalam)', short: 'മ' },
       { code: 'English', label: 'English', short: 'Eng' },
     ],
     quickPrompts: QUICK_PROMPTS_BY_LANG,

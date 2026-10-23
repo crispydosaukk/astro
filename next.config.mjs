@@ -30,6 +30,12 @@ const nextConfig = {
     minimumCacheTTL: 60,
     qualities: [75, 85, 100],
   },
+  async rewrites() {
+    return [
+      { source: '/api/app-dynamic/kundli-calculate', destination: '/api/app-dynamic/kundli/calculate' },
+      { source: '/api/app-dynamic/match-kundli', destination: '/api/app-dynamic/kundli/match' },
+    ];
+  },
   async redirects() {
     return [
       { source: '/services/free-horoscope', destination: '/services/free-janam-kundli', permanent: false },

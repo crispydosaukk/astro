@@ -573,7 +573,7 @@ export default function Navbar() {
                   type="button"
                   onClick={() => setIsLangOpen(!isLangOpen)}
                   className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold border border-[#E5D9C8] bg-[#FFFDFC] text-[#292522] hover:border-[#713B32] hover:text-[#713B32] hover:bg-[#F8F3EA] transition-all duration-200 shadow-sm whitespace-nowrap shrink-0"
-                  title="Select Language / భాష / भाषा / மொழி"
+                  title="Select Language / భాష / भाषा / மொழி / ಭಾಷೆ / ഭാഷ"
                   aria-label="Select Language"
                   id="desktop-language-selector-btn"
                 >
@@ -599,7 +599,7 @@ export default function Navbar() {
                           <Globe size={13} className="text-[#B88A44]" />
                           <span>{t('lang.selectLanguage', 'Select Language')}</span>
                         </div>
-                        <span className="text-[10px] text-[#8C7A6B] font-mono font-semibold">4 {t('lang.languages', 'Languages')}</span>
+                        <span className="text-[10px] text-[#8C7A6B] font-mono font-semibold">{languages.length} {t('lang.languages', 'Languages')}</span>
                       </div>
                       <div className="py-1 space-y-1">
                         {languages.map((item) => {
@@ -743,7 +743,7 @@ export default function Navbar() {
                       <Globe size={14} className="text-[#B88A44]" />
                       <span>{t('lang.selectLanguage', 'Select Language')}</span>
                     </div>
-                    <span className="text-[10px] text-[#8C7A6B] font-mono">4 {t('lang.languages', 'Languages')}</span>
+                    <span className="text-[10px] text-[#8C7A6B] font-mono">{languages.length} {t('lang.languages', 'Languages')}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {languages.map((item) => {
@@ -834,7 +834,7 @@ export default function Navbar() {
                                   </div>
                                   <span
                                     className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ml-1 ${
-                                      itemBadge === 'Free' || itemBadge === 'ఉచితం' || itemBadge === 'मुफ्त' || itemBadge === 'இலவசம்'
+                                      itemBadge === 'Free' || itemBadge === 'ఉచితం' || itemBadge === 'मुफ्त' || itemBadge === 'இலவசம்' || itemBadge === 'ಉಚಿತ' || itemBadge === 'സൗജന്യം'
                                         ? 'bg-emerald-100 text-emerald-800'
                                         : 'bg-[#EDE4D5] text-[#713B32]'
                                     }`}

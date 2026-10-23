@@ -109,6 +109,7 @@ export default function AICallRoomPage() {
     if (l.includes('hindi') || l.includes('hi')) return 'hi-IN';
     if (l.includes('tamil') || l.includes('ta')) return 'ta-IN';
     if (l.includes('kannada') || l.includes('kn')) return 'kn-IN';
+    if (l.includes('malayalam') || l.includes('ml')) return 'ml-IN';
     if (l.includes('marathi') || l.includes('mr')) return 'mr-IN';
     if (l.includes('gujarati') || l.includes('gu')) return 'gu-IN';
     if (l.includes('bengali') || l.includes('bn')) return 'bn-IN';
@@ -126,6 +127,12 @@ export default function AICallRoomPage() {
     }
     if (l.includes('hindi') || l.includes('hi')) {
       return `नमस्ते! मैं आपका ज्योतिषी ${astrologerName} हूँ। आपकी जन्म कुंडली के अनुसार करियर, विवाह, धन या ग्रह शांति के बारे में आप क्या जानना चाहते हैं?`;
+    }
+    if (l.includes('kannada') || l.includes('kn')) {
+      return `ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ ಜ್ಯೋತಿಷಿ ${astrologerName}. ನಿಮ್ಮ ಜನ್ಮ ಕುಂಡಲಿಯನ್ನು ಪರಿಶೀಲಿಸಿ ವೃತ್ತಿ, ವಿವಾಹ, ಆರ್ಥಿಕ ಸ್ಥಿತಿ ಅಥವಾ ಗ್ರಹ ದೋಷ ಪರಿಹಾರಗಳ ಬಗ್ಗೆ ಮಾರ್ಗದರ್ಶನ ನೀಡಲು ಸಿದ್ಧನಾಗಿದ್ದೇನೆ.`;
+    }
+    if (l.includes('malayalam') || l.includes('ml')) {
+      return `നമസ്കാരം! ഞാൻ നിങ്ങളുടെ ജ്യോതിഷി ${astrologerName}. നിങ്ങളുടെ ജാതകം പരിശോധിച്ച് കരിയർ, വിവാഹം, സാമ്പത്തികം അല്ലെങ്കിൽ ഗ്രഹ ദോഷ പരിഹാരങ്ങളെക്കുറിച്ച് വ്യക്തമായ മാർഗ്ഗനിർദ്ദേശം നൽകാം.`;
     }
     return `Namaste! I am ${astrologerName}. Looking at your Vedic birth chart, what would you like to explore today — career, marriage, finances, or planetary remedies?`;
   }, []);

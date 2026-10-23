@@ -68,7 +68,7 @@ export function LanguageProvider({
     if (typeof window === 'undefined') return initialLanguage;
     try {
       const savedLang = localStorage.getItem('astroparihar_language') as LanguageCode | null;
-      if (savedLang && ['en', 'te', 'hi', 'ta'].includes(savedLang)) {
+      if (savedLang && ['en', 'te', 'hi', 'ta', 'kn', 'ml'].includes(savedLang)) {
         return savedLang;
       }
     } catch (_e) {}
@@ -127,14 +127,14 @@ export function LanguageProvider({
 
     try {
       const savedLang = localStorage.getItem('astroparihar_language') as LanguageCode | null;
-      if (savedLang && ['en', 'te', 'hi', 'ta'].includes(savedLang)) {
+      if (savedLang && ['en', 'te', 'hi', 'ta', 'kn', 'ml'].includes(savedLang)) {
         initialLang = savedLang;
       } else {
         const cookieVal = getCookie('googtrans');
         if (cookieVal) {
           const parts = cookieVal.split('/');
           const target = parts[parts.length - 1];
-          if (['en', 'te', 'hi', 'ta'].includes(target)) {
+          if (['en', 'te', 'hi', 'ta', 'kn', 'ml'].includes(target)) {
             initialLang = target as LanguageCode;
           }
         }

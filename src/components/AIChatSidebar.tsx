@@ -116,6 +116,14 @@ const QUICK_PROMPTS_BY_LANG: Record<string, string[]> = {
     '🪐 ನನಗೆ ಸಾಡೇ ಸಾತಿ ಅಥವಾ ರಾಹು ಮಹಾದಶ ನಡೆಯುತ್ತಿದೆಯೇ?',
     '🙏 ಗ್ರಹ ಶಾಂತಿ ಮತ್ತು ದೋಷ ನಿವಾರಣೆಗೆ ಯಾವ ಪರಿಹಾರ ಮಾಡಬೇಕು?',
   ],
+  Malayalam: [
+    '🔮 2026-ൽ എന്റെ ഗ്രഹ സഞ്ചാര ഫലങ്ങൾ എങ്ങനെയാണ്?',
+    '❤️ എന്റെ ജാതകത്തിൽ വിവാഹ യോഗം എപ്പോഴാണ്?',
+    '💼 കരിയർ മാറ്റത്തിനോ പ്രമോഷനോ അനുയോജ്യമായ സമയം എപ്പോഴാണ്?',
+    '✨ എന്റെ ഭാഗ്യ രത്നം, രുദ്രാക്ഷം, നിത്യ മന്ത്രം എന്നിവ ഏതാണ്?',
+    '🪐 എനിക്ക് ഇപ്പോൾ ഏഴര ശനിയോ രാഹു മഹാദശയോ നടക്കുന്നുണ്ടോ?',
+    '🙏 ഗ്രഹ ദോഷ പരിഹാരത്തിനായി എന്തെല്ലാം പൂജകളും ദാനവുമാണ് ചെയ്യേണ്ടത്?',
+  ],
   English: [
     '🔮 What do planetary transits say for me in 2026?',
     '❤️ When will I meet my compatible life partner?',
@@ -131,6 +139,7 @@ const PLACEHOLDERS_BY_LANG: Record<string, string> = {
   Hindi: 'अपनी कुंडली, प्रेम, करियर या उपायों के बारे में पूछें...',
   Tamil: 'உங்கள் ஜாதகம், தொழில், திருமணம் அல்லது பரிகாரங்கள் பற்றி கேளுங்கள்...',
   Kannada: 'ನಿಮ್ಮ ಕುಂಡಲಿ, ಪ್ರೀತಿ, ವೃತ್ತಿ ಅಥವಾ ಪರಿಹಾರಗಳ ಬಗ್ಗೆ ಕೇಳಿ...',
+  Malayalam: 'നിങ്ങളുടെ കുണ്ഡലി, പ്രണയം, കരിയർ അല്ലെങ്കിൽ പരിഹാരങ്ങളെക്കുറിച്ച് ചോദിക്കൂ...',
   English: 'Ask about your Kundli, love, career, or remedies...',
 };
 
@@ -139,6 +148,7 @@ const LANGUAGES = [
   { code: 'Hindi', label: 'हिन्दी (Hindi)', short: 'हि' },
   { code: 'Tamil', label: 'தமிழ் (Tamil)', short: 'த' },
   { code: 'Kannada', label: 'ಕನ್ನಡ (Kannada)', short: 'ಕ' },
+  { code: 'Malayalam', label: 'മലയാളം (Malayalam)', short: 'മ' },
   { code: 'English', label: 'English', short: 'Eng' },
 ];
 
@@ -268,6 +278,12 @@ function getWelcomeMessage(lang: string, name: string, astroName: string = 'Acha
     return {
       content: `**ನಮಸ್ಕಾರ ಮತ್ತು ಶುಭಾಶೀರ್ವಾದಗಳು, ${name}!** 🙏\n\nನಾನು **${astroName}**, ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ವೈದಿಕ ಜ್ಯೋತಿಷಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಮಾರ್ಗದರ್ಶಕ. ${currentYear} ವರ್ಷಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ನಿಮ್ಮ **ಕುಂಡಲಿ, ವೃತ್ತಿ, ವಿವಾಹ, ಆರ್ಥಿಕ ಸ್ಥಿತಿ, ಗ್ರಹ ದಶೆ ಅಥವಾ ನಿತ್ಯ ಪರಿಹಾರಗಳ** ಬಗ್ಗೆ ಕೇಳಿ. ಇಂದು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?`,
       recommendations: QUICK_PROMPTS_BY_LANG.Kannada,
+    };
+  }
+  if (lang === 'Malayalam') {
+    return {
+      content: `**നമസ്കാരം, അനുഗ്രഹങ്ങൾ, ${name}!** 🙏\n\nഞാൻ **${astroName}**, നിങ്ങളുടെ വ്യക്തിഗത വേദ ജ്യോതിഷിയും ആത്മീയ വഴികാട്ടിയും. ${currentYear} വർഷത്തെ നിങ്ങളുടെ **കുണ്ഡലി, കരിയർ, വിവാഹം, സാമ്പത്തികം, ഗ്രഹ ദശകൾ, അല്ലെങ്കിൽ നിത്യ പരിഹാരങ്ങൾ** എന്നിവയെക്കുറിച്ച് എന്തുവേണമെങ്കിലും ചോദിക്കാം. ഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കണം?`,
+      recommendations: QUICK_PROMPTS_BY_LANG.Malayalam,
     };
   }
   return {
@@ -432,6 +448,7 @@ export default function AIChatSidebar() {
   const isHindi = language === 'Hindi';
   const isTamil = language === 'Tamil';
   const isKannada = language === 'Kannada';
+  const isMalayalam = language === 'Malayalam';
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -789,6 +806,10 @@ export default function AIChatSidebar() {
           ? 'अपर्याप्त वॉलेट बैलेंस'
           : isTamil
           ? 'போதிய வாலட் இருப்பு இல்லை'
+          : isKannada
+          ? 'ಕಡಿಮೆ ವ್ಯಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್'
+          : isMalayalam
+          ? 'വാലറ്റ് ബാലൻസ് കുറവാണ്'
           : 'Insufficient Wallet Balance',
         description: isTelugu
           ? `ప్రతి ప్రశ్నకు ${activePromptPriceLabel} అవుతుంది, కానీ మీ అందుబాటులో ఉన్న బ్యాలెన్స్ ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)}. సంభాషణ కొనసాగించడానికి దయచేసి రీఛార్జ్ చేయండి.`
@@ -796,6 +817,10 @@ export default function AIChatSidebar() {
           ? `प्रत्येक प्रश्न की लागत ${activePromptPriceLabel} है, लेकिन आपका उपलब्ध बैलेंस ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)} है। बातचीत जारी रखने के लिए कृपया रीचार्ज करें।`
           : isTamil
           ? `ஒவ்வொரு கேள்விக்கும் ${activePromptPriceLabel} தேவை, ஆனால் உங்கள் இருப்பு ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)}. தொடர்ந்து பேச தயவுசெய்து ரீசார்ஜ் செய்யவும்.`
+          : isKannada
+          ? `ಪ್ರತಿ ಪ್ರಶ್ನೆಗೆ ${activePromptPriceLabel} ವೆಚ್ಚವಾಗುತ್ತದೆ, ಆದರೆ ನಿಮ್ಮ ಬ್ಯಾಲೆನ್ಸ್ ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)}. ಮುಂದುವರಿಸಲು ದಯವಿಟ್ಟು ರೀಚಾರ್ಜ್ ಮಾಡಿ.`
+          : isMalayalam
+          ? `ഓരോ ചോദ്യത്തിനും ${activePromptPriceLabel} ചിലവാകും, എന്നാൽ ലഭ്യമായ ബാലൻസ് ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)} ആണ്. തുടരാൻ ദയവായി റീചാർജ് ചെയ്യുക.`
           : `Each prompt costs ${activePromptPriceLabel}, but your available wallet balance is ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)}. Please recharge your wallet to continue.`,
         confirmText: isTelugu
           ? 'వాలెట్ రీఛార్జ్ చేయండి'
@@ -803,6 +828,10 @@ export default function AIChatSidebar() {
           ? 'वॉलेट रीचार्ज करें'
           : isTamil
           ? 'ரீசார்ஜ் செய்யவும்'
+          : isKannada
+          ? 'ವ್ಯಾಲೆಟ್ ರೀಚಾರ್ಜ್ ಮಾಡಿ'
+          : isMalayalam
+          ? 'റീചാർജ് ചെയ്യുക'
           : 'Recharge Wallet',
         variant: 'warning',
         action: () => {
@@ -1106,6 +1135,8 @@ export default function AIChatSidebar() {
                           ? 'ஆன்லைன் • உடனடி பதில்'
                           : isKannada
                           ? 'ಆನ್‌ಲೈನ್ • ತಕ್ಷಣದ ಉತ್ತರ'
+                          : isMalayalam
+                          ? 'ഓൺലൈൻ • ഉടനടി മറുപടി'
                           : 'online • typically replies in seconds'}
                       </span>
                     </p>
@@ -2136,7 +2167,7 @@ export default function AIChatSidebar() {
               {/* Pre-filled Quick Suggestions Bar */}
               <div className="p-2.5 bg-[#F0F2F5] border-t border-[#D1D7DB] overflow-x-auto flex items-center gap-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 <span className="text-[10px] uppercase font-bold text-[#075E54] shrink-0 pl-1">
-                  {isTelugu ? 'సూచనలు:' : isHindi ? 'सुझाव:' : isTamil ? 'பரிந்துரைகள்:' : isKannada ? 'ಸಲಹೆಗಳು:' : 'Suggestions:'}
+                  {isTelugu ? 'సూచనలు:' : isHindi ? 'सुझाव:' : isTamil ? 'பரிந்துரைகள்:' : isKannada ? 'ಸಲಹೆಗಳು:' : isMalayalam ? 'നിർദ്ദേശങ്ങൾ:' : 'Suggestions:'}
                 </span>
                 {(QUICK_PROMPTS_BY_LANG[language] || QUICK_PROMPTS_BY_LANG.English).map((prompt, i) => (
                   <button
@@ -2169,6 +2200,8 @@ export default function AIChatSidebar() {
                         <>{currentAstrologer.name} இடம் கேட்க தயவுசெய்து உள்நுழையவும். ஒவ்வொரு கேள்விக்கும் உங்கள் வாலட்டிலிருந்து <strong className="text-[#075E54]">{activePromptPriceLabel}</strong> கழிக்கப்படும்.</>
                       ) : isKannada ? (
                         <>{currentAstrologer.name} ಅವರೊಂದಿಗೆ ಮಾತನಾಡಲು ದಯವಿಟ್ಟು ಸೈನ್ ಇನ್ ಮಾಡಿ. ಪ್ರತಿ ಪ್ರಶ್ನೆಗೆ ನಿಮ್ಮ ವಾಲೆಟ್‌ನಿಂದ <strong className="text-[#075E54]">{activePromptPriceLabel}</strong> ಕಡಿತಗೊಳ್ಳುತ್ತದೆ.</>
+                      ) : isMalayalam ? (
+                        <>{currentAstrologer.name} മായി സംസാരിക്കാൻ ദയവായി സൈൻ ഇൻ ചെയ്യുക. ഓരോ ചോദ്യത്തിനും നിങ്ങളുടെ വാലറ്റിൽ നിന്ന് <strong className="text-[#075E54]">{activePromptPriceLabel}</strong> ഈടാക്കും.</>
                       ) : (
                         <>Please sign in to ask {currentAstrologer.name}. Each prompt costs <strong className="text-[#075E54]">{activePromptPriceLabel}</strong> from your wallet.</>
                       )}
@@ -2178,7 +2211,7 @@ export default function AIChatSidebar() {
                       onClick={() => setIsOpen(false)}
                       className="w-full py-2.5 rounded-full bg-[#075E54] hover:bg-[#054C44] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
                     >
-                      <LogIn size={14} /> {isTelugu ? 'చాట్ చేయడానికి సైన్ ఇన్ చేయండి' : isHindi ? 'चैट के लिए साइन इन करें' : isTamil ? 'உள்நுழையவும்' : 'Sign In to Chat'}
+                      <LogIn size={14} /> {isTelugu ? 'చాట్ చేయడానికి సైన్ ఇన్ చేయండి' : isHindi ? 'चैट के लिए साइन इन करें' : isTamil ? 'உள்நுழையவும்' : isKannada ? 'ಸೈನ್ ಇನ್ ಮಾಡಿ' : isMalayalam ? 'സൈൻ ഇൻ ചെയ്യുക' : 'Sign In to Chat'}
                     </Link>
                   </div>
                 ) : isLowBalance ? (
@@ -2194,6 +2227,10 @@ export default function AIChatSidebar() {
                             ? `कम वॉलेट बैलेंस (उपलब्ध: ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)})`
                             : isTamil
                             ? `குறைந்த வாலட் இருப்பு (இருப்பு: ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)})`
+                            : isKannada
+                            ? `ಕಡಿಮೆ ವ್ಯಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್ (ಲಭ್ಯತೆ: ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)})`
+                            : isMalayalam
+                            ? `കുറഞ്ഞ വാലറ്റ് ബാലൻസ് (ലഭ്യമായത്: ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)})`
                             : `Low Wallet Balance (Available: ${isUSD ? '$' : '₹'}${currentWallet.toFixed(2)})`}
                         </p>
                         <p className="text-[11px] text-rose-700 mt-0.5">
@@ -2203,6 +2240,10 @@ export default function AIChatSidebar() {
                             <>प्रत्येक प्रश्न के लिए <strong>{activePromptPriceLabel}</strong> आवश्यक है। चैट जारी रखने के लिए कृपया रीचार्ज करें।</>
                           ) : isTamil ? (
                             <>ஒவ்வொரு கேள்விக்கும் <strong>{activePromptPriceLabel}</strong> தேவை. தொடர்ந்து உரையாட தயவுசெய்து ரீசார்ஜ் செய்யவும்.</>
+                          ) : isKannada ? (
+                            <>ಪ್ರತಿ ಪ್ರಶ್ನೆಗೆ <strong>{activePromptPriceLabel}</strong> ಅಗತ್ಯವಿದೆ. ಚಾಟ್ ಮುಂದುವರಿಸಲು ದಯವಿಟ್ಟು ರೀಚಾರ್ಜ್ ಮಾಡಿ.</>
+                          ) : isMalayalam ? (
+                            <>ഓരോ ചോദ്യത്തിനും <strong>{activePromptPriceLabel}</strong> ആവശ്യമാണ്. ചാറ്റ് തുടരാൻ ദയവായി റീചാർജ് ചെയ്യുക.</>
                           ) : (
                             <>Each prompt requires <strong>{activePromptPriceLabel}</strong>. Please recharge your wallet to continue chatting.</>
                           )}
@@ -2214,7 +2255,7 @@ export default function AIChatSidebar() {
                       onClick={() => setIsOpen(false)}
                       className="w-full py-2.5 rounded-full bg-[#075E54] hover:bg-[#054C44] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md"
                     >
-                      <Wallet size={14} /> {isTelugu ? '⚡ వాలెట్ రీఛార్జ్ చేయండి' : isHindi ? '⚡ अभी वॉलेट रीचार्ज करें' : isTamil ? '⚡ இப்போது ரீசார்ஜ் செய்யவும்' : '⚡ Recharge Wallet Now'}
+                      <Wallet size={14} /> {isTelugu ? '⚡ వాలెట్ రీఛార్జ్ చేయండి' : isHindi ? '⚡ अभी वॉलेट रीचार्ज करें' : isTamil ? '⚡ இப்போது ரீசார்ஜ் செய்யவும்' : isKannada ? '⚡ ವ್ಯಾಲೆಟ್ ರೀಚಾರ್ಜ್ ಮಾಡಿ' : isMalayalam ? '⚡ ഇപ്പോൾ റീചാർജ് ചെയ്യുക' : '⚡ Recharge Wallet Now'}
                     </Link>
                   </div>
                 ) : (
@@ -2283,6 +2324,8 @@ export default function AIChatSidebar() {
                           ? `⚡ ஒரு கேள்விக்கு ${activePromptPriceLabel} கழிக்கப்படும்`
                           : isKannada
                           ? `⚡ ಪ್ರತಿ ಪ್ರಶ್ನೆಗೆ ${activePromptPriceLabel} ಕಡಿತಗೊಳಿಸಲಾಗುತ್ತದೆ`
+                          : isMalayalam
+                          ? `⚡ ഓരോ ചോദ്യത്തിനും ${activePromptPriceLabel} ഈടാക്കും`
                           : `⚡ ${activePromptPriceLabel} deducted per prompt`}
                       </span>
                       <span>
@@ -2292,6 +2335,10 @@ export default function AIChatSidebar() {
                           ? `कैलेंडर: ${new Date().getFullYear()}`
                           : isTamil
                           ? `நாட்காட்டி: ${new Date().getFullYear()}`
+                          : isKannada
+                          ? `ಕ್ಯಾಲೆಂಡರ್: ${new Date().getFullYear()}`
+                          : isMalayalam
+                          ? `കലണ്ടർ: ${new Date().getFullYear()}`
                           : `Calendar: ${new Date().getFullYear()}`}
                       </span>
                     </div>
@@ -2317,6 +2364,8 @@ export default function AIChatSidebar() {
             ? 'புதிய அமர்வைத் தொடங்கவா?'
             : isKannada
             ? 'ಹೊಸ ಸೆಷನ್ ಪ್ರಾರಂಭಿಸಬೇಕೆ?'
+            : isMalayalam
+            ? 'പുതിയ സെഷൻ ആരംഭിക്കണോ?'
             : 'Start New Consultation Session?'
         }
         description={
@@ -2328,6 +2377,8 @@ export default function AIChatSidebar() {
             ? `${currentAstrologer.name} உடனுடனான புதிய அமர்வைத் தொடங்க வேண்டுமா? உரையாடல் மீட்டமைக்கப்படும்.`
             : isKannada
             ? `${currentAstrologer.name} ಅವರೊಂದಿಗೆ ಹೊಸ ಸೆಷನ್ ಪ್ರಾರಂಭಿಸಲು ಬಯಸುವಿರಾ? ಸಂಭಾಷಣೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ.`
+            : isMalayalam
+            ? `${currentAstrologer.name} മായുള്ള പുതിയ സെഷൻ ആരംഭിക്കാൻ ആഗ്രഹിക്കുന്നുവോ? സംഭാഷണം റീസെറ്റ് ചെയ്യും.`
             : `Would you like to start a fresh consultation with ${currentAstrologer.name}? A new session with dynamic Jyotish guidance will begin.`
         }
         confirmText={
@@ -2339,9 +2390,11 @@ export default function AIChatSidebar() {
             ? 'ஆம், புதிய அமர்வு'
             : isKannada
             ? 'ಹೌದು, ಹೊಸ ಸೆಷನ್'
+            : isMalayalam
+            ? 'അതെ, പുതിയ സെഷൻ'
             : 'Yes, New Session'
         }
-        cancelText={isTelugu ? 'ఉంచండి' : isHindi ? 'रखें' : isTamil ? 'வைக்கவும்' : isKannada ? 'ಇರಿಸಿ' : 'Keep Chat'}
+        cancelText={isTelugu ? 'ఉంచండి' : isHindi ? 'रखें' : isTamil ? 'வைக்கவும்' : isKannada ? 'ಇರಿಸಿ' : isMalayalam ? 'നിലനിർത്തുക' : 'Keep Chat'}
         variant="primary"
         icon={<RotateCcw size={24} className="text-[#075E54]" />}
       />

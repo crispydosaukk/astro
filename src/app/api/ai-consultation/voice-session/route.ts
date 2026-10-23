@@ -791,6 +791,7 @@ async function generateMultilingualAudioBase64(
     else if (lLower.includes('tamil') || lLower.includes('ta') || /[\u0B80-\u0BFF]/.test(cleanInput)) langCode = 'ta';
     else if (lLower.includes('hindi') || lLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) langCode = 'hi';
     else if (lLower.includes('kannada') || lLower.includes('kn') || /[\u0C80-\u0CFF]/.test(cleanInput)) langCode = 'kn';
+    else if (lLower.includes('malayalam') || lLower.includes('ml') || /[\u0D00-\u0D7F]/.test(cleanInput)) langCode = 'ml';
     else langCode = 'en';
 
     const chunks = splitIntoNaturalChunks(cleanInput, 180);

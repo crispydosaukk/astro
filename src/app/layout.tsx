@@ -54,14 +54,14 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   try {
     const cookieStore = await cookies();
     const langCookie = cookieStore.get('astroparihar_language')?.value;
-    if (langCookie && ['en', 'te', 'hi', 'ta'].includes(langCookie)) {
+    if (langCookie && ['en', 'te', 'hi', 'ta', 'kn', 'ml'].includes(langCookie)) {
       initialLanguage = langCookie as LanguageCode;
     } else {
       const googtrans = cookieStore.get('googtrans')?.value;
       if (googtrans) {
         const parts = googtrans.split('/');
         const target = parts[parts.length - 1];
-        if (['en', 'te', 'hi', 'ta'].includes(target)) {
+        if (['en', 'te', 'hi', 'ta', 'kn', 'ml'].includes(target)) {
           initialLanguage = target as LanguageCode;
         }
       }
