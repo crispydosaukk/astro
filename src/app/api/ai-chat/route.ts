@@ -209,6 +209,7 @@ export async function PATCH(req: Request) {
 
 function generateVedicFallbackResponse(params: {
   vedikaAnswer?: string;
+  vedikaRecommendations?: string[];
   userQuery: string;
   userName: string;
   language: string;
@@ -234,6 +235,7 @@ function generateVedicFallbackResponse(params: {
 } {
   const {
     vedikaAnswer,
+    vedikaRecommendations = [],
     userQuery,
     userName,
     language,
@@ -246,10 +248,11 @@ function generateVedicFallbackResponse(params: {
     lalKitabData,
   } = params;
 
-  const isTelugu = language === 'Telugu';
-  const isHindi = language === 'Hindi';
-  const isTamil = language === 'Tamil';
-  const isKannada = language === 'Kannada';
+  const isTelugu = language === 'Telugu' || language === 'te';
+  const isHindi = language === 'Hindi' || language === 'hi';
+  const isTamil = language === 'Tamil' || language === 'ta';
+  const isKannada = language === 'Kannada' || language === 'kn';
+  const isMalayalam = language === 'Malayalam' || language === 'ml';
 
   // 1. Coordinates and Dasha
   const lagna = chart?.ascendant || 'Vedic Ascendant';
@@ -296,6 +299,13 @@ function generateVedicFallbackResponse(params: {
       userQuery
     );
 
+  const cleanVedika = (vedikaAnswer || '')
+    .replace(/(\r\n|\n)+[—–-]\s*Vedika\s*$/i, '')
+    .replace(/(\r\n|\n)+Vedika\s*$/i, '')
+    .trim();
+
+  const domain = evidence?.domain || 'general';
+
   if (isDirectCalculation && chart) {
     const planetsFormatted = chart.planetaryDegrees
       .map(
@@ -317,7 +327,6 @@ function generateVedicFallbackResponse(params: {
 • **Moon Sign (Chandra Rashi)**: **${chart.moonSign}**
 • **Moon Longitude**: **${chart.moonLongitudeDms}** in ${chart.moonSign} (Total Sidereal: ${chart.moonLongitude.toFixed(4)}°)
 • **Moon Nakshatra & Pada**: **${chart.nakshatra}** (Lord: **${chart.nakshatraLord}**, Pada: **${chart.nakshatraPada || 4}**)
-  *(Rohini Nakshatra is canonically ruled by the Moon, 10-year span)*
 
 ### ⏳ Exact Vimshottari Dasha Mathematical Derivation:
 • **Total Nakshatra Arc**: ${chart.dasha.totalNakshatraArc || '13° 20\' 00" (48,000 arcseconds)'}
@@ -326,7 +335,7 @@ function generateVedicFallbackResponse(params: {
 • **Birth Dasha Balance**: **${chart.dasha.birthDashaBalanceFormatted}**
 • **Mathematical Formula**: ${chart.dasha.birthDashaFormula}
 • **Running Antardasha at Birth**: **${chart.dasha.birthAntardashaAtBirth}**
-• **Active Vimshottari Cycle (as of ${chart.dasha.asOfDate || '14 Oct 2026'}):**
+• **Active Vimshottari Cycle (as of ${chart.dasha.asOfDate || `${currentYear}`}):**
   - **Current Mahadasha**: **${chart.dasha.currentMahadasha}** (${chart.dasha.startDate} to ${chart.dasha.endDate})
   - **Current Antardasha**: **${chart.dasha.currentAntardasha}** (${chart.dasha.antarStartDate} to ${chart.dasha.antarEndDate})
   - **Current Pratyantardasha**: **${chart.dasha.currentPratyantardasha}** (${chart.dasha.pratyantarStartDate} to ${chart.dasha.pratyantarEndDate})
@@ -335,102 +344,272 @@ function generateVedicFallbackResponse(params: {
 ${planetsFormatted}
 
 *Calculated facts are derived directly from deterministic celestial mechanics without conversational approximation.*`;
-  } else if (isTelugu) {
-    responseBody = `**నమస్కారం మరియు శుభాశీస్సులు!** 🙏
+  } else if (cleanVedika && cleanVedika.length >= 25) {
+    // ── LIVE VEDIKA AI ENGINE RESPONSE ──────────────────────────────────────────
+    // Vedika AI provided an authentic, personalized Vedic answer to the devotee's query!
+    let intro = '';
+    const hasGreeting = /^(namaste|namaskaram|vanakkam|namaskara|pranam|శుభాశీస్సులు|నమస్కారం|नमस्ते|வணக்கம்|ನಮಸ್ಕಾರ|നമസ്കാരം)/i.test(
+      cleanVedika
+    );
 
-నేను **${personaName}**, మీ వ్యక్తిగత వేద జ్యోతిష మరియు ఆధ్యాత్మిక మార్గదర్శకుడిని. మీ జాతక చక్రం మరియు ${currentYear} గ్రహ స్థితుల ఆధారంగా సమగ్ర విశ్లేషణ:
+    if (!hasGreeting) {
+      if (isTelugu) {
+        intro = `**నమస్కారం మరియు దివ్య శుభాశీస్సులు!** 🙏\n\nనేను **${personaName}**, మీ వేద జ్యోతిష మార్గదర్శకుడిని.\n\n`;
+      } else if (isHindi) {
+        intro = `**नमस्ते एवं दिव्य आशीर्वाद!** 🙏\n\nमैं **${personaName}**, आपका व्यक्तिगत वैदिक ज्योतिष मार्गदर्शक हूँ।\n\n`;
+      } else if (isTamil) {
+        intro = `**வணக்கம் மற்றும் திவ்ய ஆசிகள்!** 🙏\n\nநான் **${personaName}**, உங்கள் தனிப்பட்ட வேத ஜோதிட வழிகாட்டி.\n\n`;
+      } else if (isKannada) {
+        intro = `**ನಮಸ್ಕಾರ ಮತ್ತು ಶುಭಾಶೀರ್ವಾದಗಳು!** 🙏\n\nನಾನು **${personaName}**, ನಿಮ್ಮ ವೈದಿಕ ಜ್ಯೋತಿಷ್ಯ ಮಾರ್ಗದರ್ಶಕ.\n\n`;
+      } else if (isMalayalam) {
+        intro = `**നമസ്കാരം ദൈവാനുഗ്രഹവും!** 🙏\n\nഞാൻ **${personaName}**, നിങ്ങളുടെ വേദ ജ്യോതിഷ മാർഗ്ഗദർശി.\n\n`;
+      } else {
+        intro = `**Namaste and Divine Blessings!** 🙏\n\nI am **${personaName}**, your personal Vedic Astrologer & spiritual guide.\n\n`;
+      }
+    }
 
-### 🔮 జాతక చక్ర పరిశీలన & గ్రహ స్థితి
-• **లగ్నం & చంద్ర రాశి**: మీరు **${lagna} లగ్నం** మరియు **${moonRashi} రాశి (${nakshatra} నక్షత్రం, ${nakshatraPada}వ పాదం)** లో జన్మించారు.
-• **ప్రస్తుత వింశోత్తరి దశ**: ప్రస్తుతం మీకు **${dashaSummary}** నడుస్తోంది. ఈ దశ మీ జీవితంలో కీలకమైన పురోగతికి, నిర్ణయాలకు బలమైన ప్రభావాన్ని చూపుతోంది.
+    let remedialSection = '';
+    const needsRemedy = isRemedyRequested || isRemedyExplicitlyRequested(userQuery);
 
-### 🪐 ${currentYear} గ్రహ సంచారాలు & భావ ఫలితాలు
-• **గురు భగవానుని అనుగ్రహం**: ${currentYear} లో దేవగురువు బృహస్పతి సంచారం మీ కేంద్ర-త్రికోణ భావాలపై అమృత దృష్టిని సారిస్తోంది. దీనివల్ల బుద్ధి బలం, ఆర్థిక ప్రణాళికలు మరియు నూతన అవకాశాలు మెరుగవుతాయి.
-• **శని భగవానుని ప్రభావం**: శని సంచారం మీ కర్మ స్థానాన్ని మరియు ధర్మ భావాలను క్రమశిక్షణతో కూడిన సాధనకు పురికొల్పుతోంది. తొందరపాటు నిర్ణయాలు తీసుకోకుండా ఓర్పుతో వ్యవహరించడం ముఖ్యం.
-• **ప్రభావిత భావాలు**: మీ ప్రశ్నకు సంబంధించిన (${targetHouses}) భావాలు క్రియాశీలకంగా ఉన్నాయి. ${supporting.slice(0, 2).map((s: string) => `ఈ కాలంలో ${s}`).join(' ')}
-
-### ⏳ శుభ సమయం & కాల పరిమితి
-మీ జాతక గ్రహ సంచారాల అనుకూలత ప్రకారం, **${timing}** అత్యంత కీలకమైన మరియు అనుకూలమైన కాలం. ఈ కాలంలో ప్రారంభించే ముఖ్యమైన పనులు శాశ్వత శుభ ఫలితాలను చేకూరుస్తాయి.
-
-### 🪔 48 రోజుల పవిత్ర పరిహార ప్రోటోకాల్ (శాంతి పరిహారాలు)
-గ్రహ దోష నివారణ మరియు దేవతానుగ్రహం కొరకు ఈ క్రింది పవిత్ర సంకల్పాన్ని ఆచరించండి:
+    if (needsRemedy && activeProtocol) {
+      if (isTelugu) {
+        remedialSection = `\n\n### 🪔 48 రోజుల పవిత్ర పరిహార ప్రోటోకాల్ (శాంతి పరిహారాలు)
 • **అధిష్టాన దైవం & హోమం**: **${presidingDeity}** అనుగ్రహం కొరకు **${homamName}** (${homamDay}) సంకల్పం చేయించండి.
 • **నిత్య సాధన మంత్రం**: ప్రతిరోజూ సూర్యోదయ వేళలో "${dailyMantra}" ను **${japaCount}** భక్తితో జపించండి.
 • **24వ రోజు దానం (మధ్యంతర సంకల్పం)**: ${charityDaana}.
 • **48వ రోజు పూర్ణాహుతి**: ${culminationAction}.
-${varjyaWarning ? `• **లాల్ కితాబ్ వర్జ్య నియమం (నిషేధాలు)**: ${varjyaWarning}. ఎట్టి పరిస్థితుల్లోనూ దీనిని చేయకూడదు.` : ''}
-
-భగవాన్ పరమశివుడు మరియు జగన్మాత పార్వతీదేవి దివ్య అనుగ్రహంతో మీ సకల కోరికలు నెరవేరి, ఆయురారోగ్య ఐశ్వర్యాలు కలగాలని ఆశీర్వదిస్తున్నాను. **ఓం శాంతిః!**`;
-  } else if (isHindi) {
-    responseBody = `**नमस्ते एवं आशीर्वाद!** 🙏
-
-मैं **${personaName}**, आपका व्यक्तिगत वैदिक ज्योतिष एवं आध्यात्मिक मार्गदर्शक हूँ। आपकी जन्म कुंडली एवं वर्ष ${currentYear} के ग्रह गोचर का संपूर्ण विश्लेषण प्रस्तुत है:
-
-### 🔮 जन्म कुंडली विश्लेषण एवं ग्रह दशा
-• **लग्न एवं चंद्र राशि**: आपका जन्म **${lagna} लग्न** एवं **${moonRashi} चंद्र राशि (${nakshatra} नक्षत्र, चरण ${nakshatraPada})** में हुआ है।
-• **सक्रिय विंशोत्तरी दशा**: वर्तमान में आपकी **${dashaSummary}** गतिशील है। यह कालखंड आपके जीवन में दूरगामी निर्णय लेने और कर्म फल प्राप्त करने का सर्वोत्तम अवसर है।
-
-### 🪐 वर्ष ${currentYear} ग्रह गोचर एवं भाव प्रभाव
-• **देवगुरु बृहस्पति की कृपा**: वर्ष ${currentYear} में देवगुरु बृहस्पति का शुभ गोचर आपके केंद्र एवं त्रिकोण भावों को ऊर्जावान कर रहा है, जिससे विवेक, यश, ज्ञान और धन आगमन के मार्ग सुलभ होंगे।
-• **शनि देव का प्रभाव**: कर्मफलदाता शनि का गोचर आपको धैर्य, निरंतर परिश्रम और सत्यनिष्ठा की प्रेरणा दे रहा है। अनुशासित प्रयास से स्थिरता प्राप्त होगी।
-• **सक्रिय भाव**: आपके प्रश्न से संबंधित (${targetHouses}) भाव सक्रिय हैं। ${supporting.slice(0, 2).join(' ')}
-
-### ⏳ शुभ कालखंड एवं समय सीमा
-आपकी कुंडली के गोचर एवं दशा समीकरण के आधार पर **${timing}** का समय अत्यंत फलदायी एवं कल्याणकारी रहेगा।
-
-### 🪔 48-दिवसीय पवित्र परिहार संकल्प
-ग्रह शांति और दैवीय कृपा प्राप्ति हेतु 48 दिनों का यह शास्त्रीय उपाय अपनाएं:
+${varjyaWarning ? `• **లాల్ కితాబ్ వర్జ్య నియమం (నిషేధాలు)**: ${varjyaWarning}. ఎట్టి పరిస్థితుల్లోనూ దీనిని చేయకూడదు.` : ''}`;
+      } else if (isHindi) {
+        remedialSection = `\n\n### 🪔 48-दिवसीय पवित्र परिहार संकल्प
 • **अधिष्ठाता देव एवं होम**: **${presidingDeity}** की प्रसन्नता हेतु **${homamName}** (${homamDay}) का अनुष्ठान कराएं।
 • **दैनिक साधना मंत्र**: प्रतिदिन सूर्योदय के समय "${dailyMantra}" का **${japaCount}** श्रद्धापूर्वक जप करें।
 • **24वें दिन का दान**: ${charityDaana}।
 • **48वें दिन पूर्णाहुति**: ${culminationAction}।
-${varjyaWarning ? `• **लाल किताब वर्ज्य नियम**: ${varjyaWarning}। इसका कड़ाई से पालन करें।` : ''}
+${varjyaWarning ? `• **लाल किताब वर्ज्य नियम**: ${varjyaWarning}। इसका कड़ाई से पालन करें।` : ''}`;
+      } else if (isTamil) {
+        remedialSection = `\n\n### 🪔 48 நாட்கள் பரிகார சங்கல்பம்
+• **இஷ்ட தெய்வம் & ஹோமம்**: **${presidingDeity}** அருளுக்காக **${homamName}** (${homamDay}) சங்கல்பம் செய்யவும்.
+• **தினசரி மந்திர ஜெபம்**: தினமும் "${dailyMantra}" மந்திரத்தை **${japaCount}** முறை ஜெபிக்கவும்.
+• **24-வது நாள் தானம்**: ${charityDaana}.
+• **48-வது நாள் பூர்ணாஹுதி**: ${culminationAction}.`;
+      } else if (isKannada) {
+        remedialSection = `\n\n### 🪔 48 ದಿನಗಳ ಪವಿತ್ರ ಪರಿಹಾರ ಸಂಕಲ್ಪ
+• **ಅಧಿಷ್ಠಾನ ದೈವ & ಹೋಮ**: **${presidingDeity}** ಅನುಗ್ರಹಕ್ಕಾಗಿ **${homamName}** (${homamDay}) ಸಂಕಲ್ಪ ಮಾಡಿ.
+• **ನಿತ್ಯ ಮಂತ್ರ ಜಪ**: ಪ್ರತಿದಿನ "${dailyMantra}" ಮಂತ್ರವನ್ನು **${japaCount}** ಬಾರಿ ಶ್ರದ್ಧೆಯಿಂದ ಜಪಿಸಿ.
+• **24ನೇ ದಿನದ ದಾನ**: ${charityDaana}.
+• **48ನೇ ದಿನ ಪೂರ್ಣಾಹುತಿ**: ${culminationAction}.`;
+      } else if (isMalayalam) {
+        remedialSection = `\n\n### 🪔 48 ദിവസത്തെ പരിഹാര സങ്കൽപം
+• **ഇഷ്ടദേവത & ഹോമം**: **${presidingDeity}** പ്രീതിക്കായി **${homamName}** (${homamDay}) അനുഷ്ഠിക്കുക.
+• **നിത്യ മന്ത്ര ജപം**: ദിവസവും "${dailyMantra}" **${japaCount}** തവണ ജപിക്കുക.
+• **24-ാം ദിവസം ദാനം**: ${charityDaana}.
+• **48-ാം ദിവസം പൂർണ്ണാഹുതി**: ${culminationAction}.`;
+      } else {
+        remedialSection = `\n\n### 🪔 48-Day Sacred Mandala Parihar Protocol
+• **Presiding Deity & Homam**: Consecrate the **${homamName}** dedicated to **${presidingDeity}** on an auspicious **${homamDay}**.
+• **Daily Sadhana Mantra**: Recite the sacred mantra "${dailyMantra}" **${japaCount}** during Brahma Muhurta or sunrise.
+• **Day 24 Sacred Daana (Mid-Mandala)**: ${charityDaana}.
+• **Day 48 Purnahuti (Culmination)**: ${culminationAction}.
+${varjyaWarning ? `• **Lal Kitab Varjya (Forbidden Action)**: ${varjyaWarning}. Avoid this strictly to preserve spiritual merits.` : ''}`;
+      }
+    }
 
-भगवान शिव और माता पार्वती की असीम अनुकंपा से आपका जीवन सुख, शांति और सौभाग्य से परिपूर्ण हो। **ॐ शांतिः!**`;
+    let benediction = '';
+    if (isTelugu) {
+      benediction = `\n\nభగవాన్ పరమశివుడు మరియు జగన్మాత పార్వతీదేవి దివ్య అనుగ్రహంతో మీ సకల కోరికలు నెరవేరి, ఆయురారోగ్య ఐశ్వర్యాలు కలగాలని ఆశీర్వదిస్తున్నాను. **ఓం శాంతిః!**`;
+    } else if (isHindi) {
+      benediction = `\n\nभगवान शिव और माता पार्वती की असीम अनुकंपा से आपका जीवन सुख, शांति और सौभाग्य से परिपूर्ण हो। **ॐ शांतिः!**`;
+    } else if (isTamil) {
+      benediction = `\n\nசிவபெருமான் மற்றும் அன்னை பார்வதியின் திருவருளால் உங்கள் வாழ்வில் அனைத்து நன்மைகளும் அமைதியும் பெருகட்டும். **ஓம் சாந்தி!**`;
+    } else if (isKannada) {
+      benediction = `\n\nಭಗವಾನ್ ಶಿವ ಮತ್ತು ಪಾರ್ವತಿ ದೇವಿಯ ದಿವ್ಯ ಆಶೀರ್ವಾದದಿಂದ ನಿಮ್ಮ ಸರ್ವ ಕಾರ್ಯಗಳು ಸಿದ್ಧಿಸಲಿ. **ಓಂ ಶಾಂತಿಃ!**`;
+    } else if (isMalayalam) {
+      benediction = `\n\nഭഗവാൻ ശിവന്റെയും പാർവ്വതീദേവിയുടെയും ദിവ്യാനുഗ്രഹത്താൽ സർവ്വ ഐശ്വര്യങ്ങളും ഉണ്ടാകട്ടെ. **ഓം ശാന്തിഃ!**`;
+    } else {
+      benediction = `\n\nMay Lord Shiva and Goddess Parvathi shower their divine grace upon your path with peace, clarity, protection, and fulfillment. **Om Shanti!**`;
+    }
+
+    responseBody = `${intro}${cleanVedika}${remedialSection}${benediction}`;
+  } else if (isTelugu) {
+    // ── DETERMINISTIC LOCAL ENGINE FALLBACK (TELUGU) ──────────────────────────
+    let domainSpecificInsights = '';
+    if (domain === 'career' || domain === 'profession') {
+      domainSpecificInsights = `\n### 💼 కెరీర్ & ఉద్యోగ విశ్లేషణ (10వ భావ పరిశీలన)
+• మీ జాతకంలో 10వ స్థానం (కర్మ స్థానం) మరియు 6వ స్థానం (సేవా స్థానం) బలమైన గ్రహాల దృష్టిలో ఉన్నాయి.
+• ప్రస్తుత వింశోత్తరి దశ (${dashaSummary}) నూతన అవకాశాలు, ప్రమోషన్ లేదా ఉద్యోగ మార్పుకు కీలకమైన సూచనలు ఇస్తోంది.
+• ఓర్పుతో కూడిన ప్రయత్నాలు, సాంకేతిక నైపుణ్యాల పెంపుదల ఈ కాలంలో శాశ్వత స్థిరత్వాన్ని చేకూరుస్తాయి.`;
+    } else if (domain === 'marriage' || domain === 'relationship') {
+      domainSpecificInsights = `\n### ❤️ వివాహ యోగం & దాంపత్య విశ్లేషణ (7వ భావ పరిశీలన)
+• మీ జాతకంలో 7వ స్థానం (కళత్ర స్థానం) మరియు శుక్ర-గురు గ్రహాల స్థితులు వివాహ ప్రయత్నాలకు దోహదపడుతున్నాయి.
+• భాగస్వామి ఎంపికలో పరస్పర గ్రహ మైత్రి మరియు గుణ మేళనం అత్యంత శుభప్రదమైన ఫలితాలను అందిస్తాయి.
+• గౌరీ-శంకర ఆరాధన వివాహ సంబంధాల్లో ఆటంకాలను తొలగించి అనుకూలమైన దాంపత్యాన్ని ప్రసాదిస్తుంది.`;
+    } else if (domain === 'financial' || domain === 'wealth') {
+      domainSpecificInsights = `\n### 💰 ఆర్థిక స్థితి & ధన యోగ విశ్లేషణ (2, 11వ భావాలు)
+• ధన స్థానం (2వ భావం) మరియు లాభ స్థానం (11వ భావం) శుభ గ్రహ వీక్షణతో సత్ఫలితాలను ఇచ్చేందుకు సిద్ధంగా ఉన్నాయి.
+• క్రమబద్ధమైన పొదుపు మరియు దీర్ఘకాలిక పెట్టుబడులు లాభదాయకంగా ఉంటాయి. అనవసర రిస్క్ తీసుకోకూడదు.`;
+    } else {
+      domainSpecificInsights = `\n### 🪐 ${currentYear} గ్రహ సంచారాలు & భావ ఫలితాలు
+• **గురు భగవానుని అనుగ్రహం**: దేవగురువు బృహస్పతి సంచారం మీ కేంద్ర-త్రికోణ భావాలపై అమృత దృష్టిని సారిస్తోంది.
+• **శని భగవానుని ప్రభావం**: శని సంచారం మీ కర్మ స్థానాన్ని క్రమశిక్షణతో కూడిన సాధనకు పురికొల్పుతోంది.
+• **ప్రభావిత భావాలు**: మీ ప్రశ్నకు సంబంధించిన (${targetHouses}) భావాలు క్రియాశీలకంగా ఉన్నాయి. ${supporting.slice(0, 2).map((s: string) => `ఈ కాలంలో ${s}`).join(' ')}`;
+    }
+
+    responseBody = `**నమస్కారం మరియు శుభాశీస్సులు!** 🙏
+
+నేను **${personaName}**, మీ వ్యక్తిగత వేద జ్యోతిష మార్గదర్శకుడిని. మీ జాతక చక్రం మరియు ${currentYear} గ్రహ స్థితుల ఆధారంగా సమగ్ర విశ్లేషణ:
+
+### 🔮 జాతక చక్ర పరిశీలన & గ్రహ స్థితి
+• **లగ్నం & చంద్ర రాశి**: మీరు **${lagna} లగ్నం** మరియు **${moonRashi} రాశి (${nakshatra} నక్షత్రం, ${nakshatraPada}వ పాదం)** లో జన్మించారు.
+• **ప్రస్తుత వింశోత్తరి దశ**: ప్రస్తుతం మీకు **${dashaSummary}** నడుస్తోంది.
+${domainSpecificInsights}
+
+### ⏳ శుభ సమయం & కాల పరిమితి
+మీ జాతక గ్రహ సంచారాల అనుకూలత ప్రకారం, **${timing}** అత్యంత కీలకమైన మరియు అనుకూలమైన కాలం.
+
+### 🪔 48 రోజుల పవిత్ర పరిహార ప్రోటోకాల్ (శాంతి పరిహారాలు)
+• **అధిష్టాన దైవం & హోమం**: **${presidingDeity}** అనుగ్రహం కొరకు **${homamName}** (${homamDay}) సంకల్పం చేయించండి.
+• **నిత్య సాధన మంత్రం**: ప్రతిరోజూ సూర్యోదయ వేళలో "${dailyMantra}" ను **${japaCount}** భక్తితో జపించండి.
+• **24వ రోజు దానం**: ${charityDaana}.
+• **48వ రోజు పూర్ణాహుతి**: ${culminationAction}.
+${varjyaWarning ? `• **లాల్ కితాబ్ వర్జ్య నియమం**: ${varjyaWarning}. ఎట్టి పరిస్థితుల్లోనూ దీనిని చేయకూడదు.` : ''}
+
+భగవాన్ పరమశివుడు మరియు జగన్మాత పార్వతీదేవి దివ్య అనుగ్రహంతో మీ సకల కోరికలు నెరవేరాలని ఆశీర్వదిస్తున్నాను. **ఓం శాంతిః!**`;
+  } else if (isHindi) {
+    // ── DETERMINISTIC LOCAL ENGINE FALLBACK (HINDI) ───────────────────────────
+    let domainSpecificInsights = '';
+    if (domain === 'career' || domain === 'profession') {
+      domainSpecificInsights = `\n### 💼 करियर एवं आजीविका विश्लेषण (दशम भाव)
+• आपकी जन्म पत्रिका में दशम भाव (कर्म) एवं षष्ठ भाव (सेवा) पर शुभ ग्रहों का प्रभाव बना हुआ है।
+• वर्तमान दशा (${dashaSummary}) नई पदोन्नति, कार्यक्षेत्र में सम्मान एवं स्थिरता के लिए अत्यंत अनुकूल है।`;
+    } else if (domain === 'marriage' || domain === 'relationship') {
+      domainSpecificInsights = `\n### ❤️ विवाह योग एवं दांपत्य विश्लेषण (सप्तम भाव)
+• सप्तम भाव एवं गुरु-शुक्र की अनुकूल दृष्टि से विवाह हेतु शुभ प्रस्ताव एवं अनुकूल समय बन रहा है।
+• परस्पर विचार सामंजस्य एवं धैर्य से वैवाहिक जीवन सुखमय रहेगा।`;
+    } else {
+      domainSpecificInsights = `\n### 🪐 वर्ष ${currentYear} ग्रह गोचर एवं भाव प्रभाव
+• **देवगुरु बृहस्पति की कृपा**: गुरु का शुभ गोचर आपके केंद्र एवं त्रिकोण भावों को ऊर्जावान कर रहा है।
+• **शनि देव का प्रभाव**: शनि का प्रभाव आपको निरंतर परिश्रम एवं सत्यनिष्ठा की प्रेरणा दे रहा है।`;
+    }
+
+    responseBody = `**नमस्ते एवं आशीर्वाद!** 🙏
+
+मैं **${personaName}**, आपका व्यक्तिगत वैदिक ज्योतिष मार्गदर्शक हूँ। आपकी जन्म कुंडली एवं वर्ष ${currentYear} के ग्रह गोचर का संपूर्ण विश्लेषण प्रस्तुत है:
+
+### 🔮 जन्म कुंडली विश्लेषण एवं ग्रह दशा
+• **लग्न एवं चंद्र राशि**: आपका जन्म **${lagna} लग्न** एवं **${moonRashi} चंद्र राशि (${nakshatra} नक्षत्र, चरण ${nakshatraPada})** में हुआ है।
+• **सक्रिय विंशोत्तरी दशा**: वर्तमान में आपकी **${dashaSummary}** गतिशील है।
+${domainSpecificInsights}
+
+### ⏳ शुभ कालखंड एवं समय सीमा
+आपकी कुंडली के अनुसार **${timing}** का समय अत्यंत फलदायी एवं कल्याणकारी रहेगा।
+
+### 🪔 48-दिवसीय पवित्र परिहार संकल्प
+• **अधिष्ठाता देव एवं होम**: **${presidingDeity}** की प्रसन्नता हेतु **${homamName}** (${homamDay}) का अनुष्ठान कराएं।
+• **दैनिक साधना मंत्र**: प्रतिदिन सूर्योदय के समय "${dailyMantra}" का **${japaCount}** श्रद्धापूर्वक जप करें।
+• **24वें दिन का दान**: ${charityDaana}।
+• **48वें दिन पूर्णाहुति**: ${culminationAction}।
+${varjyaWarning ? `• **लाल किताब वर्ज्य नियम**: ${varjyaWarning}।` : ''}
+
+भगवान शिव और माता पार्वती की असीम अनुकंपा से आपका जीवन सुख-शांति से परिपूर्ण हो। **ॐ शांतिः!**`;
+  } else if (isKannada) {
+    // ── DETERMINISTIC LOCAL ENGINE FALLBACK (KANNADA) ─────────────────────────
+    responseBody = `**ನಮಸ್ಕಾರ ಮತ್ತು ಶುಭಾಶೀರ್ವಾದಗಳು!** 🙏
+
+ನಾನು **${personaName}**, ನಿಮ್ಮ ವೈದಿಕ ಜ್ಯೋತಿಷ್ಯ ಮಾರ್ಗದರ್ಶಕ. ನಿಮ್ಮ ಜನ್ಮ ಕುಂಡಲಿ ಮತ್ತು ${currentYear} ಗ್ರಹ ಸಂಚಾರದ ಆಧಾರದ ಮೇಲೆ ಸಮಗ್ರ ವಿಶ್ಲೇಷಣೆ:
+
+### 🔮 ಜನ್ಮ ಕುಂಡಲಿ ವಿಶ್ಲೇಷಣೆ & ಗ್ರಹ ಸ್ಥಿತಿ
+• **ಲಗ್ನ & ಚಂದ್ರ ರಾಶಿ**: ನೀವು **${lagna} ಲಗ್ನ** ಮತ್ತು **${moonRashi} ರಾಶಿ (${nakshatra} ನಕ್ಷತ್ರ, ಪಾದ ${nakshatraPada})** ದಲ್ಲಿ ಜನಿಸಿದ್ದೀರಿ.
+• **ಪ್ರಸ್ತುತ ವಿಂಶೋತ್ತರಿ ದಶೆ**: ಪ್ರಸ್ತುತ ನಿಮಗೆ **${dashaSummary}** ನಡೆಯುತ್ತಿದೆ. ಈ ಕಾಲ ನಿಮ್ಮ ನಿರ್ಧಾರಗಳಿಗೆ ಬಹುಮುಖ್ಯ ತಿರುವು ನೀಡಲಿದೆ.
+
+### 🪐 ಗ್ರಹ ಸಂಚಾರ & ಶುಭ ಕಾಲ
+• ದೇವಗುರು ಬೃಹಸ್ಪತಿಯ ಅನುಗ್ರಹದಿಂದ ನಿಮ್ಮ ಕೇಂದ್ರ-ತ್ರಿಕೋಣ ಸ್ಥಾನಗಳು ಬಲಗೊಳ್ಳುತ್ತಿವೆ.
+• ನಿಮ್ಮ ಪ್ರಶ್ನೆಗೆ ಅನುಗುಣವಾಗಿ, **${timing}** ಅತ್ಯಂತ ಪ್ರಶಸ್ತವಾದ ಕಾಲವಾಗಿದೆ.
+
+### 🪔 48 ದಿನಗಳ ಪವಿತ್ರ ಪರಿಹಾರ ಸಂಕಲ್ಪ
+• **ಅಧಿಷ್ಠಾನ ದೈವ & ಹೋಮ**: **${presidingDeity}** ಅನುಗ್ರಹಕ್ಕಾಗಿ **${homamName}** (${homamDay}) ಸಂಕಲ್ಪ ಮಾಡಿ.
+• **ನಿತ್ಯ ಮಂತ್ರ ಜಪ**: ಪ್ರತಿದಿನ "${dailyMantra}" ಮಂತ್ರವನ್ನು **${japaCount}** ಬಾರಿ ಶ್ರದ್ಧೆಯಿಂದ ಜಪಿಸಿ.
+• **24ನೇ ದಿನದ ದಾನ**: ${charityDaana}.
+• **48ನೇ ದಿನ ಪೂರ್ಣಾಹುತಿ**: ${culminationAction}.
+
+ಭಗವಾನ್ ಶಿವ ಮತ್ತು ಪಾರ್ವತಿ ದೇವಿಯ ದಿವ್ಯ ಕೃಪೆಯಿಂದ ನಿಮ್ಮ ಸಕಲ ಕಾರ್ಯಗಳು ಸಿದ್ಧಿಸಲಿ. **ಓಂ ಶಾಂತಿಃ!**`;
+  } else if (isMalayalam) {
+    // ── DETERMINISTIC LOCAL ENGINE FALLBACK (MALAYALAM) ───────────────────────
+    responseBody = `**നമസ്കാരം ദൈവാനുഗ്രഹവും!** 🙏
+
+ഞാൻ **${personaName}**, നിങ്ങളുടെ വേദ ജ್ಯോതിഷ മാർഗ്ഗദർശി. നിങ്ങളുടെ ജാതകവും ${currentYear}-ലെ ഗ്രഹസ്ഥിതിയും അടിസ്ഥാനമാക്കിയുള്ള സമഗ്ര ജ്യോതിഷ വിശകലനം:
+
+### 🔮 ജാതക നിരൂപണവും ദശാഫലവും
+• **ലഗ്നവും ചന്ദ്ര രാശിയും**: നിങ്ങൾ **${lagna} ലഗ്നത്തിലും** **${moonRashi} രാശിയിലും (${nakshatra} നക്ഷത്രം, പാദം ${nakshatraPada})** ജനിച്ചിരിക്കുന്നു.
+• **നടപ്പു വിംശോത്തരി ദശ**: നിലവിൽ **${dashaSummary}** ദശാകാലത്തിലൂടെയാണ് കടന്നുപോകുന്നത്.
+
+### 🪐 ഗ്രഹ സഞ്ചാര ഫലങ്ങളും ശുഭ മുഹൂർത്തവും
+• വ്യാഴത്തിന്റെ ശുഭദൃഷ്ടി സർവ്വ കാര്യങ്ങളിലും വിജയം നൽകും.
+• നിങ്ങളുടെ ജാതകപ്രകാരം, **${timing}** ഏറ്റവും അനുയോജ്യമായ സമയമാണ്.
+
+### 🪔 48 ദിവസത്തെ പരിഹാര സങ്കൽപം
+• **ഇഷ്ടദേവത & ഹോമം**: **${presidingDeity}** പ്രീതിക്കായി **${homamName}** (${homamDay}) അനുഷ്ഠിക്കുക.
+• **നിത്യ മന്ത്ര ജപം**: ദിവസവും "${dailyMantra}" **${japaCount}** തവണ ജപിക്കുക.
+• **24-ാം ദിവസം ദാനം**: ${charityDaana}.
+• **48-ാം ദിവസം പൂർണ്ണാഹുതി**: ${culminationAction}.
+
+ഭഗവാൻ ശിവന്റെയും പാർവ്വതീദേവിയുടെയും ദിവ്യാനുഗ്രഹത്താൽ സർവ്വ ഐശ്വര്യങ്ങളും ഉണ്ടാകട്ടെ. **ഓം ശാന്തിഃ!**`;
   } else if (isTamil) {
+    // ── DETERMINISTIC LOCAL ENGINE FALLBACK (TAMIL) ───────────────────────────
     responseBody = `**வணக்கம் மற்றும் ஆசிகள்!** 🙏
 
-நான் **${personaName}**, உங்கள் தனிப்பட்ட வேத ஜோதிடர் மற்றும் ஆன்மீக வழிகாட்டி. உங்கள் ஜாதகம் மற்றும் ${currentYear} ஆம் ஆண்டின் கிரக பெயர்ச்சிகளின் அடிப்படையிலான விரிவான வேத வழிகாட்டுதல்:
+நான் **${personaName}**, உங்கள் தனிப்பட்ட வேத ஜோதிடர் மற்றும் ஆன்மீக வழிகாட்டி. உங்கள் ஜாதகம் மற்றும் ${currentYear} கிரக நிலைகளின் அடிப்படையிலான வேத வழிகாட்டுதல்:
 
 ### 🔮 ஜாதக ஆய்வு & தசா இருப்பு
 • **லக்னம் & ராசி**: நீங்கள் **${lagna} லக்னம்** மற்றும் **${moonRashi} சந்திர ராசி (${nakshatra} நட்சத்திரம், பாதம் ${nakshatraPada})** இல் பிறந்துள்ளீர்கள்.
-• **நடப்பு விம்சோத்தரி தசா**: தற்போது உங்களுக்கு **${dashaSummary}** நடைபெறுகிறது. இது வாழ்க்கையில் முக்கிய திருப்புமுனைகளையும் ஆன்மீக பக்குவத்தையும் தரும் காலமாகும்.
+• **நடப்பு விம்சோத்தரி தசா**: தற்போது உங்களுக்கு **${dashaSummary}** நடைபெறுகிறது.
 
-### 🪐 ${currentYear} கிரக பெயர்ச்சி & பாவ பலன்கள்
-• **குரு பகவானின் சுப பார்வை**: ${currentYear}-ல் குருவின் சுப பார்வை உங்கள் முக்கிய கேந்திர-திரிகோண ஸ்தானங்களை ஆசீர்வதிக்கிறது. அறிவுக்கூர்மை, தொழில் வளர்ச்சி மற்றும் சுப காரியங்கள் கைகூடும்.
-• **சனி பகவானின் கர்ம தாக்கம்**: சனி பகவானின் பார்வை உங்கள் கர்ம ஸ்தானத்தில் ஒழுக்கத்தையும், பொறுமையையும் சோதிக்கும். நிதானத்துடன் செயல்படுவது வெற்றி தரும்.
-• **செயல்படும் ஸ்தானங்கள்**: உங்கள் கேள்விக்குரிய (${targetHouses}) பாவங்கள் சுப வலிமை பெற்றுள்ளன. ${supporting.slice(0, 2).join(' ')}
-
-### ⏳ சுப காலம் & உகந்த நேரம்
-உங்கள் கிரக அமைப்பின்படி, **${timing}** மிக உகந்த முன்னேற்ற காலமாகும்.
+### 🪐 ${currentYear} கிரக பெயர்ச்சி & சுப காலம்
+• குரு பகவானின் சுப பார்வை உங்கள் காரியங்களில் முன்னேற்றத்தை தரும்.
+• உங்கள் கிரக அமைப்பின்படி, **${timing}** மிக உகந்த முன்னேற்ற காலமாகும்.
 
 ### 🪔 48 நாட்கள் பரிகார சங்கல்பம்
-கிரக தோஷ நிவர்த்திக்கும் தெய்வ அருள் பெறவும் இந்த பரிகாரத்தை மேற்கொள்ளுங்கள்:
 • **இஷ்ட தெய்வம் & ஹோமம்**: **${presidingDeity}** அருளுக்காக **${homamName}** (${homamDay}) சங்கல்பம் செய்யவும்.
-• **தினசரி மந்திர ஜெபம்**: தினமும் சூரிய உதயத்தில் "${dailyMantra}" மந்திரத்தை **${japaCount}** முறை ஜெபிக்கவும்.
+• **தினசரி மந்திர ஜெபம்**: தினமும் "${dailyMantra}" மந்திரத்தை **${japaCount}** முறை ஜெபிக்கவும்.
 • **24-வது நாள் தானம்**: ${charityDaana}.
 • **48-வது நாள் பூர்ணாஹுதி**: ${culminationAction}.
 
-சிவபெருமான் மற்றும் அன்னை பார்வதியின் திருவருளால் உங்கள் வாழ்வில் அனைத்து நன்மைகளும் அமைதியும் பெருகட்டும். **ஓம் சாந்தி!**`;
+சிவபெருமான் மற்றும் அன்னை பார்வதியின் திருவருளால் அனைத்து நன்மைகளும் பெருகட்டும். **ஓம் சாந்தி!**`;
   } else {
+    // ── DETERMINISTIC LOCAL ENGINE FALLBACK (ENGLISH) ─────────────────────────
+    let domainSpecificInsights = '';
+    if (domain === 'career' || domain === 'profession') {
+      domainSpecificInsights = `\n### 💼 Career & Professional Trajectory (10th Bhava Analysis)
+• Your 10th House of Career (Karma Sthana) receives supportive cosmic aspects from Lagna and transit benefic influences.
+• The governing ${dashaSummary} cycle signals a pivotal window for career advancement, skill consolidation, and financial elevation.
+• Disciplined, methodical action during this phase creates long-lasting stability and professional recognition.`;
+    } else if (domain === 'marriage' || domain === 'relationship') {
+      domainSpecificInsights = `\n### ❤️ Marriage & Partnership Dynamics (7th Bhava Analysis)
+• The 7th House of Partnership (Kalatra Sthana) is actively stimulated by key transits, fostering relationship clarity and opportune alliances.
+• Mutual intellectual harmony and patience will ensure smooth domestic alignment.`;
+    } else if (domain === 'financial' || domain === 'wealth') {
+      domainSpecificInsights = `\n### 💰 Financial Prospects & Wealth Accumulation (2nd & 11th Bhavas)
+• Favorable planetary geometry across your Wealth (Dhana) and Gains (Labha) houses fosters sustainable income and asset appreciation.
+• Avoid speculative gambles; strategic long-term investments will yield enduring returns.`;
+    } else {
+      domainSpecificInsights = `\n### 🪐 ${currentYear} Planetary Transits & House Dynamics
+• **Jupiter's Benevolent Trine**: Throughout ${currentYear}, Jupiter (Brihaspati) casts auspicious benefic aspects across your core Kendra and Trikona houses.
+• **Saturn's Karmic Realism**: Saturn demands disciplined execution and ethical steadfastness in all pursuits.
+• **Target Bhavas Activated**: Houses (${targetHouses}) are energized for your inquiry. ${supporting.slice(0, 2).join(' ')}`;
+    }
+
     responseBody = `**Namaste and Divine Blessings!** 🙏
 
-I am **${personaName}**, your personal Vedic Astrologer & spiritual guide. Here is the comprehensive Vedic Jyotish consultation for your inquiry, synthesized from your natal Janam Kundli and active ${currentYear} planetary transits:
+I am **${personaName}**, your personal Vedic Astrologer & spiritual guide. Here is the comprehensive Vedic Jyotish consultation for your inquiry:
 
 ### 🔮 Vedic Astrological Diagnosis & Kundli Coordinates
 • **Ascendant (Lagna) & Moon Sign**: You are born with **${lagna} Ascendant** and **${moonRashi} Moon Sign (${nakshatra} Nakshatra, Pada ${nakshatraPada})**.
-• **Active Vimshottari Cycle**: You are currently navigating your **${dashaSummary}**. This governing planetary period directs focus toward strategic consolidation, self-realization, and purposeful action.
-
-### 🪐 ${currentYear} Planetary Transits & House Dynamics
-• **Jupiter's Benevolent Trine**: Throughout ${currentYear}, Jupiter (Brihaspati) casts auspicious benefic aspects across your core Kendra and Trikona houses, expanding wisdom, clarity, and opportune beginnings.
-• **Saturn's Karmic Realism**: Saturn (Shani Dev) demands disciplined execution, patience, and ethical steadfastness in your career and financial sphere. Hasty shortcuts should be strictly avoided.
-• **Target Bhavas Activated**: Houses (${targetHouses}) are energized for your inquiry. ${supporting.slice(0, 2).join(' ')}
+• **Active Vimshottari Cycle**: You are currently navigating your **${dashaSummary}**.
+${domainSpecificInsights}
 
 ### ⏳ Potent Astrological Timing Window
-According to your transits and dasha alignments, the most auspicious window for forward momentum is **${timing}**. Decisions initiated during this window yield enduring stability.
+According to your transits and dasha alignments, the most auspicious window for forward momentum is **${timing}**.
 
 ### 🪔 48-Day Sacred Mandala Parihar Protocol
-To harmonize planetary frictions and invoke supreme divine grace, adhere to this consecrated 48-day discipline:
 • **Presiding Deity & Homam**: Consecrate the **${homamName}** dedicated to **${presidingDeity}** on an auspicious **${homamDay}**.
 • **Daily Sadhana Mantra**: Recite the sacred mantra "${dailyMantra}" **${japaCount}** during Brahma Muhurta or sunrise.
 • **Day 24 Sacred Daana (Mid-Mandala)**: ${charityDaana}.
@@ -442,49 +621,80 @@ May Lord Shiva and Goddess Parvathi shower their divine grace upon your path wit
 
   // 6. Definitive Conclusion
   const conclusion = isTelugu
-    ? `${timing} సమయం మీ కుండలిలోని గ్రహానుకూలత ద్వారా ఆధ్యాత్మిక మరియు భౌతిక పురోగతికి మార్గం సుగమం చేస్తుంది.`
+    ? `${timing} సమయం మీ కుండలిలోని గ్రహానుకూలత ద్వారా శుభ ఫలితాలు మరియు నూతన పురోగతికి మార్గం సుగమం చేస్తుంది.`
     : isHindi
     ? `${timing} की समयावधि ग्रह गोचर एवं दशा अनुकूलता से आपके जीवन में प्रगति और सकारात्मक परिणाम लेकर आएगी।`
     : isTamil
     ? `${timing} காலம் உங்கள் ஜாதக சுப கிரக சேர்க்கையால் வாழ்க்கையில் அமைதியையும் முன்னேற்றத்தையும் தரும்.`
+    : isKannada
+    ? `${timing} ಸಮಯವು ನಿಮ್ಮ ಕುಂಡಲಿಯ ಗ್ರಹಬಲದಿಂದ ಸಕಾರಾತ್ಮಕ ಬದಲಾವಣೆ ಮತ್ತು ಯಶಸ್ಸನ್ನು ತರಲಿದೆ.`
+    : isMalayalam
+    ? `${timing} കാലഘട്ടം നിങ്ങളുടെ ജാതകത്തിലെ ഗ്രഹാനുകൂല്യം വഴി അഭിവൃദ്ധിയും ശാന്തിയും നൽകും.`
     : `The cosmic alignment during ${timing} offers auspicious momentum for positive life transformation.`;
 
   // 7. Structured Follow-up Recommendations
-  const recommendations = isTelugu
-    ? [
-        '🔮 2026లో నా గ్రహ సంచారాల ఫలితాలు ఎలా ఉన్నాయి?',
-        '✨ నా అదృష్ట రత్నం, రుద్రాక్ష మరియు నిత్య మంత్రం ఏమిటి?',
-        '💼 కెరీర్ మార్పు లేదా ప్రమోషన్‌కు సరైన సమయం ఎప్పుడు?',
-        '❤️ వివాహ యోగం మరియు భాగస్వామి అనుకూలత ఎప్పుడు బాగుంటుంది?',
-        '🪐 నాకు శని సాడే సాతి లేదా రాహు మహర్దశ నడుస్తుందా?',
-        '🙏 నా జాతక దోష నివారణకు ఎలాంటి పరిహారాలు లేదా దానం చేయాలి?',
-      ]
-    : isHindi
-    ? [
-        '🔮 2026 में मेरे मुख्य ग्रह गोचर का क्या प्रभाव रहेगा?',
-        '✨ मेरे लिए भाग्यशाली रत्न, रुद्राक्ष और दैनिक मंत्र क्या है?',
-        '💼 करियर में पदोन्नति या व्यापार विस्तार का सबसे शुभ समय कब है?',
-        '❤️ मेरे विवाह का शुभ योग कब बनेगा?',
-        '🪐 क्या मुझ पर शनि की साढ़ेसाती या राहु की महादशा चल रही है?',
-        '🙏 ग्रह शांति के लिए मुझे कौन सा विशेष दान या उपाय करना चाहिए?',
-      ]
-    : isTamil
-    ? [
-        '🔮 2026-ல் எனது கிரக பெயர்ச்சி பலன்கள் எப்படி உள்ளன?',
-        '✨ எனது அதிர்ஷ்ட ரத்தினம், ருத்ராட்சம் மற்றும் தினசரி மந்திரம் எது?',
-        '💼 தொழில் வளர்ச்சி அல்லது வேலை மாற்றத்திற்கு உகந்த நேரம் எப்போது?',
-        '❤️ எனது திருமண யோகம் மற்றும் வாழ்க்கை எப்போது அமையும்?',
-        '🪐 எனக்கு ஏழரை சனி அல்லது ராகு தசை நடக்கிறதா?',
-        '🙏 கிரக தோஷ நிவர்த்திக்கு என்ன பரிகாரம் அல்லது தானம் செய்ய வேண்டும்?',
-      ]
-    : [
-        '🔮 What do planetary transits say for me in 2026?',
-        '✨ What is my lucky gemstone, rudraksha & daily mantra?',
-        '💼 When is the best time for a career change or promotion?',
-        '❤️ When will I meet my compatible life partner?',
-        '🪐 Am I currently running Shani Sade Sati or Rahu Mahadasha?',
-        '🙏 What specific Vedic remedies or charity should I perform?',
-      ];
+  let finalRecommendations: string[] = [];
+  if (Array.isArray(vedikaRecommendations) && vedikaRecommendations.length >= 3) {
+    finalRecommendations = vedikaRecommendations
+      .filter((r) => typeof r === 'string' && r.trim().length > 0)
+      .slice(0, 6);
+  }
+
+  if (finalRecommendations.length < 4) {
+    finalRecommendations = isTelugu
+      ? [
+          '🔮 2026లో నా గ్రహ సంచారాల ఫలితాలు ఎలా ఉన్నాయి?',
+          '✨ నా అదృష్ట రత్నం, రుద్రాక్ష మరియు నిత్య మంత్రం ఏమిటి?',
+          '💼 కెరీర్ మార్పు లేదా ప్రమోషన్‌కు సరైన సమయం ఎప్పుడు?',
+          '❤️ వివాహ యోగం మరియు భాగస్వామి అనుకూలత ఎప్పుడు బాగుంటుంది?',
+          '🪐 నాకు శని సాడే సాతి లేదా రాహు మహర్దశ నడుస్తుందా?',
+          '🙏 నా జాతక దోష నివారణకు ఎలాంటి పరిహారాలు లేదా దానం చేయాలి?',
+        ]
+      : isHindi
+      ? [
+          '🔮 2026 में मेरे मुख्य ग्रह गोचर का क्या प्रभाव रहेगा?',
+          '✨ मेरे लिए भाग्यशाली रत्न, रुद्राक्ष और दैनिक मंत्र क्या है?',
+          '💼 करियर में पदोन्नति या व्यापार विस्तार का सबसे शुभ समय कब है?',
+          '❤️ मेरे विवाह का शुभ योग कब बनेगा?',
+          '🪐 क्या मुझ पर शनि की साढ़ेसाती या राहु की महादशा चल रही है?',
+          '🙏 ग्रह शांति के लिए मुझे कौन सा विशेष दान या उपाय करना चाहिए?',
+        ]
+      : isTamil
+      ? [
+          '🔮 2026-ல் எனது கிரக பெயர்ச்சி பலன்கள் எப்படி உள்ளன?',
+          '✨ எனது அதிர்ஷ்ட ரத்தினம், ருத்ராட்சம் மற்றும் தினசரி மந்திரம் எது?',
+          '💼 தொழில் வளர்ச்சி அல்லது வேலை மாற்றத்திற்கு உகந்த நேரம் எப்போது?',
+          '❤️ எனது திருமண யோகம் மற்றும் வாழ்க்கை எப்போது அமையும்?',
+          '🪐 எனக்கு ஏழரை சனி அல்லது ராகு தசை நடக்கிறதா?',
+          '🙏 கிரக தோஷ நிவர்த்திக்கு என்ன பரிகாரம் அல்லது தானம் செய்ய வேண்டும்?',
+        ]
+      : isKannada
+      ? [
+          '🔮 2026ರಲ್ಲಿ ನನ್ನ ಗ್ರಹ ಸಂಚಾರದ ಫಲಗಳು ಹೇಗಿವೆ?',
+          '✨ ನನ್ನ ಅದೃಷ್ಟ ರತ್ನ, ರುದ್ರಾಕ್ಷಿ ಮತ್ತು ನಿತ್ಯ ಮಂತ್ರ ಯಾವುದು?',
+          '💼 ವೃತ್ತಿ ಬೆಳವಣಿಗೆ ಅಥವಾ ಉದ್ಯೋಗ ಬದಲಾವಣೆಗೆ ಶುಭ ಸಮಯ ಯಾವುದು?',
+          '❤️ ನನ್ನ ವಿವಾಹ ಯೋಗ ಮತ್ತು ಹೊಂದಾಣಿಕೆ ಯಾವಾಗ ಬರುತ್ತದೆ?',
+          '🪐 ನನಗೆ ಸಾಡೇ ಸಾತಿ ಅಥವಾ ರಾಹು ಮಹಾದಶ ನಡೆಯುತ್ತಿದೆಯೇ?',
+          '🙏 ಗ್ರಹ ಶಾಂತಿ ಮತ್ತು ದೋಷ ನಿವಾರಣೆಗೆ ಯಾವ ಪರಿಹಾರ ಮಾಡಬೇಕು?',
+        ]
+      : isMalayalam
+      ? [
+          '🔮 2026-ൽ എന്റെ ഗ്രഹ സഞ്ചാര ഫലങ്ങൾ എങ്ങനെയാണ്?',
+          '✨ എന്റെ ഭാഗ്യ രത്നം, രുദ್ರಾക്ഷം, നിത്യ മന്ത്രം എന്നിവ ഏതാണ്?',
+          '💼 കരിയർ മാറ്റത്തിനോ പ്രമോഷനോ അനുയോജ്യമായ സമയം എപ്പോഴാണ്?',
+          '❤️ എന്റെ ജാതകത്തിൽ വിവാഹ യೋಗം എപ്പോഴാണ്?',
+          '🪐 എനിക്ക് ഇപ്പോൾ ഏഴര ശനിയോ രാహు മഹാദശയോ നടക്കുന്നുണ്ടോ?',
+          '🙏 ഗ്രഹ ദോഷ പരിഹാരത്തിനായി എന്തെല്ലാം പൂജകളും ദാനവുമാണ് ചെയ്യേണ്ടത്?',
+        ]
+      : [
+          '🔮 What do planetary transits say for me in 2026?',
+          '✨ What is my lucky gemstone, rudraksha & daily mantra?',
+          '💼 When is the best time for a career change or promotion?',
+          '❤️ When will I meet my compatible life partner?',
+          '🪐 Am I currently running Shani Sade Sati or Rahu Mahadasha?',
+          '🙏 What specific Vedic remedies or charity should I perform?',
+        ];
+  }
 
   const whyPoints = isTelugu
     ? [
@@ -503,6 +713,18 @@ May Lord Shiva and Goddess Parvathi shower their divine grace upon your path wit
         `லக்ன & ராசி பலம்: ${lagna} லக்னம் மற்றும் ${moonRashi} ராசி அதிபதிகள் சாதகமான நிலையில் உள்ளனர்.`,
         `கிரக பெயர்ச்சி தாக்கம்: ${currentYear}-ல் குரு-சனி பெயர்ச்சி உங்கள் (${targetHouses}) ஸ்தானங்களை பலப்படுத்துகிறது.`,
         `தசா புத்தி பலன்கள்: ${dashaSummary} காலத்தில் பரிகாரங்களை முறையாக பின்பற்றுவது தடையற்ற வெற்றியைத் தரும்.`
+      ]
+    : isKannada
+    ? [
+        `ಲಗ್ನ ಮತ್ತು ಚಂದ್ರ ರಾಶಿ ಬಲ: ${lagna} ಲಗ್ನ ಮತ್ತು ${moonRashi} ರಾಶ್ಯಾಧಿಪತಿಗಳು ಶುಭ ಫಲ ನೀಡಲು ಸಿದ್ಧರಾಗಿದ್ದಾರೆ.`,
+        `ಗೋಚಾರ ಗ್ರಹ ಪ್ರಭಾವ: ${currentYear} ರಲ್ಲಿ ಗುರು ಮತ್ತು ಶನಿಯ ದೃಷ್ಟಿ (${targetHouses}) ಭಾವಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದೆ.`,
+        `ದಶಾ ಫಲಾನುಕೂಲ: ${dashaSummary} ಅವಧಿಯಲ್ಲಿ ಶ್ರದ್ಧೆಯಿಂದ ಕೈಗೊಂಡ ಪರಿಹಾರಗಳು ಶುಭ ತರಲಿವೆ.`
+      ]
+    : isMalayalam
+    ? [
+        `ലഗ്ന, ചന്ദ്ര രാശി ബലം: ${lagna} ലഗ്നവും ${moonRashi} രാശിയും അനുകൂല നിലയിലാണ്.`,
+        `ഗ്രഹ സഞ്ചാര സ്വാധീനം: ${currentYear}-ൽ വ്യാഴ-ശനി സ്വാധീനം (${targetHouses}) ഭാവങ്ങളെ ഉണർത്തുന്നു.`,
+        `ദശാ നാഥന്റെ അനുഗ്രഹം: ${dashaSummary} കാലത്ത് നിഷ്ഠയോടെയുള്ള പ്രാർത്ഥനകൾ ഉത്തമ ഫലം നൽകും.`
       ]
     : [
         `Lagna & Moon Sign Harmony: Placements of ${lagna} Lagna lord and ${moonRashi} Moon lord reinforce foundational vitality.`,
@@ -525,7 +747,7 @@ May Lord Shiva and Goddess Parvathi shower their divine grace upon your path wit
     confidenceRationale: evidence?.confidenceRationale || 'Evaluated across verified ephemeris placements, house lords, and active dasha cycles.',
     needsAstrologerReview: Boolean(evidence?.needsAstrologerReview),
     escalationReason: evidence?.escalationReason || '',
-    recommendations,
+    recommendations: finalRecommendations,
     pariharProtocol: activeProtocol,
   };
 }
@@ -1131,6 +1353,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
     let replyContent = '';
     let recommendations: string[] = [];
     let vedikaTruth = '';
+    let vedikaRecommendations: string[] = [];
 
     try {
       const vDt = birthInfo?.dob ? formatToVedikaDateTime(birthInfo.dob, birthInfo.tob || '12:00') : undefined;
@@ -1144,8 +1367,13 @@ You MUST respond STRICTLY in JSON format matching this schema:
         } : undefined,
       });
 
-      if (vRes.success && (vRes.data?.response || vRes.data?.answer)) {
-        vedikaTruth = (vRes.data.response || vRes.data.answer) || '';
+      if (vRes.success && (vRes.data?.response || vRes.data?.answer || vRes.data?.text)) {
+        vedikaTruth = (vRes.data.response || vRes.data.answer || vRes.data.text) || '';
+        if (Array.isArray(vRes.data?.followUpSuggestions) && vRes.data.followUpSuggestions.length > 0) {
+          vedikaRecommendations = vRes.data.followUpSuggestions;
+        } else if (Array.isArray(vRes.data?.followUps) && vRes.data.followUps.length > 0) {
+          vedikaRecommendations = vRes.data.followUps;
+        }
       }
     } catch (vErr) {
       console.warn('[Vedika] AI chat query notice, continuing with local evidence fallback:', vErr);
@@ -1198,24 +1426,27 @@ You MUST respond STRICTLY in JSON format matching this schema:
         );
 
         if (!response.ok) {
-          console.warn('gpt-4o completion failed, attempting gpt-4o-mini fallback...');
-          response = await fetchWithOpenAIFallback(
-            'https://api.openai.com/v1/chat/completions',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
+          const isQuotaOrAuth = response.status === 429 || response.status === 401 || response.status === 403;
+          if (!isQuotaOrAuth) {
+            console.warn('gpt-4o completion failed, attempting gpt-4o-mini fallback...');
+            response = await fetchWithOpenAIFallback(
+              'https://api.openai.com/v1/chat/completions',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  model: 'gpt-4o-mini',
+                  messages: conversationMessages,
+                  temperature: isDirectCalculationQuery ? 0.1 : 0.6,
+                  max_tokens: 2000,
+                  response_format: { type: 'json_object' },
+                }),
               },
-              body: JSON.stringify({
-                model: 'gpt-4o-mini',
-                messages: conversationMessages,
-                temperature: isDirectCalculationQuery ? 0.1 : 0.6,
-                max_tokens: 2000,
-                response_format: { type: 'json_object' },
-              }),
-            },
-            openaiApiKey
-          );
+              openaiApiKey
+            );
+          }
         }
       } catch (openAiErr) {
         console.warn('OpenAI request error:', openAiErr);
@@ -1243,8 +1474,13 @@ You MUST respond STRICTLY in JSON format matching this schema:
               longitude: Number(birthInfo?.lon) || 77.209,
             } : undefined,
           });
-          if (fallbackVedika.success && (fallbackVedika.data?.answer || fallbackVedika.data?.response)) {
-            vedikaTruth = fallbackVedika.data.answer || fallbackVedika.data.response || '';
+          if (fallbackVedika.success && (fallbackVedika.data?.answer || fallbackVedika.data?.response || fallbackVedika.data?.text)) {
+            vedikaTruth = fallbackVedika.data.answer || fallbackVedika.data.response || fallbackVedika.data.text || '';
+            if (Array.isArray(fallbackVedika.data?.followUpSuggestions) && fallbackVedika.data.followUpSuggestions.length > 0) {
+              vedikaRecommendations = fallbackVedika.data.followUpSuggestions;
+            } else if (Array.isArray(fallbackVedika.data?.followUps) && fallbackVedika.data.followUps.length > 0) {
+              vedikaRecommendations = fallbackVedika.data.followUps;
+            }
           }
         } catch (vErr) {
           console.warn('Fallback Vedika query warning:', vErr);
@@ -1253,6 +1489,7 @@ You MUST respond STRICTLY in JSON format matching this schema:
 
       parsed = generateVedicFallbackResponse({
         vedikaAnswer: vedikaTruth,
+        vedikaRecommendations,
         userQuery: latestUserMessage,
         userName: cleanUserName,
         language,
@@ -1424,6 +1661,24 @@ You MUST respond STRICTLY in JSON format matching this schema:
           '❤️ திருமண யோகம் மற்றும் திருமண வாழ்க்கை எப்போது அமையும்?',
           '🪐 எனக்கு ஏழரை சனி அல்லது ராகு தசை நடக்கிறதா?',
           '🙏 கிரக தோஷ பரிகாரத்திற்கு என்ன தானம் அல்லது பூஜை செய்ய வேண்டும்?',
+        ];
+      } else if (language === 'Kannada' || language === 'kn') {
+        recommendations = [
+          '🔮 2026ರಲ್ಲಿ ನನ್ನ ಗ್ರಹ ಸಂಚಾರದ ಫಲಗಳು ಹೇಗಿವೆ?',
+          '✨ ನನ್ನ ಅದೃಷ್ಟ ರತ್ನ, ರುದ್ರಾಕ್ಷಿ ಮತ್ತು ನಿತ್ಯ ಮಂತ್ರ ಯಾವುದು?',
+          '💼 ವೃತ್ತಿ ಬೆಳವಣಿಗೆ ಅಥವಾ ಉದ್ಯೋಗ ಬದಲಾವಣೆಗೆ ಶುಭ ಸಮಯ ಯಾವುದು?',
+          '❤️ ನನ್ನ ವಿವಾಹ ಯೋಗ ಮತ್ತು ಹೊಂದಾಣಿಕೆ ಯಾವಾಗ ಬರುತ್ತದೆ?',
+          '🪐 ನನಗೆ ಸಾಡೇ ಸಾತಿ ಅಥವಾ ರಾಹು ಮಹಾದಶ ನಡೆಯುತ್ತಿದೆಯೇ?',
+          '🙏 ಗ್ರಹ ಶಾಂತಿ ಮತ್ತು ದೋಷ ನಿವಾರಣೆಗೆ ಯಾವ ಪರಿಹಾರ ಮಾಡಬೇಕು?',
+        ];
+      } else if (language === 'Malayalam' || language === 'ml') {
+        recommendations = [
+          '🔮 2026-ൽ എന്റെ ഗ്രഹ സഞ്ചാര ഫലങ്ങൾ എങ്ങനെയാണ്?',
+          '✨ എന്റെ ഭാഗ്യ രത്നം, രുദ್ರಾക്ഷം, നിത്യ മന്ത്രം എന്നിവ ഏതാണ്?',
+          '💼 കരിയർ മാറ്റത്തിനോ പ്രമോഷനോ അനുയോജ്യമായ സമയം എപ്പോഴാണ്?',
+          '❤️ എന്റെ ജാതകത്തിൽ വിവാഹ യೋಗം എപ്പോഴാണ്?',
+          '🪐 എനിക്ക് ഇപ്പോൾ ഏഴര ശനിയോ രാഹു മഹാദശയോ നടക്കുന്നുണ്ടോ?',
+          '🙏 ഗ്രಹ ദോഷ പരിഹാരത്തിനായി എന്തെല്ലാം പൂജകളും ദാനവുമാണ് ചെയ്യേണ്ടത്?',
         ];
       } else {
         recommendations = [

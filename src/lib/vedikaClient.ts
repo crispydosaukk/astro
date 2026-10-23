@@ -247,6 +247,8 @@ export async function queryVedikaAI(params: {
       ? 'ta'
       : params.language === 'Kannada' || params.language === 'kn'
       ? 'kn'
+      : params.language === 'Malayalam' || params.language === 'ml'
+      ? 'ml'
       : 'en';
 
   const payload: any = {

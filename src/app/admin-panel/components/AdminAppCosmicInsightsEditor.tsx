@@ -38,7 +38,7 @@ export default function AdminAppCosmicInsightsEditor() {
     try {
       const res = await fetch('/api/app-dynamic/cosmic-insights');
       const data = await res.json();
-      if (data.success && Array.isArray(data.insights) && data.insights.length > 0) {
+      if (data.success && Array.isArray(data.insights)) {
         setInsights(data.insights);
       }
     } catch (err) {

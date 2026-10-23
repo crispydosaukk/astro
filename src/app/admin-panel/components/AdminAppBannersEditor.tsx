@@ -49,7 +49,7 @@ export default function AdminAppBannersEditor() {
     try {
       const res = await fetch('/api/app-dynamic/banners');
       const data = await res.json();
-      if (data.success && Array.isArray(data.banners) && data.banners.length > 0) {
+      if (data.success && Array.isArray(data.banners)) {
         setBanners(data.banners);
       }
     } catch (err) {
@@ -107,10 +107,7 @@ export default function AdminAppBannersEditor() {
   };
 
   const handleDeleteBanner = (index: number) => {
-    if (banners.length <= 1) {
-      alert('You must have at least one banner configured.');
-      return;
-    }
+    
     if (confirm(`Delete Banner ${index + 1}?`)) {
       const updated = banners.filter((_, i) => i !== index).map((b, idx) => ({ ...b, order: idx + 1 }));
       setBanners(updated);

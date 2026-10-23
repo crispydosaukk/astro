@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerOpenAIApiKey, getServerVedikaApiKey, fetchWithOpenAIFallback } from '@/lib/aiConfig';
-import { queryVedikaAI } from '@/lib/vedikaClient';
+import { queryVedikaAI, formatToVedikaDateTime } from '@/lib/vedikaClient';
 import {
   calculateBirthChartData,
   formatChartSummaryForAI,
@@ -165,12 +165,21 @@ export async function POST(req: NextRequest) {
 
     if (useVedika) {
       try {
+        const vDt = birthInfo?.dob ? formatToVedikaDateTime(birthInfo.dob, birthInfo.tob || '12:00') : undefined;
         const vedikaRes: any = await queryVedikaAI({
-          question: `You are ${matchedAstrologer.name}, a revered Vedic Astrologer on AstroParihar. Devotee: ${birthInfo.name}, DOB: ${birthInfo.dob}. Lagna: ${chart?.ascendant?.sign || 'Aries'}. Question: "${latestUserMessage}". Respond in ${language}.`,
+          question: `You are ${matchedAstrologer.name}, a revered Vedic Astrologer on AstroParihar. Devotee: ${birthInfo.name}, DOB: ${birthInfo.dob}. Lagna: ${chart?.ascendant || 'Aries'}. Moon Sign: ${chart?.moonSign || 'Vedic'}. Question: "${latestUserMessage}". Respond in ${language}.`,
           language,
+          birthDetails: vDt ? {
+            datetime: vDt,
+            latitude: Number(birthInfo?.lat) || 28.6139,
+            longitude: Number(birthInfo?.lon) || 77.209,
+          } : undefined,
         });
         if (vedikaRes?.data?.response || vedikaRes?.data?.answer || vedikaRes?.data?.text) {
-          replyText = vedikaRes.data.response || vedikaRes.data.answer || vedikaRes.data.text;
+          const rawReply = (vedikaRes.data.response || vedikaRes.data.answer || vedikaRes.data.text || '')
+            .replace(/(\r\n|\n)+[—–-]\s*Vedika\s*$/i, '')
+            .trim();
+          replyText = rawReply;
           modelUsed = 'Vedika AI Engine (Live)';
         }
       } catch {}
@@ -205,7 +214,7 @@ export async function POST(req: NextRequest) {
 
     // 5. Authentic Deterministic Fallback if live APIs are silent
     if (!replyText) {
-      const lagna = chart?.ascendant?.sign || 'Scorpio';
+      const lagna = chart?.ascendant || 'Scorpio';
       const moonRashi = chart?.moonSign || 'Cancer';
       const dasha = chart?.dasha?.currentMahadasha || 'Jupiter';
       const antardasha = chart?.dasha?.currentAntardasha || 'Saturn';
@@ -218,6 +227,8 @@ export async function POST(req: NextRequest) {
         replyText = `**வணக்கம் மற்றும் ஆசிகள்!** 🙏\n\nஉங்கள் ஜாதக கணிப்பின்படி, உங்கள் லக்னம் **${lagna}** மற்றும் சந்திர ராசி **${moonRashi}**. தற்பொழுது உங்களுக்கு **${dasha} மகாதிசை - ${antardasha} புத்தி** நடைபெறுகிறது.\n\n✦ **கிரக சஞ்சார பலன்**: குரு பகவானின் பார்வை உங்கள் ராசிக்கு சுப பலன்களை தந்து காரிய தடைகளை நீக்குகிறது.\n✦ **சுப காலம்**: அடுத்த 3 முதல் 6 மாதங்களில் நல்ல முன்னேற்றம் ஏற்படும்.\n✦ **பரிகாரம்**: வியாழக்கிழமைகளில் தட்சிணாமூர்த்தி வழிபாடு செய்து நவதானிய தானம் செய்வது மிகுந்த நன்மையை தரும்.`;
       } else if (language === 'Kannada') {
         replyText = `**ನಮಸ್ಕಾರ ಮತ್ತು ಶುಭಾಶೀರ್ವಾದಗಳು!** 🙏\n\nನಿಮ್ಮ ಜನ್ಮ ಕುಂಡಲಿಯ ಪ್ರಕಾರ, ನಿಮ್ಮ ಲಗ್ನ **${lagna}** ಮತ್ತು ಚಂದ್ರ ರಾಶಿ **${moonRashi}**. ಪ್ರಸ್ತುತ ನಿಮ್ಮ ಪತ್ರಿಕೆಯಲ್ಲಿ **${dasha} ಮಹಾದಶೆ - ${antardasha} ಅಂತರ್ದಶೆ** ನಡೆಯುತ್ತಿದೆ.\n\n✦ **ಗ್ರಹ ಸಂಚಾರ ಪ್ರಭಾವ**: ಗುರು ಗ್ರಹದ ಶುಭ ದೃಷ್ಟಿಯಿಂದ ನಿಮ್ಮ ಪ್ರಯತ್ನಗಳಿಗೆ ತಕ್ಕ ಫಲ ಮತ್ತು ಮಾನಸಿಕ ಶಾಂತಿ ಲಭಿಸಲಿದೆ.\n✦ **ಶುಭ ಕಾಲ**: ಮುಂದಿನ 3 ರಿಂದ 6 ತಿಂಗಳು ಹೊಸ ಆರಂಭಗಳಿಗೆ ಸೂಕ್ತವಾಗಿದೆ.\n✦ **ನಿತ್ಯ ಪರಿಹಾರ**: ಗುರುವಾರ ವಿಷ್ಣು ಸಹಸ್ರನಾಮ ಪಠಣ ಮತ್ತು ಹಳದಿ ಬಣ್ಣದ ಹೂವುಗಳಿಂದ ಪೂಜೆ ಮಾಡುವುದು ಶ್ರೇಯಸ್ಕರ.`;
+      } else if (language === 'Malayalam') {
+        replyText = `**നമസ്കാരം ദൈവാനുഗ്രഹവും!** 🙏\n\nനിങ്ങളുടെ ജാതക പ്രകാരം, ലഗ്നം **${lagna}** ചന്ദ്ര രാശി **${moonRashi}** എന്നിവയാണ്. ഇപ്പോൾ **${dasha} മഹാദശയും - ${antardasha} അപഹാരവുമാണ്** നടക്കുന്നത്.\n\n✦ **ഗ്രഹ സഞ്ചാര ഫലം**: വ്യാഴത്തിന്റെ ശുഭദൃഷ്ടി തടസ്സങ്ങൾ നീക്കി ജീവിതത്തിൽ പുരോഗതി കൊണ്ടുവരും.\n✦ **ശുഭ സമയം**: അടുത്ത 3 മുതൽ 6 മാസം വരെ പ്രധാന തീരുമാനങ്ങൾക്ക് അനുയോജ്യമാണ്.\n✦ **നിത്യ പരിഹാരം**: വ്യാഴാഴ്ചകളിൽ വിഷ്ണു ക്ഷേത്ര ദർശനവും "ഓം നമോ നാരായണായ" ജപവും ശ്രേയസ്സ് നൽകും.`;
       } else {
         replyText = `**Namaste and Divine Blessings!** 🙏\n\nBased on your authentic Vedic birth chart, your Lagna (Ascendant) is **${lagna}** and your Moon Rashi is **${moonRashi}**. You are currently traversing the transformative **${dasha} Mahadasha – ${antardasha} Antardasha** cycle.\n\n✦ **Cosmic Transit Alignment**: Jupiter is casting an auspicious aspect over your key quadrant houses, dissipating longstanding stagnation and clarifying your highest pathway.\n✦ **Timing Window**: The cosmic currents align strongly over the upcoming 3 to 6 months for pivotal milestones.\n✦ **Sacred Pariharam**: Light a pure cow-ghee deepam on Thursdays and chant the Gayatri or Guru Mantra 108 times at sunrise for mental fortitude and divine grace.`;
       }
@@ -227,16 +238,16 @@ export async function POST(req: NextRequest) {
 
     const structured = {
       conclusion: language === 'Telugu'
-        ? `మీ కుండలిలో ${chart?.ascendant?.sign || 'లగ్నం'} బలం అనుకూలంగా ఉంది. కాలపరిమితి లోపల సత్ఫలితాలు అందుతాయి.`
+        ? `మీ కుండలిలో ${chart?.ascendant || 'లగ్నం'} బలం అనుకూలంగా ఉంది. కాలపరిమితి లోపల సత్ఫలితాలు అందుతాయి.`
         : language === 'Hindi'
-        ? `आपकी कुंडली में ${chart?.ascendant?.sign || 'लग्न'} एवं दशेश की स्थिति शुभ परिणाम देने के लिए तत्पर है।`
+        ? `आपकी कुंडली में ${chart?.ascendant || 'लग्न'} एवं दशेश की स्थिति शुभ परिणाम देने के लिए तत्पर है।`
         : `Planetary positions and active ${chart?.dasha?.currentMahadasha || 'Jupiter'} Mahadasha support timely fulfillment with consecrated remedial practices.`,
       timingWindow: 'Next 3 to 6 Months (Auspicious Transit Window)',
       diagnosis: {
         activeDasha: `${chart?.dasha?.currentMahadasha || 'Jupiter'} / ${chart?.dasha?.currentAntardasha || 'Saturn'}`,
         keyHouses: 'Houses 1, 5, 9 & 10',
         supportingFactors: [
-          `Lagna Lord (${chart?.ascendant?.lord || 'Benefic'}) in favorable quadrant`,
+          `Lagna Lord (${chart?.ascendantLord || 'Benefic'}) in favorable quadrant`,
           `Benefic transit of Jupiter amplifying auspicious results`,
         ],
       },

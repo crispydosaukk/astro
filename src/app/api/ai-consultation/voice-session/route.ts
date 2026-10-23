@@ -325,6 +325,8 @@ function formatVedikaForVoice(rawAnswer: string, language: string, astrologerNam
     .replace(/\([A-Za-z0-9\s#]+\)/g, '')
     // Remove stray Korean or non-Indian Asian glyphs if any
     .replace(/[\uAC00-\uD7AF\u4E00-\u9FFF]+/g, '')
+    // Remove Vedika signature so voice persona stays consistent with astrologer
+    .replace(/[—–-]\s*Vedika(?:\s*AI)?\.?/gi, '')
     .replace(/\s+/g, ' ')
     .trim();
 
