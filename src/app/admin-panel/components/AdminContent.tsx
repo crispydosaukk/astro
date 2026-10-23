@@ -11,11 +11,59 @@ import AdminContentManagement from './AdminContentManagement';
 import AdminDynamicPageEditor from './AdminDynamicPageEditor';
 import AdminAIPrompts from './AdminAIPrompts';
 import AdminAIAstrologersTable from './AdminAIAstrologersTable';
-import { Shield, Bell, Download, LogOut } from 'lucide-react';
+import AdminAppOnboardingEditor from './AdminAppOnboardingEditor';
+import AdminAppBannersEditor from './AdminAppBannersEditor';
+import AdminAppCosmicInsightsEditor from './AdminAppCosmicInsightsEditor';
+import AdminAppReviewsEditor from './AdminAppReviewsEditor';
+import { Shield, Bell, Download, LogOut, Smartphone, LayoutTemplate, Sparkles, ChevronDown } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
+const APP_DYNAMIC_SUBMODULES = [
+  {
+    id: 'tab-app-onboarding',
+    label: 'Onboarding Slides',
+    shortLabel: 'Onboarding',
+    href: '/admin-panel/app-dynamic/onboarding',
+    icon: Smartphone,
+  },
+  {
+    id: 'tab-app-banners',
+    label: 'Home Banners & Promos',
+    shortLabel: 'Home Banners',
+    href: '/admin-panel/app-dynamic/banners',
+    icon: LayoutTemplate,
+  },
+  {
+    id: 'tab-app-cosmic-insights',
+    label: 'Cosmic Insights Carousel',
+    shortLabel: 'Cosmic Insights',
+    href: '/admin-panel/app-dynamic/cosmic-insights',
+    icon: Sparkles,
+  },
+  {
+    id: 'tab-app-reviews',
+    label: 'Customer Reviews & Ratings',
+    shortLabel: 'Reviews & Ratings',
+    href: '/admin-panel/app-dynamic/reviews',
+    icon: Shield,
+  },
+];
 
 export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab?: string }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const router = useRouter();
+
+  const isAppDynamic =
+    activeTab === 'tab-app-onboarding' ||
+    activeTab === 'tab-app-dynamic' ||
+    activeTab === 'tab-app-banners' ||
+    activeTab === 'tab-app-cosmic-insights' ||
+    activeTab === 'tab-app-reviews';
+
+  const currentSubTab =
+    activeTab === 'tab-app-dynamic' ? 'tab-app-onboarding' : activeTab;
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,13 +96,90 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
           </div>
         </div>
       </div>
-      <div className="px-6 lg:px-8 py-8 max-w-screen-2xl space-y-8">
+      <div className="px-6 lg:px-8 py-8 max-w-screen-2xl space-y-6">
+        {/* App Dynamic Module & Submodule Dropdown Selector Bar */}
+        {isAppDynamic && (
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-card border border-border/80 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent shrink-0">
+                <Smartphone size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Module:
+                  </span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25">
+                    App Dynamic
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs font-semibold text-foreground">Submodule:</span>
+                  <div className="relative inline-block">
+                    <select
+                      value={currentSubTab}
+                      onChange={(e) => {
+                        const target = APP_DYNAMIC_SUBMODULES.find(
+                          (sub) => sub.id === e.target.value
+                        );
+                        if (target) router.push(target.href);
+                      }}
+                      className="appearance-none pl-3 pr-8 py-1.5 rounded-xl bg-muted/80 hover:bg-muted border border-border hover:border-accent text-xs font-bold text-foreground cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
+                    >
+                      {APP_DYNAMIC_SUBMODULES.map((sub) => (
+                        <option key={sub.id} value={sub.id}>
+                          {sub.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      size={13}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Submodule Switch Pills */}
+            <div className="flex items-center gap-1.5 p-1 bg-muted/60 border border-border/70 rounded-xl overflow-x-auto">
+              {APP_DYNAMIC_SUBMODULES.map((sub) => {
+                const isCurrent = currentSubTab === sub.id;
+                const SubIcon = sub.icon;
+                return (
+                  <Link
+                    key={sub.id}
+                    href={sub.href}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                      isCurrent
+                        ? 'bg-card text-foreground shadow-xs font-bold border border-border/80'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <SubIcon
+                      size={13}
+                      className={isCurrent ? 'text-accent' : 'text-muted-foreground'}
+                    />
+                    <span>{sub.shortLabel}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'tab-overview' && (
           <>
             <AdminMetrics />
             <AdminCharts />
           </>
         )}
+        {(activeTab === 'tab-app-onboarding' || activeTab === 'tab-app-dynamic') && (
+          <AdminAppOnboardingEditor />
+        )}
+        {activeTab === 'tab-app-banners' && <AdminAppBannersEditor />}
+        {activeTab === 'tab-app-cosmic-insights' && <AdminAppCosmicInsightsEditor />}
+        {activeTab === 'tab-app-reviews' && <AdminAppReviewsEditor />}
         {activeTab === 'tab-content' && <AdminContentManagement />}
         {activeTab === 'tab-page-content' && <AdminDynamicPageEditor />}
         {activeTab === 'tab-prompts' && <AdminAIPrompts />}

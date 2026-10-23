@@ -14,8 +14,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
-  // If inside existing consumer admin panel (/admin-panel), use AppSidebar
-  if (pathname?.startsWith('/admin-panel')) {
+  // If inside existing consumer admin panel (/admin-panel) or app dynamic (/app-dynamic), use AppSidebar
+  if (pathname?.startsWith('/admin-panel') || pathname?.startsWith('/app-dynamic')) {
     return (
       <div className="flex min-h-screen bg-background">
         <AppSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />

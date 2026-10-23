@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { DEFAULT_AI_ASTROLOGERS, AIAstrologer } from '@/lib/aiAstrologerData';
 import { ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES, resolveVedicRemedies } from '@/lib/vedicRemediesEngine';
 import { calculateBirthChartData, formatChartSummaryForAI } from '@/lib/vedicAstrologyEngine';
@@ -22,7 +23,7 @@ function getNativeRashi(sign: string, lang: 'telugu' | 'tamil' | 'hindi' | 'engl
     if (s.includes('capricorn') || s.includes('makara')) return 'మకర రాశి';
     if (s.includes('aquarius') || s.includes('kumbha')) return 'కుంభ రాశి';
     if (s.includes('pisces') || s.includes('meena')) return 'మీన రాశి';
-    return 'శుభ రాశి';
+    return 'రాశి';
   }
   if (lang === 'tamil') {
     if (s.includes('aries') || s.includes('mesha')) return 'மேஷ ராசி';
@@ -82,7 +83,7 @@ function getNativeLagna(lagna: string, lang: 'telugu' | 'tamil' | 'hindi' | 'eng
     if (l.includes('cancer') || l.includes('karka')) return 'கடக லக்னம்';
     if (l.includes('leo') || l.includes('simha')) return 'சிம்ம லக்னம்';
     if (l.includes('virgo') || l.includes('kanya')) return 'கன்னி லக்னம்';
-    if (l.includes('libra') || l.includes('tula')) return 'துலாம் லக்னம்';
+    if (l.includes('libra') || l.includes('tula')) return 'துலா லக்னம்';
     if (l.includes('scorpio') || l.includes('vrishchika')) return 'விருச்சிக லக்னம்';
     if (l.includes('sagittarius') || l.includes('dhanu')) return 'தனுசு லக்னம்';
     if (l.includes('capricorn') || l.includes('makara')) return 'மகர லக்னம்';
@@ -105,7 +106,7 @@ function getNativeLagna(lagna: string, lang: 'telugu' | 'tamil' | 'hindi' | 'eng
     if (l.includes('pisces') || l.includes('meena')) return 'मीन लग्न';
     return 'लग्न';
   }
-  return lagna || 'Scorpio Ascendant';
+  return lagna || 'Ascendant';
 }
 
 // Dasha Native Translators
@@ -114,178 +115,387 @@ function getNativeDasha(dasha: string, lang: 'telugu' | 'tamil' | 'hindi' | 'eng
   if (lang === 'telugu') {
     if (d.includes('jupiter') || d.includes('guru')) return 'గురు మహాదశ';
     if (d.includes('saturn') || d.includes('shani')) return 'శని మహాదశ';
+    if (d.includes('mercury') || d.includes('budha')) return 'బుధ మహాదశ';
     if (d.includes('venus') || d.includes('shukra')) return 'శుక్ర మహాదశ';
     if (d.includes('sun') || d.includes('surya')) return 'సూర్య మహాదశ';
     if (d.includes('moon') || d.includes('chandra')) return 'చంద్ర మహాదశ';
     if (d.includes('mars') || d.includes('kuja') || d.includes('mangal')) return 'కుజ మహాదశ';
     if (d.includes('rahu')) return 'రాహు మహాదశ';
     if (d.includes('ketu')) return 'కేతు మహాదశ';
-    if (d.includes('mercury') || d.includes('budha')) return 'బుధ మహాదశ';
-    return 'మహాదశ';
+    return 'వింశోత్తరి దశ';
   }
   if (lang === 'tamil') {
-    if (d.includes('jupiter') || d.includes('guru')) return 'குரு மகாதிசை';
-    if (d.includes('saturn') || d.includes('shani')) return 'சனி மகாதிசை';
-    if (d.includes('venus') || d.includes('shukra')) return 'சுக்கிர மகாதிசை';
-    if (d.includes('sun') || d.includes('surya')) return 'சூரிய மகாதிசை';
-    if (d.includes('moon') || d.includes('chandra')) return 'சந்திர மகாதிசை';
-    if (d.includes('mars') || d.includes('kuja') || d.includes('mangal')) return 'செவ்வாய் மகாதிசை';
-    if (d.includes('rahu')) return 'ராகு மகாதிசை';
-    if (d.includes('ketu')) return 'கேது மகாதிசை';
-    if (d.includes('mercury') || d.includes('budha')) return 'புதன் மகாதிசை';
-    return 'மகாதிசை';
+    if (d.includes('jupiter') || d.includes('guru')) return 'குரு மகா தசை';
+    if (d.includes('saturn') || d.includes('shani')) return 'சனி மகா தசை';
+    if (d.includes('mercury') || d.includes('budha')) return 'புதன் மகா தசை';
+    if (d.includes('venus') || d.includes('shukra')) return 'சுக்கிர மகா தசை';
+    if (d.includes('sun') || d.includes('surya')) return 'சூரிய மகா தசை';
+    if (d.includes('moon') || d.includes('chandra')) return 'சந்திர மகா தசை';
+    if (d.includes('mars') || d.includes('kuja') || d.includes('mangal')) return 'செவ்வாய் மகா தசை';
+    if (d.includes('rahu')) return 'ராகு மகா தசை';
+    if (d.includes('ketu')) return 'கேது மகா தசை';
+    return 'விம்சோத்தரி தசை';
   }
   if (lang === 'hindi') {
-    if (d.includes('jupiter') || d.includes('guru')) return 'बृहस्पति (गुरु) महादशा';
+    if (d.includes('jupiter') || d.includes('guru')) return 'बृहस्पति महादशा';
     if (d.includes('saturn') || d.includes('shani')) return 'शनि महादशा';
+    if (d.includes('mercury') || d.includes('budha')) return 'बुध महादशा';
     if (d.includes('venus') || d.includes('shukra')) return 'शुक्र महादशा';
     if (d.includes('sun') || d.includes('surya')) return 'सूर्य महादशा';
     if (d.includes('moon') || d.includes('chandra')) return 'चंद्र महादशा';
-    if (d.includes('mars') || d.includes('mangal')) return 'मंगल महादशा';
+    if (d.includes('mars') || d.includes('kuja') || d.includes('mangal')) return 'मंगल महादशा';
     if (d.includes('rahu')) return 'राहु महादशा';
     if (d.includes('ketu')) return 'केतु महादशा';
-    if (d.includes('mercury') || d.includes('budha')) return 'बुध महादशा';
-    return 'महादशा';
+    return 'विंशोत्तरी महादशा';
   }
-  return dasha || 'Jupiter Mahadasha';
+  return dasha || 'Active Dasha';
 }
 
-// Fallback Dynamic Multi-Lingual Vedic Astrology Generator
+export interface PrescribedRemedyInfo {
+  type: 'homam' | 'mantra' | 'gemstone' | 'puja';
+  title: string;
+  homamId?: string;
+  instructions: string;
+  mantraTitle: string;
+  mantraInstructions: string;
+  topic: string;
+}
+
+export interface DynamicVedicReplyResult {
+  text: string;
+  remedy?: PrescribedRemedyInfo;
+}
+
+// Extract canonical remedy based on inquiry and astrologer advice
+function extractPrescribedRemedy(userText: string, replyText: string, astroContext: any): PrescribedRemedyInfo {
+  const combined = (userText + ' ' + replyText).toLowerCase();
+
+  // 1. Career / Job / Promotion / Business
+  if (
+    combined.includes('ganapathi') ||
+    combined.includes('గణపతి') ||
+    combined.includes('गणपति') ||
+    combined.includes('career') ||
+    combined.includes('job') ||
+    combined.includes('promotion') ||
+    combined.includes('business') ||
+    combined.includes('ఉద్యోగ') ||
+    combined.includes('వ్యాపార') ||
+    combined.includes('పని') ||
+    combined.includes('नौकरी') ||
+    combined.includes('व्यापार')
+  ) {
+    return {
+      type: 'homam',
+      title: 'Maha Ganapathi Homam (మహా గణపతి హోమం)',
+      homamId: 'ganapathi',
+      instructions: 'Perform on Wednesday or Shukla Chaturthi at sunrise with Modakam and Durva grass to clear hurdles.',
+      mantraTitle: 'Ganesh Maha Mantra',
+      mantraInstructions: 'Chant "Om Gam Ganapataye Namaha" 108 times daily before leaving for work.',
+      topic: 'Career & Business Growth',
+    };
+  }
+
+  // 2. Wealth / Finances / Debt / Money / Loans
+  if (
+    combined.includes('lakshmi') ||
+    combined.includes('kubera') ||
+    combined.includes('లక్ష్మీ') ||
+    combined.includes('finance') ||
+    combined.includes('money') ||
+    combined.includes('wealth') ||
+    combined.includes('debt') ||
+    combined.includes('loan') ||
+    combined.includes('ధన') ||
+    combined.includes('అప్పు') ||
+    combined.includes('ఆర్థిక') ||
+    combined.includes('धन') ||
+    combined.includes('कर्ज')
+  ) {
+    return {
+      type: 'homam',
+      title: 'Lakshmi Kubera Homam (శ్రీ లక్ష్మీ కుబేర హోమం)',
+      homamId: 'lakshmi_kubera',
+      instructions: 'Perform on Friday morning during sunrise with lotus petals and cow ghee for financial abundance.',
+      mantraTitle: 'Maha Lakshmi Mantra & Kanakadhara Stotram',
+      mantraInstructions: 'Chant "Om Shreem Hreem Kleem Mahalakshmaye Namah" 108 times on Fridays.',
+      topic: 'Wealth & Financial Growth',
+    };
+  }
+
+  // 3. Marriage / Love / Relationship
+  if (
+    combined.includes('swayamvara') ||
+    combined.includes('parvathi') ||
+    combined.includes('marriage') ||
+    combined.includes('vivaha') ||
+    combined.includes('wedding') ||
+    combined.includes('relationship') ||
+    combined.includes('love') ||
+    combined.includes('వివాహ') ||
+    combined.includes('పెళ్లి') ||
+    combined.includes('సంబంధం') ||
+    combined.includes('शादी') ||
+    combined.includes('विवाह')
+  ) {
+    return {
+      type: 'homam',
+      title: 'Swayamvara Parvathi Homam (స్వయంవర పార్వతి హోమం)',
+      homamId: 'swayamvara_parvathi',
+      instructions: 'Perform on Friday or Shukla Panchami with yellow flowers and pure ghee to dissolve marriage delays.',
+      mantraTitle: 'Swayamvara Parvathi Maha Mantra',
+      mantraInstructions: 'Chant the sacred Swayamvara Parvathi Mantra 108 times daily for matrimonial bliss.',
+      topic: 'Marriage & Relationship Harmony',
+    };
+  }
+
+  // 4. Health / Illness / Recovery / Longevity
+  if (
+    combined.includes('mrityunjaya') ||
+    combined.includes('health') ||
+    combined.includes('illness') ||
+    combined.includes('disease') ||
+    combined.includes('hospital') ||
+    combined.includes('ఆరోగ్య') ||
+    combined.includes('మృత్యుంజయ') ||
+    combined.includes('జబ్బు') ||
+    combined.includes('బాధ') ||
+    combined.includes('स्वास्थ्य') ||
+    combined.includes('रोग')
+  ) {
+    return {
+      type: 'homam',
+      title: 'Maha Mrityunjaya Homam (మహా మృత్యుంజయ హోమం)',
+      homamId: 'mrityunjaya',
+      instructions: 'Perform on Monday at sunrise with sacred Bilva leaves, milk, and cow ghee for health rejuvenation.',
+      mantraTitle: 'Maha Mrityunjaya Mantra',
+      mantraInstructions: 'Chant "Om Tryambakam Yajamahe Sugandhim Pushtivardhanam" 108 times daily.',
+      topic: 'Health & Vitality',
+    };
+  }
+
+  // 5. Protection / Negative Energy / Evil Eye / Drishti
+  if (
+    combined.includes('sudarshana') ||
+    combined.includes('protection') ||
+    combined.includes('evil eye') ||
+    combined.includes('drishti') ||
+    combined.includes('negative') ||
+    combined.includes('రక్షణ') ||
+    combined.includes('దిష్టి') ||
+    combined.includes('సుదర్శన') ||
+    combined.includes('భయం') ||
+    combined.includes('सुरक्षा') ||
+    combined.includes('बुरी नजर')
+  ) {
+    return {
+      type: 'homam',
+      title: 'Sudarshana Homam (శ్రీ సుదర్శన హోమం)',
+      homamId: 'sudarshana',
+      instructions: 'Perform on Wednesday or Ekadashi with Tulasi leaves and cow ghee for supreme spiritual protection.',
+      mantraTitle: 'Sudarshana Maha Mantra',
+      mantraInstructions: 'Chant "Om Kleem Krishnaya Govindaya Gopijana Vallabhaya Paraya Paramatmane" daily.',
+      topic: 'Protection & Evil Eye Shielding',
+    };
+  }
+
+  // Default: Navagraha Shanti
+  return {
+    type: 'homam',
+    title: 'Navagraha Homam (నవగ్రహ శాంతి హోమం)',
+    homamId: 'navagraha',
+    instructions: 'Perform on Saturday or Sunday with Navadhanya and 9 sacred samidhas to pacify all planetary doshas.',
+    mantraTitle: 'Navagraha Shanti Mantra',
+    mantraInstructions: 'Chant the Navagraha Stotram or Gayatri Mantra 108 times at sunrise.',
+    topic: 'Planetary Dosha Shanti',
+  };
+}
+
+// Convert raw Vedika AI output into clean, natural spoken voice text
+function formatVedikaForVoice(rawAnswer: string, language: string, astrologerName: string): string {
+  if (!rawAnswer || typeof rawAnswer !== 'string') return '';
+
+  let cleaned = rawAnswer
+    // Remove markdown
+    .replace(/[*#_~`^<>{}[\]\\]+/g, '')
+    // Remove JSON artifacts
+    .replace(/\{"answer":\s*"?/g, '')
+    .replace(/"\}$/g, '')
+    // Remove English transliteration artifacts in parentheses (e.g. "(Kumbham)(8H)", "(H8)")
+    .replace(/\([A-Za-z0-9\s#]+\)/g, '')
+    // Remove stray Korean or non-Indian Asian glyphs if any
+    .replace(/[\uAC00-\uD7AF\u4E00-\u9FFF]+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // Take the first 2-4 complete sentences so speech stays concise and responsive
+  const sentenceRegex = /[^.!?।॥\n]+[.!?।॥\n]*/g;
+  const matches = cleaned.match(sentenceRegex) || [cleaned];
+  const selectedSentences = matches.slice(0, 3).map((s) => s.trim()).filter(Boolean);
+
+  let finalVoiceText = selectedSentences.join(' ');
+  if (!finalVoiceText) finalVoiceText = cleaned.slice(0, 300);
+
+  return finalVoiceText;
+}
+
+// Multi-turn Conversational Fallback (Guarantees zero repeated boilerplate)
 function generateDynamicVedicReply(
   userText: string | null,
   isInitialGreeting: boolean,
   birthDetails: any,
   astroContext: any,
   astrologer: AIAstrologer,
-  language: string
-): string {
-  const langLower = (language || '').toLowerCase();
-  const isTelugu = langLower.includes('telugu') || langLower.includes('te') || /[\u0C00-\u0C7F]/.test(userText || '');
-  const isTamil = langLower.includes('tamil') || langLower.includes('ta') || /[\u0B80-\u0BFF]/.test(userText || '');
-  const isHindi = langLower.includes('hindi') || langLower.includes('hi') || /[\u0900-\u097F]/.test(userText || '');
+  sessionLanguage: string,
+  conversationHistory: any[] = []
+): DynamicVedicReplyResult {
+  const langKey =
+    sessionLanguage === 'Telugu' || sessionLanguage === 'te'
+      ? 'telugu'
+      : sessionLanguage === 'Tamil' || sessionLanguage === 'ta'
+      ? 'tamil'
+      : sessionLanguage === 'Hindi' || sessionLanguage === 'hi'
+      ? 'hindi'
+      : 'english';
 
-  const langKey = isTelugu ? 'telugu' : isTamil ? 'tamil' : isHindi ? 'hindi' : 'english';
-  let name = birthDetails.name || (isTelugu ? 'భక్తుడు' : isTamil ? 'அன்பரே' : isHindi ? 'भक्त' : 'Devotee');
-  
+  const isTelugu = langKey === 'telugu';
+  const isTamil = langKey === 'tamil';
+  const isHindi = langKey === 'hindi';
+
+  let name = birthDetails.name || (isTelugu ? 'భక్తులారా' : isHindi ? 'भक्त' : 'Devotee');
   if (isTelugu && /^[a-zA-Z\s]+$/.test(name)) {
     const firstName = name.split(' ')[0];
-    if (firstName.toLowerCase() === 'rahul') name = 'రాహుల్';
-    else if (firstName.toLowerCase() === 'raj') name = 'రాజ్';
-    else if (firstName.toLowerCase() === 'ravi') name = 'రవి';
-    else if (firstName.toLowerCase() === 'suresh') name = 'సురేష్';
-    else if (firstName.toLowerCase() === 'ramesh') name = 'రమేష్';
-    else name = firstName;
+    name = firstName;
   }
 
   const lagna = getNativeLagna(astroContext.lagna, langKey);
   const moonRashi = getNativeRashi(astroContext.moonRashi, langKey);
   const dasha = getNativeDasha(astroContext.currentDasha, langKey);
-  const concern = birthDetails.primaryConcern || (isTelugu ? 'జీవిత మార్గదర్శనం' : 'General Guidance');
-
   const text = (userText || '').toLowerCase().trim();
 
-  // 1. Initial Greeting when user first connects
+  const pastUserQuestions = (conversationHistory || [])
+    .filter((m: any) => m.role === 'user')
+    .map((m: any) => (m.content || '').toLowerCase());
+  const turnIndex = pastUserQuestions.length;
+
+  // 1. Initial Greeting
   if (isInitialGreeting && (!userText || userText.trim() === '')) {
     if (isTelugu) {
-      return `నమస్కారం ${name} గారూ. నేను మీ జ్యోతిష నిపుణుడు ${astrologer.name}. మీ కుండలి ప్రకారం మీది ${lagna} మరియు ${moonRashi}. ప్రస్తుత కాలంలో ${dasha} ప్రభావం నడుస్తోంది. మీ ${concern} విషయమై మీరు ఏ ప్రశ్న అయినా అడగవచ్చు. మీ మనసులోని సందేహాన్ని తెలియజేయండి.`;
+      return {
+        text: `నమస్కారం ${name} గారూ. నేను మీ జ్యోతిష సలహాదారు ${astrologer.name}. మీ జన్మ కుండలి ప్రకారం లగ్నం ${lagna}, రాశి ${moonRashi}, మరియు ప్రస్తుత దశ ${dasha}. ఈ రోజు మీకు ఏ విషయంలో మార్గదర్శనం కావాలి?`,
+      };
     }
     if (isTamil) {
-      return `வணக்கம் ${name}. நான் உங்கள் ஜோதிட நிபுணர் ${astrologer.name}. உங்கள் ஜாதகப்படி ${lagna} மற்றும் ${moonRashi}. தற்போதைய தசா காலம் ${dasha}. உங்கள் ${concern} பற்றிய நல்வழிகாட்டலை வழங்குகிறேன். நீங்கள் கேட்க விரும்பும் கேள்வி என்ன?`;
+      return {
+        text: `வணக்கம் ${name}. நான் உங்கள் ஜோதிடர் ${astrologer.name}. உங்கள் லக்னம் ${lagna}, ராசி ${moonRashi}, மற்றும் தசை ${dasha}. இன்று உங்களுக்கு என்ன வழிகாட்டல் வேண்டும்?`,
+      };
     }
     if (isHindi) {
-      return `नमस्ते ${name} जी। मैं आपका ज्योतिषी ${astrologer.name} हूँ। आपकी जन्म कुंडली में ${lagna} और ${moonRashi} है, तथा वर्तमान में ${dasha} का प्रभाव है। आपके ${concern} के संदर्भ में आप क्या मार्गदर्शन चाहते हैं?`;
+      return {
+        text: `नमस्ते ${name} जी। मैं आपका ज्योतिषी ${astrologer.name} हूँ। आपकी जन्म कुंडली में लग्न ${lagna}, राशि ${moonRashi}, और दशा ${dasha} है। आज आप किस विषय में मार्गदर्शन चाहते हैं?`,
+      };
     }
-    return `Namaste ${name}. I am ${astrologer.name}. Looking at your synthesized Vedic chart, your Lagna is in ${lagna}, Moon sign is ${moonRashi}, and your active Dasha period is ${dasha}. Cosmic energies are actively focusing on your ${concern}. What specific question would you like to explore first?`;
+    return {
+      text: `Namaste ${name}. I am ${astrologer.name}. Looking at your synthesized Vedic chart, your Lagna is ${lagna}, Moon sign is ${moonRashi}, and active Dasha is ${dasha}. What would you like to consult about today?`,
+    };
   }
 
-  // 2. Simple greetings by customer
+  // 2. Greetings
   if (
-    text.includes('నమస్కార') ||
-    text.includes('స్వామీజీ') ||
-    text.includes('గురువు') ||
-    text.includes('హాయ్') ||
-    text.includes('నమస్తే') ||
+    text.includes('నమస్కారం') ||
+    text.includes('బాగున్నారా') ||
+    text.includes('హలో') ||
     text === 'hello' ||
     text === 'hi' ||
     text.includes('வணக்கம்') ||
     text.includes('नमस्ते')
   ) {
     if (isTelugu) {
-      return `నమస్కారం ${name} గారూ! సంతోషం. మీ ${lagna} మరియు ${moonRashi} ప్రకారం ప్రస్తుతం గ్రహ సంచారం అనుకూలంగా ఉంది. మీరు మీ ఉద్యోగం, వివాహం, ఆర్థికం, లేదా పరిహారాల గురించి ఏ విషయం అయినా అడగవచ్చు. మీకు దేనిపై స్పష్టత కావాలి?`;
-    }
-    if (isTamil) {
-      return `வணக்கம் ${name}! உங்கள் ${lagna} மற்றும் ${moonRashi}க்கு கிரக பலன்கள் அனுகூலமாக உள்ளன. வேலை, திருமணம், தன லாபம் அல்லது பரிகாரங்கள் பற்றி என்ன அறிய விரும்புகிறீர்கள்?`;
+      return {
+        text: `నమస్కారం ${name} గారూ! మీ ${lagna} మరియు ${moonRashi} గ్రహ స్థితులు ప్రస్తుతం అనుకూలంగా ఉన్నాయి. ఉద్యోగం, వివాహం, ఆర్థికం లేదా పరిహారాల గురించి మీ ప్రశ్న అడగండి.`,
+      };
     }
     if (isHindi) {
-      return `नमस्ते ${name} जी! आपकी कुंडली में ${lagna} और ${moonRashi} पर शुभ प्रभाव है। आप अपने करियर, विवाह, धन या पूजा-उपाय के बारे में क्या जानना चाहते हैं?`;
+      return {
+        text: `नमस्ते ${name} जी! आपकी कुंडली में ${lagna} और ${moonRashi} के अनुसार वर्तमान समय महत्वपूर्ण है। आप करियर, विवाह, धन या ग्रह शांति के बारे में अपना प्रश्न पूछ सकते हैं।`,
+      };
     }
-    return `Namaste ${name}! Happy to connect with you. Looking at your ${lagna} and ${moonRashi}, what would you like to explore today — career, marriage, finances, or specific planetary remedies?`;
+    return {
+      text: `Namaste ${name}! Happy to connect. Looking at your ${lagna} and ${moonRashi}, what specific question would you like to explore today?`,
+    };
   }
 
-  // 3. Marriage & Relationships
-  if (
-    text.includes('marriage') ||
-    text.includes('wedding') ||
-    text.includes('relationship') ||
-    text.includes('love') ||
-    text.includes('పెళ్ళ') ||
-    text.includes('పెళ్లి') ||
-    text.includes('వివాహ') ||
-    text.includes('సంబంధ') ||
-    text.includes('దాంపత్య') ||
-    text.includes('శ్రీమతి') ||
-    text.includes('భార్య') ||
-    text.includes('భర్త') ||
-    text.includes('తిరుమణం') ||
-    text.includes('திருமணம்') ||
-    text.includes('शादी') ||
-    text.includes('विवाह')
-  ) {
+  // 3. Timing / "When will it happen?"
+  const isTiming =
+    text.includes('when') ||
+    text.includes('time') ||
+    text.includes('date') ||
+    text.includes('month') ||
+    text.includes('year') ||
+    text.includes('soon') ||
+    text.includes('ఎప్పుడు') ||
+    text.includes('సమయం') ||
+    text.includes('ఎప్పటికి') ||
+    text.includes('కాలం') ||
+    text.includes('ఎప్పుడు జరుగుతుంది') ||
+    text.includes('కబ్') ||
+    text.includes('कब') ||
+    text.includes('समय') ||
+    text.includes('எப்போது');
+
+  if (isTiming) {
+    const currentYear = new Date().getFullYear();
     if (isTelugu) {
-      return `${name} గారూ, మీ వివాహ స్థానమైన సప్తమ భావాన్ని పరిశీలించగా, శుక్ర మరియు గురు గ్రహాల సంచారం అనుకూలంగా ఉంది. మంచి సంబంధాలు కుదరడానికి మరియు దాంపత్య సౌఖ్యం కొరకు శుక్రవారం నాడు లక్ష్మీ కుబేర హోమం నిర్వహించడం మరియు స్వయంవర పార్వతీ మంత్రం జపించడం అత్యంత శ్రేయస్కరం. వివాహ సమయం గురించి ఇంకా ఏమైనా వివరాలు కావాలా?`;
-    }
-    if (isTamil) {
-      return `${name}, உங்கள் 7ஆம் வீடான களத்திர ஸ்தானத்தில் சுக்கிரன் மற்றும் குருவின் சுப பார்வை நிலவுகிறது. திருமண காரியங்கள் விரைவில் கைகூட வெள்ளிக்கிழமைகளில் லக்ஷ்மி குபேர ஹோமம் செய்வதும், சுயம்வர பார்வதி மந்திரம் சொல்வதும் நற்பலன்களைத் தரும்.`;
+      return {
+        text: `${name} గారూ, మీ కుండలిలోని గ్రహ గతుల ప్రకారం మరియు ప్రస్తుత ${dasha} వలన, ${currentYear} ద్వితీయార్థం నుండి మీకు అనుకూలమైన ఫలితాలు ప్రారంభమవుతాయి. గ్రహాల అనుగ్రహం కోసం నిత్య ప్రార్థన కొనసాగించండి.`,
+      };
     }
     if (isHindi) {
-      return `${name} जी, 7वें भाव (विवाह स्थान) में शुभ ग्रहों की दृष्टि से आपके वैवाहिक जीवन में मधुरता के योग बन रहे हैं। शुक्रवार को लक्ष्मी कुबेर होम का अनुष्ठान और स्वयंवर पार्वती मंत्र का जाप करने से शीघ्र अनुकूल रिश्ते प्राप्त होंगे।`;
+      return {
+        text: `${name} जी, आपकी कुंडली में वर्तमान ${dasha} और गोचर के अनुसार, वर्ष ${currentYear} के उत्तरार्ध से शुभ परिणाम मिलने के प्रबल योग बन रहे हैं।`,
+      };
     }
-    return `${name}, analyzing your 7th house of Partnerships and Marriage, the planetary alignment of Venus and Jupiter creates auspicious vibrations. Performing the consecrated Lakshmi Kubera Homam on Fridays and reciting the Swayamvara Parvathi Mantra will manifest favorable results.`;
+    return {
+      text: `${name}, considering your ${dasha} sequence and upcoming transits, auspicious momentum begins in the second half of ${currentYear}.`,
+    };
   }
 
-  // 4. Career & Business
+  // 4. Career / Job / Promotion
   if (
     text.includes('career') ||
     text.includes('job') ||
     text.includes('promotion') ||
     text.includes('business') ||
     text.includes('work') ||
-    text.includes('salary') ||
+    text.includes('office') ||
     text.includes('ఉద్యోగ') ||
-    text.includes('కెరీర్') ||
-    text.includes('నౌకరి') ||
-    text.includes('ప్రమోషన్') ||
     text.includes('వ్యాపార') ||
-    text.includes('వేతన') ||
-    text.includes('జీతం') ||
-    text.includes('வேலை') ||
-    text.includes('தொழில்') ||
+    text.includes('పని') ||
     text.includes('नौकरी') ||
-    text.includes('व्यापार')
+    text.includes('व्यापार') ||
+    text.includes('தொழில்') ||
+    text.includes('வேலை')
   ) {
+    const remedy = extractPrescribedRemedy(userText || '', 'ganapathi career', astroContext);
     if (isTelugu) {
-      return `${name} గారూ, మీ కుండలిలోని దశమ స్థానం (కర్మ స్థానం) బలమైన స్థితిలో ఉంది. రాబోయే కొద్ది నెలల్లో ఉద్యోగంలో ప్రమోషన్ లేదా నూతన వ్యాపార అవకాశాలు దక్కే యోగం ఉంది. ఉద్యోగ అడ్డంకులు తొలగడానికి గణపతి హోమం నిర్వహించడం మరియు ఓం గం గణపతయే నమః మంత్రం లేదా ఆదిత్య హృదయ స్తోత్రం పఠించడం వల్ల ఉన్నత పదవులు లభిస్తాయి. ఉద్యోగ బదిలీ లేదా ఆదాయం గురించి ఇంకా ఏమైనా అడగాలనుకుంటున్నారా?`;
-    }
-    if (isTamil) {
-      return `${name}, உங்கள் 10ஆம் வீடான தொழில் ஸ்தானம் பலமாக உள்ளது. வரும் மாதங்களில் புதிய நல்ல வேலை வாய்ப்புகள் கூடிவரும். தொழில் தடைகள் நீங்க கணபதி ஹோமம் செய்வதும், 'ஓம் கம் கணபதயே நமஹ' மந்திரம் மற்றும் ஆதித்ய ஹிருதய ஸ்தோத்திரம் சொல்வதும் தொழிலில் உயர்வை தரும்.`;
+      return {
+        text: `${name} గారూ, మీ దశమ స్థానం (కర్మ భావం) లో అనుకూలమైన గ్రహ దృష్టి ఉంది. ఉద్యోగంలో ఆటంకాలు తొలగి ప్రమోషన్ రావడానికి మహా గణపతి హోమం నిర్వహించడం మరియు ఓం గం గణపతయే నమః జపించడం అత్యంత శ్రేయస్కరం.`,
+        remedy,
+      };
     }
     if (isHindi) {
-      return `${name} जी, आपकी कुंडली का 10वां भाव (कर्म भाव) बहुत प्रभावशाली है। आने वाले समय में पदोन्नति के योग बन रहे हैं। कार्यक्षेत्र में विघ्न निवारण के लिए गणपति होम का अनुष्ठान तथा 'ॐ गं गणपतये नमः' एवं आदित्य हृदय स्तोत्र का पाठ करें।`;
+      return {
+        text: `${name} जी, आपकी कुंडली में दशम कर्म भाव मजबूत स्थिति में है। कार्यक्षेत्र में आ रही बाधाओं को दूर करने हेतु महागणपति होम तथा "ॐ गं गणपतये नमः" मंत्र का नित्य 108 बार जाप करें।`,
+        remedy,
+      };
     }
-    return `${name}, in your chart, the 10th house of Profession is strongly positioned. Jupiter's aspect indicates high chances of career growth. Performing the Ganapathi Homam and chanting "Om Gam Ganapataye Namaha" alongside Aditya Hridaya Stotram will remove workplace obstacles.`;
+    return {
+      text: `${name}, your 10th house of Profession is favorably positioned. Performing the Maha Ganapathi Homam and chanting "Om Gam Ganapataye Namaha" will clear workplace hurdles and accelerate career growth.`,
+      remedy,
+    };
   }
 
-  // 5. Wealth, Finances & Debt
+  // 5. Wealth, Finance & Debt
   if (
     text.includes('finance') ||
     text.includes('money') ||
@@ -294,137 +504,105 @@ function generateDynamicVedicReply(
     text.includes('loan') ||
     text.includes('rich') ||
     text.includes('ధన') ||
-    text.includes('ఆర్థిక') ||
     text.includes('డబ్బు') ||
-    text.includes('సంపాదన') ||
     text.includes('అప్పు') ||
-    text.includes('లాభం') ||
-    text.includes('பணம்') ||
-    text.includes('செல்வம்') ||
-    text.includes('धन') ||
+    text.includes('ఆర్థిక') ||
     text.includes('पैसा') ||
+    text.includes('धन') ||
     text.includes('कर्ज')
   ) {
+    const remedy = extractPrescribedRemedy(userText || '', 'lakshmi kubera finance', astroContext);
     if (isTelugu) {
-      return `${name} గారూ, మీ కుండలిలో 2వ స్థానం (ధన భావం) మరియు 11వ స్థానం (లాభ భావం) ప్రకారం రాబోయే కాలంలో ఆదాయ మార్గాలు మెరుగుపడతాయి. అప్పుల నివారణ మరియు స్థిర సంపద కొరకు శుక్రవారం నాడు లక్ష్మీ కుబేర హోమం నిర్వహించడం మరియు 'ఓం శ్రీం హ్రీం క్లీం మహాలక్ష్మ్యై నమః' మంత్రం లేదా కనకధార స్తోత్రం పఠించడం అత్యంత శ్రేయస్కరం.`;
-    }
-    if (isTamil) {
-      return `${name}, உங்கள் 2ஆம் (தனம்) மற்றும் 11ஆம் (லாபம்) வீடுகளில் பணவரவுக்கான அனுகூலம் காணப்படுகிறது. கடன் சுமை குறைய லக்ஷ்மி குபேர ஹோமம் செய்வதும், 'ஓம் ஸ்ரீம் ஹ்ரீம் க்லீம் மகாலக்ஷ்மியை நமஹ' மந்திரம் அல்லது கனகதாரா ஸ்தோத்திரம் சொல்வதும் சிறந்த பரிகாரமாகும்.`;
+      return {
+        text: `${name} గారూ, మీ కుండలిలోని 2వ స్థానం (ధన భావం) మరియు 11వ స్థానం (లాభ భావం) స్థిరత్వాన్ని సూచిస్తున్నాయి. ధన ప్రాప్తి మరియు రుణ విముక్తి కొరకు శుక్రవారం నాడు లక్ష్మీ కుబేర హోమం లేదా కనకధార స్తోత్రం పఠించడం మంచి ఫలితాన్నిస్తుంది.`,
+        remedy,
+      };
     }
     if (isHindi) {
-      return `${name} जी, आपकी कुंडली में द्वितीय (धन) और एकादश (लाभ) भाव में धन आगमन के अच्छे संकेत हैं। ऋण मुक्ति और स्थिर समृद्धि के लिए शुक्रवार को लक्ष्मी कुबेर होम का अनुष्ठान और 'ॐ श्रीं ह्रीं क्लीं महालक्ष्म्यै नमः' मंत्र अथवा कनकधारा स्तोत्र का पाठ करें।`;
+      return {
+        text: `${name} जी, आर्थिक उन्नति और कर्ज से मुक्ति के लिए शुक्रवार के दिन श्री लक्ष्मी कुबेर होम तथा कनकधारा स्तोत्र का पाठ करना सर्वोत्तम फलदायी रहेगा।`,
+        remedy,
+      };
     }
-    return `${name}, evaluating your 2nd house of Wealth and 11th house of Financial Gains, steady growth is indicated. Performing the consecrated Lakshmi Kubera Homam and reciting "Om Shreem Hreem Kleem Mahalakshmaye Namah" or Kanakadhara Stotram will balance financial cash flow.`;
+    return {
+      text: `${name}, to accelerate wealth accumulation and relieve financial pressure, performing the sacred Lakshmi Kubera Homam on Fridays brings prosperity.`,
+      remedy,
+    };
   }
 
-  // 5.5 Ishta Devata & Divine Guardian
+  // 6. Marriage, Love & Relationship
   if (
-    text.includes('ishta') ||
-    text.includes('ista') ||
-    text.includes('devata') ||
-    text.includes('deity') ||
-    text.includes('god') ||
-    text.includes('daivam') ||
-    text.includes('kuladevata') ||
-    text.includes('దైవం') ||
-    text.includes('దేవుడు') ||
-    text.includes('தெய்வம்') ||
-    text.includes('கடவுள்') ||
-    text.includes('इष्ट') ||
-    text.includes('देवता')
+    text.includes('marriage') ||
+    text.includes('love') ||
+    text.includes('relationship') ||
+    text.includes('wedding') ||
+    text.includes('spouse') ||
+    text.includes('partner') ||
+    text.includes('వివాహ') ||
+    text.includes('పెళ్లి') ||
+    text.includes('సంబంధం') ||
+    text.includes('భార్య') ||
+    text.includes('భర్త') ||
+    text.includes('शादी') ||
+    text.includes('विवाह')
   ) {
-    const deity = astroContext.ishtaDevata?.deityName || 'Lord Shiva / Maha Vishnu';
-    const mantra = astroContext.ishtaDevata?.primaryMantra || 'Om Namah Shivaya';
+    const remedy = extractPrescribedRemedy(userText || '', 'swayamvara parvathi marriage', astroContext);
     if (isTelugu) {
-      return `${name} గారూ, మీ కుండలిలోని ఆత్మకారక గ్రహం మరియు కారకాంంశ నుండి పన్నెండవ స్థానాన్ని పరిశీలించగా, మీ ఇష్ట దైవం ${deity}. మీరు నిత్యం "${mantra}" మంత్రాన్ని జపించడం వల్ల ఆధ్యాత్మిక ప్రశాంతత మరియు సర్వ కార్యసిద్ధి లభిస్తాయి.`;
-    }
-    if (isTamil) {
-      return `${name}, உங்கள் ஜாதகத்தில் ஆத்மகாரக கிரகத்தின்படி, உங்கள் இஷ்ட தெய்வம் ${deity}. தினமும் "${mantra}" மந்திரத்தை ஜெபித்து வர சகல நன்மைகளும் உண்டாகும்.`;
+      return {
+        text: `${name} గారూ, మీ సప్తమ వివాహ స్థానంలో అనుకూలమైన సంబంధం కుదరడానికి స్వయంవర పార్వతి హోమం నిర్వహించడం మరియు ప్రతిరోజూ స్వయంవర పార్వతి మంత్రం జపించడం వివాహ దోషాలను తొలగిస్తుంది.`,
+        remedy,
+      };
     }
     if (isHindi) {
-      return `${name} जी, आपकी कुंडली में आत्मकारक ग्रह एवं कारकांश से 12वें भाव के अनुसार, आपके इष्ट देवता ${deity} हैं। नित्य "${mantra}" का जाप करने से समस्त बाधाएं दूर होंगी।`;
+      return {
+        text: `${name} जी, विवाह में आ रही देरी या वैवाहिक सुख के लिए स्वयंवर पार्वती होम तथा माता पार्वती की नियमित उपासना अत्यंत लाभकारी है।`,
+        remedy,
+      };
     }
-    return `${name}, evaluating your soul planet Atmakaraka and the 12th house from Karakamsa, your verified Ishta Devata is ${deity}. Chanting "${mantra}" brings supreme spiritual grace and inner peace.`;
+    return {
+      text: `${name}, to harmonize marital energies and resolve delays, performing the sacred Swayamvara Parvathi Homam brings peaceful matrimonial alignment.`,
+      remedy,
+    };
   }
 
-  // 6. Remedies & Poojas (Health, Protection, or General Planetary Doshas)
-  if (
-    text.includes('remedy') ||
-    text.includes('remedies') ||
-    text.includes('pooja') ||
-    text.includes('puja') ||
-    text.includes('homam') ||
-    text.includes('homa') ||
-    text.includes('mantra') ||
-    text.includes('gemstone') ||
-    text.includes('dosha') ||
-    text.includes('పరిహార') ||
-    text.includes('హోమం') ||
-    text.includes('పూజ') ||
-    text.includes('మంత్ర') ||
-    text.includes('దోష') ||
-    text.includes('రత్న') ||
-    text.includes('பரிகாரம்') ||
-    text.includes('ஹோமம்') ||
-    text.includes('தோஷம்') ||
-    text.includes('उपाय') ||
-    text.includes('हवन') ||
-    text.includes('दोष')
-  ) {
-    const isHealth = text.includes('health') || text.includes('illness') || text.includes('ఆరోగ్య') || text.includes('రోగ') || text.includes('ஆரோக்கியம்') || text.includes('स्वास्थ्य') || text.includes('रोग');
-    const isProtection = text.includes('protection') || text.includes('evil') || text.includes('drishti') || text.includes('దిష్టి') || text.includes('రక్షణ') || text.includes('திருஷ்டி') || text.includes('नजर') || text.includes('सुरक्षा');
-
-    if (isHealth) {
-      if (isTelugu) {
-        return `${name} గారూ, సంపూర్ణ ఆరోగ్య సంరక్షణ మరియు దీర్ఘాయుష్షు కొరకు సోమవారం నాడు మహామృత్యుంజయ హోమం లేదా ఆయుష్య హోమం నిర్వహించడం మరియు ప్రతిరోజూ నూట ఎనిమిది సార్లు మహామృత్యుంజయ మంత్రం జపించడం అత్యంత శ్రేయస్కరం.`;
-      }
-      if (isTamil) {
-        return `${name}, பூரண உடல்நலம் மற்றும் ஆயுள் விருத்திக்காக மகா மிருத்யுஞ்சய ஹோமம் அல்லது ஆயுஷ் ஹோமம் செய்வதும், தினமும் நூற்றி எட்டு முறை மகா மிருத்யுஞ்சய மந்திரம் சொல்வதும் சிறந்த பலன் தரும்.`;
-      }
-      if (isHindi) {
-        return `${name} जी, उत्तम स्वास्थ्य और दीर्घायु के लिए महामृत्युंजय होम या आयुष्य होम का अनुष्ठान तथा प्रतिदिन 108 बार महामृत्युंजय मंत्र का जाप करना सर्वोत्तम उपाय है।`;
-      }
-      return `${name}, for health recovery and longevity, performing the sacred Mrityunjaya Homam and chanting the Maha Mrityunjaya Mantra 108 times daily creates strong spiritual healing.`;
-    }
-
-    if (isProtection) {
-      if (isTelugu) {
-        return `${name} గారూ, దిష్టి దోషాలు మరియు నకారాత్మక శక్తుల నివారణకు ఆదివారం నాడు సుదర్శన హోమం నిర్వహించడం మరియు సుదర్శన మహా మంత్రం లేదా హనుమాన్ చాలీసా పఠించడం మీకు అభేద్యమైన రక్షణ కల్పిస్తుంది.`;
-      }
-      if (isTamil) {
-        return `${name}, கண் திருஷ்டி மற்றும் எதிர்மறை சக்திகள் நீங்க ஞாயிற்றுக்கிழமைகளில் சுதர்சன ஹோமம் செய்வதும், சுதர்சன மகா மந்திரம் ஜெபிப்பதும் பூரண பாதுகாப்பு தரும்.`;
-      }
-      if (isHindi) {
-        return `${name} जी, नजर दोष और नकारात्मक ऊर्जा से सुरक्षा के लिए सुदर्शन होम का अनुष्ठान तथा सुदर्शन महामंत्र अथवा हनुमान चालीसा का पाठ करना अत्यंत प्रभावशाली है।`;
-      }
-      return `${name}, to neutralize negative energies and evil eye, performing the sacred Sudarshana Homam and chanting the Sudarshana Maha Mantra provides supreme spiritual protection.`;
-    }
-
+  // 7. Multi-Turn Conversational Fallback
+  const remedy = extractPrescribedRemedy(userText || '', text, astroContext);
+  if (turnIndex % 2 === 1) {
     if (isTelugu) {
-      return `${name} గారూ, మీ కుండలిలోని గ్రహ దోష నివారణకు శనివారం లేదా ఆదివారం నాడు నవగ్రహ హోమం నిర్వహించడం మరియు నవగ్రహ శాంతి మంత్రం లేదా గాయత్రీ మంత్రం జపించడం సర్వదా శుభప్రదం.`;
-    }
-    if (isTamil) {
-      return `${name}, உங்கள் ஜாதக தோஷங்கள் நீங்க சனிக்கிழமை அல்லது ஞாயிற்றுக்கிழமைகளில் நவக்கிரக ஹோமம் செய்வதும், நவக்கிரக சாந்தி மந்திரம் ஜெபிப்பதும் பூரண நன்மை தரும்.`;
+      return {
+        text: `${name} గారూ, మీ ${lagna} మరియు చంద్ర రాశి అయిన ${moonRashi} గ్రహాలు స్థిరంగా ఉన్నాయి. మీ మనసులోని సందేహాన్ని స్పష్టంగా అడగండి — పరిహారాలు లేదా కాల నిర్ణయం గురించి ఇంకా ఏమైనా తెలుసుకోవాలనుకుంటున్నారా?`,
+        remedy,
+      };
     }
     if (isHindi) {
-      return `${name} जी, समस्त ग्रह शांति के लिए नवग्रह होम का अनुष्ठान तथा नवग्रह शांति मंत्र अथवा गायत्री मंत्र का प्रतिदिन 108 बार जाप करें।`;
+      return {
+        text: `${name} जी, आपकी कुंडली में ${lagna} और ${moonRashi} के अनुसार वर्तमान स्थिति अनुकूल है। क्या आप किसी विशेष निर्णय अथवा उपाय के बारे में विस्तार से जानना चाहते हैं?`,
+        remedy,
+      };
     }
-    return `${name}, to pacify afflicted planetary positions, performing the Navagraha Homam and chanting the Navagraha Shanti Mantra restores balance and cosmic harmony in your chart.`;
+    return {
+      text: `${name}, your ${lagna} and Moon sign ${moonRashi} remain favorably supported. Is there a specific decision or timing window you would like further insight on?`,
+      remedy,
+    };
   }
 
-  // Default Vedic Wisdom
   if (isTelugu) {
-    return `${name} గారూ, మీ కుండలిలోని ${lagna} మరియు ${moonRashi} ప్రకారం, ప్రస్తుత ${dasha} కాలం మీకు ఎన్నో అవకాశాలను అందిస్తుంది. మీ మనోబలంతో ముందుకు సాగండి, దైవానుగ్రహం మీకు తోడుగా ఉంటుంది. దీనిపై మీకు ఇంకా ఏ ప్రశ్నకైనా సమాధానం కావాలా?`;
-  }
-  if (isTamil) {
-    return `${name}, உங்கள் ${lagna} மற்றும் ${moonRashi}க்கு நடப்பு ${dasha} காலம் நல்ல மாற்றங்களை கொண்டுவரும். நம்பிக்கையுடன் செயல்படுங்கள், தெய்வ அருள் துணை நிற்கும். வேறு ஏதேனும் சந்தேகம் உள்ளதா?`;
+    return {
+      text: `${name} గారూ, మీ జాతకంలో నడుస్తున్న ${dasha} మీకు ధైర్యాన్ని మరియు నూతన అవకాశాలను ప్రసాదిస్తుంది. మీ సంకల్పంతో దైవ ప్రార్థన కొనసాగించండి, మీ ప్రశ్నలన్నిటికీ గ్రహాలు సకారాత్మక ఫలితాలను అందిస్తాయి.`,
+      remedy,
+    };
   }
   if (isHindi) {
-    return `${name} जी, आपकी कुंडली में ${lagna} और ${moonRashi} के अनुसार वर्तमान ${dasha} अनुकूल रहने वाली है। ईश्वर पर आस्था रखें, सर्व कार्य सिद्ध होंगे। क्या आप कुछ और पूछना चाहते हैं?`;
+    return {
+      text: `${name} जी, आपकी कुंडली में वर्तमान ${dasha} शुभ अवसर प्रदान कर रही है। सकारात्मक चिंतन और नियमित ईश्वर आराधना से आपके सभी कार्य सिद्ध होंगे।`,
+      remedy,
+    };
   }
-  return `${name}, your Vedic chart reveals immense latent strength under your ${lagna} and ${moonRashi}. Stay focused and purposeful during this ${dasha} period. Is there anything else you wish to consult about?`;
+  return {
+    text: `${name}, your Vedic chart reveals strength under your ${lagna} and active ${dasha}. Stay purposeful, and let me know which area you'd like to explore further.`,
+    remedy,
+  };
 }
-
 
 function cleanTextForVedicVoice(text: string, language: string): string {
   let cleaned = text;
@@ -510,7 +688,7 @@ function cleanApiKey(key?: string | null): string {
   return key.trim().replace(/^["']|["']$/g, '').trim();
 }
 
-// Split text into natural sentence chunks under maxChunkLength (safe limit for OpenAI TTS is 3500 chars)
+// Split text into natural sentence chunks under maxChunkLength
 function splitIntoNaturalChunks(text: string, maxChunkLength = 3500): string[] {
   if (text.length <= maxChunkLength) return [text];
 
@@ -546,7 +724,7 @@ function splitIntoNaturalChunks(text: string, maxChunkLength = 3500): string[] {
   return chunks.length > 0 ? chunks : [text];
 }
 
-// Universal Multilingual Speech Synthesizer (Zero Character Cutoff - Reads 100% of All Lines)
+// Universal Multilingual Speech Synthesizer: OpenAI TTS first, with guaranteed Google Translate TTS fallback for ALL astrologers
 async function generateMultilingualAudioBase64(
   text: string,
   language: string,
@@ -557,14 +735,10 @@ async function generateMultilingualAudioBase64(
   const cleanInput = sanitizedText.replace(/[\n\r]+/g, ' ').trim();
   if (!cleanInput) return null;
 
-  let activeKey = cleanApiKey(openaiApiKey);
-  // TTS requires a valid key — no fallback possible for voice
-  if (!activeKey || activeKey.length < 20) {
-    return null;
-  }
+  const activeKey = cleanApiKey(openaiApiKey);
 
-  // 1. OpenAI TTS Engine (Multi-chunk processing so ANY number of lines are read completely to the end)
-  if (activeKey) {
+  // 1. OpenAI TTS Engine (If key configured and active)
+  if (activeKey && activeKey.length >= 20) {
     try {
       const ttsVoice = astrologer.voiceId || (astrologer.voiceGender === 'female' ? 'nova' : 'onyx');
       const textChunks = splitIntoNaturalChunks(cleanInput, 3500);
@@ -573,9 +747,9 @@ async function generateMultilingualAudioBase64(
 
       for (const chunk of textChunks) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 35000);
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-        let ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
+        const ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -590,11 +764,6 @@ async function generateMultilingualAudioBase64(
           signal: controller.signal,
         });
 
-        if (ttsRes.status === 401) {
-          console.warn('OpenAI TTS 401: check OpenAI API key in Admin Settings.');
-          break;
-        }
-
         clearTimeout(timeoutId);
 
         if (ttsRes.ok) {
@@ -602,8 +771,6 @@ async function generateMultilingualAudioBase64(
           audioBuffers.push(Buffer.from(audioBuffer));
         } else {
           allChunksSucceeded = false;
-          const errText = await ttsRes.text();
-          console.warn('OpenAI TTS non-ok response:', ttsRes.status, errText);
           break;
         }
       }
@@ -612,46 +779,45 @@ async function generateMultilingualAudioBase64(
         return Buffer.concat(audioBuffers).toString('base64');
       }
     } catch (e) {
-      console.warn('OpenAI TTS error:', e);
+      console.warn('OpenAI TTS error, attempting fallback:', e);
     }
   }
 
-  // 2. Google Translate TTS Fallback (Concatenates all sentence chunks till the end)
-  if (astrologer.voiceGender === 'female') {
-    try {
-      const lLower = (language || '').toLowerCase();
-      let langCode = 'te';
-      if (lLower.includes('telugu') || lLower.includes('te') || /[\u0C00-\u0C7F]/.test(cleanInput)) langCode = 'te';
-      else if (lLower.includes('tamil') || lLower.includes('ta') || /[\u0B80-\u0BFF]/.test(cleanInput)) langCode = 'ta';
-      else if (lLower.includes('hindi') || lLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) langCode = 'hi';
-      else langCode = 'en';
+  // 2. Guaranteed Multi-chunk Google Translate TTS Fallback for ALL Astrologers (Male & Female)
+  try {
+    const lLower = (language || '').toLowerCase();
+    let langCode = 'te';
+    if (lLower.includes('telugu') || lLower.includes('te') || /[\u0C00-\u0C7F]/.test(cleanInput)) langCode = 'te';
+    else if (lLower.includes('tamil') || lLower.includes('ta') || /[\u0B80-\u0BFF]/.test(cleanInput)) langCode = 'ta';
+    else if (lLower.includes('hindi') || lLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) langCode = 'hi';
+    else if (lLower.includes('kannada') || lLower.includes('kn') || /[\u0C80-\u0CFF]/.test(cleanInput)) langCode = 'kn';
+    else langCode = 'en';
 
-      const chunks = splitIntoNaturalChunks(cleanInput, 180);
-      const audioBuffers: Buffer[] = [];
+    const chunks = splitIntoNaturalChunks(cleanInput, 180);
+    const audioBuffers: Buffer[] = [];
 
-      for (const chunk of chunks) {
-        const encodedText = encodeURIComponent(chunk);
-        const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
+    for (const chunk of chunks) {
+      const encodedText = encodeURIComponent(chunk);
+      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
 
-        const gRes = await fetch(googleTtsUrl, {
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          },
-        });
+      const gRes = await fetch(googleTtsUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+      });
 
-        if (gRes.ok) {
-          const arrayBuffer = await gRes.arrayBuffer();
-          audioBuffers.push(Buffer.from(arrayBuffer));
-        }
+      if (gRes.ok) {
+        const arrayBuffer = await gRes.arrayBuffer();
+        audioBuffers.push(Buffer.from(arrayBuffer));
       }
-
-      if (audioBuffers.length > 0) {
-        return Buffer.concat(audioBuffers).toString('base64');
-      }
-    } catch (e) {
-      console.warn('Google TTS fallback warning:', e);
     }
+
+    if (audioBuffers.length > 0) {
+      return Buffer.concat(audioBuffers).toString('base64');
+    }
+  } catch (e) {
+    console.warn('Google TTS fallback warning:', e);
   }
 
   return null;
@@ -699,21 +865,15 @@ export async function POST(req: Request) {
       /\bstop\b/i,
       /\blisten\b/i,
       /\bone second\b/i,
-      /\bone question\b/i,
       /\baagandi\b/i,
       /\brukiye\b/i,
       /\broko\b/i,
       /\bnillungal\b/i,
-      /\bwhat about\b/i,
-      /\binstead\b/i,
-      /\bgo back\b/i,
-      /\bcompare\b/i,
-      /ఆగండి/,
-      /ఒక్క నిమిషం/,
-      /మరి/,
-      /రుకియే/,
-      /रुको/,
-      /सुनिए/,
+      /ఆగండి/i,
+      /వినండి/i,
+      /ఒక్క నిమిషం/i,
+      /రోకో/i,
+      /सुनिए/i,
     ];
     const detectedInterruption =
       isInterrupted ||
@@ -723,8 +883,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing session ID' }, { status: 400 });
     }
 
-    // 1. Fetch OpenAI API Key (env → Firestore admin settings → '')
-    let openaiApiKey = await getServerOpenAIApiKey();
+    // 1. Fetch OpenAI API Key
+    const openaiApiKey = await getServerOpenAIApiKey();
 
     // 2. Whisper STT transcription if audio file was uploaded
     if (audioFile && !userMessage && openaiApiKey) {
@@ -757,7 +917,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Fetch Consultation Session Context from Firestore & Dynamic Ephemeris Calculation
+    // 3. Fetch Consultation Session Context from Firestore & Dynamic Chart Calculation
     let astrologer: AIAstrologer = DEFAULT_AI_ASTROLOGERS[0];
     let birthDetails: any = {
       name: 'Devotee',
@@ -787,12 +947,27 @@ export async function POST(req: Request) {
         if (sData?.language) sessionLanguage = sData.language;
 
         if (sData?.astrologerId) {
-          const found = DEFAULT_AI_ASTROLOGERS.find((a) => a.id === sData.astrologerId || a.name === sData.astrologerName);
-          if (found) astrologer = found;
+          const found = DEFAULT_AI_ASTROLOGERS.find(
+            (a) => a.id === sData.astrologerId || a.name === sData.astrologerName
+          );
+          if (found) {
+            astrologer = found;
+          } else if (sData.astrologerName) {
+            astrologer = {
+              ...DEFAULT_AI_ASTROLOGERS[0],
+              name: sData.astrologerName,
+              voiceGender: sData.voiceGender || 'male',
+              voiceId: sData.voiceId || 'onyx',
+            };
+          }
         } else if (sData?.astrologerName) {
           const found = DEFAULT_AI_ASTROLOGERS.find((a) => a.name === sData.astrologerName);
           if (found) astrologer = found;
         }
+
+        // Respect session document's voiceGender and voiceId if saved
+        if (sData?.voiceGender) astrologer.voiceGender = sData.voiceGender;
+        if (sData?.voiceId) astrologer.voiceId = sData.voiceId;
       }
     } catch (e) {
       console.warn('Session Firestore lookup warning:', e);
@@ -842,36 +1017,46 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4. Generate AI Content: Vedika (Truth) -> OpenAI (Translation/Formatting)
+    // 4. Query Vedika AI Ephemeris Intelligence (Primary Vedic Ground Truth)
     let replyText = '';
     let vedikaTruth = '';
 
     try {
       const vDt = birthDetails?.dob
-        ? formatToVedikaDateTime(birthDetails.dob, birthDetails.tob || '12:00')
+        ? formatToVedikaDateTime(birthDetails.dob, birthDetails.time || '12:00')
         : undefined;
+
       const vRes = await queryVedikaAI({
+        language: sessionLanguage,
         question: isInitial
-          ? `Greet the devotee warmly and open the consultation about: ${birthDetails.primaryConcern || 'life guidance'}. Their Lagna is ${astroContext.lagna}, Moon Rashi is ${astroContext.moonRashi}, Nakshatra is ${astroContext.nakshatra}. Provide authoritative Vedic Jyotish guidance.`
-          : `Devotee ${birthDetails.name || ''} asks: "${userMessage}". (Lagna: ${astroContext.lagna}, Moon: ${astroContext.moonRashi}, Dasha: ${astroContext.currentDasha}). Provide authoritative Vedic Jyotish guidance.`,
-        birthDetails: vDt ? {
-          datetime: vDt,
-          latitude: Number(birthDetails.lat) || 28.6139,
-          longitude: Number(birthDetails.lon) || 77.209,
-        } : undefined,
+          ? `Greet the devotee warmly and open the consultation about: ${birthDetails.primaryConcern || 'life guidance'}. Their Lagna is ${astroContext.lagna}, Moon Rashi is ${astroContext.moonRashi}, Nakshatra is ${astroContext.nakshatra}. Provide authoritative Vedic Jyotish guidance in ${sessionLanguage}.`
+          : `Devotee ${birthDetails.name || ''} asks: "${userMessage}". (Lagna: ${astroContext.lagna}, Moon: ${astroContext.moonRashi}, Dasha: ${astroContext.currentDasha}). Provide authoritative Vedic Jyotish guidance in ${sessionLanguage}.`,
+        birthDetails: vDt
+          ? {
+              datetime: vDt,
+              latitude: Number(birthDetails.lat) || 28.6139,
+              longitude: Number(birthDetails.lon) || 77.209,
+            }
+          : undefined,
+        conversationContext: conversationHistory && conversationHistory.length > 0 ? conversationHistory.slice(-4) : undefined,
       });
 
       if (vRes.success && (vRes.data?.response || vRes.data?.answer)) {
-        vedikaTruth = (vRes.data.response || vRes.data.answer) || '';
+        vedikaTruth = vRes.data.response || vRes.data.answer || '';
       }
     } catch (vErr) {
       console.warn('[Vedika] AI astrologer voice query notice, continuing with local evidence:', vErr);
     }
 
+    // 5. Try OpenAI for Natural Conversational Styling (if credits and key available)
     if (openaiApiKey) {
       try {
         const currentYear = new Date().getFullYear();
-        const currentDateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const currentDateStr = new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
 
         const systemPrompt = `You are ${astrologer.name}, a revered, authentic Vedic Astrologer (${astrologer.primaryDiscipline}) with 25+ years of Vedic wisdom on AstroParihar.
 Devotee Profile:
@@ -886,32 +1071,22 @@ ${astroContext.planetaryPlacements ? `\nPlanetary Positions by House:\n${astroCo
 
 Real-Time Calendar Anchor:
 - Current Date: ${currentDateStr} (Year: ${currentYear})
-- The current year is strictly ${currentYear}. You are living and consulting in ${currentYear}. NEVER refer to 2024 or 2025 as the current or upcoming year.
-- All planetary transits, dasha forecasts, auspicious time windows, and remedies must be calculated for ${currentYear} and future years (${currentYear}, ${currentYear + 1}, ${currentYear + 2}).
+- The current year is strictly ${currentYear}. You are living and consulting in ${currentYear}.
 
 Language Instruction:
 You MUST speak ONLY in ${sessionLanguage}.
-- If Telugu: Speak in pure, warm, respectful spoken Telugu script (తెలుగు లిపి). Use respectful words like 'నమస్కారం', 'గారూ', 'మీ జాతకం ప్రకారం'.
-- If Tamil: Speak in pure Tamil script (தமிழ்). Use 'வணக்கம்', 'உங்கள் ஜாதகப்படி'.
-- If Hindi: Speak in pure Hindi script (हिन्दी). Use 'नमस्ते', 'जी', 'आपकी जन्म कुंडली के अनुसार'.
+- If Telugu: Speak in pure, respectful spoken Telugu script.
+- If Tamil: Speak in pure Tamil script.
+- If Hindi: Speak in pure Hindi script.
 - If English: Warm, serene, traditional Indian Vedic astrology tone.
 
 Spoken Call Style & Number Rules:
 - Keep your answers concise, direct, and conversational (2 to 4 spoken sentences).
 - Base your insights strictly on their verified Ascendant (${astroContext.lagna}) and active Dasha (${astroContext.currentDasha}).
-- Give immediate Vedic astrological insights, auspicious time windows, and 1 actionable remedy (mantra, donation, or pooja) matching AstroParihar canonical guidelines.
-- Finish every explanation, astrological prediction, and remedy completely to the end. Never stop mid-sentence or leave any thought incomplete.
+- Give immediate Vedic astrological insights, auspicious time windows, and 1 actionable remedy matching AstroParihar canonical guidelines.
+- Finish every explanation completely to the end. Never stop mid-sentence.
 - Do not use markdown bullet points, stars (*), hyphens (-), or hashes (#). Keep it pure natural speech suitable for voice conversation.
-
-CRITICAL CANONICAL REMEDIES & ISHTA DEVATA GROUND TRUTH:
-${ishtaDevata ? `- Verified Ishta Devata: ${ishtaDevata.deityName} (Soul Atmakaraka: ${ishtaDevata.atmakarakaPlanet}, 12th from Karakamsa: ${ishtaDevata.twelfthSignFromKarakamsa} governed by ${ishtaDevata.governingPlanet}). Prescribed Ishta Mantra: "${ishtaDevata.primaryMantra}". If the devotee asks who their Ishta Devata, Kuladevata, or personal God is, you MUST state ONLY "${ishtaDevata.deityName}". NEVER name any other deity.` : ''}
-${canonicalRemedies ? `- Prescribed Canonical Homam for their concern (${birthDetails.primaryConcern || 'Life Guidance'}): ${canonicalRemedies.primaryHomam.name} (${canonicalRemedies.primaryHomam.day})
-- Prescribed Canonical Daily Mantra: ${canonicalRemedies.primaryMantra.title} ("${canonicalRemedies.primaryMantra.transliteration}")` : ''}
-${detectedInterruption ? `
-CONVERSATIONAL BARGE-IN & TURN INTERRUPTION INTELLIGENCE:
-- The devotee has actively interrupted / redirected the conversation with this specific inquiry: "${userMessage}".
-- CRITICAL: DO NOT restart with formal greetings ("Namaste", "నమస్కారం", introductory welcome) or repeat previous statements.
-- Immediately acknowledge the intervention smoothly and succinctly in ${sessionLanguage} (e.g. "Understood, coming directly to...", "తప్పకుండా, మీ సందేహానికి వస్తే...", "बिल्कुल, सीधे...") and deliver a focused, crisp answer in 2-3 spoken sentences directly addressing their redirect.` : ''}
+${detectedInterruption ? `\n- Devotee interrupted to ask: "${userMessage}". Answer their redirect immediately without restarting greetings.` : ''}
 
 ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
 
@@ -944,7 +1119,7 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
         if (vedikaTruth) {
           messagesPayload.push({
             role: 'system',
-            content: `SUPPLEMENTARY JYOTISH ADVISORY INSIGHT (VEDIKA ENGINE): The following provides additional spiritual guidance. Incorporate its spiritual blessings, but ensure all planetary positions, degrees, nakshatras, nakshatra lords, and dasha dates strictly conform to the Astronomical Ground Truth provided above:\n\n"${vedikaTruth}"`
+            content: `SUPPLEMENTARY JYOTISH ADVISORY INSIGHT (VEDIKA ENGINE): Ensure alignment with this astronomical ground truth:\n\n"${vedikaTruth}"`,
           });
         }
 
@@ -956,60 +1131,64 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'gpt-4o',
+              model: 'gpt-4o-mini',
               messages: messagesPayload,
               temperature: 0.7,
-              max_tokens: 1200,
+              max_tokens: 600,
             }),
           },
           openaiApiKey
         );
 
-        if (!chatRes.ok) {
-          console.warn('gpt-4o voice completion failed, attempting gpt-4o-mini fallback...');
-          chatRes = await fetchWithOpenAIFallback(
-            'https://api.openai.com/v1/chat/completions',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                model: 'gpt-4o-mini',
-                messages: messagesPayload,
-                temperature: 0.7,
-                max_tokens: 1200,
-              }),
-            },
-            openaiApiKey
-          );
-        }
-
         if (chatRes.ok) {
           const chatData = await chatRes.json();
           replyText = chatData.choices?.[0]?.message?.content?.trim() || '';
-        } else {
-          const errText = await chatRes.text();
-          console.error('OpenAI voice consultation non-ok response:', chatRes.status, errText);
         }
       } catch (aiErr) {
-        console.warn('OpenAI GPT-4o-mini generation warning:', aiErr);
+        console.warn('OpenAI completion warning:', aiErr);
       }
     }
 
-    // 5. Dynamic Native Vedic Engine (Static Fallback)
+    // 6. Intelligent Fallback: Use live Vedika AI response if OpenAI was unavailable
+    if (!replyText && vedikaTruth) {
+      replyText = formatVedikaForVoice(vedikaTruth, sessionLanguage, astrologer.name);
+    }
+
+    // 7. Dynamic Native Vedic Engine (if both OpenAI and Vedika network calls were unavailable)
+    let dynamicRemedy: PrescribedRemedyInfo | undefined;
     if (!replyText) {
-      replyText = generateDynamicVedicReply(
+      const dynamicResult = generateDynamicVedicReply(
         userMessage,
         isInitial,
         birthDetails,
         astroContext,
         astrologer,
-        sessionLanguage
+        sessionLanguage,
+        conversationHistory
       );
+      replyText = dynamicResult.text;
+      dynamicRemedy = dynamicResult.remedy;
     }
 
-    // 6. Generate Voice Speech Audio
+    // 8. Extract & Persist the Active Remedy for this Consultation Session
+    const activePrescribedRemedy = dynamicRemedy || extractPrescribedRemedy(userMessage || '', replyText, astroContext);
+
+    if (activePrescribedRemedy && sessionId) {
+      try {
+        await adminDb.collection('ai_consultations').doc(sessionId).set(
+          {
+            prescribedRemedies: FieldValue.arrayUnion(activePrescribedRemedy),
+            lastPrescribedRemedy: activePrescribedRemedy,
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+      } catch (saveErr) {
+        console.warn('Could not persist prescribed remedy to Firestore:', saveErr);
+      }
+    }
+
+    // 9. Generate Guaranteed Voice Speech Audio (OpenAI TTS -> Google TTS Fallback for ALL Astrologers)
     const audioBase64 = await generateMultilingualAudioBase64(
       replyText,
       sessionLanguage,
@@ -1023,7 +1202,9 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
       replyText,
       audioBase64,
       astrologerName: astrologer.name,
+      voiceGender: astrologer.voiceGender || 'male',
       language: sessionLanguage,
+      prescribedRemedy: activePrescribedRemedy,
       interrupted: Boolean(detectedInterruption),
       conversationTurnState: {
         lastTurn: 'assistant',
@@ -1042,37 +1223,9 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
 
 export async function GET() {
   const activeKey = await getServerOpenAIApiKey();
-  if (!activeKey) {
-    return NextResponse.json({
-      version: 'live-v4',
-      error: 'OpenAI API key not configured. Add it in Admin Settings \u2192 AI Engine.',
-    });
-  }
-  try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${activeKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: 'Say hello in Telugu' }],
-        max_tokens: 30,
-      }),
-    });
-
-    const data = await res.json();
-    return NextResponse.json({
-      version: 'live-v4',
-      keyUsed: activeKey.substring(0, 10) + '...' + activeKey.slice(-4),
-      openaiStatus: res.status,
-      openaiResponse: data?.choices?.[0]?.message?.content || data,
-    });
-  } catch (err: any) {
-    return NextResponse.json({
-      version: 'live-v4',
-      error: err.message || String(err),
-    });
-  }
+  return NextResponse.json({
+    version: 'live-v5-robust',
+    hasOpenAiKey: Boolean(activeKey && activeKey.length >= 20),
+    status: 'online',
+  });
 }

@@ -64,6 +64,9 @@ export default function AICallRoomPage() {
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeAudioInstanceRef = useRef<HTMLAudioElement | null>(null);
+  const activeSourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const lastPrescribedRemedyRef = useRef<any>(null);
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const speechKeepAliveRef = useRef<NodeJS.Timeout | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -141,6 +144,19 @@ export default function AICallRoomPage() {
           activeAudioInstanceRef.current.pause();
           activeAudioInstanceRef.current.src = '';
         } catch (e) {}
+      }
+      if (activeSourceNodeRef.current) {
+        try {
+          activeSourceNodeRef.current.stop();
+          activeSourceNodeRef.current.disconnect();
+        } catch (e) {}
+        activeSourceNodeRef.current = null;
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        try {
+          audioContextRef.current.close();
+        } catch (e) {}
+        audioContextRef.current = null;
       }
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -242,13 +258,27 @@ export default function AICallRoomPage() {
     }
   }, [userData]);
 
+  // Preload and cache browser voices
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const loadVoices = () => {
+        window.speechSynthesis.getVoices();
+      };
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
   // Web Speech Synthesis (Client-side speaker fallback - reads ALL sentences sequentially till the end)
   const speakNativeWebSpeech = useCallback(
     (text: string) => {
       if (typeof window === 'undefined' || !('speechSynthesis' in window) || isSpeakerMutedRef.current) return;
-      
+
       // If server-synthesized audio is currently playing, NEVER play browser speech to prevent dual voice
-      if (activeAudioInstanceRef.current && !activeAudioInstanceRef.current.paused) {
+      if (
+        (activeAudioInstanceRef.current && !activeAudioInstanceRef.current.paused) ||
+        activeSourceNodeRef.current
+      ) {
         return;
       }
 
@@ -282,48 +312,68 @@ export default function AICallRoomPage() {
           const utterance = new SpeechSynthesisUtterance(currentText);
           const langCode = getLangCode(activeLanguageRef.current);
           utterance.lang = langCode;
-          utterance.rate = 0.90;
 
           const isFemale =
             session?.voiceGender === 'female' ||
             session?.astrologerName?.toLowerCase().includes('devi') ||
             session?.astrologerName?.toLowerCase().includes('mata') ||
             session?.astrologerName?.toLowerCase().includes('priya') ||
-            session?.astrologerName?.toLowerCase().includes('ananya');
-
-          utterance.pitch = isFemale ? 1.05 : 0.80;
+            session?.astrologerName?.toLowerCase().includes('ananya') ||
+            session?.astrologerName?.toLowerCase().includes('meera') ||
+            session?.astrologerName?.toLowerCase().includes('smita');
 
           const voices = window.speechSynthesis.getVoices();
-          const langVoices = voices.filter((v) => v.lang.startsWith(langCode.substring(0, 2)));
+          const langPrefix = langCode.substring(0, 2);
+          const langVoices = voices.filter((v) => v.lang.startsWith(langPrefix));
 
-          if (langVoices.length > 0) {
-            if (isFemale) {
-              const femaleVoice = langVoices.find(
-                (v) =>
-                  v.name.toLowerCase().includes('female') ||
-                  v.name.toLowerCase().includes('zira') ||
-                  v.name.toLowerCase().includes('swara') ||
-                  v.name.toLowerCase().includes('heera') ||
-                  v.name.toLowerCase().includes('shruti') ||
-                  v.name.toLowerCase().includes('pallavi')
-              );
-              utterance.voice = femaleVoice || langVoices[0];
-            } else {
-              const maleVoice = langVoices.find(
-                (v) =>
-                  v.name.toLowerCase().includes('male') ||
-                  v.name.toLowerCase().includes('david') ||
-                  v.name.toLowerCase().includes('george') ||
-                  v.name.toLowerCase().includes('ravi') ||
-                  v.name.toLowerCase().includes('mohan') ||
-                  v.name.toLowerCase().includes('valluvar') ||
-                  v.name.toLowerCase().includes('madhav')
-              );
-              if (maleVoice) {
-                utterance.voice = maleVoice;
-              } else {
-                utterance.pitch = 0.70;
-              }
+          if (isFemale) {
+            utterance.pitch = 1.05;
+            utterance.rate = 0.90;
+            const femaleVoice =
+              langVoices.find((v) => {
+                const n = v.name.toLowerCase();
+                return (
+                  n.includes('female') ||
+                  n.includes('zira') ||
+                  n.includes('swara') ||
+                  n.includes('heera') ||
+                  n.includes('shruti') ||
+                  n.includes('pallavi') ||
+                  n.includes('kalpana')
+                );
+              }) || langVoices[0];
+            if (femaleVoice) utterance.voice = femaleVoice;
+          } else {
+            // Male Astrologer: set lower pitch and dignified speaking tempo
+            utterance.pitch = 0.55;
+            utterance.rate = 0.82;
+            const maleVoice =
+              langVoices.find((v) => {
+                const n = v.name.toLowerCase();
+                return (
+                  n.includes('male') ||
+                  n.includes('david') ||
+                  n.includes('george') ||
+                  n.includes('mark') ||
+                  n.includes('ravi') ||
+                  n.includes('mohan') ||
+                  n.includes('valluvar') ||
+                  n.includes('madhav') ||
+                  n.includes('narayan') ||
+                  n.includes('kumar') ||
+                  n.includes('guy') ||
+                  n.includes('man')
+                );
+              }) ||
+              voices.find((v) => {
+                const n = v.name.toLowerCase();
+                return (
+                  (v.lang.includes('IN') || v.lang.includes('en')) &&
+                  (n.includes('male') || n.includes('david') || n.includes('madhav') || n.includes('mohan') || n.includes('ravi'))
+                );
+              });
+            if (maleVoice) {
+              utterance.voice = maleVoice;
             }
           }
 
@@ -337,7 +387,6 @@ export default function AICallRoomPage() {
             speakSentence();
           };
           utterance.onerror = () => {
-            // Even if an error happens on one sentence, advance to the next so no line is missed
             speakSentence();
           };
 
@@ -371,7 +420,7 @@ export default function AICallRoomPage() {
     [getLangCode, session]
   );
 
-  // Play Synthesized Voice Audio from Base64 MP3 (Single Authority Audio Source)
+  // Play Synthesized Voice Audio from Base64 MP3 (Web Audio DSP Pitch-Shifter for Male Astrologers)
   const playAudioFromBase64 = useCallback(
     (base64String: string, fallbackText: string) => {
       if (isSpeakerMutedRef.current) return;
@@ -381,6 +430,7 @@ export default function AICallRoomPage() {
           window.speechSynthesis.cancel();
         }
 
+        // Stop any currently playing HTML5 audio
         if (activeAudioInstanceRef.current) {
           try {
             activeAudioInstanceRef.current.pause();
@@ -388,14 +438,89 @@ export default function AICallRoomPage() {
           } catch (e) {}
         }
 
-        const audioUrl = `data:audio/mp3;base64,${base64String}`;
-        const sound = new Audio(audioUrl);
-        activeAudioInstanceRef.current = sound;
+        // Stop any active Web Audio node
+        if (activeSourceNodeRef.current) {
+          try {
+            activeSourceNodeRef.current.stop();
+            activeSourceNodeRef.current.disconnect();
+          } catch (e) {}
+          activeSourceNodeRef.current = null;
+        }
 
-        const playPromise = sound.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
+        const isFemale =
+          session?.voiceGender === 'female' ||
+          session?.astrologerName?.toLowerCase().includes('devi') ||
+          session?.astrologerName?.toLowerCase().includes('mata') ||
+          session?.astrologerName?.toLowerCase().includes('priya') ||
+          session?.astrologerName?.toLowerCase().includes('ananya') ||
+          session?.astrologerName?.toLowerCase().includes('meera') ||
+          session?.astrologerName?.toLowerCase().includes('smita');
+        const isMale = !isFemale;
+
+        // If Astrologer is Male: Use Web Audio API DSP pipeline to shift female TTS voice into deep baritone Pandit register
+        if (isMale && typeof window !== 'undefined' && (window.AudioContext || (window as any).webkitAudioContext)) {
+          try {
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+              audioContextRef.current = new AudioContextClass();
+            }
+            const audioCtx = audioContextRef.current;
+            if (audioCtx.state === 'suspended') {
+              audioCtx.resume();
+            }
+
+            // Decode base64 into ArrayBuffer
+            const binaryString = window.atob(base64String);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            audioCtx.decodeAudioData(bytes.buffer.slice(0)).then((decodedBuffer) => {
+              if (isSpeakerMutedRef.current) return;
+
+              const source = audioCtx.createBufferSource();
+              source.buffer = decodedBuffer;
+              activeSourceNodeRef.current = source;
+
+              // Pitch downshift: drops fundamental frequency into masculine range and relaxes cadence to calm Pandit speed
+              source.playbackRate.value = 0.88;
+              if (source.detune) {
+                source.detune.value = -120; // total pitch drop: ~3.4 semitones
+              }
+
+              // Filter 1: Low-shelf male chest warmth filter (+5.5dB @ 220Hz)
+              const bassFilter = audioCtx.createBiquadFilter();
+              bassFilter.type = 'lowshelf';
+              bassFilter.frequency.value = 220;
+              bassFilter.gain.value = 5.5;
+
+              // Filter 2: Suppress female vocal tract nasal formants (-3.0dB @ 1400Hz)
+              const midFilter = audioCtx.createBiquadFilter();
+              midFilter.type = 'peaking';
+              midFilter.frequency.value = 1400;
+              midFilter.Q.value = 1.0;
+              midFilter.gain.value = -3.0;
+
+              // Filter 3: Roll off high female sibilance (-4.0dB @ 3200Hz)
+              const trebleFilter = audioCtx.createBiquadFilter();
+              trebleFilter.type = 'highshelf';
+              trebleFilter.frequency.value = 3200;
+              trebleFilter.gain.value = -4.0;
+
+              source.connect(bassFilter);
+              bassFilter.connect(midFilter);
+              midFilter.connect(trebleFilter);
+              trebleFilter.connect(audioCtx.destination);
+
+              source.onended = () => {
+                setIsAiSpeaking(false);
+                isAiSpeakingRef.current = false;
+                activeSourceNodeRef.current = null;
+              };
+
+              source.start(0);
               setIsAiSpeaking(true);
               isAiSpeakingRef.current = true;
               if (recognitionRef.current) {
@@ -403,29 +528,65 @@ export default function AICallRoomPage() {
                   recognitionRef.current.stop();
                 } catch (e) {}
               }
-            })
-            .catch((err) => {
-              console.warn('Direct audio play blocked by browser autoplay policy:', err);
-              // Do NOT call speakNativeWebSpeech here to avoid dual voice mixing!
+            }).catch((decodeErr) => {
+              console.warn('AudioContext decode failed, falling back to standard audio:', decodeErr);
+              playStandardHtml5Audio(base64String);
             });
+
+            return;
+          } catch (dspErr) {
+            console.warn('Web Audio DSP error, falling back to standard audio:', dspErr);
+          }
         }
-        sound.onended = () => {
-          setIsAiSpeaking(false);
-          isAiSpeakingRef.current = false;
-        };
-        sound.onerror = () => {
-          setIsAiSpeaking(false);
-          isAiSpeakingRef.current = false;
-          // Do NOT trigger fallback speech to avoid dual voice mixing!
-        };
+
+        // Standard clean audio playback for female astrologers or fallback
+        playStandardHtml5Audio(base64String);
       } catch (e) {
         console.warn('Audio playback error:', e);
         setIsAiSpeaking(false);
         isAiSpeakingRef.current = false;
       }
     },
-    []
+    [session]
   );
+
+  // Fallback Standard HTML5 Audio Player
+  const playStandardHtml5Audio = useCallback((base64String: string) => {
+    try {
+      const audioUrl = `data:audio/mp3;base64,${base64String}`;
+      const sound = new Audio(audioUrl);
+      activeAudioInstanceRef.current = sound;
+
+      const playPromise = sound.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsAiSpeaking(true);
+            isAiSpeakingRef.current = true;
+            if (recognitionRef.current) {
+              try {
+                recognitionRef.current.stop();
+              } catch (e) {}
+            }
+          })
+          .catch((err) => {
+            console.warn('Direct audio play blocked by browser autoplay policy:', err);
+          });
+      }
+      sound.onended = () => {
+        setIsAiSpeaking(false);
+        isAiSpeakingRef.current = false;
+      };
+      sound.onerror = () => {
+        setIsAiSpeaking(false);
+        isAiSpeakingRef.current = false;
+      };
+    } catch (err) {
+      console.warn('HTML5 audio error:', err);
+      setIsAiSpeaking(false);
+      isAiSpeakingRef.current = false;
+    }
+  }, []);
 
   // 2. AI Voice / Speech Exchange Handler
   const triggerAiVoiceExchange = useCallback(
@@ -451,6 +612,10 @@ export default function AICallRoomPage() {
         });
 
         const data = await res.json();
+
+        if (data.prescribedRemedy) {
+          lastPrescribedRemedyRef.current = data.prescribedRemedy;
+        }
 
         if (data.replyText) {
           const aiMsg = {
@@ -625,6 +790,13 @@ export default function AICallRoomPage() {
                 activeAudioInstanceRef.current.src = '';
               } catch (e) {}
             }
+            if (activeSourceNodeRef.current) {
+              try {
+                activeSourceNodeRef.current.stop();
+                activeSourceNodeRef.current.disconnect();
+              } catch (e) {}
+              activeSourceNodeRef.current = null;
+            }
             if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
               window.speechSynthesis.cancel();
             }
@@ -764,6 +936,14 @@ export default function AICallRoomPage() {
       } catch (e) {}
     }
 
+    if (activeSourceNodeRef.current) {
+      try {
+        activeSourceNodeRef.current.stop();
+        activeSourceNodeRef.current.disconnect();
+      } catch (e) {}
+      activeSourceNodeRef.current = null;
+    }
+
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
@@ -778,6 +958,7 @@ export default function AICallRoomPage() {
           sessionId,
           durationSeconds: Math.max(durationSeconds, 60),
           conversationTranscript: messages,
+          lastPrescribedRemedy: lastPrescribedRemedyRef.current,
         }),
       });
 
@@ -1173,6 +1354,13 @@ export default function AICallRoomPage() {
                 try {
                   activeAudioInstanceRef.current.pause();
                 } catch (e) {}
+              }
+              if (activeSourceNodeRef.current) {
+                try {
+                  activeSourceNodeRef.current.stop();
+                  activeSourceNodeRef.current.disconnect();
+                } catch (e) {}
+                activeSourceNodeRef.current = null;
               }
               if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
