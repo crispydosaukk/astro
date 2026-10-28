@@ -89,6 +89,7 @@ const sidebarGroups: SidebarGroup[] = [
           { icon: Smartphone, label: 'Onboarding', href: '/admin-panel/app-dynamic/onboarding' },
           { icon: LayoutTemplate, label: 'Banners', href: '/admin-panel/app-dynamic/banners' },
           { icon: Sparkles, label: 'Cosmic Insights', href: '/admin-panel/app-dynamic/cosmic-insights' },
+          { icon: LayoutTemplate, label: 'Services', href: '/admin-panel/app-dynamic/services' },
         ],
       },
       { icon: Shield, label: 'Overview', href: '/admin-panel', badge: null },

@@ -306,3 +306,684 @@ export async function saveCosmicInsights(insights: CosmicInsightCard[]): Promise
     throw err;
   }
 }
+
+/* ------------------------------------------------ App Services & Remedies */
+const SERVICES_DOC_ID = 'app_services';
+const SERVICE_CATEGORIES_DOC_ID = 'app_service_categories';
+
+export interface AppServiceItem {
+  id: string;
+  order: number;
+  category: string;
+  name: string;
+  sanskrit?: string;
+  desc: string;
+  direction?: string;
+  directionHindi?: string;
+  mantra?: string;
+  icon: string;
+  route: string;
+  color: string;
+  badge?: string;
+  active: boolean;
+  isRemediesCard?: boolean;
+  updatedAt?: string;
+}
+
+export interface AppServiceCategory {
+  id: string;
+  order: number;
+  category: 'remedies' | 'panchang' | 'kundli' | 'consultations' | 'guidance' | string;
+  title: string;
+  sanskrit: string;
+  desc: string;
+  badge?: string;
+  icon: string;
+  color: string;
+  active: boolean;
+  items: AppServiceItem[];
+  updatedAt?: string;
+}
+
+export const DEFAULT_SERVICE_CATEGORIES: AppServiceCategory[] = [
+  {
+    id: 'cat-remedies',
+    order: 1,
+    category: 'remedies',
+    title: 'Sacred Vedic Remedies',
+    sanskrit: 'अष्ट परिहार • Ashta-Digbandhana',
+    desc: 'Harmonize planetary energies through authentic Vedic remedies prescribed by the 8 sacred directions.',
+    badge: '8 in 1 Card',
+    icon: 'auto_awesome',
+    color: '#713B32',
+    active: true,
+    items: [
+      {
+        id: 'rem-mantra',
+        order: 1,
+        category: 'remedies',
+        name: 'Mantra Shakti (मन्त्र शक्ति)',
+        sanskrit: 'मन्त्र शक्ति',
+        direction: 'North',
+        directionHindi: 'उत्तर (North)',
+        desc: 'Sacred sound vibrations that align planetary energies',
+        mantra: 'ॐ ह्रीं श्रीं क्लीं चामुण्डायै विच्चे ॥',
+        icon: 'auto_awesome',
+        route: '/remedy-detail-screen',
+        color: '#9370DB',
+        badge: 'North',
+        active: true,
+      },
+      {
+        id: 'rem-yantra',
+        order: 2,
+        category: 'remedies',
+        name: 'Yantra (यन्त्र)',
+        sanskrit: 'यन्त्र',
+        direction: 'North-East',
+        directionHindi: 'ईशान (North-East)',
+        desc: 'Sacred geometric diagrams that attract cosmic energies',
+        mantra: 'ॐ श्रीं ह्रीं क्लीं नमः ॥',
+        icon: 'auto_awesome',
+        route: '/remedy-detail-screen',
+        color: '#FFD700',
+        badge: 'North-East',
+        active: true,
+      },
+      {
+        id: 'rem-homa',
+        order: 3,
+        category: 'remedies',
+        name: 'Homa (होम / हवन)',
+        sanskrit: 'होम / हवन',
+        direction: 'East',
+        directionHindi: 'पूर्व (East)',
+        desc: 'Sacred fire rituals to purify and invoke divine blessings',
+        mantra: 'ॐ अग्नये स्वाहा ॥',
+        icon: 'whatshot',
+        route: '/remedy-detail-screen',
+        color: '#FF6B35',
+        badge: 'East',
+        active: true,
+      },
+      {
+        id: 'rem-devata',
+        order: 4,
+        category: 'remedies',
+        name: 'Devata Upasana (देवता उपासना)',
+        sanskrit: 'देवता उपासना',
+        direction: 'South-East',
+        directionHindi: 'आग्नेय (South-East)',
+        desc: 'Personal deity worship for spiritual alignment',
+        mantra: 'ॐ नमः शिवाय ॥',
+        icon: 'wb_sunny',
+        route: '/remedy-detail-screen',
+        color: '#FFB347',
+        badge: 'South-East',
+        active: true,
+      },
+      {
+        id: 'rem-ratna',
+        order: 5,
+        category: 'remedies',
+        name: 'Ratna / Gemstones (रत्न)',
+        sanskrit: 'रत्न',
+        direction: 'South',
+        directionHindi: 'दक्षिण (South)',
+        desc: 'Planetary gemstones to strengthen beneficial influences',
+        mantra: 'ॐ ग्रहाय नमः ॥',
+        icon: 'diamond',
+        route: '/remedy-detail-screen',
+        color: '#4FC3F7',
+        badge: 'South (S)',
+        active: true,
+      },
+      {
+        id: 'rem-rudraksha',
+        order: 6,
+        category: 'remedies',
+        name: 'Rudraksha (रुद्राक्ष)',
+        sanskrit: 'रुद्राक्ष',
+        direction: 'South-West',
+        directionHindi: 'नैऋत्य (South-West)',
+        desc: 'Sacred seeds of Lord Shiva for protection and healing',
+        mantra: 'ॐ नमः शिवाय ॥',
+        icon: 'spa',
+        route: '/remedy-detail-screen',
+        color: '#8B4513',
+        badge: 'South-West (SW)',
+        active: true,
+      },
+      {
+        id: 'rem-vastu',
+        order: 7,
+        category: 'remedies',
+        name: 'Vastu (वास्तु)',
+        sanskrit: 'वास्तु',
+        direction: 'West',
+        directionHindi: 'पश्चिम (West)',
+        desc: 'Sacred architecture for harmonious living spaces',
+        mantra: 'ॐ वास्तुपुरुषाय नमः ॥',
+        icon: 'home',
+        route: '/remedy-detail-screen',
+        color: '#81C784',
+        badge: 'West (W)',
+        active: true,
+      },
+      {
+        id: 'rem-charity',
+        order: 8,
+        category: 'remedies',
+        name: 'Dāna & Seva (दान एवं सेवा)',
+        sanskrit: 'दान एवं सेवा',
+        direction: 'North-West',
+        directionHindi: 'वायव्य (North-West)',
+        desc: 'Charitable giving and selfless service for karmic balance',
+        mantra: 'ॐ परोपकाराय नमः ॥',
+        icon: 'favorite',
+        route: '/remedy-detail-screen',
+        color: '#FF6B6B',
+        badge: 'North-West (NW)',
+        active: true,
+      },
+    ],
+  },
+  {
+    id: 'cat-free-tools',
+    order: 2,
+    category: 'kundli',
+    title: 'Free Services & Tools',
+    sanskrit: 'निःशुल्क वैदिक सेवाएं',
+    desc: 'Personalized Vedic birth charts, compatibility, Panchang, daily horoscope, meditation & fasting planners.',
+    badge: 'Free',
+    icon: 'auto_stories',
+    color: '#9370DB',
+    active: true,
+    items: [
+      {
+        id: 'tool-janam-kundli',
+        order: 1,
+        category: 'kundli',
+        name: 'Janam Kundli',
+        sanskrit: 'जन्म कुंडली',
+        desc: 'Personalized Vedic birth chart & life predictions',
+        icon: 'auto_stories',
+        route: '/my-kundli-screen',
+        color: '#9370DB',
+        badge: 'Free',
+        active: true,
+      },
+      {
+        id: 'tool-kundli-match',
+        order: 2,
+        category: 'kundli',
+        name: 'Kundli Matching',
+        sanskrit: 'कुंडली मिलान',
+        desc: 'Vedic Gun Milan & marital compatibility check',
+        icon: 'favorite_border',
+        route: '/match-kundli-screen',
+        color: '#FF6B6B',
+        badge: 'Free',
+        active: true,
+      },
+      {
+        id: 'tool-panchang',
+        order: 3,
+        category: 'kundli',
+        name: 'Panchang',
+        sanskrit: 'पंचांग',
+        desc: 'Tithi, Nakshatra, Yoga & Shubh Muhurat',
+        icon: 'calendar_today_outlined',
+        route: '/panchang-screen',
+        color: '#4FC3F7',
+        badge: 'Free',
+        active: true,
+      },
+      {
+        id: 'tool-horoscope',
+        order: 4,
+        category: 'kundli',
+        name: 'Daily Horoscope',
+        sanskrit: 'दैनिक राशिफल',
+        desc: 'Daily zodiac forecasts & lucky guidance',
+        icon: 'wb_sunny_outlined',
+        route: '/horoscope-screen',
+        color: '#FFB347',
+        badge: 'Free',
+        active: true,
+      },
+      {
+        id: 'tool-meditation',
+        order: 5,
+        category: 'kundli',
+        name: 'Meditation Guide',
+        sanskrit: 'ध्यान एवं प्राणायाम',
+        desc: 'Mindfulness, mantras & spiritual alignment',
+        icon: 'self_improvement',
+        route: 'meditation_modal',
+        color: '#81C784',
+        badge: 'Free',
+        active: true,
+      },
+      {
+        id: 'tool-fasting',
+        order: 6,
+        category: 'kundli',
+        name: 'Fasting Planner',
+        sanskrit: 'व्रत एवं उपवास तालिका',
+        desc: 'Sacred Vrat schedules, rules & rituals',
+        icon: 'event_note',
+        route: 'fasting_modal',
+        color: '#E91E63',
+        badge: 'Free',
+        active: true,
+      },
+    ],
+  },
+  {
+    id: 'cat-mahadasha',
+    order: 3,
+    category: 'mahadasha',
+    title: 'Mahadasha Guides (Paid PDFs)',
+    sanskrit: 'महादशा विशेष संकलन • PDF Dossiers',
+    desc: 'In-depth downloadable PDF blueprints with exact Sanskrit mantras, dietary rules, and planetary remedies.',
+    badge: 'Paid PDFs',
+    icon: 'menu_book',
+    color: '#FF6B35',
+    active: true,
+    items: [
+      {
+        id: 'maha-rahu-stab',
+        order: 1,
+        category: 'mahadasha',
+        name: 'Rahu Mahadasha Stabilisation Guide',
+        sanskrit: 'राहु महादशा शांति संकलन',
+        desc: 'Harmonize intense Rahu transit & remedies (PDF Dossier)',
+        icon: 'shield',
+        route: 'mahadasha_rahu-stabilisation',
+        color: '#713B32',
+        badge: '₹499',
+        active: true,
+      },
+      {
+        id: 'maha-rahu-surv',
+        order: 2,
+        category: 'mahadasha',
+        name: 'Rahu Mahadasha Survival Guide',
+        sanskrit: 'राहु महादशा सर्वाइवल गाइड',
+        desc: 'Tactical survival & protective mantras (PDF Dossier)',
+        icon: 'local_fire_department',
+        route: 'mahadasha_rahu-survival',
+        color: '#E65100',
+        badge: '₹999',
+        active: true,
+      },
+      {
+        id: 'maha-sani-stab',
+        order: 3,
+        category: 'mahadasha',
+        name: 'Sani Mahadasha Stabilisation Guide',
+        sanskrit: 'शनि महादशा शांति संकलन',
+        desc: 'Saturn discipline, endurance & remedies (PDF Dossier)',
+        icon: 'shield',
+        route: 'mahadasha_sani-stabilisation',
+        color: '#1A3D5C',
+        badge: '₹499',
+        active: true,
+      },
+      {
+        id: 'maha-sani-surv',
+        order: 4,
+        category: 'mahadasha',
+        name: 'Sani Mahadasha Survival Guide',
+        sanskrit: 'शनि महादशा सर्वाइवल गाइड',
+        desc: 'Navigating Saturn trials & karmic phase (PDF Dossier)',
+        icon: 'bolt',
+        route: 'mahadasha_sani-survival',
+        color: '#4A148C',
+        badge: '₹999',
+        active: true,
+      },
+    ],
+  },
+  {
+    id: 'cat-panchang',
+    order: 4,
+    category: 'panchang',
+    title: 'Panchang & Sacred Timings',
+    sanskrit: 'पंचांग एवं शुभ मुहूर्त • Celestial Almanac',
+    desc: 'Real-time Tithi, Nakshatra, Shubh Muhurat, Rahu Kaal, Choghadiya and Hora calculations.',
+    badge: 'Live Almanac',
+    icon: 'calendar_today_outlined',
+    color: '#4FC3F7',
+    active: true,
+    items: [
+      {
+        id: 'pan-today',
+        order: 1,
+        category: 'panchang',
+        name: 'Today Panchang',
+        sanskrit: 'आज का पंचांग',
+        desc: 'Tithi, Nakshatra, Yoga & Shubh Muhurat',
+        icon: 'calendar_today_outlined',
+        route: '/panchang-screen',
+        color: '#4FC3F7',
+        badge: 'Live',
+        active: true,
+      },
+      {
+        id: 'pan-tomorrow',
+        order: 2,
+        category: 'panchang',
+        name: 'Tomorrow Panchang',
+        sanskrit: 'कल का पंचांग',
+        desc: 'Advance next-day celestial alignments',
+        icon: 'event_outlined',
+        route: '/panchang-screen',
+        color: '#81C784',
+        badge: 'Advance',
+        active: true,
+      },
+      {
+        id: 'pan-tithi',
+        order: 3,
+        category: 'panchang',
+        name: 'Tithi',
+        sanskrit: 'तिथि एवं पक्ष',
+        desc: 'Lunar phases & paksha calculations',
+        icon: 'nightlight_round',
+        route: '/panchang-screen',
+        color: '#9370DB',
+        badge: 'Lunar',
+        active: true,
+      },
+      {
+        id: 'pan-vaar',
+        order: 4,
+        category: 'panchang',
+        name: 'Vaar',
+        sanskrit: 'वार एवं अधिष्ठाता देवता',
+        desc: 'Seven day lords & planetary deity',
+        icon: 'wb_sunny_outlined',
+        route: '/panchang-screen',
+        color: '#FFB347',
+        badge: 'Solar',
+        active: true,
+      },
+      {
+        id: 'pan-karana',
+        order: 5,
+        category: 'panchang',
+        name: 'Karana',
+        sanskrit: 'करण',
+        desc: 'Half-tithi interval for action planning',
+        icon: 'auto_awesome',
+        route: '/panchang-screen',
+        color: '#4FC3F7',
+        badge: 'Half-Tithi',
+        active: true,
+      },
+      {
+        id: 'pan-muhurat',
+        order: 6,
+        category: 'panchang',
+        name: 'Shubh Muhurat',
+        sanskrit: 'शुभ मुहूर्त',
+        desc: 'Auspicious Abhijit & Amrit timing windows',
+        icon: 'event_available_outlined',
+        route: '/muhurat-screen',
+        color: '#FFD700',
+        badge: 'Auspicious',
+        active: true,
+      },
+      {
+        id: 'pan-rahu',
+        order: 7,
+        category: 'panchang',
+        name: 'Rahu Kaal & Cautions',
+        sanskrit: 'राहु काल एवं यमघंट',
+        desc: 'Inauspicious Rahu periods & cautions',
+        icon: 'warning_amber_outlined',
+        route: '/muhurat-screen',
+        color: '#FF6B6B',
+        badge: 'Caution',
+        active: true,
+      },
+      {
+        id: 'pan-choghadiya',
+        order: 8,
+        category: 'panchang',
+        name: 'Choghadiya',
+        sanskrit: 'चौघड़िया',
+        desc: 'Day & night 7-fold auspicious divisions',
+        icon: 'explore_outlined',
+        route: '/panchang-screen',
+        color: '#FFB347',
+        badge: '7-Fold',
+        active: true,
+      },
+      {
+        id: 'pan-hora',
+        order: 9,
+        category: 'panchang',
+        name: 'Hora',
+        sanskrit: 'होरा',
+        desc: 'Hourly planetary ruler alignment & tasks',
+        icon: 'schedule_outlined',
+        route: '/panchang-screen',
+        color: '#9370DB',
+        badge: 'Hourly',
+        active: true,
+      },
+    ],
+  },
+  {
+    id: 'cat-consultations',
+    order: 5,
+    category: 'consultations',
+    title: 'Consultations & AI Astrologer',
+    sanskrit: 'विशेषज्ञ ज्योतिष परामर्श',
+    desc: 'Direct guidance from verified Vedic scholars and 24/7 AI spiritual intelligence.',
+    badge: 'Direct Access',
+    icon: 'people_outline',
+    color: '#81C784',
+    active: true,
+    items: [
+      {
+        id: 'con-live',
+        order: 1,
+        category: 'consultations',
+        name: 'Talk to Astrologer',
+        sanskrit: 'ज्योतिषी से बात करें',
+        desc: 'Live 1-on-1 consultations with verified Vedic masters',
+        icon: 'people_outline',
+        route: '/live-astrologers-screen',
+        color: '#81C784',
+        badge: 'Live',
+        active: true,
+      },
+      {
+        id: 'con-ai',
+        order: 2,
+        category: 'consultations',
+        name: 'AI Expert Astrologer',
+        sanskrit: 'एआई ज्योतिषी',
+        desc: '24/7 instant Kundli calculations, remedies & guidance',
+        icon: 'auto_awesome',
+        route: '/ai-chat-screen',
+        color: '#713B32',
+        badge: '24/7',
+        active: true,
+      },
+    ],
+  },
+  {
+    id: 'cat-guidance',
+    order: 6,
+    category: 'guidance',
+    title: 'Specialized Life Guidance',
+    sanskrit: 'विशेष जीवन मार्गदर्शन',
+    desc: 'In-depth astrological solutions for career, relationships, business, wealth, and destiny.',
+    badge: 'Comprehensive',
+    icon: 'psychology_outlined',
+    color: '#FFB347',
+    active: true,
+    items: [
+      {
+        id: 'gui-career',
+        order: 1,
+        category: 'guidance',
+        name: 'Career Astrology',
+        sanskrit: 'करियर मार्गदर्शन',
+        desc: 'Career path, promotions, switch timings & business success',
+        icon: 'work_outline',
+        route: '/career-astrology-screen',
+        color: '#FFD700',
+        active: true,
+      },
+      {
+        id: 'gui-marriage',
+        order: 2,
+        category: 'guidance',
+        name: 'Marriage Astrology',
+        sanskrit: 'विवाह एवं संबंध',
+        desc: 'Marriage timing, spouse characteristics & relationship harmony',
+        icon: 'ring_volume_outlined',
+        route: '/marriage-astrology-screen',
+        color: '#FF6B6B',
+        active: true,
+      },
+      {
+        id: 'gui-business',
+        order: 3,
+        category: 'guidance',
+        name: 'Business Astrology',
+        sanskrit: 'व्यापार मुहूर्त',
+        desc: 'Company launch, partnerships & auspicious commencement',
+        icon: 'business_center_outlined',
+        route: '/business-astrology-screen',
+        color: '#4FC3F7',
+        active: true,
+      },
+      {
+        id: 'gui-finance',
+        order: 4,
+        category: 'guidance',
+        name: 'Finance Astrology',
+        sanskrit: 'धन एवं समृद्धि',
+        desc: 'Dhana Yogas, wealth accumulation & investment windows',
+        icon: 'attach_money',
+        route: '/finance-astrology-screen',
+        color: '#81C784',
+        active: true,
+      },
+      {
+        id: 'gui-tarot',
+        order: 5,
+        category: 'guidance',
+        name: 'Tarot Reading',
+        sanskrit: 'टैरो कार्ड परामर्श',
+        desc: 'Intuitive card spreads for immediate clarity and insight',
+        icon: 'style_outlined',
+        route: '/tarot-screen',
+        color: '#9370DB',
+        active: true,
+      },
+      {
+        id: 'gui-numerology',
+        order: 6,
+        category: 'guidance',
+        name: 'Numerology',
+        sanskrit: 'अंक ज्योतिष',
+        desc: 'Life path numbers, name vibrations & lucky dates',
+        icon: 'pin_outlined',
+        route: '/numerology-screen',
+        color: '#FFB347',
+        active: true,
+      },
+      {
+        id: 'gui-spiritual',
+        order: 7,
+        category: 'guidance',
+        name: 'Spiritual Guidance',
+        sanskrit: 'आध्यात्मिक साधना',
+        desc: 'Mantra sadhana, chakra balancing & karmic alignment',
+        icon: 'self_improvement',
+        route: '/spiritual-guidance-screen',
+        color: '#FF6B6B',
+        active: true,
+      },
+    ],
+  },
+];
+
+export const DEFAULT_APP_SERVICES: AppServiceItem[] = DEFAULT_SERVICE_CATEGORIES.flatMap(
+  (c) => c.items
+);
+
+export async function getAppServiceCategories(): Promise<AppServiceCategory[]> {
+  try {
+    if (!db) return DEFAULT_SERVICE_CATEGORIES;
+
+    const docRef = doc(db, COLLECTION_NAME, SERVICE_CATEGORIES_DOC_ID);
+    const snap = await getDoc(docRef);
+
+    if (snap.exists() && snap.data()?.categories && Array.isArray(snap.data()?.categories)) {
+      const categories = snap.data().categories as AppServiceCategory[];
+      return categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+    }
+  } catch (err) {
+    console.warn('Could not fetch app service categories from Firestore, using defaults:', err);
+  }
+  return DEFAULT_SERVICE_CATEGORIES;
+}
+
+export async function saveAppServiceCategories(categories: AppServiceCategory[]): Promise<boolean> {
+  try {
+    if (!db) return false;
+
+    const docRef = doc(db, COLLECTION_NAME, SERVICE_CATEGORIES_DOC_ID);
+    await setDoc(
+      docRef,
+      {
+        categories,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (err) {
+    console.error('Error saving app service categories to Firestore:', err);
+    throw err;
+  }
+}
+
+export async function getAppServices(): Promise<AppServiceItem[]> {
+  try {
+    const categories = await getAppServiceCategories();
+    return categories.flatMap((c) => c.items).sort((a, b) => (a.order || 0) - (b.order || 0));
+  } catch (err) {
+    console.warn('Could not fetch app services from categories, using defaults:', err);
+  }
+  return DEFAULT_APP_SERVICES;
+}
+
+export async function saveAppServices(services: AppServiceItem[]): Promise<boolean> {
+  try {
+    if (!db) return false;
+
+    const docRef = doc(db, COLLECTION_NAME, SERVICES_DOC_ID);
+    await setDoc(
+      docRef,
+      {
+        services,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (err) {
+    console.error('Error saving app services to Firestore:', err);
+    throw err;
+  }
+}

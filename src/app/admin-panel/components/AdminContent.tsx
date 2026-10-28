@@ -15,6 +15,7 @@ import AdminAppOnboardingEditor from './AdminAppOnboardingEditor';
 import AdminAppBannersEditor from './AdminAppBannersEditor';
 import AdminAppCosmicInsightsEditor from './AdminAppCosmicInsightsEditor';
 import AdminAppReviewsEditor from './AdminAppReviewsEditor';
+import AdminAppServicesEditor from './AdminAppServicesEditor';
 import { Shield, Bell, Download, LogOut, Smartphone, LayoutTemplate, Sparkles, ChevronDown } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
 import Link from 'next/link';
@@ -43,6 +44,13 @@ const APP_DYNAMIC_SUBMODULES = [
     icon: Sparkles,
   },
   {
+    id: 'tab-app-services',
+    label: 'App Services & Remedies',
+    shortLabel: 'Services',
+    href: '/admin-panel/app-dynamic/services',
+    icon: LayoutTemplate,
+  },
+  {
     id: 'tab-app-reviews',
     label: 'Customer Reviews & Ratings',
     shortLabel: 'Reviews & Ratings',
@@ -60,7 +68,8 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
     activeTab === 'tab-app-dynamic' ||
     activeTab === 'tab-app-banners' ||
     activeTab === 'tab-app-cosmic-insights' ||
-    activeTab === 'tab-app-reviews';
+    activeTab === 'tab-app-reviews' ||
+    activeTab === 'tab-app-services';
 
   const currentSubTab =
     activeTab === 'tab-app-dynamic' ? 'tab-app-onboarding' : activeTab;
@@ -180,6 +189,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
         {activeTab === 'tab-app-banners' && <AdminAppBannersEditor />}
         {activeTab === 'tab-app-cosmic-insights' && <AdminAppCosmicInsightsEditor />}
         {activeTab === 'tab-app-reviews' && <AdminAppReviewsEditor />}
+        {activeTab === 'tab-app-services' && <AdminAppServicesEditor />}
         {activeTab === 'tab-content' && <AdminContentManagement />}
         {activeTab === 'tab-page-content' && <AdminDynamicPageEditor />}
         {activeTab === 'tab-prompts' && <AdminAIPrompts />}

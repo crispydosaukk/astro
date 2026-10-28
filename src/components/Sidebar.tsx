@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
       { id: 'nav-app-onboarding', label: 'Onboarding Slides', icon: <Sliders size={14} />, href: '/admin-panel/app-dynamic/onboarding' },
       { id: 'nav-app-banners', label: 'Home Banners', icon: <LayoutTemplate size={14} />, href: '/admin-panel/app-dynamic/banners' },
       { id: 'nav-app-cosmic-insights', label: 'Cosmic Insights', icon: <Sparkles size={14} />, href: '/admin-panel/app-dynamic/cosmic-insights' },
+      { id: 'nav-app-services', label: 'App Services', icon: <LayoutTemplate size={14} />, href: '/admin-panel/app-dynamic/services' },
     ],
   },
   {

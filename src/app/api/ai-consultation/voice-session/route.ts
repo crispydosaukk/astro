@@ -166,33 +166,49 @@ export interface DynamicVedicReplyResult {
   remedy?: PrescribedRemedyInfo;
 }
 
-// Extract canonical remedy based on inquiry and astrologer advice
-function extractPrescribedRemedy(userText: string, replyText: string, astroContext: any): PrescribedRemedyInfo {
+// Extract canonical remedy based on genuine inquiry and astrologer advice
+function extractPrescribedRemedy(userText: string, replyText: string, astroContext: any): PrescribedRemedyInfo | undefined {
+  if (!userText || !userText.trim()) return undefined;
+
+  const cleanUser = userText.trim().toLowerCase();
+  // Filter out pure greeting and acknowledgment messages
+  const greetingWords = [
+    'hi', 'hello', 'namaste', 'నమస్కారం', 'హలో', 'బాగున్నారా',
+    'ధన్యవాదాలు', 'థాంక్స్', 'ఓకే', 'సరే', 'thank you', 'thanks',
+    'ok', 'okay', 'नमस्ते', 'வணக்கம்', 'நன்றி', 'നമസ്കാരം',
+  ];
+  if (greetingWords.includes(cleanUser) || (cleanUser.length < 4 && !cleanUser.includes('job'))) {
+    return undefined;
+  }
+
   const combined = (userText + ' ' + replyText).toLowerCase();
 
-  // 1. Career / Job / Promotion / Business
+  // 1. Marriage / Love / Relationship (Prioritized before general work/career)
   if (
-    combined.includes('ganapathi') ||
-    combined.includes('గణపతి') ||
-    combined.includes('गणपति') ||
-    combined.includes('career') ||
-    combined.includes('job') ||
-    combined.includes('promotion') ||
-    combined.includes('business') ||
-    combined.includes('ఉద్యోగ') ||
-    combined.includes('వ్యాపార') ||
-    combined.includes('పని') ||
-    combined.includes('नौकरी') ||
-    combined.includes('व्यापार')
+    combined.includes('swayamvara') ||
+    combined.includes('parvathi') ||
+    combined.includes('marriage') ||
+    combined.includes('vivaha') ||
+    combined.includes('wedding') ||
+    combined.includes('relationship') ||
+    combined.includes('love') ||
+    combined.includes('spouse') ||
+    combined.includes('partner') ||
+    combined.includes('వివాహ') ||
+    combined.includes('పెళ్లి') ||
+    combined.includes('సంబంధం') ||
+    combined.includes('శాదీ') ||
+    combined.includes('शादी') ||
+    combined.includes('विवाह')
   ) {
     return {
       type: 'homam',
-      title: 'Maha Ganapathi Homam (మహా గణపతి హోమం)',
-      homamId: 'ganapathi',
-      instructions: 'Perform on Wednesday or Shukla Chaturthi at sunrise with Modakam and Durva grass to clear hurdles.',
-      mantraTitle: 'Ganesh Maha Mantra',
-      mantraInstructions: 'Chant "Om Gam Ganapataye Namaha" 108 times daily before leaving for work.',
-      topic: 'Career & Business Growth',
+      title: 'Swayamvara Parvathi Homam (స్వయంవర పార్వతి హోమం)',
+      homamId: 'swayamvara_parvathi',
+      instructions: 'Perform on Friday or Shukla Panchami with yellow flowers and pure ghee to dissolve marriage delays.',
+      mantraTitle: 'Swayamvara Parvathi Maha Mantra',
+      mantraInstructions: 'Chant the sacred Swayamvara Parvathi Mantra 108 times daily for matrimonial bliss.',
+      topic: 'Marriage & Relationship Harmony',
     };
   }
 
@@ -207,6 +223,7 @@ function extractPrescribedRemedy(userText: string, replyText: string, astroConte
     combined.includes('debt') ||
     combined.includes('loan') ||
     combined.includes('ధన') ||
+    combined.includes('డబ్బు') ||
     combined.includes('అప్పు') ||
     combined.includes('ఆర్థిక') ||
     combined.includes('धन') ||
@@ -223,33 +240,7 @@ function extractPrescribedRemedy(userText: string, replyText: string, astroConte
     };
   }
 
-  // 3. Marriage / Love / Relationship
-  if (
-    combined.includes('swayamvara') ||
-    combined.includes('parvathi') ||
-    combined.includes('marriage') ||
-    combined.includes('vivaha') ||
-    combined.includes('wedding') ||
-    combined.includes('relationship') ||
-    combined.includes('love') ||
-    combined.includes('వివాహ') ||
-    combined.includes('పెళ్లి') ||
-    combined.includes('సంబంధం') ||
-    combined.includes('शादी') ||
-    combined.includes('विवाह')
-  ) {
-    return {
-      type: 'homam',
-      title: 'Swayamvara Parvathi Homam (స్వయంవర పార్వతి హోమం)',
-      homamId: 'swayamvara_parvathi',
-      instructions: 'Perform on Friday or Shukla Panchami with yellow flowers and pure ghee to dissolve marriage delays.',
-      mantraTitle: 'Swayamvara Parvathi Maha Mantra',
-      mantraInstructions: 'Chant the sacred Swayamvara Parvathi Mantra 108 times daily for matrimonial bliss.',
-      topic: 'Marriage & Relationship Harmony',
-    };
-  }
-
-  // 4. Health / Illness / Recovery / Longevity
+  // 3. Health / Illness / Recovery / Longevity
   if (
     combined.includes('mrityunjaya') ||
     combined.includes('health') ||
@@ -274,7 +265,7 @@ function extractPrescribedRemedy(userText: string, replyText: string, astroConte
     };
   }
 
-  // 5. Protection / Negative Energy / Evil Eye / Drishti
+  // 4. Protection / Negative Energy / Evil Eye / Drishti
   if (
     combined.includes('sudarshana') ||
     combined.includes('protection') ||
@@ -299,16 +290,55 @@ function extractPrescribedRemedy(userText: string, replyText: string, astroConte
     };
   }
 
-  // Default: Navagraha Shanti
-  return {
-    type: 'homam',
-    title: 'Navagraha Homam (నవగ్రహ శాంతి హోమం)',
-    homamId: 'navagraha',
-    instructions: 'Perform on Saturday or Sunday with Navadhanya and 9 sacred samidhas to pacify all planetary doshas.',
-    mantraTitle: 'Navagraha Shanti Mantra',
-    mantraInstructions: 'Chant the Navagraha Stotram or Gayatri Mantra 108 times at sunrise.',
-    topic: 'Planetary Dosha Shanti',
-  };
+  // 5. Career / Job / Promotion / Business
+  if (
+    combined.includes('ganapathi') ||
+    combined.includes('గణపతి') ||
+    combined.includes('गणपति') ||
+    combined.includes('career') ||
+    combined.includes('job') ||
+    combined.includes('promotion') ||
+    combined.includes('business') ||
+    combined.includes('interview') ||
+    combined.includes('ఉద్యోగ') ||
+    combined.includes('జాబ్') ||
+    combined.includes('ప్రమోషన్') ||
+    combined.includes('వ్యాపార') ||
+    combined.includes('नौकरी') ||
+    combined.includes('व्यापार')
+  ) {
+    return {
+      type: 'homam',
+      title: 'Maha Ganapathi Homam (మహా గణపతి హోమం)',
+      homamId: 'ganapathi',
+      instructions: 'Perform on Wednesday or Shukla Chaturthi at sunrise with Modakam and Durva grass to clear hurdles.',
+      mantraTitle: 'Ganesh Maha Mantra',
+      mantraInstructions: 'Chant "Om Gam Ganapataye Namaha" 108 times daily before leaving for work.',
+      topic: 'Career & Business Growth',
+    };
+  }
+
+  // 6. If explicit remedy/pariharam requested without specific domain
+  if (
+    combined.includes('remedy') ||
+    combined.includes('parihar') ||
+    combined.includes('పరిహార') ||
+    combined.includes('శాంతి') ||
+    combined.includes('దోష') ||
+    combined.includes('उपाय')
+  ) {
+    return {
+      type: 'homam',
+      title: 'Navagraha Homam (నవగ్రహ శాంతి హోమం)',
+      homamId: 'navagraha',
+      instructions: 'Perform on Saturday or Sunday with Navadhanya and 9 sacred samidhas to pacify all planetary doshas.',
+      mantraTitle: 'Navagraha Shanti Mantra',
+      mantraInstructions: 'Chant the Navagraha Stotram or Gayatri Mantra 108 times at sunrise.',
+      topic: 'Planetary Dosha Shanti',
+    };
+  }
+
+  return undefined;
 }
 
 // Convert raw Vedika AI output into clean, natural spoken voice text
