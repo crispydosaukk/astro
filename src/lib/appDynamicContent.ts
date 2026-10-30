@@ -987,3 +987,250 @@ export async function saveAppServices(services: AppServiceItem[]): Promise<boole
     throw err;
   }
 }
+
+// ==========================================
+// APP DYNAMIC: PROFILE SCREEN & MENU CONFIG
+// ==========================================
+export const PROFILE_CONFIG_DOC_ID = 'app_profile_config';
+
+export interface AppProfileMenuItem {
+  id: string;
+  order: number;
+  labelKey: string;
+  defaultLabel: string;
+  subtitle?: string;
+  icon: string;
+  route: string;
+  action?: string;
+  badge?: string;
+  badgeColor?: string;
+  active: boolean;
+  value?: string;
+}
+
+export interface AppProfileSection {
+  id: string;
+  order: number;
+  title: string;
+  labelKey?: string;
+  active: boolean;
+  items: AppProfileMenuItem[];
+}
+
+export interface AppProfileConfig {
+  headerTitle: string;
+  welcomeGuestText: string;
+  guestSubtitle: string;
+  guestSignInButtonText: string;
+  defaultMemberBadge: string;
+
+  // Quick Stats
+  showWalletStat: boolean;
+  walletStatLabel: string;
+  showConsultationStat: boolean;
+  consultationStatLabel: string;
+  showReportsStat: boolean;
+  reportsStatLabel: string;
+
+  // Astrological Signs Trio
+  showAstroTrio: boolean;
+  zodiacStatLabel: string;
+  defaultZodiac: string;
+  moonSignStatLabel: string;
+  defaultMoonSign: string;
+  nakshatraStatLabel: string;
+  defaultNakshatra: string;
+
+  // VIP Gold Promo Banner
+  vipEnabled: boolean;
+  vipBadge: string;
+  vipTitle: string;
+  vipSubtitle: string;
+  vipCtaText: string;
+  vipCtaRoute: string;
+  vipEmoji: string;
+
+  // Support Care Card
+  showSupportCard: boolean;
+  supportCardTitle: string;
+  supportPhone: string;
+  supportPhoneLabel: string;
+  supportEmail: string;
+  helplineHoursPrefix: string;
+  helplineHours: string;
+
+  // Sign In / Out
+  signOutButtonText: string;
+  signOutConfirmTitle: string;
+  signOutConfirmMessage: string;
+  cancelButtonText: string;
+
+  // Edit Profile Sheet
+  editProfileTitle: string;
+  editNameLabel: string;
+  editPhoneOrEmailLabel: string;
+  editDobLabel: string;
+  editTobLabel: string;
+  editPobLabel: string;
+  editSaveButtonText: string;
+
+  // Footer & Sanskrit
+  appVersionText: string;
+  sanskritTagline: string;
+
+  // Menu Sections & Items
+  sections: AppProfileSection[];
+  updatedAt?: string;
+}
+
+export const DEFAULT_APP_PROFILE_CONFIG: AppProfileConfig = {
+  headerTitle: 'Profile',
+  welcomeGuestText: 'Guest Explorer • Tap to Sign In',
+  guestSubtitle: 'Sign in to sync your profile, birth charts & consultations',
+  guestSignInButtonText: 'Sign In / Register',
+  defaultMemberBadge: 'AstroParihar Member',
+
+  showWalletStat: true,
+  walletStatLabel: 'Wallet',
+  showConsultationStat: true,
+  consultationStatLabel: 'Consultations',
+  showReportsStat: true,
+  reportsStatLabel: 'Reports',
+
+  showAstroTrio: true,
+  zodiacStatLabel: 'Zodiac',
+  defaultZodiac: 'Scorpio',
+  moonSignStatLabel: 'Moon Sign',
+  defaultMoonSign: 'Cancer',
+  nakshatraStatLabel: 'Nakshatra',
+  defaultNakshatra: 'Pushya',
+
+  vipEnabled: true,
+  vipBadge: 'ASTROPARIHAR GOLD',
+  vipTitle: 'Unlock Sacred Kundli & Infinite Wisdom',
+  vipSubtitle: 'Unlimited Kundli matching, detailed Mahadasha PDF reports, and 24/7 AI consultations.',
+  vipCtaText: 'Upgrade to Gold Seeker',
+  vipCtaRoute: '/wallet-screen',
+  vipEmoji: '👑',
+
+  showSupportCard: true,
+  supportCardTitle: 'Spiritual Care & Help Desk',
+  supportPhone: '+91 98765 43210',
+  supportPhoneLabel: 'Helpline',
+  supportEmail: 'support@astroparihar.com',
+  helplineHoursPrefix: 'Helpline: ',
+  helplineHours: 'Mon - Sun: 8:00 AM – 11:00 PM IST',
+
+  signOutButtonText: 'Sign Out',
+  signOutConfirmTitle: 'Sign Out',
+  signOutConfirmMessage: 'Are you sure you want to sign out? Your astrological charts will remain securely saved.',
+  cancelButtonText: 'Cancel',
+
+  editProfileTitle: 'Edit Profile Details',
+  editNameLabel: 'Full Name',
+  editPhoneOrEmailLabel: 'Phone / Email',
+  editDobLabel: 'Date of Birth (DD/MM/YYYY)',
+  editTobLabel: 'Time of Birth (e.g. 10:30 AM)',
+  editPobLabel: 'Place of Birth (City, State)',
+  editSaveButtonText: 'Save Profile Details',
+
+  appVersionText: 'AstroParihar v2.4.0 • Sacred Vedic Wisdom',
+  sanskritTagline: '॥ लोकाः समस्ताः सुखिनो भवन्तु ॥',
+
+  sections: [
+    {
+      id: 'my-astrology',
+      order: 1,
+      title: 'MY ASTROLOGY',
+      labelKey: 'profile.myAstrology',
+      active: true,
+      items: [
+        { id: 'myKundli', order: 1, labelKey: 'profile.myKundli', defaultLabel: 'My Kundli', subtitle: 'Your detailed birth chart & planetary positions', icon: 'auto_stories', route: '/my-kundli-screen', active: true },
+        { id: 'myRemedies', order: 2, labelKey: 'profile.myRemedies', defaultLabel: 'My Remedies (अष्ट परिहार)', subtitle: 'Personalised 8-directional remedial remedies', icon: 'auto_awesome', route: '/remedies-screen', badge: '8 in 1', active: true },
+        { id: 'birthProfiles', order: 3, labelKey: 'profile.birthProfiles', defaultLabel: 'Birth Profiles', subtitle: 'Family, partner & seeker kundli profiles', icon: 'person_outline_rounded', route: '/birth-profiles-screen', active: true },
+        { id: 'kundliReports', order: 4, labelKey: 'profile.kundliReports', defaultLabel: 'Kundli & Service Reports', subtitle: 'Saved astrology predictions & PDF reports', icon: 'description_outlined', route: '/kundli-reports-screen', active: true },
+        { id: 'matchReports', order: 5, labelKey: 'profile.matchReports', defaultLabel: 'Match Reports', subtitle: '36 Guna Ashtakoot matrimonial reports', icon: 'favorite_border', route: '/match-reports-screen', active: true },
+        { id: 'panchangReports', order: 6, labelKey: 'profile.panchangReports', defaultLabel: 'Panchang & Muhurat', subtitle: 'Daily Vedic almanac, tithi & auspicious timings', icon: 'calendar_today_outlined', route: '/panchang-screen', active: true },
+        { id: 'savedAstrologers', order: 7, labelKey: 'profile.savedAstrologers', defaultLabel: 'Saved Astrologers', subtitle: 'Your favorite verified Vedic consultants', icon: 'star_outline', route: '/saved-astrologers-screen', active: true },
+        { id: 'consultationHistory', order: 8, labelKey: 'profile.consultationHistory', defaultLabel: 'Consultation History', subtitle: 'Past audio, video & AI chat recordings', icon: 'history', route: '/consultation-history-screen', active: true },
+      ],
+    },
+    {
+      id: 'my-account',
+      order: 2,
+      title: 'MY ACCOUNT & BILLING',
+      labelKey: 'profile.myAccount',
+      active: true,
+      items: [
+        { id: 'wallet', order: 1, labelKey: 'profile.wallet', defaultLabel: 'Wallet', subtitle: 'View balance, add funds & recharge offers', icon: 'account_balance_wallet_outlined', route: '/wallet-screen', active: true },
+        { id: 'transactions', order: 2, labelKey: 'profile.transactions', defaultLabel: 'Transactions', subtitle: 'Detailed billing history & payment receipts', icon: 'receipt_long_outlined', route: '/wallet-screen', active: true },
+        { id: 'paymentMethods', order: 3, labelKey: 'profile.paymentMethods', defaultLabel: 'Payment Methods', subtitle: 'UPI, Cards, Netbanking & Saved options', icon: 'credit_card_outlined', route: '/wallet-screen', active: true },
+        { id: 'notifications', order: 4, labelKey: 'profile.notifications', defaultLabel: 'Notifications', subtitle: 'Daily horoscopes, muhurat & chat alerts', icon: 'notifications_outlined', route: '/notifications-screen', active: true },
+      ],
+    },
+    {
+      id: 'preferences',
+      order: 3,
+      title: 'PREFERENCES',
+      labelKey: 'profile.preferences',
+      active: true,
+      items: [
+        { id: 'language', order: 1, labelKey: 'profile.language', defaultLabel: 'Language', subtitle: 'Choose Telugu, Hindi, English, Tamil, etc.', icon: 'translate', route: '/language-screen', action: 'languageModal', active: true },
+        { id: 'theme', order: 2, labelKey: 'profile.theme', defaultLabel: 'Theme', subtitle: 'Switch between Light Vedic and Dark Cosmic', icon: 'palette_outlined', route: '/theme-screen', action: 'themeToggle', active: true },
+        { id: 'notificationSettings', order: 3, labelKey: 'profile.notificationSettings', defaultLabel: 'Notification Settings', subtitle: 'Manage reminders, panchang & astro alerts', icon: 'tune_outlined', route: '/notification-settings-screen', active: true },
+        { id: 'privacy', order: 4, labelKey: 'profile.privacy', defaultLabel: 'Privacy', subtitle: 'Manage your birth chart & account privacy', icon: 'lock_outline_rounded', route: '/privacy-screen', active: true },
+        { id: 'security', order: 5, labelKey: 'profile.security', defaultLabel: 'Security', subtitle: 'Biometric lock, PIN & authentication', icon: 'security_outlined', route: '/security-screen', active: true },
+      ],
+    },
+    {
+      id: 'support',
+      order: 4,
+      title: 'SUPPORT & LEGAL',
+      labelKey: 'profile.support',
+      active: true,
+      items: [
+        { id: 'helpCentre', order: 1, labelKey: 'profile.helpCentre', defaultLabel: 'Help Centre', subtitle: 'Guides, tutorials and knowledge base', icon: 'help_outline_rounded', route: '/help-centre-screen', active: true },
+        { id: 'contactSupport', order: 2, labelKey: 'profile.contactSupport', defaultLabel: 'Contact Support', subtitle: 'Reach our spiritual care team 24/7', icon: 'support_agent_outlined', route: '/contact-support-screen', active: true },
+        { id: 'faqs', order: 3, labelKey: 'profile.faqs', defaultLabel: 'FAQs', subtitle: 'Frequently asked astrological questions', icon: 'quiz_outlined', route: '/help-centre-screen', active: true },
+        { id: 'terms', order: 4, labelKey: 'profile.terms', defaultLabel: 'Terms of Service', subtitle: 'Platform usage rules and spiritual disclaimers', icon: 'gavel_outlined', route: '/terms-screen', active: true },
+        { id: 'privacyPolicy', order: 5, labelKey: 'profile.privacyPolicy', defaultLabel: 'Privacy Policy', subtitle: 'Birth data privacy and security measures', icon: 'policy_outlined', route: '/privacy-policy-screen', active: true },
+      ],
+    },
+  ],
+};
+
+export async function getAppProfileConfig(): Promise<AppProfileConfig> {
+  try {
+    if (!db) return DEFAULT_APP_PROFILE_CONFIG;
+
+    const docRef = doc(db, COLLECTION_NAME, PROFILE_CONFIG_DOC_ID);
+    const snap = await getDoc(docRef);
+
+    if (snap.exists() && snap.data()?.config) {
+      return { ...DEFAULT_APP_PROFILE_CONFIG, ...(snap.data().config as AppProfileConfig) };
+    }
+  } catch (err) {
+    console.warn('Could not fetch app profile config from Firestore, using defaults:', err);
+  }
+  return DEFAULT_APP_PROFILE_CONFIG;
+}
+
+export async function saveAppProfileConfig(config: AppProfileConfig): Promise<boolean> {
+  try {
+    if (!db) return false;
+
+    const docRef = doc(db, COLLECTION_NAME, PROFILE_CONFIG_DOC_ID);
+    await setDoc(
+      docRef,
+      {
+        config,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (err) {
+    console.error('Error saving app profile config to Firestore:', err);
+    throw err;
+  }
+}

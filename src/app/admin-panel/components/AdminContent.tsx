@@ -16,6 +16,7 @@ import AdminAppBannersEditor from './AdminAppBannersEditor';
 import AdminAppCosmicInsightsEditor from './AdminAppCosmicInsightsEditor';
 import AdminAppReviewsEditor from './AdminAppReviewsEditor';
 import AdminAppServicesEditor from './AdminAppServicesEditor';
+import AdminAppProfileEditor from './AdminAppProfileEditor';
 import { Shield, Bell, Download, LogOut, Smartphone, LayoutTemplate, Sparkles, ChevronDown } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
 import Link from 'next/link';
@@ -69,7 +70,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
     activeTab === 'tab-app-banners' ||
     activeTab === 'tab-app-cosmic-insights' ||
     activeTab === 'tab-app-reviews' ||
-    activeTab === 'tab-app-services';
+    activeTab === 'tab-app-services' || activeTab === 'tab-app-profile';
 
   const currentSubTab =
     activeTab === 'tab-app-dynamic' ? 'tab-app-onboarding' : activeTab;
@@ -190,6 +191,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
         {activeTab === 'tab-app-cosmic-insights' && <AdminAppCosmicInsightsEditor />}
         {activeTab === 'tab-app-reviews' && <AdminAppReviewsEditor />}
         {activeTab === 'tab-app-services' && <AdminAppServicesEditor />}
+        {activeTab === 'tab-app-profile' && <AdminAppProfileEditor />}
         {activeTab === 'tab-content' && <AdminContentManagement />}
         {activeTab === 'tab-page-content' && <AdminDynamicPageEditor />}
         {activeTab === 'tab-prompts' && <AdminAIPrompts />}

@@ -12,137 +12,94 @@ export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-// Fallback verified human master astrologers when Firestore has not yet onboarded real astrologers
-const VERIFIED_HUMAN_ASTROLOGERS = [
-  {
-    id: 'astro-swami-shankarananda',
-    name: 'Swami Shankarananda Giri',
-    specialty: 'Parashara Dasha Guru & Vedic Astrology',
-    title: 'Venerable Himalayan Sage & Parashara Dasha Guru',
-    experience: '35+ Yrs',
-    rating: 4.99,
-    reviews: '24.5k',
-    consultations: '98k+',
-    price: 45,
-    isOnline: true,
-    isAi: false,
-    imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&fit=crop',
-    languages: 'Hindi, Sanskrit, English',
-    category: 'Vedic',
-    bio: 'Renowned authority on Vimshottari Mahadasha calculations, Kundli Milan, and ancestral karmic remedies.',
-  },
-  {
-    id: 'astro-swami-rao',
-    name: 'Swami Sadasiva Rao',
-    specialty: 'Dasha Transitions & Milestones',
-    title: 'Venerable South Indian Vedic Astrologer & Dasha Authority',
-    experience: '42+ Yrs',
-    rating: 4.99,
-    reviews: '26.8k',
-    consultations: '112k+',
-    price: 55,
-    isOnline: true,
-    isAi: false,
-    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=400&fit=crop',
-    languages: 'Telugu, Tamil, Hindi, English',
-    category: 'Vedic',
-    bio: 'Four decades of expertise in Jyotish shastra, marriage timing, and life transition guidance.',
-  },
-  {
-    id: 'astro-raghvendra-shastri',
-    name: 'Acharya Raghvendra Shastri',
-    specialty: 'Relationship Astrology & Soul Harmony',
-    title: 'Relationship Astrology & Soul Harmony Expert',
-    experience: '19+ Yrs',
-    rating: 4.96,
-    reviews: '18.9k',
-    consultations: '64k+',
-    price: 22,
-    isOnline: true,
-    isAi: false,
-    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&fit=crop',
-    languages: 'Hindi, English',
-    category: 'Love',
-    bio: 'Specialist in 36 Guna Milan, marital dispute resolution, and emotional peace.',
-  },
-  {
-    id: 'astro-shreya-devi',
-    name: 'Acharya Shreya Devi',
-    specialty: 'Kundli Milan & Navamsha (D9) Counselor',
-    title: 'Kundli Milan Specialist & Marital Bliss Counselor',
-    experience: '16+ Yrs',
-    rating: 4.97,
-    reviews: '15.2k',
-    consultations: '52k+',
-    price: 20,
-    isOnline: true,
-    isAi: false,
-    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&fit=crop',
-    languages: 'Tamil, Hindi, English',
-    category: 'Marriage',
-    bio: 'Expert analysis of Navamsha charts, spouse compatibility, and timing of marriage.',
-  },
-  {
-    id: 'astro-radhey-shyam',
-    name: 'Pandit Radhey Shyam Chaturvedi',
-    specialty: 'Kaal Sarp, Manglik Dosha & Sade Sati Remedies',
-    title: 'Traditional Mathura Jyotishi & Kundli Dosha Expert',
-    experience: '28+ Yrs',
-    rating: 4.96,
-    reviews: '16.4k',
-    consultations: '71k+',
-    price: 35,
-    isOnline: false,
-    isAi: false,
-    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&fit=crop',
-    languages: 'Hindi, Sanskrit',
-    category: 'Remedies',
-    bio: 'Authentic Lal Kitab remedies, planetary dosha shanti, and temple consecrated pujas.',
-  },
-  {
-    id: 'astro-meenakshi-iyer',
-    name: 'Jyotishacharya Meenakshi Iyer',
-    specialty: 'KP Astrology & Career Timing',
-    title: 'KP Astrology Specialist & Career Guidance Expert',
-    experience: '14+ Yrs',
-    rating: 4.95,
-    reviews: '11.2k',
-    consultations: '38k+',
-    price: 18,
-    isOnline: true,
-    isAi: false,
-    imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&fit=crop',
-    languages: 'Tamil, English, Hindi',
-    category: 'Career',
-    bio: 'Krishnamurti Padhdhati (KP) sub-lord expert specializing in career promotion and financial growth.',
-  },
-];
+function parseFirestoreValue(val: any): any {
+  if (!val) return undefined;
+  if (val.stringValue !== undefined) return val.stringValue;
+  if (val.integerValue !== undefined) return parseInt(val.integerValue, 10);
+  if (val.doubleValue !== undefined) return parseFloat(val.doubleValue);
+  if (val.booleanValue !== undefined) return val.booleanValue;
+  if (val.arrayValue !== undefined) {
+    return (val.arrayValue.values || []).map((v: any) => parseFirestoreValue(v));
+  }
+  if (val.mapValue !== undefined) {
+    const res: Record<string, any> = {};
+    for (const [k, v] of Object.entries(val.mapValue.fields || {})) {
+      res[k] = parseFirestoreValue(v);
+    }
+    return res;
+  }
+  return undefined;
+}
+
+function capitalizeWords(str: string): string {
+  if (!str) return '';
+  return str
+    .split(' ')
+    .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ''))
+    .join(' ')
+    .trim();
+}
 
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const requestedType = url.searchParams.get('type'); // 'real' | 'ai' | null
 
-    // 1. Fetch Human Astrologers from Firestore (Backend Onboarding & Admin Approval)
+    // 1. Fetch Real Human Astrologers from Firestore
     let dbRealAstrologers: any[] = [];
     try {
-      let snap = await adminDb.collection('astrologers').where('status', 'in', ['approved', 'active', 'probation', 'verified']).get();
-      if (snap.empty) {
-        snap = await adminDb.collection('astrologers').get();
+      if (adminDb && typeof adminDb.collection === 'function') {
+        let snap = await adminDb
+          .collection('astrologers')
+          .where('status', 'in', ['approved', 'active', 'probation', 'verified'])
+          .get();
+
+        if (snap.empty) {
+          snap = await adminDb.collection('astrologers').get();
+        }
+
+        if (!snap.empty) {
+          dbRealAstrologers = snap.docs
+            .map((doc: any) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((d: any) => ['approved', 'active', 'probation', 'verified'].includes(d.status));
+        }
       }
-      if (!snap.empty) {
-        dbRealAstrologers = snap.docs
-          .map((doc: any) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter((d: any) => d.status !== 'rejected');
-      }
-    } catch (e: any) {
-      console.warn('Could not read real astrologers from Firestore:', e.message);
+    } catch (adminErr: any) {
+      console.warn('adminDb query failed, falling back to Firestore REST:', adminErr?.message);
     }
 
-    // Format real human astrologers matching the website's data schema
+    // Direct Firestore REST API fallback if adminDb did not return records
+    if (dbRealAstrologers.length === 0) {
+      try {
+        const restRes = await fetch(
+          'https://firestore.googleapis.com/v1/projects/astroparihar-85e2d/databases/(default)/documents/astrologers',
+          { next: { revalidate: 10 } }
+        );
+        if (restRes.ok) {
+          const restData = await restRes.json();
+          if (Array.isArray(restData.documents)) {
+            dbRealAstrologers = restData.documents
+              .map((doc: any) => {
+                const id = doc.name ? doc.name.split('/').pop() : '';
+                const fields = doc.fields || {};
+                const parsed: Record<string, any> = { id };
+                for (const [k, v] of Object.entries(fields)) {
+                  parsed[k] = parseFirestoreValue(v);
+                }
+                return parsed;
+              })
+              .filter((d: any) => ['approved', 'active', 'probation', 'verified'].includes(d.status));
+          }
+        }
+      } catch (restErr: any) {
+        console.warn('Firestore REST fallback error:', restErr?.message);
+      }
+    }
+
+    // Format real human astrologers strictly matching website schema
     const formattedDbReal = dbRealAstrologers.map((r) => {
       const skillsList = Array.isArray(r.skills)
         ? r.skills
@@ -160,32 +117,41 @@ export async function GET(req: NextRequest) {
         ? r.languages.split(',').map((l: string) => l.trim())
         : ['English', 'Hindi'];
 
-      const expNum = Number(r.experienceYears) ||
-        (typeof r.experience === 'string' ? Number(r.experience.replace(/[^0-9]/g, '')) : Number(r.experience)) || 10;
+      const expNum =
+        Number(r.experienceYears) ||
+        (typeof r.experience === 'string' ? Number(r.experience.replace(/[^0-9]/g, '')) : Number(r.experience)) ||
+        12;
 
       const mainSpecialty = skillsList[0] || 'Vedic Astrology';
+      const cleanName = capitalizeWords(r.name || 'Astrologer');
 
       return {
         id: r.id,
-        name: r.name || 'Acharya Ji',
+        name: cleanName,
         specialty: mainSpecialty,
         title: r.title || `${mainSpecialty} • ${expNum}+ Yrs`,
         experience: `${expNum}+ Yrs`,
         rating: Number(r.rating) || 4.95,
-        reviews: `${Math.round((r.totalConsultations || r.reviewsCount || 850) / 100) / 10}k`,
-        consultations: `${r.totalConsultations || r.reviewsCount || 850}+`,
-        price: Number(r.pricePerMinute || r.amount || r.price) || 25,
-        isOnline: r.isOnline !== false,
+        reviews: `${Math.round((Number(r.totalConsultations || r.reviewsCount || r.reviews) || 980) / 100) / 10}k`,
+        consultations: `${Number(r.totalConsultations || r.reviewsCount || r.reviews) || 980}+`,
+        price: Math.max(10, Number(r.pricePerMinute || r.amount || r.price) || 25),
+        isOnline: r.isOnline !== undefined ? Boolean(r.isOnline) : true,
         isAi: false,
-        imageUrl: r.photoURL || r.avatar || r.imageUrl || r.profilePic || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-        languages: langsList.join(', '),
+        imageUrl:
+          r.profileImageUrl ||
+          r.photoURL ||
+          r.avatar ||
+          r.imageUrl ||
+          r.profilePic ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=f59e0b&color=fff&size=400`,
+        languages: langsList.map((l: string) => capitalizeWords(l)).join(', '),
         category: r.category || 'Vedic',
-        bio: r.bio || r.about || '',
+        bio: r.bio || r.about || `${cleanName} is a verified Vedic Astrologer providing personalized astrological guidance.`,
       };
     });
 
-    // Pure Real Astrologers list: Onboarded real astrologers from Firestore + verified masters
-    const realAstrologers = [...formattedDbReal, ...VERIFIED_HUMAN_ASTROLOGERS];
+    // Pure Real Astrologers list: 100% dynamic from Firestore. ZERO hardcoded mock data!
+    const realAstrologers = formattedDbReal;
 
     // 2. Fetch AI Astrologers (Strictly separated)
     const aiAstrologersData = await getAIAstrologers();
@@ -220,7 +186,7 @@ export async function GET(req: NextRequest) {
         success: true,
         realAstrologers,
         aiAstrologers: formattedAi,
-        astrologers: selectedList, // Strictly Real by default, or strictly AI if ?type=ai
+        astrologers: selectedList,
         realCount: realAstrologers.length,
         aiCount: formattedAi.length,
       },
