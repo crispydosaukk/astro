@@ -292,10 +292,26 @@ export function resolveCityCoordinates(
 
 // Parse birth date/time into UTC Date object
 export function parseBirthDateTimeToUTC(dob: string, tob: string, lon?: number, tzOffsetHours?: number): Date {
-  const [yearStr, monthStr, dayStr] = (dob || '1995-01-01').split('-').map(Number);
-  const year = yearStr || 1995;
-  const month = (monthStr ? monthStr - 1 : 0);
-  const day = dayStr || 1;
+  let year = 1995;
+  let month = 9; // October (0-indexed)
+  let day = 15;
+
+  if (dob) {
+    const clean = dob.trim().split('T')[0];
+    const dmy = clean.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (dmy) {
+      day = parseInt(dmy[1], 10);
+      month = parseInt(dmy[2], 10) - 1;
+      year = parseInt(dmy[3], 10);
+    } else {
+      const ymd = clean.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+      if (ymd) {
+        year = parseInt(ymd[1], 10);
+        month = parseInt(ymd[2], 10) - 1;
+        day = parseInt(ymd[3], 10);
+      }
+    }
+  }
 
   let hours = 12;
   let minutes = 0;

@@ -112,13 +112,19 @@ export async function POST(req: NextRequest) {
         foundRecord.status ||
         'Pending Review';
 
+      const isRejected =
+        String(currentStage).toLowerCase().includes('reject') ||
+        String(currentStage).toLowerCase().includes('decline');
+
       return NextResponse.json(
         {
           success: false,
           registered: true,
           approved: false,
-          status: currentStage,
-          error: `Your astrologer application is currently ${currentStage}. Only finally approved and onboarded astrologers can sign in. Please contact admin for assistance.`,
+          status: isRejected ? 'rejected' : currentStage,
+          error: isRejected
+            ? 'Your application has been declined by the administrative committee. Please contact admin support for more information.'
+            : `Your astrologer application is currently ${currentStage}. Only finally approved and onboarded astrologers can sign in. Please contact admin for assistance.`,
         },
         { status: 403 }
       );

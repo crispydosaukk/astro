@@ -95,7 +95,21 @@ export async function vedikaFetch<T = any>(
  */
 export function formatToVedikaDateTime(dateStr: string, timeStr: string = '12:00'): string {
   try {
-    const d = dateStr ? dateStr.trim().split('T')[0] : '1995-01-01';
+    let cleanDate = '1995-01-01';
+    if (dateStr) {
+      const s = dateStr.trim().split('T')[0];
+      const dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (dmy) {
+        cleanDate = `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
+      } else {
+        const ymd = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (ymd) {
+          cleanDate = `${ymd[1]}-${ymd[2].padStart(2, '0')}-${ymd[3].padStart(2, '0')}`;
+        } else {
+          cleanDate = s;
+        }
+      }
+    }
     let [hh, mm] = (timeStr || '12:00').replace(/(am|pm)/i, '').trim().split(':');
     let h = parseInt(hh || '12', 10);
     let m = parseInt(mm || '0', 10);
@@ -105,7 +119,7 @@ export function formatToVedikaDateTime(dateStr: string, timeStr: string = '12:00
     if (/am/i.test(timeStr) && h === 12) h = 0;
 
     const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${d}T${pad(h)}:${pad(m)}:00`;
+    return `${cleanDate}T${pad(h)}:${pad(m)}:00`;
   } catch {
     return '1995-01-01T12:00:00';
   }
