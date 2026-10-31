@@ -38,6 +38,7 @@ import {
   Layers,
   Check,
   X,
+  Smartphone,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -274,8 +275,11 @@ export default function AdminAppProfileEditor() {
         </div>
       </div>
 
-      {/* Editor Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-2 overflow-x-auto">
+      {/* Main Grid: Controls (8 cols) + Live Mobile App Simulator (4 cols) */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="xl:col-span-8 space-y-6">
+          {/* Editor Navigation Tabs */}
+          <div className="flex items-center gap-2 border-b border-border pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab('sections')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
@@ -1026,6 +1030,176 @@ export default function AdminAppProfileEditor() {
           </div>
         </div>
       )}
+        </div>
+
+        {/* Right 4 cols: Live Mobile App Simulator (Profile Screen) */}
+        <div className="xl:col-span-4">
+          <div className="sticky top-6 rounded-3xl border border-border/80 bg-neutral-900 text-white p-4 shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Smartphone size={16} className="text-amber-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-neutral-300">
+                  Mobile App Simulator (Profile Screen)
+                </span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">
+                Live Preview
+              </span>
+            </div>
+
+            {/* Mobile Viewport Screen */}
+            <div className="mt-3 rounded-2xl bg-[#0F0B15] border border-white/10 p-3 h-[680px] overflow-y-auto space-y-3 font-sans text-xs">
+              {/* Devotee Profile Header */}
+              <div className="p-3 rounded-xl bg-gradient-to-r from-[#713B32]/30 via-amber-500/10 to-transparent border border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-full border-2 border-amber-400 bg-[#713B32] flex items-center justify-center font-extrabold text-sm text-white">
+                    S
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-extrabold text-sm text-white">Sandeep</span>
+                      <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                        {config.defaultMemberBadge || 'Verified Devotee ✦'}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-neutral-400">London · +44 •••• 5678</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Stats Grid */}
+              <div className="grid grid-cols-3 gap-1.5">
+                <div className="p-2 rounded-lg bg-white/5 border border-white/5 text-center">
+                  <p className="font-extrabold text-xs text-amber-400">
+                    12
+                  </p>
+                  <p className="text-[8px] text-neutral-400 truncate mt-0.5">
+                    {config.consultationStatLabel || 'Consultations'}
+                  </p>
+                </div>
+                <div className="p-2 rounded-lg bg-white/5 border border-white/5 text-center">
+                  <p className="font-extrabold text-xs text-amber-400">
+                    4
+                  </p>
+                  <p className="text-[8px] text-neutral-400 truncate mt-0.5">
+                    {config.reportsStatLabel || 'Kundli Reports'}
+                  </p>
+                </div>
+                <div className="p-2 rounded-lg bg-white/5 border border-white/5 text-center">
+                  <p className="font-extrabold text-xs text-amber-400">
+                    ₹450
+                  </p>
+                  <p className="text-[8px] text-neutral-400 truncate mt-0.5">
+                    {config.walletStatLabel || 'Wallet'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Kundli Signs Trio */}
+              {config.showAstroTrio && (
+                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
+                    Vedic Astrological Trio
+                  </p>
+                  <div className="grid grid-cols-3 gap-1 text-center">
+                    <div className="p-1 rounded bg-white/5">
+                      <p className="text-[8px] text-amber-400 font-bold">{config.zodiacStatLabel || 'Sun'}</p>
+                      <p className="text-[9px] font-bold text-white">{config.defaultZodiac || 'Leo'}</p>
+                    </div>
+                    <div className="p-1 rounded bg-white/5">
+                      <p className="text-[8px] text-amber-400 font-bold">{config.moonSignStatLabel || 'Moon'}</p>
+                      <p className="text-[9px] font-bold text-white">{config.defaultMoonSign || 'Scorpio'}</p>
+                    </div>
+                    <div className="p-1 rounded bg-white/5">
+                      <p className="text-[8px] text-amber-400 font-bold">{config.nakshatraStatLabel || 'Nakshatra'}</p>
+                      <p className="text-[9px] font-bold text-white">{config.defaultNakshatra || 'Anuradha'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* VIP Banner if Active */}
+              {config.vipEnabled && (
+                <div className="p-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-[#713B32]/30 border border-amber-400/30 flex items-center justify-between">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-extrabold text-[11px] text-amber-300">
+                        {config.vipTitle}
+                      </span>
+                      {config.vipBadge && (
+                        <span className="px-1 py-0.2 rounded text-[7px] font-bold bg-amber-400 text-black">
+                          {config.vipBadge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[8px] text-neutral-300 truncate mt-0.5">
+                      {config.vipSubtitle}
+                    </p>
+                  </div>
+                  <span className="px-2 py-1 rounded-full text-[8px] font-bold bg-[#713B32] text-white shrink-0">
+                    {config.vipCtaText || 'Upgrade'}
+                  </span>
+                </div>
+              )}
+
+              {/* Menu Sections in Exact Order */}
+              {config.sections
+                .filter((s) => s.active)
+                .map((sec) => (
+                  <div key={sec.id} className="space-y-1 pt-1">
+                    <p className="text-[9px] font-extrabold text-neutral-400 uppercase tracking-wider px-1">
+                      {sec.title}
+                    </p>
+                    <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden divide-y divide-white/5">
+                      {sec.items
+                        .filter((it) => it.active)
+                        .map((it) => (
+                          <div
+                            key={it.id}
+                            className="p-2 flex items-center justify-between hover:bg-white/5"
+                          >
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <div className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold bg-[#713B32]/40 text-amber-300 shrink-0">
+                                {it.icon ? it.icon[0].toUpperCase() : '✦'}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="font-bold text-[10px] text-neutral-200 truncate">
+                                  {it.defaultLabel}
+                                </p>
+                                {it.subtitle && (
+                                  <p className="text-[8px] text-neutral-400 truncate">
+                                    {it.subtitle}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            {it.badge && (
+                              <span className="px-1.5 py-0.2 rounded text-[7px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                                {it.badge}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+
+              {/* Sign Out Button */}
+              <div className="p-2.5 rounded-xl border border-red-500/20 bg-red-500/5 text-center">
+                <p className="text-[10px] font-bold text-red-400">
+                  {config.signOutButtonText || 'Sign Out'}
+                </p>
+              </div>
+
+              {/* Tagline & Version */}
+              <div className="text-center pt-2 space-y-0.5 text-[8px] text-neutral-500">
+                <p className="font-semibold text-neutral-400">{config.sanskritTagline}</p>
+                <p>{config.appVersionText}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* =========================================================================
           MODAL 1: EDIT / RENAME SECTION
@@ -1181,6 +1355,35 @@ export default function AdminAppProfileEditor() {
 
               <div>
                 <label className="text-xs font-bold text-foreground">Destination Route</label>
+                <select
+                  value={editingItem.item.route}
+                  onChange={(e) =>
+                    setEditingItem({
+                      ...editingItem,
+                      item: { ...editingItem.item, route: e.target.value },
+                    })
+                  }
+                  className="w-full mt-1 mb-1 px-3 py-2 rounded-xl bg-background border border-border text-xs font-mono"
+                >
+                  <option value="/my-kundli-screen">My Kundli (/my-kundli-screen)</option>
+                  <option value="/kundli-reports-screen">Kundli Reports (/kundli-reports-screen)</option>
+                  <option value="/match-reports-screen">Match Reports (/match-reports-screen)</option>
+                  <option value="/saved-astrologers-screen">Saved Astrologers (/saved-astrologers-screen)</option>
+                  <option value="/consultation-history-screen">Consultation History (/consultation-history-screen)</option>
+                  <option value="/birth-profiles-screen">Birth Profiles (/birth-profiles-screen)</option>
+                  <option value="/wallet-screen">Devotee Wallet (/wallet-screen)</option>
+                  <option value="/notifications-screen">Notifications (/notifications-screen)</option>
+                  <option value="/language-screen">Language Selection (/language-screen)</option>
+                  <option value="/theme-screen">Theme Options (/theme-screen)</option>
+                  <option value="/contact-support-screen">Contact Support (/contact-support-screen)</option>
+                  <option value="/help-centre-screen">Help Centre / FAQs (/help-centre-screen)</option>
+                  <option value="/terms-screen">Terms of Service (/terms-screen)</option>
+                  <option value="/privacy-policy-screen">Privacy Policy (/privacy-policy-screen)</option>
+                  <option value="/remedies-screen">Sacred Remedies (/remedies-screen)</option>
+                  <option value="/live-astrologers-screen">Live Astrologers (/live-astrologers-screen)</option>
+                  <option value="/ai-chat-screen">AI Chat (/ai-chat-screen)</option>
+                  <option value={editingItem.item.route}>Custom Route ({editingItem.item.route})</option>
+                </select>
                 <input
                   type="text"
                   value={editingItem.item.route}
@@ -1190,7 +1393,7 @@ export default function AdminAppProfileEditor() {
                       item: { ...editingItem.item, route: e.target.value },
                     })
                   }
-                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium font-mono"
+                  className="w-full px-3 py-1.5 rounded-lg bg-background border border-border text-xs font-medium font-mono"
                 />
               </div>
             </div>

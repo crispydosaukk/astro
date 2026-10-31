@@ -90,7 +90,7 @@ export const DEFAULT_APP_BANNERS: AppBanner[] = [
     badgeColor: 'amber',
     imageUrl: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=800&auto=format&fit=crop',
     ctaText: 'Talk to Astrologer',
-    ctaAction: '/consultation-booking-screen',
+    ctaAction: '/live-astrologers-screen',
     active: true,
   },
   {
@@ -102,7 +102,7 @@ export const DEFAULT_APP_BANNERS: AppBanner[] = [
     badgeColor: 'indigo',
     imageUrl: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=800&auto=format&fit=crop',
     ctaText: 'Chat Now',
-    ctaAction: '/talk-to-ai-astrologer',
+    ctaAction: '/ai-chat-screen',
     active: true,
   },
   {
@@ -114,7 +114,7 @@ export const DEFAULT_APP_BANNERS: AppBanner[] = [
     badgeColor: 'emerald',
     imageUrl: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=800&auto=format&fit=crop',
     ctaText: 'View Today Panchang',
-    ctaAction: '/panchang',
+    ctaAction: '/panchang-screen',
     active: true,
   },
 ];
@@ -338,6 +338,7 @@ export interface AppServiceCategory {
   sanskrit: string;
   desc: string;
   badge?: string;
+  tabLabel?: string;
   icon: string;
   color: string;
   active: boolean;
@@ -354,6 +355,7 @@ export const DEFAULT_SERVICE_CATEGORIES: AppServiceCategory[] = [
     sanskrit: 'अष्ट परिहार • Ashta-Digbandhana',
     desc: 'Harmonize planetary energies through authentic Vedic remedies prescribed by the 8 sacred directions.',
     badge: '8 in 1 Card',
+    tabLabel: 'Remedies',
     icon: 'auto_awesome',
     color: '#713B32',
     active: true,
@@ -496,6 +498,7 @@ export const DEFAULT_SERVICE_CATEGORIES: AppServiceCategory[] = [
     sanskrit: 'निःशुल्क वैदिक सेवाएं',
     desc: 'Personalized Vedic birth charts, compatibility, Panchang, daily horoscope, meditation & fasting planners.',
     badge: 'Free',
+    tabLabel: 'Free Tools',
     icon: 'auto_stories',
     color: '#9370DB',
     active: true,
@@ -588,6 +591,7 @@ export const DEFAULT_SERVICE_CATEGORIES: AppServiceCategory[] = [
     sanskrit: 'महादशा विशेष संकलन • PDF Dossiers',
     desc: 'In-depth downloadable PDF blueprints with exact Sanskrit mantras, dietary rules, and planetary remedies.',
     badge: 'Paid PDFs',
+    tabLabel: 'Mahadasha',
     icon: 'menu_book',
     color: '#FF6B35',
     active: true,
@@ -654,6 +658,7 @@ export const DEFAULT_SERVICE_CATEGORIES: AppServiceCategory[] = [
     sanskrit: 'पंचांग एवं शुभ मुहूर्त • Celestial Almanac',
     desc: 'Real-time Tithi, Nakshatra, Shubh Muhurat, Rahu Kaal, Choghadiya and Hora calculations.',
     badge: 'Live Almanac',
+    tabLabel: 'Panchang',
     icon: 'calendar_today_outlined',
     color: '#4FC3F7',
     active: true,
@@ -785,6 +790,7 @@ export const DEFAULT_SERVICE_CATEGORIES: AppServiceCategory[] = [
     sanskrit: 'विशेषज्ञ ज्योतिष परामर्श',
     desc: 'Direct guidance from verified Vedic scholars and 24/7 AI spiritual intelligence.',
     badge: 'Direct Access',
+    tabLabel: 'Consultations',
     icon: 'people_outline',
     color: '#81C784',
     active: true,
@@ -825,6 +831,7 @@ export const DEFAULT_SERVICE_CATEGORIES: AppServiceCategory[] = [
     sanskrit: 'विशेष जीवन मार्गदर्शन',
     desc: 'In-depth astrological solutions for career, relationships, business, wealth, and destiny.',
     badge: 'Comprehensive',
+    tabLabel: 'Guidance',
     icon: 'psychology_outlined',
     color: '#FFB347',
     active: true,

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AppLogo from '@/components/ui/AppLogo';
-import { LayoutDashboard, Search, Users, Send, ClipboardList, Star, Shield, BarChart3, Bot, Bell, UserCog, Settings, ScrollText, ChevronDown, ChevronRight, Telescope, FileText, MessageSquare, CheckSquare, GitBranch, BookOpen, Video, UserCheck, Timer, BadgeCheck, FolderOpen, Database, Zap, PanelLeftClose, PanelLeftOpen, Smartphone, Sliders, LayoutTemplate, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Search, Users, Send, ClipboardList, Star, Shield, BarChart3, Bot, Bell, UserCog, Settings, ScrollText, ChevronDown, ChevronRight, Telescope, FileText, MessageSquare, CheckSquare, GitBranch, BookOpen, Video, UserCheck, Timer, BadgeCheck, FolderOpen, Database, Zap, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 interface NavItem {
   id: string;
@@ -21,17 +21,6 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     icon: <LayoutDashboard size={16} />,
     href: '/admin-dashboard',
-  },
-  {
-    id: 'nav-app-dynamic',
-    label: 'App Dynamic',
-    icon: <Smartphone size={16} />,
-    children: [
-      { id: 'nav-app-onboarding', label: 'Onboarding Slides', icon: <Sliders size={14} />, href: '/admin-panel/app-dynamic/onboarding' },
-      { id: 'nav-app-banners', label: 'Home Banners', icon: <LayoutTemplate size={14} />, href: '/admin-panel/app-dynamic/banners' },
-      { id: 'nav-app-cosmic-insights', label: 'Cosmic Insights', icon: <Sparkles size={14} />, href: '/admin-panel/app-dynamic/cosmic-insights' },
-      { id: 'nav-app-services', label: 'App Services', icon: <LayoutTemplate size={14} />, href: '/admin-panel/app-dynamic/services' },
-    ],
   },
   {
     id: 'nav-discovery',

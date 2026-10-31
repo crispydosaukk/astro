@@ -22,7 +22,7 @@ import { Home,
   Users,
   CreditCard,
   ClipboardList,
-  Bot, Smartphone, Sliders } from 'lucide-react';
+  Bot } from 'lucide-react';
 import AppLogo from '@/components/ui/AppLogo';
 import { useUserData } from '@/lib/useUserData';
 import { auth } from '@/lib/firebase/config';
@@ -81,17 +81,6 @@ const sidebarGroups: SidebarGroup[] = [
   {
     label: 'Admin',
     items: [
-      {
-        icon: Smartphone,
-        label: 'App Dynamic',
-        badge: 'App',
-        children: [
-          { icon: Smartphone, label: 'Onboarding', href: '/admin-panel/app-dynamic/onboarding' },
-          { icon: LayoutTemplate, label: 'Banners', href: '/admin-panel/app-dynamic/banners' },
-          { icon: Sparkles, label: 'Cosmic Insights', href: '/admin-panel/app-dynamic/cosmic-insights' },
-          { icon: LayoutTemplate, label: 'Services', href: '/admin-panel/app-dynamic/services' },
-        ],
-      },
       { icon: Shield, label: 'Overview', href: '/admin-panel', badge: null },
       { icon: Bot, label: 'AI Astrologers', href: '/admin-panel/ai-astrologers', badge: 'AI' },
       { icon: LayoutTemplate, label: 'Content', href: '/admin-panel/content', badge: null },
@@ -123,16 +112,7 @@ export default function AppSidebar({ collapsed = false, onToggle }: AppSidebarPr
   const { user, userData, loading } = useUserData();
   const [reportsCount, setReportsCount] = useState<number | null>(null);
 
-  const isAppDynamicRoute = pathname.startsWith('/admin-panel/app-dynamic') || pathname.startsWith('/app-dynamic');
-  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
-    'App Dynamic': true,
-  });
-
-  React.useEffect(() => {
-    if (isAppDynamicRoute) {
-      setOpenMenus((prev) => ({ ...prev, 'App Dynamic': true }));
-    }
-  }, [isAppDynamicRoute]);
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
   const toggleMenu = (label: string) => {
     setOpenMenus((prev) => ({

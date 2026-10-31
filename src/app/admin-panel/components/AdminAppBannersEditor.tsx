@@ -97,7 +97,7 @@ export default function AdminAppBannersEditor() {
       badgeColor: 'amber',
       imageUrl: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&auto=format&fit=crop',
       ctaText: 'Book Pooja',
-      ctaAction: '/consultation-booking-screen',
+      ctaAction: '/live-astrologers-screen',
       active: true,
     };
     const updated = [...banners, newBanner];
@@ -578,13 +578,29 @@ export default function AdminAppBannersEditor() {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-foreground">App Route Target</label>
+                        <label className="text-xs font-bold text-foreground">App Destination Route</label>
+                        <select
+                          value={editingBanner.ctaAction}
+                          onChange={(e) => updateBanner(editingBannerIndex, { ctaAction: e.target.value })}
+                          className="w-full px-3.5 py-2 rounded-xl bg-background border border-border text-xs text-foreground outline-none focus:border-accent font-mono mb-1.5"
+                        >
+                          <option value="/live-astrologers-screen">Live Astrologers (/live-astrologers-screen)</option>
+                          <option value="/ai-chat-screen">AI Astrologer Chat (/ai-chat-screen)</option>
+                          <option value="/panchang-screen">Today Panchang (/panchang-screen)</option>
+                          <option value="/remedies-screen">Sacred Remedies (/remedies-screen)</option>
+                          <option value="/my-kundli-screen">My Kundli (/my-kundli-screen)</option>
+                          <option value="/match-kundli-screen">Kundli Matching (/match-kundli-screen)</option>
+                          <option value="/horoscope-screen">Daily Horoscope (/horoscope-screen)</option>
+                          <option value="/wallet-screen">Devotee Wallet & Offers (/wallet-screen)</option>
+                          <option value="/services-screen">Services Screen (/services-screen)</option>
+                          <option value={editingBanner.ctaAction}>Custom Route ({editingBanner.ctaAction})</option>
+                        </select>
                         <input
                           type="text"
                           value={editingBanner.ctaAction}
                           onChange={(e) => updateBanner(editingBannerIndex, { ctaAction: e.target.value })}
-                          placeholder="/talk-to-ai-astrologer"
-                          className="w-full px-3.5 py-2 rounded-xl bg-background border border-border text-xs text-foreground outline-none focus:border-accent font-mono"
+                          placeholder="/live-astrologers-screen"
+                          className="w-full px-3.5 py-1.5 rounded-lg bg-background border border-border text-[11px] text-muted-foreground outline-none focus:border-accent font-mono"
                         />
                       </div>
                     </div>

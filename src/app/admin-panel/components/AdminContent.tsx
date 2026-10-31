@@ -17,7 +17,7 @@ import AdminAppCosmicInsightsEditor from './AdminAppCosmicInsightsEditor';
 import AdminAppReviewsEditor from './AdminAppReviewsEditor';
 import AdminAppServicesEditor from './AdminAppServicesEditor';
 import AdminAppProfileEditor from './AdminAppProfileEditor';
-import { Shield, Bell, Download, LogOut, Smartphone, LayoutTemplate, Sparkles, ChevronDown } from 'lucide-react';
+import { Shield, Bell, Download, LogOut, Smartphone, LayoutTemplate, Sparkles, ChevronDown, User } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -50,6 +50,13 @@ const APP_DYNAMIC_SUBMODULES = [
     shortLabel: 'Services',
     href: '/admin-panel/app-dynamic/services',
     icon: LayoutTemplate,
+  },
+  {
+    id: 'tab-app-profile',
+    label: 'App Profile & Menus',
+    shortLabel: 'Profile',
+    href: '/admin-panel/app-dynamic/profile',
+    icon: User,
   },
   {
     id: 'tab-app-reviews',
