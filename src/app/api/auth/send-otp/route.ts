@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { adminDb } from '@/lib/firebase/admin';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +21,23 @@ export async function POST(req: Request) {
 
     // Extract digits and remove the plus sign
     const cleanPhone = phone.replace(/\D/g, '');
+
+    // Check if this phone number account was permanently deleted
+    try {
+      const deletedSnap = await adminDb.collection('deleted_accounts').doc(cleanPhone).get();
+      if (deletedSnap.exists) {
+        return NextResponse.json(
+          {
+            success: false,
+            isDeleted: true,
+            error: 'This number account is already deleted. Please try with another number.',
+          },
+          { status: 403, headers: corsHeaders }
+        );
+      }
+    } catch (checkErr: any) {
+      console.warn('Could not check deleted_accounts collection:', checkErr.message);
+    }
 
     const authKey = process.env.MSG91_AUTH_KEY;
     const templateId = process.env.MSG91_TEMPLATE_ID;

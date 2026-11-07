@@ -23,6 +23,23 @@ export async function POST(req: Request) {
     const cleanPhone = phone.replace(/\D/g, '');
     const formattedPhone = '+' + cleanPhone; // Firebase expects E.164
 
+    // Check if this phone number account was permanently deleted
+    try {
+      const deletedSnap = await adminDb.collection('deleted_accounts').doc(cleanPhone).get();
+      if (deletedSnap.exists) {
+        return NextResponse.json(
+          {
+            success: false,
+            isDeleted: true,
+            error: 'This number account is already deleted. Please try with another number.',
+          },
+          { status: 403, headers: corsHeaders }
+        );
+      }
+    } catch (checkErr: any) {
+      console.warn('Could not check deleted_accounts collection:', checkErr.message);
+    }
+
     const authKey = process.env.MSG91_AUTH_KEY;
     const isMasterOtp = otp === '1234' || otp === '9999' || otp === '0000';
 
