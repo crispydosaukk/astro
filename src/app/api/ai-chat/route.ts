@@ -207,6 +207,86 @@ export async function PATCH(req: Request) {
   }
 }
 
+function stripTrailingAstrologerQuestions(text: string, language?: string): string {
+  if (!text) return '';
+  let cleaned = text.trim();
+
+  const normLang =
+    /telugu|^te$/i.test(language || '') ? 'Telugu' :
+    /hindi|^hi$/i.test(language || '') ? 'Hindi' :
+    /tamil|^ta$/i.test(language || '') ? 'Tamil' :
+    /kannada|^kn$/i.test(language || '') ? 'Kannada' :
+    /malayalam|^ml$/i.test(language || '') ? 'Malayalam' : 'English';
+
+  const isQuestionSentence = (s: string) => {
+    const t = s.trim();
+    if (!t) return false;
+    if (/[?？]/.test(t)) return true;
+    return /తెలుసుకోవాలనుకుంటున్నారా|అనుభవిస్తున్నారా|కలిగి ఉన్నారా|వివరించగలరా|ఉన్నారా\?|जानना चाहते हैं|अनुभव कर रहे हैं|बता सकते हैं|Would you like to|Do you want to|Are you experiencing|Can you tell me/i.test(t);
+  };
+
+  let changed = true;
+  while (changed && cleaned.length > 0) {
+    changed = false;
+    const lines = cleaned.split('\n');
+    const lastLine = lines[lines.length - 1].trim();
+    if (isQuestionSentence(lastLine)) {
+      lines.pop();
+      cleaned = lines.join('\n').trim();
+      changed = true;
+      continue;
+    }
+
+    const sentenceDelim = /([.!?।॥])/;
+    const parts = lastLine.split(sentenceDelim);
+    if (parts.length > 2) {
+      const sentences: string[] = [];
+      for (let i = 0; i < parts.length - 1; i += 2) {
+        sentences.push((parts[i] + parts[i + 1]).trim());
+      }
+      if (parts[parts.length - 1].trim()) {
+        sentences.push(parts[parts.length - 1].trim());
+      }
+      const lastSent = sentences[sentences.length - 1];
+      if (isQuestionSentence(lastSent)) {
+        sentences.pop();
+        lines[lines.length - 1] = sentences.join(' ').trim();
+        cleaned = lines.filter((l) => l.trim().length > 0).join('\n\n').trim();
+        changed = true;
+      }
+    }
+  }
+
+  cleaned = cleaned.replace(/[—–-]\s*[^\n.!?]*[?？]\s*$/g, '').trim();
+  cleaned = cleaned.replace(/[?？]\s*$/g, '.').trim();
+
+  if (!cleaned || cleaned.length < 20) {
+    if (normLang === 'Telugu') {
+      cleaned = 'మీ జన్మ కుండలి ప్రకారం గ్రహాల స్థితులు పరిశీలించబడ్డాయి. ప్రస్తుత గోచారంలో బృహస్పతి అనుకూలంగా ఉండటంతో కార్యసిద్ధి, మనశ్శాంతి లభిస్తాయి. నిత్యం ఇష్టదేవతా ప్రార్థన మరియు వేద పరిహారాల ఆచరణ శ్రేయస్కరం.';
+    } else if (normLang === 'Hindi') {
+      cleaned = 'आपकी जन्म पत्रिका के अनुसार ग्रह स्थितियां अनुकूल हैं। देवगुरु बृहस्पति की शुभ दृष्टि से आपके कार्यों में प्रगति और मानसिक शांति प्राप्त होगी। नित्य इष्टदेव की उपासना एवं वैदिक उपाय कल्याणकारी सिद्ध होंगे।';
+    } else {
+      cleaned = 'Based on your Vedic birth chart, planetary transits are aligning favorably. Consecrated remedial rituals and regular spiritual practices will illuminate your highest pathway with peace and prosperity.';
+    }
+  }
+
+  const BLESSINGS: Record<string, string> = {
+    Telugu: 'సర్వే జనాః సుఖినో భవంతు. శుభం భూయాత్! 🙏',
+    Hindi: 'सर्वे भवन्तु सुखिनः। शुभं भवतु! 🙏',
+    Tamil: 'ஓம் சாந்தி. சுப மங்களம் உண்டாகட்டும்! 🙏',
+    Kannada: 'ಸರ್ವೇ ಜನಾಃ ಸುಖಿನೋ ಭವಂತು. ಶುಭವಾಗಲಿ! 🙏',
+    Malayalam: 'സർവ്വേ ഭവന്തു സുഖിനഃ. ശുഭം ഭവിക്കട്ടെ! 🙏',
+    English: 'May cosmic grace illuminate your path with peace and prosperity. Om Tat Sat! 🙏',
+  };
+
+  const blessing = BLESSINGS[normLang] || BLESSINGS.English;
+  if (!cleaned.includes('🙏') && !cleaned.includes('శుభం') && !cleaned.includes('शुभं') && !cleaned.includes('Blessings')) {
+    cleaned += `\n\n${blessing}`;
+  }
+
+  return cleaned;
+}
+
 function generateVedicFallbackResponse(params: {
   vedikaAnswer?: string;
   vedikaRecommendations?: string[];
@@ -1627,6 +1707,8 @@ You MUST respond STRICTLY in JSON format matching this schema:
         mainReply ||
         parsed.conclusion ||
         'May Lord Shiva and Goddess Parvathi shower their divine blessings upon this alliance with health, harmony, and prosperity.';
+
+      replyContent = stripTrailingAstrologerQuestions(replyContent, language);
 
       if (Array.isArray(parsed.recommendations) && parsed.recommendations.length > 0) {
         recommendations = parsed.recommendations

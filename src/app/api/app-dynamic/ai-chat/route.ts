@@ -91,6 +91,89 @@ export async function GET(req: NextRequest) {
   }, { headers: corsHeaders });
 }
 
+function stripTrailingAstrologerQuestions(text: string, language?: string): string {
+  if (!text) return '';
+  let cleaned = text.trim();
+
+  const normLang =
+    /telugu|^te$/i.test(language || '') ? 'Telugu' :
+    /hindi|^hi$/i.test(language || '') ? 'Hindi' :
+    /tamil|^ta$/i.test(language || '') ? 'Tamil' :
+    /kannada|^kn$/i.test(language || '') ? 'Kannada' :
+    /malayalam|^ml$/i.test(language || '') ? 'Malayalam' : 'English';
+
+  const isQuestionSentence = (s: string) => {
+    const t = s.trim();
+    if (!t) return false;
+    if (/[?？]/.test(t)) return true;
+    return /తెలుసుకోవాలనుకుంటున్నారా|అనుభవిస్తున్నారా|కలిగి ఉన్నారా|వివరించగలరా|ఉన్నారా\?|जानना चाहते हैं|अनुभव कर रहे हैं|बता सकते हैं|Would you like to|Do you want to|Are you experiencing|Can you tell me/i.test(t);
+  };
+
+  // Repeatedly strip trailing question lines / sentences
+  let changed = true;
+  while (changed && cleaned.length > 0) {
+    changed = false;
+    const lines = cleaned.split('\n');
+    const lastLine = lines[lines.length - 1].trim();
+    if (isQuestionSentence(lastLine)) {
+      lines.pop();
+      cleaned = lines.join('\n').trim();
+      changed = true;
+      continue;
+    }
+
+    const sentenceDelim = /([.!?।॥])/;
+    const parts = lastLine.split(sentenceDelim);
+    if (parts.length > 2) {
+      const sentences: string[] = [];
+      for (let i = 0; i < parts.length - 1; i += 2) {
+        sentences.push((parts[i] + parts[i + 1]).trim());
+      }
+      if (parts[parts.length - 1].trim()) {
+        sentences.push(parts[parts.length - 1].trim());
+      }
+      const lastSent = sentences[sentences.length - 1];
+      if (isQuestionSentence(lastSent)) {
+        sentences.pop();
+        lines[lines.length - 1] = sentences.join(' ').trim();
+        cleaned = lines.filter((l) => l.trim().length > 0).join('\n\n').trim();
+        changed = true;
+      }
+    }
+  }
+
+  // Remove any lingering question marks and their clauses at the end
+  cleaned = cleaned.replace(/[—–-]\s*[^\n.!?]*[?？]\s*$/g, '').trim();
+  cleaned = cleaned.replace(/[?？]\s*$/g, '.').trim();
+
+  // If text became empty or was only questions to begin with, provide auspicious response
+  if (!cleaned || cleaned.length < 20) {
+    if (normLang === 'Telugu') {
+      cleaned = 'మీ జన్మ కుండలి ప్రకారం గ్రహాల స్థితులు పరిశీలించబడ్డాయి. ప్రస్తుత గోచారంలో బృహస్పతి అనుకూలంగా ఉండటంతో కార్యసిద్ధి, మనశ్శాంతి లభిస్తాయి. నిత్యం ఇష్టదేవతా ప్రార్థన మరియు వేద పరిహారాల ఆచరణ శ్రేయస్కరం.';
+    } else if (normLang === 'Hindi') {
+      cleaned = 'आपकी जन्म पत्रिका के अनुसार ग्रह स्थितियां अनुकूल हैं। देवगुरु बृहस्पति की शुभ दृष्टि से आपके कार्यों में प्रगति और मानसिक शांति प्राप्त होगी। नित्य इष्टदेव की उपासना एवं वैदिक उपाय कल्याणकारी सिद्ध होंगे।';
+    } else {
+      cleaned = 'Based on your Vedic birth chart, planetary transits are aligning favorably. Consecrated remedial rituals and regular spiritual practices will illuminate your highest pathway with peace and prosperity.';
+    }
+  }
+
+  const BLESSINGS: Record<string, string> = {
+    Telugu: 'సర్వే జనాః సుఖినో భవంతు. శుభం భూయాత్! 🙏',
+    Hindi: 'सर्वे भवन्तु सुखिनः। शुभं भवतु! 🙏',
+    Tamil: 'ஓம் சாந்தி. சுப மங்களம் உண்டாகட்டும்! 🙏',
+    Kannada: 'ಸರ್ವೇ ಜನಾಃ ಸುಖಿನೋ ಭವಂತು. ಶುಭವಾಗಲಿ! 🙏',
+    Malayalam: 'സർവ്വേ ഭവന്തു സുഖിനഃ. ശുഭം ഭവിക്കട്ടെ! 🙏',
+    English: 'May cosmic grace illuminate your path with peace and prosperity. Om Tat Sat! 🙏',
+  };
+
+  const blessing = BLESSINGS[normLang] || BLESSINGS.English;
+  if (!cleaned.includes('🙏') && !cleaned.includes('శుభం') && !cleaned.includes('शुभं') && !cleaned.includes('Blessings')) {
+    cleaned += `\n\n${blessing}`;
+  }
+
+  return cleaned;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -167,7 +250,8 @@ export async function POST(req: NextRequest) {
       try {
         const vDt = birthInfo?.dob ? formatToVedikaDateTime(birthInfo.dob, birthInfo.tob || '12:00') : undefined;
         const vedikaRes: any = await queryVedikaAI({
-          question: `You are ${matchedAstrologer.name}, a revered Vedic Astrologer on AstroParihar. Devotee: ${birthInfo.name}, DOB: ${birthInfo.dob}. Lagna: ${chart?.ascendant || 'Aries'}. Moon Sign: ${chart?.moonSign || 'Vedic'}. Question: "${latestUserMessage}". Respond in ${language}.`,
+          question: `You are ${matchedAstrologer.name}, a revered Vedic Astrologer on AstroParihar. Devotee: ${birthInfo.name}, DOB: ${birthInfo.dob}. Lagna: ${chart?.ascendant || 'Aries'}. Moon Sign: ${chart?.moonSign || 'Vedic'}. Question: "${latestUserMessage}". Respond purely in ${language}.
+CRITICAL INSTRUCTION: Provide authoritative astrological insights and remedies (Parihar). NEVER ask questions back to the devotee at the end of your response. DO NOT ask conversational return questions like 'Would you like to know...', 'Can you tell me...', or 'Are you experiencing...'. Always conclude gracefully with complete astrological guidance and auspicious Vedic blessings.`,
           language,
           birthDetails: vDt ? {
             datetime: vDt,
@@ -187,7 +271,8 @@ export async function POST(req: NextRequest) {
 
     if (!replyText && useOpenAI) {
       try {
-        const sysPrompt = `You are ${matchedAstrologer.name}, an authentic Vedic Astrologer on AstroParihar. Devotee: ${birthInfo.name}. Answer in ${language}.`;
+        const sysPrompt = `You are ${matchedAstrologer.name}, an authentic Vedic Astrologer on AstroParihar. Devotee: ${birthInfo.name}. Answer purely in ${language}.
+CRITICAL INSTRUCTION: Provide authoritative astrological insights and remedies (Parihar). NEVER ask questions back to the devotee at the end of your response. DO NOT ask conversational return questions like 'Would you like to know...', 'Are you experiencing...', or any follow-up questions. Always conclude gracefully with complete astrological remedies and Vedic blessings.`;
         const openAIRes = await fetchWithOpenAIFallback(
           'https://api.openai.com/v1/chat/completions',
           {
@@ -236,29 +321,116 @@ export async function POST(req: NextRequest) {
 
     const recs = QUICK_PROMPTS_BY_LANG[language] || QUICK_PROMPTS_BY_LANG.English;
 
+    const dashaLord = chart?.dasha?.currentMahadasha || 'Jupiter';
+    const antarLord = chart?.dasha?.currentAntardasha || 'Mercury';
+
+    const TIMING_BY_LANG: Record<string, string> = {
+      Telugu: 'రాబోయే 3 నుండి 6 నెలలు (శుభ గోచార సమయం)',
+      Hindi: 'आगामी 3 से 6 महीने (शुभ गोचर कालखंड)',
+      Tamil: 'அடுத்த 3 முதல் 6 மாதங்கள் (சுப பெயர்ச்சி காலம்)',
+      Kannada: 'ಮುಂದಿನ 3 ರಿಂದ 6 ತಿಂಗಳು (ಶುಭ ಸಂಚಾರ ಕಾಲ)',
+      Malayalam: 'അടുത്ത 3 മുതൽ 6 മാസം വരെ (ശുഭ ഗ്രഹ സഞ്ചാര സമയം)',
+      English: 'Next 3 to 6 Months (Auspicious Transit Window)',
+    };
+
+    const WHY_EVIDENCE_BY_LANG: Record<string, string[]> = {
+      Telugu: [
+        'లగ్నం మరియు చంద్ర రాశి సమతుల్యత మానసిక స్థిరత్వాన్ని మరియు స్పష్టతను ఇస్తుంది.',
+        'మహాదశాధిపతి మీ ప్రధాన లక్ష్యాలు మరియు కార్యసిద్ధికి అనుకూలంగా ఉన్నారు.',
+        'వేద పరిహారాల ఆచరణ ఆటంకాలను వేగంగా తొలగిస్తుంది.',
+      ],
+      Hindi: [
+        'लग्न और चंद्र राशि का संतुलन मानसिक शांति और स्पष्टता प्रदान करता है।',
+        'महादशाधिपति मुख्य कार्यों और उन्नति के अनुकूल संरेखित हैं।',
+        'शास्त्रोक्त वैदिक उपायों का अनुष्ठान बाधाओं का शीघ्र निवारण करता है।',
+      ],
+      Tamil: [
+        'லக்னம் மற்றும் சந்திர ராசியின் சமநிலை மன அமைதியைத் தருகிறது.',
+        'மகாதிசாதிபதி முக்கிய முயற்சிகளுக்கு சாதகமாக உள்ளார்.',
+        'பரிகாரங்களின் சக்தி தடைகளை விரைவாக நீக்குகிறது.',
+      ],
+      Kannada: [
+        'ಲಗ್ನ ಮತ್ತು ಚಂದ್ರ ರಾಶಿಯ ಸಮತೋಲನವು ಮಾನಸಿಕ ಸ್ಥಿರತೆಯನ್ನು ನೀಡುತ್ತದೆ.',
+        'ಮಹಾದಶಾಧಿಪತಿಯು ಮುಖ್ಯ ಕಾರ್ಯಸಾಧನೆಗೆ ಪೂರಕವಾಗಿದ್ದಾರೆ.',
+        'ಪರಿಹಾರಗಳ ಆಚರಣೆಯು ಅಡೆತಡೆಗಳನ್ನು ಶೀಘ್ರವಾಗಿ ನಿವಾರಿಸುತ್ತದೆ.',
+      ],
+      Malayalam: [
+        'ലഗ്നത്തിന്റെയും ചന്ദ്ര രാശിയുടെയും സന്തുലിതാവസ്ഥ മാനസിക സ്ഥിരത നൽകുന്നു.',
+        'മഹാദശാധിപൻ നിങ്ങളുടെ പ്രധാന ലക്ഷ്യങ്ങൾക്ക് അനുകൂലമായി നിലകൊള്ളുന്നു.',
+        'പരിഹാര ക്രിയകൾ തടസ്സങ്ങളെ വേഗത്തിൽ ഇല്ലാതാക്കുന്നു.',
+      ],
+      English: [
+        'Lagna and Moon sign equilibrium provides emotional stability.',
+        'Mahadasha lord aligns with core enterprise.',
+        'Remedial resonance accelerates obstacle dissolution.',
+      ],
+    };
+
+    const DASHA_NAMES_BY_LANG: Record<string, { maha: string; antar: string; planets: Record<string, string> }> = {
+      Telugu: {
+        maha: 'మహాదశ',
+        antar: 'అంతర్దశ',
+        planets: { Jupiter: 'గురు', Mercury: 'బుధ', Saturn: 'శని', Venus: 'శుక్ర', Mars: 'కుజ', Sun: 'సూర్య', Moon: 'చంద్ర', Rahu: 'రాహు', Ketu: 'కేతు' },
+      },
+      Hindi: {
+        maha: 'महादशा',
+        antar: 'अंतर्दशा',
+        planets: { Jupiter: 'गुरु', Mercury: 'बुध', Saturn: 'शनि', Venus: 'शुक्र', Mars: 'मंगल', Sun: 'सूर्य', Moon: 'चंद्र', Rahu: 'राहु', Ketu: 'केतु' },
+      },
+      Tamil: {
+        maha: 'மகாதிசை',
+        antar: 'புத்தி',
+        planets: { Jupiter: 'குரு', Mercury: 'புதன்', Saturn: 'சனி', Venus: 'சுக்கிரன்', Mars: 'செவ்வாய்', Sun: 'சூரியன்', Moon: 'சந்திரன்', Rahu: 'ராகு', Ketu: 'கேது' },
+      },
+      Kannada: {
+        maha: 'ಮಹಾದಶೆ',
+        antar: 'ಅಂತರ್ದಶೆ',
+        planets: { Jupiter: 'ಗುರು', Mercury: 'ಬುಧ', Saturn: 'ಶನಿ', Venus: 'ಶುಕ್ರ', Mars: 'ಮಂಗಳ', Sun: 'ಸೂರ್ಯ', Moon: 'ಚಂದ್ರ', Rahu: 'ರಾಹು', Ketu: 'ಕೇತು' },
+      },
+      Malayalam: {
+        maha: 'മഹാദശ',
+        antar: 'അപഹാരം',
+        planets: { Jupiter: 'വ്യാഴ', Mercury: 'ബുധ', Saturn: 'ശനി', Venus: 'ശുക്ര', Mars: 'ചൊവ്വ', Sun: 'സൂര്യ', Moon: 'ചന്ദ്ര', Rahu: 'രാഹു', Ketu: 'കേതു' },
+      },
+      English: {
+        maha: 'Mahadasha',
+        antar: 'Antardasha',
+        planets: { Jupiter: 'Jupiter', Mercury: 'Mercury', Saturn: 'Saturn', Venus: 'Venus', Mars: 'Mars', Sun: 'Sun', Moon: 'Moon', Rahu: 'Rahu', Ketu: 'Ketu' },
+      },
+    };
+
+    const dLang = DASHA_NAMES_BY_LANG[language] || DASHA_NAMES_BY_LANG.English;
+    const localizedMahaPlanet = dLang.planets[dashaLord] || dashaLord;
+    const localizedAntarPlanet = dLang.planets[antarLord] || antarLord;
+    const activeDashaStr = `${localizedMahaPlanet} ${dLang.maha} / ${localizedAntarPlanet} ${dLang.antar}`;
+
     const structured = {
       conclusion: language === 'Telugu'
         ? `మీ కుండలిలో ${chart?.ascendant || 'లగ్నం'} బలం అనుకూలంగా ఉంది. కాలపరిమితి లోపల సత్ఫలితాలు అందుతాయి.`
         : language === 'Hindi'
         ? `आपकी कुंडली में ${chart?.ascendant || 'लग्न'} एवं दशेश की स्थिति शुभ परिणाम देने के लिए तत्पर है।`
-        : `Planetary positions and active ${chart?.dasha?.currentMahadasha || 'Jupiter'} Mahadasha support timely fulfillment with consecrated remedial practices.`,
-      timingWindow: 'Next 3 to 6 Months (Auspicious Transit Window)',
+        : language === 'Tamil'
+        ? `உங்கள் ஜாதகத்தில் ${chart?.ascendant || 'லக்னம்'} மற்றும் தசாநாதர் சுப பலன்களை அளிக்க சாதகமாக உள்ளனர்.`
+        : language === 'Kannada'
+        ? `ನಿಮ್ಮ ಕುಂಡಲಿಯಲ್ಲಿ ${chart?.ascendant || 'ಲಗ್ನ'} ಬಲ ಮತ್ತು ದಶಾನಾಥರು ಸತ್ಫಲಗಳನ್ನು ನೀಡಲು ಅನುಕೂಲಕರವಾಗಿದ್ದಾರೆ.`
+        : language === 'Malayalam'
+        ? `നിങ്ങളുടെ ജാതകത്തിൽ ${chart?.ascendant || 'ലഗ്നം'} ദശാധിപനും അനുകൂലമായ ഫലങ്ങൾ നൽകാൻ പ്രാപ്തമാണ്.`
+        : `Planetary positions and active ${dashaLord} Mahadasha support timely fulfillment with consecrated remedial practices.`,
+      timingWindow: TIMING_BY_LANG[language] || TIMING_BY_LANG.English,
       diagnosis: {
-        activeDasha: `${chart?.dasha?.currentMahadasha || 'Jupiter'} / ${chart?.dasha?.currentAntardasha || 'Saturn'}`,
-        keyHouses: 'Houses 1, 5, 9 & 10',
+        activeDasha: activeDashaStr,
+        keyHouses: language === 'Telugu' ? '1, 5, 9 మరియు 10వ స్థానాలు' : language === 'Hindi' ? '1, 5, 9 एवं 10वां भाव' : 'Houses 1, 5, 9 & 10',
         supportingFactors: [
           `Lagna Lord (${chart?.ascendantLord || 'Benefic'}) in favorable quadrant`,
           `Benefic transit of Jupiter amplifying auspicious results`,
         ],
       },
-      whyAstroPariharSaysThis: [
-        `Lagna and Moon sign equilibrium provides emotional stability.`,
-        `Mahadasha lord aligns with core enterprise.`,
-        `Remedial resonance accelerates obstacle dissolution.`,
-      ],
+      whyAstroPariharSaysThis: WHY_EVIDENCE_BY_LANG[language] || WHY_EVIDENCE_BY_LANG.English,
       confidence: 'Strong',
       pariharProtocol,
     };
+
+    replyText = stripTrailingAstrologerQuestions(replyText, language);
 
     return NextResponse.json({
       success: true,

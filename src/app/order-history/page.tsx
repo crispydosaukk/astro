@@ -45,7 +45,54 @@ export default function OrderHistoryPage() {
 
   useEffect(() => {
     const fetchAllHistory = async () => {
+      // 1. Always load local cached AI consultations and past calls first
+      let localAi: any[] = [];
+      let localHuman: any[] = [];
+      try {
+        localAi = JSON.parse(localStorage.getItem('astroparihar_ai_history') || '[]');
+      } catch (e) {}
+      try {
+        localHuman = JSON.parse(localStorage.getItem('astroparihar_consultation_history') || '[]');
+      } catch (e) {}
+
+      const parseTime = (item: any) => {
+        if (!item) return 0;
+        const raw = item.createdAt ?? item.startTime ?? item.date ?? item.timestamp;
+        if (!raw) return 0;
+        if (typeof raw.toMillis === 'function') {
+          try { const v = raw.toMillis(); if (!isNaN(v)) return v; } catch {}
+        }
+        if (typeof raw.toDate === 'function') {
+          try { const d = raw.toDate(); if (!isNaN(d.getTime())) return d.getTime(); } catch {}
+        }
+        if (typeof raw === 'object' && typeof raw.seconds === 'number') {
+          return raw.seconds * 1000;
+        }
+        const t = new Date(raw).getTime();
+        return isNaN(t) ? 0 : t;
+      };
+
       if (!user) {
+        localAi.sort((a: any, b: any) => parseTime(b) - parseTime(a));
+        localHuman.sort((a: any, b: any) => parseTime(b) - parseTime(a));
+        setAiHistory(localAi);
+        setHumanHistory(localHuman);
+
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          const tabParam = params.get('tab');
+          if (tabParam === 'ai' || tabParam === 'human') {
+            setActiveTab(tabParam);
+          }
+          const sessionParam = params.get('session');
+          if (sessionParam) {
+            const found = localAi.find((s: any) => s.id === sessionParam);
+            if (found) {
+              setSelectedAiSession(found);
+              setActiveTab('ai');
+            }
+          }
+        }
         setLoading(false);
         return;
       }
@@ -59,22 +106,13 @@ export default function OrderHistoryPage() {
         );
         const humanSnap = await getDocs(humanQ);
         const humanData = humanSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        const parseTime = (item: any) => {
-          if (!item) return 0;
-          const raw = item.createdAt ?? item.startTime ?? item.date ?? item.timestamp;
-          if (!raw) return 0;
-          if (typeof raw.toMillis === 'function') {
-            try { const v = raw.toMillis(); if (!isNaN(v)) return v; } catch {}
+
+        // Merge with local human history
+        localHuman.forEach((item: any) => {
+          if (!humanData.some((existing: any) => existing.id === item.id)) {
+            humanData.push(item);
           }
-          if (typeof raw.toDate === 'function') {
-            try { const d = raw.toDate(); if (!isNaN(d.getTime())) return d.getTime(); } catch {}
-          }
-          if (typeof raw === 'object' && typeof raw.seconds === 'number') {
-            return raw.seconds * 1000;
-          }
-          const t = new Date(raw).getTime();
-          return isNaN(t) ? 0 : t;
-        };
+        });
 
         humanData.sort((a: any, b: any) => parseTime(b) - parseTime(a));
         setHumanHistory(humanData);
@@ -87,17 +125,12 @@ export default function OrderHistoryPage() {
         const aiSnap = await getDocs(aiQ);
         const aiData = aiSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-        // Merge with locally cached sessions if any
-        try {
-          const cached = JSON.parse(localStorage.getItem('astroparihar_ai_history') || '[]');
-          cached.forEach((item: any) => {
-            if (!aiData.some((existing: any) => existing.id === item.id)) {
-              aiData.push(item);
-            }
-          });
-        } catch (e) {
-          console.warn('Cache merge warning:', e);
-        }
+        // Merge with locally cached sessions
+        localAi.forEach((item: any) => {
+          if (!aiData.some((existing: any) => existing.id === item.id)) {
+            aiData.push(item);
+          }
+        });
 
         aiData.sort((a: any, b: any) => parseTime(b) - parseTime(a));
         setAiHistory(aiData);

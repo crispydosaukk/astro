@@ -16,6 +16,7 @@ export default function GlobalFooterAndBottomBar() {
     pathname?.startsWith('/admin-panel') ||
     pathname?.startsWith('/astrologer-dashboard') ||
     pathname?.startsWith('/call/') ||
+    pathname?.startsWith('/ai-call') ||
     pathname?.startsWith('/admin-dashboard') ||
     pathname?.startsWith('/ai-operations') ||
     pathname?.startsWith('/application-management') ||
