@@ -221,7 +221,7 @@ export default function SettingsPage() {
                       Active key loaded from astroparihar desktop workspace.
                     </p>
                     <span className="inline-block mt-3 text-2xs font-mono bg-background px-2 py-0.5 rounded border border-border text-foreground font-semibold">
-                      sk-proj-VEAls...VdOVsA
+                      Managed via server env (OPENAI_API_KEY)
                     </span>
                   </div>
                 </div>
