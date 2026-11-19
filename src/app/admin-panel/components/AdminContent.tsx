@@ -17,6 +17,7 @@ import AdminAppCosmicInsightsEditor from './AdminAppCosmicInsightsEditor';
 import AdminAppReviewsEditor from './AdminAppReviewsEditor';
 import AdminAppServicesEditor from './AdminAppServicesEditor';
 import AdminAppProfileEditor from './AdminAppProfileEditor';
+import AdminAppNotificationsModule from './AdminAppNotificationsModule';
 import { Shield, Bell, Download, LogOut, Smartphone, LayoutTemplate, Sparkles, ChevronDown, User } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
 import Link from 'next/link';
@@ -65,6 +66,13 @@ const APP_DYNAMIC_SUBMODULES = [
     href: '/admin-panel/app-dynamic/reviews',
     icon: Shield,
   },
+  {
+    id: 'tab-app-notifications',
+    label: 'Push & In-App Notifications',
+    shortLabel: 'Notifications',
+    href: '/admin-panel/app-dynamic/notifications',
+    icon: Bell,
+  },
 ];
 
 export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab?: string }) {
@@ -77,7 +85,9 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
     activeTab === 'tab-app-banners' ||
     activeTab === 'tab-app-cosmic-insights' ||
     activeTab === 'tab-app-reviews' ||
-    activeTab === 'tab-app-services' || activeTab === 'tab-app-profile';
+    activeTab === 'tab-app-services' ||
+    activeTab === 'tab-app-profile' ||
+    activeTab === 'tab-app-notifications';
 
   const currentSubTab =
     activeTab === 'tab-app-dynamic' ? 'tab-app-onboarding' : activeTab;
@@ -106,10 +116,14 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
             >
               <LogOut size={15} /> Sign Out
             </button>
-            <button className="relative p-2 rounded-xl hover:bg-muted transition-all">
-              <Bell size={18} className="text-muted-foreground" />
+            <Link
+              href="/admin-panel/app-dynamic/notifications"
+              className="relative p-2 rounded-xl hover:bg-muted transition-all"
+              title="Send Lock-Screen & In-App Notifications"
+            >
+              <Bell size={18} className="text-muted-foreground hover:text-accent transition-colors" />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-400" />
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -199,6 +213,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
         {activeTab === 'tab-app-reviews' && <AdminAppReviewsEditor />}
         {activeTab === 'tab-app-services' && <AdminAppServicesEditor />}
         {activeTab === 'tab-app-profile' && <AdminAppProfileEditor />}
+        {activeTab === 'tab-app-notifications' && <AdminAppNotificationsModule />}
         {activeTab === 'tab-content' && <AdminContentManagement />}
         {activeTab === 'tab-page-content' && <AdminDynamicPageEditor />}
         {activeTab === 'tab-prompts' && <AdminAIPrompts />}

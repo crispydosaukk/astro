@@ -1,6 +1,7 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 
 function initFirebaseAdmin() {
   if (getApps().length > 0) return true;
@@ -57,5 +58,12 @@ export const adminDb = new Proxy({} as any, {
   get: (target, prop) => {
     initFirebaseAdmin();
     return (getFirestore() as any)[prop];
+  },
+});
+
+export const adminMessaging = new Proxy({} as any, {
+  get: (target, prop) => {
+    initFirebaseAdmin();
+    return (getMessaging() as any)[prop];
   },
 });
