@@ -584,7 +584,10 @@ async function dispatchFcmPush(
           notification: {
             channelId: 'astroparihar_default',
             sound: 'default',
+            priority: 'max',
             visibility: 'public',
+            defaultSound: true,
+            defaultVibrateTimings: true,
             ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
           },
         },
