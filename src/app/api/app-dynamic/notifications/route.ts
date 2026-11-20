@@ -10,6 +10,7 @@ import {
   NotificationDeliveryMode,
   NotificationPriority,
 } from '@/lib/notificationService';
+import { slugifyCategoryId } from '@/lib/notificationTemplatesConfig';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -72,17 +73,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validCategories: NotificationCategory[] = [
-      'horoscope',
-      'panchang',
-      'consultation',
-      'offers',
-      'remedies',
-      'system',
-    ];
-    const category: NotificationCategory = validCategories.includes(body?.category)
-      ? body.category
-      : 'system';
+    const category: NotificationCategory =
+      slugifyCategoryId(typeof body?.category === 'string' ? body.category : '') || 'system';
 
     const priority: NotificationPriority = body?.priority === 'normal' ? 'normal' : 'high';
     const deliveryMode: NotificationDeliveryMode =

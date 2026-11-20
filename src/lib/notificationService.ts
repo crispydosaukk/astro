@@ -12,7 +12,15 @@ import {
   limit,
 } from 'firebase/firestore';
 
-export type NotificationCategory =
+import {
+  DEFAULT_NOTIFICATION_CATEGORIES,
+  sanitizeNotificationConfig,
+  type DynamicNotificationCategory,
+  type NotificationDeliveryMode,
+  type NotificationPriority,
+} from './notificationTemplatesConfig';
+
+export type BuiltInNotificationCategory =
   | 'horoscope'
   | 'panchang'
   | 'consultation'
@@ -20,9 +28,10 @@ export type NotificationCategory =
   | 'remedies'
   | 'system';
 
+export type NotificationCategory = string;
+
 export type NotificationAudience = 'all' | 'specific';
-export type NotificationPriority = 'normal' | 'high';
-export type NotificationDeliveryMode = 'push_and_inapp' | 'push_only' | 'inapp_only';
+export type { NotificationDeliveryMode, NotificationPriority, DynamicNotificationCategory };
 
 export interface UserNotificationPreferences {
   enabled: boolean;
@@ -37,6 +46,7 @@ export interface UserNotificationPreferences {
   quietHoursEnabled: boolean;
   quietStart: string;
   quietEnd: string;
+  [key: string]: boolean | string | undefined;
 }
 
 export const DEFAULT_NOTIFICATION_PREFERENCES: UserNotificationPreferences = {
@@ -376,15 +386,29 @@ export async function getAllNotifications(maxItems = 100): Promise<AppNotificati
     .sort((a, b) => b.createdAtMs - a.createdAtMs);
 }
 
+export async function getDynamicNotificationCategories(): Promise<DynamicNotificationCategory[]> {
+  try {
+    const configDoc = await readDoc('app_notifications_config', 'templates_and_categories');
+    if (configDoc) {
+      return sanitizeNotificationConfig(configDoc as any).categories;
+    }
+  } catch (err) {
+    console.warn('[notifications] Failed loading dynamic categories:', err);
+  }
+  return DEFAULT_NOTIFICATION_CATEGORIES;
+}
+
 export async function getCustomerNotifications(uid?: string, phone?: string): Promise<{
   notifications: AppNotificationItem[];
   readIds: string[];
   deletedIds: string[];
   preferences: UserNotificationPreferences;
+  categories: DynamicNotificationCategory[];
 }> {
-  const [all, userDoc] = await Promise.all([
+  const [all, userDoc, categories] = await Promise.all([
     getAllNotifications(80),
     uid ? readDoc(USERS_COLLECTION, uid) : Promise.resolve(null),
+    getDynamicNotificationCategories(),
   ]);
 
   const readIds: string[] = Array.isArray(userDoc?.notificationReadIds) ? userDoc.notificationReadIds : [];
@@ -412,7 +436,7 @@ export async function getCustomerNotifications(uid?: string, phone?: string): Pr
     });
   });
 
-  return { notifications: filtered, readIds, deletedIds, preferences };
+  return { notifications: filtered, readIds, deletedIds, preferences, categories };
 }
 
 export async function getAdminNotificationOverview() {
