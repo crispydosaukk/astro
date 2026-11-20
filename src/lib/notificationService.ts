@@ -632,8 +632,6 @@ async function dispatchFcmPush(
   });
 
   return { delivered, failed, errorDetail };
-
-  return { delivered, failed, errorDetail };
 }
 
 export async function sendDynamicNotification(

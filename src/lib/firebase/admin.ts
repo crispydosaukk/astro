@@ -84,20 +84,26 @@ function initFirebaseAdmin() {
 export const adminAuth = new Proxy({} as any, {
   get: (target, prop) => {
     initFirebaseAdmin();
-    return (getAuth() as any)[prop];
+    const inst = getAuth();
+    const val = (inst as any)[prop];
+    return typeof val === 'function' ? val.bind(inst) : val;
   },
 });
 
 export const adminDb = new Proxy({} as any, {
   get: (target, prop) => {
     initFirebaseAdmin();
-    return (getFirestore() as any)[prop];
+    const inst = getFirestore();
+    const val = (inst as any)[prop];
+    return typeof val === 'function' ? val.bind(inst) : val;
   },
 });
 
 export const adminMessaging = new Proxy({} as any, {
   get: (target, prop) => {
     initFirebaseAdmin();
-    return (getMessaging() as any)[prop];
+    const inst = getMessaging();
+    const val = (inst as any)[prop];
+    return typeof val === 'function' ? val.bind(inst) : val;
   },
 });
