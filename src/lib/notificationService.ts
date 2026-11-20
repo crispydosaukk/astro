@@ -61,6 +61,7 @@ export interface NotificationDeliveryStats {
   pushFailed: number;
   expoDelivered: number;
   fcmDelivered: number;
+  errorDetail?: string;
 }
 
 export interface AppNotificationItem {
@@ -553,13 +554,17 @@ async function dispatchFcmPush(
     imageUrl?: string;
     priority: NotificationPriority;
   }
-): Promise<{ delivered: number; failed: number }> {
-  if (tokens.length === 0 || !hasValidAdminCreds()) {
+): Promise<{ delivered: number; failed: number; errorDetail?: string }> {
+  if (tokens.length === 0) {
     return { delivered: 0, failed: 0 };
+  }
+  if (!hasValidAdminCreds()) {
+    return { delivered: 0, failed: tokens.length, errorDetail: 'Firebase Admin credentials missing or invalid in server environment' };
   }
 
   let delivered = 0;
   let failed = 0;
+  let errorDetail: string | undefined;
 
   for (let i = 0; i < tokens.length; i += 500) {
     const chunk = tokens.slice(i, i + 500);
@@ -610,13 +615,22 @@ async function dispatchFcmPush(
       });
       delivered += response.successCount || 0;
       failed += response.failureCount || 0;
-    } catch (err) {
+      if (response.failureCount > 0 && !errorDetail) {
+        const firstErr = response.responses?.find((r: any) => r.error)?.error;
+        if (firstErr) {
+          errorDetail = `${firstErr.code || 'FCM_ERROR'}: ${firstErr.message}`;
+        }
+      }
+    } catch (err: any) {
       console.warn('[notifications] FCM multicast error:', err);
       failed += chunk.length;
+      if (!errorDetail) {
+        errorDetail = err?.message || String(err);
+      }
     }
   }
 
-  return { delivered, failed };
+  return { delivered, failed, errorDetail };
 }
 
 export async function sendDynamicNotification(
@@ -767,7 +781,7 @@ export async function sendDynamicNotification(
           imageUrl: notification.imageUrl,
           priority,
         })
-      : Promise.resolve({ delivered: 0, failed: 0 }),
+      : Promise.resolve({ delivered: 0, failed: 0, errorDetail: undefined as string | undefined }),
   ]);
 
   // Deactivate stale Expo tokens
@@ -787,6 +801,7 @@ export async function sendDynamicNotification(
     pushFailed: expoRes.failed + fcmRes.failed,
     expoDelivered: expoRes.delivered,
     fcmDelivered: fcmRes.delivered,
+    ...(fcmRes.errorDetail ? { errorDetail: fcmRes.errorDetail } : {}),
   };
 
   await writeDoc(NOTIFICATIONS_COLLECTION, id, { stats: notification.stats }, true);

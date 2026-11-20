@@ -1048,10 +1048,15 @@ export default function AdminAppNotificationsModule() {
                           </span>
                           <span>
                             Push delivered:{' '}
-                            <strong className="text-emerald-600">
+                            <strong className={n.stats?.pushDelivered ? 'text-emerald-600' : 'text-amber-600'}>
                               {n.stats?.pushDelivered ?? 0}/{n.stats?.pushAttempted ?? 0}
                             </strong>
                           </span>
+                          {Boolean(n.stats?.errorDetail) && (
+                            <span className="text-red-500 max-w-xs truncate" title={n.stats?.errorDetail}>
+                              ⚠️ {n.stats?.errorDetail}
+                            </span>
+                          )}
                           {n.actionRoute && (
                             <span>
                               Route: <code className="text-[10px] bg-muted px-1.5 py-0.5 rounded">{n.actionRoute}</code>
