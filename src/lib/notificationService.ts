@@ -482,6 +482,11 @@ async function dispatchExpoPush(
   let failed = 0;
   const invalidTokens: string[] = [];
 
+  const resolvedImageUrl =
+    payload.imageUrl && payload.imageUrl.trim().length > 0
+      ? payload.imageUrl.trim()
+      : 'https://astroparihar.com/assets/images/notification_logo.png';
+
   for (let i = 0; i < tokens.length; i += 100) {
     const chunk = tokens.slice(i, i + 100);
     const messages = chunk.map((to) => ({
@@ -492,8 +497,8 @@ async function dispatchExpoPush(
       body: payload.body,
       priority: payload.priority === 'high' ? 'high' : 'default',
       interruptionLevel: payload.priority === 'high' ? 'time-sensitive' : 'active',
-      mutableContent: Boolean(payload.imageUrl),
-      ...(payload.imageUrl ? { richContent: { image: payload.imageUrl } } : {}),
+      mutableContent: true,
+      richContent: { image: resolvedImageUrl },
       channelId: 'astroparihar_default',
       data: {
         notificationId: payload.id,
@@ -564,6 +569,12 @@ async function dispatchFcmPush(
   let failed = 0;
   let errorDetail: string | undefined;
 
+  // Default full-color AstroParihar emblem shown on lockscreen notifications when no custom banner image is set
+  const resolvedImageUrl =
+    payload.imageUrl && payload.imageUrl.trim().length > 0
+      ? payload.imageUrl.trim()
+      : 'https://astroparihar.com/assets/images/notification_logo.png';
+
   // Dispatch directly via adminMessaging.send() in parallel to avoid HTTP/2 multicast proxy issues
   const results = await Promise.all(
     tokens.map(async (token) => {
@@ -573,7 +584,7 @@ async function dispatchFcmPush(
           notification: {
             title: payload.title,
             body: payload.subtitle ? `${payload.subtitle} — ${payload.body}` : payload.body,
-            ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+            imageUrl: resolvedImageUrl,
           },
           data: {
             notificationId: payload.id,
@@ -587,12 +598,14 @@ async function dispatchFcmPush(
             priority: payload.priority === 'high' ? 'high' : 'normal',
             notification: {
               channelId: 'astroparihar_default',
+              icon: 'notification_icon',
+              color: '#C9A84C',
               sound: 'default',
               priority: 'max',
               visibility: 'public',
               defaultSound: true,
               defaultVibrateTimings: true,
-              ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+              imageUrl: resolvedImageUrl,
             },
           },
           apns: {
