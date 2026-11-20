@@ -564,151 +564,74 @@ async function dispatchFcmPush(
   let failed = 0;
   let errorDetail: string | undefined;
 
-  // Use HTTP/1.1 transport to avoid host environment HTTP/2 proxy issues
-  try {
-    if (typeof (adminMessaging as any).enableLegacyHttpTransport === 'function') {
-      (adminMessaging as any).enableLegacyHttpTransport();
-    }
-  } catch (_e) {}
-
-  for (let i = 0; i < tokens.length; i += 500) {
-    const chunk = tokens.slice(i, i + 500);
-    try {
-      const response = await adminMessaging.sendEachForMulticast({
-        tokens: chunk,
-        notification: {
-          title: payload.title,
-          body: payload.subtitle ? `${payload.subtitle} — ${payload.body}` : payload.body,
-          ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
-        },
-        data: {
-          notificationId: payload.id,
-          category: payload.category,
-          actionRoute: payload.actionRoute || '/notifications-screen',
-          subtitle: payload.subtitle || '',
-          ctaText: payload.ctaText || '',
-          imageUrl: payload.imageUrl || '',
-        },
-        android: {
-          priority: payload.priority === 'high' ? 'high' : 'normal',
+  // Dispatch directly via adminMessaging.send() in parallel to avoid HTTP/2 multicast proxy issues
+  const results = await Promise.all(
+    tokens.map(async (token) => {
+      try {
+        await adminMessaging.send({
+          token,
           notification: {
-            channelId: 'astroparihar_default',
-            sound: 'default',
-            priority: 'max',
-            visibility: 'public',
-            defaultSound: true,
-            defaultVibrateTimings: true,
+            title: payload.title,
+            body: payload.subtitle ? `${payload.subtitle} — ${payload.body}` : payload.body,
             ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
           },
-        },
-        apns: {
-          headers: {
-            'apns-priority': payload.priority === 'high' ? '10' : '5',
+          data: {
+            notificationId: payload.id,
+            category: payload.category,
+            actionRoute: payload.actionRoute || '/notifications-screen',
+            subtitle: payload.subtitle || '',
+            ctaText: payload.ctaText || '',
+            imageUrl: payload.imageUrl || '',
           },
-          payload: {
-            aps: {
-              sound: 'default',
-              mutableContent: Boolean(payload.imageUrl),
-              alert: {
-                title: payload.title,
-                ...(payload.subtitle ? { subtitle: payload.subtitle } : {}),
-                body: payload.body,
-              },
-            },
-          },
-        },
-      });
-
-      delivered += response.successCount || 0;
-      const fCount = response.failureCount || 0;
-
-      if (fCount > 0) {
-        // Fallback: If HTTP/2 multicast was blocked by host proxy (e.g. 404 URL / error), retry with standard send()
-        for (let idx = 0; idx < chunk.length; idx++) {
-          const resp = response.responses?.[idx];
-          if (resp && !resp.success) {
-            try {
-              await adminMessaging.send({
-                token: chunk[idx],
-                notification: {
-                  title: payload.title,
-                  body: payload.subtitle ? `${payload.subtitle} — ${payload.body}` : payload.body,
-                  ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
-                },
-                data: {
-                  notificationId: payload.id,
-                  category: payload.category,
-                  actionRoute: payload.actionRoute || '/notifications-screen',
-                  subtitle: payload.subtitle || '',
-                  ctaText: payload.ctaText || '',
-                  imageUrl: payload.imageUrl || '',
-                },
-                android: {
-                  priority: payload.priority === 'high' ? 'high' : 'normal',
-                  notification: {
-                    channelId: 'astroparihar_default',
-                    sound: 'default',
-                    priority: 'max',
-                    visibility: 'public',
-                    defaultSound: true,
-                    defaultVibrateTimings: true,
-                    ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
-                  },
-                },
-              });
-              delivered += 1;
-            } catch (singleErr: any) {
-              failed += 1;
-              if (!errorDetail) {
-                errorDetail = singleErr?.message || String(singleErr);
-              }
-            }
-          }
-        }
-      }
-    } catch (err: any) {
-      console.warn('[notifications] FCM multicast error, falling back to direct send:', err);
-      // Fallback: attempt direct HTTP send for each token in chunk
-      for (const token of chunk) {
-        try {
-          await adminMessaging.send({
-            token,
+          android: {
+            priority: payload.priority === 'high' ? 'high' : 'normal',
             notification: {
-              title: payload.title,
-              body: payload.subtitle ? `${payload.subtitle} — ${payload.body}` : payload.body,
+              channelId: 'astroparihar_default',
+              sound: 'default',
+              priority: 'max',
+              visibility: 'public',
+              defaultSound: true,
+              defaultVibrateTimings: true,
               ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
             },
-            data: {
-              notificationId: payload.id,
-              category: payload.category,
-              actionRoute: payload.actionRoute || '/notifications-screen',
-              subtitle: payload.subtitle || '',
-              ctaText: payload.ctaText || '',
-              imageUrl: payload.imageUrl || '',
+          },
+          apns: {
+            headers: {
+              'apns-priority': payload.priority === 'high' ? '10' : '5',
             },
-            android: {
-              priority: payload.priority === 'high' ? 'high' : 'normal',
-              notification: {
-                channelId: 'astroparihar_default',
+            payload: {
+              aps: {
                 sound: 'default',
-                priority: 'max',
-                visibility: 'public',
-                defaultSound: true,
-                defaultVibrateTimings: true,
-                ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+                mutableContent: Boolean(payload.imageUrl),
+                alert: {
+                  title: payload.title,
+                  ...(payload.subtitle ? { subtitle: payload.subtitle } : {}),
+                  body: payload.body,
+                },
               },
             },
-          });
-          delivered += 1;
-        } catch (singleErr: any) {
-          failed += 1;
-          if (!errorDetail) {
-            errorDetail = singleErr?.message || String(singleErr);
-          }
-        }
+          },
+        });
+        return { success: true };
+      } catch (err: any) {
+        console.warn('[notifications] FCM send error for token:', err);
+        return { success: false, error: err?.message || String(err) };
+      }
+    })
+  );
+
+  results.forEach((r) => {
+    if (r.success) {
+      delivered += 1;
+    } else {
+      failed += 1;
+      if (!errorDetail && r.error) {
+        errorDetail = r.error;
       }
     }
-  }
+  });
+
+  return { delivered, failed, errorDetail };
 
   return { delivered, failed, errorDetail };
 }
