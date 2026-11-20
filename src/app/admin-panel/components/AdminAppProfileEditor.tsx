@@ -927,6 +927,106 @@ export default function AdminAppProfileEditor() {
                   className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
                 />
               </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground">Delete Account Button Label</label>
+                <input
+                  type="text"
+                  value={config.deleteAccountButtonText || 'Delete Account Permanently'}
+                  onChange={(e) => setConfig({ ...config, deleteAccountButtonText: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground">Delete Account Dialog Title</label>
+                <input
+                  type="text"
+                  value={config.deleteAccountConfirmTitle || 'Delete Account Permanently?'}
+                  onChange={(e) => setConfig({ ...config, deleteAccountConfirmTitle: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="text-xs font-bold text-foreground">Delete Account Confirmation Message</label>
+                <textarea
+                  rows={2}
+                  value={config.deleteAccountConfirmMessage || ''}
+                  onChange={(e) => setConfig({ ...config, deleteAccountConfirmMessage: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground">Birth Details Card Title</label>
+                <input
+                  type="text"
+                  value={config.birthDetailsCardTitle || 'Birth Details & Location'}
+                  onChange={(e) => setConfig({ ...config, birthDetailsCardTitle: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground">Birth Details Card Subtitle</label>
+                <input
+                  type="text"
+                  value={config.birthDetailsCardSubtitle || 'Verified Vedic Kundli Baseline'}
+                  onChange={(e) => setConfig({ ...config, birthDetailsCardSubtitle: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground">Guest Card Title</label>
+                <input
+                  type="text"
+                  value={config.guestCardTitle || 'Sign In to AstroParihar'}
+                  onChange={(e) => setConfig({ ...config, guestCardTitle: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground">Guest Card Subtitle</label>
+                <input
+                  type="text"
+                  value={config.guestCardSubtitle || 'Sign in to unlock your full spiritual profile'}
+                  onChange={(e) => setConfig({ ...config, guestCardSubtitle: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="text-xs font-bold text-foreground">Guest Card Notice Text</label>
+                <textarea
+                  rows={2}
+                  value={config.guestCardNotice || ''}
+                  onChange={(e) => setConfig({ ...config, guestCardNotice: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground">Language Modal Title</label>
+                <input
+                  type="text"
+                  value={config.selectLanguageTitle || 'Select Language'}
+                  onChange={(e) => setConfig({ ...config, selectLanguageTitle: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground">Edit Profile Sheet Subtitle</label>
+                <input
+                  type="text"
+                  value={config.editProfileSubtitle || 'Manage personal Vedic information'}
+                  onChange={(e) => setConfig({ ...config, editProfileSubtitle: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-background border border-border text-sm font-medium"
+                />
+              </div>
             </div>
           </div>
 

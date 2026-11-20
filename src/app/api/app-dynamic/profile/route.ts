@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { adminDb } from '@/lib/firebase/admin';
 import {
-  getAppProfileConfig,
-  saveAppProfileConfig,
   DEFAULT_APP_PROFILE_CONFIG,
+  PROFILE_CONFIG_DOC_ID,
+  AppProfileConfig,
 } from '@/lib/appDynamicContent';
 
 const corsHeaders = {
@@ -11,17 +12,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const COLLECTION_NAME = 'app_dynamic_content';
+
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
 export async function GET() {
   try {
-    const config = await getAppProfileConfig();
-    return NextResponse.json(
-      { success: true, config },
-      { headers: corsHeaders }
-    );
+    const snap = await adminDb.collection(COLLECTION_NAME).doc(PROFILE_CONFIG_DOC_ID).get();
+    const raw = snap.exists ? (snap.data()?.config as Partial<AppProfileConfig>) : null;
+    const config: AppProfileConfig = raw
+      ? { ...DEFAULT_APP_PROFILE_CONFIG, ...raw }
+      : DEFAULT_APP_PROFILE_CONFIG;
+    return NextResponse.json({ success: true, config }, { headers: corsHeaders });
   } catch (error: any) {
     console.error('Error fetching dynamic profile config:', error);
     return NextResponse.json(
@@ -43,12 +47,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await saveAppProfileConfig(config);
+    const merged: AppProfileConfig = {
+      ...DEFAULT_APP_PROFILE_CONFIG,
+      ...config,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await adminDb
+      .collection(COLLECTION_NAME)
+      .doc(PROFILE_CONFIG_DOC_ID)
+      .set(
+        {
+          config: merged,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
     return NextResponse.json(
       {
         success: true,
         message: 'Profile configuration updated successfully',
-        config,
+        config: merged,
       },
       { headers: corsHeaders }
     );
