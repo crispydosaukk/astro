@@ -564,6 +564,13 @@ async function dispatchFcmPush(
   let failed = 0;
   let errorDetail: string | undefined;
 
+  // Use HTTP/1.1 transport to avoid host environment HTTP/2 proxy issues
+  try {
+    if (typeof (adminMessaging as any).enableLegacyHttpTransport === 'function') {
+      (adminMessaging as any).enableLegacyHttpTransport();
+    }
+  } catch (_e) {}
+
   for (let i = 0; i < tokens.length; i += 500) {
     const chunk = tokens.slice(i, i + 500);
     try {
@@ -611,19 +618,94 @@ async function dispatchFcmPush(
           },
         },
       });
+
       delivered += response.successCount || 0;
-      failed += response.failureCount || 0;
-      if (response.failureCount > 0 && !errorDetail) {
-        const firstErr = response.responses?.find((r: any) => r.error)?.error;
-        if (firstErr) {
-          errorDetail = `${firstErr.code || 'FCM_ERROR'}: ${firstErr.message}`;
+      const fCount = response.failureCount || 0;
+
+      if (fCount > 0) {
+        // Fallback: If HTTP/2 multicast was blocked by host proxy (e.g. 404 URL / error), retry with standard send()
+        for (let idx = 0; idx < chunk.length; idx++) {
+          const resp = response.responses?.[idx];
+          if (resp && !resp.success) {
+            try {
+              await adminMessaging.send({
+                token: chunk[idx],
+                notification: {
+                  title: payload.title,
+                  body: payload.subtitle ? `${payload.subtitle} — ${payload.body}` : payload.body,
+                  ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+                },
+                data: {
+                  notificationId: payload.id,
+                  category: payload.category,
+                  actionRoute: payload.actionRoute || '/notifications-screen',
+                  subtitle: payload.subtitle || '',
+                  ctaText: payload.ctaText || '',
+                  imageUrl: payload.imageUrl || '',
+                },
+                android: {
+                  priority: payload.priority === 'high' ? 'high' : 'normal',
+                  notification: {
+                    channelId: 'astroparihar_default',
+                    sound: 'default',
+                    priority: 'max',
+                    visibility: 'public',
+                    defaultSound: true,
+                    defaultVibrateTimings: true,
+                    ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+                  },
+                },
+              });
+              delivered += 1;
+            } catch (singleErr: any) {
+              failed += 1;
+              if (!errorDetail) {
+                errorDetail = singleErr?.message || String(singleErr);
+              }
+            }
+          }
         }
       }
     } catch (err: any) {
-      console.warn('[notifications] FCM multicast error:', err);
-      failed += chunk.length;
-      if (!errorDetail) {
-        errorDetail = err?.message || String(err);
+      console.warn('[notifications] FCM multicast error, falling back to direct send:', err);
+      // Fallback: attempt direct HTTP send for each token in chunk
+      for (const token of chunk) {
+        try {
+          await adminMessaging.send({
+            token,
+            notification: {
+              title: payload.title,
+              body: payload.subtitle ? `${payload.subtitle} — ${payload.body}` : payload.body,
+              ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+            },
+            data: {
+              notificationId: payload.id,
+              category: payload.category,
+              actionRoute: payload.actionRoute || '/notifications-screen',
+              subtitle: payload.subtitle || '',
+              ctaText: payload.ctaText || '',
+              imageUrl: payload.imageUrl || '',
+            },
+            android: {
+              priority: payload.priority === 'high' ? 'high' : 'normal',
+              notification: {
+                channelId: 'astroparihar_default',
+                sound: 'default',
+                priority: 'max',
+                visibility: 'public',
+                defaultSound: true,
+                defaultVibrateTimings: true,
+                ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+              },
+            },
+          });
+          delivered += 1;
+        } catch (singleErr: any) {
+          failed += 1;
+          if (!errorDetail) {
+            errorDetail = singleErr?.message || String(singleErr);
+          }
+        }
       }
     }
   }

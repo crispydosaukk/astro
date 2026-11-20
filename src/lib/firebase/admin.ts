@@ -62,10 +62,14 @@ function initFirebaseAdmin() {
       privateKey = `-----BEGIN PRIVATE KEY-----\n${formattedKey}\n-----END PRIVATE KEY-----\n`;
     }
 
+    const cleanProjectId = (process.env.FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID).trim().replace(/^["']|["']$/g, '');
+    const cleanClientEmail = (process.env.FIREBASE_CLIENT_EMAIL || FALLBACK_CLIENT_EMAIL).trim().replace(/^["']|["']$/g, '');
+
     initializeApp({
+      projectId: cleanProjectId,
       credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL || FALLBACK_CLIENT_EMAIL,
+        projectId: cleanProjectId,
+        clientEmail: cleanClientEmail,
         privateKey: privateKey,
       }),
     });
