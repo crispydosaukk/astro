@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AppImage from '@/components/ui/AppImage';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import {
@@ -31,6 +31,10 @@ import {
   XCircle,
   AlertCircle,
   Filter,
+  Volume2,
+  Square,
+  Users,
+  Wand2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import LogoutModal from '@/components/LogoutModal';
@@ -41,6 +45,10 @@ import {
   DEFAULT_AI_DISCIPLINES,
   SADHU_AVATAR_PRESETS,
 } from '@/lib/aiAstrologerData';
+import {
+  CHATGPT_MALE_VOICES,
+  CHATGPT_FEMALE_VOICES,
+} from '@/lib/neuralVoiceEngine';
 
 export default function AdminAIAstrologersTable() {
   const [astrologers, setAstrologers] = useState<AIAstrologer[]>([]);
@@ -55,10 +63,162 @@ export default function AdminAIAstrologersTable() {
   
   // Filters & Search
   const [search, setSearch] = useState('');
+  const [selectedVoiceGender, setSelectedVoiceGender] = useState<'all' | 'male' | 'female'>('all');
   const [selectedDiscipline, setSelectedDiscipline] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [selectedAvailability, setSelectedAvailability] = useState<'all' | 'online' | 'busy' | 'offline'>('all');
   const [selectedFeatured, setSelectedFeatured] = useState<'all' | 'featured'>('all');
+  const [isNormalizingVoices, setIsNormalizingVoices] = useState(false);
+
+  // Live ChatGPT-Style Voice Preview Player
+  const [playingPreviewId, setPlayingPreviewId] = useState<string | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewAudioRef.current) {
+        previewAudioRef.current.pause();
+        previewAudioRef.current.src = '';
+        previewAudioRef.current = null;
+      }
+    };
+  }, []);
+
+  const stopVoicePreview = () => {
+    if (previewAudioRef.current) {
+      try {
+        previewAudioRef.current.pause();
+        previewAudioRef.current.src = '';
+      } catch {}
+      previewAudioRef.current = null;
+    }
+    setPlayingPreviewId(null);
+  };
+
+  const handleTestVoice = async (
+    previewKey: string,
+    name: string,
+    gender: 'male' | 'female',
+    voiceId?: string
+  ) => {
+    if (playingPreviewId === previewKey) {
+      stopVoicePreview();
+      return;
+    }
+    stopVoicePreview();
+    setPlayingPreviewId(previewKey);
+
+    try {
+      const sampleText = `Namaste, I am ${name} from AstroParihar. Your planetary alignment brings clarity, harmony, and positive growth today.`;
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: sampleText,
+          lang: 'en',
+          gender,
+          voiceId,
+          astrologerName: name,
+          format: 'json',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.audioBase64) {
+        throw new Error(data?.error || 'Could not synthesize voice preview');
+      }
+
+      const audio = new Audio(`data:audio/mpeg;base64,${data.audioBase64}`);
+      previewAudioRef.current = audio;
+      audio.onended = () => {
+        setPlayingPreviewId((cur) => (cur === previewKey ? null : cur));
+      };
+      audio.onerror = () => {
+        setPlayingPreviewId((cur) => (cur === previewKey ? null : cur));
+        toast.error('Browser could not play voice preview audio');
+      };
+      await audio.play();
+    } catch (err: any) {
+      setPlayingPreviewId(null);
+      toast.error(err?.message || 'Voice preview failed');
+    }
+  };
+
+  const handleSetVoiceProfile = async (
+    astro: AIAstrologer,
+    newGender: 'male' | 'female',
+    requestedVoiceId?: string
+  ) => {
+    const validList = newGender === 'female' ? CHATGPT_FEMALE_VOICES : CHATGPT_MALE_VOICES;
+    const resolvedVoiceId =
+      requestedVoiceId && validList.some((v) => v.id === requestedVoiceId)
+        ? requestedVoiceId
+        : validList[0].id;
+
+    setUpdatingStatusId(astro.id);
+    setAstrologers((prev) =>
+      prev.map((a) =>
+        a.id === astro.id
+          ? { ...a, voiceGender: newGender, voiceId: resolvedVoiceId }
+          : a
+      )
+    );
+
+    try {
+      const res = await fetch('/api/admin/ai-astrologers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'set_voice_profile',
+          astrologerId: astro.id,
+          voiceGender: newGender,
+          voiceId: resolvedVoiceId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(
+          `"${astro.name}" set to ${newGender === 'female' ? 'Female' : 'Male'} Voice (${resolvedVoiceId})`
+        );
+      } else {
+        throw new Error(data.error || 'Failed to update voice profile');
+      }
+    } catch {
+      setAstrologers((prev) =>
+        prev.map((a) =>
+          a.id === astro.id
+            ? { ...a, voiceGender: astro.voiceGender, voiceId: astro.voiceId }
+            : a
+        )
+      );
+      toast.error('Failed to save voice category');
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
+  const handleNormalizeAllVoices = async () => {
+    setIsNormalizingVoices(true);
+    try {
+      const res = await fetch('/api/admin/ai-astrologers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'normalize_all_voices' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(
+          `Voices synced! ${data.maleCount} Male & ${data.femaleCount} Female AI Astrologers (${data.updatedCount} upgraded to smooth voices).`
+        );
+        fetchAdminData();
+      } else {
+        toast.error(data.error || 'Failed to normalize voices');
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to normalize voices');
+    } finally {
+      setIsNormalizingVoices(false);
+    }
+  };
 
   // Edit / Add Modal States
   const [showAstroModal, setShowAstroModal] = useState(false);
@@ -372,8 +532,20 @@ export default function AdminAIAstrologersTable() {
     }
   };
 
+  const maleAstrologersCount = astrologers.filter(
+    (a) => (a.voiceGender || 'male') !== 'female'
+  ).length;
+  const femaleAstrologersCount = astrologers.filter(
+    (a) => a.voiceGender === 'female'
+  ).length;
+
   // Filtered Astrologers list
   const filteredAstrologers = astrologers.filter((a) => {
+    // Male / Female Division Tab filter
+    const effectiveGender = a.voiceGender === 'female' ? 'female' : 'male';
+    const matchesGender =
+      selectedVoiceGender === 'all' || effectiveGender === selectedVoiceGender;
+
     // Search query match
     const q = search.toLowerCase();
     const matchesSearch =
@@ -402,7 +574,14 @@ export default function AdminAIAstrologersTable() {
     // Featured filter
     const matchesFeatured = selectedFeatured === 'all' || a.isFeatured;
 
-    return matchesSearch && matchesDiscipline && matchesStatus && matchesAvailability && matchesFeatured;
+    return (
+      matchesGender &&
+      matchesSearch &&
+      matchesDiscipline &&
+      matchesStatus &&
+      matchesAvailability &&
+      matchesFeatured
+    );
   });
 
   return (
@@ -427,6 +606,17 @@ export default function AdminAIAstrologersTable() {
           >
             <RotateCcw size={14} className={loading ? 'animate-spin text-[#C9952B]' : ''} />
             <span>Refresh</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleNormalizeAllVoices}
+            disabled={isNormalizingVoices}
+            className="px-3.5 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+            title="Ensure every Male and Female AI Astrologer uses a clean separate smooth ChatGPT voice"
+          >
+            {isNormalizingVoices ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
+            Sync Male/Female Voices
           </button>
 
           <button
@@ -474,8 +664,8 @@ export default function AdminAIAstrologersTable() {
                   isActive: true,
                   isFeatured: false,
                   availability: 'online',
-                  voiceGender: 'male',
-                  voiceId: 'onyx',
+                  voiceGender: selectedVoiceGender === 'female' ? 'female' : 'male',
+                  voiceId: selectedVoiceGender === 'female' ? 'coral' : 'ash',
                   consultationStyle: 'Empowering, Classical & Deeply Accurate',
                   systemPersonaPrompt:
                     'You are an authentic Vedic Astrologer at AstroParihar with deep expertise in Kundli, Dasha, and planetary remedies. Reply in 2-3 concise spoken sentences with practical guidance.',
@@ -516,8 +706,11 @@ export default function AdminAIAstrologersTable() {
             <Bot size={16} className="text-[#C9952B]" />
           </div>
           <div className="text-xl font-bold text-foreground">{astrologers.length} Personas</div>
-          <span className="text-[10px] text-emerald-500 font-semibold">
+          <span className="text-[10px] text-emerald-500 font-semibold block">
             {astrologers.filter((a) => a.isActive).length} Active · {astrologers.filter((a) => (a.availability || 'online') === 'online').length} Online
+          </span>
+          <span className="text-[10px] text-muted-foreground font-semibold mt-0.5 block">
+            👨 {maleAstrologersCount} Male · 👩 {femaleAstrologersCount} Female
           </span>
         </div>
 
@@ -611,7 +804,115 @@ export default function AdminAIAstrologersTable() {
 
       {/* Filters & Search Toolbar (Only in Astrologers sub-tab) */}
       {activeSubTab === 'astrologers' && (
-        <div className="bg-card border border-border p-4 rounded-2xl shadow-sm space-y-3">
+        <div className="space-y-4">
+          {/* Male / Female AI Astrologer Voice Division Panel (Dashboard Only — Hidden in Customer App UI) */}
+          <div className="bg-card border border-border p-4 rounded-2xl shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+              <div>
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <Users size={16} className="text-[#C9952B]" />
+                  Male &amp; Female AI Astrologers Voice Division
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Organize AI Astrologers by Male &amp; Female voice categories here. Customers don&apos;t see Male/Female labels in the app — they automatically hear the smooth ChatGPT-style Male or Female voice of whichever AI Astrologer they select.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleTestVoice('sample-male', 'Acharya Devavrat', 'male', 'ash')}
+                  className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border flex items-center gap-1.5 transition-all ${
+                    playingPreviewId === 'sample-male'
+                      ? 'bg-sky-600 text-white border-sky-600'
+                      : 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30 hover:bg-sky-500/20'
+                  }`}
+                >
+                  {playingPreviewId === 'sample-male' ? <Square size={12} /> : <Volume2 size={12} />}
+                  {playingPreviewId === 'sample-male' ? 'Stop Male Voice' : 'Test Male Voice'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTestVoice('sample-female', 'Astro Ananya', 'female', 'coral')}
+                  className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border flex items-center gap-1.5 transition-all ${
+                    playingPreviewId === 'sample-female'
+                      ? 'bg-rose-600 text-white border-rose-600'
+                      : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30 hover:bg-rose-500/20'
+                  }`}
+                >
+                  {playingPreviewId === 'sample-female' ? <Square size={12} /> : <Volume2 size={12} />}
+                  {playingPreviewId === 'sample-female' ? 'Stop Female Voice' : 'Test Female Voice'}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setSelectedVoiceGender('all')}
+                className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                  selectedVoiceGender === 'all'
+                    ? 'bg-[#C9952B]/15 border-[#C9952B] shadow-sm'
+                    : 'bg-background border-border hover:border-[#C9952B]/50'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-bold text-foreground">All AI Astrologers</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                    Combined Male &amp; Female roster
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-[#C9952B] text-white">
+                  {astrologers.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedVoiceGender('male')}
+                className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                  selectedVoiceGender === 'male'
+                    ? 'bg-sky-500/15 border-sky-500 shadow-sm'
+                    : 'bg-background border-border hover:border-sky-500/50'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <span>👨</span> Male AI Astrologers
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                    Smooth Male Voices · Ash, Onyx, Echo, Fable
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-sky-600 text-white">
+                  {maleAstrologersCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedVoiceGender('female')}
+                className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                  selectedVoiceGender === 'female'
+                    ? 'bg-rose-500/15 border-rose-500 shadow-sm'
+                    : 'bg-background border-border hover:border-rose-500/50'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <span>👩</span> Female AI Astrologers
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">
+                    Smooth Female Voices · Coral, Nova, Shimmer, Sage
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-rose-600 text-white">
+                  {femaleAstrologersCount}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border p-4 rounded-2xl shadow-sm space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Search Input */}
             <div className="relative lg:col-span-2">
@@ -676,11 +977,17 @@ export default function AdminAIAstrologersTable() {
             <span>
               Showing <strong className="text-foreground">{filteredAstrologers.length}</strong> of{' '}
               <strong className="text-foreground">{astrologers.length}</strong> AI Astrologers
+              {selectedVoiceGender !== 'all' && (
+                <span className="ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-foreground">
+                  {selectedVoiceGender === 'male' ? '👨 Male Category' : '👩 Female Category'}
+                </span>
+              )}
             </span>
-            {(search || selectedDiscipline !== 'all' || selectedStatus !== 'all' || selectedAvailability !== 'all' || selectedFeatured !== 'all') && (
+            {(search || selectedVoiceGender !== 'all' || selectedDiscipline !== 'all' || selectedStatus !== 'all' || selectedAvailability !== 'all' || selectedFeatured !== 'all') && (
               <button
                 onClick={() => {
                   setSearch('');
+                  setSelectedVoiceGender('all');
                   setSelectedDiscipline('all');
                   setSelectedStatus('all');
                   setSelectedAvailability('all');
@@ -691,6 +998,7 @@ export default function AdminAIAstrologersTable() {
                 Reset All Filters
               </button>
             )}
+          </div>
           </div>
         </div>
       )}
@@ -710,7 +1018,7 @@ export default function AdminAIAstrologersTable() {
                   <th className="p-4">Astrologer</th>
                   <th className="p-4">Discipline</th>
                   <th className="p-4">Languages</th>
-                  <th className="p-4">Voice / Model</th>
+                  <th className="p-4">Gender &amp; Smooth AI Voice</th>
                   <th className="p-4">Rate (Call / Chat)</th>
                   <th className="p-4">Availability</th>
                   <th className="p-4">Status</th>
@@ -773,9 +1081,93 @@ export default function AdminAIAstrologersTable() {
                           {astro.languages?.join(', ')}
                         </td>
                         <td className="p-4">
-                          <span className="px-2 py-0.5 rounded text-[10px] bg-[#C9952B]/10 text-[#C9952B] font-mono">
-                            {astro.voiceId} ({astro.voiceGender})
-                          </span>
+                          {(() => {
+                            const rowGender: 'male' | 'female' =
+                              astro.voiceGender === 'female' ? 'female' : 'male';
+                            const voiceOptions =
+                              rowGender === 'female'
+                                ? CHATGPT_FEMALE_VOICES
+                                : CHATGPT_MALE_VOICES;
+                            const activeVoiceId = voiceOptions.some((v) => v.id === astro.voiceId)
+                              ? astro.voiceId
+                              : voiceOptions[0].id;
+                            const isPreviewPlaying = playingPreviewId === `row-${astro.id}`;
+
+                            return (
+                              <div className="flex flex-col gap-1.5 min-w-[200px]">
+                                <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5 w-fit">
+                                  <button
+                                    type="button"
+                                    disabled={updatingStatusId === astro.id}
+                                    onClick={() => {
+                                      if (rowGender !== 'male') {
+                                        handleSetVoiceProfile(astro, 'male', 'ash');
+                                      }
+                                    }}
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${
+                                      rowGender === 'male'
+                                        ? 'bg-sky-600 text-white shadow-xs'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                  >
+                                    👨 Male
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={updatingStatusId === astro.id}
+                                    onClick={() => {
+                                      if (rowGender !== 'female') {
+                                        handleSetVoiceProfile(astro, 'female', 'coral');
+                                      }
+                                    }}
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all ${
+                                      rowGender === 'female'
+                                        ? 'bg-rose-600 text-white shadow-xs'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                  >
+                                    👩 Female
+                                  </button>
+                                </div>
+
+                                <div className="flex items-center gap-1.5">
+                                  <select
+                                    value={activeVoiceId}
+                                    disabled={updatingStatusId === astro.id}
+                                    onChange={(e) =>
+                                      handleSetVoiceProfile(astro, rowGender, e.target.value)
+                                    }
+                                    className="px-2 py-1 rounded-lg bg-background border border-border text-[10px] font-semibold focus:border-[#C9952B] outline-none max-w-[148px]"
+                                  >
+                                    {voiceOptions.map((v) => (
+                                      <option key={v.id} value={v.id}>
+                                        {v.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleTestVoice(
+                                        `row-${astro.id}`,
+                                        astro.name,
+                                        rowGender,
+                                        activeVoiceId
+                                      )
+                                    }
+                                    title={`Preview ${rowGender} smooth AI voice for ${astro.name}`}
+                                    className={`p-1.5 rounded-lg border transition-all shrink-0 ${
+                                      isPreviewPlaying
+                                        ? 'bg-[#C9952B] text-white border-[#C9952B]'
+                                        : 'border-border bg-background text-muted-foreground hover:text-[#C9952B] hover:border-[#C9952B]'
+                                    }`}
+                                  >
+                                    {isPreviewPlaying ? <Square size={11} /> : <Volume2 size={11} />}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="p-4">
                           <div className="text-xs font-bold text-[#C9952B] whitespace-nowrap">
@@ -1088,32 +1480,75 @@ export default function AdminAIAstrologersTable() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-muted-foreground mb-1 font-semibold">Voice Model</label>
+                  <label className="block text-muted-foreground mb-1 font-semibold">Voice Gender Category</label>
                   <select
-                    value={editingAstro.voiceId}
-                    onChange={(e) => setEditingAstro({ ...editingAstro, voiceId: e.target.value })}
+                    value={editingAstro.voiceGender === 'female' ? 'female' : 'male'}
+                    onChange={(e: any) => {
+                      const nextGender: 'male' | 'female' =
+                        e.target.value === 'female' ? 'female' : 'male';
+                      const validVoices =
+                        nextGender === 'female' ? CHATGPT_FEMALE_VOICES : CHATGPT_MALE_VOICES;
+                      const nextVoiceId = validVoices.some((v) => v.id === editingAstro.voiceId)
+                        ? editingAstro.voiceId
+                        : validVoices[0].id;
+                      setEditingAstro({
+                        ...editingAstro,
+                        voiceGender: nextGender,
+                        voiceId: nextVoiceId,
+                      });
+                    }}
                     className="w-full px-3 py-2 rounded-xl bg-background border border-border focus:border-[#C9952B] outline-none"
                   >
-                    <option value="onyx">Onyx (Deep Male)</option>
-                    <option value="echo">Echo (Authoritative Male)</option>
-                    <option value="fable">Fable (Warm Male)</option>
-                    <option value="shimmer">Shimmer (Expressive Female)</option>
-                    <option value="nova">Nova (Warm Female)</option>
-                    <option value="alloy">Alloy (Balanced Neutral)</option>
+                    <option value="male">👨 Male AI Astrologer</option>
+                    <option value="female">👩 Female AI Astrologer</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-muted-foreground mb-1 font-semibold">Voice Gender</label>
-                  <select
-                    value={editingAstro.voiceGender}
-                    onChange={(e: any) =>
-                      setEditingAstro({ ...editingAstro, voiceGender: e.target.value })
-                    }
-                    className="w-full px-3 py-2 rounded-xl bg-background border border-border focus:border-[#C9952B] outline-none"
-                  >
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
+                  <label className="block text-muted-foreground mb-1 font-semibold">Smooth AI Voice Model</label>
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      value={
+                        (editingAstro.voiceGender === 'female'
+                          ? CHATGPT_FEMALE_VOICES
+                          : CHATGPT_MALE_VOICES
+                        ).some((v) => v.id === editingAstro.voiceId)
+                          ? editingAstro.voiceId
+                          : editingAstro.voiceGender === 'female'
+                          ? 'coral'
+                          : 'ash'
+                      }
+                      onChange={(e) => setEditingAstro({ ...editingAstro, voiceId: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-background border border-border focus:border-[#C9952B] outline-none"
+                    >
+                      {(editingAstro.voiceGender === 'female'
+                        ? CHATGPT_FEMALE_VOICES
+                        : CHATGPT_MALE_VOICES
+                      ).map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleTestVoice(
+                          'modal-preview',
+                          editingAstro.name || 'AstroParihar Guide',
+                          editingAstro.voiceGender === 'female' ? 'female' : 'male',
+                          editingAstro.voiceId
+                        )
+                      }
+                      className={`p-2 rounded-xl border shrink-0 transition-all ${
+                        playingPreviewId === 'modal-preview'
+                          ? 'bg-[#C9952B] text-white border-[#C9952B]'
+                          : 'border-border bg-background text-muted-foreground hover:text-[#C9952B] hover:border-[#C9952B]'
+                      }`}
+                      title="Preview Smooth AI Voice"
+                    >
+                      {playingPreviewId === 'modal-preview' ? <Square size={14} /> : <Volume2 size={14} />}
+                    </button>
+                  </div>
                 </div>
               </div>
 

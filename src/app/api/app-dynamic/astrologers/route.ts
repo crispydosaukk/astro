@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { getAIAstrologers, DEFAULT_AI_ASTROLOGERS } from '@/lib/aiAstrologerData';
+import { normalizeVoiceGenderAndId } from '@/lib/neuralVoiceEngine';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -187,23 +188,28 @@ export async function GET(req: NextRequest) {
 
     // 2. Fetch AI Astrologers (Strictly separated)
     const aiAstrologersData = await getAIAstrologers();
-    const formattedAi = (aiAstrologersData || DEFAULT_AI_ASTROLOGERS).map((a) => ({
-      id: a.id,
-      name: a.name,
-      specialty: a.primaryDiscipline || a.tagline || 'Vedic AI Astrology',
-      title: a.tagline || 'Autonomous Vedic Ephemeris Guide',
-      experience: `${a.experienceYears || 15}+ Yrs equivalent`,
-      rating: a.rating || 4.98,
-      reviews: `${Math.round((a.totalConsultations || 1200) / 100) / 10}k`,
-      consultations: `${a.totalConsultations || 1200}+`,
-      price: a.pricePerMin || 10,
-      isOnline: a.availability === 'online' || a.isActive !== false,
-      isAi: true,
-      imageUrl: a.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-      languages: (a.languages || ['Hindi', 'English']).join(', '),
-      category: (a as any).category || 'AI',
-      bio: a.bio || a.tagline || '',
-    }));
+    const formattedAi = (aiAstrologersData || DEFAULT_AI_ASTROLOGERS).map((a) => {
+      const voiceMeta = normalizeVoiceGenderAndId(a.voiceGender, a.voiceId, a.name);
+      return {
+        id: a.id,
+        name: a.name,
+        specialty: a.primaryDiscipline || a.tagline || 'Vedic AI Astrology',
+        title: a.tagline || 'Autonomous Vedic Ephemeris Guide',
+        experience: `${a.experienceYears || 15}+ Yrs equivalent`,
+        rating: a.rating || 4.98,
+        reviews: `${Math.round((a.totalConsultations || 1200) / 100) / 10}k`,
+        consultations: `${a.totalConsultations || 1200}+`,
+        price: a.pricePerMin || 10,
+        isOnline: a.availability === 'online' || a.isActive !== false,
+        isAi: true,
+        imageUrl: a.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+        languages: (a.languages || ['Hindi', 'English']).join(', '),
+        category: (a as any).category || 'AI',
+        bio: a.bio || a.tagline || '',
+        voiceGender: voiceMeta.voiceGender,
+        voiceId: voiceMeta.voiceId,
+      };
+    });
 
     // Depending on requested type, serve STRICTLY real or strictly AI
     let selectedList: any[] = realAstrologers;

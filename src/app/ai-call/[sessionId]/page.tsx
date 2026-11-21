@@ -427,9 +427,11 @@ export default function AICallRoomPage() {
     [getLangCode, session]
   );
 
-  // Play Synthesized Voice Audio from Base64 MP3 (Web Audio DSP Pitch-Shifter for Male Astrologers)
+  // Play Synthesized Voice Audio from Base64 MP3
+  // Note: Studio neural audio (OpenAI / Microsoft Neural) ALREADY carries authentic Male/Female voices,
+  // so NEVER apply pitch-shift distortion to it; only apply DSP pitch-shift if legacy Google fallback is returned.
   const playAudioFromBase64 = useCallback(
-    (base64String: string, fallbackText: string) => {
+    (base64String: string, fallbackText: string, voiceProvider?: string) => {
       if (isSpeakerMutedRef.current) return;
       try {
         // ALWAYS cancel and silence any pending browser SpeechSynthesis
@@ -452,6 +454,12 @@ export default function AICallRoomPage() {
             activeSourceNodeRef.current.disconnect();
           } catch (e) {}
           activeSourceNodeRef.current = null;
+        }
+
+        // Studio Neural & OpenAI ChatGPT audio already have true Male & Female voices — play cleanly!
+        if (!voiceProvider || voiceProvider === 'openai' || voiceProvider === 'neural') {
+          playStandardHtml5Audio(base64String);
+          return;
         }
 
         const isFemale =
@@ -639,7 +647,7 @@ export default function AICallRoomPage() {
           });
 
           if (data.audioBase64 && !isSpeakerMutedRef.current) {
-            playAudioFromBase64(data.audioBase64, data.replyText);
+            playAudioFromBase64(data.audioBase64, data.replyText, data.voiceProvider);
           } else {
             speakNativeWebSpeech(data.replyText);
           }

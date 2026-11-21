@@ -8,6 +8,7 @@ import {
   normalizeAIAstrologerAvatar,
 } from '@/lib/aiAstrologerData';
 import { getPricingSettings } from '@/lib/settings';
+import { normalizeVoiceGenderAndId } from '@/lib/neuralVoiceEngine';
 
 export async function GET(req: Request) {
   try {
@@ -24,25 +25,42 @@ export async function GET(req: Request) {
         astSnap.forEach((doc: any) => {
           const item = { id: doc.id, ...doc.data() } as AIAstrologer;
           const normalized = normalizeAIAstrologerAvatar(item);
+          const voiceMeta = normalizeVoiceGenderAndId(
+            normalized.voiceGender,
+            normalized.voiceId,
+            normalized.name
+          );
           astrologers.push({
             ...normalized,
+            voiceGender: voiceMeta.voiceGender,
+            voiceId: voiceMeta.voiceId,
             pricePerMin: fixedPricePerMin,
             pricePerMinUSD: fixedPricePerMinUSD,
           });
         });
       } else {
-        astrologers = DEFAULT_AI_ASTROLOGERS.map((a) => ({
-          ...a,
-          pricePerMin: fixedPricePerMin,
-          pricePerMinUSD: fixedPricePerMinUSD,
-        }));
+        astrologers = DEFAULT_AI_ASTROLOGERS.map((a) => {
+          const voiceMeta = normalizeVoiceGenderAndId(a.voiceGender, a.voiceId, a.name);
+          return {
+            ...a,
+            voiceGender: voiceMeta.voiceGender,
+            voiceId: voiceMeta.voiceId,
+            pricePerMin: fixedPricePerMin,
+            pricePerMinUSD: fixedPricePerMinUSD,
+          };
+        });
       }
     } catch (e) {
-      astrologers = DEFAULT_AI_ASTROLOGERS.map((a) => ({
-        ...a,
-        pricePerMin: fixedPricePerMin,
-        pricePerMinUSD: fixedPricePerMinUSD,
-      }));
+      astrologers = DEFAULT_AI_ASTROLOGERS.map((a) => {
+        const voiceMeta = normalizeVoiceGenderAndId(a.voiceGender, a.voiceId, a.name);
+        return {
+          ...a,
+          voiceGender: voiceMeta.voiceGender,
+          voiceId: voiceMeta.voiceId,
+          pricePerMin: fixedPricePerMin,
+          pricePerMinUSD: fixedPricePerMinUSD,
+        };
+      });
     }
 
     // 2. Fetch AI Disciplines
@@ -121,7 +139,78 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { action, astrologer, discipline, astrologerId, isActive, isFeatured, availability } = body;
+    const {
+      action,
+      astrologer,
+      discipline,
+      astrologerId,
+      isActive,
+      isFeatured,
+      availability,
+      voiceGender,
+      voiceId,
+    } = body;
+
+    // Quick update Voice Gender (Male / Female) & ChatGPT Smooth Voice Model
+    if (action === 'set_voice_profile' && astrologerId) {
+      const normalized = normalizeVoiceGenderAndId(voiceGender, voiceId);
+      const docRef = adminDb.collection('ai_astrologers').doc(astrologerId);
+      await docRef.set(
+        {
+          voiceGender: normalized.voiceGender,
+          voiceId: normalized.voiceId,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      return NextResponse.json({
+        success: true,
+        astrologerId,
+        voiceGender: normalized.voiceGender,
+        voiceId: normalized.voiceId,
+      });
+    }
+
+    // One-Click Normalize All AI Astrologer Voices in Firestore (strictly separates Male vs Female ChatGPT voices)
+    if (action === 'normalize_all_voices') {
+      const astSnap = await adminDb.collection('ai_astrologers').get();
+      const batch = adminDb.batch();
+      let updatedCount = 0;
+      let maleCount = 0;
+      let femaleCount = 0;
+
+      astSnap.forEach((doc: any) => {
+        const d = doc.data() || {};
+        const normalized = normalizeVoiceGenderAndId(d.voiceGender, d.voiceId, d.name);
+        if (normalized.voiceGender === 'female') femaleCount++;
+        else maleCount++;
+
+        if (d.voiceGender !== normalized.voiceGender || d.voiceId !== normalized.voiceId) {
+          batch.set(
+            doc.ref,
+            {
+              voiceGender: normalized.voiceGender,
+              voiceId: normalized.voiceId,
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+          updatedCount++;
+        }
+      });
+
+      if (updatedCount > 0) {
+        await batch.commit();
+      }
+
+      return NextResponse.json({
+        success: true,
+        updatedCount,
+        maleCount,
+        femaleCount,
+        totalCount: maleCount + femaleCount,
+      });
+    }
 
     // Toggle Active / Inactive Status
     if (action === 'toggle_status' && astrologerId !== undefined) {
@@ -168,10 +257,17 @@ export async function POST(req: Request) {
         astrologer.id ||
         `ai-${astrologer.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`;
       const docRef = adminDb.collection('ai_astrologers').doc(id);
+      const voiceMeta = normalizeVoiceGenderAndId(
+        astrologer.voiceGender,
+        astrologer.voiceId,
+        astrologer.name
+      );
 
       const payload: AIAstrologer = {
         ...astrologer,
         id,
+        voiceGender: voiceMeta.voiceGender,
+        voiceId: voiceMeta.voiceId,
         availability: astrologer.availability || 'online',
         updatedAt: new Date().toISOString(),
         createdAt: astrologer.createdAt || new Date().toISOString(),

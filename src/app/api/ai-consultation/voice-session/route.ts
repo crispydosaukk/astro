@@ -6,6 +6,10 @@ import { ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES, resolveVedicRemedies } from '@/
 import { calculateBirthChartData, formatChartSummaryForAI } from '@/lib/vedicAstrologyEngine';
 import { fetchWithOpenAIFallback, getServerOpenAIApiKey } from '@/lib/aiConfig';
 import { queryVedikaAI, formatToVedikaDateTime } from '@/lib/vedikaClient';
+import {
+  normalizeVoiceGenderAndId,
+  synthesizeSmoothAstrologerSpeech,
+} from '@/lib/neuralVoiceEngine';
 
 // Rashi Name Native Translators
 function getNativeRashi(sign: string, lang: 'telugu' | 'tamil' | 'hindi' | 'english'): string {
@@ -756,104 +760,64 @@ function splitIntoNaturalChunks(text: string, maxChunkLength = 3500): string[] {
   return chunks.length > 0 ? chunks : [text];
 }
 
-// Universal Multilingual Speech Synthesizer: OpenAI TTS first, with guaranteed Google Translate TTS fallback for ALL astrologers
+// Universal Multilingual Smooth Voice Synthesizer:
+// Tier 1: OpenAI ChatGPT Voice (gpt-4o-mini-tts with calm smooth tone instructions -> tts-1-hd)
+// Tier 2: Microsoft Studio Neural TTS (dedicated separate Male & Female neural voices across EN/HI/TE/TA/KN/ML)
 async function generateMultilingualAudioBase64(
   text: string,
   language: string,
   astrologer: AIAstrologer,
   openaiApiKey?: string | null
-): Promise<string | null> {
+): Promise<{
+  audioBase64: string | null;
+  voiceProvider: 'openai' | 'neural' | 'none';
+  voiceId: string;
+  voiceGender: 'male' | 'female';
+}> {
   const sanitizedText = cleanTextForVedicVoice(text, language);
   const cleanInput = sanitizedText.replace(/[\n\r]+/g, ' ').trim();
-  if (!cleanInput) return null;
-
-  const activeKey = cleanApiKey(openaiApiKey);
-
-  // 1. OpenAI TTS Engine (If key configured and active)
-  if (activeKey && activeKey.length >= 20) {
-    try {
-      const ttsVoice = astrologer.voiceId || (astrologer.voiceGender === 'female' ? 'nova' : 'onyx');
-      const textChunks = splitIntoNaturalChunks(cleanInput, 3500);
-      const audioBuffers: Buffer[] = [];
-      let allChunksSucceeded = true;
-
-      for (const chunk of textChunks) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000);
-
-        const ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${activeKey}`,
-          },
-          body: JSON.stringify({
-            model: 'tts-1',
-            voice: ttsVoice,
-            input: chunk,
-            response_format: 'mp3',
-          }),
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        if (ttsRes.ok) {
-          const audioBuffer = await ttsRes.arrayBuffer();
-          audioBuffers.push(Buffer.from(audioBuffer));
-        } else {
-          allChunksSucceeded = false;
-          break;
-        }
-      }
-
-      if (allChunksSucceeded && audioBuffers.length > 0) {
-        return Buffer.concat(audioBuffers).toString('base64');
-      }
-    } catch (e) {
-      console.warn('OpenAI TTS error, attempting fallback:', e);
-    }
+  const normalizedVoice = normalizeVoiceGenderAndId(
+    astrologer.voiceGender,
+    astrologer.voiceId,
+    astrologer.name
+  );
+  if (!cleanInput) {
+    return {
+      audioBase64: null,
+      voiceProvider: 'none',
+      voiceId: normalizedVoice.voiceId,
+      voiceGender: normalizedVoice.voiceGender,
+    };
   }
 
-  // 2. Guaranteed Multi-chunk Google Translate TTS Fallback for ALL Astrologers (Male & Female)
   try {
-    const lLower = (language || '').toLowerCase();
-    let langCode = 'te';
-    if (lLower.includes('telugu') || lLower.includes('te') || /[\u0C00-\u0C7F]/.test(cleanInput)) langCode = 'te';
-    else if (lLower.includes('tamil') || lLower.includes('ta') || /[\u0B80-\u0BFF]/.test(cleanInput)) langCode = 'ta';
-    else if (lLower.includes('hindi') || lLower.includes('hi') || /[\u0900-\u097F]/.test(cleanInput)) langCode = 'hi';
-    else if (lLower.includes('kannada') || lLower.includes('kn') || /[\u0C80-\u0CFF]/.test(cleanInput)) langCode = 'kn';
-    else if (lLower.includes('malayalam') || lLower.includes('ml') || /[\u0D00-\u0D7F]/.test(cleanInput)) langCode = 'ml';
-    else langCode = 'en';
+    const synth = await synthesizeSmoothAstrologerSpeech({
+      text: cleanInput,
+      language,
+      gender: normalizedVoice.voiceGender,
+      voiceId: normalizedVoice.voiceId,
+      astrologerName: astrologer.name,
+      openaiApiKey: cleanApiKey(openaiApiKey) || undefined,
+    });
 
-    const chunks = splitIntoNaturalChunks(cleanInput, 180);
-    const audioBuffers: Buffer[] = [];
-
-    for (const chunk of chunks) {
-      const encodedText = encodeURIComponent(chunk);
-      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=${langCode}&client=tw-ob`;
-
-      const gRes = await fetch(googleTtsUrl, {
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
-      });
-
-      if (gRes.ok) {
-        const arrayBuffer = await gRes.arrayBuffer();
-        audioBuffers.push(Buffer.from(arrayBuffer));
-      }
-    }
-
-    if (audioBuffers.length > 0) {
-      return Buffer.concat(audioBuffers).toString('base64');
+    if (synth && synth.audioBuffer.byteLength > 0) {
+      return {
+        audioBase64: synth.audioBuffer.toString('base64'),
+        voiceProvider: synth.provider,
+        voiceId: synth.voiceId,
+        voiceGender: synth.gender,
+      };
     }
   } catch (e) {
-    console.warn('Google TTS fallback warning:', e);
+    console.warn('Smooth neural TTS synthesis error:', e);
   }
 
-  return null;
+  return {
+    audioBase64: null,
+    voiceProvider: 'none',
+    voiceId: normalizedVoice.voiceId,
+    voiceGender: normalizedVoice.voiceGender,
+  };
 }
 
 export async function POST(req: Request) {
@@ -980,27 +944,51 @@ export async function POST(req: Request) {
         if (sData?.language) sessionLanguage = sData.language;
 
         if (sData?.astrologerId) {
-          const found = DEFAULT_AI_ASTROLOGERS.find(
-            (a) => a.id === sData.astrologerId || a.name === sData.astrologerName
-          );
+          // Prefer live Firestore ai_astrologers record so Admin Dashboard Male/Female & voice changes reflect immediately
+          let dbAstro: AIAstrologer | null = null;
+          try {
+            const liveDoc = await adminDb.collection('ai_astrologers').doc(sData.astrologerId).get();
+            if (liveDoc.exists) {
+              dbAstro = { id: liveDoc.id, ...liveDoc.data() } as AIAstrologer;
+            }
+          } catch {}
+
+          const found =
+            dbAstro ||
+            DEFAULT_AI_ASTROLOGERS.find(
+              (a) => a.id === sData.astrologerId || a.name === sData.astrologerName
+            );
           if (found) {
-            astrologer = found;
+            astrologer = { ...found };
           } else if (sData.astrologerName) {
+            const norm = normalizeVoiceGenderAndId(
+              sData.voiceGender,
+              sData.voiceId,
+              sData.astrologerName
+            );
             astrologer = {
               ...DEFAULT_AI_ASTROLOGERS[0],
+              id: sData.astrologerId,
               name: sData.astrologerName,
-              voiceGender: sData.voiceGender || 'male',
-              voiceId: sData.voiceId || 'onyx',
+              voiceGender: norm.voiceGender,
+              voiceId: norm.voiceId,
             };
           }
         } else if (sData?.astrologerName) {
           const found = DEFAULT_AI_ASTROLOGERS.find((a) => a.name === sData.astrologerName);
-          if (found) astrologer = found;
+          if (found) astrologer = { ...found };
         }
 
-        // Respect session document's voiceGender and voiceId if saved
-        if (sData?.voiceGender) astrologer.voiceGender = sData.voiceGender;
-        if (sData?.voiceId) astrologer.voiceId = sData.voiceId;
+        // Respect session document's voiceGender and voiceId only if live record did not set them
+        if (!astrologer.voiceGender && sData?.voiceGender) astrologer.voiceGender = sData.voiceGender;
+        if (!astrologer.voiceId && sData?.voiceId) astrologer.voiceId = sData.voiceId;
+        const normalizedAstroVoice = normalizeVoiceGenderAndId(
+          astrologer.voiceGender,
+          astrologer.voiceId,
+          astrologer.name
+        );
+        astrologer.voiceGender = normalizedAstroVoice.voiceGender;
+        astrologer.voiceId = normalizedAstroVoice.voiceId;
       }
     } catch (e) {
       console.warn('Session Firestore lookup warning:', e);
@@ -1221,8 +1209,8 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
       }
     }
 
-    // 9. Generate Guaranteed Voice Speech Audio (OpenAI TTS -> Google TTS Fallback for ALL Astrologers)
-    const audioBase64 = await generateMultilingualAudioBase64(
+    // 9. Generate Smooth ChatGPT-Style Separate Male/Female Voice Speech Audio
+    const speechResult = await generateMultilingualAudioBase64(
       replyText,
       sessionLanguage,
       astrologer,
@@ -1233,9 +1221,11 @@ ${ASTROPARIHAR_UNIFIED_REMEDY_DIRECTIVES}`;
       success: true,
       userMessage,
       replyText,
-      audioBase64,
+      audioBase64: speechResult.audioBase64,
+      voiceProvider: speechResult.voiceProvider,
+      voiceId: speechResult.voiceId,
       astrologerName: astrologer.name,
-      voiceGender: astrologer.voiceGender || 'male',
+      voiceGender: speechResult.voiceGender,
       language: sessionLanguage,
       prescribedRemedy: activePrescribedRemedy,
       interrupted: Boolean(detectedInterruption),

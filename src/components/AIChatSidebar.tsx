@@ -1017,11 +1017,22 @@ export default function AIChatSidebar() {
     handleSendMessage(questionText);
   };
 
-  const speakText = (text: string) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  const activeTtsAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const speakText = async (text: string) => {
+    if (typeof window === 'undefined') return;
 
     if (isSpeaking) {
-      window.speechSynthesis.cancel();
+      if (activeTtsAudioRef.current) {
+        try {
+          activeTtsAudioRef.current.pause();
+          activeTtsAudioRef.current.src = '';
+        } catch {}
+        activeTtsAudioRef.current = null;
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
       setIsSpeaking(false);
       return;
     }
@@ -1030,16 +1041,55 @@ export default function AIChatSidebar() {
       .replace(/\*\*(.*?)\*\*/g, '$1')
       .replace(/\*(.*?)\*/g, '$1')
       .replace(/#/g, '')
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1');
-
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 0.95;
-    utterance.pitch = 1.0;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+      .trim();
+    if (!cleanText) return;
 
     setIsSpeaking(true);
-    window.speechSynthesis.speak(utterance);
+
+    try {
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: cleanText.slice(0, 2000),
+          lang: language,
+          astrologerId: activeAstrologer?.id || sessionAstrologer?.id,
+          astrologerName: activeAstrologer?.name || sessionAstrologer?.name,
+          gender: activeAstrologer?.voiceGender,
+          voiceId: activeAstrologer?.voiceId,
+          format: 'json',
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.audioBase64) {
+          const audio = new Audio(`data:audio/mpeg;base64,${data.audioBase64}`);
+          activeTtsAudioRef.current = audio;
+          audio.onended = () => {
+            activeTtsAudioRef.current = null;
+            setIsSpeaking(false);
+          };
+          audio.onerror = () => {
+            activeTtsAudioRef.current = null;
+            setIsSpeaking(false);
+          };
+          await audio.play();
+          return;
+        }
+      }
+    } catch {}
+
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.rate = 0.96;
+      utterance.pitch = 1.0;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
+    } else {
+      setIsSpeaking(false);
+    }
   };
 
   if (isExcluded) {
