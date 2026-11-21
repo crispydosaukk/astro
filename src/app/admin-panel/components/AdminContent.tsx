@@ -20,12 +20,20 @@ import AdminAppProfileEditor from './AdminAppProfileEditor';
 import AdminAppSupportLegalEditor from './AdminAppSupportLegalEditor';
 import AdminAppServiceDetailsEditor from './AdminAppServiceDetailsEditor';
 import AdminAppNotificationsModule from './AdminAppNotificationsModule';
-import { Shield, Bell, Download, LogOut, Smartphone, LayoutTemplate, Sparkles, ChevronDown, User, HelpCircle, BookOpen } from 'lucide-react';
+import AdminAppAllScreensCmsEditor from './AdminAppAllScreensCmsEditor';
+import { Shield, Bell, Download, LogOut, Smartphone, LayoutTemplate, Sparkles, ChevronDown, User, HelpCircle, BookOpen, Layers } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 const APP_DYNAMIC_SUBMODULES = [
+  {
+    id: 'tab-app-all-screens',
+    label: 'All 45 App Screens CMS (Complete)',
+    shortLabel: 'All 45 Screens',
+    href: '/admin-panel/app-dynamic/all-screens',
+    icon: Layers,
+  },
   {
     id: 'tab-app-onboarding',
     label: 'Onboarding Slides',
@@ -96,6 +104,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
   const router = useRouter();
 
   const isAppDynamic =
+    activeTab === 'tab-app-all-screens' ||
     activeTab === 'tab-app-onboarding' ||
     activeTab === 'tab-app-dynamic' ||
     activeTab === 'tab-app-banners' ||
@@ -223,6 +232,7 @@ export default function AdminContent({ activeTab = 'tab-overview' }: { activeTab
             <AdminCharts />
           </>
         )}
+        {activeTab === 'tab-app-all-screens' && <AdminAppAllScreensCmsEditor />}
         {(activeTab === 'tab-app-onboarding' || activeTab === 'tab-app-dynamic') && (
           <AdminAppOnboardingEditor />
         )}
