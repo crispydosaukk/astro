@@ -29,6 +29,11 @@ import {
   Wand2,
   BookmarkPlus,
   FolderPlus,
+  Sliders,
+  ArrowUp,
+  ArrowDown,
+  Volume2,
+  Moon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type {
@@ -42,11 +47,13 @@ import type { AutomatedScheduleItem } from '@/lib/notificationAutomations';
 import {
   CATEGORY_COLOR_LIST,
   CATEGORY_COLOR_PRESETS,
+  DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN,
   DEFAULT_NOTIFICATION_CATEGORIES,
   DEFAULT_NOTIFICATION_TEMPLATES,
   SUGGESTED_CATEGORY_EMOJIS,
   slugifyCategoryId,
   slugifyTemplateId,
+  type AppNotificationSettingsScreenConfig,
   type DynamicNotificationCategory,
   type DynamicNotificationTemplate,
   type NotificationCategoryColorKey,
@@ -97,7 +104,7 @@ function formatTimeAgo(iso: string) {
 }
 
 export default function AdminAppNotificationsModule() {
-  const [moduleTab, setModuleTab] = useState<'broadcast' | 'templates' | 'automations'>('broadcast');
+  const [moduleTab, setModuleTab] = useState<'broadcast' | 'templates' | 'settings_ui' | 'automations'>('broadcast');
 
   const [loading, setLoading] = useState(true);
   const [loadingConfig, setLoadingConfig] = useState(true);
@@ -124,6 +131,9 @@ export default function AdminAppNotificationsModule() {
   );
   const [autoLoadOnOpen, setAutoLoadOnOpen] = useState(true);
   const [autoLoadOnCategoryChange, setAutoLoadOnCategoryChange] = useState(true);
+  const [settingsScreen, setSettingsScreen] = useState<AppNotificationSettingsScreenConfig>(
+    DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN
+  );
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const initialAutoLoadedRef = useRef(false);
 
@@ -289,6 +299,12 @@ export default function AdminAppNotificationsModule() {
         setTemplates(loadedTpls);
         setAutoLoadOnOpen(openFlag);
         setAutoLoadOnCategoryChange(catFlag);
+        if (data.settingsScreen && typeof data.settingsScreen === 'object') {
+          setSettingsScreen({
+            ...DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN,
+            ...data.settingsScreen,
+          });
+        }
 
         // Auto-load global default template once when opening composer with empty draft
         if (!initialAutoLoadedRef.current && openFlag && loadedTpls.length > 0) {
@@ -315,6 +331,7 @@ export default function AdminAppNotificationsModule() {
       templates?: DynamicNotificationTemplate[];
       autoLoadOnOpen?: boolean;
       autoLoadOnCategoryChange?: boolean;
+      settingsScreen?: AppNotificationSettingsScreenConfig;
     },
     successMessage?: string
   ): Promise<boolean> => {
@@ -323,6 +340,7 @@ export default function AdminAppNotificationsModule() {
       templates: next.templates ?? templates,
       autoLoadOnOpen: next.autoLoadOnOpen ?? autoLoadOnOpen,
       autoLoadOnCategoryChange: next.autoLoadOnCategoryChange ?? autoLoadOnCategoryChange,
+      settingsScreen: next.settingsScreen ?? settingsScreen,
     };
 
     setSavingConfig(true);
@@ -340,6 +358,12 @@ export default function AdminAppNotificationsModule() {
         if (typeof data.autoLoadOnCategoryChange === 'boolean') {
           setAutoLoadOnCategoryChange(data.autoLoadOnCategoryChange);
         }
+        if (data.settingsScreen && typeof data.settingsScreen === 'object') {
+          setSettingsScreen({
+            ...DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN,
+            ...data.settingsScreen,
+          });
+        }
         if (successMessage) toast.success(successMessage);
         return true;
       }
@@ -351,6 +375,38 @@ export default function AdminAppNotificationsModule() {
     } finally {
       setSavingConfig(false);
     }
+  };
+
+  const handleToggleCategoryFlag = async (
+    cat: DynamicNotificationCategory,
+    field: 'active' | 'defaultEnabled'
+  ) => {
+    const nextVal = field === 'active' ? cat.active === false : cat.defaultEnabled === false;
+    const nextCategories = categories.map((c) =>
+      c.id === cat.id ? { ...c, [field]: nextVal } : c
+    );
+    await persistConfig(
+      { categories: nextCategories },
+      field === 'active'
+        ? `${cat.emoji} ${cat.label} is now ${nextVal ? 'VISIBLE' : 'HIDDEN'} in App Notification Settings`
+        : `${cat.emoji} ${cat.label} default toggle set to ${nextVal ? 'ON' : 'OFF'}`
+    );
+  };
+
+  const handleMoveCategory = async (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= categories.length) return;
+    const nextCategories = [...categories];
+    const [moved] = nextCategories.splice(index, 1);
+    nextCategories.splice(target, 0, moved);
+    await persistConfig({ categories: nextCategories }, 'Updated category display order');
+  };
+
+  const handleSaveSettingsScreen = async () => {
+    await persistConfig(
+      { settingsScreen },
+      'App Notification Settings screen saved & synced live!'
+    );
   };
 
   const fetchAutomations = async () => {
@@ -1103,25 +1159,25 @@ export default function AdminAppNotificationsModule() {
         </div>
       </div>
 
-      {/* Main Mode Navigation Tabs (3 Tabs) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-1.5 bg-muted/60 border border-border rounded-2xl">
+      {/* Main Mode Navigation Tabs (4 Tabs) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 p-1.5 bg-muted/60 border border-border rounded-2xl">
         <button
           type="button"
           onClick={() => setModuleTab('broadcast')}
-          className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all ${
             moduleTab === 'broadcast'
               ? 'bg-card text-foreground shadow-sm border border-border'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
           <Send size={15} className={moduleTab === 'broadcast' ? 'text-amber-600' : ''} />
-          Manual Broadcast Composer
+          Broadcast Composer
         </button>
 
         <button
           type="button"
           onClick={() => setModuleTab('templates')}
-          className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all ${
             moduleTab === 'templates'
               ? 'bg-card text-foreground shadow-sm border border-border'
               : 'text-muted-foreground hover:text-foreground'
@@ -1130,14 +1186,30 @@ export default function AdminAppNotificationsModule() {
           <Layers size={15} className={moduleTab === 'templates' ? 'text-amber-600' : ''} />
           Templates & Categories
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700">
-            {templates.length} • {categories.length}
+            {templates.length} · {categories.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setModuleTab('settings_ui')}
+          className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all ${
+            moduleTab === 'settings_ui'
+              ? 'bg-card text-foreground shadow-sm border border-border'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Sliders size={15} className={moduleTab === 'settings_ui' ? 'text-amber-600' : ''} />
+          App Settings Screen
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700">
+            {categories.filter((c) => c.active !== false).length} Live
           </span>
         </button>
 
         <button
           type="button"
           onClick={() => setModuleTab('automations')}
-          className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all ${
             moduleTab === 'automations'
               ? 'bg-card text-foreground shadow-sm border border-border'
               : 'text-muted-foreground hover:text-foreground'
@@ -2247,12 +2319,17 @@ export default function AdminAppNotificationsModule() {
                 </div>
 
                 <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
-                  {categories.map((cat) => {
+                  {categories.map((cat, catIdx) => {
                     const tplCount = templates.filter((t) => t.category === cat.id).length;
+                    const isVisibleInApp = cat.active !== false;
                     return (
                       <div
                         key={cat.id}
-                        className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors"
+                        className={`flex items-center justify-between gap-2.5 p-3 rounded-xl border transition-colors ${
+                          isVisibleInApp
+                            ? 'border-border bg-muted/20 hover:bg-muted/40'
+                            : 'border-dashed border-border bg-muted/10 opacity-65'
+                        }`}
                       >
                         <div className="flex items-start gap-2.5 min-w-0">
                           <div
@@ -2272,8 +2349,13 @@ export default function AdminAppNotificationsModule() {
                               <span
                                 className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${cat.badgeClass}`}
                               >
-                                {tplCount} {tplCount === 1 ? 'template' : 'templates'}
+                                {tplCount} tpl
                               </span>
+                              {!isVisibleInApp && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-500/15 text-slate-600">
+                                  Hidden in App
+                                </span>
+                              )}
                             </div>
                             <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                               {cat.description || `ID: ${cat.id}`}
@@ -2281,7 +2363,44 @@ export default function AdminAppNotificationsModule() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            disabled={savingConfig || catIdx === 0}
+                            onClick={() => handleMoveCategory(catIdx, -1)}
+                            className="p-1 rounded-md border border-border bg-background text-muted-foreground hover:text-foreground disabled:opacity-30"
+                            title="Move up"
+                          >
+                            <ArrowUp size={11} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={savingConfig || catIdx === categories.length - 1}
+                            onClick={() => handleMoveCategory(catIdx, 1)}
+                            className="p-1 rounded-md border border-border bg-background text-muted-foreground hover:text-foreground disabled:opacity-30"
+                            title="Move down"
+                          >
+                            <ArrowDown size={11} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={savingConfig}
+                            onClick={() => handleToggleCategoryFlag(cat, 'active')}
+                            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                              isVisibleInApp ? 'bg-emerald-600' : 'bg-slate-400/60'
+                            }`}
+                            title={
+                              isVisibleInApp
+                                ? 'Visible in App Notification Settings (click to hide)'
+                                : 'Hidden in App Notification Settings (click to show)'
+                            }
+                          >
+                            <span
+                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
+                                isVisibleInApp ? 'translate-x-4' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
                           <button
                             type="button"
                             onClick={() => startEditCategory(cat)}
@@ -2700,7 +2819,765 @@ export default function AdminAppNotificationsModule() {
         </div>
       )}
 
-      {/* TAB 3: ASTROTALK AUTOMATED DAILY ENGINE */}
+      {/* TAB 3: APP NOTIFICATION SETTINGS SCREEN & CATEGORIES MODULE */}
+      {moduleTab === 'settings_ui' && (
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          {/* Left: Full Dynamic Controls for App Notification Settings Screen */}
+          <div className="xl:col-span-8 space-y-5">
+            {/* Save Header Bar */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <Sliders size={16} className="text-amber-600" />
+                  Mobile App Notification Settings &amp; Categories Module
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Control every heading, category toggle, Master Control label, Delivery Preference (Sound, Vibration, Quiet Hours), and Inbox text rendered in the customer mobile app.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={savingConfig}
+                onClick={handleSaveSettingsScreen}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md transition-all disabled:opacity-50 shrink-0"
+              >
+                <Save size={14} />
+                {savingConfig ? 'Saving...' : 'Save App Settings UI'}
+              </button>
+            </div>
+
+            {/* 1. Push Status Card & Screen Titles */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 border-b border-border pb-2.5">
+                1. Screen Titles &amp; Push Status Card
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Settings Screen Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.settingsScreenTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, settingsScreenTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Notifications Inbox Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.inboxScreenTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, inboxScreenTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Active Status Card Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.statusActiveTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, statusActiveTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Active Status Card Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.statusActiveSubtitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, statusActiveSubtitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Push Off Card Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.statusOffTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, statusOffTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Push Off Card Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.statusOffSubtitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, statusOffSubtitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Master Control */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 border-b border-border pb-2.5">
+                2. Master Control Section
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Section Heading
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.masterSectionHeading}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, masterSectionHeading: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Toggle Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.masterToggleTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, masterToggleTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Toggle Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.masterToggleSubtitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, masterToggleSubtitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Astrological Alerts & Categories Module */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700">
+                  3. Astrological Alerts &amp; Categories ({categories.length})
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetCategoryForm();
+                    setModuleTab('templates');
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-800 border border-amber-500/30 text-[11px] font-bold hover:bg-amber-500/25"
+                >
+                  <Plus size={12} />
+                  Add / Edit Categories
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-foreground mb-1">
+                  Categories Section Heading
+                </label>
+                <input
+                  type="text"
+                  value={settingsScreen.categoriesSectionHeading}
+                  onChange={(e) =>
+                    setSettingsScreen((s) => ({ ...s, categoriesSectionHeading: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                {categories.map((cat, idx) => {
+                  const isVisible = cat.active !== false;
+                  const isDefOn = cat.defaultEnabled !== false;
+                  return (
+                    <div
+                      key={cat.id}
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border ${
+                        isVisible
+                          ? 'border-border bg-muted/20'
+                          : 'border-dashed border-border bg-muted/10 opacity-65'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 border"
+                          style={{
+                            backgroundColor: `${cat.color}20`,
+                            borderColor: `${cat.color}50`,
+                          }}
+                        >
+                          {cat.emoji}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-foreground truncate">{cat.label}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {cat.description || `Receive ${cat.label} alerts`}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            disabled={savingConfig || idx === 0}
+                            onClick={() => handleMoveCategory(idx, -1)}
+                            className="p-1 rounded-md border border-border bg-background text-muted-foreground hover:text-foreground disabled:opacity-30"
+                            title="Move up"
+                          >
+                            <ArrowUp size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={savingConfig || idx === categories.length - 1}
+                            onClick={() => handleMoveCategory(idx, 1)}
+                            className="p-1 rounded-md border border-border bg-background text-muted-foreground hover:text-foreground disabled:opacity-30"
+                            title="Move down"
+                          >
+                            <ArrowDown size={12} />
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={savingConfig}
+                          onClick={() => handleToggleCategoryFlag(cat, 'defaultEnabled')}
+                          className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all ${
+                            isDefOn
+                              ? 'bg-amber-500/15 border-amber-500/35 text-amber-800'
+                              : 'bg-muted border-border text-muted-foreground'
+                          }`}
+                          title="Default switch state ON/OFF for app users"
+                        >
+                          Default: {isDefOn ? 'ON' : 'OFF'}
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={savingConfig}
+                          onClick={() => handleToggleCategoryFlag(cat, 'active')}
+                          className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all ${
+                            isVisible
+                              ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-700'
+                              : 'bg-slate-500/15 border-slate-500/30 text-slate-600'
+                          }`}
+                          title="Show or hide this category in App Notification Settings & Inbox tabs"
+                        >
+                          {isVisible ? '● Shown in App' : '○ Hidden'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            startEditCategory(cat);
+                            setModuleTab('templates');
+                          }}
+                          className="p-1.5 rounded-lg border border-border bg-background hover:border-amber-500 text-muted-foreground hover:text-foreground"
+                          title="Edit category name, emoji, description & color"
+                        >
+                          <Edit3 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 4. Delivery Preferences (Sound, Vibration, Quiet Hours) */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 border-b border-border pb-2.5">
+                4. Delivery Preferences (Sound, Vibration &amp; Quiet Hours)
+              </h4>
+
+              <div>
+                <label className="block text-xs font-bold text-foreground mb-1">
+                  Delivery Section Heading
+                </label>
+                <input
+                  type="text"
+                  value={settingsScreen.deliverySectionHeading}
+                  onChange={(e) =>
+                    setSettingsScreen((s) => ({ ...s, deliverySectionHeading: e.target.value }))
+                  }
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs text-foreground outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end p-3 rounded-xl bg-muted/20 border border-border">
+                <div className="sm:col-span-4">
+                  <label className="block text-[11px] font-bold text-foreground mb-1">
+                    Sound Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.soundTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, soundTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs"
+                  />
+                </div>
+                <div className="sm:col-span-5">
+                  <label className="block text-[11px] font-bold text-foreground mb-1">
+                    Sound Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.soundSubtitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, soundSubtitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs"
+                  />
+                </div>
+                <div className="sm:col-span-3 flex items-center justify-between sm:justify-end gap-2 pb-1">
+                  <span className="text-[11px] font-semibold text-muted-foreground">Default:</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettingsScreen((s) => ({
+                        ...s,
+                        defaultSoundEnabled: !s.defaultSoundEnabled,
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                      settingsScreen.defaultSoundEnabled
+                        ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-700'
+                        : 'bg-muted border-border text-muted-foreground'
+                    }`}
+                  >
+                    {settingsScreen.defaultSoundEnabled ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end p-3 rounded-xl bg-muted/20 border border-border">
+                <div className="sm:col-span-4">
+                  <label className="block text-[11px] font-bold text-foreground mb-1">
+                    Vibration Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.vibrationTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, vibrationTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs"
+                  />
+                </div>
+                <div className="sm:col-span-5">
+                  <label className="block text-[11px] font-bold text-foreground mb-1">
+                    Vibration Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.vibrationSubtitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, vibrationSubtitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs"
+                  />
+                </div>
+                <div className="sm:col-span-3 flex items-center justify-between sm:justify-end gap-2 pb-1">
+                  <span className="text-[11px] font-semibold text-muted-foreground">Default:</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSettingsScreen((s) => ({
+                        ...s,
+                        defaultVibrationEnabled: !s.defaultVibrationEnabled,
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                      settingsScreen.defaultVibrationEnabled
+                        ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-700'
+                        : 'bg-muted border-border text-muted-foreground'
+                    }`}
+                  >
+                    {settingsScreen.defaultVibrationEnabled ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3 p-3 rounded-xl bg-muted/20 border border-border">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                  <div className="sm:col-span-4">
+                    <label className="block text-[11px] font-bold text-foreground mb-1">
+                      Quiet Hours Title
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsScreen.quietHoursTitle}
+                      onChange={(e) =>
+                        setSettingsScreen((s) => ({ ...s, quietHoursTitle: e.target.value }))
+                      }
+                      className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs"
+                    />
+                  </div>
+                  <div className="sm:col-span-5">
+                    <label className="block text-[11px] font-bold text-foreground mb-1">
+                      Quiet Hours Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={settingsScreen.quietHoursSubtitle}
+                      onChange={(e) =>
+                        setSettingsScreen((s) => ({ ...s, quietHoursSubtitle: e.target.value }))
+                      }
+                      className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs"
+                    />
+                  </div>
+                  <div className="sm:col-span-3 flex items-center justify-between sm:justify-end gap-2 pb-1">
+                    <span className="text-[11px] font-semibold text-muted-foreground">
+                      Default:
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSettingsScreen((s) => ({
+                          ...s,
+                          defaultQuietHoursEnabled: !s.defaultQuietHoursEnabled,
+                        }))
+                      }
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                        settingsScreen.defaultQuietHoursEnabled
+                          ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-700'
+                          : 'bg-muted border-border text-muted-foreground'
+                      }`}
+                    >
+                      {settingsScreen.defaultQuietHoursEnabled ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
+                      Quiet Start Time (24h)
+                    </label>
+                    <input
+                      type="time"
+                      value={settingsScreen.quietHoursStart}
+                      onChange={(e) =>
+                        setSettingsScreen((s) => ({ ...s, quietHoursStart: e.target.value }))
+                      }
+                      className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
+                      Quiet End Time (24h)
+                    </label>
+                    <input
+                      type="time"
+                      value={settingsScreen.quietHoursEnd}
+                      onChange={(e) =>
+                        setSettingsScreen((s) => ({ ...s, quietHoursEnd: e.target.value }))
+                      }
+                      className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Test Push Buttons & Inbox Copy */}
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+              <div className="flex items-center justify-between border-b border-border pb-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700">
+                  5. Test Push Buttons &amp; Inbox Copy
+                </h4>
+                <label className="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settingsScreen.showTestButtons}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, showTestButtons: e.target.checked }))
+                    }
+                    className="rounded border-border text-amber-600"
+                  />
+                  Show Test Buttons on App Settings Screen
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Instant Test Button Label
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.instantTestButtonLabel}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, instantTestButtonLabel: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Lock-Screen Test Button Label
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.lockScreenTestButtonLabel}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({
+                        ...s,
+                        lockScreenTestButtonLabel: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Inbox Enable Push Banner Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.enablePushBannerTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, enablePushBannerTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Inbox Enable Push Banner Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.enablePushBannerSubtitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({
+                        ...s,
+                        enablePushBannerSubtitle: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Empty Inbox Title
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.emptyAllTitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, emptyAllTitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1">
+                    Empty Inbox Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={settingsScreen.emptyAllSubtitle}
+                    onChange={(e) =>
+                      setSettingsScreen((s) => ({ ...s, emptyAllSubtitle: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Live Mobile App Notification Settings Screen Preview */}
+          <div className="xl:col-span-4">
+            <div className="bg-card border border-border rounded-2xl p-4 shadow-xs space-y-3 sticky top-20">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Smartphone size={14} className="text-amber-600" />
+                  Live App Notification Settings Preview
+                </h4>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700">
+                  100% Dynamic
+                </span>
+              </div>
+
+              <div className="rounded-[28px] bg-[#FAF6EE] text-[#1F1A17] border-2 border-[#E5D9C8] p-4 space-y-4 shadow-inner max-h-[680px] overflow-y-auto">
+                <div className="text-sm font-extrabold text-[#1F1A17] flex items-center gap-2">
+                  <span>←</span>
+                  <span>{settingsScreen.settingsScreenTitle}</span>
+                </div>
+
+                {/* Status Banner */}
+                <div className="p-3 rounded-2xl bg-[#E8F6EE] border border-[#2D9E6B]/40 flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#2D9E6B]/20 flex items-center justify-center text-[#2D9E6B] shrink-0">
+                    <Bell size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[#1F1A17]">
+                      {settingsScreen.statusActiveTitle}
+                    </p>
+                    <p className="text-[10px] text-[#5F5A54] leading-snug">
+                      {settingsScreen.statusActiveSubtitle}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Master Control */}
+                <div className="space-y-1.5">
+                  <p className="text-xs font-extrabold text-[#1F1A17]">
+                    {settingsScreen.masterSectionHeading}
+                  </p>
+                  <div className="p-3 rounded-2xl bg-[#FFFDF9] border border-[#E5D9C8] flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-[#1F1A17]">
+                        {settingsScreen.masterToggleTitle}
+                      </p>
+                      <p className="text-[10px] text-[#6B5E55]">
+                        {settingsScreen.masterToggleSubtitle}
+                      </p>
+                    </div>
+                    <span className="w-8 h-4.5 rounded-full bg-[#C9A84C] inline-block shrink-0" />
+                  </div>
+                </div>
+
+                {/* Astrological Alerts & Categories */}
+                <div className="space-y-1.5">
+                  <p className="text-xs font-extrabold text-[#1F1A17]">
+                    {settingsScreen.categoriesSectionHeading}
+                  </p>
+                  <div className="rounded-2xl bg-[#FFFDF9] border border-[#E5D9C8] divide-y divide-[#EFE7DA]">
+                    {categories
+                      .filter((c) => c.active !== false)
+                      .map((c) => (
+                        <div
+                          key={c.id}
+                          className="p-2.5 flex items-center justify-between gap-2"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0"
+                              style={{ backgroundColor: `${c.color}22` }}
+                            >
+                              {c.emoji}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-bold text-[#1F1A17] truncate">
+                                {c.label}
+                              </p>
+                              <p className="text-[9.5px] text-[#6B5E55] truncate">
+                                {c.description || `Receive ${c.label} alerts`}
+                              </p>
+                            </div>
+                          </div>
+                          <span
+                            className={`w-7 h-4 rounded-full inline-block shrink-0 ${
+                              c.defaultEnabled !== false ? 'bg-[#C9A84C]' : 'bg-slate-300'
+                            }`}
+                          />
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Delivery Preferences */}
+                <div className="space-y-1.5">
+                  <p className="text-xs font-extrabold text-[#1F1A17]">
+                    {settingsScreen.deliverySectionHeading}
+                  </p>
+                  <div className="rounded-2xl bg-[#FFFDF9] border border-[#E5D9C8] divide-y divide-[#EFE7DA]">
+                    <div className="p-2.5 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Volume2 size={14} className="text-[#C9A84C] shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-bold truncate">
+                            {settingsScreen.soundTitle}
+                          </p>
+                          <p className="text-[9.5px] text-[#6B5E55] truncate">
+                            {settingsScreen.soundSubtitle}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`w-7 h-4 rounded-full inline-block shrink-0 ${
+                          settingsScreen.defaultSoundEnabled ? 'bg-[#C9A84C]' : 'bg-slate-300'
+                        }`}
+                      />
+                    </div>
+                    <div className="p-2.5 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Smartphone size={14} className="text-[#4FC3F7] shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-bold truncate">
+                            {settingsScreen.vibrationTitle}
+                          </p>
+                          <p className="text-[9.5px] text-[#6B5E55] truncate">
+                            {settingsScreen.vibrationSubtitle}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`w-7 h-4 rounded-full inline-block shrink-0 ${
+                          settingsScreen.defaultVibrationEnabled ? 'bg-[#C9A84C]' : 'bg-slate-300'
+                        }`}
+                      />
+                    </div>
+                    <div className="p-2.5 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Moon size={14} className="text-[#9370DB] shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-bold truncate">
+                            {settingsScreen.quietHoursTitle}
+                          </p>
+                          <p className="text-[9.5px] text-[#6B5E55] truncate">
+                            {settingsScreen.quietHoursSubtitle}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`w-7 h-4 rounded-full inline-block shrink-0 ${
+                          settingsScreen.defaultQuietHoursEnabled ? 'bg-[#C9A84C]' : 'bg-slate-300'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: ASTROTALK AUTOMATED DAILY ENGINE */}
       {moduleTab === 'automations' && (
         <div className="space-y-6">
           {/* Engine Header Card */}

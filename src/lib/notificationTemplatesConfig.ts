@@ -123,7 +123,44 @@ export interface DynamicNotificationCategory {
   color: string;
   badgeClass: string;
   description?: string;
+  active?: boolean;
+  defaultEnabled?: boolean;
   isBuiltIn?: boolean;
+}
+
+export interface AppNotificationSettingsScreenConfig {
+  inboxScreenTitle: string;
+  settingsScreenTitle: string;
+  statusActiveTitle: string;
+  statusActiveSubtitle: string;
+  statusGrantedFallbackSubtitle: string;
+  statusOffTitle: string;
+  statusOffSubtitle: string;
+  masterSectionHeading: string;
+  masterToggleTitle: string;
+  masterToggleSubtitle: string;
+  categoriesSectionHeading: string;
+  deliverySectionHeading: string;
+  soundTitle: string;
+  soundSubtitle: string;
+  defaultSoundEnabled: boolean;
+  vibrationTitle: string;
+  vibrationSubtitle: string;
+  defaultVibrationEnabled: boolean;
+  quietHoursTitle: string;
+  quietHoursSubtitle: string;
+  defaultQuietHoursEnabled: boolean;
+  quietHoursStart: string;
+  quietHoursEnd: string;
+  showTestButtons: boolean;
+  instantTestButtonLabel: string;
+  lockScreenTestButtonLabel: string;
+  enablePushBannerTitle: string;
+  enablePushBannerSubtitle: string;
+  emptyAllTitle: string;
+  emptyAllSubtitle: string;
+  emptyUnreadTitle: string;
+  emptyUnreadSubtitle: string;
 }
 
 export interface DynamicNotificationTemplate {
@@ -149,8 +186,46 @@ export interface NotificationTemplatesConfig {
   templates: DynamicNotificationTemplate[];
   autoLoadOnOpen: boolean;
   autoLoadOnCategoryChange: boolean;
+  settingsScreen: AppNotificationSettingsScreenConfig;
   updatedAt?: string;
 }
+
+export const DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN: AppNotificationSettingsScreenConfig = {
+  inboxScreenTitle: 'Notifications',
+  settingsScreenTitle: 'Notification Settings',
+  statusActiveTitle: 'Push Notifications Active',
+  statusActiveSubtitle: 'Device registered for live AstroParihar push & in-app alerts.',
+  statusGrantedFallbackSubtitle: 'Permission granted. Alerts will appear live on this device.',
+  statusOffTitle: 'Push Notifications Off',
+  statusOffSubtitle: 'Allow notifications to receive auspicious timings & astrologer alerts.',
+  masterSectionHeading: 'Master Control',
+  masterToggleTitle: 'All Notifications',
+  masterToggleSubtitle: 'Pause or resume all AstroParihar alerts',
+  categoriesSectionHeading: 'Astrological Alerts & Categories',
+  deliverySectionHeading: 'Delivery Preferences',
+  soundTitle: 'Notification Sound',
+  soundSubtitle: 'Play alert tone when notifications arrive',
+  defaultSoundEnabled: true,
+  vibrationTitle: 'Vibration',
+  vibrationSubtitle: 'Vibrate device on incoming alerts',
+  defaultVibrationEnabled: true,
+  quietHoursTitle: 'Quiet Hours (10:00 PM – 7:00 AM)',
+  quietHoursSubtitle: 'Silence non-urgent alerts during night rest',
+  defaultQuietHoursEnabled: false,
+  quietHoursStart: '22:00',
+  quietHoursEnd: '07:00',
+  showTestButtons: true,
+  instantTestButtonLabel: 'Send Instant Test Banner',
+  lockScreenTestButtonLabel: 'Test Lock-Screen Push (Arrives in 5s — Lock Phone)',
+  enablePushBannerTitle: 'Enable Live Push Alerts',
+  enablePushBannerSubtitle:
+    'Receive daily horoscope, auspicious Muhurat & live consultation reminders.',
+  emptyAllTitle: 'No Notifications Yet',
+  emptyAllSubtitle:
+    'Daily horoscopes, Panchang timings, consultation alerts, and special offers from AstroParihar will appear here.',
+  emptyUnreadTitle: 'You are all caught up!',
+  emptyUnreadSubtitle: 'All your cosmic updates and reminders have been read.',
+};
 
 export const DEFAULT_NOTIFICATION_CATEGORIES: DynamicNotificationCategory[] = [
   {
@@ -161,6 +236,8 @@ export const DEFAULT_NOTIFICATION_CATEGORIES: DynamicNotificationCategory[] = [
     color: CATEGORY_COLOR_PRESETS.purple.hex,
     badgeClass: CATEGORY_COLOR_PRESETS.purple.badgeClass,
     description: 'Morning Rashi forecasts & planetary transits',
+    active: true,
+    defaultEnabled: true,
     isBuiltIn: true,
   },
   {
@@ -171,46 +248,56 @@ export const DEFAULT_NOTIFICATION_CATEGORIES: DynamicNotificationCategory[] = [
     color: CATEGORY_COLOR_PRESETS.amber.hex,
     badgeClass: CATEGORY_COLOR_PRESETS.amber.badgeClass,
     description: 'Daily Tithi, Abhijit Muhurat & Rahu Kaal',
+    active: true,
+    defaultEnabled: true,
     isBuiltIn: true,
   },
   {
     id: 'consultation',
-    label: 'Consultations',
+    label: 'Consultations & Chat',
     emoji: '📞',
     colorKey: 'blue',
     color: CATEGORY_COLOR_PRESETS.blue.hex,
     badgeClass: CATEGORY_COLOR_PRESETS.blue.badgeClass,
     description: 'Astrologer availability, call & chat reminders',
+    active: true,
+    defaultEnabled: true,
     isBuiltIn: true,
   },
   {
     id: 'offers',
-    label: 'Offers & Wallet',
+    label: 'Offers & Wallet Updates',
     emoji: '🎁',
     colorKey: 'emerald',
     color: CATEGORY_COLOR_PRESETS.emerald.hex,
     badgeClass: CATEGORY_COLOR_PRESETS.emerald.badgeClass,
     description: 'Recharge bonuses, festive discounts & receipts',
+    active: true,
+    defaultEnabled: true,
     isBuiltIn: true,
   },
   {
     id: 'remedies',
-    label: 'Remedies & Reports',
+    label: 'Vedic Remedies & Reports',
     emoji: '🕉️',
     colorKey: 'rose',
     color: CATEGORY_COLOR_PRESETS.rose.hex,
     badgeClass: CATEGORY_COLOR_PRESETS.rose.badgeClass,
     description: 'Ashta Parihar reminders & Kundli PDF updates',
+    active: true,
+    defaultEnabled: true,
     isBuiltIn: true,
   },
   {
     id: 'system',
-    label: 'System Alert',
+    label: 'Account & Security Alerts',
     emoji: '🔔',
     colorKey: 'slate',
     color: CATEGORY_COLOR_PRESETS.slate.hex,
     badgeClass: CATEGORY_COLOR_PRESETS.slate.badgeClass,
     description: 'Important platform & account notices',
+    active: true,
+    defaultEnabled: true,
     isBuiltIn: true,
   },
 ];
@@ -314,6 +401,7 @@ export const DEFAULT_NOTIFICATION_TEMPLATES_CONFIG: NotificationTemplatesConfig 
   templates: DEFAULT_NOTIFICATION_TEMPLATES,
   autoLoadOnOpen: true,
   autoLoadOnCategoryChange: true,
+  settingsScreen: DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN,
 };
 
 export function slugifyCategoryId(raw: string): string {
@@ -365,6 +453,8 @@ export function sanitizeNotificationConfig(
         : preset.hex,
       badgeClass: preset.badgeClass,
       description: typeof item.description === 'string' ? item.description.trim().slice(0, 120) : '',
+      active: item.active !== false,
+      defaultEnabled: item.defaultEnabled !== false,
       isBuiltIn: Boolean(item.isBuiltIn || id === 'system'),
     });
   }
@@ -446,6 +536,60 @@ export function sanitizeNotificationConfig(
   const finalTemplates =
     Array.isArray(input?.templates) ? normalizedTemplates : [...DEFAULT_NOTIFICATION_TEMPLATES];
 
+  const rawScreen =
+    input?.settingsScreen && typeof input.settingsScreen === 'object'
+      ? input.settingsScreen
+      : ({} as Partial<AppNotificationSettingsScreenConfig>);
+  const sStr = (val: unknown, fallback: string, maxLen = 180): string =>
+    typeof val === 'string' && val.trim().length > 0 ? val.trim().slice(0, maxLen) : fallback;
+
+  const settingsScreen: AppNotificationSettingsScreenConfig = {
+    inboxScreenTitle: sStr(rawScreen.inboxScreenTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.inboxScreenTitle, 60),
+    settingsScreenTitle: sStr(rawScreen.settingsScreenTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.settingsScreenTitle, 60),
+    statusActiveTitle: sStr(rawScreen.statusActiveTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.statusActiveTitle, 80),
+    statusActiveSubtitle: sStr(rawScreen.statusActiveSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.statusActiveSubtitle),
+    statusGrantedFallbackSubtitle: sStr(rawScreen.statusGrantedFallbackSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.statusGrantedFallbackSubtitle),
+    statusOffTitle: sStr(rawScreen.statusOffTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.statusOffTitle, 80),
+    statusOffSubtitle: sStr(rawScreen.statusOffSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.statusOffSubtitle),
+    masterSectionHeading: sStr(rawScreen.masterSectionHeading, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.masterSectionHeading, 60),
+    masterToggleTitle: sStr(rawScreen.masterToggleTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.masterToggleTitle, 80),
+    masterToggleSubtitle: sStr(rawScreen.masterToggleSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.masterToggleSubtitle),
+    categoriesSectionHeading: sStr(rawScreen.categoriesSectionHeading, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.categoriesSectionHeading, 80),
+    deliverySectionHeading: sStr(rawScreen.deliverySectionHeading, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.deliverySectionHeading, 80),
+    soundTitle: sStr(rawScreen.soundTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.soundTitle, 80),
+    soundSubtitle: sStr(rawScreen.soundSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.soundSubtitle),
+    defaultSoundEnabled:
+      typeof rawScreen.defaultSoundEnabled === 'boolean'
+        ? rawScreen.defaultSoundEnabled
+        : DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.defaultSoundEnabled,
+    vibrationTitle: sStr(rawScreen.vibrationTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.vibrationTitle, 80),
+    vibrationSubtitle: sStr(rawScreen.vibrationSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.vibrationSubtitle),
+    defaultVibrationEnabled:
+      typeof rawScreen.defaultVibrationEnabled === 'boolean'
+        ? rawScreen.defaultVibrationEnabled
+        : DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.defaultVibrationEnabled,
+    quietHoursTitle: sStr(rawScreen.quietHoursTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.quietHoursTitle, 90),
+    quietHoursSubtitle: sStr(rawScreen.quietHoursSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.quietHoursSubtitle),
+    defaultQuietHoursEnabled:
+      typeof rawScreen.defaultQuietHoursEnabled === 'boolean'
+        ? rawScreen.defaultQuietHoursEnabled
+        : DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.defaultQuietHoursEnabled,
+    quietHoursStart: sStr(rawScreen.quietHoursStart, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.quietHoursStart, 10),
+    quietHoursEnd: sStr(rawScreen.quietHoursEnd, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.quietHoursEnd, 10),
+    showTestButtons:
+      typeof rawScreen.showTestButtons === 'boolean'
+        ? rawScreen.showTestButtons
+        : DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.showTestButtons,
+    instantTestButtonLabel: sStr(rawScreen.instantTestButtonLabel, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.instantTestButtonLabel, 90),
+    lockScreenTestButtonLabel: sStr(rawScreen.lockScreenTestButtonLabel, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.lockScreenTestButtonLabel, 110),
+    enablePushBannerTitle: sStr(rawScreen.enablePushBannerTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.enablePushBannerTitle, 80),
+    enablePushBannerSubtitle: sStr(rawScreen.enablePushBannerSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.enablePushBannerSubtitle),
+    emptyAllTitle: sStr(rawScreen.emptyAllTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.emptyAllTitle, 80),
+    emptyAllSubtitle: sStr(rawScreen.emptyAllSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.emptyAllSubtitle, 240),
+    emptyUnreadTitle: sStr(rawScreen.emptyUnreadTitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.emptyUnreadTitle, 80),
+    emptyUnreadSubtitle: sStr(rawScreen.emptyUnreadSubtitle, DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN.emptyUnreadSubtitle, 240),
+  };
+
   return {
     categories: finalCategories,
     templates: finalTemplates,
@@ -454,6 +598,7 @@ export function sanitizeNotificationConfig(
       typeof input?.autoLoadOnCategoryChange === 'boolean'
         ? input.autoLoadOnCategoryChange
         : true,
+    settingsScreen,
     updatedAt: input?.updatedAt || new Date().toISOString(),
   };
 }

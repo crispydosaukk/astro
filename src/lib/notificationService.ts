@@ -13,8 +13,10 @@ import {
 } from 'firebase/firestore';
 
 import {
+  DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN,
   DEFAULT_NOTIFICATION_CATEGORIES,
   sanitizeNotificationConfig,
+  type AppNotificationSettingsScreenConfig,
   type DynamicNotificationCategory,
   type NotificationDeliveryMode,
   type NotificationPriority,
@@ -386,16 +388,31 @@ export async function getAllNotifications(maxItems = 100): Promise<AppNotificati
     .sort((a, b) => b.createdAtMs - a.createdAtMs);
 }
 
-export async function getDynamicNotificationCategories(): Promise<DynamicNotificationCategory[]> {
+export async function getDynamicNotificationAppConfig(): Promise<{
+  categories: DynamicNotificationCategory[];
+  settingsScreen: AppNotificationSettingsScreenConfig;
+}> {
   try {
     const configDoc = await readDoc('app_notifications_config', 'templates_and_categories');
     if (configDoc) {
-      return sanitizeNotificationConfig(configDoc as any).categories;
+      const sanitized = sanitizeNotificationConfig(configDoc as any);
+      return {
+        categories: sanitized.categories,
+        settingsScreen: sanitized.settingsScreen,
+      };
     }
   } catch (err) {
-    console.warn('[notifications] Failed loading dynamic categories:', err);
+    console.warn('[notifications] Failed loading dynamic app notification config:', err);
   }
-  return DEFAULT_NOTIFICATION_CATEGORIES;
+  return {
+    categories: DEFAULT_NOTIFICATION_CATEGORIES,
+    settingsScreen: DEFAULT_APP_NOTIFICATION_SETTINGS_SCREEN,
+  };
+}
+
+export async function getDynamicNotificationCategories(): Promise<DynamicNotificationCategory[]> {
+  const cfg = await getDynamicNotificationAppConfig();
+  return cfg.categories;
 }
 
 export async function getCustomerNotifications(uid?: string, phone?: string): Promise<{
@@ -404,11 +421,12 @@ export async function getCustomerNotifications(uid?: string, phone?: string): Pr
   deletedIds: string[];
   preferences: UserNotificationPreferences;
   categories: DynamicNotificationCategory[];
+  settingsScreen: AppNotificationSettingsScreenConfig;
 }> {
-  const [all, userDoc, categories] = await Promise.all([
+  const [all, userDoc, appConfig] = await Promise.all([
     getAllNotifications(80),
     uid ? readDoc(USERS_COLLECTION, uid) : Promise.resolve(null),
-    getDynamicNotificationCategories(),
+    getDynamicNotificationAppConfig(),
   ]);
 
   const readIds: string[] = Array.isArray(userDoc?.notificationReadIds) ? userDoc.notificationReadIds : [];
@@ -417,6 +435,11 @@ export async function getCustomerNotifications(uid?: string, phone?: string): Pr
 
   const preferences: UserNotificationPreferences = {
     ...DEFAULT_NOTIFICATION_PREFERENCES,
+    sound: appConfig.settingsScreen.defaultSoundEnabled,
+    vibration: appConfig.settingsScreen.defaultVibrationEnabled,
+    quietHoursEnabled: appConfig.settingsScreen.defaultQuietHoursEnabled,
+    quietStart: appConfig.settingsScreen.quietHoursStart,
+    quietEnd: appConfig.settingsScreen.quietHoursEnd,
     ...(userDoc?.notificationPreferences || {}),
   };
 
@@ -436,7 +459,14 @@ export async function getCustomerNotifications(uid?: string, phone?: string): Pr
     });
   });
 
-  return { notifications: filtered, readIds, deletedIds, preferences, categories };
+  return {
+    notifications: filtered,
+    readIds,
+    deletedIds,
+    preferences,
+    categories: appConfig.categories,
+    settingsScreen: appConfig.settingsScreen,
+  };
 }
 
 export async function getAdminNotificationOverview() {

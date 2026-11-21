@@ -76,6 +76,7 @@ export async function GET() {
         templates: config.templates,
         autoLoadOnOpen: config.autoLoadOnOpen,
         autoLoadOnCategoryChange: config.autoLoadOnCategoryChange,
+        settingsScreen: config.settingsScreen,
       },
       { headers: corsHeaders }
     );
@@ -90,6 +91,7 @@ export async function GET() {
         templates: DEFAULT_NOTIFICATION_TEMPLATES_CONFIG.templates,
         autoLoadOnOpen: DEFAULT_NOTIFICATION_TEMPLATES_CONFIG.autoLoadOnOpen,
         autoLoadOnCategoryChange: DEFAULT_NOTIFICATION_TEMPLATES_CONFIG.autoLoadOnCategoryChange,
+        settingsScreen: DEFAULT_NOTIFICATION_TEMPLATES_CONFIG.settingsScreen,
       },
       { status: 500, headers: corsHeaders }
     );
@@ -114,6 +116,10 @@ export async function POST(request: NextRequest) {
         typeof payload?.autoLoadOnCategoryChange === 'boolean'
           ? payload.autoLoadOnCategoryChange
           : existing.autoLoadOnCategoryChange,
+      settingsScreen:
+        payload?.settingsScreen && typeof payload.settingsScreen === 'object'
+          ? { ...existing.settingsScreen, ...payload.settingsScreen }
+          : existing.settingsScreen,
     };
 
     const saved = await writeNotificationTemplatesConfig(
@@ -123,12 +129,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Notification categories & templates saved successfully',
+        message: 'Notification settings, categories & templates saved successfully',
         config: saved,
         categories: saved.categories,
         templates: saved.templates,
         autoLoadOnOpen: saved.autoLoadOnOpen,
         autoLoadOnCategoryChange: saved.autoLoadOnCategoryChange,
+        settingsScreen: saved.settingsScreen,
       },
       { headers: corsHeaders }
     );
