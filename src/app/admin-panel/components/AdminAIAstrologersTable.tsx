@@ -48,7 +48,7 @@ import {
 import {
   CHATGPT_MALE_VOICES,
   CHATGPT_FEMALE_VOICES,
-} from '@/lib/neuralVoiceEngine';
+} from '@/lib/voicePresets';
 
 export default function AdminAIAstrologersTable() {
   const [astrologers, setAstrologers] = useState<AIAstrologer[]>([]);

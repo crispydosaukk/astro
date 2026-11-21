@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  serverExternalPackages: [],
+  serverExternalPackages: ['firebase-admin', 'nodemailer', 'razorpay'],
   outputFileTracingRoot: __dirname,
   productionBrowserSourceMaps: false, // Disabled to save memory
   experimental: {
