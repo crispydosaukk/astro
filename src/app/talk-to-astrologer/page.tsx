@@ -127,11 +127,19 @@ export default function TalkToAstrologerPage() {
       try {
         const q = query(
           collection(db, 'astrologers'),
-          where('status', 'in', ['approved', 'active', 'probation', 'verified'])
+          where('status', 'in', ['approved', 'active', 'probation', 'verified', 'full_time'])
         );
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
-          const fetchedData = querySnapshot.docs.map((doc: any) => {
+          const activeDocs = querySnapshot.docs.filter((doc: any) => {
+            const d = doc.data() || {};
+            if (d.isSuspended === true || d.isActive === false || d.dashboardDisabled === true) {
+              return false;
+            }
+            if (d.showOnWebsite === false || d.isPublished === false) return false;
+            return true;
+          });
+          const fetchedData = activeDocs.map((doc: any) => {
             const data = doc.data();
             const skillsList = Array.isArray(data.skills)
               ? data.skills

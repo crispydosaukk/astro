@@ -13,7 +13,40 @@ const VALID_APPROVED_STATUSES = [
   'onboarded',
 ];
 
+function checkAccountRestriction(record: any): {
+  blocked: boolean;
+  type?: 'suspended' | 'deactivated';
+  reason?: string;
+} {
+  if (!record) return { blocked: false };
+  const status = String(record.status || '').toLowerCase().trim();
+  if (record.isSuspended === true || status === 'suspended') {
+    return {
+      blocked: true,
+      type: 'suspended',
+      reason: String(record.suspensionReason || '').trim(),
+    };
+  }
+  if (
+    record.isActive === false ||
+    record.dashboardDisabled === true ||
+    status === 'deactivated' ||
+    status === 'inactive' ||
+    status === 'blocked'
+  ) {
+    return {
+      blocked: true,
+      type: 'deactivated',
+      reason: String(record.suspensionReason || '').trim(),
+    };
+  }
+  return { blocked: false };
+}
+
 function isFinallyApproved(record: any): boolean {
+  const restriction = checkAccountRestriction(record);
+  if (restriction.blocked) return false;
+
   const status = String(record.status || '').toLowerCase().trim();
   const appStatus = String(record.applicationStatus || '').toLowerCase().trim();
   const lifecycle = String(record.lifecycleStatus || '').toLowerCase().trim();
@@ -99,6 +132,29 @@ export async function POST(req: NextRequest) {
           error: 'You are not a registered astrologer. Please submit an application or contact admin.',
         },
         { status: 404 }
+      );
+    }
+
+    // 3b. Block suspended or deactivated astrologers immediately
+    const restriction = checkAccountRestriction(foundRecord);
+    if (restriction.blocked) {
+      const isSuspended = restriction.type === 'suspended';
+      return NextResponse.json(
+        {
+          success: false,
+          registered: true,
+          approved: false,
+          suspended: isSuspended,
+          deactivated: !isSuspended,
+          status: isSuspended ? 'suspended' : 'deactivated',
+          reason: restriction.reason || '',
+          error: isSuspended
+            ? `Your astrologer account has been suspended by the administrator.${
+                restriction.reason ? ` Reason: ${restriction.reason}` : ''
+              } Your Astrologer Dashboard access is disabled. Please contact admin support.`
+            : 'Your astrologer account has been deactivated by the administrator. Your Astrologer Dashboard access is currently disabled. Please contact admin support to reactivate.',
+        },
+        { status: 403 }
       );
     }
 

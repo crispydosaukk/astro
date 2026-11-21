@@ -91,12 +91,22 @@ export default function FeaturedAstrologers() {
       try {
         const q = query(
           collection(db, 'astrologers'),
-          where('status', 'in', ['approved', 'active', 'probation', 'verified']),
-          limit(8)
+          where('status', 'in', ['approved', 'active', 'probation', 'verified', 'full_time']),
+          limit(15)
         );
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
-          const fetchedData = querySnapshot.docs.map((docSnap) => {
+          const visibleDocs = querySnapshot.docs
+            .filter((docSnap) => {
+              const d = docSnap.data() || {};
+              if (d.isSuspended === true || d.isActive === false || d.dashboardDisabled === true) {
+                return false;
+              }
+              if (d.showOnWebsite === false || d.isPublished === false) return false;
+              return true;
+            })
+            .slice(0, 8);
+          const fetchedData = visibleDocs.map((docSnap) => {
             const data = docSnap.data();
             const skillsList = Array.isArray(data.skills)
               ? data.skills

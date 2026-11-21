@@ -113,6 +113,37 @@ export async function POST(req: NextRequest) {
       } catch (e) {}
     }
 
+    // 2b. Strictly block suspended or deactivated accounts from logging in
+    if (profileData) {
+      const pStatus = String(profileData.status || '').toLowerCase().trim();
+      const isSuspended = Boolean(profileData.isSuspended || pStatus === 'suspended');
+      const isDeactivated = Boolean(
+        profileData.isActive === false ||
+          profileData.dashboardDisabled === true ||
+          pStatus === 'deactivated' ||
+          pStatus === 'inactive' ||
+          pStatus === 'blocked'
+      );
+
+      if (isSuspended || isDeactivated) {
+        return NextResponse.json(
+          {
+            success: false,
+            suspended: isSuspended,
+            deactivated: !isSuspended,
+            status: isSuspended ? 'suspended' : 'deactivated',
+            reason: profileData.suspensionReason || '',
+            error: isSuspended
+              ? `Your astrologer account has been suspended by the administrator.${
+                  profileData.suspensionReason ? ` Reason: ${profileData.suspensionReason}` : ''
+                } Dashboard access is disabled.`
+              : 'Your astrologer account is currently deactivated by the administrator. Dashboard access is disabled.',
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // 3. Create Custom Firebase Auth Token
     const uid = targetAstrologerId || `ast_phone_${last10}`;
     let customToken = '';
@@ -126,14 +157,17 @@ export async function POST(req: NextRequest) {
       console.warn('Custom token creation warning:', tokenError);
     }
 
-    // 4. Ensure doc exists in 'astrologers' collection so dashboard layout passes role check
+    // 4. Ensure doc exists in 'astrologers' collection while preserving existing status
+    const preservedStatus = profileData?.status || 'approved';
     const astrologerDoc = {
       id: uid,
       name: profileData?.name || 'Verified Astrologer',
       phone: formattedPhone,
       email: profileData?.email || '',
-      status: 'approved',
+      status: preservedStatus,
       isVerified: true,
+      isActive: profileData?.isActive !== undefined ? Boolean(profileData.isActive) : true,
+      isSuspended: false,
       lastLoginAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -156,7 +190,7 @@ export async function POST(req: NextRequest) {
         name: profileData?.name || 'Verified Astrologer',
         phone: formattedPhone,
         email: profileData?.email || '',
-        status: 'approved',
+        status: preservedStatus,
       },
     });
   } catch (err: any) {

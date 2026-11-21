@@ -10,6 +10,28 @@ export async function POST(req: Request) {
     }
 
     const consultationRef = adminDb.collection('consultations').doc(consultationId);
+    const consultSnap = await consultationRef.get();
+    const consultData = consultSnap.exists ? consultSnap.data() : null;
+
+    if (consultData?.astrologerId) {
+      const astSnap = await adminDb.collection('astrologers').doc(String(consultData.astrologerId)).get();
+      if (astSnap.exists) {
+        const ast = astSnap.data() || {};
+        const astStatus = String(ast.status || '').toLowerCase();
+        if (
+          ast.isSuspended === true ||
+          ast.isActive === false ||
+          ast.dashboardDisabled === true ||
+          astStatus === 'suspended' ||
+          astStatus === 'deactivated'
+        ) {
+          return NextResponse.json(
+            { error: 'Your astrologer account is suspended or deactivated. You cannot accept calls.' },
+            { status: 403 }
+          );
+        }
+      }
+    }
 
     // Update consultation status to active
     await consultationRef.update({

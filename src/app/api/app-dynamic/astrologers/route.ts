@@ -40,6 +40,26 @@ function capitalizeWords(str: string): string {
     .trim();
 }
 
+const PUBLIC_ALLOWED_STATUSES = [
+  'approved',
+  'active',
+  'probation',
+  'verified',
+  'full_time',
+  'full-time active',
+];
+
+function isPubliclyVisibleAstrologer(d: any): boolean {
+  if (!d || typeof d !== 'object') return false;
+  const status = String(d.status || '').toLowerCase().trim();
+  if (!PUBLIC_ALLOWED_STATUSES.includes(status)) return false;
+  if (d.isSuspended === true) return false;
+  if (d.isActive === false) return false;
+  if (d.dashboardDisabled === true) return false;
+  if (d.showOnWebsite === false || d.isPublished === false) return false;
+  return true;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
@@ -49,14 +69,7 @@ export async function GET(req: NextRequest) {
     let dbRealAstrologers: any[] = [];
     try {
       if (adminDb && typeof adminDb.collection === 'function') {
-        let snap = await adminDb
-          .collection('astrologers')
-          .where('status', 'in', ['approved', 'active', 'probation', 'verified'])
-          .get();
-
-        if (snap.empty) {
-          snap = await adminDb.collection('astrologers').get();
-        }
+        const snap = await adminDb.collection('astrologers').get();
 
         if (!snap.empty) {
           dbRealAstrologers = snap.docs
@@ -64,7 +77,7 @@ export async function GET(req: NextRequest) {
               id: doc.id,
               ...doc.data(),
             }))
-            .filter((d: any) => ['approved', 'active', 'probation', 'verified'].includes(d.status));
+            .filter(isPubliclyVisibleAstrologer);
         }
       }
     } catch (adminErr: any) {
@@ -75,8 +88,8 @@ export async function GET(req: NextRequest) {
     if (dbRealAstrologers.length === 0) {
       try {
         const restRes = await fetch(
-          'https://firestore.googleapis.com/v1/projects/astroparihar-85e2d/databases/(default)/documents/astrologers',
-          { next: { revalidate: 10 } }
+          'https://firestore.googleapis.com/v1/projects/astroparihar-85e2d/databases/(default)/documents/astrologers?pageSize=100',
+          { cache: 'no-store' }
         );
         if (restRes.ok) {
           const restData = await restRes.json();
@@ -91,7 +104,7 @@ export async function GET(req: NextRequest) {
                 }
                 return parsed;
               })
-              .filter((d: any) => ['approved', 'active', 'probation', 'verified'].includes(d.status));
+              .filter(isPubliclyVisibleAstrologer);
           }
         }
       } catch (restErr: any) {
@@ -99,56 +112,75 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Format real human astrologers strictly matching website schema
-    const formattedDbReal = dbRealAstrologers.map((r) => {
-      const skillsList = Array.isArray(r.skills)
-        ? r.skills
-        : typeof r.skills === 'string'
-        ? r.skills.split(',').map((s: string) => s.trim())
-        : Array.isArray(r.specialisations)
-        ? r.specialisations
-        : Array.isArray(r.specialties)
-        ? r.specialties
-        : [r.speciality || r.specialization || 'Vedic Astrology'];
+    // Format real human astrologers strictly matching website & app schema
+    const formattedDbReal = dbRealAstrologers
+      .map((r) => {
+        const skillsList = Array.isArray(r.skills)
+          ? r.skills
+          : typeof r.skills === 'string'
+          ? r.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
+          : Array.isArray(r.specialisations)
+          ? r.specialisations
+          : Array.isArray(r.specialties)
+          ? r.specialties
+          : [r.speciality || r.specialization || 'Vedic Astrology'];
 
-      const langsList = Array.isArray(r.languages)
-        ? r.languages
-        : typeof r.languages === 'string'
-        ? r.languages.split(',').map((l: string) => l.trim())
-        : ['English', 'Hindi'];
+        const langsList = Array.isArray(r.languages)
+          ? r.languages
+          : typeof r.languages === 'string'
+          ? r.languages.split(',').map((l: string) => l.trim()).filter(Boolean)
+          : ['English', 'Hindi'];
 
-      const expNum =
-        Number(r.experienceYears) ||
-        (typeof r.experience === 'string' ? Number(r.experience.replace(/[^0-9]/g, '')) : Number(r.experience)) ||
-        12;
+        const expNum =
+          Number(r.experienceYears) ||
+          (typeof r.experience === 'string'
+            ? Number(r.experience.replace(/[^0-9]/g, ''))
+            : Number(r.experience)) ||
+          10;
 
-      const mainSpecialty = skillsList[0] || 'Vedic Astrology';
-      const cleanName = capitalizeWords(r.name || 'Astrologer');
+        const mainSpecialty = skillsList.join(', ') || 'Vedic Astrology';
+        const cleanName = capitalizeWords(r.name || 'Astrologer');
+        const reviewsNum = Number(r.reviewsCount || r.reviews) || 0;
+        const consultationsNum = Number(r.totalConsultations || r.consultations) || reviewsNum;
 
-      return {
-        id: r.id,
-        name: cleanName,
-        specialty: mainSpecialty,
-        title: r.title || `${mainSpecialty} • ${expNum}+ Yrs`,
-        experience: `${expNum}+ Yrs`,
-        rating: Number(r.rating) || 4.95,
-        reviews: `${Math.round((Number(r.totalConsultations || r.reviewsCount || r.reviews) || 980) / 100) / 10}k`,
-        consultations: `${Number(r.totalConsultations || r.reviewsCount || r.reviews) || 980}+`,
-        price: Math.max(10, Number(r.pricePerMinute || r.amount || r.price) || 25),
-        isOnline: r.isOnline !== undefined ? Boolean(r.isOnline) : true,
-        isAi: false,
-        imageUrl:
-          r.profileImageUrl ||
-          r.photoURL ||
-          r.avatar ||
-          r.imageUrl ||
-          r.profilePic ||
-          `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=f59e0b&color=fff&size=400`,
-        languages: langsList.map((l: string) => capitalizeWords(l)).join(', '),
-        category: r.category || 'Vedic',
-        bio: r.bio || r.about || `${cleanName} is a verified Vedic Astrologer providing personalized astrological guidance.`,
-      };
-    });
+        return {
+          id: r.id,
+          name: cleanName,
+          specialty: mainSpecialty,
+          title: r.title || `${skillsList[0] || 'Vedic Astrology'} • ${expNum}+ Yrs`,
+          experience: `${expNum}+ Yrs`,
+          rating: Number(r.rating) || 4.9,
+          reviews: String(reviewsNum),
+          consultations: String(consultationsNum),
+          price: Math.max(10, Number(r.pricePerMinute || r.pricePerMin || r.amount || r.price) || 25),
+          isOnline: Boolean(r.isOnline),
+          isActive: true,
+          isSuspended: false,
+          isFeatured: Boolean(r.isFeatured),
+          isAi: false,
+          imageUrl:
+            r.profileImageUrl ||
+            r.photoURL ||
+            r.avatar ||
+            r.imageUrl ||
+            r.profilePic ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=713B32&color=fff&size=400`,
+          languages: langsList.map((l: string) => capitalizeWords(l)).join(', '),
+          category: r.category || 'Vedic',
+          bio: r.bio || r.about || `${cleanName} is a verified Vedic Astrologer providing personalized astrological guidance.`,
+          about: r.about || r.bio || '',
+          education: r.education || '',
+          certifications: Array.isArray(r.certifications) ? r.certifications : [],
+          learningSource: r.learningSource || '',
+          dailyHours: r.dailyHours || '',
+          city: r.city || r.location || '',
+          badge: r.badge || (String(r.status || '').toLowerCase() === 'probation' ? 'PROBATION' : 'VERIFIED'),
+          status: r.status || 'approved',
+          showOnWebsite: true,
+          isPublished: true,
+        };
+      })
+      .sort((a, b) => Number(b.isOnline) - Number(a.isOnline));
 
     // Pure Real Astrologers list: 100% dynamic from Firestore. ZERO hardcoded mock data!
     const realAstrologers = formattedDbReal;
@@ -174,7 +206,7 @@ export async function GET(req: NextRequest) {
     }));
 
     // Depending on requested type, serve STRICTLY real or strictly AI
-    let selectedList = realAstrologers;
+    let selectedList: any[] = realAstrologers;
     if (requestedType === 'ai') {
       selectedList = formattedAi;
     } else if (requestedType === 'real') {

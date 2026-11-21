@@ -92,7 +92,7 @@ export default function AstrologerAuthScreen() {
 
   // Status error feedback
   const [errorState, setErrorState] = useState<{
-    type: 'not_registered' | 'pending_approval' | 'general' | null;
+    type: 'not_registered' | 'pending_approval' | 'suspended' | 'general' | null;
     title: string;
     message: string;
     statusBadge?: string;
@@ -241,6 +241,19 @@ export default function AstrologerAuthScreen() {
           return;
         }
 
+        if (data.suspended === true || data.deactivated === true) {
+          setErrorState({
+            type: 'suspended',
+            title: data.suspended ? 'Account Suspended by Admin' : 'Account Deactivated by Admin',
+            statusBadge: data.suspended ? 'Suspended' : 'Deactivated',
+            message:
+              data.error ||
+              'Your astrologer dashboard access is currently disabled by the administrator. Please contact admin support.',
+          });
+          setIsLoading(false);
+          return;
+        }
+
         if (data.registered === true && data.approved === false) {
           setErrorState({
             type: 'pending_approval',
@@ -306,6 +319,19 @@ export default function AstrologerAuthScreen() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (data.suspended || data.deactivated) {
+          setStep('phone');
+          setErrorState({
+            type: 'suspended',
+            title: data.suspended ? 'Account Suspended by Admin' : 'Account Deactivated by Admin',
+            statusBadge: data.suspended ? 'Suspended' : 'Deactivated',
+            message:
+              data.error ||
+              'Your astrologer dashboard access is disabled by the administrator.',
+          });
+          setIsLoading(false);
+          return;
+        }
         throw new Error(data.error || 'Invalid verification code. Please check and try again.');
       }
 
@@ -518,6 +544,20 @@ export default function AstrologerAuthScreen() {
                       <a
                         href="mailto:astropariharuk@gmail.com?subject=Astrologer%20Registration%20Inquiry"
                         className="py-2 px-3 text-xs font-bold text-center rounded-xl bg-white border border-red-200 text-red-800 hover:bg-red-100/50 transition-all flex items-center justify-center gap-1"
+                      >
+                        <Mail size={12} /> Contact Admin
+                      </a>
+                    </div>
+                  )}
+
+                  {errorState.type === 'suspended' && (
+                    <div className="pt-2 border-t border-red-200/60 flex items-center justify-between gap-2">
+                      <span className="text-2xs text-red-800 font-semibold">
+                        Dashboard access disabled
+                      </span>
+                      <a
+                        href="mailto:astropariharuk@gmail.com?subject=Astrologer%20Account%20Suspension%20Inquiry"
+                        className="py-1.5 px-2.5 text-xs font-bold rounded-lg bg-red-100 hover:bg-red-200 text-red-900 transition-colors inline-flex items-center gap-1"
                       >
                         <Mail size={12} /> Contact Admin
                       </a>
