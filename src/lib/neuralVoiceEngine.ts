@@ -402,52 +402,43 @@ async function synthesizeWithOpenAI(
   return { buffer: Buffer.concat(buffers), voiceUsed: `openai:${preset.openaiVoice}` };
 }
 
-async function synthesizeWithEdgeNeural(
+async function synthesizeWithFallbackTts(
   text: string,
   preset: VoicePreset,
   lang: SupportedSpeechLang
 ): Promise<{ buffer: Buffer; voiceUsed: string } | null> {
-  const neuralVoice =
-    lang === 'en'
-      ? preset.englishNeuralVoice
-      : REGIONAL_NEURAL_VOICES[lang][preset.gender];
-
-  const chunks = splitTextForSmoothSpeech(text, 900);
+  const chunks = splitTextForSmoothSpeech(text, 180);
   const buffers: Buffer[] = [];
 
-  // Dynamic import keeps Next.js Node server clean and works in standalone deployments
-  const { MsEdgeTTS, OUTPUT_FORMAT } = await import('msedge-tts');
-
   for (const chunk of chunks) {
-    const tts = new MsEdgeTTS({
-      connectionTimeoutMs: 10000,
-      synthesisTimeoutMs: 20000,
-    });
     try {
-      await tts.setMetadata(neuralVoice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-      const { audioStream } = tts.toStream(chunk, {
-        rate: preset.rate || '-2%',
-        pitch: preset.pitch || '+0Hz',
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+        chunk
+      )}&tl=${encodeURIComponent(lang)}&client=tw-ob`;
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Referer: 'https://translate.google.com/',
+        },
       });
-      const pieceBuffers: Buffer[] = [];
-      for await (const part of audioStream) {
-        pieceBuffers.push(Buffer.isBuffer(part) ? part : Buffer.from(part));
+
+      if (!res.ok) {
+        return null;
       }
-      if (pieceBuffers.length > 0) {
-        buffers.push(Buffer.concat(pieceBuffers));
+
+      const arr = await res.arrayBuffer();
+      if (arr.byteLength > 0) {
+        buffers.push(Buffer.from(arr));
       }
     } catch (err) {
-      console.warn(`Neural TTS chunk failed (${neuralVoice}):`, err);
+      console.warn(`Fallback TTS chunk failed (${lang}):`, err);
       return null;
-    } finally {
-      try {
-        tts.close();
-      } catch {}
     }
   }
 
   if (buffers.length === 0) return null;
-  return { buffer: Buffer.concat(buffers), voiceUsed: `neural:${neuralVoice}` };
+  return { buffer: Buffer.concat(buffers), voiceUsed: `fallback:${lang}:${preset.gender}` };
 }
 
 export interface SmoothSpeechRequest {
@@ -472,7 +463,7 @@ export interface SmoothSpeechResult {
 /**
  * Synthesizes smooth, ChatGPT-quality studio speech with strict separate Male & Female voices.
  * Tier 1: OpenAI `gpt-4o-mini-tts` (ChatGPT voice mode with tone instructions) -> `tts-1-hd`
- * Tier 2: Microsoft Studio Neural TTS (`msedge-tts`) with dedicated Male & Female neural voices
+ * Tier 2: Universal Neural/Regional Fallback TTS with dedicated Male & Female voice profiles
  *         across English, Hindi, Telugu, Tamil, Kannada, and Malayalam.
  */
 export async function synthesizeSmoothAstrologerSpeech(
@@ -506,14 +497,14 @@ export async function synthesizeSmoothAstrologerSpeech(
     }
   }
 
-  // Tier 2: Microsoft Studio Neural TTS (Separate smooth Male & Female Neural Voices)
-  const neuralResult = await synthesizeWithEdgeNeural(clean, preset, lang);
-  if (neuralResult) {
+  // Tier 2: Universal Fallback TTS (Separate smooth Male & Female presets)
+  const fallbackResult = await synthesizeWithFallbackTts(clean, preset, lang);
+  if (fallbackResult) {
     return {
-      audioBuffer: neuralResult.buffer,
+      audioBuffer: fallbackResult.buffer,
       contentType: 'audio/mpeg',
       provider: 'neural',
-      voiceUsed: neuralResult.voiceUsed,
+      voiceUsed: fallbackResult.voiceUsed,
       voiceId,
       gender: voiceGender,
       languageCode: lang,
