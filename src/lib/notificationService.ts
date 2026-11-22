@@ -611,17 +611,23 @@ async function dispatchFcmPush(
     imageUrl?: string;
     priority: NotificationPriority;
   }
-): Promise<{ delivered: number; failed: number; errorDetail?: string }> {
+): Promise<{ delivered: number; failed: number; invalidTokens: string[]; errorDetail?: string }> {
   if (tokens.length === 0) {
-    return { delivered: 0, failed: 0 };
+    return { delivered: 0, failed: 0, invalidTokens: [] };
   }
   if (!hasValidAdminCreds()) {
-    return { delivered: 0, failed: tokens.length, errorDetail: 'Firebase Admin credentials missing or invalid in server environment' };
+    return {
+      delivered: 0,
+      failed: tokens.length,
+      invalidTokens: [],
+      errorDetail: 'Firebase Admin credentials missing or invalid in server environment',
+    };
   }
 
   let delivered = 0;
   let failed = 0;
   let errorDetail: string | undefined;
+  const invalidTokens: string[] = [];
 
   // Default full-color AstroParihar emblem shown on lockscreen notifications when no custom banner image is set
   const resolvedImageUrl =
@@ -679,10 +685,16 @@ async function dispatchFcmPush(
             },
           },
         });
-        return { success: true };
+        return { success: true, token };
       } catch (err: any) {
         console.warn('[notifications] FCM send error for token:', err);
-        return { success: false, error: err?.message || String(err) };
+        const code = String(err?.code || '');
+        const msg = String(err?.message || err || '');
+        const isUnregistered =
+          code.includes('registration-token-not-registered') ||
+          code.includes('invalid-registration-token') ||
+          /NotRegistered|Requested entity was not found|UNREGISTERED/i.test(msg);
+        return { success: false, token, isUnregistered, error: msg };
       }
     })
   );
@@ -692,13 +704,16 @@ async function dispatchFcmPush(
       delivered += 1;
     } else {
       failed += 1;
+      if (r.isUnregistered && r.token) {
+        invalidTokens.push(r.token);
+      }
       if (!errorDetail && r.error) {
         errorDetail = r.error;
       }
     }
   });
 
-  return { delivered, failed, errorDetail };
+  return { delivered, failed, invalidTokens, errorDetail };
 }
 
 export async function sendDynamicNotification(
@@ -849,7 +864,12 @@ export async function sendDynamicNotification(
           imageUrl: notification.imageUrl,
           priority,
         })
-      : Promise.resolve({ delivered: 0, failed: 0, errorDetail: undefined as string | undefined }),
+      : Promise.resolve({
+          delivered: 0,
+          failed: 0,
+          invalidTokens: [] as string[],
+          errorDetail: undefined as string | undefined,
+        }),
   ]);
 
   // Deactivate stale Expo tokens
@@ -858,6 +878,22 @@ export async function sendDynamicNotification(
     for (const t of tokenDocs) {
       if (t.expoPushToken && invalidSet.has(t.expoPushToken)) {
         await writeDoc(PUSH_TOKENS_COLLECTION, t.id, { active: false }, true).catch(() => {});
+      }
+    }
+  }
+
+  // Deactivate stale / uninstalled FCM tokens so NotRegistered devices stop failing repeatedly
+  if (fcmRes.invalidTokens.length > 0) {
+    const invalidFcmSet = new Set(fcmRes.invalidTokens);
+    for (const t of tokenDocs) {
+      if (t.nativeToken && invalidFcmSet.has(t.nativeToken)) {
+        await writeDoc(PUSH_TOKENS_COLLECTION, t.id, { active: false, staleReason: 'NotRegistered' }, true).catch(() => {});
+      }
+    }
+    for (const u of userDocs) {
+      const uid = String(u.id || u.uid || '');
+      if (uid && u.fcmToken && invalidFcmSet.has(u.fcmToken)) {
+        await writeDoc(USERS_COLLECTION, uid, { fcmToken: '' }, true).catch(() => {});
       }
     }
   }
