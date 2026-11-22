@@ -32,9 +32,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, ...overview }, { headers: corsHeaders });
     }
 
-    const uid = searchParams.get('uid') || undefined;
-    const phone = searchParams.get('phone') || undefined;
+    const uid = (searchParams.get('uid') || '').trim() || undefined;
+    const phone = (searchParams.get('phone') || '').trim() || undefined;
     const result = await getCustomerNotifications(uid, phone);
+
+    // Guests (unauthenticated users with neither uid nor phone) must never receive user notifications
+    if (!uid && !phone) {
+      return NextResponse.json(
+        {
+          success: true,
+          ...result,
+          notifications: [],
+          readIds: [],
+          deletedIds: [],
+          requiresAuth: true,
+        },
+        { headers: corsHeaders }
+      );
+    }
+
     return NextResponse.json({ success: true, ...result }, { headers: corsHeaders });
   } catch (error: any) {
     console.error('[API /notifications GET] error:', error);

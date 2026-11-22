@@ -24,12 +24,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const uid = typeof body?.uid === 'string' ? body.uid.trim() : '';
+    const phone = typeof body?.phone === 'string' ? body.phone.trim() : '';
+
+    if (!uid && !phone) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required (uid or phone) to register push notifications' },
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
     const platform =
       body?.platform === 'android' ? 'android' : body?.platform === 'web' ? 'web' : 'ios';
 
     const record = await registerDevicePushToken({
-      uid: body?.uid ? String(body.uid) : undefined,
-      phone: body?.phone ? String(body.phone) : undefined,
+      uid: uid || undefined,
+      phone: phone || undefined,
       name: body?.name ? String(body.name) : undefined,
       expoPushToken: expoPushToken || undefined,
       nativeToken: nativeToken || undefined,
