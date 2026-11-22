@@ -536,10 +536,10 @@ async function dispatchExpoPush(
   let failed = 0;
   const invalidTokens: string[] = [];
 
-  const resolvedImageUrl =
+  const customImageUrl =
     payload.imageUrl && payload.imageUrl.trim().length > 0
       ? payload.imageUrl.trim()
-      : 'https://astroparihar.com/assets/images/notification_logo.png';
+      : undefined;
 
   for (let i = 0; i < tokens.length; i += 100) {
     const chunk = tokens.slice(i, i + 100);
@@ -551,8 +551,9 @@ async function dispatchExpoPush(
       body: payload.body,
       priority: payload.priority === 'high' ? 'high' : 'default',
       interruptionLevel: payload.priority === 'high' ? 'time-sensitive' : 'active',
-      mutableContent: true,
-      richContent: { image: resolvedImageUrl },
+      ...(customImageUrl
+        ? { mutableContent: true, richContent: { image: customImageUrl } }
+        : {}),
       channelId: 'astroparihar_default',
       data: {
         notificationId: payload.id,
@@ -629,11 +630,11 @@ async function dispatchFcmPush(
   let errorDetail: string | undefined;
   const invalidTokens: string[] = [];
 
-  // Default full-color AstroParihar emblem shown on lockscreen notifications when no custom banner image is set
-  const resolvedImageUrl =
+  // Only attach a right-side/expanded image when the admin explicitly provides a custom Banner Image URL
+  const customImageUrl =
     payload.imageUrl && payload.imageUrl.trim().length > 0
       ? payload.imageUrl.trim()
-      : 'https://astroparihar.com/assets/images/notification_logo.png';
+      : undefined;
 
   // Dispatch directly via adminMessaging.send() in parallel to avoid HTTP/2 multicast proxy issues
   const results = await Promise.all(
@@ -644,7 +645,7 @@ async function dispatchFcmPush(
           notification: {
             title: payload.title,
             body: payload.subtitle ? `${payload.subtitle} — ${payload.body}` : payload.body,
-            imageUrl: resolvedImageUrl,
+            ...(customImageUrl ? { imageUrl: customImageUrl } : {}),
           },
           data: {
             notificationId: payload.id,
@@ -665,7 +666,7 @@ async function dispatchFcmPush(
               visibility: 'public',
               defaultSound: true,
               defaultVibrateTimings: true,
-              imageUrl: resolvedImageUrl,
+              ...(customImageUrl ? { imageUrl: customImageUrl } : {}),
             },
           },
           apns: {
