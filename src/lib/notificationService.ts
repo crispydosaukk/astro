@@ -138,6 +138,15 @@ function isExpoToken(token?: string): boolean {
   return token.startsWith('ExponentPushToken[') || token.startsWith('ExpoPushToken[');
 }
 
+function isLikelyFcmToken(token?: string): boolean {
+  if (!token || typeof token !== 'string') return false;
+  const trimmed = token.trim();
+  if (isExpoToken(trimmed)) return false;
+  // Exclude raw 64-char hex APNs device tokens; Firebase FCM registration tokens are longer (~140+ chars)
+  if (/^[0-9a-fA-F]{64}$/.test(trimmed)) return false;
+  return trimmed.length >= 80;
+}
+
 function sanitizeDocId(raw: string): string {
   return raw.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
 }
@@ -817,7 +826,7 @@ export async function sendDynamicNotification(
 
     if (isExpoToken(t.expoPushToken)) {
       expoTokens.add(t.expoPushToken);
-    } else if (t.nativeToken && typeof t.nativeToken === 'string' && t.platform === 'android') {
+    } else if (isLikelyFcmToken(t.nativeToken) && (t.platform === 'android' || t.platform === 'ios')) {
       fcmTokens.add(t.nativeToken);
     }
   });
@@ -829,7 +838,7 @@ export async function sendDynamicNotification(
 
     if (isExpoToken(u.expoPushToken)) {
       expoTokens.add(u.expoPushToken);
-    } else if (u.fcmToken && typeof u.fcmToken === 'string' && u.pushPlatform === 'android') {
+    } else if (isLikelyFcmToken(u.fcmToken) && (u.pushPlatform === 'android' || u.pushPlatform === 'ios')) {
       fcmTokens.add(u.fcmToken);
     }
   });
