@@ -5,12 +5,12 @@ import {
   SUPPORT_LEGAL_DOC_ID,
   AppSupportLegalContent,
 } from '@/lib/appDynamicContent';
+import { NO_CACHE_CORS_HEADERS, stripUndefinedDeep } from '@/lib/noCacheHeaders';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const corsHeaders = NO_CACHE_CORS_HEADERS;
 
 const COLLECTION_NAME = 'app_dynamic_content';
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const merged = mergeSupportLegal(content);
+    const merged = stripUndefinedDeep(mergeSupportLegal(content));
     merged.updatedAt = new Date().toISOString();
 
     await adminDb

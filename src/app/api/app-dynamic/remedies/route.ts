@@ -11,12 +11,12 @@ import {
   ASTROPARIHAR_MANTRAS,
   generate48DayRemedyProtocol,
 } from '@/lib/vedicRemediesEngine';
+import { NO_CACHE_CORS_HEADERS, stripUndefinedDeep } from '@/lib/noCacheHeaders';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const corsHeaders = NO_CACHE_CORS_HEADERS;
 
 const COLLECTION_NAME = 'app_dynamic_content';
 
@@ -86,13 +86,14 @@ export async function POST(req: NextRequest) {
           updatedAt: new Date().toISOString(),
         });
 
+    const cleanCatalog = stripUndefinedDeep(nextCatalog);
     await adminDb
       .collection(COLLECTION_NAME)
       .doc(REMEDIES_CATALOG_DOC_ID)
       .set(
         {
-          catalog: nextCatalog,
-          updatedAt: nextCatalog.updatedAt,
+          catalog: cleanCatalog,
+          updatedAt: cleanCatalog.updatedAt,
         },
         { merge: true }
       );

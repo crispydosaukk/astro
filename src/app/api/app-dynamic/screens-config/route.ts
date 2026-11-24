@@ -7,12 +7,12 @@ import {
   DEFAULT_APP_SCREENS_CMS,
   mergeAppScreensCms,
 } from '@/lib/appScreensCmsConfig';
+import { NO_CACHE_CORS_HEADERS, stripUndefinedDeep } from '@/lib/noCacheHeaders';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const corsHeaders = NO_CACHE_CORS_HEADERS;
 
 const COLLECTION_NAME = 'app_dynamic_content';
 
@@ -95,10 +95,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const cleanConfig = stripUndefinedDeep(nextConfig);
     await docRef.set(
       {
-        config: nextConfig,
-        updatedAt: nextConfig.updatedAt,
+        config: cleanConfig,
+        updatedAt: cleanConfig.updatedAt,
       },
       { merge: true }
     );

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
+import { NO_CACHE_CORS_HEADERS } from '@/lib/noCacheHeaders';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const corsHeaders = NO_CACHE_CORS_HEADERS;
 
 const SESSIONS_COLLECTION = 'user_sessions';
 

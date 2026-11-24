@@ -90,10 +90,25 @@ export const adminAuth = new Proxy({} as any, {
   },
 });
 
+let firestoreConfigured = false;
+
+function getConfiguredFirestore() {
+  initFirebaseAdmin();
+  const inst = getFirestore();
+  if (!firestoreConfigured) {
+    firestoreConfigured = true;
+    try {
+      inst.settings({ ignoreUndefinedProperties: true });
+    } catch {
+      // Already initialized with settings in this process
+    }
+  }
+  return inst;
+}
+
 export const adminDb = new Proxy({} as any, {
   get: (target, prop) => {
-    initFirebaseAdmin();
-    const inst = getFirestore();
+    const inst = getConfiguredFirestore();
     const val = (inst as any)[prop];
     return typeof val === 'function' ? val.bind(inst) : val;
   },

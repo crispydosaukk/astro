@@ -66,12 +66,19 @@ export default function AdminAppProfileEditor() {
   const fetchConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/app-dynamic/profile');
+      const res = await fetch(`/api/app-dynamic/profile?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
       const data = await res.json();
       if (data.success && data.config) {
         setConfig({ ...DEFAULT_APP_PROFILE_CONFIG, ...data.config });
         if (data.config.sections?.[0]?.id) {
-          setActiveSectionId(data.config.sections[0].id);
+          setActiveSectionId((curr) =>
+            data.config.sections.some((s: AppProfileSection) => s.id === curr)
+              ? curr
+              : data.config.sections[0].id
+          );
         }
       }
     } catch (err) {
@@ -81,17 +88,22 @@ export default function AdminAppProfileEditor() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (overrideConfig?: AppProfileConfig) => {
+    const payloadConfig = overrideConfig ?? config;
     setSaving(true);
     try {
-      const res = await fetch('/api/app-dynamic/profile', {
+      const res = await fetch(`/api/app-dynamic/profile?_t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config }),
+        body: JSON.stringify({ config: payloadConfig }),
       });
       const data = await res.json();
-      if (data.success) {
-        toast.success('All Profile screen settings & texts saved and live in mobile app!');
+      if (res.ok && data.success) {
+        if (data.config) {
+          setConfig({ ...DEFAULT_APP_PROFILE_CONFIG, ...data.config });
+        }
+        toast.success('All Profile screen settings & menus saved live to mobile app!');
       } else {
         toast.error(data.error || 'Failed to save configuration');
       }
@@ -119,28 +131,26 @@ export default function AdminAppProfileEditor() {
       active: true,
       items: [],
     };
-    setConfig((prev) => ({
-      ...prev,
-      sections: [...prev.sections, newSec],
-    }));
+    const nextConfig: AppProfileConfig = {
+      ...config,
+      sections: [...config.sections, newSec],
+    };
+    setConfig(nextConfig);
     setActiveSectionId(newSec.id);
-    toast.success('New section added. You can now add menu items and configure its title.');
+    handleSave(nextConfig);
   };
 
   const handleDeleteSection = (secId: string) => {
     if (confirm('Are you sure you want to delete this section and all its menu items?')) {
-      setConfig((prev) => {
-        const remaining = prev.sections.filter((s) => s.id !== secId);
-        return {
-          ...prev,
-          sections: remaining.map((s, idx) => ({ ...s, order: idx + 1 })),
-        };
-      });
-      const remainingSecs = config.sections.filter((s) => s.id !== secId);
-      if (remainingSecs.length > 0) {
-        setActiveSectionId(remainingSecs[0].id);
+      const remaining = config.sections
+        .filter((s) => s.id !== secId)
+        .map((s, idx) => ({ ...s, order: idx + 1 }));
+      const nextConfig: AppProfileConfig = { ...config, sections: remaining };
+      setConfig(nextConfig);
+      if (remaining.length > 0) {
+        setActiveSectionId(remaining[0].id);
       }
-      toast.success('Section deleted');
+      handleSave(nextConfig);
     }
   };
 
@@ -150,19 +160,21 @@ export default function AdminAppProfileEditor() {
     const newSections = [...config.sections];
     const [moved] = newSections.splice(index, 1);
     newSections.splice(targetIndex, 0, moved);
-    setConfig((prev) => ({
-      ...prev,
+    const nextConfig: AppProfileConfig = {
+      ...config,
       sections: newSections.map((sec, idx) => ({ ...sec, order: idx + 1 })),
-    }));
+    };
+    setConfig(nextConfig);
+    handleSave(nextConfig);
   };
 
   // Item CRUD
   const currentSection = config.sections.find((s) => s.id === activeSectionId) || config.sections[0];
 
   const toggleItemActive = (sectionId: string, itemId: string) => {
-    setConfig((prev) => ({
-      ...prev,
-      sections: prev.sections.map((sec) =>
+    const nextConfig: AppProfileConfig = {
+      ...config,
+      sections: config.sections.map((sec) =>
         sec.id === sectionId
           ? {
               ...sec,
@@ -170,16 +182,19 @@ export default function AdminAppProfileEditor() {
             }
           : sec
       ),
-    }));
+    };
+    setConfig(nextConfig);
+    handleSave(nextConfig);
   };
 
   const moveItem = (sectionId: string, index: number, direction: 'up' | 'down') => {
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    setConfig((prev) => ({
-      ...prev,
-      sections: prev.sections.map((sec) => {
+    const targetSec = config.sections.find((s) => s.id === sectionId);
+    if (!targetSec || targetIndex < 0 || targetIndex >= targetSec.items.length) return;
+    const nextConfig: AppProfileConfig = {
+      ...config,
+      sections: config.sections.map((sec) => {
         if (sec.id !== sectionId) return sec;
-        if (targetIndex < 0 || targetIndex >= sec.items.length) return sec;
         const newItems = [...sec.items];
         const [moved] = newItems.splice(index, 1);
         newItems.splice(targetIndex, 0, moved);
@@ -188,23 +203,28 @@ export default function AdminAppProfileEditor() {
           items: newItems.map((it, idx) => ({ ...it, order: idx + 1 })),
         };
       }),
-    }));
+    };
+    setConfig(nextConfig);
+    handleSave(nextConfig);
   };
 
   const deleteItem = (sectionId: string, itemId: string) => {
     if (confirm('Are you sure you want to remove this menu item?')) {
-      setConfig((prev) => ({
-        ...prev,
-        sections: prev.sections.map((sec) =>
+      const nextConfig: AppProfileConfig = {
+        ...config,
+        sections: config.sections.map((sec) =>
           sec.id === sectionId
             ? {
                 ...sec,
-                items: sec.items.filter((it) => it.id !== itemId).map((it, idx) => ({ ...it, order: idx + 1 })),
+                items: sec.items
+                  .filter((it) => it.id !== itemId)
+                  .map((it, idx) => ({ ...it, order: idx + 1 })),
               }
             : sec
         ),
-      }));
-      toast.success('Menu item removed');
+      };
+      setConfig(nextConfig);
+      handleSave(nextConfig);
     }
   };
 
@@ -219,13 +239,14 @@ export default function AdminAppProfileEditor() {
       route: '/home-dashboard-screen',
       active: true,
     };
-    setConfig((prev) => ({
-      ...prev,
-      sections: prev.sections.map((sec) =>
+    const nextConfig: AppProfileConfig = {
+      ...config,
+      sections: config.sections.map((sec) =>
         sec.id === sectionId ? { ...sec, items: [...sec.items, newItem] } : sec
       ),
-    }));
-    toast.success('New menu item added. Click edit to customize its label and route.');
+    };
+    setConfig(nextConfig);
+    handleSave(nextConfig);
   };
 
   return (
@@ -265,7 +286,7 @@ export default function AdminAppProfileEditor() {
             <RotateCcw size={14} /> Reset Defaults
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={saving}
             className="px-5 py-2.5 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground text-xs font-bold shadow-md shadow-accent/20 transition-all flex items-center gap-1.5"
           >
@@ -1358,16 +1379,17 @@ export default function AdminAppProfileEditor() {
               </button>
               <button
                 onClick={() => {
-                  setConfig((prev) => ({
-                    ...prev,
-                    sections: prev.sections.map((s) => (s.id === editingSection.id ? editingSection : s)),
-                  }));
+                  const nextConfig: AppProfileConfig = {
+                    ...config,
+                    sections: config.sections.map((s) => (s.id === editingSection.id ? editingSection : s)),
+                  };
+                  setConfig(nextConfig);
                   setEditingSection(null);
-                  toast.success('Section updated');
+                  handleSave(nextConfig);
                 }}
                 className="px-4 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold"
               >
-                Apply Changes
+                Apply & Publish
               </button>
             </div>
           </div>
@@ -1507,9 +1529,9 @@ export default function AdminAppProfileEditor() {
               </button>
               <button
                 onClick={() => {
-                  setConfig((prev) => ({
-                    ...prev,
-                    sections: prev.sections.map((sec) =>
+                  const nextConfig: AppProfileConfig = {
+                    ...config,
+                    sections: config.sections.map((sec) =>
                       sec.id === editingItem.sectionId
                         ? {
                             ...sec,
@@ -1519,13 +1541,14 @@ export default function AdminAppProfileEditor() {
                           }
                         : sec
                     ),
-                  }));
+                  };
+                  setConfig(nextConfig);
                   setEditingItem(null);
-                  toast.success('Item updated');
+                  handleSave(nextConfig);
                 }}
                 className="px-4 py-2 rounded-xl bg-accent text-accent-foreground text-xs font-bold"
               >
-                Apply Changes
+                Apply & Publish
               </button>
             </div>
           </div>

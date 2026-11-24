@@ -54,7 +54,10 @@ export default function AdminAppServiceDetailsEditor() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/app-dynamic/service-details');
+      const res = await fetch(`/api/app-dynamic/service-details?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
       const data = await res.json();
       if (data.success && data.content) {
         setContent(mergeServiceDetailPages(data.content));
@@ -73,13 +76,17 @@ export default function AdminAppServiceDetailsEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/app-dynamic/service-details', {
+      const res = await fetch(`/api/app-dynamic/service-details?_t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
+        if (data.content) {
+          setContent(mergeServiceDetailPages(data.content));
+        }
         toast.success('All 9 Service Detail Screens published live to mobile app!');
       } else {
         toast.error(data.error || 'Failed to save');

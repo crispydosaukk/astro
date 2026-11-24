@@ -73,7 +73,10 @@ export default function AdminAppServicesEditor() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/app-dynamic/services');
+      const res = await fetch(`/api/app-dynamic/services?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
       const data = await res.json();
       if (data.success && Array.isArray(data.categories) && data.categories.length > 0) {
         setCategories(data.categories);
@@ -85,16 +88,21 @@ export default function AdminAppServicesEditor() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (overrideCategories?: AppServiceCategory[]) => {
+    const payload = Array.isArray(overrideCategories) ? overrideCategories : categories;
     setSaving(true);
     try {
-      const res = await fetch('/api/app-dynamic/services', {
+      const res = await fetch(`/api/app-dynamic/services?_t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categories }),
+        body: JSON.stringify({ categories: payload }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
+        if (Array.isArray(data.categories)) {
+          setCategories(data.categories);
+        }
         toast.success('App Services, Category Names, Tabs & Remedies published live to mobile app!');
       } else {
         toast.error(data.error || 'Failed to save configuration');
@@ -289,7 +297,7 @@ export default function AdminAppServicesEditor() {
             <RotateCcw size={14} /> Reset Defaults
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#713B32] text-white font-bold text-sm hover:bg-[#552B24] shadow-md transition disabled:opacity-50"
           >

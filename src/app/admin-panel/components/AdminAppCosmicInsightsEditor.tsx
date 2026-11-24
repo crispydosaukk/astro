@@ -36,7 +36,10 @@ export default function AdminAppCosmicInsightsEditor() {
   const fetchInsights = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/app-dynamic/cosmic-insights');
+      const res = await fetch(`/api/app-dynamic/cosmic-insights?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
       const data = await res.json();
       if (data.success && Array.isArray(data.insights)) {
         setInsights(data.insights);
@@ -48,16 +51,21 @@ export default function AdminAppCosmicInsightsEditor() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (overrideInsights?: CosmicInsightCard[]) => {
+    const payload = Array.isArray(overrideInsights) ? overrideInsights : insights;
     setSaving(true);
     try {
-      const res = await fetch('/api/app-dynamic/cosmic-insights', {
+      const res = await fetch(`/api/app-dynamic/cosmic-insights?_t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ insights }),
+        body: JSON.stringify({ insights: payload }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
+        if (Array.isArray(data.insights)) {
+          setInsights(data.insights);
+        }
         toast.success('Cosmic Insight cards published live to mobile app!');
       } else {
         toast.error(data.error || 'Failed to save cosmic insights');
@@ -83,14 +91,16 @@ export default function AdminAppCosmicInsightsEditor() {
       badgeColor: '#C9A84C',
       planetTags: ['Vedic Insight', 'Planetary Shift'],
     };
-    setInsights([...insights, newCard]);
-    setEditingIndex(insights.length);
+    const next = [...insights, newCard];
+    setInsights(next);
+    setEditingIndex(next.length - 1);
   };
 
   const handleDeleteCard = (idx: number) => {
     const updated = insights.filter((_, i) => i !== idx).map((c, i) => ({ ...c, order: i + 1 }));
     setInsights(updated);
     if (editingIndex === idx) setEditingIndex(null);
+    handleSave(updated);
   };
 
   const handleMove = (idx: number, dir: -1 | 1) => {
@@ -102,12 +112,14 @@ export default function AdminAppCosmicInsightsEditor() {
     const reordered = copy.map((c, i) => ({ ...c, order: i + 1 }));
     setInsights(reordered);
     if (editingIndex === idx) setEditingIndex(target);
+    handleSave(reordered);
   };
 
   const handleToggleActive = (idx: number) => {
     const copy = [...insights];
-    copy[idx].active = !copy[idx].active;
+    copy[idx] = { ...copy[idx], active: !copy[idx].active };
     setInsights(copy);
+    handleSave(copy);
   };
 
   const updateCardField = (idx: number, field: keyof CosmicInsightCard, val: any) => {
@@ -139,7 +151,7 @@ export default function AdminAppCosmicInsightsEditor() {
             <Plus size={16} /> Add Card
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={saving}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 text-stone-900 font-bold text-sm hover:bg-amber-400 shadow-md transition disabled:opacity-50"
           >

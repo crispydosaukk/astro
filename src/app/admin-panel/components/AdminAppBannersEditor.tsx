@@ -47,7 +47,10 @@ export default function AdminAppBannersEditor() {
   const fetchBanners = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/app-dynamic/banners');
+      const res = await fetch(`/api/app-dynamic/banners?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
       const data = await res.json();
       if (data.success && Array.isArray(data.banners)) {
         setBanners(data.banners);
@@ -59,16 +62,21 @@ export default function AdminAppBannersEditor() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (overrideBanners?: AppBanner[]) => {
+    const payload = overrideBanners ?? banners;
     setSaving(true);
     try {
-      const res = await fetch('/api/app-dynamic/banners', {
+      const res = await fetch(`/api/app-dynamic/banners?_t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ banners }),
+        body: JSON.stringify({ banners: payload }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
+        if (Array.isArray(data.banners)) {
+          setBanners(data.banners);
+        }
         toast.success('All promotional banners published live to mobile app!');
       } else {
         toast.error(data.error || 'Failed to save banners');
@@ -107,13 +115,12 @@ export default function AdminAppBannersEditor() {
   };
 
   const handleDeleteBanner = (index: number) => {
-    
     if (confirm(`Delete Banner ${index + 1}?`)) {
       const updated = banners.filter((_, i) => i !== index).map((b, idx) => ({ ...b, order: idx + 1 }));
       setBanners(updated);
       if (editingBannerIndex === index) setEditingBannerIndex(null);
       if (previewBannerIndex === index) setPreviewBannerIndex(null);
-      toast.info('Banner removed');
+      handleSave(updated);
     }
   };
 
@@ -126,15 +133,14 @@ export default function AdminAppBannersEditor() {
     const reordered = copy.map((b, idx) => ({ ...b, order: idx + 1 }));
     setBanners(reordered);
     if (editingBannerIndex === index) setEditingBannerIndex(targetIndex);
+    handleSave(reordered);
   };
 
   const handleToggleStatus = (index: number) => {
-    setBanners((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], active: !copy[index].active };
-      return copy;
-    });
-    toast.success(`Banner ${index + 1} status updated`);
+    const copy = [...banners];
+    copy[index] = { ...copy[index], active: !copy[index].active };
+    setBanners(copy);
+    handleSave(copy);
   };
 
   const updateBanner = (index: number, patch: Partial<AppBanner>) => {
@@ -256,7 +262,7 @@ export default function AdminAppBannersEditor() {
             {/* Save Changes */}
             <button
               type="button"
-              onClick={handleSave}
+              onClick={() => handleSave()}
               disabled={saving}
               className="px-4 py-2 rounded-xl text-xs font-bold bg-accent text-white hover:bg-accent/90 shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50"
             >

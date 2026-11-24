@@ -59,7 +59,10 @@ export default function AdminAppOnboardingEditor() {
   const fetchSlides = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/app-dynamic/onboarding');
+      const res = await fetch(`/api/app-dynamic/onboarding?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
       const data = await res.json();
       if (data.success && Array.isArray(data.slides) && data.slides.length > 0) {
         setSlides(data.slides);
@@ -71,16 +74,21 @@ export default function AdminAppOnboardingEditor() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (overrideSlides?: AppOnboardingSlide[]) => {
+    const payload = overrideSlides ?? slides;
     setSaving(true);
     try {
-      const res = await fetch('/api/app-dynamic/onboarding', {
+      const res = await fetch(`/api/app-dynamic/onboarding?_t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slides }),
+        body: JSON.stringify({ slides: payload }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
+        if (Array.isArray(data.slides)) {
+          setSlides(data.slides);
+        }
         toast.success('All onboarding slides published live to mobile app!');
       } else {
         toast.error(data.error || 'Failed to save slides');
@@ -127,7 +135,7 @@ export default function AdminAppOnboardingEditor() {
       setSlides(updated);
       if (editingSlideIndex === index) setEditingSlideIndex(null);
       if (previewSlideIndex === index) setPreviewSlideIndex(null);
-      toast.info('Slide deleted');
+      handleSave(updated);
     }
   };
 
@@ -140,15 +148,14 @@ export default function AdminAppOnboardingEditor() {
     const reordered = copy.map((s, idx) => ({ ...s, order: idx + 1 }));
     setSlides(reordered);
     if (editingSlideIndex === index) setEditingSlideIndex(targetIndex);
+    handleSave(reordered);
   };
 
   const handleToggleStatus = (index: number) => {
-    setSlides((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], active: !copy[index].active };
-      return copy;
-    });
-    toast.success(`Slide ${index + 1} status updated`);
+    const copy = [...slides];
+    copy[index] = { ...copy[index], active: !copy[index].active };
+    setSlides(copy);
+    handleSave(copy);
   };
 
   const updateSlide = (index: number, patch: Partial<AppOnboardingSlide>) => {
@@ -270,7 +277,7 @@ export default function AdminAppOnboardingEditor() {
             {/* Save Changes */}
             <button
               type="button"
-              onClick={handleSave}
+              onClick={() => handleSave()}
               disabled={saving}
               className="px-4 py-2 rounded-xl text-xs font-bold bg-accent text-white hover:bg-accent/90 shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50"
             >

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { DEFAULT_MAHADASHA_GUIDES, MahadashaGuide } from '@/lib/mahadasha';
+import { NO_CACHE_CORS_HEADERS } from '@/lib/noCacheHeaders';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const corsHeaders = NO_CACHE_CORS_HEADERS;
 
 const GUIDE_EMOJIS: Record<string, string> = {
   'rahu-stabilisation': '🛡️',

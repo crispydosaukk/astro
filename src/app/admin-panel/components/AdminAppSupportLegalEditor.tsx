@@ -50,7 +50,10 @@ export default function AdminAppSupportLegalEditor() {
   const loadContent = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/app-dynamic/support-legal');
+      const res = await fetch(`/api/app-dynamic/support-legal?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
       const data = await res.json();
       if (data.success && data.content) {
         setContent({
@@ -76,7 +79,7 @@ export default function AdminAppSupportLegalEditor() {
   const loadTickets = async () => {
     setLoadingTickets(true);
     try {
-      const res = await fetch('/api/app-dynamic/support-tickets');
+      const res = await fetch(`/api/app-dynamic/support-tickets?_t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.success && Array.isArray(data.tickets)) {
         setTickets(data.tickets);
@@ -96,13 +99,28 @@ export default function AdminAppSupportLegalEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/app-dynamic/support-legal', {
+      const res = await fetch(`/api/app-dynamic/support-legal?_t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
+        if (data.content) {
+          setContent({
+            helpCentre: { ...DEFAULT_SUPPORT_LEGAL_CONTENT.helpCentre, ...(data.content.helpCentre || {}) },
+            contactSupport: { ...DEFAULT_SUPPORT_LEGAL_CONTENT.contactSupport, ...(data.content.contactSupport || {}) },
+            terms: { ...DEFAULT_SUPPORT_LEGAL_CONTENT.terms, ...(data.content.terms || {}) },
+            privacyPolicy: { ...DEFAULT_SUPPORT_LEGAL_CONTENT.privacyPolicy, ...(data.content.privacyPolicy || {}) },
+            privacyScreen: { ...DEFAULT_SUPPORT_LEGAL_CONTENT.privacyScreen, ...(data.content.privacyScreen || {}) },
+            securityScreen: { ...DEFAULT_SUPPORT_LEGAL_CONTENT.securityScreen, ...(data.content.securityScreen || {}) },
+            preferencesScreen: {
+              ...(DEFAULT_SUPPORT_LEGAL_CONTENT.preferencesScreen!),
+              ...(data.content.preferencesScreen || {}),
+            },
+          });
+        }
         toast.success('All Support, FAQ, Legal, Privacy, Security & Preferences content synced live to app!');
       } else {
         toast.error(data.error || 'Failed to save changes');

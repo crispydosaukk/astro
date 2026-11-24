@@ -300,9 +300,16 @@ export default function AdminAppAllScreensCmsEditor() {
   const loadAll = async () => {
     setLoading(true);
     try {
+      const ts = Date.now();
       const [cfgRes, remRes] = await Promise.all([
-        fetch('/api/app-dynamic/screens-config'),
-        fetch('/api/app-dynamic/remedies'),
+        fetch(`/api/app-dynamic/screens-config?_t=${ts}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+        }),
+        fetch(`/api/app-dynamic/remedies?_t=${ts}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+        }),
       ]);
       const cfgJson = await cfgRes.json();
       if (cfgJson?.success && cfgJson.config) {
